@@ -21,7 +21,7 @@ const PUBLIC_ROUTES = [
   "/contact",
   "/api/auth",
   "/api-docs",
-  "/incident/playbooks",
+  "/incident",
 ];
 
 // Define auth routes that should redirect to dashboard if already logged in
@@ -29,6 +29,7 @@ const AUTH_ROUTES = [
   "/auth/signin",
   "/auth/business-signup",
   "/auth/developer-signup",
+
 ];
 
 // Define protected routes that require authentication

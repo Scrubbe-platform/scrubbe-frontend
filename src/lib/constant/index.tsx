@@ -914,7 +914,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Incidents",
       Icon: IoIosWarning,
       description: "Active , resolved, and backing",
-      link: "/incident/tickets/create",
+      link: "/incident/tickets",
       isActive: false,
       isMenu: false,
       pillText: "list",
