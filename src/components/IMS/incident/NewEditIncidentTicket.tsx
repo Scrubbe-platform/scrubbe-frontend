@@ -7,7 +7,7 @@ import { IoDocumentTextSharp, IoLocation } from "react-icons/io5";
 import { TiSpanner } from "react-icons/ti";
 import { useFetch } from "@/hooks/useFetch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { endpoint } from "@/lib/api/endpoint";
 import { toast } from "sonner";
@@ -115,6 +115,8 @@ const NewEditIncidentTicket = () => {
   const [uploadedLogo, setUploadedLogo] = useState<File | null>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data, isLoading } = useTicketDetails();
+  const { id } = useParams();
+
   const ticket = data as Tticket;
   const [openPostMortem, setOpenPostMortem] = useState(false);
   const {
@@ -600,11 +602,11 @@ const NewEditIncidentTicket = () => {
         </StepWrapper>
 
         <div className="flex gap-2 justify-end">
-        <CButton className="w-fit border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
+        <CButton onClick={() => router.push(`/incident/tickets/ezra/${id}`)} className="w-fit border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
           <AiStarIcon stroke="#06eefd"/>
           Ezra Lead
         </CButton>
-        <CButton className="w-fit border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
+        <CButton onClick={() => router.push(`/incident/tickets/ezra/${id}`)} className="w-fit border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
           <AiStarIcon stroke="#06eefd"/>
           Ezra Analyst
         </CButton>

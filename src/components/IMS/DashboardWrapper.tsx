@@ -12,7 +12,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const { collapse, toggle } = useSidebar();
   const pathname = usePathname();
   return (
-    <div className="w-full  h-screen  overflow-auto relative">
+    <div className="w-full bg-dark h-screen  overflow-auto relative">
       <div
         onClick={toggle}
         className={clsx(
