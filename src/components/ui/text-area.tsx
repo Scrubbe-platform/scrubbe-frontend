@@ -13,6 +13,7 @@ interface TextareaProps
   icon?: React.ReactNode;
   labelClassName?: string;
   info?: string;
+  rows?: number
 }
 
 const TextArea = ({
@@ -23,6 +24,7 @@ const TextArea = ({
   className = "",
   labelClassName = "",
   info,
+  rows,
   ...props
 }: TextareaProps) => {
   return (
@@ -54,7 +56,7 @@ const TextArea = ({
               : "border-gray-400"
           } ${error ? "border-red-500" : ""} ${className}`}
           disabled={isLoading}
-          rows={4}
+          rows={rows || 4}
           {...props}
         />
 
