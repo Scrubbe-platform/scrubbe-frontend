@@ -1,6 +1,6 @@
 import React from 'react'
 import SettingWrapper from '../_module/setting-wrapper'
-import { Edit3, Mail, BellRing, ChevronDown, GitBranch, CheckCircle } from 'lucide-react';
+import { GitBranch, CheckCircle } from 'lucide-react';
 import Select from '@/components/ui/select';
 import Input from '@/components/ui/input';
 import CButton from '@/components/ui/Cbutton';
@@ -55,7 +55,7 @@ const page = () => {
             <h3 className="text-white font-bold text-lg px-1">Email fallback</h3>
 
             <div className="space-y-6">
-              {/* NOTIFICATION EMAIL DROPDOWN */}
+              {/* NOTIFICATION EMAIL */}
               <div className="space-y-3">
                 <label className="text-white text-sm font-medium ml-1">Notification email</label>
                 <div className="relative">
@@ -70,8 +70,7 @@ const page = () => {
               <div className="p-4 border border-neutral-500 rounded-2xl space-y-4">
                 <div className="flex justify-between">
                   <span className="text-white text-sm font-medium">Rate limit notifications</span>
-                  <Select className="text-white" options={[{value: "off", label: "Off"}, {value: " 10/minute", label: "10/minute"}, {value: " 20/minute", label: "20/minute"}]}/>
-                   
+                  <Select className="text-white" options={[{value: "off", label: "Off"}, {value: "10/minute", label: "10/minute"}, {value: "20/minute", label: "20/minute"}]}/>
                 </div>
                 <p className="text-[#64748B] text-xs leading-normal">
                   Prevent spam during flake storms.
@@ -86,7 +85,7 @@ const page = () => {
           <CButton className='w-fit px-4'>
             Save
           </CButton>
-        </div>        
+        </div>
         </SettingWrapper>
     </div>
   )

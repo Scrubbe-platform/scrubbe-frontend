@@ -3,13 +3,22 @@ import { Plus, ArrowRight } from 'lucide-react';
 import SideModal from '@/components/ui/SideModal';
 import QuietRuleForm from './QuietRuleForm';
 
+export type QuietRule = {
+  name: string;
+  startTime: string;
+  endTime: string;
+  timezone: string;
+  daysOfWeek: number[];
+  teamScope?: string;
+  isActive: boolean;
+};
 
-const QuietRules = () => {
+const QuietRules = ({ onRuleAdded }: { onRuleAdded?: (rule: QuietRule) => void }) => {
     const [open, setOpen] = useState(false)
   return (
     <div className=" bg-[#030D25] p-8 text-slate-300 antialiased border border-cyan-400/40 rounded-lg">
       <div className="max-w-4xl mx-auto space-y-6">
-        
+
         {/* HEADER SECTION */}
         <div className="flex justify-between items-start">
           <div className="space-y-1">
@@ -31,7 +40,7 @@ const QuietRules = () => {
 
         {/* MAIN CONTAINER */}
         <div className="rounded-2xl border border-white/40 p-6 space-y-4">
-          
+
           {/* GROUP HEADER */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-base font-semibold text-white">Git providers</h2>
@@ -39,7 +48,7 @@ const QuietRules = () => {
           </div>
 
           {/* RULE CARD 1: FRONTEND PLATFORM */}
-          <RuleCard 
+          <RuleCard
             title="Frontend Platform"
             badge="Frontend"
             badgeColor="text-cyan-400 border-cyan-400/30 bg-cyan-400/5"
@@ -51,7 +60,7 @@ const QuietRules = () => {
           />
 
           {/* RULE CARD 2: CORE PAYMENTS */}
-          <RuleCard 
+          <RuleCard
             title="Core Payments"
             badge="Critical"
             badgeColor="text-rose-500 border-rose-500/30 bg-rose-500/5"
@@ -69,10 +78,10 @@ const QuietRules = () => {
         </div>
       </div>
 
-      { 
+      {
       open &&
         <SideModal title='Add Team-Specific Quiet Rule' isOpen={open} onClose={() => setOpen(false)}>
-            <QuietRuleForm onClose={() => setOpen(false)}/>
+            <QuietRuleForm onClose={() => setOpen(false)} onSave={(rule: QuietRule) => { onRuleAdded?.(rule); setOpen(false); }}/>
         </SideModal>
       }
     </div>
@@ -85,11 +94,11 @@ interface RuleRow {
   rightValue?: string;
 }
 
-const RuleCard = ({ title, badge, badgeColor, rows }: { 
-  title: string, 
-  badge: string, 
-  badgeColor: string, 
-  rows: RuleRow[] 
+const RuleCard = ({ title, badge, badgeColor, rows }: {
+  title: string,
+  badge: string,
+  badgeColor: string,
+  rows: RuleRow[]
 }) => {
   return (
     <div className="rounded-xl border border-white/40 p-5 hover:border-white/20 transition-all">
@@ -99,7 +108,7 @@ const RuleCard = ({ title, badge, badgeColor, rows }: {
           {badge}
         </span>
       </div>
-      
+
       <div className="space-y-1.5">
         {rows.map((row, idx) => (
           <div key={idx} className="grid grid-cols-3 text-[13px]">

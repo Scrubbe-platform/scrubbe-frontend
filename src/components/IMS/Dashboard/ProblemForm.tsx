@@ -9,7 +9,8 @@ import { endpoint } from "@/lib/api/endpoint";
 import { querykeys } from "@/lib/constant";
 import { Ticket } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -45,7 +46,24 @@ const ProblemForm = ({ onClose }: { onClose: () => void }) => {
     mode: "onChange",
   });
   const router = useRouter();
-  const { get } = useFetch();
+  const { get, post } = useFetch();
+  const queryClient = useQueryClient();
+
+  const createProblemMutation = useMutation({
+    mutationFn: async (value: FormType) => {
+      const res = await post(endpoint.problems.create, value);
+      if (!res.success) throw new Error(res.message ?? "Failed to create problem");
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Problem created successfully");
+      queryClient.invalidateQueries({ queryKey: [querykeys.PROBLEMS] });
+      onClose();
+    },
+    onError: (err: any) => {
+      toast.error(err.message ?? "Failed to create problem");
+    },
+  });
 
   const { data } = useQuery({
     queryKey: [querykeys.INCIDENT_TICKET],
@@ -82,7 +100,7 @@ const ProblemForm = ({ onClose }: { onClose: () => void }) => {
   };
 
   const handleSubmtForm = (value: FormType) => {
-    console.log(value);
+    createProblemMutation.mutate(value);
   };
   return (
     <div>
@@ -314,8 +332,12 @@ const ProblemForm = ({ onClose }: { onClose: () => void }) => {
                   >
                     Back
                   </CButton>
-                  <CButton type="submit" className=" w-fit px-6">
-                    Create New Problem
+                  <CButton
+                    type="submit"
+                    className=" w-fit px-6"
+                    disabled={createProblemMutation.isPending}
+                  >
+                    {createProblemMutation.isPending ? "Creating..." : "Create New Problem"}
                   </CButton>
                 </div>
               </div>
