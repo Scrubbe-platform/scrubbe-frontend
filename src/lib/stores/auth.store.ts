@@ -97,17 +97,18 @@ const useAuthStore = create<AuthState & AuthActions>()(
           const validatedData = loginSchema.parse({ email, password });
 
           const { data } = await apiClient.post("/auth/login", validatedData);
+          const { user, tokens } = data.data;
 
           set({
-            token: data.tokens.accessToken,
-            refreshToken: data.tokens.refreshToken,
-            user: data.user,
+            token: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            user,
             isLoading: false,
           });
 
-          setCookie(COOKIE_KEYS.TOKEN, data.tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, data.tokens.refreshToken);
-          return data.user;
+          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
+          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
+          return user;
         } catch (error) {
           set({
             error:
@@ -133,17 +134,18 @@ const useAuthStore = create<AuthState & AuthActions>()(
             "/auth/oauth/login",
             validatedData
           );
+          const { user, tokens } = data.data;
 
           set({
-            token: data.tokens.accessToken,
-            refreshToken: data.tokens.refreshToken,
-            user: data.user,
+            token: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            user,
             isLoading: false,
           });
-          setCookie(COOKIE_KEYS.TOKEN, data.tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, data.tokens.refreshToken);
+          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
+          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
 
-          return data.user;
+          return user;
         } catch (error) {
           set({
             error:
@@ -170,15 +172,15 @@ const useAuthStore = create<AuthState & AuthActions>()(
             experienceLevel: validatedData.experience,
           };
           const { data } = await apiClient.post("/auth/dev/register", devData);
-          console.log(devData, data);
+          const { user, tokens } = data.data;
           set({
-            token: data.tokens.accessToken,
-            refreshToken: data.tokens.refreshToken,
-            user: data.user,
+            token: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            user,
             isLoading: false,
           });
-          setCookie(COOKIE_KEYS.TOKEN, data.tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, data.tokens.refreshToken);
+          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
+          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
         } catch (error) {
           set({
             error:
@@ -209,14 +211,15 @@ const useAuthStore = create<AuthState & AuthActions>()(
             "/auth/business/register",
             newBusinessData
           );
+          const { user, tokens } = data.data;
           set({
-            token: data.tokens.accessToken,
-            refreshToken: data.tokens.refreshToken,
-            user: data.user,
+            token: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            user,
             isLoading: false,
           });
-          setCookie(COOKIE_KEYS.TOKEN, data.tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, data.tokens.refreshToken);
+          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
+          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
         } catch (error) {
           set({
             error:
@@ -288,15 +291,16 @@ const useAuthStore = create<AuthState & AuthActions>()(
             "/auth/oauth/business/register",
             newBusinessData
           );
+          const { user, tokens } = data.data;
           set({
-            token: data.tokens.accessToken,
-            refreshToken: data.tokens.refreshToken,
-            user: data.user,
+            token: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            user,
             isLoading: false,
           });
-          setCookie(COOKIE_KEYS.TOKEN, data.tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, data.tokens.refreshToken);
-          return data?.user;
+          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
+          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
+          return user;
         } catch (error) {
           set({
             error:
@@ -327,14 +331,15 @@ const useAuthStore = create<AuthState & AuthActions>()(
             "/auth/oauth/dev/register",
             newDevData
           );
+          const { user, tokens } = data.data;
           set({
-            token: data.tokens.accessToken,
-            refreshToken: data.tokens.refreshToken,
-            user: data.user,
+            token: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            user,
             isLoading: false,
           });
-          setCookie(COOKIE_KEYS.TOKEN, data.tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, data.tokens.refreshToken);
+          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
+          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
         } catch (error) {
           set({
             error:
@@ -382,15 +387,16 @@ const useAuthStore = create<AuthState & AuthActions>()(
           const { data } = await apiClient.post("/auth/refresh-token", {
             refreshToken,
           });
+          const newTokens = data.data;
 
           set({
-            token: data.accessToken,
-            refreshToken: data.refreshToken || refreshToken,
+            token: newTokens.accessToken,
+            refreshToken: newTokens.refreshToken || refreshToken,
           });
 
-          setCookie(COOKIE_KEYS.TOKEN, data.accessToken);
-          if (data.refreshToken) {
-            setCookie(COOKIE_KEYS.REFRESH_TOKEN, data.refreshToken);
+          setCookie(COOKIE_KEYS.TOKEN, newTokens.accessToken);
+          if (newTokens.refreshToken) {
+            setCookie(COOKIE_KEYS.REFRESH_TOKEN, newTokens.refreshToken);
           }
 
           return true;
