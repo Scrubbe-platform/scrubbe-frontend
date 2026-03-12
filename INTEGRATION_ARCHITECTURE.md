@@ -478,7 +478,7 @@ app.use(
 
 ```env
 # API Configuration
-NEXT_PUBLIC_API_BASE_URL=https://admin-rul9.onrender.com/api/v1
+NEXT_PUBLIC_API_BASE_URL=https://scrubbe-server-9z77.onrender.com/api/v1
 
 # NextAuth
 NEXTAUTH_URL=http://localhost:3000
