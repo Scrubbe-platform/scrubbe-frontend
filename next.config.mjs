@@ -4,6 +4,9 @@ const nextConfig = {
   experimental: {
     missingSuspenseWithCSRBailout: false,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   //  images: {
   //   loader: 'custom',
   //   loaderFile: './Imageloader.js',

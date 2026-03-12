@@ -610,7 +610,7 @@ debug: process.env.NODE_ENV === "development",
 ## 14. Support & Resources
 
 ### 14.1 Documentation
-- **Swagger UI**: `https://scrubbe-server-9z77.onrender.com/api/docs`
+- **Swagger UI**: `https://scrubbe-server-9z77.onrender.com/api/docs/`
 - **Next-Auth Docs**: https://authjs.dev/
 - **Prisma Docs**: https://www.prisma.io/docs
 
