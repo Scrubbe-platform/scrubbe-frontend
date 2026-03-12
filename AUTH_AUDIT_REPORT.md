@@ -490,7 +490,7 @@ AUTH_MICROSOFT_ENTRA_ID_SECRET=your-azure-client-secret
 AUTH_MICROSOFT_ENTRA_ID_ISSUER=https://login.microsoftonline.com/your-tenant-id/v2.0
 
 # API Configuration
-NEXT_PUBLIC_API_BASE_URL=https://admin-rul9.onrender.com/api/v1
+NEXT_PUBLIC_API_BASE_URL=https://scrubbe-server-9z77.onrender.com/api/v1
 
 # Feature Flags
 NEXT_PUBLIC_IS_STANDALONE=false
