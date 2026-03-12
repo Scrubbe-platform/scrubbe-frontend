@@ -82,7 +82,7 @@ const OtpInput = ({
   }, [resendTimer]);
 
   const handleResendCode = () => {
-    if (!isResendDisabled) return;
+    if (isResendDisabled) return;
 
     // Reset verification code
     setVerificationCode(Array(6).fill(""));
