@@ -53,7 +53,7 @@ const ChangeForm = ({ onClose }: { onClose: () => void }) => {
   const createChangeMutation = useMutation({
     mutationFn: async (value: FormType) => {
       const res = await post(endpoint.changes.create, value);
-      if (!res.success) throw new Error(res.message ?? "Failed to create change");
+      if (!res.success) throw new Error(res.data ?? "Failed to create change");
       return res.data;
     },
     onSuccess: () => {

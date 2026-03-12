@@ -2,9 +2,13 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequ
 import { getCookie, setCookie, deleteCookie } from "cookies-next";
 import { COOKIE_KEYS } from "../constant";
 
+if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
+  throw new Error("Missing required environment variable: NEXT_PUBLIC_API_BASE_URL");
+}
+
 // API Configuration
 const API_CONFIG = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "https://admin-rul9.onrender.com/api/v1",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   timeout: 30000,
   retries: 3,
   retryDelay: 1000,

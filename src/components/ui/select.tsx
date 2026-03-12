@@ -14,7 +14,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   icon?: React.ReactNode;
 }
 
-const Select = ({
+const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
   label,
   error,
   isLoading = false,
@@ -24,7 +24,7 @@ const Select = ({
   info,
   icon,
   ...props
-}: SelectProps) => {
+}, ref) => {
   return (
     <div className="mb-4">
       {label && (
@@ -54,6 +54,7 @@ const Select = ({
         } ${error ? "border-red-500" : ""} ${className}`}
       >
         <select
+          ref={ref}
           className="w-full bg-transparent h-full rounded-md outline-none"
           disabled={isLoading}
           {...props}
@@ -73,6 +74,8 @@ const Select = ({
       )}
     </div>
   );
-};
+});
+
+Select.displayName = "Select";
 
 export default Select;

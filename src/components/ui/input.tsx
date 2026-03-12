@@ -14,7 +14,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   info?: string;
 }
 
-const Input = ({
+const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,
   isLoading = false,
@@ -24,7 +24,7 @@ const Input = ({
   labelClassName = "",
   info,
   ...props
-}: InputProps) => {
+}, ref) => {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordType = type === "password";
 
@@ -51,6 +51,7 @@ const Input = ({
       )}
       <div className="relative">
         <input
+          ref={ref}
           type={isPasswordType ? (showPassword ? "text" : "password") : type}
           className={`w-full read-only:opacity-70 dark:text-white bg-transparent h-[42px] px-3 text-sm py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             isLoading
@@ -116,6 +117,8 @@ const Input = ({
       )}
     </div>
   );
-};
+});
+
+Input.displayName = "Input";
 
 export default Input;

@@ -52,7 +52,7 @@ const ProblemForm = ({ onClose }: { onClose: () => void }) => {
   const createProblemMutation = useMutation({
     mutationFn: async (value: FormType) => {
       const res = await post(endpoint.problems.create, value);
-      if (!res.success) throw new Error(res.message ?? "Failed to create problem");
+      if (!res.success) throw new Error(res.data ?? "Failed to create problem");
       return res.data;
     },
     onSuccess: () => {

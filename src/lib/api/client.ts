@@ -2,7 +2,7 @@ import axios, { InternalAxiosRequestConfig, AxiosError } from "axios";
 import { getCookie } from "cookies-next";
 import { COOKIE_KEYS } from "../constant";
 
-const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://admin-rul9.onrender.com/api/v1";
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 if (!baseURL) {
   throw new Error("Missing NEXT_PUBLIC_API_BASE_URL environment variable");
