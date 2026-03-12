@@ -5,14 +5,17 @@ import Modal from "@/components/ui/Modal";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import useAuthStore from "@/lib/stores/auth.store";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 
 const Page = () => {
   const [openPlan, setOpenPlan] = useState(false);
-  const { get } = useFetch();
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  const { get, patch } = useFetch();
   const { user } = useAuthStore();
+  const queryClient = useQueryClient();
 
   const { data } = useQuery({
     queryKey: ["SUBSCRIPTION"],
@@ -20,14 +23,37 @@ const Page = () => {
       const res = await get(
         `${endpoint.plans.getUserSubscription}/${user?.id}/subscriptions`
       );
-      console.log(res);
       if (res.success) {
         return res.data.data;
       }
       return null;
     },
   });
-  console.log(data);
+
+  const cancelMutation = useMutation({
+    mutationFn: async () => {
+      if (!data?.id) throw new Error("No active subscription found");
+      const res = await patch(`${endpoint.plans.cancel}/${data.id}/cancel`, {});
+      if (!res.success) throw new Error((res.data as string) ?? "Failed to cancel subscription");
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Subscription will be cancelled at the end of the billing period");
+      queryClient.invalidateQueries({ queryKey: ["SUBSCRIPTION"] });
+      setConfirmCancel(false);
+    },
+    onError: (err: any) => {
+      toast.error(err.message ?? "Failed to cancel subscription");
+    },
+  });
+
+  const planName = data?.plan?.name ?? "Starter";
+  const planPrice = data?.plan?.price ?? 0;
+  const billingEnd = data?.currentPeriodEnd
+    ? new Date(data.currentPeriodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : null;
+  const isCancelPending = data?.cancelAtPeriodEnd;
+
   return (
     <div className=" p-4">
       <p className=" text-lg font-bold"> Billing and Usage </p>
@@ -37,24 +63,28 @@ const Page = () => {
           <div className="flex flex-col gap-2 justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <p className=" font-medium text-base">Start Plan </p>
-                <div className=" text-xs px-2 py-1 bg-emerald-100 text-emerald-600 border border-emerald-500 rounded-lg w-fit">
-                  Active
+                <p className=" font-medium text-base">{planName} Plan</p>
+                <div className={`text-xs px-2 py-1 rounded-lg w-fit border ${isCancelPending ? "bg-rose-100 text-rose-600 border-rose-400" : "bg-emerald-100 text-emerald-600 border-emerald-500"}`}>
+                  {isCancelPending ? "Cancelling" : data?.status ?? "Active"}
                 </div>
               </div>
-              <p className=" font-bold">$15/agent/month</p>
+              <p className=" font-bold">${planPrice}/month</p>
             </div>
 
             <div>
               <p className="text-sm font-medium mt-2">Next Billing date</p>
               <p className="text-sm mt-1 ">
-                Your plan will expire on Oct 17, 2024 (10days left)
+                {billingEnd
+                  ? isCancelPending
+                    ? `Subscription ends on ${billingEnd}`
+                    : `Your plan renews on ${billingEnd}`
+                  : "No active subscription"}
               </p>
             </div>
           </div>
           <div className=" flex-col flex justify-between items-end gap-2">
-            <p className=" text-2xl font-bold">$60/month</p>
-            <p className=" text-sm">4 agents available</p>
+            <p className=" text-2xl font-bold">${planPrice}/month</p>
+            <p className=" text-sm">{data?.plan?.maxAgents ?? 1} agents available</p>
             <CButton
               onClick={() => setOpenPlan(true)}
               className=" text-IMSLightGreen bg-transparent hover:bg-transparent border border-IMSLightGreen rounded-lg p-1 text-sm flex items-center gap-2 px-2 w-fit"
@@ -65,10 +95,38 @@ const Page = () => {
           </div>
         </div>
         <div className="flex justify-between items-center border-t border-neutral-300 mt-3 pt-3">
-          <CButton className=" !w-fit bg-rose-500 hover:bg-rose-600">
-            Cancel Plan
+          {!isCancelPending ? (
+            confirmCancel ? (
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-gray-600">Are you sure you want to cancel?</p>
+                <CButton
+                  onClick={() => cancelMutation.mutate()}
+                  disabled={cancelMutation.isPending}
+                  className="!w-fit bg-rose-500 hover:bg-rose-600 text-sm"
+                >
+                  {cancelMutation.isPending ? "Cancelling..." : "Yes, Cancel"}
+                </CButton>
+                <CButton
+                  onClick={() => setConfirmCancel(false)}
+                  className="!w-fit bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-50 shadow-none text-sm"
+                >
+                  Keep Plan
+                </CButton>
+              </div>
+            ) : (
+              <CButton
+                onClick={() => setConfirmCancel(true)}
+                className="!w-fit bg-rose-500 hover:bg-rose-600"
+              >
+                Cancel Plan
+              </CButton>
+            )
+          ) : (
+            <p className="text-sm text-rose-500 font-medium">Cancellation scheduled</p>
+          )}
+          <CButton className=" !w-fit" onClick={() => setOpenPlan(true)}>
+            Upgrade Plan
           </CButton>
-          <CButton className=" !w-fit">Upgrade Plan</CButton>
         </div>
       </div>
 

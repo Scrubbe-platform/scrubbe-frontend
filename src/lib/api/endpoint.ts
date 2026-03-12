@@ -5,10 +5,15 @@ export const endpoint = {
     decode_invite_token: "/business/decode-invite",
     accept_invite: "/business/accept-invite",
     ims_setup: "/ims/setup",
+    ims_config: "/ims/config",
     me: "/auth/me",
+    profile: "/auth/profile",
+    update_profile: "/auth/profile",
     forgot_password: "/auth/forgot-password",
     valid_token: "/auth/validate-reset-token",
     reset_password: "/auth/reset-password",
+    change_password: "/auth/change-password",
+    logout: "/auth/logout",
   },
   data_source: {
     fingerprint_configuration: "/fingerprint/configuration",
@@ -37,9 +42,26 @@ export const endpoint = {
       generatePDF: "/generate-pdf",
     },
   },
+  changes: {
+    create: "/changes",
+    get: "/changes",
+    getOne: "/changes",
+    update: "/changes",
+    delete: "/changes",
+  },
+  problems: {
+    create: "/problems",
+    get: "/problems",
+    getOne: "/problems",
+    update: "/problems",
+    delete: "/problems",
+  },
   api_key: {
     create: "/apikey/createapikey",
-    get: "apikey/apikeys",
+    get: "/apikey/apikeys",
+    rotate: "/apikey",
+    revoke: "/apikey",
+    delete: "/apikey",
   },
   integration: {
     whatsapp: "/integrations/whatsapp/connect",
@@ -58,6 +80,11 @@ export const endpoint = {
     create_subscription: "/pricing/subscriptions",
     create_session: "/pricing/checkout/create-session",
     getUserSubscription: "/pricing/customers",
+    cancel: "/pricing/subscriptions",
+  },
+  public: {
+    blogs: "/admin/public/blogs",
+    jobs: "/admin/public/jobs",
   },
   portal: {
     get_companies: "/customer/companies",
@@ -76,5 +103,16 @@ export const endpoint = {
   dashboard: {
     get_metrics: "/dashboard/metrics",
     get_analytics: "/dashboard/analytics",
+  },
+  sla_policies: {
+    create: "/sla-policies",
+    get: "/sla-policies",
+    getOne: "/sla-policies",
+    update: "/sla-policies",
+    delete: "/sla-policies",
+  },
+  silent_hours: {
+    get: "/silent-hours",
+    save: "/silent-hours",
   },
 };

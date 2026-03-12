@@ -96,6 +96,27 @@ function useFetch() {
    * @param {string} url - The URL to make the DELETE request to.
    * @returns {Promise<Object>} A Promise that resolves to an object with success, data, and status properties.
    */
+  const patch = async (url: string, data: unknown) => {
+    try {
+      const response = await customAxios.patch(url, data);
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data:
+          (error as { response: { data: { detail: string } } })?.response?.data
+            ?.detail ||
+          (error as { response: { data: { message: string } } })?.response?.data
+            ?.message,
+        status: (error as { response: { status: string } })?.response?.status,
+      };
+    }
+  };
+
   const remove = async (url: string, id: string) => {
     try {
       const response = await customAxios.delete(`${url}/${id}`);
@@ -117,7 +138,7 @@ function useFetch() {
     }
   };
 
-  return { get, post, put, remove };
+  return { get, post, put, patch, remove };
 }
 
 export { useFetch };

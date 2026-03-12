@@ -9,12 +9,13 @@ import { endpoint } from "@/lib/api/endpoint";
 import { querykeys } from "@/lib/constant";
 import { Ticket } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import toast from "react-hot-toast";
 
 const formScheme = z.object({
   title: z.string().nonempty({ message: "title is required" }),
@@ -46,7 +47,24 @@ const ChangeForm = ({ onClose }: { onClose: () => void }) => {
     mode: "onChange",
   });
   const router = useRouter();
-  const { get } = useFetch();
+  const { get, post } = useFetch();
+  const queryClient = useQueryClient();
+
+  const createChangeMutation = useMutation({
+    mutationFn: async (value: FormType) => {
+      const res = await post(endpoint.changes.create, value);
+      if (!res.success) throw new Error(res.data ?? "Failed to create change");
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Change created successfully");
+      queryClient.invalidateQueries({ queryKey: [querykeys.CHANGES] });
+      onClose();
+    },
+    onError: (err: any) => {
+      toast.error(err.message ?? "Failed to create change");
+    },
+  });
 
   const { data } = useQuery({
     queryKey: [querykeys.INCIDENT_TICKET],
@@ -83,7 +101,7 @@ const ChangeForm = ({ onClose }: { onClose: () => void }) => {
   };
 
   const handleSubmtForm = (value: FormType) => {
-    console.log(value);
+    createChangeMutation.mutate(value);
   };
   return (
     <div>
@@ -332,8 +350,12 @@ const ChangeForm = ({ onClose }: { onClose: () => void }) => {
                   >
                     Back
                   </CButton>
-                  <CButton type="submit" className=" w-fit px-6">
-                    Create New Change
+                  <CButton
+                    type="submit"
+                    className=" w-fit px-6"
+                    disabled={createChangeMutation.isPending}
+                  >
+                    {createChangeMutation.isPending ? "Creating..." : "Create New Change"}
                   </CButton>
                 </div>
               </div>

@@ -1,4 +1,9 @@
+"use client";
 import EmptyState from "@/components/ui/EmptyState";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { querykeys } from "@/lib/constant";
+import { useQuery } from "@tanstack/react-query";
 import React from "react";
 
 const mission = [
@@ -46,7 +51,19 @@ const benefits = [
       "Receive a stipend to support your physical and mental well-being.",
   },
 ];
+
 const page = () => {
+  const { get } = useFetch();
+
+  const { data: jobs, isLoading } = useQuery({
+    queryKey: [querykeys.PUBLIC_JOBS],
+    queryFn: async () => {
+      const res = await get(endpoint.public.jobs);
+      if (res.success) return res.data.data as any[];
+      return [];
+    },
+  });
+
   return (
     <div>
       <div className="h-[800px] w-full bg-no-repeat bg-cover relative z-10">
@@ -58,10 +75,10 @@ const page = () => {
         <div className="container mx-auto p-4">
           <div className=" absolute flex flex-col justify-center h-full">
             <h1 className="text-white text-4xl md:text-5xl font-bigshotOne sm:text-start text-center">
-              Join us in building <br /> Africa’s resilience layer
+              Join us in building <br /> Africa's resilience layer
             </h1>
             <p className=" max-w-2xl text-white sm:text-start text-center">
-              At Scrubbe, we’re solving one of Africa’s most urgent problems:
+              At Scrubbe, we're solving one of Africa's most urgent problems:
               resilience. Join us to build tools that minimize downtime, protect
               revenue, and empower developers across the continent.
             </p>
@@ -81,7 +98,7 @@ const page = () => {
         <p className=" text-center max-w-2xl mx-auto text-base">
           At Scrubbe IMS, our mission is to empower African businesses with
           tools to ensure reliability, fight fraud, and stay resilient in
-          challenging environments. We’re building a platform that developers
+          challenging environments. We're building a platform that developers
           and enterprises trust to deliver uptime and security.
         </p>
 
@@ -108,11 +125,44 @@ const page = () => {
         </div>
 
         <div className=" space-y-3 py-10">
-          <p className=" text-xl font-bold">Open Role</p>
-          <EmptyState
-            title="No Opening Available"
-            description="Check back soon to get updates on our new opening. See you soon."
-          />
+          <p className=" text-xl font-bold">Open Roles</p>
+          {isLoading ? (
+            <div className="text-center py-10 text-gray-500">Loading open roles...</div>
+          ) : jobs && jobs.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-5">
+              {jobs.map((job: any) => (
+                <div
+                  key={job.id}
+                  className="border border-zinc-200 rounded-lg p-5 space-y-2 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-lg font-semibold">{job.title}</p>
+                    <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full shrink-0">
+                      {job.type ?? "Full-time"}
+                    </span>
+                  </div>
+                  {(job.department || job.location) && (
+                    <p className="text-sm text-gray-500">
+                      {[job.department, job.location].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-600 line-clamp-3">{job.description}</p>
+                  {job.requirements && job.requirements.length > 0 && (
+                    <ul className="list-disc list-inside text-sm text-gray-500 space-y-0.5">
+                      {job.requirements.slice(0, 3).map((req: string, i: number) => (
+                        <li key={i}>{req}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title="No Opening Available"
+              description="Check back soon to get updates on our new opening. See you soon."
+            />
+          )}
         </div>
 
         <div className=" py-10">

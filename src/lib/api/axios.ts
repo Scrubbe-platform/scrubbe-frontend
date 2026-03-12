@@ -11,18 +11,15 @@ axios.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     config.headers.Accept = "application/json";
-
-    // Disable credentials to avoid CORS issues
-    // TEMP: This should be removed in production
-    config.withCredentials = false;
-
     return config;
   },
-  async (error) => {
-    // Check for a 401 status code
-    if (error.response && error.response.status === 401) {
-      // Call the passed-in function
-      console.log("This is 404 error");
+  (error) => Promise.reject(error)
+);
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
       deleteCookie(COOKIE_KEYS.TOKEN);
       deleteCookie(COOKIE_KEYS.REFRESH_TOKEN);
     }

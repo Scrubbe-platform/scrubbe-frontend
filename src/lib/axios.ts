@@ -7,8 +7,8 @@ const getBaseUrl = () => {
   if (process.env.NODE_ENV === "development") {
     return "/api/proxy";
   }
-  // In production, use the direct API URL
-  return "https://admin-rul9.onrender.com/api/v1";
+  // In production, use the env variable
+  return process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 };
 
 // Create a configured Axios instance for API calls

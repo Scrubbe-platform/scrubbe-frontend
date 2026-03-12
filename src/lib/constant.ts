@@ -26,6 +26,10 @@ export const querykeys = {
   PRICING: "PRICING",
   GET_ALL_ASSIGN: "GET_ALL_ASSIGN",
   METRICS: "METRICS",
+  CHANGES: "CHANGES",
+  PROBLEMS: "PROBLEMS",
+  PUBLIC_BLOGS: "PUBLIC_BLOGS",
+  PUBLIC_JOBS: "PUBLIC_JOBS",
 };
 
 export const borderColors: { [key: string]: string } = {
