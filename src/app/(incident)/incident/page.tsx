@@ -1,10 +1,10 @@
-import Dashboard from "@/components/IMS/Dashboard/Index";
+import OperationalDashboard from "@/components/IMS/Dashboard/OperationalDashboard";
 import React from "react";
 
 const page = () => {
   return (
     <div>
-      <Dashboard />
+      <OperationalDashboard />
     </div>
   );
 };
