@@ -24,20 +24,22 @@ const GlobalSearch = () => {
       {/* NAVIGATION TABS */}
       <div className="flex px-4 pt-2 border-b border-white/30 ">
         {["Incidents", "Dashboards", "Policy"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-6 py-3 text-base font-bold transition-all relative flex-1 ${
-              activeTab === tab
-                ? "text-cyan-400"
-                : "text-slate-500 hover:text-slate-300"
-            }`}
-          >
-            {tab}
-            {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
-            )}
-          </button>
+          <div key={tab}>
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-6 py-3 text-base font-bold transition-all relative flex-1 ${
+                activeTab === tab
+                  ? "text-cyan-400"
+                  : "text-slate-500 hover:text-slate-300"
+              }`}
+            >
+              {tab}
+              {activeTab === tab && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
+              )}
+            </button>
+          </div>
         ))}
       </div>
 

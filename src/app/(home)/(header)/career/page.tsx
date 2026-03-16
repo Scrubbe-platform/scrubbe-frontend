@@ -52,7 +52,7 @@ const benefits = [
   },
 ];
 
-const page = () => {
+const Page = () => {
   const { get } = useFetch();
 
   const { data: jobs, isLoading } = useQuery({
@@ -75,12 +75,13 @@ const page = () => {
         <div className="container mx-auto p-4">
           <div className=" absolute flex flex-col justify-center h-full">
             <h1 className="text-white text-4xl md:text-5xl font-bigshotOne sm:text-start text-center">
-              Join us in building <br /> Africa's resilience layer
+              Join us in building <br /> Africa&apos;s resilience layer
             </h1>
             <p className=" max-w-2xl text-white sm:text-start text-center">
-              At Scrubbe, we're solving one of Africa's most urgent problems:
-              resilience. Join us to build tools that minimize downtime, protect
-              revenue, and empower developers across the continent.
+              At Scrubbe, we&apos;re solving one of Africa&apos;s most urgent
+              problems: resilience. Join us to build tools that minimize
+              downtime, protect revenue, and empower developers across the
+              continent.
             </p>
             <div className="flex sm:flex-row flex-col sm:gap-0 gap-5 items-center mt-3">
               <div className="h-[42px] rounded-lg bg-IMSLightGreen text-white flex items-center px-6 font-semibold cursor-pointer">
@@ -98,8 +99,8 @@ const page = () => {
         <p className=" text-center max-w-2xl mx-auto text-base">
           At Scrubbe IMS, our mission is to empower African businesses with
           tools to ensure reliability, fight fraud, and stay resilient in
-          challenging environments. We're building a platform that developers
-          and enterprises trust to deliver uptime and security.
+          challenging environments. We&apos;re building a platform that
+          developers and enterprises trust to deliver uptime and security.
         </p>
 
         <div className="grid md:grid-cols-2 pt-5 md:gap-10">
@@ -127,7 +128,9 @@ const page = () => {
         <div className=" space-y-3 py-10">
           <p className=" text-xl font-bold">Open Roles</p>
           {isLoading ? (
-            <div className="text-center py-10 text-gray-500">Loading open roles...</div>
+            <div className="text-center py-10 text-gray-500">
+              Loading open roles...
+            </div>
           ) : jobs && jobs.length > 0 ? (
             <div className="grid md:grid-cols-2 gap-5">
               {jobs.map((job: any) => (
@@ -143,15 +146,21 @@ const page = () => {
                   </div>
                   {(job.department || job.location) && (
                     <p className="text-sm text-gray-500">
-                      {[job.department, job.location].filter(Boolean).join(" · ")}
+                      {[job.department, job.location]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                   )}
-                  <p className="text-sm text-gray-600 line-clamp-3">{job.description}</p>
+                  <p className="text-sm text-gray-600 line-clamp-3">
+                    {job.description}
+                  </p>
                   {job.requirements && job.requirements.length > 0 && (
                     <ul className="list-disc list-inside text-sm text-gray-500 space-y-0.5">
-                      {job.requirements.slice(0, 3).map((req: string, i: number) => (
-                        <li key={i}>{req}</li>
-                      ))}
+                      {job.requirements
+                        .slice(0, 3)
+                        .map((req: string, i: number) => (
+                          <li key={i}>{req}</li>
+                        ))}
                     </ul>
                   )}
                 </div>
@@ -191,4 +200,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

@@ -6,7 +6,7 @@ import { querykeys } from "@/lib/constant";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 
-const page = () => {
+const Page = () => {
   const [search, setSearch] = useState("");
   const { get } = useFetch();
 
@@ -23,7 +23,9 @@ const page = () => {
     (b: any) =>
       !search ||
       b.title?.toLowerCase().includes(search.toLowerCase()) ||
-      b.tags?.some((t: string) => t.toLowerCase().includes(search.toLowerCase()))
+      b.tags?.some((t: string) =>
+        t.toLowerCase().includes(search.toLowerCase())
+      )
   );
 
   return (
@@ -60,7 +62,9 @@ const page = () => {
       <div className=" container mx-auto mt-4 px-4 space-y-3">
         <p className=" text-xl font-bold">Blog Posts</p>
         {isLoading ? (
-          <div className="text-center py-10 text-gray-500">Loading blog posts...</div>
+          <div className="text-center py-10 text-gray-500">
+            Loading blog posts...
+          </div>
         ) : filtered.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
             {filtered.map((blog: any) => (
@@ -69,26 +73,39 @@ const page = () => {
                 className="border border-zinc-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
               >
                 {blog.coverImage && (
-                  <img src={blog.coverImage} alt={blog.title} className="w-full h-48 object-cover" />
+                  <img
+                    src={blog.coverImage}
+                    alt={blog.title}
+                    className="w-full h-48 object-cover"
+                  />
                 )}
                 <div className="p-4 space-y-2">
                   <div className="flex flex-wrap gap-1">
                     {(blog.tags ?? []).map((tag: string) => (
-                      <span key={tag} className="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">
+                      <span
+                        key={tag}
+                        className="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full"
+                      >
                         {tag}
                       </span>
                     ))}
                   </div>
-                  <p className="font-semibold text-lg leading-tight">{blog.title}</p>
+                  <p className="font-semibold text-lg leading-tight">
+                    {blog.title}
+                  </p>
                   {blog.excerpt && (
-                    <p className="text-sm text-gray-500 line-clamp-3">{blog.excerpt}</p>
+                    <p className="text-sm text-gray-500 line-clamp-3">
+                      {blog.excerpt}
+                    </p>
                   )}
                   <p className="text-xs text-gray-400">
                     {blog.author
                       ? `By ${blog.author.firstName} ${blog.author.lastName}`
                       : "Scrubbe Team"}{" "}
                     &bull;{" "}
-                    {blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString() : ""}
+                    {blog.publishedAt
+                      ? new Date(blog.publishedAt).toLocaleDateString()
+                      : ""}
                   </p>
                 </div>
               </div>
@@ -105,4 +122,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

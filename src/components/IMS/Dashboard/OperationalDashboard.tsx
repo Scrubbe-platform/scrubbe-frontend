@@ -41,16 +41,18 @@ export default function OperationalDashboard() {
 
       <div className="flex gap-8 text-base font-medium w-full border-b border-slate-500 ">
         {tabs.map((value) => (
-          <button
-            onClick={() => setTab(value)}
-            className={`${
-              value === tab
-                ? "text-IMSCyan border-IMSCyan"
-                : "text-slate-300 border-transparent"
-            } border-b-2  pb-4 flex-1`}
-          >
-            {value}
-          </button>
+          <div key={value}>
+            <button
+              onClick={() => setTab(value)}
+              className={`${
+                value === tab
+                  ? "text-IMSCyan border-IMSCyan"
+                  : "text-slate-300 border-transparent"
+              } border-b-2  pb-4 flex-1`}
+            >
+              {value}
+            </button>
+          </div>
         ))}
       </div>
 
