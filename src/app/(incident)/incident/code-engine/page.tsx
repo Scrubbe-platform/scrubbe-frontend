@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { ReactNode, useState } from "react";
 import {
   Bell,
   ChevronRight,
@@ -11,12 +12,52 @@ import {
   Shield,
   Zap,
   Layout,
+  Phone,
+  Workflow,
+  BookOpen,
+  Logs,
+  ShieldCheck,
+  WorkflowIcon,
 } from "lucide-react";
 import CodeEngineRecommendation from "./_modules/components/code-engine-recommendation";
+import { BiGitBranch } from "react-icons/bi";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { PiSpiral } from "react-icons/pi";
+import { TiFlowMerge } from "react-icons/ti";
+import { IoCodeSlash } from "react-icons/io5";
+import { LuClock2 } from "react-icons/lu";
+import { FiGitPullRequest } from "react-icons/fi";
+import moment from "moment";
+import SideModal from "@/components/ui/SideModal";
+import Pipeline from "./_modules/components/Pipeline";
 
+const incidentData = [
+  {
+    ticketId: "INC-311",
+    title: "Checkout-Service Deployment failed",
+    timezone: "eu-west- 1",
+    createdAt: new Date(),
+    priority: "P1",
+  },
+  {
+    ticketId: "INC-312",
+    title: "Checkout-Service Deployment failed",
+    timezone: "eu-west- 1",
+    createdAt: new Date(),
+    priority: "P2",
+  },
+  {
+    ticketId: "INC-313",
+    title: "Checkout-Service Deployment failed",
+    timezone: "eu-west- 1",
+    createdAt: new Date(),
+    priority: "P3",
+  },
+];
 export default function IncidentOverview() {
+  const [openPipeline, setOpenPipeline] = useState(false);
   return (
-    <div className="min-h-screen bg-[#0a0f1d] text-slate-300 p-6 font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen text-slate-300 p-6 font-sans selection:bg-cyan-500/30">
       <div className="flex gap-6 max-w-[1600px] mx-auto relative">
         {/* LEFT SIDEBAR - STICKY */}
         <aside className="w-72 shrink-0 self-start sticky top-6 space-y-4">
@@ -28,25 +69,23 @@ export default function IncidentOverview() {
           </div>
 
           <div className="space-y-3">
-            <ActiveIncidentCard
-              id="INC-311"
-              priority="P1"
-              title="Checkout-Service Deployment failed"
-              active
-            />
-            <ActiveIncidentCard
-              id="INC-305"
-              priority="P2"
-              title="auth-service latency spike"
-            />
-            <ActiveIncidentCard
-              id="INC-208"
-              priority="P3"
-              title="Scheduled Maintenance Window"
-            />
+            {incidentData.map((incident) => (
+              <ActiveIncidentCard
+                id={incident.ticketId}
+                priority={incident.priority}
+                title={incident.title}
+                timezone={incident.timezone}
+                date={incident.createdAt}
+                active
+                key={incident.ticketId}
+              />
+            ))}
           </div>
 
-          <button className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-xs font-bold hover:bg-cyan-500/10 transition-all">
+          <button
+            onClick={() => setOpenPipeline(true)}
+            className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-xs font-bold hover:bg-cyan-500/10 transition-all"
+          >
             <Layout size={14} /> View Pipeline #311
           </button>
         </aside>
@@ -57,10 +96,10 @@ export default function IncidentOverview() {
           <section className="flex justify-between items-start">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-black text-white italic tracking-tighter">
+                <h1 className="text-2xl font-black text-white tracking-tighter">
                   INC-311
                 </h1>
-                <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-500 text-[10px] font-black uppercase border border-rose-500/30">
+                <span className="px-2 py-0.5 rounded bg-rose-500 text-[10px] text-black uppercase border border-rose-500/30">
                   P1 • Investigating
                 </span>
               </div>
@@ -70,17 +109,17 @@ export default function IncidentOverview() {
               </p>
             </div>
             <div className="flex gap-2">
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/10 hover:bg-white/5 text-xs font-bold transition-all">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-IMSCyan text-IMSCyan text-xs transition-all">
                 <Bell size={14} /> Notify
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-400 text-black text-xs font-black transition-all hover:bg-cyan-300">
-                <Share2 size={14} /> Declare Incident
+              <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-400 text-black text-xs transition-all hover:bg-cyan-300">
+                <Phone size={14} /> Declare Incident
               </button>
             </div>
           </section>
 
           {/* KPI GRID */}
-          <section className="grid grid-cols-4 gap-px bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+          <section className="grid grid-cols-4 gap-4 overflow-hidden">
             <StatBox label="Org MTTR (last 30 days)" value="27m" />
             <StatBox
               label="This incident"
@@ -97,14 +136,14 @@ export default function IncidentOverview() {
               label="Current blast radius"
               value="Checkout only"
               sub="View topology"
-              subIcon={<Activity size={12} />}
+              subIcon={<BiGitBranch size={16} />}
             />
           </section>
 
           {/* SCRUBBE INSIGHT (PURPLE) */}
           <section className="p-5 rounded-2xl border border-purple-500/30 bg-purple-500/5 space-y-3">
-            <div className="flex items-center gap-2 text-purple-400">
-              <Zap size={16} fill="currentColor" />
+            <div className="flex items-center gap-2 ">
+              <Zap size={16} fill="currentColor" className="text-yellow-400" />
               <span className="text-sm font-bold uppercase tracking-widest">
                 Scrubbe Insight • 94% confidence
               </span>
@@ -126,17 +165,43 @@ export default function IncidentOverview() {
           {/* SECONDARY INFO GRID */}
           <section className="grid grid-cols-3 gap-4">
             <InfoCard
-              icon={<GaugeIcon size={16} />}
+              icon={<PiSpiral size={16} />}
               title="SLO & error budget"
-              desc="This failure consumes ~7% of the remaining monthly error budget for checkout-service."
+              desc={
+                <div>
+                  <p>
+                    This failure consumes ~7% of the remaining monthly error
+                    budget for checkout-service.
+                  </p>
+                  <div className="flex text-white gap-2 items-center cursor-pointer mt-2">
+                    <p>Open SLO Context</p>
+                    <GiHamburgerMenu className="text-IMSCyan" />
+                  </div>
+                </div>
+              }
             />
             <InfoCard
-              icon={<Database size={16} />}
+              icon={<Workflow size={16} />}
               title="Blast radius snapshot"
-              desc="Impacted: checkout-service -> db-core in eu-west-1. No evidence of cross-region spread yet."
+              desc={
+                <div>
+                  <p>
+                    Impacted:{" "}
+                    <span className="text-green">
+                      checkout-service → db-core
+                    </span>
+                     in eu-west-1. No evidence of cross-region or cross-service
+                    spread yet.
+                  </p>
+                  <p className="mt-2">
+                    If this drags on, payments-api and order-service may breach
+                    latency SLO.
+                  </p>
+                </div>
+              }
             />
             <InfoCard
-              icon={<Terminal size={16} />}
+              icon={<BookOpen size={16} />}
               title="Runbook suggestion"
               desc="Match found: RBK-17 - 'DB pool exhaustion during campaign'. Steps 2-4 are already covered."
             />
@@ -150,17 +215,49 @@ export default function IncidentOverview() {
                 Code Intelligence Engine • 3 Suggested Fixes
               </span>
             </div>
-            <div className="grid grid-cols-5 gap-2">
-              <FixTag label="Diff-based meaning" />
-              <FixTag label="Pattern matching" />
-              <FixTag label="Logs / Context" />
-              <FixTag label="Env guardrails" />
-              <FixTag label="Workflow" />
-              <FixTag label="Remediation" active />
-              <FixTag label="Tooling" />
-              <FixTag label="Rationale" />
-              <FixTag label="Approval" />
-              <FixTag label="SLO Impact" />
+            <div className="flex flex-wrap gap-2">
+              <FixTag
+                icon={<BiGitBranch size={14} />}
+                label="Diff-based meaning"
+              />
+              <FixTag icon={<BookOpen size={14} />} label="Pattern matching" />
+              <FixTag
+                icon={<Logs size={14} />}
+                label="Logs / metrics / fraud context"
+              />
+              <FixTag
+                icon={<ShieldCheck size={14} />}
+                label="Env guardrails & RBAC"
+              />
+              <FixTag
+                icon={<WorkflowIcon size={14} />}
+                label="Remediation Workflow"
+              />
+              <FixTag
+                icon={<WorkflowIcon size={14} />}
+                label="Service Topology"
+                active
+              />
+              <FixTag
+                icon={<TiFlowMerge size={14} />}
+                label="Multi-step auto-remediation"
+              />
+              <FixTag
+                icon={<IoCodeSlash size={14} />}
+                label="Developer tooling integration"
+              />
+              <FixTag
+                icon={<LuClock2 size={14} />}
+                label="Rationale & Confidence Model"
+              />
+              <FixTag
+                icon={<BookOpen size={14} />}
+                label="Enterprise approval & RBAC"
+              />
+              <FixTag
+                icon={<FiGitPullRequest size={14} />}
+                label="SLO Impact"
+              />
             </div>
           </section>
 
@@ -180,9 +277,9 @@ export default function IncidentOverview() {
             </p>
             <ul className="space-y-2">
               {[
-                "Review retry configuration",
-                "Check recent config changes",
-                "Use Magic Insight timeline",
+                "Review retry and timeout configuration for auth-service.",
+                "Check recent config changes in config/auth.yml.",
+                "Use Magic Insight and the unified timeline to identify the exact change that caused the spike.",
               ].map((text, i) => (
                 <li
                   key={i}
@@ -199,6 +296,18 @@ export default function IncidentOverview() {
           </section>
         </main>
       </div>
+
+      <>
+        {openPipeline && (
+          <SideModal
+            title=""
+            isOpen={openPipeline}
+            onClose={() => setOpenPipeline(false)}
+          >
+            <Pipeline />
+          </SideModal>
+        )}
+      </>
     </div>
   );
 }
@@ -209,17 +318,24 @@ const ActiveIncidentCard = ({
   priority,
   title,
   active = false,
+  timezone,
+  date,
+  onClick,
 }: {
   id: string;
   priority: string;
   title: string;
   active?: boolean;
+  timezone?: string;
+  date: Date;
+  onClick?: (value: any) => void;
 }) => (
   <div
+    onClick={onClick}
     className={`p-4 rounded-2xl border transition-all cursor-pointer ${
       active
         ? "bg-white/[0.04] border-white/20 ring-1 ring-white/10 shadow-2xl"
-        : "bg-transparent border-white/5 hover:border-white/10 hover:bg-white/[0.02]"
+        : "bg-transparent border-white/5 hover:border-white/20 hover:bg-white/[0.02]"
     }`}
   >
     <div className="flex justify-between items-start mb-2">
@@ -227,18 +343,18 @@ const ActiveIncidentCard = ({
         {id}
       </span>
       <span
-        className={`px-1.5 py-0.5 rounded text-[8px] font-black border ${
+        className={`px-1.5 py-0.5 rounded text-[8px] font-black border text-black ${
           priority === "P1"
-            ? "bg-rose-500/10 text-rose-500 border-rose-500/30"
-            : "bg-amber-500/10 text-amber-500 border-amber-500/30"
+            ? " bg-rose-500 border-rose-500/30"
+            : "bg-amber-500 border-amber-500/30"
         }`}
       >
         {priority}
       </span>
     </div>
     <h3 className="text-[11px] font-bold text-white leading-snug">{title}</h3>
-    <p className="text-[9px] text-slate-500 mt-1 uppercase font-bold tracking-widest">
-      eu-west-1 • 23m ago
+    <p className="text-[9px] text-slate-300 mt-1 uppercase">
+      {timezone} • {moment(date).fromNow()}
     </p>
   </div>
 );
@@ -251,16 +367,14 @@ const StatBox = ({
   valueClass = "text-white",
   subIcon,
 }: any) => (
-  <div className="bg-[#0d1425] p-5 flex flex-col justify-between">
-    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-4">
+  <div className="p-5 border rounded-xl border-slate-400 flex flex-col justify-between">
+    <span className="text-[9px] font-bold text-slate-500 uppercase ">
       {label}
     </span>
     <div className="space-y-1">
-      <div
-        className={`text-lg font-black italic tracking-tighter ${valueClass}`}
-      >
-        {value}
-      </div>
+      {value && (
+        <div className={`text-lg font-black  ${valueClass}`}>{value}</div>
+      )}
       {sub && (
         <div
           className={`text-[10px] flex items-center gap-1 font-bold ${
@@ -274,9 +388,17 @@ const StatBox = ({
   </div>
 );
 
-const InfoCard = ({ icon, title, desc }: any) => (
+const InfoCard = ({
+  icon,
+  title,
+  desc,
+}: {
+  icon: ReactNode;
+  title: string;
+  desc: string | ReactNode;
+}) => (
   <div className="p-5 rounded-2xl border border-white/5 bg-white/[0.02] space-y-3">
-    <div className="flex items-center gap-2 text-slate-400">
+    <div className="flex items-center gap-2 text-slate-200">
       {icon}{" "}
       <span className="text-[10px] font-black uppercase tracking-widest">
         {title}
@@ -289,17 +411,20 @@ const InfoCard = ({ icon, title, desc }: any) => (
 const FixTag = ({
   label,
   active = false,
+  icon,
 }: {
   label: string;
   active?: boolean;
+  icon: ReactNode;
 }) => (
   <div
-    className={`px-3 py-1.5 rounded-lg border text-[9px] font-bold text-center transition-all cursor-pointer ${
+    className={`px-3 py-1.5 rounded-lg border flex items-center gap-2 text-[9px] font-bold text-center transition-all cursor-pointer ${
       active
         ? "bg-emerald-500/20 border-emerald-400 text-emerald-400"
         : "bg-white/5 border-white/10 text-slate-500 hover:border-emerald-500/30"
     }`}
   >
+    {icon}
     {label}
   </div>
 );
