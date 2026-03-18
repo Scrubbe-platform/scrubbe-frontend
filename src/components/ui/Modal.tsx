@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect } from "react";
 
 type ModalProps = {
   isOpen: boolean;
@@ -9,6 +10,22 @@ type ModalProps = {
 };
 
 const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    // Attach the listener
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Clean up the listener on unmount
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -23,7 +40,7 @@ const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            className={`${className} relative bg-dark rounded-lg p-2 sm:p-6 w-full sm:min-w-[42rem]  sm:max-w-3xl mx-2 max-h-[90vh] overflow-y-auto `}
+            className={`${className} relative bg-dark rounded-lg p-2 sm:p-2 w-full   sm:max-w-xl mx-2 max-h-[90vh] overflow-y-auto `}
           >
             <div className=" absolute right-3 top-3">
               <div
