@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "../dashboard/Navbar";
 import Sidebar from "./Sidebar";
 import { motion } from "framer-motion";
@@ -7,10 +7,31 @@ import { usePathname } from "next/navigation";
 import { BsArrowBarLeft } from "react-icons/bs";
 import clsx from "clsx";
 import { useSidebar } from "@/lib/stores/useSidebar";
+import { RiMenuFold2Fill } from "react-icons/ri";
+import { useCommands } from "@/lib/stores/command.store";
+import Modal from "../ui/Modal";
+import GlobalSearch from "./Dashboard/GlobalSearch";
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const { collapse, toggle } = useSidebar();
   const pathname = usePathname();
+  const { setOpenCommandPalette, openCommandPalette } = useCommands();
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Open command Palette
+      if (event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
+        setOpenCommandPalette(true);
+      }
+    };
+
+    // Attach the listener
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Clean up the listener on unmount
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
   return (
     <div className="w-full bg-dark h-screen  overflow-auto relative">
       <div
@@ -36,12 +57,30 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
               duration: 0.5,
               type: "tween",
             }}
-            className="w-full  h-[calc(100vh)] overflow-y-auto"
+            className="w-full  h-[calc(100vh)] overflow-y-auto relative"
           >
             {children}
+            <div className=" w-fit sticky bottom-12 left-[80%]">
+              <div
+                onClick={() => setOpenCommandPalette(true)}
+                className="bg-black cursor-pointer text-white shadow-md shadow-white/50 rounded-lg p-2 text-xs  w-fit flex items-center gap-2"
+              >
+                <RiMenuFold2Fill />
+                <p className=" ">Command Palette</p>
+                <div className="bg-zinc-700 p-1 rounded-sm">⌘ k</div>
+                <div className="bg-zinc-700 p-1 rounded-sm">Ctrl + k</div>
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>
+
+      <Modal
+        onClose={() => setOpenCommandPalette(false)}
+        isOpen={openCommandPalette}
+      >
+        <GlobalSearch />
+      </Modal>
     </div>
   );
 };
