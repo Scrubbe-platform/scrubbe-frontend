@@ -1,16 +1,17 @@
 "use client";
 import { useRef, useState } from "react";
 // import hljs from "highlight.js";
-import "highlight.js/styles/atom-one-dark-reasonable.min.css";
 
 interface CodeHighlighterProps {
   language: string;
   code: string;
+  isCopy?: boolean;
 }
 
 export default function CodeHighlighter({
   language,
   code,
+  isCopy = true,
 }: CodeHighlighterProps) {
   const codeRef = useRef<HTMLElement>(null);
   const [copied, setCopied] = useState(false);
@@ -36,13 +37,15 @@ export default function CodeHighlighter({
         </code>
       </pre>
 
-      <button
-        onClick={handleCopy}
-        className="absolute top-2 right-2 bg-gray-800 text-white text-sm px-3 py-1 rounded hover:bg-gray-700 transition"
-        aria-label="Copy code"
-      >
-        {copied ? "Copied!" : "Copy"}
-      </button>
+      {isCopy && (
+        <button
+          onClick={handleCopy}
+          className="absolute top-2 right-2 bg-gray-800 text-white text-sm px-3 py-1 rounded hover:bg-gray-700 transition"
+          aria-label="Copy code"
+        >
+          {copied ? "Copied!" : "Copy"}
+        </button>
+      )}
     </div>
   );
 }
