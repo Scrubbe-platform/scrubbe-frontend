@@ -1,6 +1,8 @@
 "use client";
 import Integrations from "@/components/IncidentTicket/Integrations";
 import Overview from "@/components/IncidentTicket/Overview";
+import RulesAndRouting from "@/components/IncidentTicket/RulesAndRouting";
+import ErrorLogs from "@/components/IncidentTicket/ErrorLogs";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
 
@@ -42,8 +44,8 @@ const Page = () => {
           {tab === 0 && <Overview />}
 
           {tab === 1 && <Integrations />}
-          {tab === 2 && <div></div>}
-          {tab === 3 && <div></div>}
+          {tab === 2 && <RulesAndRouting />}
+          {tab === 3 && <ErrorLogs />}
         </motion.div>
       </div>
     </div>

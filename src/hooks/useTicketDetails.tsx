@@ -14,7 +14,7 @@ const useTicketDetails = () => {
       const res = await get(endpoint.incident_ticket.getTicket + "/" + id);
       console.log({ res });
       if (res.success) {
-        return res.data.data[0];
+        return res.data.data ?? null;
       }
       return null;
     },

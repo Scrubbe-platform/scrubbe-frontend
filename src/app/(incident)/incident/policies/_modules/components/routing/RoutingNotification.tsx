@@ -11,6 +11,10 @@ import SideModal from '@/components/ui/SideModal'
 import { BiInfoCircle } from 'react-icons/bi'
 import TextArea from '@/components/ui/text-area'
 import Select from '@/components/ui/select'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useFetch } from '@/hooks/useFetch'
+import { endpoint } from '@/lib/api/endpoint'
+import { toast } from 'sonner'
 
 
 
@@ -29,6 +33,8 @@ const formScheme = z.object({
 
 type TformScheme = z.infer<typeof formScheme>
 const RoutingNotification = () => {
+    const { post } = useFetch()
+    const queryClient = useQueryClient()
     const [openModal, setOpenModal] = useState(false)
     const [notification, setNotification] = useState<Record<string, boolean>>({
         slack: false,
@@ -36,7 +42,7 @@ const RoutingNotification = () => {
         email: false,
         sms: false
     })
-    const { control, formState: { isValid, errors }, setValue, watch } = useForm({
+    const { control, handleSubmit, formState: { isValid, errors } } = useForm({
         resolver: zodResolver(formScheme),
         mode: "onChange",
         defaultValues: {
@@ -45,7 +51,32 @@ const RoutingNotification = () => {
             note: "",
         }
     })
-    const handleTestNotication = () => { }
+
+    const { mutateAsync: createRule, isPending: saving } = useMutation({
+        mutationFn: async (data: TformScheme) => {
+            const res = await post(endpoint.guardrails.create, { ...data, ruleType: 'ROUTING', channels: notification })
+            if (!res.success) throw new Error(res.data?.message ?? 'Failed to save rule')
+            return res.data
+        },
+        onSuccess: () => {
+            toast.success('Routing rule saved')
+            queryClient.invalidateQueries({ queryKey: ['guardrails'] })
+            setOpenModal(false)
+        },
+        onError: (e: Error) => toast.error(e.message),
+    })
+
+    const { mutateAsync: testNotification, isPending: testing } = useMutation({
+        mutationFn: async () => {
+            const res = await post(endpoint.guardrails.evaluate, { type: 'TEST_NOTIFICATION', channels: notification })
+            if (!res.success) throw new Error(res.data?.message ?? 'Test failed')
+            return res.data
+        },
+        onSuccess: () => toast.success('Test notification sent'),
+        onError: (e: Error) => toast.error(e.message),
+    })
+
+    const handleTestNotication = () => { testNotification() }
     return (
         <div>
             <FormWrapper
@@ -172,7 +203,12 @@ const RoutingNotification = () => {
                             <CButton onClick={() => setOpenModal(false)} className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan w-fit">
                                 Cancel
                             </CButton>
-                            <CButton disabled={!isValid} className=" hover:bg-IMSCyan bg-IMSCyan text-black w-fit">
+                            <CButton
+                                disabled={!isValid || saving}
+                                isLoading={saving}
+                                onClick={handleSubmit(data => createRule(data))}
+                                className="hover:bg-IMSCyan bg-IMSCyan text-black w-fit"
+                            >
                                 Save Rule
                             </CButton>
                         </div>

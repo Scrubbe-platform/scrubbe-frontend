@@ -30,6 +30,7 @@ export const querykeys = {
   PROBLEMS: "PROBLEMS",
   PUBLIC_BLOGS: "PUBLIC_BLOGS",
   PUBLIC_JOBS: "PUBLIC_JOBS",
+  PIPELINES: "PIPELINES",
 };
 
 export const borderColors: { [key: string]: string } = {

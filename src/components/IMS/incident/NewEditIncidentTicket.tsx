@@ -158,7 +158,7 @@ const NewEditIncidentTicket = () => {
         const res = await get(endpoint.incident_ticket.get_members);
         console.log({ memeber: res });
         if (res.success) {
-          return res.data;
+          return res.data.data ?? [];
         }
         return [];
       } catch (error) {
@@ -177,7 +177,7 @@ const NewEditIncidentTicket = () => {
           incidentId: ticket?.id,
         };
 
-        const res = await put(endpoint.incident_ticket.create, newData);
+        const res = await put(`${endpoint.incident_ticket.create}/${id}`, newData);
         if (res.success) {
           toast.success("Incident ticket updated successfully");
           queryClient.refetchQueries({ queryKey: [querykeys.INCIDENT_TICKET] });
