@@ -4,6 +4,7 @@ import { useState, useMemo, ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronDown, Info, Check } from "lucide-react";
 import { Switch } from "@heroui/react";
+import { useRouter } from "next/navigation";
 
 const ScrubbeOnboarding = () => {
   const { register, handleSubmit, control, watch, setValue } = useForm({
@@ -34,6 +35,8 @@ const ScrubbeOnboarding = () => {
       manualDone: { s1: false, s2: false, s3: false, s4: false },
     },
   });
+
+  const router = useRouter();
 
   const formValues = watch();
 
@@ -72,6 +75,7 @@ const ScrubbeOnboarding = () => {
           </div>
           <button
             type="button"
+            onClick={() => router.push("/incident")}
             className="px-4 py-1.5 border border-white rounded text-xs font-bold text-white hover:bg-transparent"
           >
             Skip for now
@@ -669,7 +673,7 @@ const IntegrationCard = ({
   onChange: (value: boolean) => void;
 }) => (
   <div
-    className={`p-4 rounded-lg border flex justify-between items-center cursor-pointer transition-all bg-[#111827] border-[#6D7280] `}
+    className={`p-4 rounded-lg border flex justify-between items-center cursor-pointer transition-all bg-darkEzra border-[#6D7280] `}
   >
     <div>
       <p className={`text-base font-bold text-white`}>{label}</p>

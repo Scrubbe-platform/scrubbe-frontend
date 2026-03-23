@@ -44,16 +44,17 @@ const statusColor = (s: string) =>
 export default function Dashboard() {
   const { get } = useFetch();
 
-  const { data: metrics, isLoading: loadingMetrics } = useQuery<DashboardMetrics>({
-    queryKey: ["dashboard-metrics"],
-    queryFn: async () => {
-      const res = await get(endpoint.dashboard.get_metrics);
-      if (res.success) return res.data?.data ?? res.data ?? {};
-      return {} as DashboardMetrics;
-    },
-    refetchOnWindowFocus: false,
-    refetchInterval: 60000,
-  });
+  const { data: metrics, isLoading: loadingMetrics } =
+    useQuery<DashboardMetrics>({
+      queryKey: ["dashboard-metrics"],
+      queryFn: async () => {
+        const res = await get(endpoint.dashboard.get_metrics);
+        if (res.success) return res.data?.data ?? res.data ?? {};
+        return {} as DashboardMetrics;
+      },
+      refetchOnWindowFocus: false,
+      refetchInterval: 60000,
+    });
 
   const { data: analytics, isLoading: loadingAnalytics } = useQuery<Analytics>({
     queryKey: ["dashboard-analytics"],
@@ -69,25 +70,32 @@ export default function Dashboard() {
   const stats = [
     {
       label: "Total Incidents",
-      value: loadingMetrics ? "—" : (metrics?.totalIncidents ?? 0),
+      value: loadingMetrics ? "—" : metrics?.totalIncidents ?? 0,
       subText: "All severities • 24h",
       valueColor: "text-cyan-400",
     },
     {
       label: "Auto-Remediated",
-      value: loadingMetrics ? "—" : (metrics?.autoRemediated ?? 0),
-      subText: metrics?.automationRate != null ? `${metrics.automationRate}% automation rate` : "—",
+      value: loadingMetrics ? "—" : metrics?.autoRemediated ?? 0,
+      subText:
+        metrics?.automationRate != null
+          ? `${metrics.automationRate}% automation rate`
+          : "—",
       valueColor: "text-green",
     },
     {
       label: "Avg MTTR",
-      value: loadingMetrics ? "—" : (metrics?.avgMTTR != null ? formatTime(metrics.avgMTTR) : "—"),
+      value: loadingMetrics
+        ? "—"
+        : metrics?.avgMTTR != null
+        ? formatTime(metrics.avgMTTR)
+        : "—",
       subText: `SLA compliance: ${metrics?.slaCompliance ?? "—"}%`,
       valueColor: "text-yellow-500",
     },
     {
       label: "Policy Violations",
-      value: loadingMetrics ? "—" : (metrics?.policyViolations ?? 0),
+      value: loadingMetrics ? "—" : metrics?.policyViolations ?? 0,
       subText: "Require manual review",
       valueColor: "text-rose-500",
     },
@@ -96,7 +104,7 @@ export default function Dashboard() {
   const executions: RecentExecution[] = analytics?.recentExecutions ?? [];
 
   return (
-    <main className="max-w-[1400px] mx-auto p-10 space-y-12">
+    <main className="max-w-[1400px] mx-auto p-10 space-y-5">
       <header>
         <h1 className="text-2xl font-bold text-white mb-2">Dashboard</h1>
         <p className="text-slate-500 text-sm font-medium">
@@ -114,7 +122,9 @@ export default function Dashboard() {
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
               {stat.label}
             </span>
-            <div className={`text-3xl font-bold tracking-tighter ${stat.valueColor}`}>
+            <div
+              className={`text-3xl font-bold tracking-tighter ${stat.valueColor}`}
+            >
               {stat.value}
             </div>
             <div className="text-[11px] font-medium text-slate-500">
@@ -128,21 +138,33 @@ export default function Dashboard() {
       {metrics && (
         <section className="grid grid-cols-3 gap-6">
           <div className="bg-darkEzra border border-white/30 p-6 rounded-xl space-y-2">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Open Incidents</span>
-            <div className="text-3xl font-bold text-rose-400">{metrics.openIncidents ?? 0}</div>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              Open Incidents
+            </span>
+            <div className="text-3xl font-bold text-rose-400">
+              {metrics.openIncidents ?? 0}
+            </div>
             <div className="text-[11px] text-slate-500">Active right now</div>
           </div>
           <div className="bg-darkEzra border border-white/30 p-6 rounded-xl space-y-2">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Resolved</span>
-            <div className="text-3xl font-bold text-emerald-400">{metrics.resolvedIncidents ?? 0}</div>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              Resolved
+            </span>
+            <div className="text-3xl font-bold text-emerald-400">
+              {metrics.resolvedIncidents ?? 0}
+            </div>
             <div className="text-[11px] text-slate-500">Last 24 hours</div>
           </div>
           <div className="bg-darkEzra border border-white/30 p-6 rounded-xl space-y-2">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Avg MTTA</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              Avg MTTA
+            </span>
             <div className="text-3xl font-bold text-cyan-400">
               {metrics.avgMTTA != null ? formatTime(metrics.avgMTTA) : "—"}
             </div>
-            <div className="text-[11px] text-slate-500">Mean time to acknowledge</div>
+            <div className="text-[11px] text-slate-500">
+              Mean time to acknowledge
+            </div>
           </div>
         </section>
       )}
@@ -154,14 +176,18 @@ export default function Dashboard() {
         </h2>
         {loadingAnalytics && (
           <div className="space-y-2">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-16 bg-darkEzra border border-white/10 rounded-xl animate-pulse" />
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-16 bg-darkEzra border border-white/10 rounded-xl animate-pulse"
+              />
             ))}
           </div>
         )}
         {!loadingAnalytics && executions.length === 0 && (
           <div className="text-center py-10 text-slate-500 text-sm border border-white/10 rounded-xl bg-darkEzra">
-            No recent executions. Incidents will appear here as they are processed.
+            No recent executions. Incidents will appear here as they are
+            processed.
           </div>
         )}
         <div className="space-y-2">
@@ -173,8 +199,11 @@ export default function Dashboard() {
               <div className="flex items-center gap-4">
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    exec.status === "RESOLVED" ? "bg-green" :
-                    exec.status === "OPEN" ? "bg-rose-500" : "bg-yellow-500"
+                    exec.status === "RESOLVED"
+                      ? "bg-green"
+                      : exec.status === "OPEN"
+                      ? "bg-rose-500"
+                      : "bg-yellow-500"
                   }`}
                 />
                 <div>
@@ -189,7 +218,9 @@ export default function Dashboard() {
                 </div>
               </div>
               <div
-                className={`px-4 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest ${statusColor(exec.status)}`}
+                className={`px-4 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest ${statusColor(
+                  exec.status
+                )}`}
               >
                 {exec.status}
               </div>

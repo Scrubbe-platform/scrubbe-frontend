@@ -18,69 +18,70 @@ import {
 } from "lucide-react";
 import { PiPlug } from "react-icons/pi";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 
 const Sidebar = () => {
   const navItems = [
     {
       icon: <Building2 size={18} className="text-yellow-400" />,
-      path: "/incident/setting",
+      path: "/incident/settings",
       label: "Organization",
       active: true,
     },
     {
       icon: <Users2 size={18} className="text-indigo-400" />,
-      path: "/incident/setting/roles",
+      path: "/incident/settings/roles",
       label: "User & Roles",
     },
     {
       icon: <PiPlug size={18} className="text-pink-400" />,
-      path: "/incident/setting/integrations",
+      path: "/incident/settings/integrations",
       label: "Integrations",
     },
     {
       icon: <GitBranch size={18} className="text-orange-400" />,
-      path: "/incident/setting/ingestion",
+      path: "/incident/settings/ingestion",
       label: "CI/CD & PR Ingestion",
     },
     {
       icon: <Bell size={18} className="text-emerald-400" />,
-      path: "/incident/setting/notification",
+      path: "/incident/settings/notification",
       label: "Notifications",
     },
     {
       icon: <ListTodo size={18} className="text-lime-400" />,
-      path: "/incident/setting/defaults",
+      path: "/incident/settings/defaults",
       label: "Defaults",
     },
     {
       icon: <ShieldCheck size={18} className="text-cyan-400" />,
-      path: "/incident/setting/policies",
+      path: "/incident/settings/policies",
       label: "Policies",
       margin: "mt-8",
     },
     {
       icon: <Database size={18} className="text-lime-400" />,
-      path: "/incident/setting/code-engine",
+      path: "/incident/settings/code-engine",
       label: "Code & Engine",
     },
     {
       icon: <Sparkles size={18} className="text-cyan-400" />,
-      path: "/incident/setting/ezra",
+      path: "/incident/settings/ezra",
       label: "Ezra",
     },
     {
       icon: <Lock size={18} className="text-lime-400" />,
-      path: "/incident/setting/security",
+      path: "/incident/settings/security",
       label: "Security & SSO",
     },
     {
       icon: <CheckCircle2 size={18} className="text-red-400" />,
-      path: "/incident/setting/compliance",
+      path: "/incident/settings/compliance",
       label: "Compliance",
     },
     {
       icon: <Sliders size={18} className="text-lime-400" />,
-      path: "/incident/setting/features-flags",
+      path: "/incident/settings/features-flags",
       label: "Features Flags",
     },
   ];
@@ -104,9 +105,9 @@ const Sidebar = () => {
         {navItems.map((item, idx) => {
           const active = pathname === item.path;
           return (
-            <div
+            <Link
               key={idx}
-              onClick={() => router.push(item.path)}
+              href={item.path}
               className={`
               flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 
               ${item.margin || ""}
@@ -121,7 +122,7 @@ const Sidebar = () => {
                 {item.icon}
               </span>
               <span className="text-sm font-medium">{item.label}</span>
-            </div>
+            </Link>
           );
         })}
       </nav>

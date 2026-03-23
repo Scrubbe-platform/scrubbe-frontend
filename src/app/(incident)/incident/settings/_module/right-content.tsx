@@ -20,7 +20,7 @@ const RightContent = () => {
           </div>
 
           {/* STATUS CARDS SECTION */}
-          <div className="border border-neutral-500 rounded-2xl p-3 space-y-2">
+          <div className="border border-neutral-500 rounded-2xl p-3 space-y-2 ">
             <StatusRow
               icon={<Activity size={16} className="text-green" />}
               label="Listener health"
@@ -54,7 +54,7 @@ const RightContent = () => {
 
           {/* ONBOARDING STEPS */}
           <section className="border border-neutral-500 rounded-2xl p-4 space-y-2">
-            <h3 className="text-lg font-bold text-white">
+            <h3 className="text-base font-bold text-white">
               Next steps for enterprise onboarding
             </h3>
             <ul className="space-y-4">
@@ -98,12 +98,12 @@ const StatusRow = ({
   isWarning?: boolean;
 }) => (
   <div className="flex justify-between items-center rounded-xl">
-    <div className="flex items-center gap-3 px-3 py-1.5 border border-neutral-500 rounded-lg">
+    <div className="flex items-center gap-2 px-2 py-1.5 border border-neutral-500 rounded-lg">
       <span className="text-[#00CAD8]">{icon}</span>
-      <span className="text-sm font-bold text-white">{label}</span>
+      <span className="text-xs font-bold text-white">{label}</span>
     </div>
     <div
-      className={`px-4 py-1.5 rounded-lg border border-neutral-500 text-sm font-medium ${
+      className={`px-4 py-1.5 rounded-lg border border-neutral-500 text-xs font-medium ${
         isWarning ? "text-[#94A3B8]" : "text-white"
       }`}
     >
@@ -115,7 +115,7 @@ const StatusRow = ({
 const OnboardingItem = ({ number, text }: { number: string; text: string }) => (
   <li className="flex gap-4 group">
     <span className="text-[#64748B] font-mono text-sm pt-0.5">{number}.</span>
-    <p className="text-[#D1D5DB] text-base leading-relaxed group-hover:text-white transition-colors cursor-default">
+    <p className="text-[#D1D5DB] text-sm leading-relaxed group-hover:text-white transition-colors cursor-default">
       {text}
     </p>
   </li>

@@ -31,7 +31,7 @@ export default function SignInForm() {
   const path = searchParams.get("to");
   const isAuthRef = useRef(false);
   const inviteEmail = searchParams.get("email");
-  const [steps, setSteps] = useState<"email" | "authenticate">("email")
+  const [steps, setSteps] = useState<"email" | "authenticate">("email");
 
   // Keep the form handling sfirsture closer to the original
   // even though we're simplifying functionality
@@ -44,13 +44,16 @@ export default function SignInForm() {
   } = useForm<LoginFormData>({
     defaultValues: {
       email: "",
-      password: "",
+      // password: "",
     },
     resolver: zodResolver(loginSchema),
     mode: "onChange",
   });
 
-  const redirectAfterLogin = (accountType?: string | null, purpose?: string | null) => {
+  const redirectAfterLogin = (
+    accountType?: string | null,
+    purpose?: string | null
+  ) => {
     if (IS_STANDALONE) {
       if (path === "payment") {
         router.replace("/pricing");
@@ -72,8 +75,11 @@ export default function SignInForm() {
       if (purpose === "IMS") {
         const token = getCookie(COOKIE_KEYS.TOKEN);
         const incidentUrl =
-          process.env.NEXT_PUBLIC_INCIDENT_URL ?? "https://incidents.scrubbe.com";
-        window.location.href = `${incidentUrl}/incident/tickets?token=${token ?? ""}`;
+          process.env.NEXT_PUBLIC_INCIDENT_URL ??
+          "https://incidents.scrubbe.com";
+        window.location.href = `${incidentUrl}/incident/tickets?token=${
+          token ?? ""
+        }`;
         return;
       }
       router.push("/dashboard");
@@ -90,14 +96,17 @@ export default function SignInForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const userDetails = await login(data.email, data.password);
+      const userDetails = await login(data.email, "");
 
       toast.success("Successfully signed in!", {
         description: `${data.email}, you are being redirected...`,
         duration: 10000,
       });
 
-      redirectAfterLogin(userDetails?.accountType, userDetails?.purpose ?? null);
+      redirectAfterLogin(
+        userDetails?.accountType,
+        userDetails?.purpose ?? null
+      );
     } catch (error) {
       console.error("Login error:", error);
       toast.error("Login failed", {
@@ -134,9 +143,13 @@ export default function SignInForm() {
       });
 
       await signOut({ redirect: false });
-      redirectAfterLogin(userDetails?.accountType, userDetails?.purpose ?? null);
+      redirectAfterLogin(
+        userDetails?.accountType,
+        userDetails?.purpose ?? null
+      );
     } catch (error) {
-      const status = error instanceof AxiosError ? error.response?.status : undefined;
+      const status =
+        error instanceof AxiosError ? error.response?.status : undefined;
       if (status === 404) {
         toast.error("No account found", {
           description: "Please create an account to continue.",
@@ -163,7 +176,11 @@ export default function SignInForm() {
   };
 
   useEffect(() => {
-    if (session.status === "authenticated" && session.data?.user && !isAuthRef.current) {
+    if (
+      session.status === "authenticated" &&
+      session.data?.user &&
+      !isAuthRef.current
+    ) {
       isAuthRef.current = true;
       onSubmitOAuth();
     }
@@ -188,7 +205,9 @@ export default function SignInForm() {
             <h1 className=" text-xl md:text-2xl text-white font-semibold">
               Sign in
             </h1>
-            <p className="text-base text-white">Enter your work email to continue.</p>
+            <p className="text-base text-white">
+              Enter your work email to continue.
+            </p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -207,7 +226,7 @@ export default function SignInForm() {
               )}
             />
 
-            <Controller
+            {/* <Controller
               name="password"
               control={control}
               render={({ field }) => (
@@ -221,9 +240,9 @@ export default function SignInForm() {
                   className="text-white"
                 />
               )}
-            />
+            /> */}
 
-            <div className="flex items-center justify-between mb-6">
+            {/* <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
                 <input
                   id="remember-me"
@@ -248,114 +267,28 @@ export default function SignInForm() {
               >
                 Forgot password?
               </Link>
-            </div>
+            </div> */}
 
-            <CButton type="submit" disabled={isLoading || !isValid}>
+            {/* <CButton type="submit" disabled={isLoading || !isValid}>
               {isLoading ? " Signing in..." : "Sign in"}
-            </CButton>
+            </CButton> */}
 
             <CButton
               onClick={() => setSteps("authenticate")}
               type="button"
+              disabled={!isValid}
               className="mt-3 border border-zinc-600 bg-zinc-800 text-white hover:text-dark"
             >
-              Continue with SSO
+              Continue
             </CButton>
-
-            {/* <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">OR</span>
-              </div>
-            </div> */}
-
-            {/* <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-6 ">
-              <button
-                type="button"
-                className="w-full flex gap-3 items-center justify-center px-3 py-1 border border-gray-300 rounded-md  transition-colors"
-                onClick={() => signIn("google")}
-              >
-                <div>
-                  <FcGoogle size={33} />
-                </div>
-                <span className="text-sm font-medium text-white">Google</span>
-              </button>
-              <button
-                type="button"
-                className="w-full gap-3 group flex items-center justify-center px-3 py-1 border border-gray-300 rounded-md   transition-colors"
-                onClick={() =>
-                  signIn("github", {
-                    // callbackUrl: "/auth/account-setup",
-                  })
-                }
-              >
-                <div>
-                  <FaGithub size={33} className=" dark:text-white" />
-                </div>
-                <span className="text-sm font-medium text-white">GitHub</span>
-              </button>
-  
-              <button
-                type="button"
-                className="w-full flex items-center justify-center px-3 py-1 border border-gray-300 rounded-md  transition-colors"
-                onClick={() =>
-                  signIn("gitlab", {
-                    // callbackUrl: "/auth/account-setup",
-                  })
-                }
-              >
-                <img
-                  src="/icon-auth-gitlab.svg"
-                  alt="GitLab"
-                  width={38}
-                  height={38}
-                  className="mr-2"
-                />
-                <span className="text-sm font-medium text-white">GitLab</span>
-              </button>
-  
-              <button
-                type="button"
-                className="w-full flex items-center justify-center px-3 py-1 border border-gray-300 rounded-md  transition-colors"
-              >
-                <img
-                  src="/icon-auth-aws.svg"
-                  alt="AWS"
-                  width={38}
-                  height={38}
-                  className="mr-2"
-                />
-                <span className="text-sm font-medium text-white">AWS</span>
-              </button>
-  
-              <button
-                type="button"
-                className="w-full flex items-center justify-center px-3 py-1 border border-gray-300 rounded-md  transition-colors"
-                onClick={() =>
-                  signIn("microsoft-entra-id", {
-                    // callbackUrl: "/auth/account-setup",
-                  })
-                }
-              >
-                <img
-                  src="/icon-auth-azure.svg"
-                  alt="Azure"
-                  width={38}
-                  height={38}
-                  className="mr-2"
-                />
-                <span className="text-sm font-medium text-white">Azure</span>
-              </button>
-            </div> */}
 
             <div className="mt-4 text-center text-gray-200 text-base">
               New to Scrubbe?{" "}
               <Link
                 href={`/auth/business-signup?to=${path}`}
-                className={`${IS_STANDALONE ? "text-IMSCyan" : "text-blue-600"
-                  } underline hover:underline inline-flex items-center`}
+                className={`${
+                  IS_STANDALONE ? "text-IMSCyan" : "text-blue-600"
+                } underline hover:underline inline-flex items-center`}
               >
                 Create Workspace
               </Link>
@@ -364,9 +297,7 @@ export default function SignInForm() {
         </div>
       </Suspense>
     );
-  }
-
-  else if (steps === "authenticate") {
+  } else if (steps === "authenticate") {
     return (
       <Suspense fallback={<div>Loading...</div>}>
         {session.status == "loading" && (
@@ -376,7 +307,7 @@ export default function SignInForm() {
         )}
         <div className="w-full p-6">
           <div className="mb-6 text-center">
-            <h1 className=" text-xl md:text-2xl text-white font-semibold">
+            <h1 className=" text-lg md:text-xl text-white font-semibold">
               Continue to your workspace
             </h1>
             <p className="text-base text-white">
@@ -384,7 +315,7 @@ export default function SignInForm() {
             </p>
           </div>
 
-          {/* <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3">
             <div className=" border border-zinc-500 bg px-2 py-2 rounded-full text-sm text-zinc-300 w-fit capitalize flex items-center gap-2 bg-zinc-800/70">
               <FaBuilding />
               {getEmailDomain(watch("email")).domain}
@@ -393,85 +324,21 @@ export default function SignInForm() {
               <MdOutlineEmail />
               {getEmailDomain(watch("email")).email}
             </div>
-          </div> */}
+          </div>
 
-          {/* <div className="border">
-          Magic link sent to ol*****@scrubbe.com.
-
-          </div> */}
+          {/* <div className="border">Magic link sent to ol*****@scrubbe.com.</div> */}
 
           <CButton
-            onClick={() => setSteps("email")}
+            onClick={() => {}}
             type="button"
             className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark"
           >
-            Back to password sign-in
+            Continue with SSO
           </CButton>
           <div className="flex justify-center items-center text-sm text-zinc-400 gap-2 py-3">
             <div className="h-[1px] w-[100%] bg-zinc-700" />
             or
             <div className="h-[1px] w-[100%] bg-zinc-700" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            <button
-              type="button"
-              className="w-full flex gap-3 items-center justify-center px-3 py-2 border border-gray-300 rounded-md transition-colors"
-              onClick={() => signIn("google")}
-            >
-              <FcGoogle size={24} className="text-white" />
-              <span className="text-sm font-medium text-white">Google</span>
-            </button>
-            <button
-              type="button"
-              className="w-full gap-3 group flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md transition-colors"
-              onClick={() =>
-                signIn("github", {
-                  // callbackUrl: "/auth/account-setup",
-                })
-              }
-            >
-              <div>
-              <FaGithub size={24} className=" text-white" />
-              </div>
-              <span className="text-sm font-medium text-white">GitHub</span>
-            </button>
-            <button
-              type="button"
-              className="w-full flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md transition-colors"
-              onClick={() =>
-                signIn("gitlab", {
-                  // callbackUrl: "/auth/account-setup",
-                })
-              }
-            >
-              <img
-                src="/icon-auth-gitlab.svg"
-                alt="GitLab"
-                width={24}
-                height={24}
-                className="mr-2"
-              />
-              <span className="text-sm font-medium text-white">GitLab</span>
-            </button>
-            <button
-              type="button"
-              className="w-full flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md transition-colors"
-              onClick={() =>
-                signIn("microsoft-entra-id", {
-                  // callbackUrl: "/auth/account-setup",
-                })
-              }
-            >
-              <img
-                src="/icon-auth-azure.svg"
-                alt="Azure"
-                width={24}
-                height={24}
-                className="mr-2"
-              />
-              <span className="text-sm font-medium text-white">Azure</span>
-            </button>
           </div>
 
           <CButton
@@ -481,19 +348,14 @@ export default function SignInForm() {
           >
             <FaLink /> Email me a magic link
           </CButton>
-          <div className="mt-4 text-center text-gray-200 text-base">
-            New to Scrubbe?{" "}
-            <Link
-              href={`/auth/business-signup?to=${path}`}
-              className={`${IS_STANDALONE ? "text-IMSCyan" : "text-blue-600"
-                } underline hover:underline inline-flex items-center`}
-            >
-              Create Workspace
-            </Link>
+          <div
+            onClick={() => setSteps("email")}
+            className="mt-4 text-center text-IMSCyan text-base cursor-pointer"
+          >
+            Use a different email
           </div>
         </div>
       </Suspense>
     );
   }
-
 }

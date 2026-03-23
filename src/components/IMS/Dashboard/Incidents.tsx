@@ -67,9 +67,9 @@ const Incidents = () => {
   ];
 
   return (
-    <main className="max-w-[1400px] mx-auto p-10 space-y-10">
+    <main className="max-w-[1400px] mx-auto p-10 space-y-5">
       <header>
-        <h1 className="text-2xl font-bold text-white mb-2">Incidents</h1>
+        <h1 className="text-2xl font-bold text-white">Incidents</h1>
         <p className="text-slate-500 text-sm font-medium">
           Active, investigating & recently resolved incidents
         </p>

@@ -1,16 +1,21 @@
+import Docs from "@/components/IMS/Home/Nav/Docs";
+import Enterprise from "@/components/IMS/Home/Nav/Enterprise";
 import Product from "@/components/IMS/Home/Nav/Product";
+import Resources from "@/components/IMS/Home/Nav/Resources";
 import Usecase from "@/components/IMS/Home/Nav/Usecase";
 import { BookOpen, Grid, Key, Lock, Play } from "lucide-react";
 import { ReactNode } from "react";
 import { IconType } from "react-icons";
 import { BiSupport } from "react-icons/bi";
 import { CiWarning } from "react-icons/ci";
-import { FaChartLine } from "react-icons/fa";
+import { FaChartLine, FaRegClock, FaTv } from "react-icons/fa";
+import { GrGroup } from "react-icons/gr";
 import { HiOutlineDocumentCheck } from "react-icons/hi2";
 import { IoMdTrendingUp } from "react-icons/io";
 import { IoDocumentTextOutline, IoFilter } from "react-icons/io5";
 import { LuComponent, LuDraftingCompass } from "react-icons/lu";
-import { MdOutlineShield } from "react-icons/md";
+import { MdOutlineChat, MdOutlineShield } from "react-icons/md";
+import { RiGroup3Line } from "react-icons/ri";
 import { RxFilter } from "react-icons/rx";
 import { SlGrid } from "react-icons/sl";
 import { TbBolt } from "react-icons/tb";
@@ -461,7 +466,7 @@ case 'high':
           subTags: [],
           title: "Role Hierarchy",
         },
-        rightComponent: <Usecase />,
+        rightComponent: <Enterprise />,
       },
 
       {
@@ -501,7 +506,7 @@ version: 3
           subTags: [],
           title: "Policy Config",
         },
-        rightComponent: <Usecase />,
+        rightComponent: <Enterprise />,
       },
       {
         id: "enterprise",
@@ -537,7 +542,7 @@ version: 3
           subTags: [],
           title: "Certification Status",
         },
-        rightComponent: <Usecase />,
+        rightComponent: <Enterprise />,
       },
       {
         id: "enterprise",
@@ -573,7 +578,7 @@ version: 3
           subTags: [],
           title: "Deployment Modes",
         },
-        rightComponent: <Usecase />,
+        rightComponent: <Enterprise />,
       },
       {
         id: "enterprise",
@@ -609,7 +614,7 @@ version: 3
           subTags: [],
           title: "Response SLAs",
         },
-        rightComponent: <Usecase />,
+        rightComponent: <Enterprise />,
       },
     ],
   },
@@ -654,7 +659,7 @@ version: 3
           subTags: [],
           title: "Setup Steps",
         },
-        rightComponent: <Usecase />,
+        rightComponent: <Docs />,
       },
 
       {
@@ -691,7 +696,7 @@ version: 3
           subTags: [],
           title: "Key Entities",
         },
-        rightComponent: <Usecase />,
+        rightComponent: <Docs />,
       },
       {
         id: "docs",
@@ -733,7 +738,7 @@ await client.incidents
           subTags: [],
           title: "Example Call",
         },
-        rightComponent: <Usecase />,
+        rightComponent: <Docs />,
       },
       {
         id: "docs",
@@ -769,7 +774,7 @@ await client.incidents
           subTags: [],
           title: "Available Guides",
         },
-        rightComponent: <Usecase />,
+        rightComponent: <Docs />,
       },
       {
         id: "docs",
@@ -810,7 +815,7 @@ await client.incidents
           subTags: [],
           title: "Popular Tutorials",
         },
-        rightComponent: <Usecase />,
+        rightComponent: <Docs />,
       },
 
       {
@@ -857,12 +862,135 @@ await client.incidents
           subTags: [],
           title: "Reference Sections",
         },
-        rightComponent: <Usecase />,
+        rightComponent: <Docs />,
       },
     ],
   },
   {
-    label: "Company",
+    label: "Resources",
+    dropdownOptions: [
+      {
+        id: "resources",
+        label: "Blog",
+        Icon: MdOutlineChat,
+        href: "/blog",
+        description: "Blog",
+        hrefLabel: "Visit Blog",
+        subText:
+          "Engineering deep-dives, incident response philosophy, and the thinking behind Scrubbe's architecture. Written by the team building the platform.",
+        tags: ["Engineering", "Incident response", "AI governance"],
+        analytics: [],
+        subSection: {
+          isCode: false,
+          code: undefined,
+          tags: [
+            "Why governance must precede automation",
+            "Designing the execution gate",
+            "The case for immutable audit events",
+          ],
+          subTags: [],
+          title: "Recent Posts",
+        },
+        rightComponent: <Resources />,
+      },
+
+      {
+        id: "resources",
+        label: "Demos",
+        Icon: FaTv,
+        href: "#",
+        description: "Demos",
+        hrefLabel: "Watch Demos",
+        subText:
+          "Watch Scrubbe handle real incident scenarios — P1 database latency, deployment-induced regressions, cascading service failures — with the full gate and approval flow visible.",
+        tags: ["P1 triage", "Deployment rollback", "Approval flow"],
+        analytics: [],
+        subSection: {
+          isCode: false,
+          tags: [
+            "DB latency — end-to-end triage",
+            "Deployment rollback with approval",
+            "Policy engine walkthrough",
+          ],
+          subTags: [],
+          title: "Available Demos",
+        },
+        rightComponent: <Resources />,
+      },
+      {
+        id: "resources",
+        label: "Webinars",
+        Icon: RiGroup3Line,
+        href: "#",
+        description: "Webinars",
+        hrefLabel: "View Webinars",
+        subText:
+          "Live and on-demand sessions covering incident response strategy, AI governance in regulated environments, and technical deep-dives into Scrubbe's architecture with the engineering team.",
+        tags: ["Live sessions", "On-demand", "Q&A included"],
+        analytics: [],
+        subSection: {
+          isCode: false,
+          code: undefined,
+          tags: [
+            "AI-governed incident response — 25 Mar",
+            "Policy engine deep-dive — 8 Apr",
+            "Enterprise deployment — 22 Apr",
+          ],
+          subTags: [],
+          title: "Upcoming",
+        },
+        rightComponent: <Resources />,
+      },
+      {
+        id: "resources",
+        label: "Community",
+        Icon: GrGroup,
+        href: "/community",
+        description: "Community",
+        hrefLabel: "Join Community",
+        subText:
+          "Join engineers building with Scrubbe. Share policies, playbooks, agent patterns, and integration guides. Get early access to beta features and direct input into the roadmap.",
+        tags: ["Slack community", "Policy sharing", "Beta access"],
+        analytics: [],
+        subSection: {
+          isCode: false,
+          code: undefined,
+          tags: [
+            "#general",
+            "#policies",
+            "#integrations",
+            "GitHub Discussions",
+          ],
+          subTags: [],
+          title: "Community Spaces",
+        },
+        rightComponent: <Resources />,
+      },
+      {
+        id: "resource",
+        label: "Release Notes",
+        Icon: FaRegClock,
+        href: "#",
+        description: "Release Notes",
+        hrefLabel: "View Release Notes",
+        subText:
+          "A complete record of what ships in every release — new features, behaviour changes, deprecations, and bug fixes. Organised by component and tagged by impact area.",
+        tags: ["Feature releases", "Breaking changes", "Bug fixes"],
+        analytics: [],
+        subSection: {
+          isCode: false,
+          code: undefined,
+          tags: [
+            "v0.9.4 — Gate dry-run default",
+            "v0.9.2 — Policy versioning",
+            "v0.9.0 — Slack integration",
+          ],
+          subTags: [],
+          title: "Popular Tutorials",
+        },
+        rightComponent: <Resources />,
+      },
+    ],
   },
   // {
   //   label: "More",

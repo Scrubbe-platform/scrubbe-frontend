@@ -34,12 +34,36 @@ import { HiOutlineCreditCard } from "react-icons/hi";
 import { TbCloudDataConnection, TbRouteSquare } from "react-icons/tb";
 import { TiFlowChildren } from "react-icons/ti";
 import { GoLock } from "react-icons/go";
-import { IoIosCall, IoIosNotifications, IoIosWarning, IoMdCall } from "react-icons/io";
+import {
+  IoIosCall,
+  IoIosNotifications,
+  IoIosWarning,
+  IoMdCall,
+} from "react-icons/io";
 import { CgArrowBottomRightR } from "react-icons/cg";
-import { MdAnalytics, MdBalance, MdGroup, MdLock, MdShield } from "react-icons/md";
-import { BiPlus, BiSolidBookBookmark, BiSolidChart, BiSolidDashboard, BiSolidMessageAltEdit } from "react-icons/bi";
+import {
+  MdAnalytics,
+  MdBalance,
+  MdGroup,
+  MdLock,
+  MdShield,
+} from "react-icons/md";
+import {
+  BiPlus,
+  BiSolidBookBookmark,
+  BiSolidChart,
+  BiSolidDashboard,
+  BiSolidMessageAltEdit,
+} from "react-icons/bi";
 import { RiBloggerLine, RiOrganizationChart } from "react-icons/ri";
-import { FaBolt, FaBox, FaBrain, FaLink, FaRedo, FaSignal } from "react-icons/fa";
+import {
+  FaBolt,
+  FaBox,
+  FaBrain,
+  FaLink,
+  FaRedo,
+  FaSignal,
+} from "react-icons/fa";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { SiAccuweather } from "react-icons/si";
 import { GiScrollUnfurled } from "react-icons/gi";
@@ -50,7 +74,6 @@ import { HiOutlineLink } from "react-icons/hi";
 import { IoMap } from "react-icons/io5";
 import { HiMiniBuildingOffice } from "react-icons/hi2";
 
-
 export type NavItem = {
   name: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,9 +83,9 @@ export type NavItem = {
   isActive: boolean;
   menu?: NavItemChild[];
   description?: string;
-  pillText?:string,
-  pillBorderColor?: string,
-  pillTextColor?:string,
+  pillText?: string;
+  pillBorderColor?: string;
+  pillTextColor?: string;
 };
 type NavItemChild = {
   name: string;
@@ -873,29 +896,47 @@ export const AdminSidebar: NavItem[] = [
 ];
 
 export const popularTimezones = [
-  { label: "(GMT-08:00) Pacific Time (US & Canada)", value: "America/Los_Angeles" },
+  {
+    label: "(GMT-08:00) Pacific Time (US & Canada)",
+    value: "America/Los_Angeles",
+  },
   { label: "(GMT-07:00) Mountain Time (US & Canada)", value: "America/Denver" },
   { label: "(GMT-06:00) Central Time (US & Canada)", value: "America/Chicago" },
-  { label: "(GMT-05:00) Eastern Time (US & Canada)", value: "America/New_York" },
+  {
+    label: "(GMT-05:00) Eastern Time (US & Canada)",
+    value: "America/New_York",
+  },
   { label: "(GMT+00:00) UTC / Greenwich Mean Time", value: "UTC" },
-  { label: "(GMT+00:00) Western European Time (London)", value: "Europe/London" },
-  { label: "(GMT+01:00) Central European Time (Paris/Berlin)", value: "Europe/Paris" },
+  {
+    label: "(GMT+00:00) Western European Time (London)",
+    value: "Europe/London",
+  },
+  {
+    label: "(GMT+01:00) Central European Time (Paris/Berlin)",
+    value: "Europe/Paris",
+  },
   { label: "(GMT+05:30) India Standard Time", value: "Asia/Kolkata" },
-  { label: "(GMT+08:00) China Standard Time / Singapore", value: "Asia/Singapore" },
+  {
+    label: "(GMT+08:00) China Standard Time / Singapore",
+    value: "Asia/Singapore",
+  },
   { label: "(GMT+09:00) Japan Standard Time", value: "Asia/Tokyo" },
-  { label: "(GMT+10:00) Australian Eastern Time (Sydney)", value: "Australia/Sydney" },
-  { label: "(GMT+11:00) Central Pacific Time", value: "Pacific/Guadalcanal" }
+  {
+    label: "(GMT+10:00) Australian Eastern Time (Sydney)",
+    value: "Australia/Sydney",
+  },
+  { label: "(GMT+11:00) Central Pacific Time", value: "Pacific/Guadalcanal" },
 ];
 
 export const NewMenu: Record<string, NavItem[]> = {
-  overview:[
+  overview: [
     {
       name: "Dashboard",
       Icon: BiSolidDashboard,
       link: "/incident",
-      isActive: true, 
-      isMenu:false,
-      description:"Health + Active Incidents + Reliability Signals",
+      isActive: true,
+      isMenu: false,
+      description: "Health + Active Incidents + Reliability Signals",
     },
   ],
   incident_command: [
@@ -913,7 +954,7 @@ export const NewMenu: Record<string, NavItem[]> = {
     {
       name: "Incidents",
       Icon: IoIosWarning,
-      description: "Active , resolved, and backing",
+      description: "Active, resolved, and backing",
       link: "/incident/tickets",
       isActive: false,
       isMenu: false,
@@ -928,7 +969,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       isMenu: false,
       pillText: "12",
       pillBorderColor: "border-orange-400",
-      pillTextColor: "text-orange-400"
+      pillTextColor: "text-orange-400",
     },
     {
       name: "Runtime Warning",
@@ -939,7 +980,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       isMenu: false,
       pillText: "p1",
       pillBorderColor: "border-red-400",
-      pillTextColor: "text-red-400"
+      pillTextColor: "text-red-400",
     },
     {
       name: "Playbooks",
@@ -958,7 +999,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       isActive: false,
       isMenu: false,
       pillText: "History",
-    }, 
+    },
   ],
   signals_control: [
     {
@@ -1008,7 +1049,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       isMenu: false,
       pillText: "Agent",
       pillBorderColor: "border-IMSCyan",
-      pillTextColor: "text-IMSCyan"
+      pillTextColor: "text-IMSCyan",
     },
     {
       name: "Incident Summaries",
@@ -1028,7 +1069,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       isMenu: false,
       pillText: "rca",
       pillBorderColor: "border-red-400",
-      pillTextColor: "text-red-400"
+      pillTextColor: "text-red-400",
     },
   ],
   reliability: [
@@ -1118,9 +1159,9 @@ export const NewMenu: Record<string, NavItem[]> = {
       isActive: false,
       isMenu: false,
       pillText: "list",
-    }
-  ]
-}
+    },
+  ],
+};
 
 export const activityData = [
   {
@@ -1131,21 +1172,34 @@ export const activityData = [
     repoPath: "scrubbe/control-plane",
     service: "control-plane",
     metadata: { pr: "pr #131", sha: "sha d00f00", env: "env pr" },
-    status: { label: "Warning", type: "warning", subLabel: "Approval required" },
-    trigger: { title: "PR#131", description: "PR#131 • Add new policy evaluator" },
+    status: {
+      label: "Warning",
+      type: "warning",
+      subLabel: "Approval required",
+    },
+    trigger: {
+      title: "PR#131",
+      description: "PR#131 • Add new policy evaluator",
+    },
     details: {
       incidentStatus: "active • S4",
       stages: [
         { name: "checkout", status: "warning" },
         { name: "unit-tests", status: "error" },
         { name: "integration-tests", status: "success" },
-        { name: "reports", status: "warning" }
+        { name: "reports", status: "warning" },
       ],
-      codeEngine: { id: "CE-9812A31F", confidence: "0.86", risk: "Low", paths: "No sensitive paths" },
+      codeEngine: {
+        id: "CE-9812A31F",
+        confidence: "0.86",
+        risk: "Low",
+        paths: "No sensitive paths",
+      },
       affectedFiles: ["src/payouts/idempotency.test.ts"],
-      gateReason: "Merge conflict remediation touches /policy. Requires owning-team approval."
+      gateReason:
+        "Merge conflict remediation touches /policy. Requires owning-team approval.",
     },
-    evidence: { runUrl: "#", logsUrl: "#", incidentId: "INC-9AC0D113" }
+    evidence: { runUrl: "#", logsUrl: "#", incidentId: "INC-9AC0D113" },
   },
   {
     id: "run_311_payment",
@@ -1156,19 +1210,28 @@ export const activityData = [
     service: "payment-api",
     metadata: { pr: "pr #124", sha: "sha 9fd1a0c", env: "env pr" },
     status: { label: "failed", type: "error", subLabel: null },
-    trigger: { title: "PR#128", description: "PR#128 • Add idempotency keys to payout flow" },
+    trigger: {
+      title: "PR#128",
+      description: "PR#128 • Add idempotency keys to payout flow",
+    },
     details: {
       incidentStatus: "resolved • S2",
       stages: [
         { name: "checkout", status: "success" },
         { name: "unit-tests", status: "error" },
-        { name: "security-scan", status: "error" }
+        { name: "security-scan", status: "error" },
       ],
-      codeEngine: { id: "CE-1122B44G", confidence: "0.92", risk: "High", paths: "/api/payouts/**" },
+      codeEngine: {
+        id: "CE-1122B44G",
+        confidence: "0.92",
+        risk: "High",
+        paths: "/api/payouts/**",
+      },
       affectedFiles: ["api/v1/payouts.go", "db/schema.sql"],
-      gateReason: "High risk path detected in payout logic. Manual review required."
+      gateReason:
+        "High risk path detected in payout logic. Manual review required.",
     },
-    evidence: { runUrl: "#", logsUrl: "#", incidentId: "INC-2A7F9BIC" }
+    evidence: { runUrl: "#", logsUrl: "#", incidentId: "INC-2A7F9BIC" },
   },
   {
     id: "deploy_88_infra",
@@ -1185,13 +1248,19 @@ export const activityData = [
       stages: [
         { name: "tf-plan", status: "success" },
         { name: "tf-apply", status: "error" },
-        { name: "cost-estimation", status: "warning" }
+        { name: "cost-estimation", status: "warning" },
       ],
-      codeEngine: { id: "CE-5566X99P", confidence: "0.99", risk: "Critical", paths: "/terraform/rds/**" },
+      codeEngine: {
+        id: "CE-5566X99P",
+        confidence: "0.99",
+        risk: "Critical",
+        paths: "/terraform/rds/**",
+      },
       affectedFiles: ["terraform/rds/main.tf"],
-      gateReason: "Critical infrastructure change. Requires Senior SRE approval."
+      gateReason:
+        "Critical infrastructure change. Requires Senior SRE approval.",
     },
-    evidence: { runUrl: "#", logsUrl: "#", incidentId: "INC-11B0DE88" }
+    evidence: { runUrl: "#", logsUrl: "#", incidentId: "INC-11B0DE88" },
   },
   {
     id: "run_315_gateway",
@@ -1202,18 +1271,27 @@ export const activityData = [
     service: "edge-auth",
     metadata: { pr: "pr #140", sha: "sha a1b2c3d", env: "env pr" },
     status: { label: "Warning", type: "warning", subLabel: "Internal Flake" },
-    trigger: { title: "PR#140", description: "PR#140 • Update JWT validation logic" },
+    trigger: {
+      title: "PR#140",
+      description: "PR#140 • Update JWT validation logic",
+    },
     details: {
       incidentStatus: "monitoring • S3",
       stages: [
         { name: "lint", status: "success" },
         { name: "type-check", status: "warning" },
-        { name: "e2e-tests", status: "success" }
+        { name: "e2e-tests", status: "success" },
       ],
-      codeEngine: { id: "CE-4433Z11L", confidence: "0.74", risk: "Med", paths: "No sensitive paths" },
+      codeEngine: {
+        id: "CE-4433Z11L",
+        confidence: "0.74",
+        risk: "Med",
+        paths: "No sensitive paths",
+      },
       affectedFiles: ["middleware/auth.ts"],
-      gateReason: "Validation logic changed. Verification tests passed but linting warnings present."
+      gateReason:
+        "Validation logic changed. Verification tests passed but linting warnings present.",
     },
-    evidence: { runUrl: "#", logsUrl: "#", incidentId: "INC-77C12F00" }
-  }
+    evidence: { runUrl: "#", logsUrl: "#", incidentId: "INC-77C12F00" },
+  },
 ];

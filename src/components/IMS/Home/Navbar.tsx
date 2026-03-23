@@ -84,7 +84,7 @@ const Navbar = () => {
                       {item.label} <VscChevronDown />
                     </button>
 
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 bg-[#090D14] shadow-lg rounded-lg min-w-[630px] z-50 py-4 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
+                    <div className="absolute top-full left-1/2 transform -translate-x-[40%] mt-1 bg-[#090D14] shadow-lg rounded-lg min-w-[630px] z-50 py-4 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
                       {/* <div className="absolute top-full left-1/2 transform -translate-x-1/3 mt-1 bg-[#090D14] shadow-lg rounded-lg min-w-[630px] z-50 visible group-hover:opacity-100 transition-all duration-200"> */}
                       <div className="flex flex-row gap-2">
                         <div className="border-r border-neutral-700">
@@ -94,7 +94,7 @@ const Navbar = () => {
                               className={`${
                                 option.label == selectTab?.label &&
                                 "border-IMSCyan text-IMSCyan"
-                              } p-3 flex gap-3 border-b border-neutral-600 hover:border-IMSCyan transition-colors relative overflow-hidden group/item `}
+                              } p-3 flex gap-3  hover:border-IMSCyan transition-colors relative overflow-hidden group/item items-center `}
                               onMouseEnter={() => setSelectTab(option)}
                             >
                               {option.Icon && (
@@ -109,7 +109,7 @@ const Navbar = () => {
                                 {option.label}
                               </h3>
                               <ArrowRight
-                                className="group-hover/item:text-IMSCyan"
+                                className="group-hover/item:text-IMSCyan invisible group-hover/item:visible"
                                 size={15}
                               />
                             </div>
@@ -138,7 +138,7 @@ const Navbar = () => {
                                 ))}
                               </div>
 
-                              <div className="flex w-full ">
+                              <div className="flex w-full  ">
                                 {selectTab?.analytics.map((item) => (
                                   <div
                                     className="space-y-2 flex-1"
@@ -159,7 +159,7 @@ const Navbar = () => {
                               </div>
                             </div>
                             <div>
-                              <div className="bg-[#0D1219] p-2 border border-neutral-500 rounded-lg min-w-[200px]">
+                              <div className="bg-[#0D1219] p-2 border border-neutral-500 rounded-lg min-w-[200px] h-[300px]">
                                 <p className="text-sm uppercase text-neutral-300">
                                   {selectTab?.subSection.title}
                                 </p>
@@ -188,7 +188,7 @@ const Navbar = () => {
                                               colors(i).secondary
                                             } size-2 rounded-full`}
                                           />
-                                          <span className="text-sm">{tag}</span>
+                                          <span className="text-xs">{tag}</span>
                                         </div>
                                       )
                                     )}
@@ -199,7 +199,7 @@ const Navbar = () => {
                           </div>
                           <div className="flex justify-between items-center border-t border-neutral-600 p-4">
                             <p className="text-base">
-                              Governed automation from signal to resolution
+                              {/* Governed automation from signal to resolution */}
                             </p>
                             <Link
                               className="border border-IMSCyan p-3 rounded-md text-sm text-IMSCyan font-medium items-center flex justify-between gap-2"
@@ -210,7 +210,7 @@ const Navbar = () => {
                             </Link>
                           </div>
                         </div>
-                        <div>{selectTab?.rightComponent}</div>
+                        <div className="pr-3">{selectTab?.rightComponent}</div>
                       </div>
                     </div>
                   </>
