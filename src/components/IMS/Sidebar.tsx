@@ -73,7 +73,10 @@ const Sidebar = () => {
         </div>
 
         <div className="flex items-center gap-1 border border-neutral-400 rounded-lg px-2 mt-3">
-          <input placeholder="Search Menu" className="h-9 border-none outline-none bg-transparent text-sm flex-1" />
+          <input
+            placeholder="Search Menu"
+            className="h-9 border-none outline-none bg-transparent text-sm flex-1"
+          />
           <div>
             <Search className="text-white " size={14} />
           </div>
@@ -81,16 +84,33 @@ const Sidebar = () => {
 
         <div>
           <div className="flex flex-col gap-1  mt-[15%] w-full border-b border-white/50 pb-2">
-            <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">Overview</p>
+            <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">
+              Overview
+            </p>
             {NewMenu.overview.map((item) => {
               const active = pathname === item.link;
-              const { Icon, link, name, isActive, description, pillBorderColor, pillText, pillTextColor } = item;
+              const {
+                Icon,
+                link,
+                name,
+                isActive,
+                description,
+                pillBorderColor,
+                pillText,
+                pillTextColor,
+              } = item;
               return (
-                <Link href={isActive ? link : "#"} key={name} className="w-full">
+                <Link
+                  href={isActive ? link : "#"}
+                  key={name}
+                  className="w-full"
+                >
                   <div
                     className={clsx(
                       "flex  text-white gap-2  h-full rounded-lg cursor-pointer transition-all duration-300 px-3 py-3 w-full",
-                      active ? "bg-gradient-to-t from-[#004B571A] to-[#0074834D] border-IMSCyan border" : "bg-transparent",
+                      active
+                        ? "bg-gradient-to-t from-[#004B571A] to-[#0074834D] border-IMSCyan border"
+                        : "bg-transparent"
                     )}
                   >
                     <Icon size={18} />
@@ -99,13 +119,17 @@ const Sidebar = () => {
                         <p className="text-sm transition-all delay-200 duration-100">
                           {name}
                         </p>
-                        {pillText &&
-                          <p className={`${pillBorderColor || ""} ${pillTextColor || ""} border rounded-full px-1 py-0.5 text-xs`}>{pillText}</p>
-                        }
+                        {pillText && (
+                          <p
+                            className={`${pillBorderColor || ""} ${
+                              pillTextColor || ""
+                            } border rounded-full px-1 py-0.5 text-xs`}
+                          >
+                            {pillText}
+                          </p>
+                        )}
                       </div>
-                      <p className="text-xs">
-                        {description}
-                      </p>
+                      <p className="text-xs">{description}</p>
                     </div>
                   </div>
                   {/* Nested children */}
@@ -115,58 +139,82 @@ const Sidebar = () => {
           </div>
 
           <div className="flex flex-col gap-1  mt-[15%] w-full border-b border-white/50 pb-2">
-            <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">Incident Command</p>
+            <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">
+              Incident Command
+            </p>
             {NewMenu.incident_command.map((item, index) => {
-                           return <AdminSidebarItem item={item} pathname={pathname} key={index} />
-
+              return (
+                <AdminSidebarItem item={item} pathname={pathname} key={index} />
+              );
             })}
           </div>
 
           <div className="flex flex-col gap-1  mt-[15%] w-full border-b border-white/50 pb-2">
-          <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">Signals & Control</p>
-            {NewMenu.signals_control.map((item,index) => {
-                          return  <AdminSidebarItem item={item} pathname={pathname} key={index}/>
-
+            <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">
+              Signals & Control
+            </p>
+            {NewMenu.signals_control.map((item, index) => {
+              return (
+                <AdminSidebarItem item={item} pathname={pathname} key={index} />
+              );
             })}
           </div>
 
           <div className="flex flex-col gap-1  mt-[15%] w-full border-b border-white/50 pb-2">
-          <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">Ezra</p>
+            <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">
+              Ezra
+            </p>
             {NewMenu.ezra.map((item, index) => {
-              return  <AdminSidebarItem item={item} pathname={pathname} key={index} />
+              return (
+                <AdminSidebarItem item={item} pathname={pathname} key={index} />
+              );
             })}
           </div>
 
           <div className="flex flex-col gap-1  mt-[15%] w-full border-b border-white/50 pb-2">
-          <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">Reliability Outcomes</p>
-            {NewMenu.reliability.map((item,index) => {
-              return  <AdminSidebarItem item={item} pathname={pathname} key={index}/>
+            <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">
+              Reliability Outcomes
+            </p>
+            {NewMenu.reliability.map((item, index) => {
+              return (
+                <AdminSidebarItem item={item} pathname={pathname} key={index} />
+              );
             })}
           </div>
 
           <div className="flex flex-col gap-1  mt-[15%] w-full border-b border-white/50 pb-2">
-          <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">Audit & Governance</p>
-            {NewMenu.audit.map((item,index) => {
-              return  <AdminSidebarItem item={item} pathname={pathname} key={index} />
+            <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">
+              Audit & Governance
+            </p>
+            {NewMenu.audit.map((item, index) => {
+              return (
+                <AdminSidebarItem item={item} pathname={pathname} key={index} />
+              );
             })}
           </div>
 
           <div className="flex flex-col gap-1  mt-[15%] w-full border-b border-white/50 pb-2">
-          <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">Integration</p>
-            {NewMenu.integrations.map((item,index) => {
-              return  <AdminSidebarItem item={item} pathname={pathname} key={index} />
+            <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">
+              Integration
+            </p>
+            {NewMenu.integrations.map((item, index) => {
+              return (
+                <AdminSidebarItem item={item} pathname={pathname} key={index} />
+              );
             })}
           </div>
           <div className="flex flex-col gap-1  mt-[15%] w-full border-b border-white/50 pb-2">
-          <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">Workspace</p>
-            {NewMenu.workspace.map((item,index) => {
-              return  <AdminSidebarItem item={item} pathname={pathname} key={index} />
+            <p className=" text-sm text-white pl-3 pb-2 uppercase font-medium">
+              Workspace
+            </p>
+            {NewMenu.workspace.map((item, index) => {
+              return (
+                <AdminSidebarItem item={item} pathname={pathname} key={index} />
+              );
             })}
           </div>
         </div>
-
       </div>
-
 
       <div className="flex flex-col mt-6 ">
         {/* <div className="flex items-center gap-2 justify-between py-3 px-3">
@@ -226,53 +274,56 @@ const Sidebar = () => {
 
 export default Sidebar;
 
-
-
 interface SidebarItemProps {
-  item: NavItem
+  item: NavItem;
   pathname: string;
 }
 
 const AdminSidebarItem = ({ item, pathname }: SidebarItemProps) => {
-  const { 
-    Icon, 
-    link, 
-    name, 
-    isActive, 
-    description, 
-    pillText, 
-    pillBorderColor, 
-    pillTextColor 
+  const {
+    Icon,
+    link,
+    name,
+    isActive,
+    description,
+    pillText,
+    pillBorderColor,
+    pillTextColor,
   } = item;
 
   // Active state based on current navigation path
   const active = pathname === link;
 
   return (
-       <Link href={link} key={name} className="w-full">
-        <div
-          className={clsx(
-            "flex  text-white gap-2  h-full rounded-lg cursor-pointer transition-all duration-300 px-3 py-3 w-full",
-            active ? "bg-gradient-to-t from-[#004B571A] to-[#0074834D] border-IMSCyan border" : "bg-transparent",
-          )}
-        >
-          <Icon size={18} />
-          <div className="flex-1 space-y-1 -mt-1">
-            <div className="flex items-center justify-between">
-              <p className="text-sm transition-all delay-200 duration-100">
-                {name}
-              </p>
-              {pillText &&
-                <p className={`${pillBorderColor || ""} ${pillTextColor || ""} border rounded-full px-1 py-0.5 text-xs uppercase`}>{pillText}</p>
-              }
-            </div>
-            <p className="text-xs">
-              {description}
+    <Link href={link} key={name} className="w-full">
+      <div
+        className={clsx(
+          "flex  text-white gap-2  h-full rounded-lg cursor-pointer transition-all duration-300 px-3 py-3 w-full",
+          active
+            ? "bg-gradient-to-t from-[#004B571A] to-[#0074834D] border-IMSCyan border"
+            : "bg-transparent"
+        )}
+      >
+        <Icon size={18} />
+        <div className="flex-1 space-y-1 -mt-1">
+          <div className="flex items-center justify-between">
+            <p className="text-sm transition-all delay-200 duration-100">
+              {name}
             </p>
+            {pillText && (
+              <p
+                className={`${pillBorderColor || " border-zinc-500"} ${
+                  pillTextColor || ""
+                } border rounded-full px-1 py-0.5 text-[10px] uppercase`}
+              >
+                {pillText}
+              </p>
+            )}
           </div>
+          <p className="text-xs">{description}</p>
         </div>
-        {/* Nested children */}
-      </Link>
-   );
+      </div>
+      {/* Nested children */}
+    </Link>
+  );
 };
-

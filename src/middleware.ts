@@ -22,6 +22,7 @@ const PUBLIC_ROUTES = [
   "/api/auth",
   "/api-docs",
   "/incident",
+  "/auth/account-setup",
 ];
 
 // Define auth routes that should redirect to dashboard if already logged in
@@ -29,7 +30,6 @@ const AUTH_ROUTES = [
   "/auth/signin",
   "/auth/business-signup",
   "/auth/developer-signup",
-
 ];
 
 // Define protected routes that require authentication
@@ -73,7 +73,10 @@ const decodeJwtPayload = (token: string | undefined): JwtPayload | null => {
 
   try {
     const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+    const padded = base64.padEnd(
+      base64.length + ((4 - (base64.length % 4)) % 4),
+      "="
+    );
     const json = atob(padded);
     return JSON.parse(json) as JwtPayload;
   } catch {
@@ -106,30 +109,32 @@ export default function middleware(req: NextRequest) {
   const userRoles = payload?.roles;
 
   // Check if route is public
-  const isPublicRoute = PUBLIC_ROUTES.some(route => 
-    pathname === route || pathname.startsWith(route + "/")
+  const isPublicRoute = PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
   );
 
   // Check if route is protected
-  const isProtectedRoute = PROTECTED_ROUTE_PREFIXES.some(prefix =>
+  const isProtectedRoute = PROTECTED_ROUTE_PREFIXES.some((prefix) =>
     pathname.startsWith(prefix)
   );
 
   // Check if route is auth route
-  const isAuthRoute = AUTH_ROUTES.some(route =>
-    pathname === route || pathname.startsWith(route + "/")
+  const isAuthRoute = AUTH_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
   );
 
   // Check for role-based route protection
-  const roleProtectedEntry = Object.entries(ROLE_PROTECTED_ROUTES).find(([route]) =>
-    pathname === route || pathname.startsWith(route + "/")
+  const roleProtectedEntry = Object.entries(ROLE_PROTECTED_ROUTES).find(
+    ([route]) => pathname === route || pathname.startsWith(route + "/")
   );
 
   // Allow public routes
   if (isPublicRoute) {
     // If logged in and trying to access auth routes, redirect to dashboard
     if (isAuthRoute && isLoggedIn) {
-      return NextResponse.redirect(new URL(getDefaultRedirect(payload), nextUrl));
+      return NextResponse.redirect(
+        new URL(getDefaultRedirect(payload), nextUrl)
+      );
     }
     return NextResponse.next();
   }
@@ -137,19 +142,21 @@ export default function middleware(req: NextRequest) {
   // Handle role-based protection
   if (roleProtectedEntry) {
     const [route, requiredRoles] = roleProtectedEntry;
-    
+
     // Not logged in - redirect to login
     if (!isLoggedIn) {
       const signInUrl = new URL("/auth/signin", nextUrl);
       signInUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(signInUrl);
     }
-    
+
     // Logged in but doesn't have required role - redirect to unauthorized
     if (!hasRequiredRole(userRoles, requiredRoles)) {
-      return NextResponse.redirect(new URL("/auth/error?error=AccessDenied", nextUrl));
+      return NextResponse.redirect(
+        new URL("/auth/error?error=AccessDenied", nextUrl)
+      );
     }
-    
+
     // Has required role - allow access
     return NextResponse.next();
   }

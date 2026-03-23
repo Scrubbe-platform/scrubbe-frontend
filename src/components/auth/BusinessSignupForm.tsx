@@ -25,8 +25,7 @@ import { FaGithub } from "react-icons/fa";
 const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 
 // Define the form schema using zod
-export const businessSignupSchema = z
-  .object({
+export const businessSignupSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }),
   lastName: z.string().min(1, { message: "Last name is required" }),
   businessEmail: z
@@ -74,12 +73,12 @@ export const businessSignupSchema = z
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/,
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
     ),
-    // confirmPassword: z.string().min(1, { message: "Confirm password is required" }),
-  })
-  // .refine((data) => data.password === data.confirmPassword, {
-  //   message: "Passwords don't match",
-  //   path: ["confirmPassword"],
-  // });
+  // confirmPassword: z.string().min(1, { message: "Confirm password is required" }),
+});
+// .refine((data) => data.password === data.confirmPassword, {
+//   message: "Passwords don't match",
+//   path: ["confirmPassword"],
+// });
 
 // TypeScript type based on the schema
 type BusinessSignupFormData = z.infer<typeof businessSignupSchema>;
@@ -229,24 +228,8 @@ export default function BusinessSignupForm() {
   useEffect(() => {
     if (showSuccess) {
       const timeout = setTimeout(() => {
-        if (IS_STANDALONE) {
-          if (path === "payment") {
-            router.replace("/get-started?to=payment");
-            return;
-          }
-          if (path === "community") {
-            router.replace("/get-started?to=community");
-            return;
-          }
-          router.replace("/get-started");
-          return;
-        }
-
-        if (path) {
-          return router.push(`/auth/account-setup?to=${path}`);
-        } else {
-          return router.push(`/auth/account-setup`);
-        }
+        router.replace("/auth/account-setup");
+        return;
       }, 3000);
 
       return () => clearTimeout(timeout);
@@ -279,7 +262,8 @@ export default function BusinessSignupForm() {
           </h1>
 
           <p className="text-gray-300 text-center">
-            Welcome {firstName} {lastName}! You have successfully created an account.
+            Welcome {firstName} {lastName}! You have successfully created an
+            account.
           </p>
         </div>
       </Suspense>
@@ -366,53 +350,36 @@ export default function BusinessSignupForm() {
               <VerifyAccount />
             ) : (
               <>
-                <h1 className="text-xl md:text-2xl text-white font-semibold mb-6 ">
+                <h1 className="text-xl md:text-2xl text-white font-semibold text-center mb-3">
                   Create your workspace
                 </h1>
 
                 <form onSubmit={handleSubmit(onSubmit)}>
                   {/* First Name and Last Name Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Controller
-                      name="firstName"
-                      control={control}
-                      render={({ field }) => (
-                        <Input
-                          label="First Name"
-                          placeholder="First Name"
-                          {...field}
-                          error={errors.firstName?.message}
-                          labelClassName="text-white"
-                          className="text-white"
-                        />
-                      )}
-                    />
-
-                    <Controller
-                      name="lastName"
-                      control={control}
-                      render={({ field }) => (
-                        <Input
-                          label="Last Name"
-                          placeholder="Last Name"
-                          {...field}
-                          error={errors.lastName?.message}
-                          labelClassName="text-white"
-                          className="text-white"
-                        />
-                      )}
-                    />
-                  </div>
+                  <Controller
+                    name="firstName"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        label="Full name"
+                        placeholder="Your name"
+                        {...field}
+                        error={errors.firstName?.message}
+                        labelClassName="text-white"
+                        className="text-white"
+                      />
+                    )}
+                  />
 
                   {/* Business Email and Address Row */}
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1">
                     <Controller
                       name="businessEmail"
                       control={control}
                       render={({ field }) => (
                         <Input
-                          label="Business Email"
-                          placeholder="Enter Business Email"
+                          label="Work Email"
+                          placeholder="name@company.com"
                           {...field}
                           error={errors.businessEmail?.message}
                           labelClassName="text-white"
@@ -425,8 +392,8 @@ export default function BusinessSignupForm() {
                       control={control}
                       render={({ field }) => (
                         <Input
-                          label="Business Name"
-                          placeholder="Enter Business Address"
+                          label="Company / organization"
+                          placeholder="Company name"
                           {...field}
                           error={errors.businessName?.message}
                           labelClassName="text-white"
@@ -495,7 +462,9 @@ export default function BusinessSignupForm() {
                       placeholder="*********"
                       onValueChange={(value) => setValue("password", value)}
                       onValidationChange={setIsPasswordValid}
-                      error={!isPasswordValid ? "Complete all requirements" : ""}
+                      error={
+                        !isPasswordValid ? "Complete all requirements" : ""
+                      }
                     />
                     {/* <Controller
                       name="confirmPassword"
@@ -535,94 +504,6 @@ export default function BusinessSignupForm() {
                   </div> */}
 
                   {/* OAuth Buttons */}
-                  <div className="grid grid-cols-2  gap-2 my-6 ">
-                    <button
-                      type="button"
-                      className="w-full flex gap-3 items-center justify-center px-3 py-1 border border-gray-300 rounded-md  transition-colors"
-                      onClick={() => signIn("google")}
-                    >
-                      <div>
-                        <FcGoogle size={33} />
-                      </div>
-                      <span className="text-sm font-medium text-white">
-                        Google
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      className="w-full gap-3 group flex items-center justify-center px-3 py-1 border border-gray-300 rounded-md   transition-colors"
-                      onClick={() =>
-                        signIn("github", {
-                          // callbackUrl: "/auth/account-setup",
-                        })
-                      }
-                    >
-                      <div>
-                        <FaGithub size={33} className=" text-white" />
-                      </div>
-                      <span className="text-sm font-medium text-white">
-                        GitHub
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className="w-full flex items-center justify-center px-3 py-1 border border-gray-300 rounded-md  transition-colors"
-                      onClick={() =>
-                        signIn("gitlab", {
-                          // callbackUrl: "/auth/account-setup",
-                        })
-                      }
-                    >
-                      <img
-                        src="/icon-auth-gitlab.svg"
-                        alt="GitLab"
-                        width={32}
-                        height={32}
-                        className="mr-2"
-                      />
-                      <span className="text-sm font-medium text-white">
-                        GitLab
-                      </span>
-                    </button>
-
-                    {/* <button
-                      type="button"
-                      className="w-full flex items-center justify-center px-3 py-1 border border-gray-300 rounded-md  transition-colors"
-                    >
-                      <img
-                        src="/icon-auth-aws.svg"
-                        alt="AWS"
-                        width={38}
-                        height={38}
-                        className="mr-2"
-                      />
-                      <span className="text-sm font-medium text-white">
-                        AWS
-                      </span>
-                    </button> */}
-
-                    <button
-                      type="button"
-                      className="w-full flex items-center justify-center px-3 py-1 border border-gray-300 rounded-md  transition-colors"
-                      onClick={() =>
-                        signIn("microsoft-entra-id", {
-                          // callbackUrl: "/auth/account-setup",
-                        })
-                      }
-                    >
-                      <img
-                        src="/icon-auth-azure.svg"
-                        alt="Azure"
-                        width={38}
-                        height={38}
-                        className="mr-2"
-                      />
-                      <span className="text-sm font-medium text-white">
-                        Azure
-                      </span>
-                    </button>
-                  </div>
 
                   {/* Demo Page Link */}
                   <div className="text-center text-white mt-3 text-base">

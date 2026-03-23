@@ -52,8 +52,16 @@ const businessEmailSchema = emailSchema.refine(
 
 // Login schema
 export const loginSchema = z.object({
-  email: emailSchema,
-  password: z.string().min(1, "Password is required"),
+  email: emailSchema.refine(
+    (email) => {
+      const domain = email.split("@")[1]?.toLowerCase();
+      return !freeEmailDomains.includes(domain);
+    },
+    {
+      message: "Please use a work email address",
+    }
+  ),
+  // password: z.string().min(1, "Password is required"),
 });
 
 // Developer signup schema
@@ -66,7 +74,10 @@ export const developerSignupSchema = z
       .string()
       .min(2, "GitHub username must be at least 2 characters")
       .max(39, "GitHub username must be less than 39 characters")
-      .regex(/^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/, "Invalid GitHub username format")
+      .regex(
+        /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/,
+        "Invalid GitHub username format"
+      )
       .optional(),
     experience: z
       .string()
@@ -75,10 +86,13 @@ export const developerSignupSchema = z
     password: passwordSchema,
     confirmPassword: z.string().optional(),
   })
-  .refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
+  .refine(
+    (data) => !data.confirmPassword || data.password === data.confirmPassword,
+    {
+      message: "Passwords don't match",
+      path: ["confirmPassword"],
+    }
+  );
 
 // Business signup schema
 export const businessSignupSchema = z
@@ -125,10 +139,13 @@ export const businessSignupSchema = z
     password: passwordSchema,
     confirmPassword: z.string().optional(),
   })
-  .refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
+  .refine(
+    (data) => !data.confirmPassword || data.password === data.confirmPassword,
+    {
+      message: "Passwords don't match",
+      path: ["confirmPassword"],
+    }
+  );
 
 // Email verification schema
 export const verifyEmailSchema = z.object({
@@ -155,7 +172,7 @@ export const resetPasswordSchema = z.object({
   password: passwordSchema,
 });
 
-export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema >
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 // Change password schema
 export const changePasswordSchema = z
@@ -164,10 +181,14 @@ export const changePasswordSchema = z
     newPassword: passwordSchema,
     confirmNewPassword: z.string().optional(),
   })
-  .refine((data) => !data.confirmNewPassword || data.newPassword === data.confirmNewPassword, {
-    message: "New passwords don't match",
-    path: ["confirmNewPassword"],
-  })
+  .refine(
+    (data) =>
+      !data.confirmNewPassword || data.newPassword === data.confirmNewPassword,
+    {
+      message: "New passwords don't match",
+      path: ["confirmNewPassword"],
+    }
+  )
   .refine((data) => data.currentPassword !== data.newPassword, {
     message: "New password must be different from current password",
     path: ["newPassword"],

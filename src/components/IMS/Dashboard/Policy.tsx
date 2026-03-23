@@ -86,7 +86,7 @@ export default function Policy() {
   ];
 
   return (
-    <main className="max-w-[1400px] mx-auto p-10 space-y-12">
+    <main className="max-w-[1400px] mx-auto p-10 space-y-5">
       <header>
         <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
         <p className="text-slate-500 text-sm font-medium">

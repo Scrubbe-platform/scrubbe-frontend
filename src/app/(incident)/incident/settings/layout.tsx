@@ -12,7 +12,7 @@ const layout = ({ children }: { children: ReactNode }) => {
       <div className="flex justify-between items-center">
         <p className="text-xl font-bold text-white">Settings</p>
 
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-3">
           <div className="text-sm flex items-center gap-2 border rounded-lg px-2 py-1">
             <Building className="text-yellow-400 size-4" />
             <p className="text-white">Company name</p>
@@ -28,13 +28,13 @@ const layout = ({ children }: { children: ReactNode }) => {
             <p className="text-white">Delivery: Connected</p>
           </div>
 
-          <CButton className="w-fit border bg-transparent border-IMSCyan hover:bg-transparent">
+          <div className="w-fit border bg-transparent border-IMSCyan hover:bg-transparent flex items-center gap-2 text-sm p-2 rounded-lg">
             <AiStarIcon color="#06eefd" />
             <p className="text-IMSCyan">What should i configure?</p>
-          </CButton>
+          </div>
         </div>
       </div>
-      <p className="text-base text-white">
+      <p className="text-sm text-white mt-4">
         Configure governance, integrations, delivery failure ingestion, Ezra,
         Code Engine, and security controls (including SSO).
       </p>
