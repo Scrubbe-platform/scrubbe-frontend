@@ -39,7 +39,14 @@ const TicketComments = ({ ticket }: Props) => {
         `${endpoint.incident_ticket.get_comment}/${ticket?.id}`
       );
       if (res.success) {
-        return res.data;
+        return (res.data.data ?? []).map((c: any) => ({
+          id: c.id,
+          content: c.content,
+          createdAt: c.createdAt,
+          firstname: c.author?.firstName ?? c.firstname ?? "",
+          lastname: c.author?.lastName ?? c.lastname ?? "",
+          isBusinessOwner: c.authorType === "BUSINESS",
+        }));
       }
       return [];
     },
@@ -52,8 +59,9 @@ const TicketComments = ({ ticket }: Props) => {
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (content: string) => {
       const res = await post(
-        `${endpoint.incident_ticket.send_comment}/${ticket.id}`,
+        endpoint.incident_ticket.send_comment,
         {
+          ticketId: ticket.id,
           content,
         }
       );

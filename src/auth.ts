@@ -127,8 +127,38 @@ export const {
       session.user.businessId = token.businessId as string | null;
       return session;
     },
-    async signIn({ user, account, profile }) {
-      // Allow sign in
+    async signIn({ user, account }) {
+      if (!account || !user) return false;
+      // For OAuth providers, exchange with backend to get real JWT tokens
+      if (account.type === "oauth") {
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.API_BASE_URL;
+          const res = await fetch(`${apiUrl}/auth/oauth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: user.email,
+              provider_uuid: account.providerAccountId,
+              oAuthProvider: user.oAuthProvider,
+            }),
+          });
+          if (res.ok) {
+            const json = await res.json();
+            const { user: backendUser, tokens } = json?.data ?? {};
+            if (tokens) {
+              user.accessToken = tokens.accessToken;
+              user.refreshToken = tokens.refreshToken;
+              user.accountType = backendUser?.accountType ?? null;
+              user.businessId = backendUser?.businessId ?? null;
+              user.roles = backendUser?.roles ?? ["USER"];
+            }
+          }
+          // Allow sign-in even if backend call fails (handled in SignInForm)
+          return true;
+        } catch {
+          return true;
+        }
+      }
       return true;
     },
     async redirect({ url, baseUrl }) {

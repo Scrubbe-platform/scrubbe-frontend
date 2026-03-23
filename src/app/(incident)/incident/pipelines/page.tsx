@@ -1,20 +1,36 @@
 "use client"
 import React, { useMemo, useState } from 'react';
-import { 
-  createColumnHelper, 
-  flexRender, 
-  getCoreRowModel, 
-  useReactTable 
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable
 } from '@tanstack/react-table';
 import { Table } from '@/components/ui/table';
 import { activityData } from '@/lib/constant/index';
 import { useActivitySelector } from './_modules/state/useActivitySelector';
 import SideModal from '@/components/ui/SideModal';
 import RunDetailPanel from './_modules/component/RunDetailPanel';
+import { useQuery } from '@tanstack/react-query';
+import { useFetch } from '@/hooks/useFetch';
+import { endpoint } from '@/lib/api/endpoint';
+import { querykeys } from '@/lib/constant';
 
 const columnHelper = createColumnHelper();
 
 const ActivityTable = () => {
+  const { get } = useFetch();
+
+  const { data: apiData } = useQuery({
+    queryKey: [querykeys.PIPELINES],
+    queryFn: async () => {
+      const res = await get(endpoint.pipelines.list);
+      if (res.success) return res.data?.data?.runs ?? [];
+      return [];
+    },
+    refetchOnWindowFocus: false,
+  });
+
   const columns = useMemo(() => [
     // COLUMN 1: RUN
     columnHelper.accessor('run', {
@@ -107,7 +123,7 @@ const handleSelect = (item:any) => {
   return (
     <div>
         <Table
-            data={activityData}
+            data={(apiData && apiData.length > 0 ? apiData : activityData) as any}
             columns={columns as any}
             onRowClick={handleSelect}
         />

@@ -11,10 +11,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Clock, Plus } from "lucide-react";
 import Modal from "../ui/Modal";
 import CButton from "../ui/Cbutton";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { querykeys } from "@/lib/constant";
 import { endpoint } from "@/lib/api/endpoint";
 import { useFetch } from "@/hooks/useFetch";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
  const incidentSchema = z.object({
   // Section: Basics & Source
@@ -79,7 +81,9 @@ const RaiseIncident = () => {
   } = useForm<IncidentFormValues>({
     resolver: zodResolver(incidentSchema),
   });
-  const { get } = useFetch();
+  const { get, post } = useFetch();
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
   type TDialogs = "isMetric" | "isLog" | "isPipeline" | "isFraud";
   const [openDialog, setOpenDialog] = useState<Record<TDialogs, boolean>>({
@@ -124,7 +128,7 @@ const RaiseIncident = () => {
   const watched = watch();
 
   const onSubmit = (data: IncidentFormValues) => {
-    console.log("Validated Form Data:", data);
+    createIncident(data);
   };
 
   const { data: members } = useQuery<
@@ -136,13 +140,29 @@ const RaiseIncident = () => {
         const res = await get(endpoint.incident_ticket.get_members);
         console.log({ memeber: res });
         if (res.success) {
-          return res.data;
+          return res.data.data ?? [];
         }
         return [];
       } catch (error) {
         console.log(error);
         return [];
       }
+    },
+  });
+
+  const { mutateAsync: createIncident, isPending: isCreating } = useMutation({
+    mutationFn: async (data: IncidentFormValues) => {
+      const res = await post(endpoint.incident_ticket.create, data);
+      if (!res.success) throw new Error(res.data as string ?? "Failed to create incident");
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Incident created successfully");
+      queryClient.invalidateQueries({ queryKey: [querykeys.INCIDENT_TICKET] });
+      router.push("/incident/tickets");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
     },
   });
 
@@ -1141,7 +1161,7 @@ Refusal Reasons:"
               >
                 Save Draft
               </CButton>
-              <CButton type="submit" className="px-10 py-2 w-fit text-sm ">
+              <CButton type="submit" isLoading={isCreating} disabled={isCreating} className="px-10 py-2 w-fit text-sm ">
                 Create Incident
               </CButton>
             </div>

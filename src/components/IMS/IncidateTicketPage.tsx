@@ -148,14 +148,15 @@ const IncidentTicketPage = () => {
         );
         console.log({ res });
         if (res.success) {
-          setTotalPages(res.data?.pagination.totalPages);
-          setCurrentPage(res.data?.pagination.currentPage);
-          return res.data;
+          const payload = res.data?.data ?? res.data;
+          setTotalPages(payload?.pagination?.totalPages ?? 0);
+          setCurrentPage(payload?.pagination?.currentPage ?? 1);
+          return payload;
         }
-        return [];
+        return null;
       } catch (error) {
         console.log(error);
-        return [];
+        return null;
       }
     },
     refetchOnWindowFocus: false,

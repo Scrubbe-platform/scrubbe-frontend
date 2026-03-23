@@ -28,7 +28,7 @@ const DeliverySignal = () => {
           </div>
           <div className="flex gap-2">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-900/50 border border-slate-800 rounded-lg text-[11px] font-bold uppercase tracking-wider">
-              <span className="text-yellow-500">≡</span> Policy mode : Standard
+              <span className="text-yellow-500">â‰¡</span> Policy mode : Standard
             </div>
             <button className="px-4 py-1.5 bg-transparent border border-IMSCyan text-IMSCyan rounded-lg text-sm font-bold transition-colors">
               Toggle Stricter
@@ -80,7 +80,7 @@ const DeliverySignal = () => {
           </div>
           
           <div className="mt-4">
-             <TraceStep title="Remediation + verification" sub="Suggest → verify → summarize" />
+             <TraceStep title="Remediation + verification" sub="Suggest â†’ verify â†’ summarize" />
           </div>
         </div>
       </div>

@@ -13,8 +13,11 @@ import { z } from 'zod'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Input from '@/components/ui/input'
-import { error } from 'console'
 import TextArea from '@/components/ui/text-area'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useFetch } from '@/hooks/useFetch'
+import { endpoint } from '@/lib/api/endpoint'
+import { toast } from 'sonner'
 
 type TSeverityRule = {
     name: string,
@@ -43,6 +46,33 @@ const formScheme = z.object({
 type TformScheme = z.infer<typeof formScheme>
 
 const SeverityRules = () => {
+    const { get, post, patch } = useFetch()
+    const queryClient = useQueryClient()
+
+    const { data: rules } = useQuery({
+        queryKey: ['guardrails', 'severity'],
+        queryFn: async () => {
+            const res = await get(endpoint.guardrails.list + '?type=SEVERITY')
+            if (res.success) return (res.data?.data ?? []) as TSeverityRule[]
+            return [] as TSeverityRule[]
+        },
+        refetchOnWindowFocus: false,
+    })
+
+    const { mutateAsync: createRule, isPending: saving } = useMutation({
+        mutationFn: async (data: TformScheme) => {
+            const res = await post(endpoint.guardrails.create, { ...data, ruleType: 'SEVERITY' })
+            if (!res.success) throw new Error(res.data?.message ?? 'Failed to save rule')
+            return res.data
+        },
+        onSuccess: () => {
+            toast.success('Severity rule saved')
+            queryClient.invalidateQueries({ queryKey: ['guardrails', 'severity'] })
+            setOpenModal(false)
+        },
+        onError: (e: Error) => toast.error(e.message),
+    })
+
     const columns = [
         {
             accessorKey: "name",
@@ -111,7 +141,7 @@ const SeverityRules = () => {
     ];
 
     const [openModal, setOpenModal] = useState(false)
-    const { control, formState: { isValid, errors }, setValue, watch } = useForm({
+    const { control, handleSubmit, formState: { isValid, errors }, setValue, watch } = useForm({
         resolver: zodResolver(formScheme),
         mode: "onChange",
         defaultValues: {
@@ -137,7 +167,7 @@ const SeverityRules = () => {
                 action={() => setOpenModal(true)}
             >
                 <div className='space-y-3'>
-                    <Table columns={columns} data={[]} />
+                    <Table columns={columns} data={rules ?? []} />
                     <div className='border border-gray-400 p-3 rounded-lg'>
                         <div className='flex justify-between'>
                             <div>
@@ -303,7 +333,12 @@ const SeverityRules = () => {
                                 <CButton onClick={() => setOpenModal(false)} className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan w-fit">
                                     Cancel
                                 </CButton>
-                                <CButton disabled={!isValid} className=" hover:bg-IMSCyan bg-IMSCyan text-black w-fit">
+                                <CButton
+                                    disabled={!isValid || saving}
+                                    isLoading={saving}
+                                    onClick={handleSubmit(data => createRule(data))}
+                                    className="hover:bg-IMSCyan bg-IMSCyan text-black w-fit"
+                                >
                                     Save Rule
                                 </CButton>
                             </div>

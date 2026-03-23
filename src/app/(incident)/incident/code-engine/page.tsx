@@ -2,13 +2,7 @@
 import React, { ReactNode, useState } from "react";
 import {
   Bell,
-  ChevronRight,
-  Share2,
   Info,
-  Activity,
-  GitBranch,
-  Database,
-  Terminal,
   Shield,
   Zap,
   Layout,
@@ -30,32 +24,52 @@ import { FiGitPullRequest } from "react-icons/fi";
 import moment from "moment";
 import SideModal from "@/components/ui/SideModal";
 import Pipeline from "./_modules/components/Pipeline";
+import { useQuery } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { querykeys } from "@/lib/constant";
 
-const incidentData = [
-  {
-    ticketId: "INC-311",
-    title: "Checkout-Service Deployment failed",
-    timezone: "eu-west- 1",
-    createdAt: new Date(),
-    priority: "P1",
-  },
-  {
-    ticketId: "INC-312",
-    title: "Checkout-Service Deployment failed",
-    timezone: "eu-west- 1",
-    createdAt: new Date(),
-    priority: "P2",
-  },
-  {
-    ticketId: "INC-313",
-    title: "Checkout-Service Deployment failed",
-    timezone: "eu-west- 1",
-    createdAt: new Date(),
-    priority: "P3",
-  },
-];
+type Incident = {
+  id: string;
+  ticketId: string;
+  reason?: string;
+  summary?: string;
+  region?: string;
+  priority?: string;
+  status?: string;
+  sourceType?: string;
+  createdAt: string;
+};
+
+const priorityLabel = (p?: string) => {
+  if (!p) return "P3";
+  if (p === "CRITICAL") return "P1";
+  if (p === "HIGH") return "P2";
+  if (p === "MEDIUM") return "P3";
+  return "P4";
+};
+
 export default function IncidentOverview() {
   const [openPipeline, setOpenPipeline] = useState(false);
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
+  const { get } = useFetch();
+
+  const { data, isLoading } = useQuery({
+    queryKey: [querykeys.INCIDENT_TICKET, "code-engine"],
+    queryFn: async () => {
+      const res = await get(endpoint.incident_ticket.get + "?page=1&limit=10");
+      if (res.success) {
+        const payload = res.data?.data ?? res.data;
+        return (payload?.incidents ?? []) as Incident[];
+      }
+      return [] as Incident[];
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const incidents = data ?? [];
+  const activeIncident = selectedIncident ?? incidents[0] ?? null;
+
   return (
     <div className="min-h-screen text-slate-300 p-6 font-sans selection:bg-cyan-500/30">
       <div className="flex gap-6 max-w-[1600px] mx-auto relative">
@@ -64,20 +78,26 @@ export default function IncidentOverview() {
           <div className="flex items-center gap-2 mb-6 px-2">
             <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-              Active Incidents (3)
+              Active Incidents {incidents.length > 0 ? `(${incidents.length})` : ""}
             </h2>
           </div>
 
-          <div className="space-y-3">
-            {incidentData.map((incident) => (
+          <div className="space-y-3 overflow-y-auto max-h-[60vh]">
+            {isLoading && (
+              <div className="space-y-2">
+                {[1, 2, 3].map(i => <div key={i} className="h-16 bg-white/5 rounded-2xl animate-pulse" />)}
+              </div>
+            )}
+            {incidents.map((incident) => (
               <ActiveIncidentCard
                 id={incident.ticketId}
-                priority={incident.priority}
-                title={incident.title}
-                timezone={incident.timezone}
-                date={incident.createdAt}
-                active
-                key={incident.ticketId}
+                priority={priorityLabel(incident.priority)}
+                title={incident.reason ?? incident.summary ?? incident.ticketId}
+                timezone={incident.region ?? "—"}
+                date={new Date(incident.createdAt)}
+                active={activeIncident?.id === incident.id}
+                key={incident.id}
+                onClick={() => setSelectedIncident(incident)}
               />
             ))}
           </div>
@@ -86,7 +106,7 @@ export default function IncidentOverview() {
             onClick={() => setOpenPipeline(true)}
             className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-xs font-bold hover:bg-cyan-500/10 transition-all"
           >
-            <Layout size={14} /> View Pipeline #311
+            <Layout size={14} /> View Pipeline {activeIncident ? `#${activeIncident.ticketId}` : ""}
           </button>
         </aside>
 
@@ -97,15 +117,16 @@ export default function IncidentOverview() {
             <div className="space-y-2">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-black text-white tracking-tighter">
-                  INC-311
+                  {activeIncident?.ticketId ?? "—"}
                 </h1>
-                <span className="px-2 py-0.5 rounded bg-rose-500 text-[10px] text-black uppercase border border-rose-500/30">
-                  P1 • Investigating
-                </span>
+                {activeIncident && (
+                  <span className="px-2 py-0.5 rounded bg-rose-500 text-[10px] text-black uppercase border border-rose-500/30">
+                    {priorityLabel(activeIncident.priority)} • {activeIncident.status ?? "Open"}
+                  </span>
+                )}
               </div>
               <p className="text-slate-400 text-sm">
-                checkout-service failed integration tests due to DB pool
-                exhaustion
+                {activeIncident?.reason ?? activeIncident?.summary ?? "Select an incident from the sidebar to view details."}
               </p>
             </div>
             <div className="flex gap-2">

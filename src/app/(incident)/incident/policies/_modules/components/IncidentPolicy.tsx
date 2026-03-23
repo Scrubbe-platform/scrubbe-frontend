@@ -18,7 +18,7 @@ const IncidentPolicy = () => {
       <p className="text-sm max-w-md">
         This is where incidents live in Scrubbe: signal-rich, CI/CD-linked, and
         ready for Ezra summaries. Filter by priority, type, service, time
-        window, or ownership — then click an incident to work it end-to-end.
+        window, or ownership â€” then click an incident to work it end-to-end.
       </p>
 
       <div className="flex items-center gap-3">

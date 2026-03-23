@@ -261,28 +261,28 @@ const NewIncidentList = () => {
         const res = await get(
           endpoint.incident_ticket.get + `?page=${currentPage}`
         );
-        console.log({ res });
         if (res.success) {
-          setTotalPages(res.data?.pagination.totalPages);
-          setCurrentPage(res.data?.pagination.currentPage);
-          return res.data;
+          const payload = res.data?.data ?? res.data;
+          setTotalPages(payload?.pagination?.totalPages ?? 0);
+          setCurrentPage(payload?.pagination?.currentPage ?? 1);
+          return payload;
         }
-        return [];
+        return null;
       } catch (error) {
         console.log(error);
-        return [];
+        return null;
       }
     },
     refetchOnWindowFocus: false,
   });
 
-  const incidents = data?.incidents as Ticket[];
+  const incidents = data?.incidents as Tticket[];
 
 
   const router = useRouter();
 
-  const handleRowClick = () => {
-    router.push("/incident/tickets/1234")
+  const handleRowClick = (item: any) => {
+    router.push("/incident/tickets/" + item.id);
   }
   return (
     <div className="bg-dark w-full min-h-screen p-10 text-gray-100 space-y-4">
@@ -468,7 +468,7 @@ const NewIncidentList = () => {
         </Button>
       </div>
 
-      <Table data={incidentRecords as any} columns={columns} onRowClick={handleRowClick} />
+      <Table data={(incidents && incidents.length > 0 ? incidents : incidentRecords) as any} columns={columns} onRowClick={handleRowClick} />
 
 
     </div>

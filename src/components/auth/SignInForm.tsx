@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -29,7 +29,7 @@ export default function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const path = searchParams.get("to");
-  const [isAuth, setIsAuth] = useState(false);
+  const isAuthRef = useRef(false);
   const inviteEmail = searchParams.get("email");
   const [steps, setSteps] = useState<"email" | "authenticate">("email")
 
@@ -163,11 +163,11 @@ export default function SignInForm() {
   };
 
   useEffect(() => {
-    if (session.status == "authenticated" && session.data.user && !isAuth) {
+    if (session.status === "authenticated" && session.data?.user && !isAuthRef.current) {
+      isAuthRef.current = true;
       onSubmitOAuth();
-      setIsAuth(true);
     }
-  }, [session]);
+  }, [session.status]);
 
   useEffect(() => {
     if (inviteEmail) {
