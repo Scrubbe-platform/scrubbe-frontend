@@ -15,13 +15,15 @@ const Page: React.FC = () => {
   const { get } = useFetch();
   const { replace } = useRouter();
   const searchParams = useSearchParams();
-  const code = searchParams.get("code");
+  const query = searchParams.toString();
 
   const { isLoading, isError } = useQuery({
     queryKey: [querykeys.GITHUB_INTEGRATION],
     queryFn: async () => {
       const res = await get(
-        `${endpoint.integration.github_callback}?code=${code}`
+        query
+          ? `${endpoint.integration.github_callback}?${query}`
+          : endpoint.integration.github_callback
       );
       if (res.success) {
         replace("/incident/ingestion");

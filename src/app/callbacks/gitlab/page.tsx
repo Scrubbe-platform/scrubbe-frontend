@@ -8,16 +8,22 @@ import { querykeys } from "@/lib/constant";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FaGithub } from "react-icons/fa";
 
 const Page: React.FC = () => {
   const { get } = useFetch();
   const { replace } = useRouter();
+  const searchParams = useSearchParams();
   const { isLoading, isError } = useQuery({
     queryKey: [querykeys.GITLAB_INTEGRATION],
     queryFn: async () => {
-      const res = await get(endpoint.integration.gitlab_callback);
+      const query = searchParams.toString();
+      const res = await get(
+        query
+          ? `${endpoint.integration.gitlab_callback}?${query}`
+          : endpoint.integration.gitlab_callback
+      );
       if (res.success) {
         replace("/dashboard/incident-ticket");
         toast.error("Gitlab Integration Successful");

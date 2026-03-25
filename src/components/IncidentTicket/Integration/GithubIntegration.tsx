@@ -17,10 +17,16 @@ const GithubIntegration: React.FC = () => {
       const res = await get(endpoint.integration.github);
       console.log(res);
       if (res.success) {
+        const url =
+          res.data?.url ??
+          (typeof res.data === "string" ? res.data : undefined) ??
+          res.data?.data?.url;
         if (typeof window !== "undefined") {
-          window.location.href = res.data.url;
+          if (url) {
+            window.location.href = url;
+          }
         }
-        return res.data;
+        return url;
       }
       toast.error("Github Integration failed");
       return;

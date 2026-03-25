@@ -17,10 +17,16 @@ const GitlabIntegration: React.FC = () => {
       const res = await get(endpoint.integration.gitlab);
       console.log(res);
       if (res.success) {
+        const url =
+          typeof res.data === "string"
+            ? res.data
+            : res.data?.url ?? res.data?.data?.url;
         if (typeof window !== "undefined") {
-          window.location.href = res.data;
+          if (url) {
+            window.location.href = url;
+          }
         }
-        return res.data;
+        return url;
       }
       toast.error("Gitlab Integration failed");
       return;

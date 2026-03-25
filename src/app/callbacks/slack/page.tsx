@@ -9,15 +9,21 @@ import { querykeys } from "@/lib/constant";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const Page: React.FC = () => {
   const { get } = useFetch();
   const { replace } = useRouter();
+  const searchParams = useSearchParams();
   const { isLoading, isError } = useQuery({
     queryKey: [querykeys.SLACK_INTEGRATION],
     queryFn: async () => {
-      const res = await get(endpoint.integration.slack_callback);
+      const query = searchParams.toString();
+      const res = await get(
+        query
+          ? `${endpoint.integration.slack_callback}?${query}`
+          : endpoint.integration.slack_callback
+      );
       if (res.success) {
         replace("/dashboard/incident-ticket");
         return res.data;

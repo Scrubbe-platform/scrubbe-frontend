@@ -122,7 +122,7 @@ const EditIncidentTicket = () => {
         const res = await get(endpoint.incident_ticket.get_members);
         console.log({ memeber: res });
         if (res.success) {
-          return res.data;
+          return res.data?.data ?? res.data ?? [];
         }
         return [];
       } catch (error) {
