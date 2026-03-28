@@ -54,6 +54,8 @@ type AuthActions = {
     provider_uuid: string,
     oAuthProvider: string
   ) => Promise<User | null>;
+  requestMagicLink: (email: string, to?: string | null) => Promise<void>;
+  consumeMagicLink: (token: string) => Promise<User | null>;
   developerSignup: (
     data: Zod.infer<typeof developerSignupSchema>
   ) => Promise<void>;
@@ -152,6 +154,57 @@ const useAuthStore = create<AuthState & AuthActions>()(
               error instanceof AxiosError
                 ? error.response?.data?.message
                 : "Login failed",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+      requestMagicLink: async (email, to) => {
+        try {
+          set({ isLoading: true, error: null });
+
+          await apiClient.post("/auth/magic-link", {
+            email,
+            to: to ?? undefined,
+          });
+
+          set({ isLoading: false });
+        } catch (error) {
+          set({
+            error:
+              error instanceof AxiosError
+                ? error.response?.data?.message
+                : "Failed to send magic link",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+      consumeMagicLink: async (token) => {
+        try {
+          set({ isLoading: true, error: null });
+
+          const { data } = await apiClient.post("/auth/magic-link/consume", {
+            token,
+          });
+          const { user, tokens } = data.data;
+
+          set({
+            token: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            user,
+            isLoading: false,
+          });
+          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
+          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
+
+          return user;
+        } catch (error) {
+          set({
+            error:
+              error instanceof AxiosError
+                ? error.response?.data?.message
+                : "Magic link login failed",
             isLoading: false,
           });
           throw error;

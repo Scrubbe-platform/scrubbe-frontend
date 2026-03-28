@@ -44,7 +44,7 @@ export interface LoginRequest {
 
 export interface DeveloperSignupRequest {
   firstName: string;
-  lastName: string;
+  lastName?: string;
   email: string;
   password: string;
   githubUsername?: string;
@@ -53,7 +53,7 @@ export interface DeveloperSignupRequest {
 
 export interface BusinessSignupRequest {
   firstName: string;
-  lastName: string;
+  lastName?: string;
   email: string;
   password: string;
   businessAddress: string;
@@ -64,7 +64,7 @@ export interface BusinessSignupRequest {
 
 export interface OAuthSignupRequest {
   firstName: string;
-  lastName: string;
+  lastName?: string;
   email: string;
   id: string;
   oAuthProvider: string;
@@ -94,6 +94,15 @@ export interface ForgotPasswordRequest {
 export interface ResetPasswordRequest {
   token: string;
   password: string;
+}
+
+export interface MagicLinkRequest {
+  email: string;
+  to?: string | null;
+}
+
+export interface MagicLinkConsumeRequest {
+  token: string;
 }
 
 export interface ChangePasswordRequest {
@@ -192,6 +201,18 @@ export const AuthService = {
   // Forgot Password
   async forgotPassword(data: ForgotPasswordRequest): Promise<void> {
     await apiRequest<void>("post", "/auth/forgot-password", data);
+  },
+
+  // Request Magic Link
+  async requestMagicLink(data: MagicLinkRequest): Promise<void> {
+    await apiRequest<void>("post", "/auth/magic-link", data);
+  },
+
+  // Consume Magic Link
+  async consumeMagicLink(data: MagicLinkConsumeRequest): Promise<AuthResponse> {
+    const response = await apiRequest<AuthResponse>("post", "/auth/magic-link/consume", data);
+    this.setAuthCookies(response.tokens);
+    return response;
   },
 
   // Reset Password

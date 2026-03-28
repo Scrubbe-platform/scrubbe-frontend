@@ -20,18 +20,22 @@ import { FaGithub } from "react-icons/fa";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth.schema";
 import { getCookie } from "cookies-next";
 import { COOKIE_KEYS } from "@/lib/constant";
+import { apiClient } from "@/lib/api/client";
 
 const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 
 export default function SignInForm() {
   const [rememberMe, setRememberMe] = useState(false);
-  const { login, oauthLogin, isLoading } = useAuthStore();
+  const { oauthLogin, requestMagicLink, consumeMagicLink } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const path = searchParams.get("to");
+  const magicToken = searchParams.get("magic");
   const isAuthRef = useRef(false);
   const inviteEmail = searchParams.get("email");
   const [steps, setSteps] = useState<"email" | "authenticate">("email");
+  const [isSsoLoading, setIsSsoLoading] = useState(false);
+  const [isMagicLinkLoading, setIsMagicLinkLoading] = useState(false);
 
   // Keep the form handling sfirsture closer to the original
   // even though we're simplifying functionality
@@ -94,27 +98,96 @@ export default function SignInForm() {
     router.push("/dashboard");
   };
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async () => {
+    setSteps("authenticate");
+  };
+
+  const handleContinueWithSso = async () => {
+    const email = watch("email").trim();
+
+    if (!email) {
+      toast.error("Please enter your work email first");
+      return;
+    }
+
     try {
-      const userDetails = await login(data.email, "");
+      setIsSsoLoading(true);
 
-      toast.success("Successfully signed in!", {
-        description: `${data.email}, you are being redirected...`,
-        duration: 10000,
+      const discovery = await apiClient.get("/auth/sso/discovery", {
+        params: { email },
       });
+      const policy = discovery.data?.data;
+      const provider = String(policy?.provider ?? "")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+      const callbackUrl = `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}`;
+      const providerMap: Record<string, string> = {
+        GOOGLE: "google",
+        GITHUB: "github",
+        GITLAB: "gitlab",
+        AZURE: "microsoft-entra-id",
+        OIDC: "microsoft-entra-id",
+        MICROSOFT: "microsoft-entra-id",
+        MICROSOFTENTRAID: "microsoft-entra-id",
+        AZUREAD: "microsoft-entra-id",
+        ENTRAID: "microsoft-entra-id",
+      };
+      const nextAuthProvider =
+        providerMap[provider] ??
+        (policy?.oidcIssuer ? "microsoft-entra-id" : "");
 
-      redirectAfterLogin(
-        userDetails?.accountType,
-        userDetails?.purpose ?? null
-      );
+      if (!policy?.available) {
+        toast.error("This workspace does not have SSO configured yet.");
+        return;
+      }
+
+      if (!nextAuthProvider) {
+        toast.error(
+          `This workspace uses ${provider || "an unsupported"} SSO provider, which is not enabled on this sign-in path yet.`
+        );
+        return;
+      }
+
+      await signIn(nextAuthProvider, {
+        redirectTo: callbackUrl,
+      });
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Login failed", {
+      console.error("SSO login error:", error);
+      toast.error("SSO login failed", {
         description:
           error instanceof AxiosError
             ? error.response?.data?.message
-            : "Login failed",
+            : "Unable to start SSO sign in",
       });
+    } finally {
+      setIsSsoLoading(false);
+    }
+  };
+
+  const handleRequestMagicLink = async () => {
+    const email = watch("email").trim();
+
+    if (!email) {
+      toast.error("Please enter your work email first");
+      return;
+    }
+
+    try {
+      setIsMagicLinkLoading(true);
+      await requestMagicLink(email, path);
+      toast.success("Check your inbox", {
+        description: "If your account exists, we sent a magic sign-in link.",
+      });
+    } catch (error) {
+      console.error("Magic link request error:", error);
+      toast.error("Unable to send magic link", {
+        description:
+          error instanceof AxiosError
+            ? error.response?.data?.message
+            : "We could not send the link right now",
+      });
+    } finally {
+      setIsMagicLinkLoading(false);
     }
   };
 
@@ -179,12 +252,13 @@ export default function SignInForm() {
     if (
       session.status === "authenticated" &&
       session.data?.user &&
-      !isAuthRef.current
+      !isAuthRef.current &&
+      !magicToken
     ) {
       isAuthRef.current = true;
       onSubmitOAuth();
     }
-  }, [session.status]);
+  }, [session.status, magicToken]);
 
   useEffect(() => {
     if (inviteEmail) {
@@ -192,10 +266,74 @@ export default function SignInForm() {
     }
   }, [inviteEmail, setValue]);
 
+  useEffect(() => {
+    if (!magicToken || isAuthRef.current) {
+      return;
+    }
+
+    let isMounted = true;
+
+    const handleConsumeMagicLink = async () => {
+      try {
+        setIsMagicLinkLoading(true);
+        isAuthRef.current = true;
+
+        const userDetails = await consumeMagicLink(magicToken);
+
+        if (!isMounted) {
+          return;
+        }
+
+        await signOut({ redirect: false });
+        toast.success("Successfully signed in!", {
+          description: `${userDetails?.email ?? "Your account"} is being redirected...`,
+          duration: 10000,
+          id: "magic-link-redirect",
+        });
+
+        redirectAfterLogin(
+          userDetails?.accountType,
+          userDetails?.purpose ?? null
+        );
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        const description =
+          error instanceof AxiosError
+            ? error.response?.data?.message
+            : "Unable to consume magic link";
+
+        toast.error("Magic link failed", {
+          description,
+        });
+
+        const params = new URLSearchParams();
+        if (path) {
+          params.set("to", path);
+        }
+        router.replace(
+          `/auth/signin${params.toString() ? `?${params.toString()}` : ""}`
+        );
+      } finally {
+        if (isMounted) {
+          setIsMagicLinkLoading(false);
+        }
+      }
+    };
+
+    void handleConsumeMagicLink();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [consumeMagicLink, magicToken, path, redirectAfterLogin, router, signOut]);
+
   if (steps === "email") {
     return (
       <Suspense fallback={<div>Loading...</div>}>
-        {session.status == "loading" && (
+        {(session.status == "loading" || isMagicLinkLoading) && (
           <div className=" absolute inset-0 bg-black/20 z-50 flex justify-center pt-[20%] h-screen">
             <Loader2 className=" animate-spin text-primary-500" size={30} />
           </div>
@@ -300,7 +438,7 @@ export default function SignInForm() {
   } else if (steps === "authenticate") {
     return (
       <Suspense fallback={<div>Loading...</div>}>
-        {session.status == "loading" && (
+        {(session.status == "loading" || isMagicLinkLoading) && (
           <div className=" absolute inset-0 bg-black/20 z-50 flex justify-center pt-[20%] h-screen">
             <Loader2 className=" animate-spin text-primary-500" size={30} />
           </div>
@@ -329,12 +467,13 @@ export default function SignInForm() {
           {/* <div className="border">Magic link sent to ol*****@scrubbe.com.</div> */}
 
           <CButton
-            onClick={() => {}}
-            type="button"
-            className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark"
-          >
-            Continue with SSO
-          </CButton>
+          onClick={handleContinueWithSso}
+          type="button"
+          disabled={isSsoLoading}
+          className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark"
+        >
+          Continue with SSO
+        </CButton>
           <div className="flex justify-center items-center text-sm text-zinc-400 gap-2 py-3">
             <div className="h-[1px] w-[100%] bg-zinc-700" />
             or
@@ -342,8 +481,9 @@ export default function SignInForm() {
           </div>
 
           <CButton
-            onClick={() => toast.info("Magic link is coming soon.")}
+            onClick={handleRequestMagicLink}
             type="button"
+            disabled={isMagicLinkLoading}
             className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark"
           >
             <FaLink /> Email me a magic link
