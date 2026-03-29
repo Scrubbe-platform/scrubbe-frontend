@@ -13,10 +13,9 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 import { AxiosError } from "axios";
 import { getEmailDomain } from "@/lib/utils";
-import { FaBuilding, FaLink } from "react-icons/fa";
+import { FaBuilding, FaLink, FaGithub, FaGitlab, FaMicrosoft } from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
 import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth.schema";
 import { getCookie } from "cookies-next";
 import { COOKIE_KEYS } from "@/lib/constant";
@@ -464,16 +463,41 @@ export default function SignInForm() {
             </div>
           </div>
 
-          {/* <div className="border">Magic link sent to ol*****@scrubbe.com.</div> */}
+          <div className="flex flex-col gap-2">
+            <CButton
+              onClick={() => signIn("google", { callbackUrl: `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}` })}
+              type="button"
+              disabled={isSsoLoading}
+              className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"
+            >
+              <FcGoogle size={18} /> Continue with Google
+            </CButton>
+            <CButton
+              onClick={() => signIn("github", { callbackUrl: `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}` })}
+              type="button"
+              disabled={isSsoLoading}
+              className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"
+            >
+              <FaGithub size={18} /> Continue with GitHub
+            </CButton>
+            <CButton
+              onClick={() => signIn("gitlab", { callbackUrl: `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}` })}
+              type="button"
+              disabled={isSsoLoading}
+              className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"
+            >
+              <FaGitlab size={18} /> Continue with GitLab
+            </CButton>
+            <CButton
+              onClick={() => signIn("microsoft-entra-id", { callbackUrl: `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}` })}
+              type="button"
+              disabled={isSsoLoading}
+              className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"
+            >
+              <FaMicrosoft size={18} /> Continue with Microsoft
+            </CButton>
+          </div>
 
-          <CButton
-          onClick={handleContinueWithSso}
-          type="button"
-          disabled={isSsoLoading}
-          className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark"
-        >
-          Continue with SSO
-        </CButton>
           <div className="flex justify-center items-center text-sm text-zinc-400 gap-2 py-3">
             <div className="h-[1px] w-[100%] bg-zinc-700" />
             or
