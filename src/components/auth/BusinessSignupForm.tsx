@@ -27,7 +27,7 @@ const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 // Define the form schema using zod
 export const businessSignupSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }),
-  lastName: z.string().min(1, { message: "Last name is required" }),
+  lastName: z.string().optional(),
   businessEmail: z
     .string()
     .email({ message: "Please enter a valid email address" })
@@ -243,6 +243,7 @@ export default function BusinessSignupForm() {
   }, [inviteEmail, setValue]);
 
   const SuccessPage = ({ firstName, lastName }: SuccessPageProps) => {
+    const displayName = [firstName, lastName].filter(Boolean).join(" ");
     return (
       <Suspense fallback={<div>Loading...</div>}>
         <div className="w-full p-6 flex flex-col items-center justify-center min-h-96">
@@ -262,8 +263,7 @@ export default function BusinessSignupForm() {
           </h1>
 
           <p className="text-gray-300 text-center">
-            Welcome {firstName} {lastName}! You have successfully created an
-            account.
+            Welcome {displayName}! You have successfully created an account.
           </p>
         </div>
       </Suspense>

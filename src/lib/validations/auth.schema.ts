@@ -98,7 +98,7 @@ export const developerSignupSchema = z
 export const businessSignupSchema = z
   .object({
     firstName: z.string().min(1, { message: "First name is required" }),
-    lastName: z.string().min(1, { message: "Last name is required" }),
+    lastName: z.string().optional(),
     businessEmail: z
       .string()
       .email({ message: "Please enter a valid email address" })
