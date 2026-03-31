@@ -5,6 +5,9 @@ import { useForm, Controller } from "react-hook-form";
 import { ChevronDown, Info, Check } from "lucide-react";
 import { Switch } from "@heroui/react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { popularTimezones } from "@/lib/constant/index";
+import Select from "@/components/ui/select";
 
 const ScrubbeOnboarding = () => {
   const { register, handleSubmit, control, watch, setValue } = useForm({
@@ -350,7 +353,7 @@ const ScrubbeOnboarding = () => {
                   </label>
                   <input
                     {...register("workspaceName")}
-                    className="w-full bg-[#0A1635] border border-[#4B5563] rounded p-2 text-sm outline-none"
+                    className="w-full bg-[#08132F] border border-[#4B5563] rounded p-2 text-sm outline-none"
                   />
                   <p className="text-sm">
                     Used in emails, alerts and handover documents.
@@ -364,7 +367,7 @@ const ScrubbeOnboarding = () => {
                       label="Timezone"
                       value={field.value}
                       onChange={field.onChange}
-                      options={["UTC", "PST", "EST"]}
+                      options={popularTimezones.map((value) => value.label)}
                     />
                   )}
                 />
@@ -427,7 +430,7 @@ const ScrubbeOnboarding = () => {
                   type="submit"
                   className="w-fit border-IMSCyan border text-IMSCyan py-3 px-3 text-base rounded-lg font-bold mt-8 hover:brightness-110"
                 >
-                  Complete Setup & Go to Handover
+                  Continue
                 </button>
               </div>
             </StepWrapper>
@@ -539,8 +542,12 @@ const StepWrapper = ({
   isDone,
   onManualDone,
 }: any) => (
-  <div
-    className={`bg-gradient-to-b from-[#0074834D] to-[#004B571A] border rounded-xl transition-all border-IMSCyan/40 overflow-clip`}
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.5, ease: "easeOut" }}
+    className={`bg-gradient-to-b from-[#0074834D] to-[#004B571A] border rounded-xl transition-all border-IMSCyan/40 overflow-clip mb-8`}
   >
     <div className="p-4 border-b border-[#1F2937] flex justify-between items-center ">
       <div className="flex flex-col gap-1">
@@ -549,7 +556,9 @@ const StepWrapper = ({
         </h2>
         <p className="text-neutral-300 text-sm">{subtitle}</p>
       </div>
-      <button
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         type="button"
         onClick={onManualDone}
         className="flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors"
@@ -559,17 +568,20 @@ const StepWrapper = ({
             isDone ? "bg-[#00CAD8] border-[#00CAD8]" : "border-[#4B5563]"
           }`}
         >
-          {isDone && <Check size={16} color="black" />}
+          {isDone && (
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+              <Check size={16} color="black" />
+            </motion.div>
+          )}
         </div>
         <span className="text-[9px] font-bold text-white uppercase">
           Mark Step as done
         </span>
-      </button>
+      </motion.button>
     </div>
     <div className="px-4 py-4">{children}</div>
-  </div>
+  </motion.div>
 );
-
 const ToggleSwitch = ({ label, sub, value, onChange }: any) => (
   <div className="flex items-center justify-between gap-6">
     <div className="flex flex-col">
@@ -590,35 +602,19 @@ const RoleCard = ({ title, desc }: any) => (
 );
 
 const CustomSelect = ({ label, value, options, onChange }: any) => {
-  const [open, setOpen] = useState(false);
   return (
     <div className="space-y-2 relative">
       <label className="text-[11px] font-bold text-white uppercase">
         {label}
       </label>
-      <div
-        onClick={() => setOpen(!open)}
-        className="bg-[#08132F] border border-zinc-500 rounded-md p-2.5 flex justify-between items-center cursor-pointer hover:border-[#4B5563]"
-      >
-        <span className="text-xs text-[#E5E7EB]">{value}</span>
-        <ChevronDown size={14} className="text-[#4B5563]" />
-      </div>
-      {open && (
-        <div className="absolute top-full w-full bg-[#08132F] border border-[#1F2937] z-50 rounded mt-1 shadow-2xl">
-          {options.map((o: any) => (
-            <div
-              key={o}
-              onClick={() => {
-                onChange(o);
-                setOpen(false);
-              }}
-              className="px-3 py-2 text-xs text-white hover:bg-[#00CAD8] hover:text-black cursor-pointer"
-            >
-              {o}
-            </div>
-          ))}
-        </div>
-      )}
+      <Select
+        label={""}
+        options={options.map((option: any) => ({
+          value: option,
+          label: option,
+        }))}
+        className="!bg-[#08132F] !h-10 border-zinc-500"
+      />
     </div>
   );
 };
@@ -661,48 +657,48 @@ const PolicyToggle = ({
   </div>
 );
 
-const IntegrationCard = ({
-  label,
-  active,
-  onChange,
-  desc,
-}: {
-  label: string;
-  desc: string;
-  active: any;
-  onChange: (value: boolean) => void;
-}) => (
-  <div
-    className={`p-4 rounded-lg border flex justify-between items-center cursor-pointer transition-all bg-darkEzra border-[#6D7280] `}
+const IntegrationCard = ({ label, active, onChange, desc }: any) => (
+  <motion.div
+    animate={{ borderColor: active ? "#00CAD8" : "#4B5563" }}
+    className="p-4 rounded-lg border flex justify-between items-center cursor-pointer bg-[#0A1635]"
   >
-    <div>
-      <p className={`text-base font-bold text-white`}>{label}</p>
-      <p className={`text-base text-white`}>{desc}</p>
+    <div className="pr-4">
+      <p className="text-xs font-bold text-white tracking-widest">{label}</p>
+      <p className="text-[11px] text-zinc-400">{desc}</p>
     </div>
-    <Switch value={active} onChange={() => onChange(!active)} color="success" />
-  </div>
+    <Switch
+      isSelected={active}
+      onValueChange={onChange}
+      color="success"
+      size="sm"
+    />
+  </motion.div>
 );
 
-const SidebarStep = ({
-  label,
-  subLabel,
-  active,
-}: {
-  label: string;
-  subLabel: string;
-  active: boolean;
-}) => (
+const SidebarStep = ({ label, subLabel, active }: any) => (
   <div className="flex items-center gap-3">
-    <div
-      className={`w-3.5 h-3.5 border rounded flex items-center justify-center ${
-        active ? "bg-[#00CAD8] border-[#00CAD8]" : "border-[#1F2937]"
-      }`}
+    <motion.div
+      animate={{
+        backgroundColor: active ? "#00CAD8" : "transparent",
+        borderColor: active ? "#00CAD8" : "#1F2937",
+      }}
+      className="w-4 h-4 border rounded flex items-center justify-center"
     >
-      {active && <Check size={10} color="black" strokeWidth={4} />}
-    </div>
+      {active && (
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+          <Check size={10} color="black" strokeWidth={4} />
+        </motion.div>
+      )}
+    </motion.div>
     <div>
-      <p className={`text-base font-bold text-white`}>{label}</p>
-      <p className="text-sm">{subLabel}</p>
+      <p
+        className={`text-sm font-bold ${
+          active ? "text-white" : "text-[#6B7280]"
+        }`}
+      >
+        {label}
+      </p>
+      <p className="text-[11px] text-[#6B7280]">{subLabel}</p>
     </div>
   </div>
 );

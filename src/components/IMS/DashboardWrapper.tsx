@@ -39,7 +39,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
         className={clsx(
           "cursor-pointer",
           collapse
-            ? " absolute left-3 transition-all duration-150 ease-out rotate-180 bottom-[10px] bg-IMSLightGreen size-10 shadow-lg rounded-full flex justify-center items-center "
+            ? " absolute z-50 left-10 transition-all duration-150 ease-out rotate-180 bottom-12 bg-IMSLightGreen size-10 shadow-lg rounded-full flex justify-center items-center "
             : " hidden"
         )}
       >

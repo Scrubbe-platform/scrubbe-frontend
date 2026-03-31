@@ -115,7 +115,6 @@ export default function CodeEngineRecommendation() {
                 automaticLayout: true,
                 scrollbar: {
                   vertical: "hidden",
-                  horizontal: "on",
                 },
               }}
             />
