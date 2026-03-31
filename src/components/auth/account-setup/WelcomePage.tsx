@@ -2,12 +2,21 @@
 "use client";
 import { useState, useMemo, ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { ChevronDown, Info, Check } from "lucide-react";
+import {
+  ChevronDown,
+  Info,
+  Check,
+  AlertCircle,
+  Fingerprint,
+  Database,
+} from "lucide-react";
 import { Switch } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { popularTimezones } from "@/lib/constant/index";
 import Select from "@/components/ui/select";
+import Input from "@/components/ui/input";
+import TextArea from "@/components/ui/text-area";
 
 const ScrubbeOnboarding = () => {
   const { register, handleSubmit, control, watch, setValue } = useForm({
@@ -26,6 +35,16 @@ const ScrubbeOnboarding = () => {
         restrictExport: false,
         requireTwoApprovals: true,
         flagFraud: false,
+      },
+      ssoConfiguration: {
+        ssoType: "SAML_2",
+        domain: "",
+        client_secret: "",
+        entity_id: "",
+        idp_url: "",
+        acs_url: "https://app.scrubbe.com/auth/saml/callback",
+        issuer_url: "",
+        client_id: "",
       },
       workspaceName: "acme-payments",
       timezone: "UTC",
@@ -281,6 +300,217 @@ const ScrubbeOnboarding = () => {
                     )}
                   />
                 </PolicyGroup>
+
+                <AnimatePresence>
+                  {formValues.policies.enforceSSO === true && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="space-y-6"
+                    >
+                      <div className="p-4 rounded-lg bg-dark">
+                        <div className="grid grid-cols-2 gap-3">
+                          <Controller
+                            name="ssoConfiguration.ssoType"
+                            control={control}
+                            render={({ field }) => (
+                              <Select
+                                label="SSO Type"
+                                options={[
+                                  { label: "SAML 2.0", value: "SAML_2" },
+                                  {
+                                    label: "OIDC (OpenID Connect)",
+                                    value: "OIDC",
+                                  },
+                                ]}
+                                labelClassName=""
+                                {...field}
+                              />
+                            )}
+                          />
+                          <Input
+                            label="Discovery Domain"
+                            placeholder="acme.com"
+                          />
+                        </div>
+
+                        {/* 3. SAML/OIDC DYNAMIC DETAILS — Signal Ingestion */}
+                        <div className="bg-panel/40 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                          <div className="p-4 border-b border-white/5 bg-white/5 flex items-center gap-3">
+                            <Database className="size-4 text-accent" />
+                            <h3 className="text-xs font-bold text-white uppercase tracking-widest">
+                              {formValues.ssoConfiguration.ssoType === "SAML_2"
+                                ? "SAML 2.0 Identity Details"
+                                : "OIDC Client Configuration"}
+                            </h3>
+                          </div>
+
+                          <div className="p-6 space-y-6">
+                            {formValues.ssoConfiguration.ssoType ===
+                            "SAML_2" ? (
+                              <>
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+                                    IdP Metadata URL
+                                  </label>
+                                  <Controller
+                                    name="ssoConfiguration.idp_url"
+                                    control={control}
+                                    render={({ field }) => (
+                                      <Input
+                                        placeholder="https://idp.example.com/app/metadata"
+                                        className="!h-11 !bg-void/50"
+                                        {...field}
+                                      />
+                                    )}
+                                  />
+                                  <p className="text-[9px] text-gray-500 font-mono italic">
+                                    Required for Stage 6 Guardrail Check
+                                    integration.{" "}
+                                  </p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-6">
+                                  <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+                                      Entity ID
+                                    </label>
+                                    <Controller
+                                      name="ssoConfiguration.entity_id"
+                                      control={control}
+                                      render={({ field }) => (
+                                        <Input
+                                          placeholder="urn:scrubbe:acme"
+                                          className="!h-11 !bg-void/50"
+                                          {...field}
+                                        />
+                                      )}
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+                                      ACS URL
+                                    </label>
+                                    <Controller
+                                      name="ssoConfiguration.acs_url"
+                                      control={control}
+                                      render={({ field }) => (
+                                        <Input
+                                          value="https://app.scrubbe.com/auth/saml/callback"
+                                          readOnly
+                                          className="!h-11 !bg-void/20 text-gray-500"
+                                          // {...field}
+                                        />
+                                      )}
+                                    />
+                                  </div>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="space-y-6">
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+                                    Issuer URL
+                                  </label>
+                                  <Controller
+                                    name="ssoConfiguration.issuer_url"
+                                    control={control}
+                                    render={({ field }) => (
+                                      <Input
+                                        placeholder="https://accounts.google.com"
+                                        className="!h-11 !bg-void/50"
+                                      />
+                                    )}
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 gap-6">
+                                  <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+                                      Client ID
+                                    </label>
+                                    <Controller
+                                      name="ssoConfiguration.client_id"
+                                      control={control}
+                                      render={({ field }) => (
+                                        <Input
+                                          placeholder="scrubbe-client-id"
+                                          className="!h-11 !bg-void/50"
+                                          {...field}
+                                        />
+                                      )}
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+                                      Client Secret
+                                    </label>
+                                    <Controller
+                                      name="ssoConfiguration.client_secret"
+                                      control={control}
+                                      render={({ field }) => (
+                                        <Input
+                                          type="password"
+                                          placeholder="••••••••••••"
+                                          className="!h-11 !bg-void/50"
+                                          {...field}
+                                        />
+                                      )}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 4. PROVISIONING — Trust Ladder Integration */}
+                        <div className=" border border-IMSCyan/10 rounded-2xl p-6 space-y-6 mt-4">
+                          <div className="flex items-center gap-3 mb-2">
+                            <Fingerprint className="size-5 text-IMSCyan" />
+                            <h3 className="text-sm font-bold text-white uppercase tracking-widest">
+                              Provisioning & Role Mapping
+                            </h3>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="flex items-center justify-between p-4 bg-void/40 border border-white/5 rounded-xl">
+                              <div className="flex items-center gap-3">
+                                <Info className="size-4 text-gray-500" />
+                                <span className="text-xs font-medium">
+                                  JIT Provisioning
+                                </span>
+                              </div>
+                              <Switch size="sm" color="success" />
+                            </div>
+                            <div className="flex items-center justify-between p-4 bg-void/40 border border-white/5 rounded-xl">
+                              <div className="flex items-center gap-3">
+                                <AlertCircle className="size-4 text-gray-500" />
+                                <span className="text-xs font-medium">
+                                  Auto-Role Sync
+                                </span>
+                              </div>
+                              <Switch size="sm" color="success" />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+                              Group → Scrubbe Role Mapping
+                            </label>
+                            <TextArea
+                              className="w-full bg-void/50 border border-white/10 rounded-xl p-4 h-32 text-xs font-mono outline-none focus:border-IMSCyan/50 transition-all"
+                              placeholder='{ "SRE_TEAM": "Commander", "DEVOPS": "Responder" }'
+                            />
+                            <p className="text-[10px] text-gray-500 italic">
+                              Mapping is stored as JSONB data in policy-service.
+                              [cite: 168]
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <PolicyGroup title="Data export & sharing">
                   <Controller
                     name="policies.allowPDF"
