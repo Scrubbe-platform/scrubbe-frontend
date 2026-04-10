@@ -13,7 +13,7 @@ interface TextareaProps
   icon?: React.ReactNode;
   labelClassName?: string;
   info?: string;
-  rows?: number
+  rows?: number;
 }
 
 const TextArea = ({
@@ -32,7 +32,7 @@ const TextArea = ({
       {label && (
         <label
           htmlFor={props.id}
-          className={`flex gap-2 items-center dark:text-white mb-2 text-sm font-medium ${
+          className={`flex gap-2 items-center text-white mb-2 text-sm font-medium ${
             isLoading ? "text-gray-500" : "text-gray-700"
           } ${labelClassName}`}
         >
