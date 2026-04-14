@@ -39,12 +39,16 @@ const ContactUs = () => {
     }
   };
   return (
-    <div className="bg-dark min-h-screen font-sans w-full ">
+    <div className="bg-dark min-h-screen font-sans w-full overflow-hidden ">
       <div className="h-[500px] w-full bg-no-repeat bg-cover relative z-10">
         <div className="container mx-auto p-4">
           <div className=" absolute flex flex-col items-center justify-center h-full w-full">
             <h1 className="text-white text-4xl md:text-6xl font-bigshotOne text-center">
-              We’re Here to Keep Your <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-IMSCyan to-[#8250BE]">Operations Resilient</span>.
+              We’re Here to Keep Your <br />{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-IMSCyan to-[#8250BE]">
+                Operations Resilient
+              </span>
+              .
             </h1>
             <p className=" max-w-2xl text-white text-center pt-4">
               From onboarding to ongoing incident management, our dedicated
@@ -146,9 +150,7 @@ const ContactUs = () => {
               </CButton>
             </div>
           </form>
-          <div 
-            className="bg-gradient-to-b from-[#0074834D] to-[#004B571A] border rounded-xl transition-all border-IMSCyan/40 overflow-clip text-white p-10"
-            >
+          <div className="bg-gradient-to-b from-[#0074834D] to-[#004B571A] border rounded-xl transition-all border-IMSCyan/40 overflow-clip text-white p-10">
             <p className=" font-semibold text-xl">Send us a message</p>
             <div className="flex flex-col gap-3 mt-3">
               <div className="p-4 py-6 border border-IMSCyan rounded-xl  flex-row flex gap-3 items-center">

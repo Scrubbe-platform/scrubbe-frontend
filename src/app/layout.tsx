@@ -6,7 +6,6 @@ import { Toaster } from "sonner";
 import { StoreProvider } from "@/store/StoreProvider";
 import NextJsTopLoader from "@/lib/NextJsTopLoader";
 import AuthProvider from "@/provider/AuthProvider";
-import ModalManager from "@/components/landing/ModalManager";
 import ThemeProvider from "@/components/ThemeProvider";
 import Image from "next/image";
 import { QueryClientProviders } from "@/provider/QueryClientProvider";
@@ -114,8 +113,6 @@ export default function RootLayout({
                   {/* <NavbarWrapper /> */}
                   <main className="flex-grow h-full w-full">{children}</main>
                   {/* <FooterWrapper /> */}
-
-                  <ModalManager />
                 </StoreProvider>
                 <Toaster position="top-center" />
               </AuthProvider>

@@ -12,7 +12,6 @@ import Pagination from "../alert-setting/Pagination";
 import NotificationSettings from "./NotificationSettings";
 import CreateIncident from "./CreateIncident";
 import MangePlaybook from "./MangePlaybook";
-import IncidentAnalysis from "./IncidentAnalysis";
 import { useQuery } from "@tanstack/react-query";
 import { querykeys } from "@/lib/constant";
 import { useFetch } from "@/hooks/useFetch";
@@ -338,11 +337,6 @@ const IncidentTicketPage = () => {
         <MangePlaybook
           isOpen={isManagePlaybookOpen}
           onClose={() => setIsManagePlaybookOpen(false)}
-        />
-
-        <IncidentAnalysis
-          isOpen={isIncidentAnalysisOpen}
-          onClose={() => setIsIncidentAnalysisOpen(false)}
         />
 
         <Modal

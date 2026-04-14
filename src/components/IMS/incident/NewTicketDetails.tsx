@@ -13,13 +13,12 @@ import Collaboration from "../../IncidentTicket/Collaboration";
 import History from "../../IncidentTicket/History";
 import TreatIntel from "../../IncidentTicket/TreatIntel";
 import { Ticket, Tticket } from "@/types";
-import { priorityColors, statusColors } from "./NewIncidentList";
 import NewEditIncidentTicket from "./NewEditIncidentTicket";
 
 const TABS = [
   "Details",
   "Comments",
-//   "Collaboration",
+  //   "Collaboration",
   "Timeline",
   // "Threat intel",
 ];
@@ -52,21 +51,21 @@ const NewTicketDetails = () => {
           window, or ownership — then click an incident to work it end-to-end.
         </p>
 
-        {
-            ticket && <div className="flex items-center gap-3">
-            <div>{priorityColors(ticket?.state ?? "")}</div>
-            <div>{statusColors(ticket?.severity ?? "")}</div>
+        {ticket && (
+          <div className="flex items-center gap-3">
+            <div>{ticket?.state ?? ""}</div>
+            <div>{ticket?.severity ?? ""}</div>
             <p className="p-1 px-2 text-xs rounded-md capitalize border">
               {ticket?.environment} • {ticket?.region}
             </p>
             <p className="p-1 px-2 text-xs rounded-md capitalize border">
-             {ticket?.serviceArea}
+              {ticket?.serviceArea}
             </p>
             <p className="p-1 px-2 text-xs rounded-md capitalize border">
-            {ticket?.sourceType}
+              {ticket?.sourceType}
             </p>
           </div>
-        }
+        )}
 
         {/* Tabs */}
         <div className="flex gap-8 border-b border-gray-400 mb-6">
