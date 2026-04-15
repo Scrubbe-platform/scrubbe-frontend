@@ -23,7 +23,8 @@ const ScrubbeOnboarding = () => {
     defaultValues: {
       inviteEmails: "",
       inviteRole: "Admin-Full Control",
-      welcomeNote: "Use my own message later",
+      welcomeNote: "Standard Welcome",
+      customWelcomeNote: "",
       selfSignUp: true,
       newMemberRole: "Viewer - Safest Default",
       whoCanInvite: "Admin Only",
@@ -52,7 +53,7 @@ const ScrubbeOnboarding = () => {
         slack: true,
         email: true,
         cicd: false,
-        fraud: true,
+        fraud: false,
       },
       manualDone: { s1: false, s2: false, s3: false, s4: false },
     },
@@ -88,7 +89,7 @@ const ScrubbeOnboarding = () => {
             <h1 className="text-3xl font-bold text-white mb-3">
               Welcome to your Scrubbe Workspace
             </h1>
-            <p className="text-[#9CA3AF] text-sm leading-relaxed">
+            <p className="text-[#9CA3AF] text-base leading-relaxed">
               You&apos;re the first administrator here. Take a few minutes to
               invite your team, choose roles and permissions, and set the basic
               guardrails for how incidents, fraud signals, and handovers work in
@@ -158,15 +159,26 @@ const ScrubbeOnboarding = () => {
                         label="Send Welcome Note"
                         value={field.value}
                         onChange={field.onChange}
-                        options={[
-                          "Use my own message later",
-                          "Standard Welcome",
-                          "None",
-                        ]}
+                        options={["Custom Message", "Standard Welcome", "None"]}
                       />
                     )}
                   />
                 </div>
+
+                {watch("welcomeNote") === "Custom Message" && (
+                  <Controller
+                    name="customWelcomeNote"
+                    control={control}
+                    render={({ field }) => (
+                      <TextArea
+                        label="Send Welcome Note"
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="!bg-[#08132F]"
+                      />
+                    )}
+                  />
+                )}
                 <Controller
                   name="selfSignUp"
                   control={control}
@@ -217,11 +229,7 @@ const ScrubbeOnboarding = () => {
                       label="Default role for new members"
                       value={field.value}
                       onChange={field.onChange}
-                      options={[
-                        "Viewer - Safest Default",
-                        "Responder",
-                        "Commander",
-                      ]}
+                      options={["Admin", "Commander", "Responder", "Viewer"]}
                     />
                   )}
                 />
@@ -258,7 +266,12 @@ const ScrubbeOnboarding = () => {
                     desc: "Read-only access to incidents and handovers.",
                   },
                 ].map((r) => (
-                  <RoleCard key={r.name} title={r.name} desc={r.desc} />
+                  <RoleCard
+                    key={r.name}
+                    title={r.name}
+                    desc={r.desc}
+                    active={watch("newMemberRole") === r.name}
+                  />
                 ))}
               </div>
             </StepWrapper>
@@ -638,6 +651,7 @@ const ScrubbeOnboarding = () => {
                         active={field.value}
                         onChange={field.onChange}
                         desc={desc}
+                        disable={value == "fraud"}
                       />
                     )}
                   />
@@ -645,14 +659,8 @@ const ScrubbeOnboarding = () => {
               </div>
               <div className=" space-y-3 py-3">
                 <p className="text-base">
-                  You can adjust and add more integrations later from
-                  the Settings → Integrations page.
-                </p>
-                <p className="text-base">What happens next?</p>
-                <p className="text-base">
-                  Once you’ve invited your team and connected at least one
-                  channel, configure On-call & Handover so Scrubbe can
-                  automatically assemble shift summaries for you.{" "}
+                  You can adjust and add more connectors later from the Settings
+                  → Integrations page.
                 </p>
               </div>
               <div className="flex justify-end">
@@ -668,44 +676,6 @@ const ScrubbeOnboarding = () => {
 
           {/* RIGHT COLUMN: SIDEBAR (EXACT UI) */}
           <aside className="flex-1 space-y-6 ">
-            <div className=" border border-zinc-400 p-6 rounded-lg sticky top-8 bg-[#08132F]">
-              <h3 className="text-base font-bold text-white mb-1">
-                Setup progress
-              </h3>
-              <p className="text-[10px] text-[#6B7280] mb-4">
-                Complete these steps so Scrubbe reflects how your team really
-                works.{" "}
-              </p>
-              <div className="w-full bg-white h-1 rounded-full mb-6 overflow-hidden">
-                <div
-                  className="bg-[#00CAD8] h-full transition-all duration-500"
-                  style={{ width: `${progress.percentage}%` }}
-                />
-              </div>
-              <div className="space-y-4">
-                <SidebarStep
-                  label="Invite your team"
-                  subLabel="Admins, SREs, fraud & business teams"
-                  active={progress.s1}
-                />
-                <SidebarStep
-                  label="Set roles & permissions"
-                  subLabel="Decide who can lead incidents & export data"
-                  active={progress.s2}
-                />
-                <SidebarStep
-                  label="Tenant policies"
-                  subLabel="Sign-in, exports & approvals"
-                  active={progress.s3}
-                />
-                <SidebarStep
-                  label="Connect integrations"
-                  subLabel="Slack, email, CI/CD, fraud tools"
-                  active={progress.s4}
-                />
-              </div>
-            </div>
-
             <div className="border-zinc-400 border bg-[#08132F] p-6 rounded-lg">
               <h3 className="text-base font-bold text-white mb-1">
                 People in this workspace
@@ -786,28 +756,6 @@ const StepWrapper = ({
         </h2>
         <p className="text-neutral-300 text-sm">{subtitle}</p>
       </div>
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        type="button"
-        onClick={onManualDone}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors"
-      >
-        <div
-          className={`w-4 h-4 flex justify-center items-center rounded-sm border ${
-            isDone ? "bg-[#00CAD8] border-[#00CAD8]" : "border-[#4B5563]"
-          }`}
-        >
-          {isDone && (
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-              <Check size={16} color="black" />
-            </motion.div>
-          )}
-        </div>
-        <span className="text-[9px] font-bold text-white uppercase">
-          Mark Step as done
-        </span>
-      </motion.button>
     </div>
     <div className="px-4 py-4">{children}</div>
   </motion.div>
@@ -822,9 +770,19 @@ const ToggleSwitch = ({ label, sub, value, onChange }: any) => (
   </div>
 );
 
-const RoleCard = ({ title, desc }: any) => (
+const RoleCard = ({
+  title,
+  desc,
+  active,
+}: {
+  title: string;
+  desc: string;
+  active: boolean;
+}) => (
   <div
-    className={`p-4 rounded-lg border cursor-pointer transition-all bg-[#111827] border-zinc-300 hover:border-[#4B5563]`}
+    className={`${
+      active ? "opacity-100 scale-105" : "opacity-65 scale-100"
+    } p-4 rounded-lg border cursor-pointer bg-[#111827] border-zinc-300 hover:border-[#4B5563] transition-all duration-250`}
   >
     <h4 className={`text-base font-bold mb-1 text-white`}>{title}</h4>
     <p className="text-sm text-zinc-300 leading-tight">{desc}</p>
@@ -839,10 +797,12 @@ const CustomSelect = ({ label, value, options, onChange }: any) => {
       </label>
       <Select
         label={""}
+        value={value}
         options={options.map((option: any) => ({
           value: option,
           label: option,
         }))}
+        onChange={onChange}
         className="!bg-[#08132F] !h-10 border-zinc-500"
       />
     </div>
@@ -887,10 +847,24 @@ const PolicyToggle = ({
   </div>
 );
 
-const IntegrationCard = ({ label, active, onChange, desc }: any) => (
+const IntegrationCard = ({
+  label,
+  active,
+  onChange,
+  desc,
+  disable,
+}: {
+  disable: boolean;
+  label: string;
+  active: boolean;
+  onChange: (value: any) => void;
+  desc: string;
+}) => (
   <motion.div
     animate={{ borderColor: active ? "#00CAD8" : "#4B5563" }}
-    className="p-4 rounded-lg border flex justify-between items-center cursor-pointer bg-[#0A1635]"
+    className={`p-4 rounded-lg border flex justify-between items-center cursor-pointer bg-[#0A1635] ${
+      disable ? "opacity-70" : ""
+    }`}
   >
     <div className="pr-4">
       <p className="text-xs font-bold text-white tracking-widest">{label}</p>
@@ -901,6 +875,7 @@ const IntegrationCard = ({ label, active, onChange, desc }: any) => (
       onValueChange={onChange}
       color="success"
       size="sm"
+      disabled={disable}
     />
   </motion.div>
 );
