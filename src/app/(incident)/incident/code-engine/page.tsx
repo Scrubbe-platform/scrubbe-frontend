@@ -51,7 +51,9 @@ const priorityLabel = (p?: string) => {
 
 export default function IncidentOverview() {
   const [openPipeline, setOpenPipeline] = useState(false);
-  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(
+    null
+  );
   const { get } = useFetch();
 
   const { data, isLoading } = useQuery({
@@ -78,14 +80,20 @@ export default function IncidentOverview() {
           <div className="flex items-center gap-2 mb-6 px-2">
             <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-              Active Incidents {incidents.length > 0 ? `(${incidents.length})` : ""}
+              Active Incidents{" "}
+              {incidents.length > 0 ? `(${incidents.length})` : ""}
             </h2>
           </div>
 
           <div className="space-y-3 overflow-y-auto max-h-[60vh]">
             {isLoading && (
               <div className="space-y-2">
-                {[1, 2, 3].map(i => <div key={i} className="h-16 bg-white/5 rounded-2xl animate-pulse" />)}
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-16 bg-white/5 rounded-2xl animate-pulse"
+                  />
+                ))}
               </div>
             )}
             {incidents.map((incident) => (
@@ -106,7 +114,8 @@ export default function IncidentOverview() {
             onClick={() => setOpenPipeline(true)}
             className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-xs font-bold hover:bg-cyan-500/10 transition-all"
           >
-            <Layout size={14} /> View Pipeline {activeIncident ? `#${activeIncident.ticketId}` : ""}
+            <Layout size={14} /> View Pipeline{" "}
+            {activeIncident ? `#${activeIncident.ticketId}` : ""}
           </button>
         </aside>
 
@@ -121,12 +130,15 @@ export default function IncidentOverview() {
                 </h1>
                 {activeIncident && (
                   <span className="px-2 py-0.5 rounded bg-rose-500 text-[10px] text-black uppercase border border-rose-500/30">
-                    {priorityLabel(activeIncident.priority)} • {activeIncident.status ?? "Open"}
+                    {priorityLabel(activeIncident.priority)} •{" "}
+                    {activeIncident.status ?? "Open"}
                   </span>
                 )}
               </div>
               <p className="text-slate-400 text-sm">
-                {activeIncident?.reason ?? activeIncident?.summary ?? "Select an incident from the sidebar to view details."}
+                {activeIncident?.reason ??
+                  activeIncident?.summary ??
+                  "Select an incident from the sidebar to view details."}
               </p>
             </div>
             <div className="flex gap-2">

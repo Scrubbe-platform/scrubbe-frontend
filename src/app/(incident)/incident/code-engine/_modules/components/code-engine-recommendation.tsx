@@ -1,245 +1,296 @@
 "use client";
-import React from "react";
-import { DiffEditor } from "@monaco-editor/react"; // Optimized for diff viewing
-import {
-  Zap,
-  CheckCircle2,
-  ShieldCheck,
-  Eye,
-  ExternalLink,
-  MessageSquare,
-  Play,
-  Workflow,
-  Clock,
-  Database,
-  AlertTriangle,
-} from "lucide-react";
 
-export default function CodeEngineRecommendation() {
-  // Mock data representing the diff from your screenshot
-  const originalCode = `production:
-  adapter: postgresql
-  encoding: unicode
-  pool_size: 50
-  timeout_ms: 2000
-  reconnect: true
-  checkout_timeout: 10`;
+import { useState } from "react";
+import { DiffEditor } from "@monaco-editor/react";
 
-  const modifiedCode = `production:
-  adapter: postgresql
-  encoding: unicode
-  pool_size: 150      # sized for peak QPS of 280/s (was 50)
-  timeout_ms: 5000     # prevents gateway timeouts under load
-  max_overflow: 50    # allows burst capacity during flash sales
-  reconnect: true
-  checkout_timeout: 10`;
+type ViewMode = "original" | "diff" | "suggested";
+
+interface Props {
+  original?: string;
+  suggested?: string;
+  filename?: string;
+  language?: string;
+  incidentId?: string;
+  service?: string;
+  environment?: string;
+  severity?: string;
+  confidence?: number;
+  prNumber?: string;
+  prTitle?: string;
+  prRepo?: string;
+  prBranch?: string;
+  playbook?: string;
+  patternMatch?: string;
+  onApprove?: () => void;
+  onDecline?: () => void;
+}
+
+const DEFAULT_ORIGINAL = `import { NextRequest, NextResponse } from "next/server"
+import { verifyJwt } from "@/services/jwt.service"
+
+export async function authMiddleware(req: NextRequest) {
+  const token = req.headers.get("authorization")?.split(" ")[1]
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const payload = await verifyJwt(token)
+  if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 })
+
+  const res = NextResponse.next()
+  res.headers.set("x-user-id", payload.sub)
+  return res
+}`;
+
+const DEFAULT_SUGGESTED = `import { NextRequest, NextResponse } from "next/server"
+import { verifyJwt } from "@/services/jwt.service"
+
+export async function authMiddleware(req: NextRequest) {
+  const token = req.headers.get("authorization")?.split(" ")[1]
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const payload = await verifyJwt(token, {
+    algorithms: ["RS256"],
+    issuer: process.env.JWT_ISSUER,
+    audience: process.env.JWT_AUDIENCE,
+  })
+  if (!payload) return NextResponse.json({
+    error: "Invalid or expired token",
+    code: "AUTH_TOKEN_INVALID",
+  }, { status: 401 })
+
+  const res = NextResponse.next()
+  res.headers.set("x-user-id", payload.sub)
+  res.headers.set("x-deploy-version", process.env.DEPLOY_VERSION ?? "unknown")
+  return res
+}`;
+
+export default function CodeEngineRecommendation({
+  original = DEFAULT_ORIGINAL,
+  suggested = DEFAULT_SUGGESTED,
+  filename = "src/middleware/auth.ts",
+  language = "typescript",
+  incidentId = "INC-9204",
+  service = "checkout-api",
+  environment = "production",
+  severity = "P1",
+  confidence = 0.91,
+  prNumber = "#2847",
+  prTitle = "fix(auth): enforce RS256 + issuer validation [INC-9204]",
+  prRepo = "acme-corp/checkout-api",
+  prBranch = "ezra/fix-inc-9204 → main",
+  playbook = "jwt-algo-constraint-v3",
+  patternMatch = "INC-231, INC-187 (×2)",
+  onApprove,
+  onDecline,
+}: Props) {
+  const [view, setView] = useState<ViewMode>("diff");
+  const [sideBySide, setSideBySide] = useState<boolean>(false);
+
+  const originalContent = view === "suggested" ? suggested : original;
+  const modifiedContent = view === "original" ? original : suggested;
+
+  const tabs: { id: ViewMode; label: string; sub: string; badge: string }[] = [
+    {
+      id: "original",
+      label: "FAILED PR",
+      sub: `— ${filename.split("/").pop()}`,
+      badge: "3 issues",
+    },
+    {
+      id: "diff",
+      label: "EZRA SUGGESTION",
+      sub: `— PR ${prNumber}`,
+      badge: "+14  −7",
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-dark rounded-xl border border-slate-500 text-slate-300 p-8 font-sans selection:bg-emerald-500/30">
-      <div className="max-w-5xl mx-auto space-y-6">
-        {/* HEADER: RECOMMENDED FIX */}
-        <header className="space-y-4">
-          <div className="flex justify-between items-start">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">
-                  Recommended
-                </span>
-                <h1 className="text-xl font-bold text-white tracking-tight">
-                  Fix #1 • Increase DB connection pool (production-safe)
-                </h1>
+    <div className="flex flex-col h-screen bg-[#1e1e1e] font-sans text-sm">
+      {/* ── TOP NAV ── */}
+      <header className="flex items-center justify-between px-4 h-10 bg-[#111] border-b border-neutral-800 shrink-0">
+        <div className="flex items-center gap-2.5">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-red-900 text-red-400 bg-red-950/40 text-[11px] font-bold tracking-wider">
+            ⚠ INCIDENT
+          </span>
+          <span className="text-neutral-200 font-semibold">{incidentId}</span>
+          <span className="text-blue-400 text-xs">{service}</span>
+          <span className="px-2 py-0.5 rounded bg-blue-950/60 text-blue-300 text-[11px] font-semibold">
+            {environment}
+          </span>
+          <span className="px-2 py-0.5 rounded bg-red-950/60 text-red-400 text-[11px] font-bold">
+            {severity}
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5 text-green-400 text-xs font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
+            ACTION PROPOSED
+          </span>
+          <span className="text-neutral-600 text-xs">14:22:07 UTC</span>
+        </div>
+      </header>
+
+      {/* ── TABS ── */}
+      <div className="flex items-stretch bg-[#161616] border-b border-neutral-800 shrink-0 pl-2">
+        {tabs.map((t) => {
+          const active = view === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setView(t.id)}
+              className={`
+                flex items-center gap-2 px-4 h-[38px] text-xs font-semibold tracking-wide
+                border-b-2 transition-colors cursor-pointer bg-transparent border-x-0 border-t-0
+                ${
+                  active
+                    ? "border-green-500 text-neutral-200 bg-[#1e1e1e]"
+                    : "border-transparent text-neutral-500 hover:text-neutral-300"
+                }
+              `}
+            >
+              {t.id === "original" && <span className="text-red-400">○</span>}
+              {t.id === "diff" && <span className="text-yellow-400">⚡</span>}
+              <span className="uppercase">{t.label}</span>
+              <span className="text-neutral-500 font-normal normal-case">
+                {t.sub}
+              </span>
+              <span
+                className={`px-1.5 py-0.5 rounded text-[10px] font-bold
+                ${
+                  active && t.id === "original"
+                    ? "bg-red-950/60 text-red-400"
+                    : ""
+                }
+                ${
+                  active && t.id === "diff"
+                    ? "bg-green-950/60 text-green-400"
+                    : ""
+                }
+                ${!active ? "bg-neutral-800 text-neutral-500" : ""}
+              `}
+              >
+                {t.badge}
+              </span>
+            </button>
+          );
+        })}
+
+        {/* Tab bar right info */}
+        <div className="ml-auto flex items-center gap-2 pr-4 text-[11px] text-neutral-600">
+          <span>{filename}</span>
+          <span>·</span>
+          <span>{incidentId}</span>
+          <span>·</span>
+          <span className="text-green-500">conf: {confidence}</span>
+        </div>
+      </div>
+
+      {/* ── FILE SUBBAR ── */}
+      {view !== "original" && (
+        <div className="flex items-center justify-between px-4 py-1.5 bg-[#181818] border-b border-neutral-800 shrink-0">
+          <div className="flex items-center gap-2 text-xs text-neutral-400">
+            <span className="text-yellow-400">⚡</span>
+            <span>
+              {filename} → Ezra fix (PR {prNumber})
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-green-400">+14 −7</span>
+            <span className="px-2 py-0.5 rounded border border-green-900 bg-green-950/40 text-green-400 text-[11px] font-bold">
+              EZRA FIX
+            </span>
+            {view === "diff" && (
+              <label className="flex items-center gap-1.5 text-xs text-neutral-500 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sideBySide}
+                  onChange={(e) => setSideBySide(e.target.checked)}
+                  className="accent-green-500"
+                />
+                Side by side
+              </label>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── EDITOR ── */}
+      <div className="flex-1 overflow-hidden">
+        <DiffEditor
+          height="100%"
+          language={language}
+          original={originalContent}
+          modified={modifiedContent}
+          theme="vs-dark"
+          options={{
+            readOnly: true,
+            renderSideBySide: view === "diff" ? sideBySide : false,
+            minimap: { enabled: false },
+            fontSize: 13,
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+          }}
+        />
+      </div>
+
+      {/* ── FOOTER PANEL ── */}
+      <div className="shrink-0 bg-[#161616] border-t border-neutral-800">
+        <div className="flex items-stretch divide-x divide-neutral-800">
+          {/* Confidence */}
+          <div className="flex items-center gap-3 px-5 py-3">
+            <span className="text-2xl font-bold text-green-400">
+              {confidence}
+            </span>
+            <div>
+              <div className="w-24 h-1 bg-neutral-800 rounded-full mb-1">
+                <div
+                  className="h-full bg-green-400 rounded-full"
+                  style={{ width: `${Math.round(confidence * 100)}%` }}
+                />
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Badge
-                  label="Confidence 0.96"
-                  color="bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                />
-                <Badge
-                  label="Config Change"
-                  color="bg-slate-800 text-slate-300 border-white/10"
-                />
-                <Badge
-                  label="Used in 9 past incidents • 0 regressions"
-                  color="bg-purple-500/10 text-purple-400 border-purple-500/20"
-                />
-              </div>
+              <p className="text-[11px] text-neutral-500">
+                High · auto-PR eligible
+              </p>
             </div>
-            <Zap size={32} className="text-emerald-500/40" />
           </div>
 
-          <div className="flex gap-4">
-            <Meta
-              icon={<Clock size={12} />}
-              text="Metrics: latency_p95, error_rate_5xx"
-            />
-            <Meta icon={<Database size={12} />} text="Logs: db-core timeouts" />
-            <Meta icon={<Workflow size={12} />} text="Deploy: #311 on main" />
-            <Meta
-              icon={<Clock size={12} />}
-              text="Similar to: INC-231, INC-187"
-            />
+          {/* PR title */}
+          <div className="flex items-center px-5 py-3 flex-1 min-w-0">
+            <p className="text-xs text-neutral-400 truncate">{prTitle}</p>
           </div>
-        </header>
 
-        {/* MONACO DIFF EDITOR */}
-        <section className="rounded-2xl border border-white/10 bg-[#0d1425] overflow-hidden shadow-2xl">
-          <div className="flex justify-between items-center px-6 py-3 border-b border-white/5 bg-white/[0.02]">
-            <div className="flex flex-col">
-              <span className="text-xs font-mono text-slate-200">
-                config/database.yml
-              </span>
-              <span className="text-[10px] text-slate-500 font-medium italic uppercase tracking-tighter">
-                PR-ready patch generated from incident context
-              </span>
-            </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-[#10b981] text-black rounded-lg text-xs font-black hover:bg-emerald-400 transition-all">
-              <Workflow size={14} /> Apply Fix & Open PR
+          {/* Actions */}
+          <div className="flex items-center gap-2 px-5 py-3 shrink-0">
+            <button
+              onClick={onApprove}
+              className="px-4 py-2 rounded-md bg-green-500 hover:bg-green-400 text-neutral-900 text-xs font-bold transition-colors"
+            >
+              ✓ Approve &amp; merge
+            </button>
+            <button
+              onClick={onDecline}
+              className="px-4 py-2 rounded-md border border-neutral-700 hover:border-neutral-500 text-neutral-400 hover:text-neutral-200 text-xs font-semibold transition-colors bg-transparent"
+            >
+              ✕ Decline
             </button>
           </div>
-
-          <div className="h-[350px] w-full pt-2 overflow-auto">
-            <DiffEditor
-              height="100%"
-              original={originalCode}
-              modified={modifiedCode}
-              // language="yaml"
-              theme="vs-dark"
-              options={{
-                readOnly: true,
-                renderSideBySide: true, // Side-by-side view as requested
-                minimap: { enabled: false },
-                fontSize: 13,
-                scrollBeyondLastLine: false,
-                lineNumbers: "on",
-                diffWordWrap: "on",
-                automaticLayout: true,
-                scrollbar: {
-                  vertical: "hidden",
-                },
-              }}
-            />
-          </div>
-        </section>
-
-        {/* EXPLANATION SECTION */}
-        <section className="p-6 rounded-2xl border border-white/10 bg-white/[0.02] space-y-4">
-          <div className="flex items-center gap-2 text-yellow-500">
-            <Zap size={16} />
-            <h2 className="text-sm font-bold uppercase tracking-widest">
-              Why this works
-            </h2>
-          </div>
-          <p className="text-sm text-slate-400 leading-relaxed">
-            The deploy at 14:32 UTC increased traffic by{" "}
-            <b className="text-white">41%</b>. The previous pool of 50
-            connections was exhausted in 8 seconds, causing timeouts on db-core.
-            This configuration matches capacity used during Black Friday 2024
-            and resolved identical failures in{" "}
-            <b className="text-white underline cursor-pointer">INC-231</b> and{" "}
-            <b className="text-white underline cursor-pointer">INC-187</b>.
-          </p>
-        </section>
-
-        {/* GUARDRAILS & WATCH GRID */}
-        <div className="grid grid-cols-3 gap-6">
-          <GuardrailCard
-            title="Pre-checks"
-            icon={<CheckCircle2 size={14} className="text-emerald-500" />}
-            items={[
-              "Unit & integration tests will re-run in staging",
-              "Config validated against schema",
-              "No conflicting changes on main",
-            ]}
-          />
-          <GuardrailCard
-            title="Guardrails"
-            icon={<ShieldCheck size={14} className="text-yellow-500" />}
-            items={[
-              "Auto-apply only in staging",
-              "PR + approval required for production",
-              "Full audit trail added to incident timeline",
-            ]}
-            link="View guardrail matrix"
-          />
-          <GuardrailCard
-            title="Post-apply watch"
-            icon={<Eye size={14} className="text-blue-500" />}
-            items={[
-              "Monitor latency_p95 & error_rate_5xx for 15 mins",
-              "Auto-open follow-up if metrics regress",
-              "Snapshot added to incident report",
-            ]}
-            warning="Auto-open follow-up if metrics regress"
-          />
         </div>
 
-        {/* FOOTER ACTIONS */}
-        <footer className="flex gap-3 flex-wrap items-center pt-4 border-t border-white/5">
-          <button className="flex items-center gap-1 px-2 py-3 bg-[#10b981] text-black rounded-xl text-xs font-black hover:bg-emerald-400 transition-all">
-            <Play size={14} /> Apply in Staging & Rerun Pipeline
-          </button>
-          <button className="flex items-center gap-1 px-2 py-3 bg-slate-900 border border-white/10 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all">
-            <MessageSquare size={14} /> Explain reasoning in Slack
-          </button>
-          <a
-            href="#"
-            className="text-emerald-500 text-xs font-bold flex items-center gap-1 hover:underline"
-          >
-            Preview PR in GitHub <ExternalLink size={12} />
-          </a>
-          <button className="text-slate-500 text-xs font-bold flex items-center gap-1 hover:text-white transition-colors">
-            <Workflow size={14} /> View remediation workflow
-          </button>
-        </footer>
+        {/* Status bar */}
+        <div className="flex items-center justify-between px-5 py-1.5 border-t border-neutral-800 text-[11px] text-neutral-600">
+          <div className="flex items-center gap-4">
+            <span className="text-yellow-500">⚡ Ezra Code Engine</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+              ACTION PROPOSED
+            </span>
+            <span>⊙ Governed · Audited · Safe</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span>{filename}</span>
+            <span>TypeScript</span>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-
-// Sub-components for structure and type safety
-const Badge = ({ label, color }: { label: string; color: string }) => (
-  <span
-    className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${color}`}
-  >
-    {label}
-  </span>
-);
-
-const Meta = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
-  <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-tight">
-    {icon} {text}
-  </div>
-);
-
-const GuardrailCard = ({ title, icon, items, link, warning }: any) => (
-  <div className="p-5 rounded-2xl border border-white/5 bg-white/[0.01] space-y-4">
-    <div className="flex items-center gap-2">
-      {icon}
-      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-        {title}
-      </span>
-    </div>
-    <ul className="space-y-2">
-      {items.map((item: string, i: number) => (
-        <li
-          key={i}
-          className={`text-[11px] flex items-start gap-2 ${
-            item === warning ? "text-yellow-500" : "text-slate-500"
-          }`}
-        >
-          {item === warning ? (
-            <AlertTriangle size={12} className="mt-0.5" />
-          ) : (
-            <div className="w-1 h-1 rounded-full bg-slate-700 mt-1.5" />
-          )}
-          {item}
-        </li>
-      ))}
-    </ul>
-    {link && (
-      <button className="text-[10px] text-yellow-500 font-black uppercase flex items-center gap-1 hover:underline pt-2">
-        <Database size={10} /> {link}
-      </button>
-    )}
-  </div>
-);

@@ -11,6 +11,7 @@ import { RiMenuFold2Fill } from "react-icons/ri";
 import { useCommands } from "@/lib/stores/command.store";
 import Modal from "../ui/Modal";
 import GlobalSearch from "./Dashboard/GlobalSearch";
+import { Terminal } from "lucide-react";
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const { collapse, toggle } = useSidebar();
@@ -60,16 +61,22 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
             className="w-full  h-[calc(100vh)] overflow-y-auto relative"
           >
             {children}
+
             <div className=" w-fit sticky bottom-12 left-[80%]">
-              <div
+              <button
                 onClick={() => setOpenCommandPalette(true)}
-                className="bg-black cursor-pointer text-white shadow-md shadow-white/50 rounded-lg p-2 text-xs  w-fit flex items-center gap-2"
+                className={clsx(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium",
+                  "bg-neutral-900 border border-neutral-700 text-neutral-400",
+                  "hover:border-neutral-500 hover:text-neutral-200 transition-all shadow-sm"
+                )}
               >
-                <RiMenuFold2Fill />
-                <p className=" ">Command Palette</p>
-                <div className="bg-zinc-700 p-1 rounded-sm">⌘ k</div>
-                <div className="bg-zinc-700 p-1 rounded-sm">Ctrl + k</div>
-              </div>
+                <Terminal size={13} />
+                <span>Command Palette</span>
+                <kbd className="ml-1 px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-500 font-mono text-[10px] border border-neutral-700">
+                  ⌘K
+                </kbd>
+              </button>
             </div>
           </motion.div>
         </div>
