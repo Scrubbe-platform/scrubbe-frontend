@@ -13,7 +13,13 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 import { AxiosError } from "axios";
 import { getEmailDomain } from "@/lib/utils";
-import { FaBuilding, FaLink, FaGithub, FaGitlab, FaMicrosoft } from "react-icons/fa";
+import {
+  FaBuilding,
+  FaLink,
+  FaGithub,
+  FaGitlab,
+  FaMicrosoft,
+} from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
 import { FcGoogle } from "react-icons/fc";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth.schema";
@@ -85,7 +91,7 @@ export default function SignInForm() {
         }`;
         return;
       }
-      router.push("/dashboard");
+      router.push("/incident");
       return;
     }
 
@@ -94,7 +100,7 @@ export default function SignInForm() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push("/incident");
   };
 
   const onSubmit = async () => {
@@ -119,7 +125,9 @@ export default function SignInForm() {
       const provider = String(policy?.provider ?? "")
         .toUpperCase()
         .replace(/[^A-Z0-9]/g, "");
-      const callbackUrl = `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}`;
+      const callbackUrl = `/auth/signin${
+        path ? `?to=${encodeURIComponent(path)}` : ""
+      }`;
       const providerMap: Record<string, string> = {
         GOOGLE: "google",
         GITHUB: "github",
@@ -142,7 +150,9 @@ export default function SignInForm() {
 
       if (!nextAuthProvider) {
         toast.error(
-          `This workspace uses ${provider || "an unsupported"} SSO provider, which is not enabled on this sign-in path yet.`
+          `This workspace uses ${
+            provider || "an unsupported"
+          } SSO provider, which is not enabled on this sign-in path yet.`
         );
         return;
       }
@@ -285,7 +295,9 @@ export default function SignInForm() {
 
         await signOut({ redirect: false });
         toast.success("Successfully signed in!", {
-          description: `${userDetails?.email ?? "Your account"} is being redirected...`,
+          description: `${
+            userDetails?.email ?? "Your account"
+          } is being redirected...`,
           duration: 10000,
           id: "magic-link-redirect",
         });
@@ -465,7 +477,13 @@ export default function SignInForm() {
 
           <div className="flex flex-col gap-2">
             <CButton
-              onClick={() => signIn("google", { callbackUrl: `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}` })}
+              onClick={() =>
+                signIn("google", {
+                  callbackUrl: `/auth/signin${
+                    path ? `?to=${encodeURIComponent(path)}` : ""
+                  }`,
+                })
+              }
               type="button"
               disabled={isSsoLoading}
               className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"
@@ -473,7 +491,13 @@ export default function SignInForm() {
               <FcGoogle size={18} /> Continue with Google
             </CButton>
             <CButton
-              onClick={() => signIn("github", { callbackUrl: `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}` })}
+              onClick={() =>
+                signIn("github", {
+                  callbackUrl: `/auth/signin${
+                    path ? `?to=${encodeURIComponent(path)}` : ""
+                  }`,
+                })
+              }
               type="button"
               disabled={isSsoLoading}
               className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"
@@ -481,7 +505,13 @@ export default function SignInForm() {
               <FaGithub size={18} /> Continue with GitHub
             </CButton>
             <CButton
-              onClick={() => signIn("gitlab", { callbackUrl: `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}` })}
+              onClick={() =>
+                signIn("gitlab", {
+                  callbackUrl: `/auth/signin${
+                    path ? `?to=${encodeURIComponent(path)}` : ""
+                  }`,
+                })
+              }
               type="button"
               disabled={isSsoLoading}
               className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"
@@ -489,7 +519,13 @@ export default function SignInForm() {
               <FaGitlab size={18} /> Continue with GitLab
             </CButton>
             <CButton
-              onClick={() => signIn("microsoft-entra-id", { callbackUrl: `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}` })}
+              onClick={() =>
+                signIn("microsoft-entra-id", {
+                  callbackUrl: `/auth/signin${
+                    path ? `?to=${encodeURIComponent(path)}` : ""
+                  }`,
+                })
+              }
               type="button"
               disabled={isSsoLoading}
               className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"

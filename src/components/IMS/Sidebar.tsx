@@ -46,7 +46,7 @@ const Sidebar = () => {
               <div className="flex items-center justify-between">
                 <div className="h-[30px] w-[220px]">
                   <img
-                    src="/IMS/logo-white.png"
+                    src="/IMS/whitelogo.png"
                     alt="scrubbe.png"
                     className="object-contain h-full"
                   />
@@ -63,16 +63,8 @@ const Sidebar = () => {
                 <span className="text-sm">Acme Payments PROD</span>
               </div>
 
-              <div className="flex items-center gap-1 border border-neutral-400 rounded-lg px-2 mt-3">
-                <input
-                  placeholder="Search Menu"
-                  className="h-9 border-none outline-none bg-transparent text-sm flex-1 text-white"
-                />
-                <Search className="text-white" size={14} />
-              </div>
-
               {/* Menu Sections - Scrollable Area */}
-              <div className="overflow-y-auto mt-6 custom-scrollbar pr-1">
+              <div className="overflow-y-auto  custom-scrollbar pr-1">
                 {Object.entries(NewMenu).map(([key, items]) => (
                   <div
                     key={key}
@@ -92,42 +84,6 @@ const Sidebar = () => {
                 ))}
               </div>
             </div>
-
-            {/* Bottom Section */}
-            {/* <div className="flex flex-col mt-6">
-              <p className="text-sm text-white pl-3 pb-2 opacity-50 font-mono text-[10px] uppercase">
-                Account
-              </p>
-              {SubSidebar.map((item) => {
-                const active = pathname === item.link;
-                const { Icon, link, name, isActive } = item;
-                return (
-                  <Link
-                    href={isActive ? link : "#"}
-                    key={name}
-                    className="w-full"
-                  >
-                    <div
-                      className={cn(
-                        "flex items-center text-white gap-2 h-10 rounded-lg cursor-pointer transition-all duration-300 px-3",
-                        active ? "bg-IMSLightGreen" : "bg-transparent",
-                        isActive ? "opacity-100" : "opacity-40"
-                      )}
-                    >
-                      <Icon size={18} />
-                      <p className="text-sm">{name}</p>
-                    </div>
-                  </Link>
-                );
-              })}
-              <div
-                onClick={() => handleLogout()}
-                className="flex items-center gap-2 py-2 px-3 cursor-pointer text-white hover:bg-rose-500/20 hover:text-rose-400 transition-all rounded-lg mt-2 group"
-              >
-                <FaSignOutAlt className="group-hover:scale-110 transition-transform" />
-                <p className="text-sm">Logout</p>
-              </div>
-            </div> */}
           </motion.div>
         )}
       </AnimatePresence>

@@ -96,7 +96,7 @@ const getDefaultRedirect = (payload: JwtPayload | null): string => {
   if (payload?.accountType === "DEVELOPER") {
     return "/developer/dashboard";
   }
-  return "/dashboard";
+  return "/incident";
 };
 
 export default function middleware(req: NextRequest) {

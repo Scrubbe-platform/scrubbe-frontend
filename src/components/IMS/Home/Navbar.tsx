@@ -64,7 +64,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center px-10 max-w-7xl mx-auto w-full">
           <Link href={"/"} className="h-[30px] w-[220px]">
             <img
-              src="/IMS/logo-white.png"
+              src="/IMS/whitelogo.png"
               alt="scrubbe.png"
               className="object-contain h-full "
             />

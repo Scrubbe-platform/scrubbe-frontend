@@ -220,7 +220,7 @@ const Footer: React.FC = () => {
             <div className={componentStyles.logoSection.container}>
               <div className="relative w-32 h-8 xl:w-40 xl:h-10">
                 <Image
-                  src="/scrubbe-logo-white.png"
+                  src="/IMS/whitelogo.png"
                   alt="Scrubbe Logo"
                   fill
                   sizes="(max-width: 1280px) 128px, 160px"

@@ -940,17 +940,17 @@ export const NewMenu: Record<string, NavItem[]> = {
     },
   ],
   incident_command: [
-    {
-      name: "New incident",
-      Icon: BiPlus,
-      description: "Admin-only configuration",
-      link: "/incident/tickets/create",
-      isActive: false,
-      isMenu: false,
-      pillText: "create",
-      pillBorderColor: "border-green",
-      pillTextColor: "text-green",
-    },
+    // {
+    //   name: "New incident",
+    //   Icon: BiPlus,
+    //   description: "Admin-only configuration",
+    //   link: "/incident/tickets/create",
+    //   isActive: false,
+    //   isMenu: false,
+    //   pillText: "create",
+    //   pillBorderColor: "border-green",
+    //   pillTextColor: "text-green",
+    // },
     {
       name: "Incidents",
       Icon: IoIosWarning,
