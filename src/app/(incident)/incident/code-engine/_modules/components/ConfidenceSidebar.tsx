@@ -157,204 +157,211 @@ export default function ConfidenceSidebar({
   const confidencePct = Math.round(confidence * 100);
 
   return (
-    <div className="w-full bg-darkEzra text-neutral-300 flex flex-col overflow-y-auto">
-      {/* ── Confidence Score Section ── */}
-      <div className="px-4 pt-4 pb-2">
-        {/* Header row */}
-        <button
-          onClick={() => setConfidenceOpen((o) => !o)}
-          className="flex items-center justify-between w-full mb-3 bg-transparent border-none cursor-pointer"
-        >
-          <span className="text-sm font-medium text-neutral-200">
-            Confidence Score
-          </span>
-          {confidenceOpen ? (
-            <ChevronUp size={16} className="text-neutral-400" />
-          ) : (
-            <ChevronDown size={16} className="text-neutral-400" />
-          )}
-        </button>
+    <div className="w-full bg-darkEzra text-neutral-300 flex md:flex-col flex-col-reverse overflow-y-auto ">
+      <div>
+        {/* ── Confidence Score Section ── */}
+        <div className="px-4 pt-4 pb-2">
+          {/* Header row */}
+          <button
+            onClick={() => setConfidenceOpen((o) => !o)}
+            className="flex items-center justify-between w-full mb-3 bg-transparent border-none cursor-pointer"
+          >
+            <span className="text-sm font-medium text-neutral-200">
+              Confidence Score
+            </span>
+            {confidenceOpen ? (
+              <ChevronUp size={16} className="text-neutral-400" />
+            ) : (
+              <ChevronDown size={16} className="text-neutral-400" />
+            )}
+          </button>
 
-        {confidenceOpen && (
-          <>
-            {/* Score */}
-            <p className="text-4xl font-bold text-green-400 leading-none mb-2">
-              {confidence}
-            </p>
+          {confidenceOpen && (
+            <>
+              {/* Score */}
+              <p className="text-4xl font-bold text-green-400 leading-none mb-2">
+                {confidence}
+              </p>
 
-            {/* Progress bar */}
-            <div className="h-1.5 bg-neutral-700 rounded-full mb-2">
-              <div
-                className="h-full bg-green-400 rounded-full transition-all"
-                style={{ width: `${confidencePct}%` }}
-              />
-            </div>
-
-            <p className="text-xs text-neutral-400 mb-4">{confidenceLabel}</p>
-
-            {/* Inner card */}
-            <div className="bg-[#161e2e] rounded-xl p-4">
-              {/* Risk level row */}
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs text-neutral-400">
-                  Risk level :{" "}
-                  <span className="text-neutral-200 font-semibold">
-                    {riskLevel}
-                  </span>
-                </span>
-                <span className="text-xs text-neutral-400">
-                  Auto /{" "}
-                  <span className="text-neutral-200 font-semibold">
-                    {approvalMode}
-                  </span>
-                </span>
-              </div>
-
-              {/* Evidence Signal */}
-              <SectionTitle>Evidence Signal</SectionTitle>
-              {evidenceSignals.map((s) => (
-                <CheckRow
-                  key={s.label}
-                  label={s.label}
-                  value={s.value}
-                  valueColor={s.valueColor}
+              {/* Progress bar */}
+              <div className="h-1.5 bg-neutral-700 rounded-full mb-2">
+                <div
+                  className="h-full bg-green-400 rounded-full transition-all"
+                  style={{ width: `${confidencePct}%` }}
                 />
-              ))}
+              </div>
 
-              <SectionDivider />
+              <p className="text-xs text-neutral-400 mb-4">{confidenceLabel}</p>
 
-              {/* Risk Analysis */}
-              <div className="mt-3">
-                <SectionTitle>Risk Analysis</SectionTitle>
-                {riskAnalysis.map((r) => (
-                  <div
-                    key={r.label}
-                    className="flex items-start justify-between gap-3 mb-2.5"
-                  >
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Check size={13} className="text-green-400 shrink-0" />
-                      <span className="text-xs text-neutral-400">
-                        {r.label}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <p
-                        className={`text-xs font-medium ${
-                          r.valueColor ?? "text-neutral-300"
-                        }`}
-                      >
-                        {r.value}
-                        {r.label === "Blast Radius" && (
-                          <span className="text-neutral-300 font-normal">
-                            {" "}
-                            {r.subValue}
-                          </span>
-                        )}
-                      </p>
-                      {r.label === "Policy Status" && r.subValue && (
-                        <p className="text-xs mt-0.5 text-neutral-300">
-                          Auto-merge allowed :{" "}
-                          <span className={r.subValueColor ?? "text-red-400"}>
-                            {r.subValue}
-                          </span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
+              {/* Inner card */}
+              <div className="bg-[#161e2e] rounded-xl p-4">
+                {/* Risk level row */}
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs text-neutral-400">
+                    Risk level :{" "}
+                    <span className="text-neutral-200 font-semibold">
+                      {riskLevel}
+                    </span>
+                  </span>
+                  <span className="text-xs text-neutral-400">
+                    Auto /{" "}
+                    <span className="text-neutral-200 font-semibold">
+                      {approvalMode}
+                    </span>
+                  </span>
+                </div>
+
+                {/* Evidence Signal */}
+                <SectionTitle>Evidence Signal</SectionTitle>
+                {evidenceSignals.map((s) => (
+                  <CheckRow
+                    key={s.label}
+                    label={s.label}
+                    value={s.value}
+                    valueColor={s.valueColor}
+                  />
                 ))}
-              </div>
 
-              <SectionDivider />
+                <SectionDivider />
 
-              {/* Decision Trace */}
-              <div className="mt-3">
-                <SectionTitle>Decision Trace</SectionTitle>
-                <div className="flex items-start gap-3 mb-2">
-                  <span className="text-xs text-neutral-500 w-14 shrink-0">
-                    Model
-                  </span>
-                  <span className="text-xs text-neutral-300">
-                    {decisionModel}
-                  </span>
+                {/* Risk Analysis */}
+                <div className="mt-3">
+                  <SectionTitle>Risk Analysis</SectionTitle>
+                  {riskAnalysis.map((r) => (
+                    <div
+                      key={r.label}
+                      className="flex items-start justify-between gap-3 mb-2.5"
+                    >
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Check size={13} className="text-green-400 shrink-0" />
+                        <span className="text-xs text-neutral-400">
+                          {r.label}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <p
+                          className={`text-xs font-medium ${
+                            r.valueColor ?? "text-neutral-300"
+                          }`}
+                        >
+                          {r.value}
+                          {r.label === "Blast Radius" && (
+                            <span className="text-neutral-300 font-normal">
+                              {" "}
+                              {r.subValue}
+                            </span>
+                          )}
+                        </p>
+                        {r.label === "Policy Status" && r.subValue && (
+                          <p className="text-xs mt-0.5 text-neutral-300">
+                            Auto-merge allowed :{" "}
+                            <span className={r.subValueColor ?? "text-red-400"}>
+                              {r.subValue}
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-xs text-neutral-500 w-14 shrink-0">
-                    Inputs
-                  </span>
-                  <div className="flex flex-col gap-1">
-                    {decisionInputs.map((input) => (
-                      <span key={input} className="text-xs text-neutral-300">
-                        — {input}
-                      </span>
-                    ))}
+
+                <SectionDivider />
+
+                {/* Decision Trace */}
+                <div className="mt-3">
+                  <SectionTitle>Decision Trace</SectionTitle>
+                  <div className="flex items-start gap-3 mb-2">
+                    <span className="text-xs text-neutral-500 w-14 shrink-0">
+                      Model
+                    </span>
+                    <span className="text-xs text-neutral-300">
+                      {decisionModel}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-xs text-neutral-500 w-14 shrink-0">
+                      Inputs
+                    </span>
+                    <div className="flex flex-col gap-1">
+                      {decisionInputs.map((input) => (
+                        <span key={input} className="text-xs text-neutral-300">
+                          — {input}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
+
+                <SectionDivider />
+
+                {/* Reasoning Summary */}
+                <div className="mt-3">
+                  <SectionTitle>Reasoning Summary</SectionTitle>
+                  <p className="text-xs text-neutral-400 leading-relaxed whitespace-pre-line">
+                    {reasoningSummary}
+                  </p>
+                </div>
               </div>
+            </>
+          )}
+        </div>
 
-              <SectionDivider />
+        <SectionDivider />
 
-              {/* Reasoning Summary */}
-              <div className="mt-3">
-                <SectionTitle>Reasoning Summary</SectionTitle>
-                <p className="text-xs text-neutral-400 leading-relaxed whitespace-pre-line">
-                  {reasoningSummary}
-                </p>
+        {/* ── Suggested Source ── */}
+        <div className="px-4 py-4">
+          <SectionTitle>Suggested Source</SectionTitle>
+          <div className="space-y-2.5">
+            {[
+              { label: "Playbook", value: playbook },
+              { label: "Pattern match", value: patternMatch },
+              { label: "Incident", value: incident },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className="flex items-start justify-between gap-4"
+              >
+                <span className="text-xs text-neutral-500 shrink-0">
+                  {label}
+                </span>
+                <span className="text-xs text-neutral-300 text-right">
+                  {value}
+                </span>
               </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      <SectionDivider />
-
-      {/* ── Suggested Source ── */}
-      <div className="px-4 py-4">
-        <SectionTitle>Suggested Source</SectionTitle>
-        <div className="space-y-2.5">
-          {[
-            { label: "Playbook", value: playbook },
-            { label: "Pattern match", value: patternMatch },
-            { label: "Incident", value: incident },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex items-start justify-between gap-4">
-              <span className="text-xs text-neutral-500 shrink-0">{label}</span>
-              <span className="text-xs text-neutral-300 text-right">
-                {value}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <SectionDivider />
-
-      {/* ── Pull Request ── */}
-      <div className="px-4 py-4">
-        <SectionTitle>Pull Request</SectionTitle>
-
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-2xl font-bold text-neutral-100">
-            {prNumber}
-          </span>
-          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-green-900/40 text-green-400 border border-green-800">
-            open
-          </span>
+            ))}
+          </div>
         </div>
 
-        <p className="text-xs text-neutral-300 mb-3 leading-relaxed">
-          {prTitle}
-        </p>
+        <SectionDivider />
 
-        <div className="space-y-1.5">
-          {[prRepo, prBranch, prUrl].map((val) => (
-            <p key={val} className="text-xs text-neutral-500">
-              {val}
-            </p>
-          ))}
+        {/* ── Pull Request ── */}
+        <div className="px-4 py-4">
+          <SectionTitle>Pull Request</SectionTitle>
+
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-2xl font-bold text-neutral-100">
+              {prNumber}
+            </span>
+            <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-green-900/40 text-green-400 border border-green-800">
+              open
+            </span>
+          </div>
+
+          <p className="text-xs text-neutral-300 mb-3 leading-relaxed">
+            {prTitle}
+          </p>
+
+          <div className="space-y-1.5">
+            {[prRepo, prBranch, prUrl].map((val) => (
+              <p key={val} className="text-xs text-neutral-500">
+                {val}
+              </p>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <SectionDivider />
+        <SectionDivider />
+      </div>
 
       {/* ── Actions ── */}
       <div className="px-4 py-4 flex flex-col gap-3">
@@ -370,7 +377,9 @@ export default function ConfidenceSidebar({
         >
           Reject
         </button>
-        <p className="text-[11px] text-neutral-600 text-center">{auditLabel}</p>
+        <p className="text-[11px] text-neutral-600 text-center md:block hidden">
+          {auditLabel}
+        </p>
       </div>
     </div>
   );

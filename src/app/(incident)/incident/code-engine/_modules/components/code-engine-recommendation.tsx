@@ -109,18 +109,20 @@ export default function CodeEngineRecommendation({
       <header className="flex items-center justify-between px-4 h-10 bg-[#111] border-b border-neutral-800 shrink-0">
         <div className="flex items-center gap-2.5">
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-red-900 text-red-400 bg-red-950/40 text-[11px] font-bold tracking-wider">
-            ⚠ INCIDENT
+            INCIDENT
           </span>
           <span className="text-neutral-200 font-semibold">{incidentId}</span>
-          <span className="text-blue-400 text-xs">{service}</span>
-          <span className="px-2 py-0.5 rounded bg-blue-950/60 text-blue-300 text-[11px] font-semibold">
+          <span className="text-blue-400 text-xs md:block hidden">
+            {service}
+          </span>
+          <span className="px-2 py-0.5 rounded bg-blue-950/60 text-blue-300 text-[11px] font-semibold md:block hidden">
             {environment}
           </span>
           <span className="px-2 py-0.5 rounded bg-red-950/60 text-red-400 text-[11px] font-bold">
             {severity}
           </span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="items-center gap-4 md:flex hidden">
           <span className="flex items-center gap-1.5 text-green-400 text-xs font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
             ACTION PROPOSED
@@ -150,11 +152,11 @@ export default function CodeEngineRecommendation({
               {t.id === "original" && <span className="text-red-400">○</span>}
               {t.id === "diff" && <span className="text-yellow-400">⚡</span>}
               <span className="uppercase">{t.label}</span>
-              <span className="text-neutral-500 font-normal normal-case">
+              <span className="text-neutral-500 font-normal normal-case md:block hidden">
                 {t.sub}
               </span>
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-bold
+                className={`px-1.5 py-0.5 rounded text-[10px] font-bold md:block hidden
                 ${
                   active && t.id === "original"
                     ? "bg-red-950/60 text-red-400"
@@ -175,7 +177,7 @@ export default function CodeEngineRecommendation({
         })}
 
         {/* Tab bar right info */}
-        <div className="ml-auto flex items-center gap-2 pr-4 text-[11px] text-neutral-600">
+        <div className="ml-auto items-center gap-2 pr-4 text-[11px] text-neutral-600 md:flex hidden">
           <span>{filename}</span>
           <span>·</span>
           <span>{incidentId}</span>
@@ -186,7 +188,7 @@ export default function CodeEngineRecommendation({
 
       {/* ── FILE SUBBAR ── */}
       {view !== "original" && (
-        <div className="flex items-center justify-between px-4 py-1.5 bg-[#181818] border-b border-neutral-800 shrink-0">
+        <div className="md:flex hidden items-center justify-between px-4 py-1.5 bg-[#181818] border-b border-neutral-800 shrink-0">
           <div className="flex items-center gap-2 text-xs text-neutral-400">
             <span className="text-yellow-400">⚡</span>
             <span>
@@ -233,7 +235,7 @@ export default function CodeEngineRecommendation({
       </div>
 
       {/* ── FOOTER PANEL ── */}
-      <div className="shrink-0 bg-[#161616] border-t border-neutral-800">
+      <div className="shrink-0 bg-[#161616] border-t border-neutral-800 md:block hidden">
         <div className="flex items-stretch divide-x divide-neutral-800">
           {/* Confidence */}
           <div className="flex items-center gap-3 px-5 py-3">

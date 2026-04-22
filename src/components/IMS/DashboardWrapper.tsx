@@ -10,12 +10,14 @@ import GlobalSearch from "./Dashboard/GlobalSearch";
 import { Terminal, Menu, X } from "lucide-react";
 import clsx from "clsx";
 import { BsArrowBarLeft } from "react-icons/bs";
+import DesktopRestrictionScreen from "./DesktopRetrictionScreen";
 
+const includedPage = ["code-engine", "ticket"];
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const { collapse, toggle } = useSidebar();
   const pathname = usePathname();
   const { setOpenCommandPalette, openCommandPalette } = useCommands();
-
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
   // Close sidebar automatically when route changes on mobile
   useEffect(() => {
     if (!collapse && window.innerWidth < 768) {
@@ -26,7 +28,13 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="w-full bg-dark h-screen overflow-hidden flex flex-col md:flex-row relative">
       {/* 1. MOBILE NAVBAR (Logo Left, Menu Right) */}
-      <div className="md:hidden w-full h-16 flex items-center justify-between px-5 border-b border-white/10 bg-dark z-[55]">
+      <div className="md:hidden w-full h-16 flex items-center px-5 gap-4 border-b border-white/10 bg-dark z-[55]">
+        <button
+          onClick={toggle}
+          className="p-2 text-white bg-white/5 rounded-lg active:scale-95 transition-transform"
+        >
+          {collapse ? <Menu size={20} /> : <X size={20} />}
+        </button>
         <div className="h-6">
           <img
             src="/IMS/whitelogo.png"
@@ -34,19 +42,13 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
             className="h-full object-contain"
           />
         </div>
-        <button
-          onClick={toggle}
-          className="p-2 text-white bg-white/5 rounded-lg active:scale-95 transition-transform"
-        >
-          {collapse ? <Menu size={20} /> : <X size={20} />}
-        </button>
       </div>
       <div
         onClick={toggle}
         className={clsx(
-          "cursor-pointer md:flex hidden",
+          "cursor-pointer",
           collapse
-            ? " absolute z-50 left-10 transition-all duration-150 ease-out rotate-180 bottom-12 bg-IMSLightGreen size-10 shadow-lg rounded-full flex justify-center items-center "
+            ? " absolute z-50 left-10 transition-all duration-150 ease-out rotate-180 bottom-12 bg-IMSLightGreen size-10 shadow-lg rounded-full hidden md:flex justify-center items-center "
             : " hidden"
         )}
       >
@@ -73,7 +75,11 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
             animate={{ opacity: 1 }}
             className="w-full h-full overflow-y-auto relative p-4 md:p-0"
           >
-            {children}
+            {includedPage.some((page) => pathname.includes(page)) ? (
+              children
+            ) : (
+              <>{isMobile ? <DesktopRestrictionScreen /> : children}</>
+            )}
 
             {/* Command Palette Floating Button */}
             <div className="fixed bottom-6 right-6 z-40">

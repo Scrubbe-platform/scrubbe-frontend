@@ -75,9 +75,9 @@ export default function IncidentOverview() {
 
   return (
     <div className="min-h-screen text-slate-300 p-6 font-sans selection:bg-cyan-500/30">
-      <div className="flex gap-6 max-w-[1600px] mx-auto relative">
+      <div className="flex md:flex-row flex-col gap-6  mx-auto relative">
         {/* LEFT SIDEBAR - STICKY */}
-        <aside className="w-52 shrink-0 self-start sticky top-6 space-y-4">
+        {/* <aside className="w-52 shrink-0 self-start sticky top-6 space-y-4">
           <div className="flex items-center gap-2 mb-6 px-2">
             <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">
@@ -118,12 +118,12 @@ export default function IncidentOverview() {
             <Layout size={14} /> View Pipeline{" "}
             {activeIncident ? `#${activeIncident.ticketId}` : ""}
           </button>
-        </aside>
+        </aside> */}
 
         {/* MAIN CONTENT AREA */}
         <main className="flex-1 space-y-6">
           {/* TOP HEADER */}
-          <section className="flex justify-between items-start">
+          <section className="flex md:flex-row flex-col gap-3 justify-between items-start">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-black text-white tracking-tighter">
@@ -153,7 +153,7 @@ export default function IncidentOverview() {
           </section>
 
           {/* KPI GRID */}
-          <section className="grid grid-cols-4 gap-4 overflow-hidden">
+          <section className="grid md:grid-cols-4 gap-4 overflow-hidden">
             <StatBox label="Org MTTR (last 30 days)" value="27m" />
             <StatBox
               label="This incident"
@@ -197,7 +197,7 @@ export default function IncidentOverview() {
           </section>
 
           {/* SECONDARY INFO GRID */}
-          <section className="grid grid-cols-3 gap-4">
+          <section className="grid md:grid-cols-3 gap-4">
             <InfoCard
               icon={<PiSpiral size={16} />}
               title="SLO & error budget"
@@ -329,7 +329,7 @@ export default function IncidentOverview() {
             </ul>
           </section>
         </main>
-        <aside className="w-64">
+        <aside className="md:w-72">
           <ConfidenceSidebar />
         </aside>
       </div>

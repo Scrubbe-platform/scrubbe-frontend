@@ -93,7 +93,7 @@ const Sidebar = () => {
       </AnimatePresence>
 
       {/* Persistent Toggle Button when collapsed */}
-      {collapse && (
+      {/* {collapse && (
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -102,7 +102,7 @@ const Sidebar = () => {
         >
           <BsArrowBarLeft className="text-white rotate-180" />
         </motion.div>
-      )}
+      )} */}
     </motion.div>
   );
 };
