@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
@@ -17,7 +17,14 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const { collapse, toggle } = useSidebar();
   const pathname = usePathname();
   const { setOpenCommandPalette, openCommandPalette } = useCommands();
-  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    // This will NOT run during 'npm run build'
+    setWidth(window.innerWidth);
+  }, []);
+  let isMobile = width < 768;
+
   // Close sidebar automatically when route changes on mobile
   useEffect(() => {
     if (!collapse && window.innerWidth < 768) {
