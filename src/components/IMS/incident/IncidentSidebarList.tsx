@@ -234,7 +234,7 @@ const ExactIncidentSidebar: React.FC = () => {
   };
 
   return (
-    <div className="w-[400px] h-screen border-r border-white/5 flex flex-col p-6 overflow-hidden">
+    <div className="w-full h-screen md:border-r border-white/5 flex flex-col p-3 md:p-6 overflow-hidden">
       {/* 1. Top Bar & Raise Incident Button */}
       <div className="flex justify-between items-center mb-8">
         <div>

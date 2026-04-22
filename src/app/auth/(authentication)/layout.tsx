@@ -18,7 +18,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             <div className="flex justify-center pt-3">
               <Link href={"/"} className="">
                 <img
-                  src="/IMS/logo-white.png"
+                  src="/IMS/whitelogo.png"
                   alt="scrubbe.png"
                   className="object-contain h-[30px] w-[100px]"
                 />

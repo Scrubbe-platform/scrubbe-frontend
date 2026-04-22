@@ -266,7 +266,7 @@ const Navbar = () => {
             >
               <div className="h-[30px] w-[220px]">
                 <Image
-                  src="/IMS/logo-white.png"
+                  src="/IMS/whitelogo.png"
                   alt="scrubbe.png"
                   fill
                   sizes="(min-width: 360px) 100vw"

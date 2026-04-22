@@ -1,4 +1,6 @@
+"use client";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 // --- Types ---
 
@@ -20,42 +22,42 @@ const IntelligenceModule: React.FC<IntelligenceProps> = ({
   return (
     <div className="w-full flex flex-col gap-4">
       {/* Title */}
-      <h2 className="text-[13px] font-bold uppercase tracking-[0.15em] mb-1 px-1">
+      <h2 className="text-[11px] md:text-[13px] font-bold text-slate-600 uppercase tracking-[0.15em] mb-1 px-1">
         Scrubbe Intelligence
       </h2>
 
       {/* Main Intelligence Box */}
-      <div className="bg-[#050b18]/40 border border-cyan-400/50 rounded-2xl p-6 relative overflow-hidden">
-        {/* Header Row */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="px-4 py-1.5 border border-cyan-400/50 rounded-lg bg-cyan-400/5">
-            <span className="text-xs font-bold text-cyan-400">
+      <div className="bg-[#050b18]/40 border border-cyan-400/50 rounded-2xl p-4 md:p-6 relative overflow-hidden">
+        {/* Header Row - Stacks on very small screens */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 md:mb-6">
+          <div className="w-fit px-3 py-1 border border-cyan-400/50 rounded-lg bg-cyan-400/5 shrink-0">
+            <span className="text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-tight">
               Scrubbe · Decision Engine
             </span>
           </div>
           <div className="flex gap-1.5 items-center">
-            <span className="text-sm font-bold text-emerald-500">
+            <span className="text-xs md:text-sm font-bold text-emerald-500 whitespace-nowrap">
               {confidence}% confidence
             </span>
             <span className="text-slate-500 text-sm">·</span>
-            <span className="text-sm font-bold text-emerald-500">
+            <span className="text-xs md:text-sm font-bold text-emerald-500 whitespace-nowrap">
               Playbook {playbook}
             </span>
           </div>
         </div>
 
-        {/* Narrative Description */}
-        <p className="text-slate-200 text-lg font-medium leading-relaxed tracking-tight">
+        {/* Narrative Description - Scaled font size */}
+        <p className="text-slate-200 text-sm md:text-lg font-medium leading-relaxed tracking-tight">
           {description}
         </p>
       </div>
 
-      {/* Correlated Incident Tags */}
-      <div className="flex gap-3 mt-1">
+      {/* Correlated Incident Tags - Horizontal Scroll on Mobile */}
+      <div className="flex overflow-x-auto no-scrollbar gap-3 mt-1 pb-1">
         {correlatedIncidents.map((incident) => (
           <div
             key={incident.id}
-            className="px-4 py-2 border border-slate-700/50 rounded-xl bg-slate-800/20 text-slate-400 text-xs font-medium"
+            className="px-3 py-2 md:px-4 border border-slate-700/50 rounded-xl bg-slate-800/20 text-slate-400 text-[10px] md:text-xs font-medium whitespace-nowrap shrink-0"
           >
             {incident.id} · {incident.confidence}%
           </div>
@@ -65,11 +67,11 @@ const IntelligenceModule: React.FC<IntelligenceProps> = ({
   );
 };
 
-// --- Usage Example ---
+// --- Usage Component ---
 
 const ScrubbeIntelligence = () => {
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       <IntelligenceModule
         confidence={94}
         playbook="RBK-17"

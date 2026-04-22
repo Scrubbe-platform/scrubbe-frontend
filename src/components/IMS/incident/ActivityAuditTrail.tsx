@@ -1,4 +1,6 @@
+"use client";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 // --- Types ---
 type AuditEventType =
@@ -52,35 +54,40 @@ const EventRow = ({
   const currentStyle = styles[event.type];
 
   return (
-    <div className="flex gap-6 relative">
-      {/* 1. The Connector Line */}
+    <div className="flex gap-3 md:gap-6 relative">
+      {/* 1. The Connector Line - Centered based on the circle width */}
       {!isLast && (
-        <div className="absolute left-[19px] top-10 w-[1px] h-[calc(100%-20px)] bg-slate-800 z-0" />
+        <div className="absolute left-[15px] md:left-[19px] top-10 w-[1px] h-[calc(100%-24px)] bg-slate-800 z-0" />
       )}
 
-      {/* 2. The Initial Node */}
+      {/* 2. The Initial Node - Scaled for mobile */}
       <div
-        className={`
-        w-10 h-10 rounded-full border-2 flex items-center justify-center shrink-0 z-10 bg-darkEzra
-        ${currentStyle.dot}
-      `}
+        className={cn(
+          "w-8 h-8 md:w-10 md:h-10 rounded-full border-2 flex items-center justify-center shrink-0 z-10 bg-darkEzra transition-all",
+          currentStyle.dot
+        )}
       >
-        <span className="text-xs font-bold">{event.initial}</span>
+        <span className="text-[10px] md:text-xs font-bold">
+          {event.initial}
+        </span>
       </div>
 
       {/* 3. The Event Card */}
-      <div className="flex-1 bg-darkEzra border border-white/5 rounded-xl p-4 mb-6 hover:border-white/10 transition-all">
-        <div className="flex justify-between items-start mb-1">
+      <div className="flex-1 bg-darkEzra border border-white/5 rounded-xl p-3 md:p-4 mb-6 hover:border-white/10 transition-all min-w-0">
+        <div className="flex flex-wrap justify-between items-start gap-x-2 mb-1">
           <span
-            className={`text-[10px] font-bold uppercase tracking-widest ${currentStyle.text}`}
+            className={cn(
+              "text-[9px] md:text-[10px] font-bold uppercase tracking-widest",
+              currentStyle.text
+            )}
           >
             {event.label}
           </span>
-          <span className="text-[10px] font-mono text-slate-600">
+          <span className="text-[9px] md:text-[10px] font-mono text-slate-600 tabular-nums">
             {event.timestamp}
           </span>
         </div>
-        <p className="text-[14px] font-semibold text-slate-200 leading-relaxed">
+        <p className="text-[12px] md:text-[14px] font-semibold text-slate-200 leading-relaxed break-words">
           {event.content}
         </p>
       </div>
@@ -129,12 +136,12 @@ const ActivityAuditTrail: React.FC = () => {
   ];
 
   return (
-    <div className="p-6">
-      <div className="w-full flex flex-col gap-4 p-4 rounded-xl border border-white/20">
-        <h2 className="text-[13px] font-bold uppercase tracking-[0.15em] mb-1 px-1">
+    <div className="p-4 md:p-6">
+      <div className="w-full flex flex-col gap-4 p-3 md:p-4 rounded-xl border border-white/20">
+        <h2 className="text-[11px] md:text-[13px] font-bold text-slate-600 uppercase tracking-[0.15em] mb-1 px-1">
           Activity & Audit Trail
         </h2>
-        <div className="w-full flex flex-col">
+        <div className="w-full flex flex-col pt-2">
           {events.map((event, idx) => (
             <EventRow
               key={event.id}

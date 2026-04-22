@@ -28,6 +28,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { querykeys } from "@/lib/constant";
+import ConfidenceSidebar from "./_modules/components/ConfidenceSidebar";
 
 type Incident = {
   id: string;
@@ -76,7 +77,7 @@ export default function IncidentOverview() {
     <div className="min-h-screen text-slate-300 p-6 font-sans selection:bg-cyan-500/30">
       <div className="flex gap-6 max-w-[1600px] mx-auto relative">
         {/* LEFT SIDEBAR - STICKY */}
-        <aside className="w-72 shrink-0 self-start sticky top-6 space-y-4">
+        <aside className="w-52 shrink-0 self-start sticky top-6 space-y-4">
           <div className="flex items-center gap-2 mb-6 px-2">
             <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">
@@ -240,6 +241,10 @@ export default function IncidentOverview() {
             />
           </section>
 
+          <section>
+            <CodeEngineRecommendation />
+          </section>
+
           {/* CODE INTELLIGENCE ENGINE (GREEN) */}
           <section className="p-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 space-y-6">
             <div className="flex items-center gap-2 text-emerald-400">
@@ -323,11 +328,10 @@ export default function IncidentOverview() {
               ))}
             </ul>
           </section>
-
-          <section>
-            <CodeEngineRecommendation />
-          </section>
         </main>
+        <aside className="w-64">
+          <ConfidenceSidebar />
+        </aside>
       </div>
 
       <>

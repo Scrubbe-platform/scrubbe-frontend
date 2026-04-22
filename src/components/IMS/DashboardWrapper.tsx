@@ -1,44 +1,50 @@
 "use client";
 import React, { useEffect } from "react";
-import Navbar from "../dashboard/Navbar";
 import Sidebar from "./Sidebar";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { BsArrowBarLeft } from "react-icons/bs";
-import clsx from "clsx";
 import { useSidebar } from "@/lib/stores/useSidebar";
-import { RiMenuFold2Fill } from "react-icons/ri";
 import { useCommands } from "@/lib/stores/command.store";
 import Modal from "../ui/Modal";
 import GlobalSearch from "./Dashboard/GlobalSearch";
-import { Terminal } from "lucide-react";
+import { Terminal, Menu, X } from "lucide-react";
+import clsx from "clsx";
+import { BsArrowBarLeft } from "react-icons/bs";
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const { collapse, toggle } = useSidebar();
   const pathname = usePathname();
   const { setOpenCommandPalette, openCommandPalette } = useCommands();
+
+  // Close sidebar automatically when route changes on mobile
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Open command Palette
-      if (event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
-        setOpenCommandPalette(true);
-      }
-    };
+    if (!collapse && window.innerWidth < 768) {
+      toggle();
+    }
+  }, [pathname]);
 
-    // Attach the listener
-    window.addEventListener("keydown", handleKeyDown);
-
-    // Clean up the listener on unmount
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
   return (
-    <div className="w-full bg-dark h-screen  overflow-auto relative">
+    <div className="w-full bg-dark h-screen overflow-hidden flex flex-col md:flex-row relative">
+      {/* 1. MOBILE NAVBAR (Logo Left, Menu Right) */}
+      <div className="md:hidden w-full h-16 flex items-center justify-between px-5 border-b border-white/10 bg-dark z-[55]">
+        <div className="h-6">
+          <img
+            src="/IMS/whitelogo.png"
+            alt="logo"
+            className="h-full object-contain"
+          />
+        </div>
+        <button
+          onClick={toggle}
+          className="p-2 text-white bg-white/5 rounded-lg active:scale-95 transition-transform"
+        >
+          {collapse ? <Menu size={20} /> : <X size={20} />}
+        </button>
+      </div>
       <div
         onClick={toggle}
         className={clsx(
-          "cursor-pointer",
+          "cursor-pointer md:flex hidden",
           collapse
             ? " absolute z-50 left-10 transition-all duration-150 ease-out rotate-180 bottom-12 bg-IMSLightGreen size-10 shadow-lg rounded-full flex justify-center items-center "
             : " hidden"
@@ -46,34 +52,38 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
       >
         <BsArrowBarLeft className=" text-white" />
       </div>
-      <div className="flex w-full h-full min-w-[1400px] ">
+      {/* 2. SIDEBAR OVERLAY (Mobile) */}
+      {/* This ensures that when the sidebar opens on mobile, it darkens the background */}
+      {!collapse && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[50]"
+          onClick={toggle}
+        />
+      )}
+
+      <div className="flex flex-1 w-full h-full overflow-hidden">
+        {/* Sidebar Component */}
         <Sidebar />
-        <div className="w-full h-full">
-          {/* <Navbar /> */}
+
+        {/* 3. MAIN CONTENT AREA */}
+        <div className="flex-1 h-full overflow-hidden flex flex-col">
           <motion.div
             key={pathname}
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{
-              duration: 0.5,
-              type: "tween",
-            }}
-            className="w-full  h-[calc(100vh)] overflow-y-auto relative"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="w-full h-full overflow-y-auto relative p-4 md:p-0"
           >
             {children}
 
-            <div className=" w-fit sticky bottom-12 left-[80%]">
+            {/* Command Palette Floating Button */}
+            <div className="fixed bottom-6 right-6 z-40">
               <button
                 onClick={() => setOpenCommandPalette(true)}
-                className={clsx(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium",
-                  "bg-neutral-900 border border-neutral-700 text-neutral-400",
-                  "hover:border-neutral-500 hover:text-neutral-200 transition-all shadow-sm"
-                )}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full md:rounded-lg text-xs font-medium bg-neutral-900 border border-neutral-700 text-neutral-400 hover:border-neutral-500 shadow-2xl transition-all"
               >
-                <Terminal size={13} />
-                <span>Command Palette</span>
-                <kbd className="ml-1 px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-500 font-mono text-[10px] border border-neutral-700">
+                <Terminal size={14} />
+                <span className="hidden sm:inline">Command Palette</span>
+                <kbd className="hidden md:block ml-1 px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-500 font-mono text-[10px] border border-neutral-700">
                   ⌘K
                 </kbd>
               </button>

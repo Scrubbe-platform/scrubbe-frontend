@@ -8,6 +8,7 @@ interface TabItem {
   label: string;
   link: string;
 }
+
 const IncidentHeader = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,93 +38,91 @@ const IncidentHeader = () => {
       label: "Playbook. RBK.17",
       link: `playbooks?id=${activeId}`,
     },
-    {
-      id: "context",
-      label: "Context",
-      link: `?tab=context`,
-    },
+    { id: "context", label: "Context", link: `?tab=context` },
   ];
 
-  useEffect(() => {
-    router.replace(`${pathname}?tab=overview`);
-  }, []);
+  // useEffect(() => {
+  //   // Only auto-redirect if there is no tab currently set
+  //   if (!currentTab) {
+  //     router.replace(`${pathname}?tab=overview`);
+  //   }
+  // }, [currentTab, pathname, router]);
 
   return (
-    <div className="w-full text-white p-6 flex flex-col gap-8 border-b border-white/5">
-      {/* 1. Top Bar: Stats and Primary Action */}
-      <div className="flex justify-between items-center">
-        <div className="flex gap-2">
+    <div className="w-full text-white p-4 md:p-6 flex flex-col gap-6 md:gap-8 border-b border-white/5">
+      {/* 1. Top Bar: Stats - Scrollable on mobile */}
+      <div className="flex overflow-x-auto no-scrollbar pb-2 md:pb-0 gap-2 items-center justify-between">
+        <div className="flex gap-2 shrink-0">
           <StatBadge label="3 Active" color="orange" />
           <StatBadge label="2 Investigating" color="yellow" />
-          <StatBadge label="2 resolved today" color="green" />
+          <StatBadge label="2 resolved" color="green" />
         </div>
-        {/* <button className="bg-[#22d3ee] hover:bg-[#06b6d4] text-[#030712] px-4 py-1 text-sm rounded-lg font-bold transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)]">
-          Raise an Incident
-        </button> */}
       </div>
 
       {/* 2. Main Incident Info */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold tracking-tight">SI-0003070</h1>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight shrink-0">
+                SI-0003070
+              </h1>
 
-            <div className="flex gap-2">
-              <Badge variant="blue">Auto-detected · Kubernetes</Badge>
-              <Badge variant="red">P1 · Critical</Badge>
-              <Badge variant="orange">Investigating</Badge>
-
-              <div className="flex flex-col items-center border border-orange-500/50 rounded px-3 py-0.5 bg-orange-500/5">
-                <span className="text-xs text-orange-400 uppercase font-bold tracking-tighter">
-                  Elapsed
-                </span>
-                <span className="text-sm font-mono font-bold text-orange-400">
-                  19 : 35
-                </span>
+              {/* Badges Container */}
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="blue">Kubernetes</Badge>
+                <Badge variant="red">P1 · Critical</Badge>
+                <div className="flex items-center border border-orange-500/50 rounded px-2 py-0.5 bg-orange-500/5">
+                  <span className="text-[10px] text-orange-400 uppercase font-black mr-2">
+                    Elapsed
+                  </span>
+                  <span className="text-xs font-mono font-bold text-orange-400">
+                    19 : 35
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="flex gap-3 ml-auto">
-            <button className="px-3 text-sm py-2 rounded-lg border border-cyan-500/50 text-cyan-400 font-semibold hover:bg-cyan-500/5 transition-all">
+          {/* Action Buttons - Stacked on mobile, side-by-side on desktop */}
+          <div className="flex gap-2 w-full md:w-auto">
+            <button className="flex-1 md:flex-none px-4 text-xs py-2.5 rounded-lg border border-cyan-500/50 text-cyan-400 font-bold hover:bg-cyan-500/5 transition-all">
               Add Context
             </button>
-            <button className="px-3 text-sm py-2 rounded-lg border border-cyan-500/50 text-cyan-400 font-semibold hover:bg-cyan-500/5 transition-all">
-              Declare War Room
+            <button className="flex-1 md:flex-none px-4 text-xs py-2.5 rounded-lg border border-cyan-500/50 text-cyan-400 font-bold hover:bg-cyan-500/5 transition-all">
+              War Room
             </button>
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold text-slate-100">
+        {/* Title - Smaller text on mobile */}
+        <h2 className="text-lg md:text-2xl font-bold text-slate-100 leading-tight">
           auth-service pod CrashLoopBackOff — OOMKilled after 14 restarts in
           eu-west-1
         </h2>
 
-        {/* 3. Metadata Tags */}
+        {/* 3. Metadata Tags - flex-wrap ensures they wrap correctly */}
         <div className="flex flex-wrap gap-2">
           <MetaTag variant="blue">checkout-service</MetaTag>
           <MetaTag variant="orange">eu-west-1</MetaTag>
-          <MetaTag variant="blue">18m elapsed</MetaTag>
           <MetaTag variant="blue">Pipeline #31</MetaTag>
-          <MetaTag variant="orange">94% match confidence</MetaTag>
-          <MetaTag variant="orange">EAL: Assisted</MetaTag>
-          <MetaTag variant="orange">1 service affected</MetaTag>
+          <MetaTag variant="orange">94% match</MetaTag>
         </div>
       </div>
 
-      {/* 4. Navigation Tabs */}
-      <nav className="flex gap-12 mt-4 relative border-b border-white/20">
+      {/* 4. Navigation Tabs - Horizontal Scroll with no scrollbar */}
+      <nav className="flex overflow-x-auto no-scrollbar gap-8 md:gap-12 relative border-b border-white/20 -mx-4 px-4 md:mx-0 md:px-0">
         {tabs.map((tab) => (
           <Link
             key={tab.id}
             href={tab.link}
-            className="relative cursor-pointer group pb-2"
+            className="relative cursor-pointer group pb-3 shrink-0"
           >
             <span
-              className={`text-sm font-medium transition-colors ${
+              className={`text-sm font-medium transition-colors whitespace-nowrap ${
                 currentTab === tab.id
                   ? "text-cyan-400"
-                  : "text-slate-400 group-hover:text-slate-200"
+                  : "text-slate-500 group-hover:text-slate-200"
               }`}
             >
               {tab.label}
@@ -139,7 +138,7 @@ const IncidentHeader = () => {
   );
 };
 
-// --- Sub-components ---
+// --- Sub-components (Updated for better mobile sizing) ---
 
 const StatBadge = ({
   label,
@@ -155,7 +154,7 @@ const StatBadge = ({
   };
   return (
     <div
-      className={`px-4 py-1.5 rounded-lg border text-xs font-medium ${colors[color]}`}
+      className={`px-3 py-1 rounded-md border text-[10px] md:text-xs font-bold whitespace-nowrap ${colors[color]}`}
     >
       {label}
     </div>
@@ -176,7 +175,7 @@ const Badge = ({
   };
   return (
     <span
-      className={`px-2 py-1.5 rounded border text-xs font-bold ${styles[variant]}`}
+      className={`px-2 py-1 rounded border text-[10px] font-bold whitespace-nowrap ${styles[variant]}`}
     >
       {children}
     </span>
@@ -196,32 +195,11 @@ const MetaTag = ({
   };
   return (
     <span
-      className={`px-3 py-1 rounded-md border text-xs font-medium bg-white/[0.02] ${styles[variant]}`}
+      className={`px-2.5 py-1 rounded border text-[10px] font-medium bg-white/[0.02] whitespace-nowrap ${styles[variant]}`}
     >
       {children}
     </span>
   );
 };
-
-const Tab = ({
-  label,
-  active = false,
-}: {
-  label: string;
-  active?: boolean;
-}) => (
-  <div className="relative cursor-pointer group pb-2">
-    <span
-      className={`text-sm font-medium transition-colors ${
-        active ? "text-cyan-400" : "text-slate-400 group-hover:text-slate-200"
-      }`}
-    >
-      {label}
-    </span>
-    {active && (
-      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-    )}
-  </div>
-);
 
 export default IncidentHeader;

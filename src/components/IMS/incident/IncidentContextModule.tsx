@@ -1,4 +1,6 @@
+"use client";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 // --- Types ---
 
@@ -18,17 +20,20 @@ const ContextBox = ({
   isDescription = false,
 }: ContextField) => (
   <div
-    className={`p-5 bg-darkEzra border border-white/5 rounded-2xl ${
+    className={cn(
+      "p-4 md:p-5 bg-darkEzra border border-white/5 rounded-2xl transition-colors hover:border-white/10",
       isDescription ? "col-span-full" : "col-span-1"
-    }`}
+    )}
   >
     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
       {label}
     </p>
     <p
-      className={`text-[13px] font-semibold leading-relaxed ${valueColor} ${
-        isDescription ? "text-slate-300 font-medium" : ""
-      }`}
+      className={cn(
+        "text-[12px] md:text-[13px] font-semibold leading-relaxed break-words",
+        valueColor,
+        isDescription && "text-slate-300 font-medium"
+      )}
     >
       {value}
     </p>
@@ -64,13 +69,18 @@ const IncidentContextModule: React.FC = () => {
   ];
 
   return (
-    <div className="p-6">
-      <div className="w-full flex flex-col gap-4 p-4 rounded-xl border border-white/20">
-        <h2 className="text-[13px] font-bold text-white uppercase tracking-[0.15em] mb-1 px-1">
+    <div className="p-4 md:p-6">
+      <div className="w-full flex flex-col gap-4 p-3 md:p-4 rounded-xl border border-white/20 bg-transparent">
+        <h2 className="text-[11px] md:text-[13px] font-bold text-white uppercase tracking-[0.15em] mb-1 px-1">
           Incident Context
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+        {/* Grid Logic:
+            - 1 column on small mobile
+            - 2 columns on tablets/small laptops (sm and up)
+            - Keeps 2 columns on large screens to match your original design
+        */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
           {fields.map((field, idx) => (
             <ContextBox key={idx} {...field} />
           ))}
@@ -82,21 +92,24 @@ const IncidentContextModule: React.FC = () => {
             value="checkout-service failed Integration tests after deploying commit 4f3a91c. Tests timeout on db-core (eu-west-1) — pool of 50 connections fully exhausted within 8 seconds of increased load. Error rate spiked to 7.8%. Pattern matches DB pool exhaustion class — 9 prior resolutions on record."
           />
 
-          {/* Footer Metrics */}
-          <div className="col-span-1 p-5 bg-darkEzra border border-white/5 rounded-2xl">
+          {/* Footer Metrics - Assigned to */}
+          <div className="col-span-1 p-4 md:p-5 bg-darkEzra border border-white/5 rounded-2xl">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
               Assigned to
             </p>
-            <p className="text-[13px] font-semibold text-white">
+            <p className="text-[12px] md:text-[13px] font-semibold text-white">
               Alice Chen - SRE Lead
             </p>
           </div>
 
-          <div className="col-span-1 p-5 bg-darkEzra border border-white/5 rounded-2xl">
+          {/* Footer Metrics - Priority */}
+          <div className="col-span-1 p-4 md:p-5 bg-darkEzra border border-white/5 rounded-2xl">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
               Priority
             </p>
-            <p className="text-[13px] font-bold text-red-500">P1-Critical</p>
+            <p className="text-[12px] md:text-[13px] font-bold text-red-500">
+              P1-Critical
+            </p>
           </div>
         </div>
       </div>

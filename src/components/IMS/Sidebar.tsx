@@ -10,6 +10,7 @@ import { useSidebar } from "@/lib/stores/useSidebar";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
+import { toggle } from "@heroui/react";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -18,18 +19,21 @@ const Sidebar = () => {
 
   return (
     <motion.div
-      // Animate width and horizontal padding
       initial={false}
       animate={{
-        width: collapse ? 0 : 300, // Adjust 280 to your preferred sidebar width
-        paddingLeft: collapse ? 0 : 12,
-        paddingRight: collapse ? 0 : 12,
+        width: collapse ? 0 : 300,
         opacity: collapse ? 0 : 1,
+        // Add x translation for mobile overlay feel
+        x:
+          collapse && typeof window !== "undefined" && window.innerWidth < 768
+            ? -300
+            : 0,
       }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={cn(
-        "border-r border-white/20 flex flex-col justify-between bg-dark py-5 overflow-x-hidden whitespace-nowrap",
-        collapse ? "border-none" : ""
+        "flex flex-col justify-between bg-dark py-5 overflow-x-hidden whitespace-nowrap z-[60] px-3",
+        // MOBILE: Make it fixed overlay | DESKTOP: Make it relative/border
+        "fixed inset-y-0 left-0 md:relative md:inset-auto md:flex md:border-r md:border-white/20",
+        collapse ? "pointer-events-none border-none" : "pointer-events-auto"
       )}
     >
       {/* Wrap content in AnimatePresence to fade it out before the width hits 0 */}

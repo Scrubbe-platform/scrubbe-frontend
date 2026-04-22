@@ -152,7 +152,7 @@ const EarlyDesignPartnerProgram: React.FC = () => {
             <div className="h-[30px] w-[220px]">
               {/* NOTE: If you are using next/image, you must import it and ensure src is correct */}
               <img
-                src="/IMS/logo-white.png"
+                src="/IMS/whitelogo.png"
                 alt="scrubbe.png"
                 className="object-contain h-full "
               />
