@@ -7,7 +7,7 @@ const CTA = () => {
   const router = useRouter();
   return (
     <div className="py-10 md:px-10 px-5 flex justify-center flex-col items-center gap-7 overflow-clip relative">
-      <div className="absolute left-1/3 translate-x-[-15%] bg-gradient-to-r from-IMSCyan to-cyan-200 blur-3xl opacity-20 w-[50%] h-full rounded-full" />
+      <div className="absolute left-1/3 translate-x-[-15%] bg-gradient-to-r from-IMSCyan to-green-200 blur-3xl opacity-20 w-[50%] h-full rounded-full" />
       <p className="text-white">WORK WITH US</p>
       <p className="text-3xl md:text-5xl font-bigshotOne text-white max-w-3xl text-center">
         If your incidents touch{" "}

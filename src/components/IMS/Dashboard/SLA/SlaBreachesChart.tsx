@@ -33,7 +33,7 @@ const data = {
     {
       label: "SLA Breaches",
       data: [], // Example data points
-      borderColor: "#22D3EE", // Tailwind's cyan-400
+      borderColor: "#22D3EE", // Tailwind's green-400
       backgroundColor: "rgba(34, 211, 238, 0.2)",
       fill: true,
       tension: 0.4,

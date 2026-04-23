@@ -26,7 +26,7 @@ const PlaybookSection = () => {
 
           <button
             onClick={() => setIsPlaybook(true)}
-            className="flex items-center gap-2 px-3 py-2 border border-cyan-400 text-cyan-400 rounded-xl text-base font-bold hover:bg-cyan-400/10 transition-all duration-200"
+            className="flex items-center gap-2 px-3 py-2 border border-green-400 text-green-400 rounded-xl text-base font-bold hover:bg-green-400/10 transition-all duration-200"
           >
             Open
           </button>

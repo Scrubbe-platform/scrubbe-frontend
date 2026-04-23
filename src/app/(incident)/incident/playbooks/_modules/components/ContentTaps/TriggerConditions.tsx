@@ -155,7 +155,7 @@ const TriggerConditions: React.FC = () => {
       </div>
 
       {/* Footer Action */}
-      <button className="flex items-center gap-2 px-4 py-2 border border-cyan-500/50 rounded-lg text-cyan-400 text-sm font-semibold hover:bg-cyan-500/5 transition-all">
+      <button className="flex items-center gap-2 px-4 py-2 border border-green-500/50 rounded-lg text-green-400 text-sm font-semibold hover:bg-green-500/5 transition-all">
         <Plus size={18} />
         Add Condition
       </button>

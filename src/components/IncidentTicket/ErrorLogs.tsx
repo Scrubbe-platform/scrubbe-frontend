@@ -36,7 +36,7 @@ const severityColors: Record<string, string> = {
 
 const statusIcons: Record<string, React.ReactNode> = {
   OPEN: <AlertCircle size={14} className="text-red-500" />,
-  ACKNOWLEDGED: <Clock size={14} className="text-cyan-500" />,
+  ACKNOWLEDGED: <Clock size={14} className="text-green-500" />,
   RESOLVED: <CheckCircle size={14} className="text-emerald-500" />,
   SUPPRESSED: <CheckCircle size={14} className="text-gray-500" />,
 };
@@ -50,7 +50,8 @@ export default function ErrorLogs() {
     queryFn: async () => {
       const res = await get(endpoint.signals.list);
       if (res.success) {
-        const items = res.data?.data?.signals ?? res.data?.data ?? res.data ?? [];
+        const items =
+          res.data?.data?.signals ?? res.data?.data ?? res.data ?? [];
         return items as Signal[];
       }
       return [];
@@ -71,22 +72,41 @@ export default function ErrorLogs() {
 
   const filtered =
     statusFilter === "ALL"
-      ? (signals ?? [])
-      : (signals ?? []).filter(s => s.status === statusFilter);
+      ? signals ?? []
+      : (signals ?? []).filter((s) => s.status === statusFilter);
 
   return (
     <div className="space-y-6">
       {/* Stats row */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: "Total signals", value: stats?.total ?? 0, color: "text-white" },
+          {
+            label: "Total signals",
+            value: stats?.total ?? 0,
+            color: "text-white",
+          },
           { label: "Open", value: stats?.open ?? 0, color: "text-red-500" },
-          { label: "Acknowledged", value: stats?.acknowledged ?? 0, color: "text-cyan-400" },
-          { label: "Resolved", value: stats?.resolved ?? 0, color: "text-emerald-400" },
-        ].map(s => (
-          <div key={s.label} className="border border-white/10 rounded-xl p-4 bg-dark">
-            <p className="text-xs text-gray-500 uppercase tracking-widest">{s.label}</p>
-            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{isLoading ? "—" : s.value}</p>
+          {
+            label: "Acknowledged",
+            value: stats?.acknowledged ?? 0,
+            color: "text-green-400",
+          },
+          {
+            label: "Resolved",
+            value: stats?.resolved ?? 0,
+            color: "text-emerald-400",
+          },
+        ].map((s) => (
+          <div
+            key={s.label}
+            className="border border-white/10 rounded-xl p-4 bg-dark"
+          >
+            <p className="text-xs text-gray-500 uppercase tracking-widest">
+              {s.label}
+            </p>
+            <p className={`text-2xl font-bold mt-1 ${s.color}`}>
+              {isLoading ? "—" : s.value}
+            </p>
           </div>
         ))}
       </div>
@@ -95,7 +115,7 @@ export default function ErrorLogs() {
       <div className="flex items-center gap-3">
         <Filter size={14} className="text-gray-500" />
         <span className="text-xs text-gray-500">Filter:</span>
-        {["ALL", "OPEN", "ACKNOWLEDGED", "RESOLVED", "SUPPRESSED"].map(f => (
+        {["ALL", "OPEN", "ACKNOWLEDGED", "RESOLVED", "SUPPRESSED"].map((f) => (
           <button
             key={f}
             onClick={() => setStatusFilter(f)}
@@ -114,14 +134,22 @@ export default function ErrorLogs() {
       {/* Signals table */}
       <div className="border border-white/10 rounded-xl bg-dark overflow-hidden">
         <div className="p-4 border-b border-white/10">
-          <h3 className="text-sm font-bold text-white">Ingestion signals & error log</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Inbound events from all connected sources. Errors and suppressed signals appear here.</p>
+          <h3 className="text-sm font-bold text-white">
+            Ingestion signals & error log
+          </h3>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Inbound events from all connected sources. Errors and suppressed
+            signals appear here.
+          </p>
         </div>
 
         {isLoading && (
           <div className="p-6 space-y-3">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-12 bg-white/5 rounded-lg animate-pulse" />
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-12 bg-white/5 rounded-lg animate-pulse"
+              />
             ))}
           </div>
         )}
@@ -145,24 +173,40 @@ export default function ErrorLogs() {
               <span>Summary</span>
               <span>Time</span>
             </div>
-            {filtered.map(signal => (
+            {filtered.map((signal) => (
               <div
                 key={signal.id}
                 className="grid grid-cols-[120px_80px_100px_80px_1fr_140px] gap-4 px-4 py-3 items-center hover:bg-white/[0.02] text-sm"
               >
-                <span className="text-xs font-mono text-gray-300 truncate capitalize">{signal.source?.toLowerCase() ?? "—"}</span>
-                <span className="text-xs text-gray-400 truncate">{signal.type ?? "—"}</span>
+                <span className="text-xs font-mono text-gray-300 truncate capitalize">
+                  {signal.source?.toLowerCase() ?? "—"}
+                </span>
+                <span className="text-xs text-gray-400 truncate">
+                  {signal.type ?? "—"}
+                </span>
                 <span>
-                  <span className={clsx("text-[10px] px-2 py-0.5 rounded font-medium", severityColors[signal.severity] ?? "bg-gray-100 text-gray-500")}>
+                  <span
+                    className={clsx(
+                      "text-[10px] px-2 py-0.5 rounded font-medium",
+                      severityColors[signal.severity] ??
+                        "bg-gray-100 text-gray-500"
+                    )}
+                  >
                     {signal.severity ?? "—"}
                   </span>
                 </span>
                 <span className="flex items-center gap-1">
                   {statusIcons[signal.status] ?? null}
-                  <span className="text-[10px] text-gray-400">{signal.status}</span>
+                  <span className="text-[10px] text-gray-400">
+                    {signal.status}
+                  </span>
                 </span>
-                <span className="text-xs text-gray-300 truncate">{signal.summary ?? "—"}</span>
-                <span className="text-xs text-gray-500">{moment(signal.createdAt).fromNow()}</span>
+                <span className="text-xs text-gray-300 truncate">
+                  {signal.summary ?? "—"}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {moment(signal.createdAt).fromNow()}
+                </span>
               </div>
             ))}
           </div>

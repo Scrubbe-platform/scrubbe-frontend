@@ -24,7 +24,7 @@ const statusColors = (status: string) => {
             : status === "CLOSED"
             ? "bg-gray-100 text-gray-500"
             : status === "ACKNOWLEDGED"
-            ? "bg-cyan-100 text-cyan-500"
+            ? "bg-green-100 text-green-500"
             : status === "INVESTIGATION"
             ? "bg-amber-100 text-amber-500"
             : status === "MITIGATED"

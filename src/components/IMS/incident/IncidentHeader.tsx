@@ -86,10 +86,10 @@ const IncidentHeader = () => {
 
           {/* Action Buttons - Stacked on mobile, side-by-side on desktop */}
           <div className="flex gap-2 w-full md:w-auto">
-            <button className="flex-1 md:flex-none px-4 text-xs py-2.5 rounded-lg border border-cyan-500/50 text-cyan-400 font-bold hover:bg-cyan-500/5 transition-all">
+            <button className="flex-1 md:flex-none px-4 text-xs py-2.5 rounded-lg border border-green-500/50 text-green-400 font-bold hover:bg-green-500/5 transition-all">
               Add Context
             </button>
-            <button className="flex-1 md:flex-none px-4 text-xs py-2.5 rounded-lg border border-cyan-500/50 text-cyan-400 font-bold hover:bg-cyan-500/5 transition-all">
+            <button className="flex-1 md:flex-none px-4 text-xs py-2.5 rounded-lg border border-green-500/50 text-green-400 font-bold hover:bg-green-500/5 transition-all">
               War Room
             </button>
           </div>
@@ -121,7 +121,7 @@ const IncidentHeader = () => {
             <span
               className={`text-sm font-medium transition-colors whitespace-nowrap ${
                 currentTab === tab.id
-                  ? "text-cyan-400"
+                  ? "text-green-400"
                   : "text-slate-500 group-hover:text-slate-200"
               }`}
             >
@@ -129,7 +129,7 @@ const IncidentHeader = () => {
             </span>
 
             {currentTab === tab.id && (
-              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-green-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
             )}
           </Link>
         ))}
@@ -169,7 +169,7 @@ const Badge = ({
   variant: "blue" | "red" | "orange";
 }) => {
   const styles = {
-    blue: "border-cyan-500/30 text-cyan-400 bg-cyan-400/5",
+    blue: "border-green-500/30 text-green-400 bg-green-400/5",
     red: "border-red-500/30 text-red-500 bg-red-500/5",
     orange: "border-orange-500/30 text-orange-500 bg-orange-500/5",
   };
@@ -190,7 +190,7 @@ const MetaTag = ({
   variant: "blue" | "orange";
 }) => {
   const styles = {
-    blue: "border-cyan-500/30 text-cyan-400",
+    blue: "border-green-500/30 text-green-400",
     orange: "border-orange-500/30 text-orange-400",
   };
   return (

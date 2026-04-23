@@ -97,7 +97,7 @@ const IncidentDetails = () => {
 
 // Sub-components for cleaner structure
 const InfoCard = ({ title, value, sub, list }: any) => (
-  <div className="bg-black border border-slate-800 rounded-2xl p-6 flex flex-col gap-2 group hover:border-cyan-500/30 transition-colors">
+  <div className="bg-black border border-slate-800 rounded-2xl p-6 flex flex-col gap-2 group hover:border-green-500/30 transition-colors">
     <h3 className="text-sm font-black text-white tracking-widest">{title}</h3>
     <p className="text-sm text-slate-100 break-all">{value}</p>
     {sub && <p className="text-sm text-white mt-1">{sub}</p>}

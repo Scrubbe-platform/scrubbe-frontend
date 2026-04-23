@@ -268,7 +268,7 @@ const NewFooter: React.FC = () => {
               <Link href={"/partners"}>
                 <CButton
                   // onClick={() => router.push("/incident/tickets/create")}
-                  className="w-fit h-[40px] hidden xl:flex bg-transparent hover:bg-transparent text-IMSCyan border border-IMSCyan shadow-none text-base"
+                  className="w-fit h-[40px] hidden xl:flex bg-transparent hover:bg-transparent text-cyan-500 border border-cyan-500 shadow-none text-base"
                 >
                   Join Early Design Partners
                 </CButton>

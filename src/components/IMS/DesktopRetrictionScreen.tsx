@@ -14,23 +14,23 @@ const DesktopRestrictionScreen = () => {
             <Monitor
               size={120}
               strokeWidth={1.5}
-              className="text-cyan-400 opacity-90"
+              className="text-green-400 opacity-90"
             />
             <div className="absolute inset-0 flex items-center justify-center mb-4">
-              <Lock size={32} fill="currentColor" className="text-cyan-400" />
+              <Lock size={32} fill="currentColor" className="text-green-400" />
             </div>
           </div>
 
           {/* Mobile Icon Overlay */}
           <div className="relative -ml-6 mt-8">
             <div className="bg-[#050b18] p-1 rounded-xl">
-              <div className="relative border-2 border-cyan-400 rounded-2xl p-2 h-24 w-14 flex items-center justify-center">
-                <div className="absolute top-1.5 w-6 h-1 bg-cyan-400/30 rounded-full" />
+              <div className="relative border-2 border-green-400 rounded-2xl p-2 h-24 w-14 flex items-center justify-center">
+                <div className="absolute top-1.5 w-6 h-1 bg-green-400/30 rounded-full" />
                 <div className="relative flex items-center justify-center">
-                  <Smartphone size={32} className="text-cyan-400 opacity-40" />
+                  <Smartphone size={32} className="text-green-400 opacity-40" />
                   <Slash
                     size={24}
-                    className="absolute text-cyan-400"
+                    className="absolute text-green-400"
                     strokeWidth={3}
                   />
                 </div>
@@ -63,18 +63,18 @@ const DesktopRestrictionScreen = () => {
 
       {/* Action Buttons */}
       {/* <div className="w-full max-w-[400px] flex flex-col gap-3 mb-10">
-        <button className="w-full py-4 bg-cyan-400 hover:bg-cyan-300 text-black font-bold rounded-xl transition-all active:scale-95 shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+        <button className="w-full py-4 bg-green-400 hover:bg-green-300 text-black font-bold rounded-xl transition-all active:scale-95 shadow-[0_0_20px_rgba(34,211,238,0.2)]">
           Open Mobile View
         </button>
-        <button className="w-full py-4 bg-transparent border border-cyan-400/60 text-cyan-400 font-bold rounded-xl hover:bg-cyan-400/5 transition-all active:scale-95">
+        <button className="w-full py-4 bg-transparent border border-green-400/60 text-green-400 font-bold rounded-xl hover:bg-green-400/5 transition-all active:scale-95">
           Continue to Desktop View
         </button>
       </div> */}
 
       {/* Footer Alert Box */}
       <div className="w-full max-w-[400px] bg-[#050b18] border border-white/5 rounded-2xl p-5 flex gap-4 items-start">
-        <div className="bg-cyan-400/10 p-2 rounded-lg">
-          <Lock size={18} className="text-cyan-400" />
+        <div className="bg-green-400/10 p-2 rounded-lg">
+          <Lock size={18} className="text-green-400" />
         </div>
         <p className="text-[13px] text-slate-300 leading-snug">
           Some features are restricted on mobile to ensure safe and effective

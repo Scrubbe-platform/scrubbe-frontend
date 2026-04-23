@@ -113,7 +113,7 @@ export default function Pipeline() {
       {/* Stages Section */}
       <section className="space-y-6 mb-8">
         <div className="flex items-center gap-2 mb-6">
-          <Workflow size={14} className="text-cyan-400" />
+          <Workflow size={14} className="text-green-400" />
           <h2 className="text-[11px] font-black uppercase tracking-[0.2em]">
             Stages & historical behaviour
           </h2>
@@ -146,7 +146,7 @@ export default function Pipeline() {
                 </p>
                 <button
                   onClick={() => setHide((prev) => !prev)}
-                  className="text-[11px] font-bold text-cyan-400 underline decoration-cyan-400/30 underline-offset-4"
+                  className="text-[11px] font-bold text-green-400 underline decoration-green-400/30 underline-offset-4"
                 >
                   Hide logs
                 </button>
@@ -199,7 +199,7 @@ export default function Pipeline() {
 
       {/* Action Buttons */}
       <footer className="space-y-3">
-        <button className="w-full py-4 bg-cyan-400 text-black text-base font-medium rounded-xl hover:bg-cyan-300 transition-all">
+        <button className="w-full py-4 bg-green-400 text-black text-base font-medium rounded-xl hover:bg-green-300 transition-all">
           Review code intelligence Suggestion
         </button>
         <div className="grid grid-cols-2 gap-3">

@@ -100,17 +100,17 @@ const Features = () => {
           {items.map((item) => (
             <motion.div
               key={item.title}
-              className="h-[218px] border border-IMSCyan/30 p-4 space-y-2 flex flex-col justify-center relative"
+              className="h-[218px] border border-cyan-500/30 p-4 space-y-2 flex flex-col justify-center relative"
               variants={itemVariants as any}
             >
-              <div className="h-4 w-[2px] bg-IMSCyan absolute top-0 right-[-1px]" />
-              <div className="h-4 w-[2px] bg-IMSCyan absolute -top-2 left-[-1px]" />
-              <div className="h-4 w-[2px] bg-IMSCyan absolute bottom-0 left-[-1px]" />
-              <div className="h-4 w-[2px] bg-IMSCyan absolute bottom-0 right-[-1px]" />
-              <div className="h-[2px] w-4 bg-IMSCyan absolute bottom-0 right-[-1px]" />
-              <div className="h-[2px] w-4 bg-IMSCyan absolute bottom-0 left-[-1px]" />
-              <div className="h-[2px] w-4 bg-IMSCyan absolute -top-2 right-[-1px]" />
-              <div className="h-[2px] w-4 bg-IMSCyan absolute -top-2 left-[-1px]" />
+              <div className="h-4 w-[2px] bg-cyan-500 absolute top-0 right-[-1px]" />
+              <div className="h-4 w-[2px] bg-cyan-500 absolute -top-2 left-[-1px]" />
+              <div className="h-4 w-[2px] bg-cyan-500 absolute bottom-0 left-[-1px]" />
+              <div className="h-4 w-[2px] bg-cyan-500 absolute bottom-0 right-[-1px]" />
+              <div className="h-[2px] w-4 bg-cyan-500 absolute bottom-0 right-[-1px]" />
+              <div className="h-[2px] w-4 bg-cyan-500 absolute bottom-0 left-[-1px]" />
+              <div className="h-[2px] w-4 bg-cyan-500 absolute -top-2 right-[-1px]" />
+              <div className="h-[2px] w-4 bg-cyan-500 absolute -top-2 left-[-1px]" />
               <div className="size-14">
                 <img
                   src={item.icon}
@@ -125,7 +125,7 @@ const Features = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-10 min-h-[400px] py-5 md:py-20 relative z-10 mx-auto">
-          <div className=" w-[40%] h-[300px] bg-IMSCyan opacity-10 rounded-[100%] blur-3xl absolute left-1/3 top-1/3 -z-10" />
+          <div className=" w-[40%] h-[300px] bg-cyan-500 opacity-10 rounded-[100%] blur-3xl absolute left-1/3 top-1/3 -z-10" />
           <div className="flex flex-col justify-center space-y-10">
             <motion.div variants={itemVariants as any} className=" space-y-5">
               <h2 className=" text-white text-3xl md:text-4xl font-bigshotOne max-w-sm">

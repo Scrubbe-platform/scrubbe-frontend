@@ -41,7 +41,7 @@ const HowItWorks = () => {
             className=" text-4xl md:text-5xl text-white font-bigshotOne"
           >
             The{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-IMSCyan via-[#8250BE] to-[#8250BE]">
+            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-[#8250BE] to-[#8250BE]">
               Incident Platform{" "}
             </span>{" "}
             Built Around How Teams Actually Work
@@ -62,7 +62,7 @@ const HowItWorks = () => {
                   context, and code intelligence attached
                 </p>
                 <Link href={""}>
-                  <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-IMSCyan text-IMSCyan rounded-md">
+                  <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
                     <p>See code intelligence</p>
                     <ArrowRight className="size-3" />
                   </div>
@@ -79,7 +79,7 @@ const HowItWorks = () => {
                   than generic runbooks.
                 </p>
                 <Link href={""}>
-                  <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-IMSCyan text-IMSCyan rounded-md">
+                  <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
                     <p>How it compares</p>
                     <ArrowRight className="size-3" />
                   </div>
@@ -95,7 +95,7 @@ const HowItWorks = () => {
                   thresholds to auto-open incidents and trigger workflows.
                 </p>
                 <Link href={""}>
-                  <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-IMSCyan text-IMSCyan rounded-md">
+                  <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
                     <p>Connect Fraud Signals</p>
                     <ArrowRight className="size-3" />
                   </div>
@@ -112,7 +112,7 @@ const HowItWorks = () => {
                   see what actually happened.
                 </p>
                 {/* <Link href={""}>
-                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-IMSCyan text-IMSCyan rounded-md">
+                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
                   <p>Connect Fraud Signals</p>
                   <ArrowRight className="size-3" />
                 </div>
@@ -123,11 +123,11 @@ const HowItWorks = () => {
               variants={itemVariants as any}
               className="relative group z-10"
             >
-              <div className="w-full h-full absolute -z-10 bg-IMSCyan scale-50 group-hover:scale-80 blur-3xl transition-all duration-200 ease-linear" />
+              <div className="w-full h-full absolute -z-10 bg-cyan-500 scale-50 group-hover:scale-80 blur-3xl transition-all duration-200 ease-linear" />
               <img
                 src="/IMS/incident-widget.jpg"
                 alt="timeline"
-                className="border border-IMSCyan/30 rounded-2xl"
+                className="border border-cyan-500/30 rounded-2xl"
               />
             </motion.div>
           </div>
@@ -139,7 +139,7 @@ const HowItWorks = () => {
             className=" text-4xl md:text-5xl text-white font-bigshotOne"
           >
             See the{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-IMSCyan  to-[#8250BE]">
+            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500  to-[#8250BE]">
               {" "}
               Real Root Cause
             </span>{" "}
@@ -160,7 +160,7 @@ const HowItWorks = () => {
                 <li>Service impact and blast radius view</li>
               </ul>
               <Link href={""}>
-                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-IMSCyan text-IMSCyan rounded-md">
+                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
                   <p>See how we compare</p>
                   <ArrowRight className="size-3" />
                 </div>
@@ -175,7 +175,7 @@ const HowItWorks = () => {
             className=" text-4xl md:text-5xl text-white font-bigshotOne max-w-4xl"
           >
             Code Intelligence — From Failed Deploy to{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-IMSCyan  to-[#8250BE]">
+            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500  to-[#8250BE]">
               Suggested Fix{" "}
             </span>
           </motion.h2>
@@ -184,7 +184,7 @@ const HowItWorks = () => {
               variants={itemVariants as any}
               className="relative group z-10"
             >
-              <div className="w-full h-full absolute -z-10 bg-IMSCyan scale-50 group-hover:scale-80 blur-3xl transition-all duration-200 ease-linear" />
+              <div className="w-full h-full absolute -z-10 bg-cyan-500 scale-50 group-hover:scale-80 blur-3xl transition-all duration-200 ease-linear" />
 
               <img
                 src="/IMS/intelligent-suggestion.svg"
@@ -234,7 +234,7 @@ const HowItWorks = () => {
               </ul>
 
               <Link href={""}>
-                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-IMSCyan text-IMSCyan rounded-md">
+                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
                   <p>Compare with copilot & more</p>
                   <ArrowRight className="size-3" />
                 </div>
@@ -249,7 +249,7 @@ const HowItWorks = () => {
             className=" text-4xl md:text-5xl text-white font-bigshotOne"
           >
             On-Call Handover That{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-IMSCyan via-[#8250BE] to-[#8250BE]">
+            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-[#8250BE] to-[#8250BE]">
               {" "}
               Writes
             </span>{" "}
@@ -279,7 +279,7 @@ const HowItWorks = () => {
               </p>
 
               <Link href={""}>
-                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-IMSCyan text-IMSCyan rounded-md">
+                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
                   <p>See how we compare</p>
                   <ArrowRight className="size-3" />
                 </div>
@@ -289,7 +289,7 @@ const HowItWorks = () => {
               variants={itemVariants as any}
               className="relative group z-10"
             >
-              <div className="w-full h-full absolute -z-10 bg-IMSCyan scale-50 group-hover:scale-80 blur-3xl transition-all duration-200 ease-linear" />
+              <div className="w-full h-full absolute -z-10 bg-cyan-500 scale-50 group-hover:scale-80 blur-3xl transition-all duration-200 ease-linear" />
 
               <img
                 src="/IMS/on-call-schedule.svg"
@@ -306,7 +306,7 @@ const HowItWorks = () => {
             className=" text-4xl md:text-5xl text-white font-bigshotOne"
           >
             Train for{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-IMSCyan via-[#8250BE] to-[#8250BE]">
+            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-[#8250BE] to-[#8250BE]">
               {" "}
               Real Outages{" "}
             </span>{" "}
@@ -341,7 +341,7 @@ const HowItWorks = () => {
             </p>
 
             <Link href={""}>
-              <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-IMSCyan text-IMSCyan rounded-md">
+              <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
                 <p>Explore Simulations</p>
                 {/* <ArrowRight className="size-3" /> */}
               </div>

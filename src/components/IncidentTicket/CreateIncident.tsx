@@ -206,7 +206,7 @@ const CreateIncident = ({ isOpen, onClose, isModal }: CreateIncidentProps) => {
 
   const statusColor: { [key: string]: string } = {
     OPEN: "bg-blue-500",
-    ACKNOWLEDGED: "bg-cyan-500",
+    ACKNOWLEDGED: "bg-green-500",
     INVESTIGATION: "bg-amber-500",
     MITIGATED: "bg-orange-500",
     RESOLVED: "bg-emerald-500",

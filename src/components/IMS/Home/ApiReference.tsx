@@ -53,7 +53,7 @@ const ApiReference = () => {
             className=" text-4xl md:text-5xl text-white font-bigshotOne text-center"
           >
             API-First{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-IMSCyan via-[#8250BE] to-[#8250BE]">
+            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-[#8250BE] to-[#8250BE]">
               Incident Management{" "}
             </span>
           </motion.h2>
@@ -68,11 +68,11 @@ const ApiReference = () => {
           >
             <CButton
               onClick={() => router.push("/auth/business-signup")}
-              className="  w-full px-5 h-[40px] bg-IMSCyan hover:bg-IMSCyan shadow-none text-base"
+              className="  w-full px-5 h-[40px] bg-cyan-500 hover:bg-cyan-500 shadow-none text-base"
             >
               Get API Keys
             </CButton>
-            <CButton className=" w-full px-5  h-[40px] border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan shadow-none text-base">
+            <CButton className=" w-full px-5  h-[40px] border bg-transparent hover:bg-transparent border-cyan-500 text-cyan-500 shadow-none text-base">
               View full API Reference{" "}
             </CButton>
           </motion.div>
@@ -83,13 +83,13 @@ const ApiReference = () => {
                 <div
                   key={index}
                   onClick={() => setItem(index)}
-                  className={`min-w-14 sm:min-w-24 px-2 py-2 text-IMSCyan text-center text-sm cursor-pointer ${
+                  className={`min-w-14 sm:min-w-24 px-2 py-2 text-cyan-500 text-center text-sm cursor-pointer ${
                     index === 0 && "rounded-l-lg"
                   } ${index === 3 && "rounded-r-lg"}
                   ${
                     index === item
                       ? "bg-[#098C95] text-black border-none"
-                      : "border-IMSCyan border"
+                      : "border-cyan-500 border"
                   }
                   `}
                 >
@@ -107,7 +107,7 @@ const ApiReference = () => {
             key={item}
             className="relative group z-10 max-w-2xl h-[600px]"
           >
-            <div className="w-full h-full absolute -z-10 bg-IMSCyan scale-50 group-hover:scale-80 blur-3xl transition-all duration-200 ease-linear" />
+            <div className="w-full h-full absolute -z-10 bg-cyan-500 scale-50 group-hover:scale-80 blur-3xl transition-all duration-200 ease-linear" />
             <img
               src={`/IMS/${referenceImages[item]}.svg`}
               alt=""

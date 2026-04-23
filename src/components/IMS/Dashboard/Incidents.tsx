@@ -99,7 +99,7 @@ const Incidents = () => {
           label="Agents Running"
           value="4"
           subValue="2 RCA • 1 fix • 1 verify"
-          colorClass="text-cyan-400"
+          colorClass="text-green-400"
         />
       </section>
 

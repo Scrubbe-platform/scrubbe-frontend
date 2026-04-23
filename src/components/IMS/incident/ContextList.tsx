@@ -52,7 +52,7 @@ const IncidentContextView: React.FC<SubmittedContextProps> = ({
   data,
 }) => {
   return (
-    <div className="w-full rounded-2xl p-6 border border-cyan-400/30 ">
+    <div className="w-full rounded-2xl p-6 border border-green-400/30 ">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-white opacity-90 tracking-tight">
@@ -101,7 +101,7 @@ const IncidentContextView: React.FC<SubmittedContextProps> = ({
           {data.runbookOverrideUrl ? (
             <a
               href={data.runbookOverrideUrl}
-              className="text-cyan-400 hover:underline"
+              className="text-green-400 hover:underline"
             >
               {data.runbookOverrideUrl}
             </a>

@@ -358,7 +358,7 @@ export default function EzraConsole() {
         </aside>
 
         {/* Center Column: Chat Interface */}
-        <section className="col-span-5 flex flex-col border border-cyan-500/20 rounded-2xl bg-[#030a1c] relative overflow-hidden">
+        <section className="col-span-5 flex flex-col border border-green-500/20 rounded-2xl bg-[#030a1c] relative overflow-hidden">
           <div className="flex justify-between items-center p-4 border-b border-white/5">
             <div className="flex items-center gap-2">
               <span className="text-xs">
@@ -419,7 +419,7 @@ export default function EzraConsole() {
                 <div
                   className={`max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
                     msg.role === "user"
-                      ? "bg-cyan-500/20 text-white"
+                      ? "bg-green-500/20 text-white"
                       : "bg-white/5 text-slate-300"
                   }`}
                 >
@@ -436,7 +436,7 @@ export default function EzraConsole() {
           <div className="p-4 bg-gradient-to-t from-black/40 to-transparent">
             <div className="relative group">
               <input
-                className="w-full bg-[#1e293b]/50 border border-white/10 rounded-xl py-4 px-12 text-sm focus:outline-none focus:border-cyan-500/50 transition-all"
+                className="w-full bg-[#1e293b]/50 border border-white/10 rounded-xl py-4 px-12 text-sm focus:outline-none focus:border-green-500/50 transition-all"
                 placeholder="Ask Ezra — e.g. 'Analyse INC-311' or 'What caused the checkout failure?'"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -447,13 +447,13 @@ export default function EzraConsole() {
                 <img
                   src="/IMS/icons/star.svg"
                   alt="ezrastar.svg"
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-500 size-5"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500 size-5"
                 />
               </div>
               <button
                 onClick={handleSend}
                 disabled={analysing || generatingReport || !input.trim()}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-cyan-500 text-black rounded-lg hover:bg-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-green-500 text-black rounded-lg hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Send size={16} />
               </button>
@@ -707,7 +707,7 @@ const SessionCard = ({
     onClick={onClick}
     className={`p-4 rounded-xl border transition-all cursor-pointer ${
       active
-        ? "border-cyan-500/50 bg-cyan-500/5"
+        ? "border-green-500/50 bg-green-500/5"
         : "border-white/5 bg-transparent hover:bg-white/[0.02]"
     }`}
   >
@@ -764,7 +764,7 @@ const PromptButton = ({
 }) => (
   <button
     onClick={onClick}
-    className="flex items-center gap-2 px-3 py-2 bg-slate-900/50 border border-white/5 rounded-lg text-sm font-bold text-slate-400 hover:border-cyan-500/30 hover:text-cyan-400 transition-all"
+    className="flex items-center gap-2 px-3 py-2 bg-slate-900/50 border border-white/5 rounded-lg text-sm font-bold text-slate-400 hover:border-green-500/30 hover:text-green-400 transition-all"
   >
     {icon} {label}
   </button>

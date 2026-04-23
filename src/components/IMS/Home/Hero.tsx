@@ -50,7 +50,7 @@ const Hero = () => {
             className="text-white text-4xl  font-bigshotOne md:text-start text-center max-w-xl"
           >
             The AI Engineering{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-IMSCyan via-[#8250BE] to-[#8250BE]">
+            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-[#8250BE] to-[#8250BE]">
               Incident Platform
             </span>{" "}
             That Detect, triage, explain, and fix failures across code,
@@ -70,11 +70,11 @@ const Hero = () => {
           >
             <CButton
               onClick={() => router.push("/auth/business-signup")}
-              className="  w-full px-5 h-[50px] bg-IMSCyan hover:bg-IMSCyan shadow-none text-base"
+              className="  w-full px-5 h-[50px] bg-cyan-500 hover:bg-cyan-500 shadow-none text-base"
             >
               Get Started
             </CButton>
-            <CButton className=" w-full px-5  h-[50px] border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan shadow-none text-base">
+            <CButton className=" w-full px-5  h-[50px] border bg-transparent hover:bg-transparent border-cyan-500 text-cyan-500 shadow-none text-base">
               Book a Demo
             </CButton>
           </motion.div>

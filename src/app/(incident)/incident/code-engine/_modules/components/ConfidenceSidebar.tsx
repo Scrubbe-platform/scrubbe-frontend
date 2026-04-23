@@ -367,7 +367,7 @@ export default function ConfidenceSidebar({
       <div className="px-4 py-4 flex flex-col gap-3">
         <button
           onClick={onApprove}
-          className="w-full py-3.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-neutral-900 text-sm font-bold transition-colors"
+          className="w-full py-3.5 rounded-xl bg-green-400 hover:bg-green-300 text-neutral-900 text-sm font-bold transition-colors"
         >
           Approve &amp; merge
         </button>

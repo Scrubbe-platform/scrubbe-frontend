@@ -72,7 +72,7 @@ export default function Dashboard() {
       label: "Total Incidents",
       value: loadingMetrics ? "—" : metrics?.totalIncidents ?? 0,
       subText: "All severities • 24h",
-      valueColor: "text-cyan-400",
+      valueColor: "text-green-400",
     },
     {
       label: "Auto-Remediated",
@@ -159,7 +159,7 @@ export default function Dashboard() {
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
               Avg MTTA
             </span>
-            <div className="text-3xl font-bold text-cyan-400">
+            <div className="text-3xl font-bold text-green-400">
               {metrics.avgMTTA != null ? formatTime(metrics.avgMTTA) : "—"}
             </div>
             <div className="text-[11px] text-slate-500">

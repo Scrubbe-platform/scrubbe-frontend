@@ -25,7 +25,7 @@ const PolicySection = () => {
 
           <button
             onClick={() => setIsPolicy(true)}
-            className="px-6 py-2 border border-cyan-400 text-cyan-400 rounded-xl text-lg font-bold hover:bg-cyan-400/10 transition-all duration-200 shadow-[0_0_15px_rgba(34,211,238,0.1)]"
+            className="px-6 py-2 border border-green-400 text-green-400 rounded-xl text-lg font-bold hover:bg-green-400/10 transition-all duration-200 shadow-[0_0_15px_rgba(34,211,238,0.1)]"
           >
             Details
           </button>
@@ -67,7 +67,7 @@ const PolicySection = () => {
 
 // Internal sub-component for policy metrics
 const PolicyCard = ({ title, value }: { title: string; value: string }) => (
-  <div className="bg-black border border-slate-800 rounded-2xl p-6 flex flex-col gap-2 group hover:border-cyan-500/30 transition-all duration-300">
+  <div className="bg-black border border-slate-800 rounded-2xl p-6 flex flex-col gap-2 group hover:border-green-500/30 transition-all duration-300">
     <h3 className="text-base font-black text-slate-100 uppercase tracking-tight">
       {title}
     </h3>

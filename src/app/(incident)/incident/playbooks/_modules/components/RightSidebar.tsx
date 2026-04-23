@@ -27,7 +27,7 @@ const SectionHeader = ({ children }: { children: React.ReactNode }) => (
 const MatchRow = ({ label, weight, met }: MatchCriteria) => (
   <div className="flex items-center justify-between py-2 border-b border-white/5 last:border-0 group">
     <div className="flex items-center gap-2">
-      <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+      <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
       <span className="text-[11px] font-mono text-slate-300 group-hover:text-white transition-colors">
         {label}
       </span>
@@ -61,7 +61,7 @@ const PlaybookRightSidebar: React.FC = () => {
       <section>
         <SectionHeader>Match Confidence</SectionHeader>
         <div className="flex flex-col items-center mb-6">
-          <span className="text-4xl font-black text-cyan-400 tracking-tight">
+          <span className="text-4xl font-black text-green-400 tracking-tight">
             91%
           </span>
           <span className="text-[10px] font-mono text-slate-500 mt-1 uppercase tracking-widest">
@@ -125,8 +125,8 @@ const PlaybookRightSidebar: React.FC = () => {
                 <CheckCircle2 size={16} className="text-emerald-500" />
               ) : step.status === "active" ? (
                 <div className="relative flex items-center justify-center">
-                  <Circle size={18} className="text-cyan-400" />
-                  <div className="absolute w-2 h-2 bg-cyan-400 rounded-full" />
+                  <Circle size={18} className="text-green-400" />
+                  <div className="absolute w-2 h-2 bg-green-400 rounded-full" />
                 </div>
               ) : (
                 <Circle size={18} className="text-slate-800" />

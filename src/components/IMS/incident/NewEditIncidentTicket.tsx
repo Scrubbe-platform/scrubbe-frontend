@@ -177,7 +177,10 @@ const NewEditIncidentTicket = () => {
           incidentId: ticket?.id,
         };
 
-        const res = await put(`${endpoint.incident_ticket.create}/${id}`, newData);
+        const res = await put(
+          `${endpoint.incident_ticket.create}/${id}`,
+          newData
+        );
         if (res.success) {
           toast.success("Incident ticket updated successfully");
           queryClient.refetchQueries({ queryKey: [querykeys.INCIDENT_TICKET] });
@@ -216,7 +219,7 @@ const NewEditIncidentTicket = () => {
 
   const statusColor: { [key: string]: string } = {
     OPEN: "bg-blue-500",
-    ACKNOWLEDGED: "bg-cyan-500",
+    ACKNOWLEDGED: "bg-green-500",
     INVESTIGATION: "bg-amber-500",
     MITIGATED: "bg-orange-500",
     RESOLVED: "bg-emerald-500",
@@ -494,122 +497,128 @@ const NewEditIncidentTicket = () => {
               </div>
             </div>
             <div className="grid grid-cols-3 mt-3 gap-6">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
-                      Incident Commander
-                    </label>
-                    <Controller
-                      name="incidentCommander"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          {...field}
-                          options={[
-                            { label: "Team member or group", value: "" },
-                          ].concat(
-                            members?.map((member) => ({
-                              label: member.email,
-                              value: member.email,
-                            })) ?? []
-                          )}
-                          className="!bg-[#08132F]"
-                        />
+              <div className="space-y-1.5">
+                <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
+                  Incident Commander
+                </label>
+                <Controller
+                  name="incidentCommander"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={[
+                        { label: "Team member or group", value: "" },
+                      ].concat(
+                        members?.map((member) => ({
+                          label: member.email,
+                          value: member.email,
+                        })) ?? []
                       )}
+                      className="!bg-[#08132F]"
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
-                      Owing squad / team
-                    </label>
-                    <Controller
-                      name="owningSquad"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          {...field}
-                          options={[
-                            { value: "checkout_sre", label: "Checkout SRE" },
-                            {
-                              value: "payment_platform",
-                              label: "Payment Platform",
-                            },
-                            {
-                              value: "risk_and_fraud",
-                              label: "Risk and Fraud",
-                            },
-                            { value: "core_infra", label: "Core Infra" },
-                            { value: "others", label: "Others" },
-                          ]}
-                          className="!bg-[#08132F]"
-                        />
-                      )}
+                  )}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
+                  Owing squad / team
+                </label>
+                <Controller
+                  name="owningSquad"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={[
+                        { value: "checkout_sre", label: "Checkout SRE" },
+                        {
+                          value: "payment_platform",
+                          label: "Payment Platform",
+                        },
+                        {
+                          value: "risk_and_fraud",
+                          label: "Risk and Fraud",
+                        },
+                        { value: "core_infra", label: "Core Infra" },
+                        { value: "others", label: "Others" },
+                      ]}
+                      className="!bg-[#08132F]"
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                  <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
-                    Root cause category
-                  </label>
-                  <Controller
-                    name="rootCauseCategory"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        {...field}
-                        options={[{ value: "config", label: "Config" }]}
-                        className="!bg-[#08132F]"
-                      />
-                    )}
+                  )}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
+                  Root cause category
+                </label>
+                <Controller
+                  name="rootCauseCategory"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={[{ value: "config", label: "Config" }]}
+                      className="!bg-[#08132F]"
+                    />
+                  )}
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5 mt-3">
+              <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
+                Full technical description ( for SREs / devs )
+              </label>
+              <Controller
+                name="techDescription"
+                control={control}
+                render={({ field }) => (
+                  <TextArea
+                    {...field}
+                    rows={4}
+                    placeholder="Write the detailed technical story : What changed , which services , which signals , why it’s failing . This is where analysts dump everything they know "
+                    className="!bg-[#08132F]"
                   />
-                </div>
-                </div>
-                <div className="space-y-1.5 mt-3">
-                  <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
-                    Full technical description ( for SREs / devs )
-                  </label>
-                  <Controller
-                    name="techDescription"
-                    control={control}
-                    render={({ field }) => (
-                      <TextArea
-                        {...field}
-                        rows={4}
-                        placeholder="Write the detailed technical story : What changed , which services , which signals , why it’s failing . This is where analysts dump everything they know "
-                        className="!bg-[#08132F]"
-                      />
-                    )}
+                )}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
+                Impact Summary (plain language - for leadership & Ezra )
+              </label>
+              <Controller
+                name="impactSummary"
+                control={control}
+                render={({ field }) => (
+                  <TextArea
+                    {...field}
+                    label="One or two paragraph : who is affected , how bad it is, whether you are in control "
+                    labelClassName="!text-gray-300"
+                    rows={3}
+                    placeholder="Example: 'Customers in EU are seeing...'"
+                    className="!bg-[#08132F]"
                   />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
-                    Impact Summary (plain language - for leadership & Ezra )
-                  </label>
-                  <Controller
-                    name="impactSummary"
-                    control={control}
-                    render={({ field }) => (
-                      <TextArea
-                        {...field}
-                        label="One or two paragraph : who is affected , how bad it is, whether you are in control "
-                        labelClassName="!text-gray-300"
-                        rows={3}
-                        placeholder="Example: 'Customers in EU are seeing...'"
-                        className="!bg-[#08132F]"
-                      />
-                    )}
-                  />
-                </div>
+                )}
+              />
+            </div>
           </section>
         </StepWrapper>
 
         <div className="flex gap-2 justify-end">
-        <CButton onClick={() => router.push(`/incident/tickets/ezra/${id}`)} className="w-fit border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
-          <AiStarIcon stroke="#06eefd"/>
-          Ezra Lead
-        </CButton>
-        <CButton onClick={() => router.push(`/incident/tickets/ezra/${id}`)} className="w-fit border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
-          <AiStarIcon stroke="#06eefd"/>
-          Ezra Analyst
-        </CButton>
+          <CButton
+            onClick={() => router.push(`/incident/tickets/ezra/${id}`)}
+            className="w-fit border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan"
+          >
+            <AiStarIcon stroke="#06eefd" />
+            Ezra Lead
+          </CButton>
+          <CButton
+            onClick={() => router.push(`/incident/tickets/ezra/${id}`)}
+            className="w-fit border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan"
+          >
+            <AiStarIcon stroke="#06eefd" />
+            Ezra Analyst
+          </CButton>
           {/* <CButton
             type="button"
             onClick={() => router.back()}

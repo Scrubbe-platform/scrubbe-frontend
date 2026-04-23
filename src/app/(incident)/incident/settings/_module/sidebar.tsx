@@ -54,7 +54,7 @@ const Sidebar = () => {
       label: "Defaults",
     },
     {
-      icon: <ShieldCheck size={18} className="text-cyan-400" />,
+      icon: <ShieldCheck size={18} className="text-green-400" />,
       path: "/incident/settings/policies",
       label: "Policies",
       margin: "mt-8",
@@ -65,7 +65,7 @@ const Sidebar = () => {
       label: "Code & Engine",
     },
     {
-      icon: <Sparkles size={18} className="text-cyan-400" />,
+      icon: <Sparkles size={18} className="text-green-400" />,
       path: "/incident/settings/ezra",
       label: "Ezra",
     },

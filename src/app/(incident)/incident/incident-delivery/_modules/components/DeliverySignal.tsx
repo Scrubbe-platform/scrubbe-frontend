@@ -38,7 +38,7 @@ const DeliverySignal = () => {
               Toggle Stricter
             </button>
             <button className="px-3 py-1.5 border border-IMSCyan rounded-lg hover:bg-slate-800 transition-colors">
-              <RefreshCcw className="w-4 h-4 text-cyan-400" />
+              <RefreshCcw className="w-4 h-4 text-green-400" />
             </button>
           </div>
         </div>
@@ -152,7 +152,7 @@ const SignalButton = ({
 );
 
 const TraceStep = ({ title, sub }: any) => (
-  <div className="w-[230px] border border-green rounded-lg p-3 group hover:border-cyan-500/50 transition-colors">
+  <div className="w-[230px] border border-green rounded-lg p-3 group hover:border-green-500/50 transition-colors">
     <p className="text-sm font-bold text-white mb-1">{title}</p>
     <p className="text-xs text-white font-medium">{sub}</p>
   </div>

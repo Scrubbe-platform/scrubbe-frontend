@@ -180,8 +180,8 @@ const PlaybookSidebar: React.FC = () => {
               )}
               {item.status === "active" && (
                 <div className="relative flex items-center justify-center">
-                  <Circle size={16} className="text-cyan-400" />
-                  <div className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  <Circle size={16} className="text-green-400" />
+                  <div className="absolute w-1.5 h-1.5 rounded-full bg-green-400" />
                 </div>
               )}
               {item.status === "pending" && (

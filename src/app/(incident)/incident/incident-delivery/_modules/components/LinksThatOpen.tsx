@@ -43,7 +43,7 @@ const LinksThatOpen = () => {
               <div className="space-y-2">
                 <a
                   href="https://github.example/pr/131"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-xs font-bold hover:bg-cyan-500/10 transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-green-500/30 bg-green-500/5 text-green-400 text-xs font-bold hover:bg-green-500/10 transition-colors"
                 >
                   <Link2 size={14} /> runUrl
                 </a>
@@ -55,7 +55,7 @@ const LinksThatOpen = () => {
               <div className="space-y-2">
                 <a
                   href="https://github.example/pr/131/files"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-xs font-bold hover:bg-cyan-500/10 transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-green-500/30 bg-green-500/5 text-green-400 text-xs font-bold hover:bg-green-500/10 transition-colors"
                 >
                   <Link2 size={14} /> diffUrl
                 </a>

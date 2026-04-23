@@ -100,7 +100,7 @@ export default function Policy() {
           label="Active Policies"
           value={17}
           sub="Enforced on all agents"
-          colorClass="text-cyan-400"
+          colorClass="text-green-400"
         />
         <StatCard
           label="Draft Policies"

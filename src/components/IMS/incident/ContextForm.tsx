@@ -187,7 +187,7 @@ const AddContextForm = () => {
             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">
               Labels / Tags
             </label>
-            <div className="flex flex-wrap items-center gap-2 p-2 bg-[#0a0f1d] border border-white/10 rounded-lg focus-within:border-cyan-500/50 transition-all">
+            <div className="flex flex-wrap items-center gap-2 p-2 bg-[#0a0f1d] border border-white/10 rounded-lg focus-within:border-green-500/50 transition-all">
               {currentTags.map((tag) => (
                 <span
                   key={tag}
@@ -316,13 +316,13 @@ const AddContextForm = () => {
         <div className="flex justify-end gap-4 mt-10">
           <button
             type="button"
-            className="px-4 py-2.5 text-sm rounded-lg border border-cyan-400 text-cyan-400 font-semibold hover:bg-cyan-400/5 transition-all"
+            className="px-4 py-2.5 text-sm rounded-lg border border-green-400 text-green-400 font-semibold hover:bg-green-400/5 transition-all"
           >
             Save as draft
           </button>
           <button
             type="submit"
-            className="px-4 py-2.5 text-sm rounded-lg bg-cyan-400 text-[#050b18] font-bold hover:bg-cyan-300 transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+            className="px-4 py-2.5 text-sm rounded-lg bg-green-400 text-[#050b18] font-bold hover:bg-green-300 transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)]"
           >
             Save and update incident
           </button>

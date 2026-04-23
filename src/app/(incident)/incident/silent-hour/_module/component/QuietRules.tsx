@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Plus, ArrowRight } from 'lucide-react';
-import SideModal from '@/components/ui/SideModal';
-import QuietRuleForm from './QuietRuleForm';
+import React, { useState } from "react";
+import { Plus, ArrowRight } from "lucide-react";
+import SideModal from "@/components/ui/SideModal";
+import QuietRuleForm from "./QuietRuleForm";
 
 export type QuietRule = {
   name: string;
@@ -13,12 +13,15 @@ export type QuietRule = {
   isActive: boolean;
 };
 
-const QuietRules = ({ onRuleAdded }: { onRuleAdded?: (rule: QuietRule) => void }) => {
-    const [open, setOpen] = useState(false)
+const QuietRules = ({
+  onRuleAdded,
+}: {
+  onRuleAdded?: (rule: QuietRule) => void;
+}) => {
+  const [open, setOpen] = useState(false);
   return (
-    <div className=" bg-[#030D25] p-8 text-slate-300 antialiased border border-cyan-400/40 rounded-lg">
+    <div className=" bg-[#030D25] p-8 text-slate-300 antialiased border border-green-400/40 rounded-lg">
       <div className="max-w-4xl mx-auto space-y-6">
-
         {/* HEADER SECTION */}
         <div className="flex justify-between items-start">
           <div className="space-y-1">
@@ -32,7 +35,10 @@ const QuietRules = ({ onRuleAdded }: { onRuleAdded?: (rule: QuietRule) => void }
               Override global/rotation rules for individual teams or services
             </p>
           </div>
-          <button onClick={() => setOpen(true)} className="flex items-center gap-2 px-4 py-2.5 text-base rounded-lg border border-cyan-500/50 bg-cyan-500/5 text-cyan-400 font-semibold hover:bg-cyan-500/10 transition-colors">
+          <button
+            onClick={() => setOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 text-base rounded-lg border border-green-500/50 bg-green-500/5 text-green-400 font-semibold hover:bg-green-500/10 transition-colors"
+          >
             <Plus size={18} />
             <span>Add Team Rule</span>
           </button>
@@ -40,10 +46,11 @@ const QuietRules = ({ onRuleAdded }: { onRuleAdded?: (rule: QuietRule) => void }
 
         {/* MAIN CONTAINER */}
         <div className="rounded-2xl border border-white/40 p-6 space-y-4">
-
           {/* GROUP HEADER */}
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-base font-semibold text-white">Git providers</h2>
+            <h2 className="text-base font-semibold text-white">
+              Git providers
+            </h2>
             <ArrowRight size={16} className="text-slate-500" />
           </div>
 
@@ -51,11 +58,19 @@ const QuietRules = ({ onRuleAdded }: { onRuleAdded?: (rule: QuietRule) => void }
           <RuleCard
             title="Frontend Platform"
             badge="Frontend"
-            badgeColor="text-cyan-400 border-cyan-400/30 bg-cyan-400/5"
+            badgeColor="text-green-400 border-green-400/30 bg-green-400/5"
             rows={[
-              { label: "Quiet window", value: "21:00 - 08:00", rightValue: "Suppression" },
-              { label: "P2 & below silenced", value: "Rotation Link", rightValue: "Frontend Primary" },
-              { label: "Exceptions", value: "3 dates" }
+              {
+                label: "Quiet window",
+                value: "21:00 - 08:00",
+                rightValue: "Suppression",
+              },
+              {
+                label: "P2 & below silenced",
+                value: "Rotation Link",
+                rightValue: "Frontend Primary",
+              },
+              { label: "Exceptions", value: "3 dates" },
             ]}
           />
 
@@ -65,25 +80,43 @@ const QuietRules = ({ onRuleAdded }: { onRuleAdded?: (rule: QuietRule) => void }
             badge="Critical"
             badgeColor="text-rose-500 border-rose-500/30 bg-rose-500/5"
             rows={[
-              { label: "Quiet window", value: "Never quiet (P0/P1 always noisy)", rightValue: "Suppression" },
-              { label: "Only p3+ at night", value: "Rotation Link", rightValue: "Payments Secondary" },
-              { label: "Exceptions", value: "1 dates" }
+              {
+                label: "Quiet window",
+                value: "Never quiet (P0/P1 always noisy)",
+                rightValue: "Suppression",
+              },
+              {
+                label: "Only p3+ at night",
+                value: "Rotation Link",
+                rightValue: "Payments Secondary",
+              },
+              { label: "Exceptions", value: "1 dates" },
             ]}
           />
 
           {/* FOOTER NOTE */}
           <p className="text-center text-xs text-slate-500 pt-4">
-            Team-specific rules override global and rotation defaults when conflicts occur.
+            Team-specific rules override global and rotation defaults when
+            conflicts occur.
           </p>
         </div>
       </div>
 
-      {
-      open &&
-        <SideModal title='Add Team-Specific Quiet Rule' isOpen={open} onClose={() => setOpen(false)}>
-            <QuietRuleForm onClose={() => setOpen(false)} onSave={(rule: QuietRule) => { onRuleAdded?.(rule); setOpen(false); }}/>
+      {open && (
+        <SideModal
+          title="Add Team-Specific Quiet Rule"
+          isOpen={open}
+          onClose={() => setOpen(false)}
+        >
+          <QuietRuleForm
+            onClose={() => setOpen(false)}
+            onSave={(rule: QuietRule) => {
+              onRuleAdded?.(rule);
+              setOpen(false);
+            }}
+          />
         </SideModal>
-      }
+      )}
     </div>
   );
 };
@@ -94,17 +127,24 @@ interface RuleRow {
   rightValue?: string;
 }
 
-const RuleCard = ({ title, badge, badgeColor, rows }: {
-  title: string,
-  badge: string,
-  badgeColor: string,
-  rows: RuleRow[]
+const RuleCard = ({
+  title,
+  badge,
+  badgeColor,
+  rows,
+}: {
+  title: string;
+  badge: string;
+  badgeColor: string;
+  rows: RuleRow[];
 }) => {
   return (
     <div className="rounded-xl border border-white/40 p-5 hover:border-white/20 transition-all">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-base font-semibold text-slate-200">{title}</h3>
-        <span className={`px-3 py-0.5 rounded-full border text-xs font-medium ${badgeColor}`}>
+        <span
+          className={`px-3 py-0.5 rounded-full border text-xs font-medium ${badgeColor}`}
+        >
           {badge}
         </span>
       </div>

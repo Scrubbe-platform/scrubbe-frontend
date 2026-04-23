@@ -68,13 +68,13 @@ const GlobalSearch = () => {
               onClick={() => setActiveTab(tab)}
               className={`px-6 py-3 text-base font-bold transition-all relative ${
                 activeTab === tab
-                  ? "text-cyan-400"
+                  ? "text-green-400"
                   : "text-slate-500 hover:text-slate-300"
               }`}
             >
               {tab}
               {activeTab === tab && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
               )}
             </button>
           </div>
@@ -99,7 +99,7 @@ const GlobalSearch = () => {
           <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
             13 results
           </span>
-          <button className="px-2 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded text-[8px] font-bold text-cyan-400 hover:bg-cyan-500/20 transition-all">
+          <button className="px-2 py-1 bg-green-500/10 border border-green-500/20 rounded text-[8px] font-bold text-green-400 hover:bg-green-500/20 transition-all">
             Audit Logs
           </button>
         </div>

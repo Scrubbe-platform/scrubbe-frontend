@@ -138,7 +138,7 @@ const FilterPill = ({
     className={`px-3 py-1 rounded-md border text-[11px] font-bold uppercase tracking-wider transition-all
     ${
       active
-        ? "border-cyan-400 text-cyan-400 bg-cyan-400/5 shadow-[0_0_10px_rgba(34,211,238,0.1)]"
+        ? "border-green-400 text-green-400 bg-green-400/5 shadow-[0_0_10px_rgba(34,211,238,0.1)]"
         : "border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20"
     }`}
   >
@@ -150,7 +150,7 @@ const StatusBadge = ({ status }: { status: LifecycleStatus }) => {
   const styles: Record<LifecycleStatus, string> = {
     Investigating: "border-amber-500/50 text-amber-500 bg-amber-500/5",
     Proposed: "border-blue-500/50 text-blue-400 bg-blue-500/5",
-    Detected: "border-cyan-500/50 text-cyan-400 bg-cyan-500/5",
+    Detected: "border-green-500/50 text-green-400 bg-green-500/5",
     Approved: "border-emerald-500/50 text-emerald-500 bg-emerald-500/5",
     Enriched: "border-purple-500/50 text-purple-400 bg-purple-500/5",
     Analyzed: "border-indigo-500/50 text-indigo-400 bg-indigo-500/5",
@@ -181,7 +181,7 @@ const IncidentCard = ({
     className={` border rounded-xl p-4 mb-3 transition-all cursor-pointer group
         ${
           isActive
-            ? "border-cyan-400/60 bg-cyan-400/5 ring-1 ring-cyan-400/20 bg-darkEzra"
+            ? "border-green-400/60 bg-green-400/5 ring-1 ring-green-400/20 bg-darkEzra"
             : "border-white/5 hover:border-white/20"
         }`}
   >
@@ -196,7 +196,7 @@ const IncidentCard = ({
       <span className="text-[10px] font-mono text-slate-600 block mb-1 uppercase tracking-widest">
         {incident.id}
       </span>
-      <h3 className="text-[13px] font-semibold text-cyan-400 group-hover:text-cyan-300 leading-snug line-clamp-2">
+      <h3 className="text-[13px] font-semibold text-green-400 group-hover:text-green-300 leading-snug line-clamp-2">
         {incident.title}
       </h3>
     </div>
@@ -242,7 +242,7 @@ const ExactIncidentSidebar: React.FC = () => {
         </div>
         <button
           onClick={() => setOpen((prev) => !prev)}
-          className="px-5 py-2 border border-IMSCyan text-IMSCyan rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-cyan-400/5 transition-all"
+          className="px-5 py-2 border border-IMSCyan text-IMSCyan rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-green-400/5 transition-all"
         >
           Raise an Incident
         </button>
@@ -267,7 +267,7 @@ const ExactIncidentSidebar: React.FC = () => {
         <input
           type="text"
           placeholder="Search incidents, services, ID"
-          className="w-full bg-white/[0.02] border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs text-slate-300 focus:outline-none focus:border-cyan-400/40 transition-all placeholder:text-slate-600 font-medium"
+          className="w-full bg-white/[0.02] border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs text-slate-300 focus:outline-none focus:border-green-400/40 transition-all placeholder:text-slate-600 font-medium"
         />
       </div>
 

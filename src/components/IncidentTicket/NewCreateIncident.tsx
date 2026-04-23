@@ -18,7 +18,7 @@ import { useFetch } from "@/hooks/useFetch";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
- const incidentSchema = z.object({
+const incidentSchema = z.object({
   // Section: Basics & Source
   summary: z.string().min(5, "Summary must be at least 5 characters"),
   serviceArea: z.string().min(1, "Service area is required"),
@@ -66,7 +66,7 @@ import { useRouter } from "next/navigation";
   postActions: z.array(z.string()),
   ezraFocusMode: z.string().optional(),
   ezraInstructions: z.string().optional(),
-  logs:z.string().optional()
+  logs: z.string().optional(),
 });
 
 export type IncidentFormValues = z.infer<typeof incidentSchema>;
@@ -153,7 +153,8 @@ const RaiseIncident = () => {
   const { mutateAsync: createIncident, isPending: isCreating } = useMutation({
     mutationFn: async (data: IncidentFormValues) => {
       const res = await post(endpoint.incident_ticket.create, data);
-      if (!res.success) throw new Error(res.data as string ?? "Failed to create incident");
+      if (!res.success)
+        throw new Error((res.data as string) ?? "Failed to create incident");
       return res.data;
     },
     onSuccess: () => {
@@ -542,8 +543,6 @@ Refusal Reasons:"
                       />
                     )}
                   />
-
-
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
@@ -555,14 +554,14 @@ Refusal Reasons:"
                     render={({ field }) => (
                       <TextArea
                         {...field}
-                         labelClassName="!text-gray-300"
+                        labelClassName="!text-gray-300"
                         rows={3}
                         placeholder="Example: 'Customers in EU are seeing...'"
                         className="!bg-[#08132F]"
                       />
                     )}
                   />
-                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-1.5">
                     <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
@@ -852,14 +851,16 @@ Refusal Reasons:"
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {(watch("metrics") ?? []).map((item:string, idx:number) => (
-                          <div
-                            className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
-                            key={idx}
-                          >
-                            {item}
-                          </div>
-                        ))}
+                        {(watch("metrics") ?? []).map(
+                          (item: string, idx: number) => (
+                            <div
+                              className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
+                              key={idx}
+                            >
+                              {item}
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
 
@@ -875,14 +876,16 @@ Refusal Reasons:"
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {(watch("logStreams") ?? []).map((item:string, idx:number) => (
-                          <div
-                            className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
-                            key={idx}
-                          >
-                            {item}
-                          </div>
-                        ))}
+                        {(watch("logStreams") ?? []).map(
+                          (item: string, idx: number) => (
+                            <div
+                              className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
+                              key={idx}
+                            >
+                              {item}
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
 
@@ -898,14 +901,16 @@ Refusal Reasons:"
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {(watch("pipelines") ?? []).map((item:string, idx:number) => (
-                          <div
-                            className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
-                            key={idx}
-                          >
-                            {item}
-                          </div>
-                        ))}
+                        {(watch("pipelines") ?? []).map(
+                          (item: string, idx: number) => (
+                            <div
+                              className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
+                              key={idx}
+                            >
+                              {item}
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
 
@@ -921,14 +926,16 @@ Refusal Reasons:"
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {(watch("fraudRiskView") ?? []).map((item:string, idx:number) => (
-                          <div
-                            className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
-                            key={idx}
-                          >
-                            {item}
-                          </div>
-                        ))}
+                        {(watch("fraudRiskView") ?? []).map(
+                          (item: string, idx: number) => (
+                            <div
+                              className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
+                              key={idx}
+                            >
+                              {item}
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1126,7 +1133,7 @@ Refusal Reasons:"
                             type="checkbox"
                             checked={field.value === mode.id}
                             onChange={() => field.onChange(mode.id)}
-                            className="accent-cyan-500 w-4 h-4"
+                            className="accent-green-500 w-4 h-4"
                           />
                         )}
                       />
@@ -1161,7 +1168,12 @@ Refusal Reasons:"
               >
                 Save Draft
               </CButton>
-              <CButton type="submit" isLoading={isCreating} disabled={isCreating} className="px-10 py-2 w-fit text-sm ">
+              <CButton
+                type="submit"
+                isLoading={isCreating}
+                disabled={isCreating}
+                className="px-10 py-2 w-fit text-sm "
+              >
                 Create Incident
               </CButton>
             </div>

@@ -36,7 +36,7 @@ const AnalystNotes: React.FC<AnalystNotesProps> = ({
 
           <button
             onClick={() => setIsAnalystNote(true)}
-            className="px-4 py-1.5 border border-cyan-500 text-cyan-500 rounded-lg text-sm font-bold w-fit"
+            className="px-4 py-1.5 border border-green-500 text-green-500 rounded-lg text-sm font-bold w-fit"
           >
             Add analyst note
           </button>

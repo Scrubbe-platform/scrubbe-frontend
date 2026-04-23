@@ -27,11 +27,11 @@ const IntelligenceModule: React.FC<IntelligenceProps> = ({
       </h2>
 
       {/* Main Intelligence Box */}
-      <div className="bg-[#050b18]/40 border border-cyan-400/50 rounded-2xl p-4 md:p-6 relative overflow-hidden">
+      <div className="bg-[#050b18]/40 border border-green-400/50 rounded-2xl p-4 md:p-6 relative overflow-hidden">
         {/* Header Row - Stacks on very small screens */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 md:mb-6">
-          <div className="w-fit px-3 py-1 border border-cyan-400/50 rounded-lg bg-cyan-400/5 shrink-0">
-            <span className="text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-tight">
+          <div className="w-fit px-3 py-1 border border-green-400/50 rounded-lg bg-green-400/5 shrink-0">
+            <span className="text-[10px] md:text-xs font-bold text-green-400 uppercase tracking-tight">
               Scrubbe · Decision Engine
             </span>
           </div>

@@ -74,7 +74,7 @@ export default function IncidentOverview() {
   const activeIncident = selectedIncident ?? incidents[0] ?? null;
 
   return (
-    <div className="min-h-screen text-slate-300 p-6 font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen text-slate-300 p-6 font-sans selection:bg-green-500/30">
       <div className="flex md:flex-row flex-col gap-6  mx-auto relative">
         {/* LEFT SIDEBAR - STICKY */}
         {/* <aside className="w-52 shrink-0 self-start sticky top-6 space-y-4">
@@ -113,7 +113,7 @@ export default function IncidentOverview() {
 
           <button
             onClick={() => setOpenPipeline(true)}
-            className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-xs font-bold hover:bg-cyan-500/10 transition-all"
+            className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl border border-green-500/30 bg-green-500/5 text-green-400 text-xs font-bold hover:bg-green-500/10 transition-all"
           >
             <Layout size={14} /> View Pipeline{" "}
             {activeIncident ? `#${activeIncident.ticketId}` : ""}
@@ -146,7 +146,7 @@ export default function IncidentOverview() {
               <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-IMSCyan text-IMSCyan text-xs transition-all">
                 <Bell size={14} /> Notify
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-400 text-black text-xs transition-all hover:bg-cyan-300">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-400 text-black text-xs transition-all hover:bg-green-300">
                 <Phone size={14} /> Declare Incident
               </button>
             </div>

@@ -321,8 +321,8 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
           </FormSection>
 
           {/* Real-time Preview */}
-          <div className="bg-cyan-950/20 border border-cyan-500/20 rounded-3xl p-8 mt-8">
-            <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest mb-4 block">
+          <div className="bg-green-950/20 border border-green-500/20 rounded-3xl p-8 mt-8">
+            <span className="text-[10px] font-bold text-green-500 uppercase tracking-widest mb-4 block">
               Incident Preview
             </span>
             <h3 className="text-2xl font-bold text-white mb-2 break-words">
@@ -349,7 +349,7 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-8 py-2.5 rounded-xl bg-cyan-400 text-[#050b18] font-bold hover:bg-cyan-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+              className="px-8 py-2.5 rounded-xl bg-green-400 text-[#050b18] font-bold hover:bg-green-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)]"
             >
               {isSubmitting ? "Creating..." : "Save and update incident"}
             </button>

@@ -4,7 +4,14 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
-import { AlertTriangle, GitBranch, Zap, ArrowRight, CheckCircle, Circle } from "lucide-react";
+import {
+  AlertTriangle,
+  GitBranch,
+  Zap,
+  ArrowRight,
+  CheckCircle,
+  Circle,
+} from "lucide-react";
 
 type FingerprintConfig = {
   dedupWindowSeconds?: number;
@@ -94,8 +101,8 @@ export default function RulesAndRouting() {
   });
 
   const toggleRule = (id: string) => {
-    setRules(prev =>
-      prev.map(r => (r.id === id ? { ...r, enabled: !r.enabled } : r))
+    setRules((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r))
     );
   };
 
@@ -106,38 +113,65 @@ export default function RulesAndRouting() {
       {/* Dedup / routing summary */}
       <div className="grid grid-cols-3 gap-4">
         <div className="border border-white/10 rounded-xl p-4 bg-dark space-y-1">
-          <p className="text-xs text-gray-500 uppercase tracking-widest">Dedup window</p>
+          <p className="text-xs text-gray-500 uppercase tracking-widest">
+            Dedup window
+          </p>
           <p className="text-lg font-bold text-white">{dedupWindow}s</p>
-          <p className="text-xs text-gray-400">Duplicate signals within this window are merged.</p>
+          <p className="text-xs text-gray-400">
+            Duplicate signals within this window are merged.
+          </p>
         </div>
         <div className="border border-white/10 rounded-xl p-4 bg-dark space-y-1">
-          <p className="text-xs text-gray-500 uppercase tracking-widest">Active rules</p>
-          <p className="text-lg font-bold text-green">{rules.filter(r => r.enabled).length}</p>
-          <p className="text-xs text-gray-400">of {rules.length} routing rules enabled</p>
+          <p className="text-xs text-gray-500 uppercase tracking-widest">
+            Active rules
+          </p>
+          <p className="text-lg font-bold text-green">
+            {rules.filter((r) => r.enabled).length}
+          </p>
+          <p className="text-xs text-gray-400">
+            of {rules.length} routing rules enabled
+          </p>
         </div>
         <div className="border border-white/10 rounded-xl p-4 bg-dark space-y-1">
-          <p className="text-xs text-gray-500 uppercase tracking-widest">Sources</p>
+          <p className="text-xs text-gray-500 uppercase tracking-widest">
+            Sources
+          </p>
           <p className="text-lg font-bold text-white">6</p>
-          <p className="text-xs text-gray-400">GitHub, GitLab, K8s, PagerDuty, Prometheus, Datadog</p>
+          <p className="text-xs text-gray-400">
+            GitHub, GitLab, K8s, PagerDuty, Prometheus, Datadog
+          </p>
         </div>
       </div>
 
       {/* Routing pipeline visual */}
       <div className="border border-white/10 rounded-xl p-6 bg-dark">
-        <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Signal routing pipeline</h3>
+        <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">
+          Signal routing pipeline
+        </h3>
         <div className="flex items-center gap-3 flex-wrap">
-          {["Ingest", "Normalise", "Deduplicate", "Fingerprint", "Route", "Create Incident"].map((step, i, arr) => (
+          {[
+            "Ingest",
+            "Normalise",
+            "Deduplicate",
+            "Fingerprint",
+            "Route",
+            "Create Incident",
+          ].map((step, i, arr) => (
             <React.Fragment key={step}>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-xs font-bold">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-green-500/30 bg-green-500/5 text-green-400 text-xs font-bold">
                 <Zap size={12} />
                 {step}
               </div>
-              {i < arr.length - 1 && <ArrowRight size={14} className="text-gray-600" />}
+              {i < arr.length - 1 && (
+                <ArrowRight size={14} className="text-gray-600" />
+              )}
             </React.Fragment>
           ))}
         </div>
         <p className="text-xs text-gray-500 mt-4">
-          All inbound webhooks pass through this pipeline. Routing rules are applied at the <span className="text-white">Route</span> step based on source and condition.
+          All inbound webhooks pass through this pipeline. Routing rules are
+          applied at the <span className="text-white">Route</span> step based on
+          source and condition.
         </p>
       </div>
 
@@ -150,20 +184,34 @@ export default function RulesAndRouting() {
           </button>
         </div>
         <div className="divide-y divide-white/5">
-          {rules.map(rule => (
-            <div key={rule.id} className="flex items-center gap-4 p-4 hover:bg-white/[0.02]">
+          {rules.map((rule) => (
+            <div
+              key={rule.id}
+              className="flex items-center gap-4 p-4 hover:bg-white/[0.02]"
+            >
               <button onClick={() => toggleRule(rule.id)} className="shrink-0">
-                {rule.enabled
-                  ? <CheckCircle size={16} className="text-green" />
-                  : <Circle size={16} className="text-gray-600" />}
+                {rule.enabled ? (
+                  <CheckCircle size={16} className="text-green" />
+                ) : (
+                  <Circle size={16} className="text-gray-600" />
+                )}
               </button>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{rule.name}</p>
+                <p className="text-sm font-medium text-white truncate">
+                  {rule.name}
+                </p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-[10px] px-2 py-0.5 rounded border font-mono ${sourceColors[rule.source] ?? "text-gray-400 bg-gray-900/20 border-gray-700"}`}>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded border font-mono ${
+                      sourceColors[rule.source] ??
+                      "text-gray-400 bg-gray-900/20 border-gray-700"
+                    }`}
+                  >
                     {rule.source}
                   </span>
-                  <span className="text-[10px] text-gray-500 font-mono">{rule.condition}</span>
+                  <span className="text-[10px] text-gray-500 font-mono">
+                    {rule.condition}
+                  </span>
                 </div>
               </div>
               <div className="shrink-0 flex items-center gap-2 text-[10px] text-gray-400 border border-white/5 rounded px-2 py-1">
@@ -177,16 +225,39 @@ export default function RulesAndRouting() {
 
       {/* Webhook URLs */}
       <div className="border border-white/10 rounded-xl p-6 bg-dark space-y-4">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Webhook endpoints</h3>
-        <p className="text-xs text-gray-400">Point your source systems to these URLs. Include your Scrubbe API key in the <span className="font-mono text-white">X-API-Key</span> header.</p>
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+          Webhook endpoints
+        </h3>
+        <p className="text-xs text-gray-400">
+          Point your source systems to these URLs. Include your Scrubbe API key
+          in the <span className="font-mono text-white">X-API-Key</span> header.
+        </p>
         <div className="space-y-2">
-          {["github", "gitlab", "kubernetes", "pagerduty", "prometheus", "datadog", "webhook"].map(src => (
-            <div key={src} className="flex items-center gap-3 bg-black/30 rounded-lg px-4 py-2">
-              <span className="text-xs font-mono text-IMSCyan w-24 shrink-0">{src}</span>
-              <span className="text-xs font-mono text-gray-400 flex-1 truncate">
-                {`${process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.scrubbe.com"}/api/v1/ingestion/${src}`}
+          {[
+            "github",
+            "gitlab",
+            "kubernetes",
+            "pagerduty",
+            "prometheus",
+            "datadog",
+            "webhook",
+          ].map((src) => (
+            <div
+              key={src}
+              className="flex items-center gap-3 bg-black/30 rounded-lg px-4 py-2"
+            >
+              <span className="text-xs font-mono text-IMSCyan w-24 shrink-0">
+                {src}
               </span>
-              <span className="text-[10px] text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">POST</span>
+              <span className="text-xs font-mono text-gray-400 flex-1 truncate">
+                {`${
+                  process.env.NEXT_PUBLIC_API_BASE_URL ??
+                  "https://api.scrubbe.com"
+                }/api/v1/ingestion/${src}`}
+              </span>
+              <span className="text-[10px] text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">
+                POST
+              </span>
             </div>
           ))}
         </div>

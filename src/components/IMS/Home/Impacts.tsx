@@ -33,7 +33,7 @@ const textItemVariants = {
 const Impacts = () => {
   return (
     <div className="bg-[#060709] py-10 px-4 relative overflow-clip z-10">
-      <div className="size-[400px] rounded-full opacity-30 bg-IMSCyan absolute left-[10%] -top-[10%] blur-3xl z-20" />
+      <div className="size-[400px] rounded-full opacity-30 bg-cyan-500 absolute left-[10%] -top-[10%] blur-3xl z-20" />
 
       <div className="flex gap-10 md:flex-row flex-col container h-full items-center mx-auto min-h-[600px] max-w-7xl">
         {/* Animated Icon Section */}
@@ -69,7 +69,7 @@ const Impacts = () => {
                 ease: "easeInOut",
                 repeatType: "mirror",
               }}
-              className="absolute size-[150px] md:size-[230px] shadow-inner bg-gradient-to-r flex justify-center items-center rounded-lg from-lime-400 to-IMSCyan"
+              className="absolute size-[150px] md:size-[230px] shadow-inner bg-gradient-to-r flex justify-center items-center rounded-lg from-lime-400 to-cyan-500"
             ></motion.div>
             <div className="absolute ">
               <IoIosInfinite className="text-8xl" />
@@ -142,7 +142,7 @@ const Impacts = () => {
             A Different Class of Intelligence
           </h2>
           <Link href={""}>
-            <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-IMSCyan text-IMSCyan rounded-md">
+            <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
               <p>View Comparison</p>
               <ArrowRight className="size-3" />
             </div>
@@ -151,7 +151,7 @@ const Impacts = () => {
         <div className="grid sm:grid-cols-2 gap-6 max-w-4xl">
           <motion.div
             variants={textItemVariants as any}
-            className=" border transition-all duration-150 ease-linear rounded-lg px-4 py-6 hover:bg-gradient-to-b from-[#0074834D] to-[#004B571A] bg-[#080A0F] border-[#1F2937] hover:border-IMSCyan text-white space-y-2 min-h-[320px]"
+            className=" border transition-all duration-150 ease-linear rounded-lg px-4 py-6 hover:bg-gradient-to-b from-[#0074834D] to-[#004B571A] bg-[#080A0F] border-[#1F2937] hover:border-cyan-500 text-white space-y-2 min-h-[320px]"
           >
             <p className="font-semibold text-lg">
               IDE-Based AI Coding Assistants
@@ -170,7 +170,7 @@ const Impacts = () => {
           </motion.div>
           <motion.div
             variants={textItemVariants as any}
-            className=" border transition-all duration-150 ease-linear rounded-lg px-4 py-6 hover:bg-gradient-to-b from-[#0074834D] to-[#004B571A] border-[#1F2937] hover:border-IMSCyan text-white space-y-2 min-h-[320px]"
+            className=" border transition-all duration-150 ease-linear rounded-lg px-4 py-6 hover:bg-gradient-to-b from-[#0074834D] to-[#004B571A] border-[#1F2937] hover:border-cyan-500 text-white space-y-2 min-h-[320px]"
           >
             <p className="font-semibold text-lg">
               Scrubbe Incident Intelligence{" "}

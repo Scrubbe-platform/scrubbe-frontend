@@ -63,7 +63,9 @@ const PlaybookHeader: React.FC = () => {
           {breadcrumbs.map((crumb, idx) => (
             <React.Fragment key={crumb.label}>
               <span
-                className={crumb.isCurrent ? "text-cyan-400" : "text-slate-500"}
+                className={
+                  crumb.isCurrent ? "text-green-400" : "text-slate-500"
+                }
               >
                 {crumb.label}
               </span>

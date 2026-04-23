@@ -216,7 +216,7 @@ const Remediation: React.FC = () => {
             <h3 className="text-sm font-bold text-white">
               2. Root-cause hypothesis panel
             </h3>
-            <button className="px-4 py-1.5 border border-cyan-500 text-cyan-500 rounded-lg text-xs font-bold">
+            <button className="px-4 py-1.5 border border-green-500 text-green-500 rounded-lg text-xs font-bold">
               Expand
             </button>
           </div>
@@ -225,7 +225,7 @@ const Remediation: React.FC = () => {
             {hypotheses.map((hyp) => (
               <div
                 key={hyp.id}
-                className="flex justify-between items-center p-4 bg-black/60 rounded-xl border border-slate-800 hover:border-cyan-500/50 transition-colors"
+                className="flex justify-between items-center p-4 bg-black/60 rounded-xl border border-slate-800 hover:border-green-500/50 transition-colors"
               >
                 <div>
                   <p className="text-sm font-bold text-slate-100">
@@ -280,7 +280,7 @@ const SuggestionBox: React.FC<{
 );
 
 const OutlineButton: React.FC<{ label: string }> = ({ label }) => (
-  <button className="w-full py-2 border border-IMSCyan text-IMSCyan text-xs font-bold rounded-lg hover:bg-cyan-500/10 transition-colors">
+  <button className="w-full py-2 border border-IMSCyan text-IMSCyan text-xs font-bold rounded-lg hover:bg-green-500/10 transition-colors">
     {label}
   </button>
 );

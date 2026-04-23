@@ -53,7 +53,7 @@ const Evidence = () => {
           </div>
 
           <div className="bg-black rounded-xl p-6 border border-slate-800 overflow-hidden relative group">
-            <div className="absolute top-4 right-4 text-slate-700 group-hover:text-cyan-500 transition-colors">
+            <div className="absolute top-4 right-4 text-slate-700 group-hover:text-green-500 transition-colors">
               <Terminal size={18} />
             </div>
             <pre className="text-sm font-mono text-slate-300 leading-relaxed overflow-x-auto">
@@ -77,8 +77,8 @@ const SignalBtn = ({ icon, color, label, darkText, className = "" }: any) => (
 );
 
 const TraceCard = ({ title, sub }: any) => (
-  <div className="border border-cyan-900/40 bg-[#090e1a] rounded-lg p-3 hover:border-cyan-500/50 transition-colors group">
-    <p className="text-sm font-bold text-slate-100 group-hover:text-cyan-400">
+  <div className="border border-green-900/40 bg-[#090e1a] rounded-lg p-3 hover:border-green-500/50 transition-colors group">
+    <p className="text-sm font-bold text-slate-100 group-hover:text-green-400">
       {title}
     </p>
     <p className="text-[10px] text-slate-500 leading-tight mt-1">{sub}</p>

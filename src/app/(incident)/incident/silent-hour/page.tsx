@@ -43,7 +43,7 @@ const Page = () => {
             Team-specific, rotation-aware, regional quiet rules + suppression.
           </p>
           {pendingRules.length > 0 && (
-            <p className="text-sm text-cyan-400 mt-1">
+            <p className="text-sm text-green-400 mt-1">
               {pendingRules.length} unsaved rule
               {pendingRules.length > 1 ? "s" : ""}
             </p>

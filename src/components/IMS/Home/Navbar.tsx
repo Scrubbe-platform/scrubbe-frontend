@@ -93,23 +93,23 @@ const Navbar = () => {
                               key={option.label}
                               className={`${
                                 option.label == selectTab?.label &&
-                                "border-IMSCyan text-IMSCyan"
-                              } p-3 flex gap-3  hover:border-IMSCyan transition-colors relative overflow-hidden group/item items-center `}
+                                "!border-cyan-500 !text-cyan-500"
+                              } p-3 flex gap-3  hover:!border-cyan-500 transition-colors relative overflow-hidden group/item items-center `}
                               onMouseEnter={() => setSelectTab(option)}
                             >
                               {option.Icon && (
                                 <option.Icon
                                   size={16}
-                                  className="group-hover/item:text-IMSCyan"
+                                  className="group-hover/item:!text-cyan-500"
                                 />
                               )}
                               <h3
-                                className={`font-medium text-nowrap flex-1 text-base group-hover/item:text-IMSCyan cursor-pointer transition-colors`}
+                                className={`font-medium text-nowrap flex-1 text-base group-hover/item:!text-cyan-500 cursor-pointer transition-colors`}
                               >
                                 {option.label}
                               </h3>
                               <ArrowRight
-                                className="group-hover/item:text-IMSCyan invisible group-hover/item:visible"
+                                className="group-hover/item:!text-cyan-500 invisible group-hover/item:visible"
                                 size={15}
                               />
                             </div>
@@ -202,7 +202,7 @@ const Navbar = () => {
                               {/* Governed automation from signal to resolution */}
                             </p>
                             <Link
-                              className="border border-IMSCyan p-3 rounded-md text-sm text-IMSCyan font-medium items-center flex justify-between gap-2"
+                              className="border !border-cyan-500 p-3 rounded-md text-sm !text-cyan-500 font-medium items-center flex justify-between gap-2"
                               href={selectTab?.href || ""}
                             >
                               {selectTab?.hrefLabel}
@@ -230,7 +230,7 @@ const Navbar = () => {
             <Link href={"/partners"} prefetch>
               <CButton
                 // onClick={() => router.push("/incident/tickets/create")}
-                className="w-fit h-[40px] hidden xl:flex bg-transparent hover:bg-transparent text-IMSCyan border border-IMSCyan shadow-none text-base"
+                className="w-fit h-[40px] hidden xl:flex bg-transparent hover:bg-transparent !text-cyan-500 border !border-cyan-500 shadow-none text-base"
               >
                 Join Early Design Partners
               </CButton>
@@ -238,7 +238,7 @@ const Navbar = () => {
             <Link href={"/auth/signin"} prefetch>
               <CButton
                 // onClick={() => router.push("/incident/tickets/create")}
-                className="w-fit h-[40px] hidden xl:flex bg-IMSCyan shadow-none text-base"
+                className="w-fit h-[40px] hidden xl:flex !bg-cyan-500 shadow-none text-base"
               >
                 Get Started
               </CButton>
@@ -276,7 +276,7 @@ const Navbar = () => {
             </Link>
             <button
               onClick={() => setIsModalOpen(false)}
-              className="p-2 bg-IMSCyan text-black rounded-lg transition-colors cursor-pointer"
+              className="p-2 !bg-cyan-500 text-black rounded-lg transition-colors cursor-pointer"
             >
               <IoMdClose size={24} className={"black"} />
             </button>
@@ -290,7 +290,7 @@ const Navbar = () => {
                   onClick={() =>
                     setSelectMenu((prev) => (prev == index ? undefined : index))
                   }
-                  className={` cursor-pointer py-2 text-lg font-medium text-white hover:text-IMSCyan transition-colors flex justify-between items-center`}
+                  className={` cursor-pointer py-2 text-lg font-medium text-white hover:!text-cyan-500 transition-colors flex justify-between items-center`}
                 >
                   {item.label}
                   <ChevronDown
@@ -301,12 +301,12 @@ const Navbar = () => {
                 </div>
 
                 {selectMenu === index && (
-                  <div className="flex flex-col gap-2 border-t border-IMSCyan/30 py-3">
+                  <div className="flex flex-col gap-2 border-t !border-cyan-500/30 py-3">
                     {item.dropdownOptions?.map((options) => (
                       <Link
                         key={options.label}
                         href={options.href}
-                        className={` py-2 text-lg font-medium text-white hover:text-IMSCyan transition-colors flex justify-between items-center`}
+                        className={` py-2 text-lg font-medium text-white hover:!text-cyan-500 transition-colors flex justify-between items-center`}
                       >
                         {options.label} <ArrowRight className="size-4" />
                       </Link>
@@ -319,12 +319,12 @@ const Navbar = () => {
             <div className="pt-6 border-t border-gray-200 flex flex-col gap-3">
               <CButton
                 // onClick={() => router.push("/incident/tickets/create")}
-                className="w-full h-[40px] bg-transparent hover:bg-transparent text-IMSCyan border border-IMSCyan shadow-none text-base"
+                className="w-full h-[40px] bg-transparent hover:bg-transparent !text-cyan-500 border !border-cyan-500 shadow-none text-base"
               >
                 Join Early Design Partners
               </CButton>
               <Link href={"/auth/signin"} prefetch>
-                <CButton className="!text-black h-[40px] bg-IMSCyan  hover:bg-IMSCyan shadow-none text-base">
+                <CButton className="!text-black h-[40px] !bg-cyan-500  hover:!bg-cyan-500 shadow-none text-base">
                   Get Started
                 </CButton>
               </Link>
