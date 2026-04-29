@@ -11,8 +11,6 @@ import {
   Mail,
   MapPin,
   Shield,
-  Clock,
-  Hash,
 } from "lucide-react";
 import { getCalApi } from "@calcom/embed-react";
 import { FaSlack } from "react-icons/fa";
@@ -22,8 +20,7 @@ import { FaSlack } from "react-icons/fa";
 // ─────────────────────────────────────────────────────────────────
 
 interface WayItem {
-  bgColor: string;
-  iconColor: string;
+  iconBg: string;
   icon: React.ReactNode;
   title: string;
   desc: string;
@@ -41,44 +38,38 @@ interface FAQItem {
 
 const WAYS: WayItem[] = [
   {
-    bgColor: "#e6f7f1",
-    iconColor: "#16a34a",
+    iconBg: "bg-emerald-50 text-emerald-600",
     icon: <Calendar size={16} />,
     title: "Book a Demo",
     desc: "Schedule a personalised demo with our team",
   },
   {
-    bgColor: "#e6f7f1",
-    iconColor: "#16a34a",
+    iconBg: "bg-purple-50 text-purple-600",
     icon: <FaSlack size={16} />,
     title: "Message us on Slack",
     desc: "Chat with us instantly on Slack",
     badge: "Slack",
   },
   {
-    bgColor: "#e6f7f1",
-    iconColor: "#16a34a",
+    iconBg: "bg-blue-50 text-blue-600",
     icon: <Users size={16} />,
     title: "Join our community",
     desc: "Connect with other engineers, share ideas and get help",
   },
   {
-    bgColor: "#e6f7f1",
-    iconColor: "#16a34a",
+    iconBg: "bg-orange-50 text-orange-500",
     icon: <Mail size={16} />,
     title: "Email us",
     desc: "hello@scrubbe.com",
   },
   {
-    bgColor: "#e6f7f1",
-    iconColor: "#16a34a",
+    iconBg: "bg-green-50 text-green-600",
     icon: <MessageSquare size={16} />,
     title: "Live Chat",
     desc: "Available Mon-Fri, 9am-6pm UTC",
   },
   {
-    bgColor: "#e6f7f1",
-    iconColor: "#16a34a",
+    iconBg: "bg-red-50 text-red-500",
     icon: <MapPin size={16} />,
     title: "Company Address",
     desc: "Scrubbe Ltd, London, United Kingdom",
@@ -206,57 +197,24 @@ const FAQ_ITEMS: FAQItem[] = [
 
 function FAQRow({ item }: { item: FAQItem }) {
   const [open, setOpen] = useState(false);
+
   return (
-    <div style={{ borderBottom: "1px solid #f3f4f6" }}>
+    <div className="border-b border-gray-100 last:border-0">
       <button
         onClick={() => setOpen((o) => !o)}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: 16,
-          padding: "16px 0",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          textAlign: "left",
-        }}
+        className="w-full flex items-start justify-between gap-4 py-4 text-left bg-transparent border-none cursor-pointer group"
       >
-        <span
-          style={{
-            fontSize: 13.5,
-            fontWeight: 500,
-            color: "#111827",
-            lineHeight: 1.4,
-            flex: 1,
-          }}
-        >
+        <span className="text-sm font-medium text-gray-800 leading-snug group-hover:text-emerald-600 transition-colors flex-1">
           {item.q}
         </span>
         {open ? (
-          <ChevronUp
-            size={15}
-            style={{ color: "#10b981", flexShrink: 0, marginTop: 2 }}
-          />
+          <ChevronUp size={15} className="text-emerald-500 shrink-0 mt-0.5" />
         ) : (
-          <ChevronDown
-            size={15}
-            style={{ color: "#9ca3af", flexShrink: 0, marginTop: 2 }}
-          />
+          <ChevronDown size={15} className="text-gray-400 shrink-0 mt-0.5" />
         )}
       </button>
       {open && (
-        <p
-          style={{
-            fontSize: 13,
-            color: "#6b7280",
-            lineHeight: 1.7,
-            paddingBottom: 16,
-            whiteSpace: "pre-line",
-            paddingRight: 24,
-          }}
-        >
+        <p className="text-[13px] text-gray-500 leading-relaxed pb-4 whitespace-pre-line pr-6">
           {item.a}
         </p>
       )}
@@ -275,8 +233,6 @@ export default function ContactPage() {
     companyName: "",
     role: "",
     message: "",
-    date: "",
-    time: "",
   });
 
   useEffect(() => {
@@ -300,285 +256,106 @@ export default function ContactPage() {
     ) =>
       setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    border: "1px solid #e5e7eb",
-    borderRadius: 8,
-    padding: "10px 12px",
-    fontSize: 13,
-    color: "#374151",
-    background: "#fff",
-    outline: "none",
-    boxSizing: "border-box",
-  };
+  const inputCls =
+    "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all bg-white";
 
-  const labelStyle: React.CSSProperties = {
-    fontSize: 12,
-    color: "#9ca3af",
-    display: "block",
-    marginBottom: 6,
-  };
+  const labelCls = "text-xs text-gray-400 block mb-1.5";
 
   const half = Math.ceil(FAQ_ITEMS.length / 2);
   const leftFAQ = FAQ_ITEMS.slice(0, half);
   const rightFAQ = FAQ_ITEMS.slice(half);
 
   return (
-    <div
-      style={{
-        background: "#fff",
-        minHeight: "100vh",
-        fontFamily: "'Inter', system-ui, sans-serif",
-      }}
-      className="pt-20"
-    >
-      {/* ── TOP CONTACT SECTION ── */}
-      <section
-        style={{
-          maxWidth: 1160,
-          margin: "0 auto",
-          padding: "56px 32px 64px",
-          display: "grid",
-          gridTemplateColumns: "1fr 1.4fr",
-          gap: 56,
-          alignItems: "start",
-        }}
-      >
-        {/* LEFT */}
+    <div className="bg-white min-h-screen font-sans pt-20">
+      {/* ── CONTACT SECTION ── */}
+      <section className="max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-10 lg:gap-14 items-start">
+        {/* ── LEFT ── */}
         <div>
-          <h1
-            style={{
-              fontSize: 38,
-              fontWeight: 700,
-              color: "#111827",
-              margin: "0 0 4px",
-              letterSpacing: -0.5,
-            }}
-          >
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight mb-1">
             Contact us
           </h1>
-          <p
-            style={{
-              fontSize: 17,
-              fontWeight: 600,
-              color: "#10b981",
-              margin: "0 0 8px",
-            }}
-          >
+          <p className="text-base sm:text-lg font-semibold text-emerald-500 mb-2">
             We'd love to hear from you
           </p>
-          <p
-            style={{
-              fontSize: 13.5,
-              color: "#6b7280",
-              lineHeight: 1.65,
-              margin: "0 0 36px",
-              maxWidth: 320,
-            }}
-          >
+          <p className="text-sm text-gray-500 leading-relaxed mb-10 max-w-xs">
             Reach out for any questions, partnerships, support, or to see
             Scrubbe in action.
           </p>
 
-          <p
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              color: "#9ca3af",
-              marginBottom: 20,
-            }}
-          >
+          <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-5">
             Ways to reach us
           </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="flex flex-col gap-5">
             {WAYS.map((w, i) => (
               <div
                 key={i}
-                style={{ display: "flex", alignItems: "flex-start", gap: 14 }}
+                className="flex items-start gap-3.5 group cursor-pointer"
               >
-                {/* Icon box */}
+                {/* Icon */}
                 <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
-                    background: w.bgColor,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    color: w.iconColor,
-                  }}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${w.iconBg}`}
                 >
                   {w.icon}
                 </div>
-                {/* Content */}
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      marginBottom: 2,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: 13.5,
-                        fontWeight: 600,
-                        color: "#111827",
-                      }}
-                    >
+                {/* Text */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-sm font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors">
                       {w.title}
                     </span>
                     {w.badge && (
-                      <span
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          background: "#f3e8ff",
-                          color: "#9333ea",
-                          border: "1px solid #e9d5ff",
-                          borderRadius: 4,
-                          padding: "1px 6px",
-                        }}
-                      >
+                      <span className="text-[10px] font-bold bg-purple-100 text-purple-600 border border-purple-200 rounded px-1.5 py-0.5">
                         {w.badge}
                       </span>
                     )}
                   </div>
-                  <p style={{ fontSize: 12.5, color: "#6b7280", margin: 0 }}>
-                    {w.desc}
-                  </p>
+                  <p className="text-xs text-gray-400">{w.desc}</p>
                 </div>
                 {/* Arrow */}
                 <ArrowRight
                   size={14}
-                  style={{ color: "#d1d5db", marginTop: 10, flexShrink: 0 }}
+                  className="text-gray-300 group-hover:text-emerald-400 transition-colors mt-2.5 shrink-0"
                 />
               </div>
             ))}
           </div>
         </div>
 
-        {/* RIGHT — BOOKING FORM CARD */}
-        <div
-          style={{
-            border: "1px solid #e5e7eb",
-            borderRadius: 16,
-            overflow: "hidden",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-            background: "#fff",
-          }}
-        >
+        {/* ── RIGHT — FORM CARD ── */}
+        <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm bg-white">
           {/* Top two quick-action cards */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              borderBottom: "1px solid #e5e7eb",
-            }}
-          >
-            {/* Book a Demo — Cal.com trigger */}
+          <div className="grid grid-cols-2 border-b border-gray-200">
+            {/* Book a Demo — Cal.com */}
             <button
               data-cal-namespace="demo"
-              data-cal-link="scrubbe/secret"
+              data-cal-link="scrubbe/scrubbe-demo"
               data-cal-config='{"layout":"month_view","theme":"light"}'
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 12,
-                padding: "16px",
-                background: "none",
-                border: "none",
-                borderRight: "1px solid #e5e7eb",
-                cursor: "pointer",
-                textAlign: "left",
-              }}
+              className="flex items-start gap-3 p-4 bg-transparent border-none border-r border-gray-200 cursor-pointer text-left hover:bg-gray-50 transition-colors"
             >
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 10,
-                  background: "#e6f7f1",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <Calendar size={16} style={{ color: "#10b981" }} />
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                <Calendar size={16} className="text-emerald-600" />
               </div>
               <div>
-                <p
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "#111827",
-                    margin: "0 0 2px",
-                  }}
-                >
+                <p className="text-[13px] font-semibold text-gray-800 mb-0.5">
                   Book a Demo
                 </p>
-                <p
-                  style={{
-                    fontSize: 11.5,
-                    color: "#9ca3af",
-                    margin: 0,
-                    lineHeight: 1.4,
-                  }}
-                >
+                <p className="text-[11.5px] text-gray-400 leading-snug">
                   Schedule a personalised demo with our team
                 </p>
               </div>
             </button>
 
             {/* Send a message */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 12,
-                padding: "16px",
-              }}
-            >
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 10,
-                  background: "#f9fafb",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <MessageSquare size={16} style={{ color: "#6b7280" }} />
+            <div className="flex items-start gap-3 p-4">
+              <div className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center shrink-0">
+                <MessageSquare size={16} className="text-gray-500" />
               </div>
               <div>
-                <p
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "#111827",
-                    margin: "0 0 2px",
-                  }}
-                >
+                <p className="text-[13px] font-semibold text-gray-800 mb-0.5">
                   Send us a message
                 </p>
-                <p
-                  style={{
-                    fontSize: 11.5,
-                    color: "#9ca3af",
-                    margin: 0,
-                    lineHeight: 1.4,
-                  }}
-                >
+                <p className="text-[11.5px] text-gray-400 leading-snug">
                   We'll get back to you soon
                 </p>
               </div>
@@ -586,42 +363,26 @@ export default function ContactPage() {
           </div>
 
           {/* Form body */}
-          <div style={{ padding: "24px" }}>
-            <p
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                color: "#9ca3af",
-                margin: "0 0 20px",
-              }}
-            >
+          <div className="p-5 sm:p-6">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-5">
               Your Details
             </p>
 
-            {/* Row 1: Full Name + Work Email */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 12,
-                marginBottom: 12,
-              }}
-            >
+            {/* Row 1 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
               <div>
-                <label style={labelStyle}>Full Name</label>
+                <label className={labelCls}>Full Name</label>
                 <input
-                  style={inputStyle}
+                  className={inputCls}
                   placeholder="Enter your full name"
                   value={form.fullName}
                   onChange={set("fullName")}
                 />
               </div>
               <div>
-                <label style={labelStyle}>Work Email</label>
+                <label className={labelCls}>Work Email</label>
                 <input
-                  style={inputStyle}
+                  className={inputCls}
                   type="email"
                   placeholder="Enter your work email"
                   value={form.workEmail}
@@ -630,31 +391,23 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Row 2: Company Name + Role */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 12,
-                marginBottom: 12,
-              }}
-            >
+            {/* Row 2 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
               <div>
-                <label style={labelStyle}>Company Name</label>
+                <label className={labelCls}>Company Name</label>
                 <input
-                  style={inputStyle}
+                  className={inputCls}
                   placeholder="Enter your company name"
                   value={form.companyName}
                   onChange={set("companyName")}
                 />
               </div>
               <div>
-                <label style={labelStyle}>What best describes you</label>
+                <label className={labelCls}>What best describes you</label>
                 <select
-                  style={{
-                    ...inputStyle,
-                    color: form.role ? "#374151" : "#9ca3af",
-                  }}
+                  className={`${inputCls} ${
+                    !form.role ? "text-gray-400" : "text-gray-700"
+                  }`}
                   value={form.role}
                   onChange={set("role")}
                 >
@@ -669,10 +422,10 @@ export default function ContactPage() {
             </div>
 
             {/* Message */}
-            <div style={{ marginBottom: 12 }}>
-              <label style={labelStyle}>How can we help you</label>
+            <div className="mb-5">
+              <label className={labelCls}>How can we help you</label>
               <textarea
-                style={{ ...inputStyle, resize: "none" }}
+                className={`${inputCls} resize-none`}
                 rows={3}
                 placeholder="Tell us a bit about your use case and goals"
                 value={form.message}
@@ -680,88 +433,41 @@ export default function ContactPage() {
               />
             </div>
 
-            {/* Date + Time */}
-
             {/* CTA */}
-            <button
-              style={{
-                width: "100%",
-                padding: "13px",
-                borderRadius: 10,
-                background: "#10b981",
-                border: "none",
-                color: "#fff",
-                fontSize: 14,
-                fontWeight: 700,
-                cursor: "pointer",
-                letterSpacing: 0.2,
-              }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.background = "#059669")
-              }
-              onMouseOut={(e) => (e.currentTarget.style.background = "#10b981")}
-            >
+            <button className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white font-bold text-sm transition-colors">
               Continue to Confirm
             </button>
 
             {/* Security note */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 5,
-                marginTop: 12,
-              }}
-            >
-              <Shield size={11} style={{ color: "#9ca3af" }} />
-              <span style={{ fontSize: 11.5, color: "#9ca3af" }}>
-                Your information is secured and will never be shared
-              </span>
-            </div>
+            <p className="flex items-center justify-center gap-1.5 text-[11.5px] text-gray-400 mt-3">
+              <Shield size={11} />
+              Your information is secured and will never be shared
+            </p>
           </div>
         </div>
       </section>
 
       {/* ── DIVIDER ── */}
-      <div style={{ borderTop: "1px solid #f3f4f6", maxWidth: "100%" }} />
+      <div className="border-t border-gray-100" />
 
       {/* ── FAQ SECTION ── */}
-      <section
-        style={{ maxWidth: 1160, margin: "0 auto", padding: "64px 32px 80px" }}
-      >
+      <section className="max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <h2
-            style={{
-              fontSize: 32,
-              fontWeight: 700,
-              color: "#111827",
-              margin: "0 0 12px",
-              letterSpacing: -0.3,
-            }}
-          >
+        <div className="text-center mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-3">
             Frequently Asked Questions
           </h2>
-          <p style={{ fontSize: 13.5, color: "#6b7280", margin: 0 }}>
+          <p className="text-[13.5px] text-gray-500">
             Got questions? We've got answers.{" "}
-            <span
-              style={{ color: "#10b981", fontWeight: 500, cursor: "pointer" }}
-            >
+            <span className="text-emerald-500 font-medium cursor-pointer hover:underline">
               Browse our frequently asked questions
             </span>{" "}
             to find what you're looking for.
           </p>
         </div>
 
-        {/* Two-column FAQ */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "0 64px",
-          }}
-        >
+        {/* Two-column on desktop, single on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-16">
           <div>
             {leftFAQ.map((item, i) => (
               <FAQRow key={i} item={item} />
