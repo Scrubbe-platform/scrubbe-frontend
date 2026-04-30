@@ -14,16 +14,13 @@ import {
 import { getCalApi } from "@calcom/embed-react";
 import { FaSlack } from "react-icons/fa";
 
-// ─────────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────────
-
 interface WayItem {
   iconBg: string;
   icon: React.ReactNode;
   title: string;
   desc: string;
   badge?: string;
+  href?: string; // optional — renders as <a> when present
 }
 
 interface FAQItem {
@@ -31,38 +28,29 @@ interface FAQItem {
   a: string;
 }
 
-// ─────────────────────────────────────────────────────────────────
-// Static data — company address removed
-// ─────────────────────────────────────────────────────────────────
-
 const WAYS: WayItem[] = [
   {
     iconBg: "bg-emerald-50 text-emerald-600",
-    icon: <Calendar size={18} />,
-    title: "Book a Demo",
-    desc: "Schedule a personalised demo with our team",
-  },
-  {
-    iconBg: "bg-emerald-50 text-emerald-600",
-    icon: <FaSlack size={18} />,
+    icon: <FaSlack size={20} />,
     title: "Message us on Slack",
     desc: "Chat with us instantly on Slack",
   },
   {
     iconBg: "bg-emerald-50 text-emerald-600",
-    icon: <Users size={18} />,
+    icon: <Users size={20} />,
     title: "Join our community",
     desc: "Connect with other engineers, share ideas and get help",
   },
   {
     iconBg: "bg-emerald-50 text-emerald-600",
-    icon: <Mail size={18} />,
+    icon: <Mail size={20} />,
     title: "Email us",
-    desc: "Contact@scrubbe.com",
+    desc: "support@scrubbe.com",
+    href: "mailto:support@scrubbe.com", // ← opens email client
   },
   {
     iconBg: "bg-emerald-50 text-emerald-600",
-    icon: <MessageSquare size={18} />,
+    icon: <MessageSquare size={20} />,
     title: "Live Chat",
     desc: "Available Mon-Fri, 9am-6pm UTC",
   },
@@ -183,30 +171,27 @@ const FAQ_ITEMS: FAQItem[] = [
   },
 ];
 
-// ─────────────────────────────────────────────────────────────────
-// FAQ Row — bigger text
-// ─────────────────────────────────────────────────────────────────
+// ── FAQ Row ────────────────────────────────────────────────────────
 
 function FAQRow({ item }: { item: FAQItem }) {
   const [open, setOpen] = useState(false);
-
   return (
     <div className="border-b border-gray-200 last:border-0">
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-start justify-between gap-4 py-5 text-left bg-transparent border-none cursor-pointer group"
       >
-        <span className="text-base font-semibold text-gray-800 leading-snug group-hover:text-emerald-600 transition-colors flex-1">
+        <span className="text-lg font-semibold text-gray-800 leading-snug group-hover:text-emerald-600 transition-colors flex-1">
           {item.q}
         </span>
         {open ? (
-          <ChevronUp size={17} className="text-emerald-500 shrink-0 mt-0.5" />
+          <ChevronUp size={20} className="text-emerald-500 shrink-0 mt-0.5" />
         ) : (
-          <ChevronDown size={17} className="text-gray-400 shrink-0 mt-0.5" />
+          <ChevronDown size={20} className="text-gray-400 shrink-0 mt-0.5" />
         )}
       </button>
       {open && (
-        <p className="text-sm text-gray-500 leading-relaxed pb-5 whitespace-pre-line pr-6">
+        <p className="text-base text-gray-500 leading-relaxed pb-5 whitespace-pre-line pr-6">
           {item.a}
         </p>
       )}
@@ -214,9 +199,50 @@ function FAQRow({ item }: { item: FAQItem }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────
-// Main Page
-// ─────────────────────────────────────────────────────────────────
+// ── Way Item — renders as <a> if href is set, else plain div ───────
+
+function WayRow({ w }: { w: WayItem }) {
+  const sharedCls = "flex items-start gap-4 group cursor-pointer no-underline";
+
+  const inner = (
+    <>
+      <div
+        className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${w.iconBg}`}
+      >
+        {w.icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors">
+            {w.title}
+          </span>
+          {w.badge && (
+            <span className="text-xs font-bold bg-purple-100 text-purple-600 border border-purple-300 rounded px-2 py-0.5">
+              {w.badge}
+            </span>
+          )}
+        </div>
+        <p className="text-base text-gray-400">{w.desc}</p>
+      </div>
+      <ArrowRight
+        size={18}
+        className="text-gray-300 group-hover:text-emerald-400 transition-colors mt-3 shrink-0"
+      />
+    </>
+  );
+
+  if (w.href) {
+    return (
+      <a href={w.href} className={sharedCls}>
+        {inner}
+      </a>
+    );
+  }
+
+  return <div className={sharedCls}>{inner}</div>;
+}
+
+// ── Main Page ──────────────────────────────────────────────────────
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -249,9 +275,9 @@ export default function ContactPage() {
       setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const inputCls =
-    "w-full border-2 border-gray-200 rounded-lg px-3.5 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all bg-white";
+    "w-full border-2 border-gray-200 rounded-lg px-4 py-3.5 text-base text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all bg-white";
 
-  const labelCls = "text-sm text-gray-500 font-medium block mb-1.5";
+  const labelCls = "text-base text-gray-500 font-medium block mb-2";
 
   const half = Math.ceil(FAQ_ITEMS.length / 2);
   const leftFAQ = FAQ_ITEMS.slice(0, half);
@@ -261,90 +287,62 @@ export default function ContactPage() {
     <div className="bg-white min-h-screen font-sans pt-20">
       {/* ── CONTACT SECTION ── */}
       <section className="max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-10 lg:gap-14 items-start">
-        {/* ── LEFT ── */}
+        {/* LEFT */}
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight mb-1">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight mb-2">
             Contact us
           </h1>
-          <p className="text-lg sm:text-xl font-semibold text-emerald-500 mb-2">
+          <p className="text-xl sm:text-2xl font-semibold text-emerald-500 mb-3">
             We'd love to hear from you
           </p>
-          <p className="text-base text-gray-500 leading-relaxed mb-10 max-w-xs">
+          <p className="text-lg text-gray-500 leading-relaxed mb-10 max-w-sm">
             Reach out for any questions, partnerships, support, or to see
             Scrubbe in action.
           </p>
 
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-5">
+          <p className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6">
             Ways to reach us
           </p>
 
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-6">
             {WAYS.map((w, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-4 group cursor-pointer"
-              >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${w.iconBg}`}
-                >
-                  {w.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-base font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors">
-                      {w.title}
-                    </span>
-                    {w.badge && (
-                      <span className="text-[11px] font-bold bg-purple-100 text-purple-600 border border-purple-300 rounded px-2 py-0.5">
-                        {w.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-400">{w.desc}</p>
-                </div>
-                <ArrowRight
-                  size={15}
-                  className="text-gray-300 group-hover:text-emerald-400 transition-colors mt-2.5 shrink-0"
-                />
-              </div>
+              <WayRow key={i} w={w} />
             ))}
           </div>
         </div>
 
-        {/* ── RIGHT — FORM CARD ── */}
+        {/* RIGHT — FORM CARD */}
         <div className="border-2 border-gray-300 rounded-2xl overflow-hidden shadow-sm bg-white">
           {/* Top two action buttons */}
           <div className="grid grid-cols-2 border-b-2 border-gray-300">
-            {/* Book a Demo — Cal.com button */}
             <button
               data-cal-namespace="demo"
               data-cal-link="scrubbe/scrubbe-demo"
               data-cal-config='{"layout":"month_view","theme":"light"}'
-              className="flex items-center gap-3 p-4 bg-transparent cursor-pointer text-left hover:bg-emerald-50 active:bg-emerald-100 transition-colors border-r-2 border-gray-300 group"
+              className="flex items-center gap-3 p-5 bg-transparent cursor-pointer text-left hover:bg-emerald-50 active:bg-emerald-100 transition-colors border-r-2 border-gray-300 group"
             >
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-200 transition-colors">
-                <Calendar size={18} className="text-emerald-600" />
+              <div className="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-200 transition-colors">
+                <Calendar size={20} className="text-emerald-600" />
               </div>
               <div>
-                <p className="text-sm font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">
+                <p className="text-base font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">
                   Book a Demo
                 </p>
-                <p className="text-xs text-gray-400 leading-snug mt-0.5">
+                <p className="text-sm text-gray-400 leading-snug mt-0.5">
                   Schedule a personalised demo with our team
                 </p>
               </div>
             </button>
 
-            {/* Send us a message button */}
-            <button className="flex items-center gap-3 p-4 bg-transparent border-none cursor-pointer text-left hover:bg-gray-50 active:bg-gray-100 transition-colors group w-full">
-              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-gray-200 transition-colors">
-                <MessageSquare size={18} className="text-gray-500" />
+            <button className="flex items-center gap-3 p-5 bg-transparent border-none cursor-pointer text-left hover:bg-gray-50 active:bg-gray-100 transition-colors group w-full">
+              <div className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-gray-200 transition-colors">
+                <MessageSquare size={20} className="text-gray-500" />
               </div>
               <div>
-                <p className="text-sm font-bold text-gray-800 group-hover:text-gray-600 transition-colors">
+                <p className="text-base font-bold text-gray-800 group-hover:text-gray-600 transition-colors">
                   Send us a message
                 </p>
-                <p className="text-xs text-gray-400 leading-snug mt-0.5">
+                <p className="text-sm text-gray-400 leading-snug mt-0.5">
                   We'll get back to you soon
                 </p>
               </div>
@@ -352,13 +350,12 @@ export default function ContactPage() {
           </div>
 
           {/* Form body */}
-          <div className="p-5 sm:p-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-5">
+          <div className="p-6 sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6">
               Your Details
             </p>
 
-            {/* Row 1 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className={labelCls}>Full Name</label>
                 <input
@@ -380,8 +377,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Row 2 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className={labelCls}>Company Name</label>
                 <input
@@ -410,8 +406,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Message */}
-            <div className="mb-5">
+            <div className="mb-6">
               <label className={labelCls}>How can we help you</label>
               <textarea
                 className={`${inputCls} resize-none`}
@@ -422,14 +417,12 @@ export default function ContactPage() {
               />
             </div>
 
-            {/* CTA */}
-            <button className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white font-bold text-base transition-colors">
+            <button className="w-full py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white font-bold text-lg transition-colors">
               Continue to Confirm
             </button>
 
-            {/* Security note */}
-            <p className="flex items-center justify-center gap-1.5 text-sm text-gray-400 mt-3">
-              <Shield size={13} />
+            <p className="flex items-center justify-center gap-2 text-base text-gray-400 mt-4">
+              <Shield size={15} />
               Your information is secured and will never be shared
             </p>
           </div>
@@ -441,13 +434,13 @@ export default function ContactPage() {
 
       {/* ── FAQ SECTION ── */}
       <section className="max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-3">
+        <div className="text-center mb-14">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight mb-4">
             Frequently Asked Questions
           </h2>
-          <p className="text-base text-gray-500">
+          <p className="text-lg text-gray-500">
             Got questions? We've got answers.{" "}
-            <span className="font-medium cursor-pointer hover:underline">
+            <span className="font-medium text-gray-700">
               Browse our frequently asked questions
             </span>{" "}
             to find what you're looking for.
