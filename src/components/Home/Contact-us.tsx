@@ -34,6 +34,7 @@ const WAYS: WayItem[] = [
     icon: <FaSlack size={20} />,
     title: "Message us on Slack",
     desc: "Chat with us instantly on Slack",
+    href: "https://scrubbecommunity.slack.com/archives/C0B0ZSFG7M0",
   },
   {
     iconBg: "bg-emerald-50 text-emerald-600",
