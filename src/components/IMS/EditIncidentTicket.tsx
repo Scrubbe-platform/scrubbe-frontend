@@ -31,7 +31,7 @@ import clsx from "clsx";
 import Modal from "../ui/Modal";
 import { Calendar, Clock } from "lucide-react";
 import { formatTime } from "@/lib/utils";
-import { Ticket } from "@/types";
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 import CreateWarRoom from "./CreateWarRoom";
 
 const formScheme = z.object({
@@ -81,7 +81,7 @@ const EditIncidentTicket = () => {
   const [uploadedLogo, setUploadedLogo] = useState<File | null>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data, isLoading } = useTicketDetails();
-  const ticket = data as Ticket;
+  const ticket = data as IncidentDetailRecord;
   const [openPostMortem, setOpenPostMortem] = useState(false);
   const {
     control,
@@ -136,6 +136,9 @@ const EditIncidentTicket = () => {
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async ({ data }: { data: FormType }) => {
       try {
+        if (!ticket) {
+          throw new Error("Incident data is not loaded yet");
+        }
         const newData = {
           ...data,
           incidentId: ticket?.id,
@@ -423,7 +426,7 @@ const EditIncidentTicket = () => {
             label="Time taken to raise incident"
             error={errors.affectedSystem?.message}
             className=" text-black dark:text-white"
-            value={formatTime(Number(ticket?.MTTR))}
+            value={formatTime((ticket?.elapsedMinutes ?? 0) * 60)}
             readOnly
           />
 
@@ -672,7 +675,9 @@ const EditIncidentTicket = () => {
         isOpen={openPostMortem}
         className="!p-0"
       >
-        <PostMortem onClose={() => setOpenPostMortem(false)} ticket={ticket} />
+        {ticket && (
+          <PostMortem onClose={() => setOpenPostMortem(false)} ticket={ticket} />
+        )}
       </Modal>
 
       <Modal isOpen={openWarRoom} onClose={() => setOpenWarRoom(false)}>

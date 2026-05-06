@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+
+import React, { useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import ExactIncidentSidebar from "./IncidentSidebarList";
 import IncidentHeader from "./IncidentHeader";
@@ -8,54 +9,55 @@ import DetectionSignals from "./DetectionSignals";
 import IncidentContextModule from "./IncidentContextModule";
 import ScrubbeIntelligence from "./IntelligentModule";
 import ActivityAuditTrail from "./ActivityAuditTrail";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import AddContextForm from "./ContextForm";
 import ContextList from "./ContextList";
 import { cn } from "@/lib/utils";
+import { useIncidentWorkspace } from "@/hooks/useIncidentWorkspace";
 
 const IncidentOverview: React.FC = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const currentTab = searchParams.get("tab");
-  const activeId = searchParams.get("id");
+  const {
+    currentTab,
+    incidentId,
+    selectedIncident,
+    stats,
+    history,
+    context,
+    isSelectionInvalid,
+    isSelectionLoading,
+    clearSelectedIncident,
+  } = useIncidentWorkspace();
 
-  const goBackToList = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("id");
-    router.push(`${pathname}?${params.toString()}`);
-  };
+  useEffect(() => {
+    if (isSelectionInvalid) {
+      clearSelectedIncident();
+    }
+  }, [clearSelectedIncident, isSelectionInvalid]);
+
+  const showMainPanel = Boolean(incidentId && selectedIncident);
 
   return (
     <div className="flex h-screen text-slate-300 font-sans overflow-hidden">
-      {/* 1. LEFT SIDEBAR: INCIDENT LIST */}
       <aside
         className={cn(
           "md:border-r border-white/5 flex flex-col h-full shrink-0",
-          // Desktop: Force a fixed width so it doesn't bleed into Main
           "md:w-[350px] md:flex",
-          // Mobile: Toggle logic
-          activeId ? "hidden" : "w-full flex"
+          showMainPanel ? "hidden" : "w-full flex"
         )}
       >
         <ExactIncidentSidebar />
       </aside>
 
-      {/* 2. MAIN CONTENT AREA */}
       <main
         className={cn(
           "flex-1 flex flex-col overflow-y-auto h-full",
-          // Desktop: Always show
           "md:flex",
-          // Mobile: Toggle logic
-          !activeId ? "hidden" : "flex"
+          !showMainPanel ? "hidden" : "flex"
         )}
       >
-        {/* Mobile-only Back Header */}
-        {activeId && (
-          <div className="md:hidden p-4 border-b border-white/5 flex items-center gap-3  bg-inherit">
+        {showMainPanel && (
+          <div className="md:hidden p-4 border-b border-white/5 flex items-center gap-3 bg-inherit">
             <button
-              onClick={goBackToList}
+              onClick={clearSelectedIncident}
               className="p-1 hover:bg-white/5 rounded-full"
             >
               <ChevronLeft size={20} />
@@ -64,25 +66,61 @@ const IncidentOverview: React.FC = () => {
           </div>
         )}
 
-        <IncidentHeader />
-
-        {(currentTab === "overview" || !currentTab) && (
+        {selectedIncident ? (
           <>
-            <IncidentLifecycle currentStep="Analysed" />
-            <DetectionSignals />
-            <ScrubbeIntelligence />
-            <IncidentContextModule />
-            <ActivityAuditTrail />
-          </>
-        )}
+            <IncidentHeader incident={selectedIncident} stats={stats} />
 
-        {currentTab === "context" && (
-          <>
-            <ContextList />
-            <AddContextForm />
+            {(currentTab === "overview" || !currentTab) && (
+              <>
+                <IncidentLifecycle currentStep={selectedIncident.lifecycleStep} />
+                <DetectionSignals incident={selectedIncident} />
+                <ScrubbeIntelligence incident={selectedIncident} />
+                <IncidentContextModule
+                  incident={selectedIncident}
+                  context={context}
+                />
+                <ActivityAuditTrail history={history} />
+              </>
+            )}
+
+            {currentTab === "context" && (
+              <>
+                <ContextList
+                  context={context}
+                  incident={selectedIncident}
+                />
+                <AddContextForm
+                  context={context}
+                  incident={selectedIncident}
+                />
+              </>
+            )}
           </>
-        )}
+        ) : isSelectionLoading ? (
+          <div className="p-6 md:p-8 space-y-4">
+            <div className="h-24 rounded-2xl border border-white/10 bg-white/[0.03]" />
+            <div className="h-40 rounded-2xl border border-white/10 bg-white/[0.03]" />
+            <div className="h-48 rounded-2xl border border-white/10 bg-white/[0.03]" />
+          </div>
+        ) : null}
       </main>
+
+      {!showMainPanel && (
+        <main className="hidden md:flex flex-1 items-center justify-center p-10">
+          <div className="max-w-lg rounded-3xl border border-white/10 bg-white/[0.02] p-8 text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+              Incident Workspace
+            </p>
+            <h2 className="mt-4 text-2xl font-bold text-white">
+              Select an incident to open the live workspace
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-slate-400">
+              The workspace only appears when a real incident is selected. Use the
+              sidebar to browse current incidents or raise a new one.
+            </p>
+          </div>
+        </main>
+      )}
     </div>
   );
 };

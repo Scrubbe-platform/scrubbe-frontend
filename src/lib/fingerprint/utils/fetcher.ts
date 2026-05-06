@@ -1,8 +1,8 @@
 import { FingerprintResponse } from "@/types/response.type";
 
-const baseURL = "https://scrubbe-server-9z77.onrender.com/api/v1";
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api/v1";
 export const fetchFingerprint = async (): Promise<FingerprintResponse> => {
-  const response = await fetch(`${baseURL}/system-info`, {
+  const response = await fetch(`${baseURL}/fingerprint/system-info`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

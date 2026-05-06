@@ -9,22 +9,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 
-const mockRepositories = [
-  { id: 1, name: "Scrubbe repo", private: true, owner: "user1" },
-  { id: 2, name: "atlas-core", private: false, owner: "user1" },
-  { id: 3, name: "nova-ui", private: true, owner: "user2" },
-  { id: 4, name: "aether-api", private: true, owner: "user3" },
-  { id: 5, name: "CodeSphere", private: false, owner: "user4" },
-  { id: 6, name: "Scrubbe repo", private: true, owner: "user1" },
-  { id: 7, name: "nova-ui", private: false, owner: "user2" },
-  { id: 8, name: "aether-api", private: true, owner: "user3" },
-];
-
 type IRepo = {
   id: number;
   name: string;
   private: boolean;
-  owner: string;
+  fullName?: string;
+  url?: string;
+  defaultBranch?: string;
 };
 
 function GithubConfiguration() {
@@ -33,15 +24,15 @@ function GithubConfiguration() {
   );
   const { get } = useFetch();
 
-  const {} = useQuery({
+  const { data: repositories = [] } = useQuery<IRepo[]>({
     queryKey: ["GITHUB_REPO"],
     queryFn: async () => {
       const res = await get(endpoint.incident_ticket.github_repos);
       console.log({ res });
       if (res.success) {
-        return res.data.data;
+        return (res.data?.data ?? []) as IRepo[];
       }
-      return [];
+      return [] as IRepo[];
     },
   });
 
@@ -56,16 +47,16 @@ function GithubConfiguration() {
   };
 
   const handleToggleAll = () => {
-    if (selectedRepoIds?.length === mockRepositories.length) {
+    if (selectedRepoIds?.length === repositories.length) {
       setSelectedRepoIds([]);
     } else {
-      const allIds = mockRepositories;
+      const allIds = repositories;
       setSelectedRepoIds(allIds);
     }
   };
 
   const selectedCount = selectedRepoIds?.length;
-  const totalCount = mockRepositories.length;
+  const totalCount = repositories.length;
 
   return (
     <div className="w-full mx-auto">
@@ -92,7 +83,7 @@ function GithubConfiguration() {
 
       {/* Repository List */}
       <div className="space-y-4">
-        {mockRepositories.map((repo) => {
+        {repositories.map((repo) => {
           const isSelected = !!selectedRepoIds?.find(
             (value) => value.id == repo.id
           );

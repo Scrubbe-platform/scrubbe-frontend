@@ -9,36 +9,31 @@ import { useQuery } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 
-const mockRepositories = [
-  { id: 1, name: "Scrubbe repo", visibility: true },
-  { id: 2, name: "atlas-core", visibility: false },
-  { id: 3, name: "nova-ui", visibility: true },
-  { id: 4, name: "aether-api", visibility: true },
-  { id: 5, name: "CodeSphere", visibility: false },
-  { id: 6, name: "Scrubbe repo", visibility: true },
-  { id: 7, name: "nova-ui", visibility: false },
-  { id: 8, name: "aether-api", visibility: true },
-];
-
 type IRepo = {
   id: number;
   name: string;
   visibility: boolean;
+  nameWithNamespace?: string;
+  private?: boolean;
+  url?: string;
+  defaultBranch?: string;
 };
 
 function GitlabConfiguration() {
-  const [selectedRepoIds, setSelectedRepoIds] = useState<IRepo[] | undefined>();
+  const [selectedRepoIds, setSelectedRepoIds] = useState<IRepo[] | undefined>(
+    []
+  );
   const { get } = useFetch();
 
-  const {} = useQuery({
+  const { data: repositories = [] } = useQuery<IRepo[]>({
     queryKey: ["GITLAB_REPO"],
     queryFn: async () => {
       const res = await get(endpoint.incident_ticket.gitlab_projects);
       console.log({ res });
       if (res.success) {
-        return res.data.data;
+        return (res.data?.data ?? []) as IRepo[];
       }
-      return [];
+      return [] as IRepo[];
     },
   });
 
@@ -53,16 +48,16 @@ function GitlabConfiguration() {
   };
 
   const handleToggleAll = () => {
-    if (selectedRepoIds?.length === mockRepositories.length) {
+    if (selectedRepoIds?.length === repositories.length) {
       setSelectedRepoIds([]);
     } else {
-      const allIds = mockRepositories;
+      const allIds = repositories;
       setSelectedRepoIds(allIds);
     }
   };
 
   const selectedCount = selectedRepoIds?.length;
-  const totalCount = mockRepositories.length;
+  const totalCount = repositories.length;
 
   return (
     <div className="w-full mx-auto">
@@ -89,7 +84,7 @@ function GitlabConfiguration() {
 
       {/* Repository List */}
       <div className="space-y-4">
-        {mockRepositories.map((repo) => {
+        {repositories.map((repo) => {
           const isSelected = !!selectedRepoIds?.find(
             (value) => value.id == repo.id
           );

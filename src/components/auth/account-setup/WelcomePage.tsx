@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState, useMemo, ReactNode } from "react";
+import { useState, useMemo, ReactNode, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
   ChevronDown,
@@ -17,9 +17,22 @@ import { popularTimezones } from "@/lib/constant/index";
 import Select from "@/components/ui/select";
 import Input from "@/components/ui/input";
 import TextArea from "@/components/ui/text-area";
+import { apiClient } from "@/lib/api/client";
+import { endpoint } from "@/lib/api/endpoint";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
+
+function normalizeInviteRole(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (normalized.includes("admin")) return "ADMIN";
+  if (normalized.includes("commander")) return "MANAGER";
+  if (normalized.includes("responder")) return "RESPONDER";
+  if (normalized.includes("viewer")) return "VIEWER";
+  return "ENGINEER";
+}
 
 const ScrubbeOnboarding = () => {
-  const { register, handleSubmit, control, watch, setValue } = useForm({
+  const { register, handleSubmit, control, watch, setValue, reset, getValues } = useForm({
     defaultValues: {
       inviteEmails: "",
       inviteRole: "Admin-Full Control",
@@ -43,9 +56,14 @@ const ScrubbeOnboarding = () => {
         client_secret: "",
         entity_id: "",
         idp_url: "",
-        acs_url: "https://app.scrubbe.com/auth/saml/callback",
+        acs_url: `${
+          process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
+        }/auth/sso/saml/acs`,
         issuer_url: "",
         client_id: "",
+        jitEnabled: true,
+        autoRoleSync: false,
+        groupMapping: '{ "scrubbe-admins": "ADMIN", "*": "RESPONDER" }',
       },
       workspaceName: "acme-payments",
       timezone: "UTC",
@@ -60,6 +78,7 @@ const ScrubbeOnboarding = () => {
   });
 
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formValues = watch();
 
@@ -75,7 +94,167 @@ const ScrubbeOnboarding = () => {
     return { s1, s2, s3, s4, percentage: (completed / 4) * 100, completed };
   }, [formValues]);
 
-  const onSubmit = (data: any) => console.log("Complete Payload:", data);
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadExistingSetup = async () => {
+      try {
+        const [imsConfigResponse, ssoConfigResponse] = await Promise.allSettled([
+          apiClient.get(endpoint.auth.ims_config),
+          apiClient.get(endpoint.auth.ims_sso),
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        const imsConfig =
+          imsConfigResponse.status === "fulfilled"
+            ? imsConfigResponse.value.data?.data ?? imsConfigResponse.value.data ?? {}
+            : {};
+        const ssoConfig =
+          ssoConfigResponse.status === "fulfilled"
+            ? ssoConfigResponse.value.data?.data ?? ssoConfigResponse.value.data ?? {}
+            : {};
+        const currentValues = getValues();
+
+        reset({
+          ...currentValues,
+          policies: {
+            ...currentValues.policies,
+            enforceSSO: Boolean(ssoConfig.ssoEnforced ?? imsConfig.ssoEnforced ?? false),
+          },
+          ssoConfiguration: {
+            ...currentValues.ssoConfiguration,
+            ssoType:
+              ssoConfig.protocol === "OIDC" || ssoConfig.protocol === "SAML_2"
+                ? ssoConfig.protocol
+                : currentValues.ssoConfiguration.ssoType,
+            domain:
+              ssoConfig.ssoDomain ??
+              imsConfig.primaryDomain ??
+              currentValues.ssoConfiguration.domain,
+            entity_id:
+              ssoConfig.samlEntityId ?? currentValues.ssoConfiguration.entity_id,
+            idp_url:
+              ssoConfig.samlIdpMetadataUrl ??
+              currentValues.ssoConfiguration.idp_url,
+            acs_url:
+              ssoConfig.samlAcsUrl ??
+              currentValues.ssoConfiguration.acs_url,
+            issuer_url:
+              ssoConfig.oidcIssuer ?? currentValues.ssoConfiguration.issuer_url,
+            client_id:
+              ssoConfig.oidcClientId ?? currentValues.ssoConfiguration.client_id,
+            client_secret: "",
+            jitEnabled:
+              ssoConfig.jitEnabled ?? currentValues.ssoConfiguration.jitEnabled,
+            autoRoleSync:
+              ssoConfig.scimEnabled ??
+              currentValues.ssoConfiguration.autoRoleSync,
+            groupMapping:
+              ssoConfig.groupMapping && Object.keys(ssoConfig.groupMapping).length > 0
+                ? JSON.stringify(ssoConfig.groupMapping, null, 2)
+                : currentValues.ssoConfiguration.groupMapping,
+          },
+          workspaceName:
+            imsConfig.orgName ?? imsConfig.companyName ?? currentValues.workspaceName,
+          timezone: imsConfig.timezone ?? currentValues.timezone,
+        });
+      } catch (error) {
+        console.error("Failed to preload workspace setup:", error);
+      }
+    };
+
+    void loadExistingSetup();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [getValues, reset]);
+
+  const onSubmit = async (data: any) => {
+    try {
+      setIsSubmitting(true);
+
+      const inviteMembers = data.inviteEmails
+        .split(/[\n,]+/)
+        .map((value: string) => value.trim())
+        .filter(Boolean)
+        .map((inviteEmail: string) => ({
+          inviteEmail,
+          role: normalizeInviteRole(data.inviteRole),
+        }));
+
+      let parsedGroupMapping: Record<string, string> | undefined;
+      if (data.ssoConfiguration?.groupMapping?.trim()) {
+        try {
+          parsedGroupMapping = JSON.parse(data.ssoConfiguration.groupMapping);
+        } catch {
+          throw new Error("Group mapping must be valid JSON");
+        }
+      }
+
+      const payload = {
+        orgName: data.workspaceName,
+        companyName: data.workspaceName,
+        primaryDomain: data.ssoConfiguration?.domain?.trim() || undefined,
+        timezone: data.timezone,
+        inviteMembers,
+        policies: data.policies,
+        ssoConfiguration: {
+          ...data.ssoConfiguration,
+          domain: data.ssoConfiguration?.domain?.trim() || "",
+          group_mapping: parsedGroupMapping,
+          scimEnabled: Boolean(data.ssoConfiguration?.autoRoleSync),
+        },
+        jitEnabled: Boolean(data.ssoConfiguration?.jitEnabled),
+        scimEnabled: Boolean(data.ssoConfiguration?.autoRoleSync),
+        ssoEnforced: Boolean(data.policies?.enforceSSO),
+      };
+
+      await apiClient.post(endpoint.auth.ims_setup, payload);
+
+      const hasSsoDraft = Boolean(
+        data.policies?.enforceSSO ||
+          data.ssoConfiguration?.domain ||
+          data.ssoConfiguration?.issuer_url ||
+          data.ssoConfiguration?.client_id ||
+          data.ssoConfiguration?.idp_url ||
+          data.ssoConfiguration?.entity_id,
+      );
+
+      if (hasSsoDraft) {
+        const testResponse = await apiClient.post(endpoint.auth.ims_sso_test);
+        const testResult = testResponse.data?.data ?? testResponse.data;
+
+        if (testResult?.outcome === "SUCCESS") {
+          await apiClient.post(endpoint.auth.ims_sso_activate);
+          toast.success("Workspace and SSO setup saved");
+        } else {
+          toast.info("Workspace saved, SSO kept in draft", {
+            description:
+              testResult?.message ??
+              "Finish the remaining identity-provider requirements before activation.",
+          });
+        }
+      } else {
+        toast.success("Workspace setup saved");
+      }
+
+      router.push("/incident");
+    } catch (error) {
+      console.error("Workspace setup error:", error);
+      toast.error("Unable to save workspace setup", {
+        description:
+          error instanceof AxiosError
+            ? error.response?.data?.message
+            : "Please review the SSO fields and try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#08132F] text-[#D1D5DB] font-sans p-10 selection:bg-IMSCyan selection:text-black">
@@ -342,9 +521,16 @@ const ScrubbeOnboarding = () => {
                               />
                             )}
                           />
-                          <Input
-                            label="Discovery Domain"
-                            placeholder="acme.com"
+                          <Controller
+                            name="ssoConfiguration.domain"
+                            control={control}
+                            render={({ field }) => (
+                              <Input
+                                label="Discovery Domain"
+                                placeholder="acme.com"
+                                {...field}
+                              />
+                            )}
                           />
                         </div>
 
@@ -407,12 +593,11 @@ const ScrubbeOnboarding = () => {
                                     <Controller
                                       name="ssoConfiguration.acs_url"
                                       control={control}
-                                      render={({ field }) => (
-                                        <Input
-                                          value="https://app.scrubbe.com/auth/saml/callback"
+                                    render={({ field }) => (
+                                      <Input
+                                          value={field.value}
                                           readOnly
                                           className="!h-11 !bg-void/20 text-gray-500"
-                                          // {...field}
                                         />
                                       )}
                                     />
@@ -432,6 +617,7 @@ const ScrubbeOnboarding = () => {
                                       <Input
                                         placeholder="https://accounts.google.com"
                                         className="!h-11 !bg-void/50"
+                                        {...field}
                                       />
                                     )}
                                   />
@@ -493,7 +679,18 @@ const ScrubbeOnboarding = () => {
                                   JIT Provisioning
                                 </span>
                               </div>
-                              <Switch size="sm" color="success" />
+                              <Controller
+                                name="ssoConfiguration.jitEnabled"
+                                control={control}
+                                render={({ field }) => (
+                                  <Switch
+                                    size="sm"
+                                    color="success"
+                                    isSelected={Boolean(field.value)}
+                                    onChange={() => field.onChange(!field.value)}
+                                  />
+                                )}
+                              />
                             </div>
                             <div className="flex items-center justify-between p-4 bg-void/40 border border-white/5 rounded-xl">
                               <div className="flex items-center gap-3">
@@ -502,7 +699,18 @@ const ScrubbeOnboarding = () => {
                                   Auto-Role Sync
                                 </span>
                               </div>
-                              <Switch size="sm" color="success" />
+                              <Controller
+                                name="ssoConfiguration.autoRoleSync"
+                                control={control}
+                                render={({ field }) => (
+                                  <Switch
+                                    size="sm"
+                                    color="success"
+                                    isSelected={Boolean(field.value)}
+                                    onChange={() => field.onChange(!field.value)}
+                                  />
+                                )}
+                              />
                             </div>
                           </div>
 
@@ -510,9 +718,17 @@ const ScrubbeOnboarding = () => {
                             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
                               Group → Scrubbe Role Mapping
                             </label>
-                            <TextArea
-                              className="w-full bg-void/50 border border-white/10 rounded-xl p-4 h-32 text-xs font-mono outline-none focus:border-IMSCyan/50 transition-all"
-                              placeholder='{ "SRE_TEAM": "Commander", "DEVOPS": "Responder" }'
+                            <Controller
+                              name="ssoConfiguration.groupMapping"
+                              control={control}
+                              render={({ field }) => (
+                                <TextArea
+                                  className="w-full bg-void/50 border border-white/10 rounded-xl p-4 h-32 text-xs font-mono outline-none focus:border-IMSCyan/50 transition-all"
+                                  placeholder='{ "SRE_TEAM": "Commander", "DEVOPS": "Responder" }'
+                                  rows={6}
+                                  {...field}
+                                />
+                              )}
                             />
                             <p className="text-[10px] text-gray-500 italic">
                               Mapping is stored as JSONB data in policy-service.
@@ -666,9 +882,10 @@ const ScrubbeOnboarding = () => {
               <div className="flex justify-end">
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="w-fit border-IMSCyan border text-IMSCyan py-3 px-3 text-base rounded-lg font-bold mt-8 hover:brightness-110"
                 >
-                  Continue
+                  {isSubmitting ? "Saving..." : "Continue"}
                 </button>
               </div>
             </StepWrapper>

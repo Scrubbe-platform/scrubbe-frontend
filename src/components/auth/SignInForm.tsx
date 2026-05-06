@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -25,20 +25,63 @@ import { FcGoogle } from "react-icons/fc";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth.schema";
 import { getCookie } from "cookies-next";
 import { COOKIE_KEYS } from "@/lib/constant";
+import { endpoint } from "@/lib/api/endpoint";
 import { apiClient } from "@/lib/api/client";
 
 const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 
+type SsoDiscoveryResult = {
+  available?: boolean;
+  enforced?: boolean;
+  provider?: string | null;
+  providerSlug?: "google" | "github" | "gitlab" | "microsoft-entra-id" | null;
+  domain?: string | null;
+  ssoDomain?: string | null;
+  businessId?: string | null;
+  businessName?: string | null;
+  protocol?: string | null;
+  status?: string | null;
+  loginUrl?: string | null;
+};
+
+const PROVIDER_OPTIONS = [
+  {
+    slug: "google",
+    label: "Continue with Google",
+    icon: <FcGoogle size={18} />,
+  },
+  {
+    slug: "github",
+    label: "Continue with GitHub",
+    icon: <FaGithub size={18} />,
+  },
+  {
+    slug: "gitlab",
+    label: "Continue with GitLab",
+    icon: <FaGitlab size={18} />,
+  },
+  {
+    slug: "microsoft-entra-id",
+    label: "Continue with Microsoft",
+    icon: <FaMicrosoft size={18} />,
+  },
+] as const;
+
 export default function SignInForm() {
-  const [rememberMe, setRememberMe] = useState(false);
   const { oauthLogin, requestMagicLink, consumeMagicLink } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const path = searchParams.get("to");
+  const errorCode = searchParams.get("error");
   const magicToken = searchParams.get("magic");
   const isAuthRef = useRef(false);
+  const shownErrorRef = useRef<string | null>(null);
   const inviteEmail = searchParams.get("email");
   const [steps, setSteps] = useState<"email" | "authenticate">("email");
+  const [ssoDiscovery, setSsoDiscovery] = useState<SsoDiscoveryResult | null>(
+    null
+  );
+  const [isDiscoveryLoading, setIsDiscoveryLoading] = useState(false);
   const [isSsoLoading, setIsSsoLoading] = useState(false);
   const [isMagicLinkLoading, setIsMagicLinkLoading] = useState(false);
 
@@ -59,52 +102,82 @@ export default function SignInForm() {
     mode: "onChange",
   });
 
-  const redirectAfterLogin = (
-    accountType?: string | null,
-    purpose?: string | null
-  ) => {
-    if (IS_STANDALONE) {
-      if (path === "payment") {
-        router.replace("/pricing");
+  const redirectAfterLogin = useCallback(
+    (accountType?: string | null, purpose?: string | null) => {
+      if (IS_STANDALONE) {
+        if (path === "payment") {
+          router.replace("/pricing");
+          return;
+        }
+        if (path === "community") {
+          router.replace("/community");
+          return;
+        }
         return;
       }
-      if (path === "community") {
-        router.replace("/community");
-        return;
-      }
-      return;
-    }
 
-    if (path === "ezra") {
-      router.push("/ezra/dashboard");
-      return;
-    }
-
-    if (accountType === "BUSINESS") {
-      if (purpose === "IMS") {
-        const token = getCookie(COOKIE_KEYS.TOKEN);
-        const incidentUrl =
-          process.env.NEXT_PUBLIC_INCIDENT_URL ??
-          "https://incidents.scrubbe.com";
-        window.location.href = `${incidentUrl}/incident/tickets?token=${
-          token ?? ""
-        }`;
+      if (path === "ezra") {
+        router.push("/ezra/dashboard");
         return;
       }
+
+      if (accountType === "BUSINESS") {
+        if (purpose === "IMS") {
+          const token = getCookie(COOKIE_KEYS.TOKEN);
+          const incidentUrl =
+            process.env.NEXT_PUBLIC_INCIDENT_URL ??
+            "https://incidents.scrubbe.com";
+          window.location.href = `${incidentUrl}/incident/tickets?token=${
+            token ?? ""
+          }`;
+          return;
+        }
+        router.push("/incident");
+        return;
+      }
+
+      if (accountType === "DEVELOPER") {
+        router.push("/developer/dashboard");
+        return;
+      }
+
       router.push("/incident");
+    },
+    [path, router]
+  );
+
+  const handleContinue = async () => {
+    const email = watch("email").trim();
+
+    if (!email) {
+      toast.error("Please enter your work email first");
       return;
     }
 
-    if (accountType === "DEVELOPER") {
-      router.push("/developer/dashboard");
-      return;
+    try {
+      setIsDiscoveryLoading(true);
+      const response = await apiClient.get(endpoint.auth.sso_discover, {
+        params: { email },
+      });
+      const result = response.data?.data ?? response.data ?? null;
+      setSsoDiscovery(result as SsoDiscoveryResult | null);
+    } catch (error) {
+      console.error("SSO discovery error:", error);
+      setSsoDiscovery(null);
+      toast.error("Unable to look up workspace sign-in options", {
+        description:
+          error instanceof AxiosError
+            ? error.response?.data?.message
+            : "We will fall back to the standard sign-in options.",
+      });
+    } finally {
+      setIsDiscoveryLoading(false);
+      setSteps("authenticate");
     }
-
-    router.push("/incident");
   };
 
   const onSubmit = async () => {
-    setSteps("authenticate");
+    await handleContinue();
   };
 
   const handleContinueWithSso = async () => {
@@ -117,49 +190,22 @@ export default function SignInForm() {
 
     try {
       setIsSsoLoading(true);
-
-      const discovery = await apiClient.get("/auth/sso/discovery", {
-        params: { email },
+      const response = await apiClient.get(endpoint.auth.sso_login, {
+        params: {
+          email,
+          ...(path ? { to: path } : {}),
+          dryrun: 1,
+        },
       });
-      const policy = discovery.data?.data;
-      const provider = String(policy?.provider ?? "")
-        .toUpperCase()
-        .replace(/[^A-Z0-9]/g, "");
-      const callbackUrl = `/auth/signin${
-        path ? `?to=${encodeURIComponent(path)}` : ""
-      }`;
-      const providerMap: Record<string, string> = {
-        GOOGLE: "google",
-        GITHUB: "github",
-        GITLAB: "gitlab",
-        AZURE: "microsoft-entra-id",
-        OIDC: "microsoft-entra-id",
-        MICROSOFT: "microsoft-entra-id",
-        MICROSOFTENTRAID: "microsoft-entra-id",
-        AZUREAD: "microsoft-entra-id",
-        ENTRAID: "microsoft-entra-id",
-      };
-      const nextAuthProvider =
-        providerMap[provider] ??
-        (policy?.oidcIssuer ? "microsoft-entra-id" : "");
 
-      if (!policy?.available) {
-        toast.error("This workspace does not have SSO configured yet.");
-        return;
+      const result = response.data?.data ?? response.data;
+      const redirectUrl = result?.redirectUrl as string | undefined;
+
+      if (!redirectUrl) {
+        throw new Error("Unable to resolve the SSO redirect URL");
       }
 
-      if (!nextAuthProvider) {
-        toast.error(
-          `This workspace uses ${
-            provider || "an unsupported"
-          } SSO provider, which is not enabled on this sign-in path yet.`
-        );
-        return;
-      }
-
-      await signIn(nextAuthProvider, {
-        redirectTo: callbackUrl,
-      });
+      window.location.href = redirectUrl;
     } catch (error) {
       console.error("SSO login error:", error);
       toast.error("SSO login failed", {
@@ -201,8 +247,57 @@ export default function SignInForm() {
   };
 
   const session = useSession();
+  const workspaceProviderSlug = ssoDiscovery?.providerSlug ?? null;
+  const workspaceProviderLabel =
+    PROVIDER_OPTIONS.find((option) => option.slug === workspaceProviderSlug)
+      ?.label ?? ssoDiscovery?.provider ?? "workspace SSO";
+  const workspaceLabel =
+    ssoDiscovery?.businessName ??
+    ssoDiscovery?.ssoDomain ??
+    getEmailDomain(watch("email")).domain;
+  const ssoBridgeUnavailable = Boolean(
+    ssoDiscovery?.available && !ssoDiscovery?.providerSlug
+  );
+  const enforceWorkspaceSso = Boolean(ssoDiscovery?.enforced);
+  const lockProviderButtons = Boolean(enforceWorkspaceSso && workspaceProviderSlug);
+  const disableProviderButtons = Boolean(enforceWorkspaceSso && ssoBridgeUnavailable);
 
-  const onSubmitOAuth = async () => {
+  const startDirectProviderSignIn = useCallback(
+    (provider: string) => {
+      return signIn(provider, {
+        callbackUrl: `/auth/signin${
+          path ? `?to=${encodeURIComponent(path)}` : ""
+        }`,
+      });
+    },
+    [path]
+  );
+
+  const handleProviderSelection = async (provider: string) => {
+    if (disableProviderButtons) {
+      toast.error("Workspace SSO is not available on this deployment", {
+        description:
+          "This workspace needs a tenant-specific SSO bridge before users can sign in here.",
+      });
+      return;
+    }
+
+    if (workspaceProviderSlug && provider === workspaceProviderSlug) {
+      await handleContinueWithSso();
+      return;
+    }
+
+    if (lockProviderButtons && provider !== workspaceProviderSlug) {
+      toast.info("Use your workspace provider to continue", {
+        description: `${workspaceLabel} is configured for ${workspaceProviderLabel}.`,
+      });
+      return;
+    }
+
+    await startDirectProviderSignIn(provider);
+  };
+
+  const onSubmitOAuth = useCallback(async () => {
     try {
       if (!session.data) {
         return;
@@ -255,7 +350,7 @@ export default function SignInForm() {
             : "Login failed",
       });
     }
-  };
+  }, [oauthLogin, path, redirectAfterLogin, router, session.data]);
 
   useEffect(() => {
     if (
@@ -265,15 +360,37 @@ export default function SignInForm() {
       !magicToken
     ) {
       isAuthRef.current = true;
-      onSubmitOAuth();
+      void onSubmitOAuth();
     }
-  }, [session.status, magicToken]);
+  }, [magicToken, onSubmitOAuth, session.data?.user, session.status]);
 
   useEffect(() => {
     if (inviteEmail) {
       setValue("email", inviteEmail);
+      setSsoDiscovery(null);
     }
   }, [inviteEmail, setValue]);
+
+  useEffect(() => {
+    if (!errorCode || shownErrorRef.current === errorCode) {
+      return;
+    }
+
+    shownErrorRef.current = errorCode;
+
+    const descriptions: Record<string, string> = {
+      sso_provider_missing: "We could not determine which identity provider to use for this workspace.",
+      sso_callback_not_supported:
+        "This workspace still needs the tenant-specific callback implementation for the selected SSO provider.",
+      AccessDenied: "The identity provider denied the sign-in request.",
+    };
+
+    toast.error("SSO sign-in failed", {
+      description:
+        descriptions[errorCode] ??
+        "We could not complete the single sign-on flow. Please try again or contact your workspace admin.",
+    });
+  }, [errorCode]);
 
   useEffect(() => {
     if (!magicToken || isAuthRef.current) {
@@ -423,12 +540,11 @@ export default function SignInForm() {
             </CButton> */}
 
             <CButton
-              onClick={() => setSteps("authenticate")}
-              type="button"
-              disabled={!isValid}
+              type="submit"
+              disabled={!isValid || isDiscoveryLoading}
               className="mt-3 border border-zinc-600 bg-zinc-800 text-white hover:text-dark"
             >
-              Continue
+              {isDiscoveryLoading ? "Checking workspace..." : "Continue"}
             </CButton>
 
             <div className="mt-4 text-center text-gray-200 text-base">
@@ -460,7 +576,9 @@ export default function SignInForm() {
               Continue to your workspace
             </h1>
             <p className="text-base text-white">
-              We’ll route you to the right sign-in method for your organization.
+              {ssoDiscovery?.available
+                ? "Your workspace sign-in options were loaded from the server."
+                : "We’ll route you to the right sign-in method for your organization."}
             </p>
           </div>
 
@@ -475,63 +593,50 @@ export default function SignInForm() {
             </div>
           </div>
 
+          {ssoDiscovery?.available && (
+            <div className="mb-4 rounded-2xl border border-zinc-700 bg-zinc-900/60 px-4 py-3 text-sm text-zinc-200">
+              <p className="font-semibold text-white">
+                {workspaceLabel} {enforceWorkspaceSso ? "requires" : "supports"}{" "}
+                {workspaceProviderLabel}.
+              </p>
+              <p className="mt-1 text-zinc-400">
+                {ssoBridgeUnavailable
+                  ? "This workspace is configured for a tenant-specific SSO bridge that is not active on this deployment yet."
+                  : enforceWorkspaceSso
+                    ? "Only the matching workspace provider is enabled below."
+                    : "The matching workspace provider is highlighted below, and other sign-in methods stay available."}
+              </p>
+            </div>
+          )}
+
           <div className="flex flex-col gap-2">
-            <CButton
-              onClick={() =>
-                signIn("google", {
-                  callbackUrl: `/auth/signin${
-                    path ? `?to=${encodeURIComponent(path)}` : ""
-                  }`,
-                })
-              }
-              type="button"
-              disabled={isSsoLoading}
-              className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"
-            >
-              <FcGoogle size={18} /> Continue with Google
-            </CButton>
-            <CButton
-              onClick={() =>
-                signIn("github", {
-                  callbackUrl: `/auth/signin${
-                    path ? `?to=${encodeURIComponent(path)}` : ""
-                  }`,
-                })
-              }
-              type="button"
-              disabled={isSsoLoading}
-              className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"
-            >
-              <FaGithub size={18} /> Continue with GitHub
-            </CButton>
-            <CButton
-              onClick={() =>
-                signIn("gitlab", {
-                  callbackUrl: `/auth/signin${
-                    path ? `?to=${encodeURIComponent(path)}` : ""
-                  }`,
-                })
-              }
-              type="button"
-              disabled={isSsoLoading}
-              className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"
-            >
-              <FaGitlab size={18} /> Continue with GitLab
-            </CButton>
-            <CButton
-              onClick={() =>
-                signIn("microsoft-entra-id", {
-                  callbackUrl: `/auth/signin${
-                    path ? `?to=${encodeURIComponent(path)}` : ""
-                  }`,
-                })
-              }
-              type="button"
-              disabled={isSsoLoading}
-              className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark flex items-center justify-center gap-2"
-            >
-              <FaMicrosoft size={18} /> Continue with Microsoft
-            </CButton>
+            {PROVIDER_OPTIONS.map((option) => {
+              const matchesWorkspaceProvider =
+                option.slug === workspaceProviderSlug;
+              const isLockedOut =
+                lockProviderButtons && !matchesWorkspaceProvider;
+
+              return (
+                <CButton
+                  key={option.slug}
+                  onClick={() => void handleProviderSelection(option.slug)}
+                  type="button"
+                  disabled={
+                    isSsoLoading || isLockedOut || disableProviderButtons
+                  }
+                  className={`border text-white hover:text-dark flex items-center justify-center gap-2 ${
+                    matchesWorkspaceProvider
+                      ? "border-IMSCyan/70 bg-[#00313A]"
+                      : "border-zinc-600 bg-zinc-800"
+                  }`}
+                >
+                  {option.icon}
+                  {matchesWorkspaceProvider && ssoDiscovery?.available
+                    ? `${option.label} (Workspace SSO)`
+                    : option.label}
+                </CButton>
+              );
+            })}
           </div>
 
           <div className="flex justify-center items-center text-sm text-zinc-400 gap-2 py-3">
@@ -543,13 +648,16 @@ export default function SignInForm() {
           <CButton
             onClick={handleRequestMagicLink}
             type="button"
-            disabled={isMagicLinkLoading}
+            disabled={isMagicLinkLoading || enforceWorkspaceSso}
             className="border border-zinc-600 bg-zinc-800 text-white hover:text-dark"
           >
             <FaLink /> Email me a magic link
           </CButton>
           <div
-            onClick={() => setSteps("email")}
+            onClick={() => {
+              setSsoDiscovery(null);
+              setSteps("email");
+            }}
             className="mt-4 text-center text-IMSCyan text-base cursor-pointer"
           >
             Use a different email

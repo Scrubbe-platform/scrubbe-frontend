@@ -3,6 +3,9 @@ import BreachesByPriorityChart from "@/components/IMS/Dashboard/SLA/BreachesByPr
 import ByTeamChart from "@/components/IMS/Dashboard/SLA/ByTeamChart";
 import OverallComplianceChart from "@/components/IMS/Dashboard/SLA/OverallComplianceChart";
 import PerformanceTrendChart from "@/components/IMS/Dashboard/SLA/SlaPerformanceTrendChart";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import {
   FaExclamationTriangle,
@@ -23,13 +26,19 @@ const KPICard = ({ title, value, change, icon: Icon, color }: any) => (
         {change && (
           <span
             className={`ml-3 text-sm font-semibold flex items-center ${
-              change.startsWith("+") ? "text-green-600" : "text-red-600"
+              change.startsWith("+")
+                ? "text-green-600"
+                : change.startsWith("-")
+                  ? "text-red-600"
+                  : "text-gray-500"
             }`}
           >
             {change.startsWith("+") ? (
               <FaArrowUp className="w-3 h-3 mr-0.5" />
-            ) : (
+            ) : change.startsWith("-") ? (
               <FaArrowDown className="w-3 h-3 mr-0.5" />
+            ) : (
+              <FaArrowUp className="w-3 h-3 mr-0.5 opacity-0" />
             )}
             {change}
           </span>
@@ -75,7 +84,52 @@ const IncidentRiskCard = ({ id, status, sla, tenant }: any) => (
   </div>
 );
 
+type SlaAnalytics = {
+  kpis?: {
+    complianceRate?: number;
+    breachedSlaCount?: number;
+    breachChange?: string;
+    avgMttrLabel?: string;
+    improvementTrend?: string;
+  };
+  overallCompliance?: number;
+  byTeam?: {
+    labels?: string[];
+    data?: number[];
+  };
+  performanceTrend?: {
+    labels?: string[];
+    data?: number[];
+  };
+  breachesByPriority?: {
+    labels?: string[];
+    data?: number[];
+  };
+  incidentsAtRisk?: Array<{
+    id: string;
+    status: string;
+    sla: string;
+    tenant: string;
+  }>;
+};
+
 const SLADashboard = () => {
+  const { get } = useFetch();
+  const { data: analytics } = useQuery<SlaAnalytics>({
+    queryKey: ["sla-analytics"],
+    queryFn: async () => {
+      const res = await get(endpoint.sla_policies.analytics);
+      if (res.success) {
+        return (res.data?.data ?? res.data ?? {}) as SlaAnalytics;
+      }
+      return {} as SlaAnalytics;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const kpis = analytics?.kpis ?? {};
+  const incidentsAtRisk = analytics?.incidentsAtRisk ?? [];
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -83,26 +137,26 @@ const SLADashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <KPICard
             title="SLA Compliance"
-            value="94%"
+            value={`${kpis.complianceRate ?? 0}%`}
             icon={FaCheckSquare}
             color="text-emerald-600"
           />
           <KPICard
             title="Breached SLAs"
-            value="6"
-            change="12%"
+            value={kpis.breachedSlaCount ?? 0}
+            change={kpis.breachChange}
             icon={FaExclamationTriangle}
             color="text-red-600"
           />
           <KPICard
             title="Avg MTTR"
-            value="1.4h"
+            value={kpis.avgMttrLabel ?? "0m"}
             icon={FaClock}
             color="text-emerald-600"
           />
           <KPICard
             title="Improvement Trend"
-            value="+2.3%"
+            value={kpis.improvementTrend ?? "0%"}
             icon={HiChartSquareBar}
             color="text-fuchsia-600"
           />
@@ -115,12 +169,15 @@ const SLADashboard = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Overall Compliance
             </h3>
-            <OverallComplianceChart />
+            <OverallComplianceChart compliance={analytics?.overallCompliance} />
           </div>
 
           {/* By Team (Bar Chart) */}
           <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100">
-            <ByTeamChart />
+            <ByTeamChart
+              labels={analytics?.byTeam?.labels}
+              values={analytics?.byTeam?.data}
+            />
           </div>
         </div>
 
@@ -131,7 +188,10 @@ const SLADashboard = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Performance Trend
             </h3>
-            <PerformanceTrendChart />
+            <PerformanceTrendChart
+              labels={analytics?.performanceTrend?.labels}
+              values={analytics?.performanceTrend?.data}
+            />
           </div>
 
           {/* Breaches by Priority (Pie Chart) */}
@@ -139,7 +199,10 @@ const SLADashboard = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Breaches by Priority
             </h3>
-            <BreachesByPriorityChart />
+            <BreachesByPriorityChart
+              labels={analytics?.breachesByPriority?.labels}
+              values={analytics?.breachesByPriority?.data}
+            />
           </div>
         </div>
 
@@ -148,21 +211,23 @@ const SLADashboard = () => {
           <h3 className="text-xl font-bold text-gray-800 mb-4">
             Incidents at Risk of Breach
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <IncidentRiskCard
-              id="1045"
-              status="Resolved"
-              sla="Met (45m / 1h)"
-              tenant="Acme Corp"
-            />
-            <IncidentRiskCard
-              id="1045"
-              status="Resolved"
-              sla="Met (45m / 1h)"
-              tenant="Delta Enterprises"
-            />
-            {/* Add more cards as needed */}
-          </div>
+          {incidentsAtRisk.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {incidentsAtRisk.map((incident) => (
+                <IncidentRiskCard
+                  key={incident.id}
+                  id={incident.id}
+                  status={incident.status}
+                  sla={incident.sla}
+                  tenant={incident.tenant}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 text-sm text-gray-500">
+              No active incidents are currently at risk of SLA breach.
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -26,6 +26,15 @@ type FingerprintConfig = {
   }>;
 };
 
+type RoutingRule = {
+  id: string;
+  name: string;
+  source: string;
+  condition: string;
+  action: string;
+  enabled: boolean;
+};
+
 const defaultRules = [
   {
     id: "rule-1",
@@ -88,7 +97,7 @@ const sourceColors: Record<string, string> = {
 
 export default function RulesAndRouting() {
   const { get } = useFetch();
-  const [rules, setRules] = useState(defaultRules);
+  const [rules, setRules] = useState<RoutingRule[]>(defaultRules);
 
   const { data: config } = useQuery<FingerprintConfig>({
     queryKey: ["fingerprint-config"],
@@ -100,6 +109,24 @@ export default function RulesAndRouting() {
     refetchOnWindowFocus: false,
   });
 
+  React.useEffect(() => {
+    if (!config?.routingRules || config.routingRules.length === 0) {
+      setRules(defaultRules);
+      return;
+    }
+
+    const liveRules = config.routingRules.map((rule, index) => ({
+      id: rule.id || `rule-${index + 1}`,
+      name: rule.name || `Routing rule ${index + 1}`,
+      source: rule.source || "custom",
+      condition: rule.condition || "always",
+      action: rule.action || "Create incident",
+      enabled: rule.enabled ?? true,
+    }));
+
+    setRules(liveRules);
+  }, [config]);
+
   const toggleRule = (id: string) => {
     setRules((prev) =>
       prev.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r))
@@ -107,6 +134,8 @@ export default function RulesAndRouting() {
   };
 
   const dedupWindow = config?.dedupWindowSeconds ?? 300;
+  const activeRuleCount = rules.filter((r) => r.enabled).length;
+  const sourceCount = new Set(rules.map((rule) => rule.source)).size;
 
   return (
     <div className="space-y-6">
@@ -126,7 +155,7 @@ export default function RulesAndRouting() {
             Active rules
           </p>
           <p className="text-lg font-bold text-green">
-            {rules.filter((r) => r.enabled).length}
+            {activeRuleCount}
           </p>
           <p className="text-xs text-gray-400">
             of {rules.length} routing rules enabled
@@ -136,9 +165,9 @@ export default function RulesAndRouting() {
           <p className="text-xs text-gray-500 uppercase tracking-widest">
             Sources
           </p>
-          <p className="text-lg font-bold text-white">6</p>
+          <p className="text-lg font-bold text-white">{sourceCount}</p>
           <p className="text-xs text-gray-400">
-            GitHub, GitLab, K8s, PagerDuty, Prometheus, Datadog
+            Distinct inbound sources represented in the routing table.
           </p>
         </div>
       </div>

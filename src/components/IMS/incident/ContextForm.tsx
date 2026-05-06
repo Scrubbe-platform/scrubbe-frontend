@@ -1,60 +1,139 @@
+"use client";
+
 import { z } from "zod";
-import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import React, { useEffect, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X, Upload } from "lucide-react";
+import { X } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Select from "@/components/ui/select";
 import Input from "@/components/ui/input";
 import TextArea from "@/components/ui/text-area";
+import useMember from "@/hooks/useMember";
+import { saveIncidentContext } from "@/lib/incident/incident.api";
+import {
+  IncidentContextRecord,
+  IncidentDetailRecord,
+} from "@/lib/incident/incident.types";
+import { querykeys } from "@/lib/constant";
 
-// Mocking your existing components
 export const incidentContextSchema = z.object({
-  customerImpact: z.string().min(1, "Customer impact is required"),
-  externalCommunication: z.string().min(1, "Selection is required"),
-  incidentCommander: z.string().min(1, "Incident commander is required"),
-  businessImpact: z.coerce.number().min(0, "Must be a positive number"),
-  additionalContext: z.string().min(10, "Please provide more detail"),
-  labels: z.array(z.string()).min(1, "Add at least one tag"),
-  relatedIncidents: z.string().optional(),
+  customerImpact: z.string(),
+  externalCommunication: z.string(),
+  incidentCommander: z.string(),
+  businessImpact: z.string(),
+  additionalContext: z.string(),
+  labels: z.array(z.string()),
+  relatedIncidents: z.string(),
   runbookOverrideUrl: z
     .string()
     .url("Must be a valid URL")
     .optional()
     .or(z.literal("")),
-  escalateTo: z.string().min(1, "Escalation target is required"),
-  attachments: z
-    .array(z.any())
-    .refine(
-      (files) => files.length > 0,
-      "At least one screenshot or log is required"
-    )
-    .optional(),
+  escalateTo: z.string(),
+  attachments: z.array(z.any()).optional(),
 });
 
 export type IncidentContextFormValues = z.infer<typeof incidentContextSchema>;
 
-const AddContextForm = () => {
+const AddContextForm = ({
+  context,
+  incident,
+}: {
+  context: IncidentContextRecord | null;
+  incident: IncidentDetailRecord;
+}) => {
   const [tagInput, setTagInput] = useState("");
+  const [saveNotice, setSaveNotice] = useState("");
+  const queryClient = useQueryClient();
+  const { data: members = [] } = useMember();
+
+  const memberOptions = useMemo(
+    () => [
+      { value: "", label: "Select team member" },
+      ...members.map((member) => {
+        const fullName =
+          `${member.firstname ?? ""} ${member.lastname ?? ""}`.trim() ||
+          member.email;
+        return {
+          value: fullName,
+          label: `${fullName} (${member.email})`,
+        };
+      }),
+    ],
+    [members]
+  );
+
+  const defaultValues = useMemo<IncidentContextFormValues>(
+    () => ({
+      labels: context?.labels ?? [],
+      businessImpact:
+        context?.businessImpact ?? incident.financialExposure ?? "",
+      customerImpact: context?.customerImpact ?? "",
+      externalCommunication: context?.externalCommunication ?? "",
+      incidentCommander:
+        context?.incidentCommander ?? incident.incidentCommander ?? "",
+      additionalContext: context?.additionalContext ?? "",
+      relatedIncidents: (context?.relatedIncidents ?? []).join(", "),
+      runbookOverrideUrl: context?.runbookOverrideUrl ?? "",
+      escalateTo: context?.escalateTo ?? "",
+      attachments: [],
+    }),
+    [context, incident.financialExposure, incident.incidentCommander]
+  );
 
   const {
     control,
     handleSubmit,
     setValue,
+    reset,
     watch,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<IncidentContextFormValues>({
     resolver: zodResolver(incidentContextSchema),
-    defaultValues: {
-      labels: ["db-pool", "Deployment", "Checkout"],
-      businessImpact: 1800,
-      customerImpact: "Partial degradation - Checkout affected",
-      externalCommunication: "Not required",
-      incidentCommander: "Alice Shen ( SRE Lead )",
-      escalateTo: "Service Owner + Change Manager",
-    },
+    defaultValues,
   });
 
+  useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues, reset]);
+
   const currentTags = watch("labels");
+
+  const saveMutation = useMutation({
+    mutationFn: async (data: IncidentContextFormValues) => {
+      const attachmentMetadata = Array.isArray(data.attachments)
+        ? data.attachments.map((file) => ({
+            name: file?.name,
+            type: file?.type,
+          }))
+        : [];
+
+      return saveIncidentContext(incident.id, {
+        customerImpact: data.customerImpact,
+        externalCommunication: data.externalCommunication,
+        incidentCommander: data.incidentCommander,
+        businessImpact: data.businessImpact,
+        additionalContext: data.additionalContext,
+        labels: data.labels,
+        relatedIncidents: data.relatedIncidents
+          .split(",")
+          .map((value) => value.trim())
+          .filter(Boolean),
+        runbookOverrideUrl: data.runbookOverrideUrl,
+        escalateTo: data.escalateTo,
+        attachments: attachmentMetadata,
+      });
+    },
+    onSuccess: async () => {
+      setSaveNotice("Incident context saved.");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["INCIDENT_CONTEXT", incident.id] }),
+        queryClient.invalidateQueries({ queryKey: [querykeys.HISTORY, incident.id] }),
+        queryClient.invalidateQueries({ queryKey: [querykeys.INCIDENT_DETAIL, incident.id] }),
+      ]);
+    },
+  });
 
   const handleAddTag = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && tagInput.trim()) {
@@ -69,26 +148,31 @@ const AddContextForm = () => {
   const removeTag = (tagToRemove: string) => {
     setValue(
       "labels",
-      currentTags.filter((t) => t !== tagToRemove)
+      currentTags.filter((tag) => tag !== tagToRemove)
     );
   };
 
-  const onSubmit = (data: IncidentContextFormValues) => {
-    console.log("Form Data:", data);
+  const onSubmit = async (data: IncidentContextFormValues) => {
+    setSaveNotice("");
+    await saveMutation.mutateAsync(data);
   };
 
   return (
-    <div className="p-6 ">
+    <div className="p-6">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className=" p-8 rounded-xl text-slate-300  border border-white/5"
+        className="p-8 rounded-xl text-slate-300 border border-white/5"
       >
-        <h2 className="text-xl font-semibold mb-8 text-white/90">
-          Add Context - Enrich signals
-        </h2>
+        <div className="flex items-center justify-between gap-4 mb-8">
+          <h2 className="text-xl font-semibold text-white/90">
+            Add Context - Enrich signals
+          </h2>
+          {saveNotice ? (
+            <p className="text-xs font-medium text-green-400">{saveNotice}</p>
+          ) : null}
+        </div>
 
         <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-          {/* Row 1 */}
           <Controller
             name="customerImpact"
             control={control}
@@ -101,14 +185,8 @@ const AddContextForm = () => {
                     value: "Partial degradation - checkout affected",
                     label: "Partial degradation - checkout affected",
                   },
-                  {
-                    value: "Full service outage",
-                    label: "Full service outage",
-                  },
-                  {
-                    value: "Data integrity risk",
-                    label: "Data integrity risk",
-                  },
+                  { value: "Full service outage", label: "Full service outage" },
+                  { value: "Data integrity risk", label: "Data integrity risk" },
                 ]}
                 {...field}
                 label="Customer Impact"
@@ -116,21 +194,26 @@ const AddContextForm = () => {
               />
             )}
           />
+
           <Controller
             name="externalCommunication"
             control={control}
             render={({ field }) => (
               <Select
                 options={[
+                  { value: "", label: "Select communication status" },
                   { value: "Not required", label: "Not required" },
                   {
                     value: "Status page update pending",
                     label: "Status page update pending",
                   },
-                  { value: "Status page update", label: "Status page update" },
                   {
-                    value: "Customer email send",
-                    label: "Customer email send",
+                    value: "Status page updated",
+                    label: "Status page updated",
+                  },
+                  {
+                    value: "Customer email sent",
+                    label: "Customer email sent",
                   },
                 ]}
                 {...field}
@@ -140,33 +223,32 @@ const AddContextForm = () => {
             )}
           />
 
-          {/* Row 2 */}
           <Controller
             name="incidentCommander"
             control={control}
             render={({ field }) => (
               <Select
-                options={[]}
+                options={memberOptions}
                 {...field}
                 label="Incident Commander"
                 error={errors.incidentCommander?.message}
               />
             )}
           />
+
           <Controller
             name="businessImpact"
             control={control}
             render={({ field }) => (
               <Input
                 {...field}
-                type="number"
-                label="Business impact (£/min)"
+                label="Business impact"
+                placeholder="$ / min"
                 error={errors.businessImpact?.message}
               />
             )}
           />
 
-          {/* Additional Context - Full Width */}
           <div className="col-span-2">
             <Controller
               name="additionalContext"
@@ -182,7 +264,6 @@ const AddContextForm = () => {
             />
           </div>
 
-          {/* Labels / Tags */}
           <div className="col-span-2">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">
               Labels / Tags
@@ -205,18 +286,15 @@ const AddContextForm = () => {
                 className="bg-transparent border-none outline-none text-sm p-1 flex-1 min-w-[150px]"
                 placeholder="Add tag + enter"
                 value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
+                onChange={(event) => setTagInput(event.target.value)}
                 onKeyDown={handleAddTag}
               />
             </div>
             {errors.labels && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.labels.message}
-              </p>
+              <p className="text-red-500 text-xs mt-1">{errors.labels.message}</p>
             )}
           </div>
 
-          {/* Related Incidents */}
           <div className="col-span-2">
             <Controller
               name="relatedIncidents"
@@ -231,20 +309,24 @@ const AddContextForm = () => {
             />
           </div>
 
-          {/* Row 4 */}
           <Controller
             name="runbookOverrideUrl"
             control={control}
             render={({ field }) => (
-              <Input {...field} label="Runbook Override URL" />
+              <Input
+                {...field}
+                label="Runbook Override URL"
+                error={errors.runbookOverrideUrl?.message}
+              />
             )}
           />
+
           <Controller
             name="escalateTo"
             control={control}
             render={({ field }) => (
               <Select
-                options={[]}
+                options={memberOptions}
                 {...field}
                 label="Escalate to"
                 error={errors.escalateTo?.message}
@@ -256,75 +338,42 @@ const AddContextForm = () => {
             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">
               Evidence & Attachments
             </label>
-
             <Controller
               name="attachments"
               control={control}
               render={({ field }) => (
-                <div
-                  className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center bg-white/[0.02] transition-all cursor-pointer
-          ${
-            errors.attachments
-              ? "border-red-500/50 bg-red-500/5"
-              : "border-white/10 hover:bg-white/[0.04]"
-          }
-        `}
-                  onClick={() =>
-                    document.getElementById("file-upload")?.click()
-                  }
-                >
+                <div className="space-y-2">
                   <input
-                    id="file-upload"
                     type="file"
                     multiple
-                    className="hidden"
-                    onChange={(e) => {
-                      const files = Array.from(e.target.files || []);
-                      field.onChange(files);
-                    }}
+                    onChange={(event) =>
+                      field.onChange(Array.from(event.target.files ?? []))
+                    }
+                    className="w-full rounded-md border border-gray-400 bg-transparent px-3 py-2 text-sm text-white"
                   />
-
-                  <Upload
-                    className={`${
-                      errors.attachments ? "text-red-400" : "text-slate-500"
-                    } mb-4`}
-                    size={32}
-                  />
-
-                  <p className="text-sm font-medium text-slate-300">
-                    {field.value?.length
-                      ? `${field.value.length} files selected`
-                      : "Attach Screenshots, Logs, Dashboards"}
+                  <p className="text-xs text-slate-500">
+                    Attachment metadata is saved in this incident slice. Upload
+                    storage can be layered on later without breaking the form.
                   </p>
-
-                  <p className="text-xs text-slate-500 mt-2">
-                    PNG, JPG, PDF, .Log, .txt, .json, .yami - max 25MB per file
-                  </p>
-
-                  {errors.attachments && (
-                    <p className="text-red-500 text-xs mt-4 font-bold uppercase tracking-tight">
-                      {errors.attachments.message}
-                    </p>
-                  )}
                 </div>
               )}
             />
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-4 mt-10">
-          <button
-            type="button"
-            className="px-4 py-2.5 text-sm rounded-lg border border-green-400 text-green-400 font-semibold hover:bg-green-400/5 transition-all"
-          >
-            Save as draft
-          </button>
+        {saveMutation.isError ? (
+          <p className="mt-4 text-sm text-red-400">
+            Unable to save incident context right now.
+          </p>
+        ) : null}
+
+        <div className="mt-8 flex justify-end">
           <button
             type="submit"
-            className="px-4 py-2.5 text-sm rounded-lg bg-green-400 text-[#050b18] font-bold hover:bg-green-300 transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+            disabled={isSubmitting || saveMutation.isPending}
+            className="px-5 py-2.5 rounded-lg border border-green-500/50 text-green-400 font-bold hover:bg-green-500/5 transition-all disabled:opacity-60"
           >
-            Save and update incident
+            {saveMutation.isPending ? "Saving..." : "Save Context"}
           </button>
         </div>
       </form>

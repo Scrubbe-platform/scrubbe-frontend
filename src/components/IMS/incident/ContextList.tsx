@@ -1,6 +1,9 @@
 import React from "react";
-
-// --- Types ---
+import {
+  IncidentContextRecord,
+  IncidentDetailRecord,
+} from "@/lib/incident/incident.types";
+import { getIncidentSubmittedAt } from "@/lib/incident/incident.mapper";
 
 interface SubmittedContextProps {
   submittedBy: string;
@@ -18,8 +21,6 @@ interface SubmittedContextProps {
     evidenceCount: number;
   };
 }
-
-// --- Sub-Components ---
 
 const ContextRow = ({
   label,
@@ -44,16 +45,13 @@ const TagPill = ({ label }: { label: string }) => (
   </span>
 );
 
-// --- Main Component ---
-
 const IncidentContextView: React.FC<SubmittedContextProps> = ({
   submittedBy,
   submittedAt,
   data,
 }) => {
   return (
-    <div className="w-full rounded-2xl p-6 border border-green-400/30 ">
-      {/* Header */}
+    <div className="w-full rounded-2xl p-6 border border-green-400/30">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-white opacity-90 tracking-tight">
           Incident Context
@@ -83,17 +81,21 @@ const IncidentContextView: React.FC<SubmittedContextProps> = ({
 
         <ContextRow label="Labels / tags">
           <div className="flex gap-2 flex-wrap">
-            {data.labels.map((tag) => (
-              <TagPill key={tag} label={tag} />
-            ))}
+            {data.labels.length > 0 ? (
+              data.labels.map((tag) => <TagPill key={tag} label={tag} />)
+            ) : (
+              <span className="text-slate-600 italic">No labels added</span>
+            )}
           </div>
         </ContextRow>
 
         <ContextRow label="Related incidents">
-          <div className="flex gap-2">
-            {data.relatedIncidents.map((id) => (
-              <TagPill key={id} label={id} />
-            ))}
+          <div className="flex gap-2 flex-wrap">
+            {data.relatedIncidents.length > 0 ? (
+              data.relatedIncidents.map((id) => <TagPill key={id} label={id} />)
+            ) : (
+              <span className="text-slate-600 italic">None linked</span>
+            )}
           </div>
         </ContextRow>
 
@@ -125,29 +127,50 @@ const IncidentContextView: React.FC<SubmittedContextProps> = ({
   );
 };
 
-// --- Example Usage ---
+export default function ContextList({
+  context,
+  incident,
+}: {
+  context: IncidentContextRecord | null;
+  incident: IncidentDetailRecord;
+}) {
+  if (!context) {
+    return (
+      <div className="p-5">
+        <div className="rounded-2xl border border-dashed border-white/10 p-6 text-sm text-slate-400">
+          No context has been saved for {incident.ticketId} yet. Add incident
+          context below to enrich this workspace.
+        </div>
+      </div>
+    );
+  }
 
-export default function ContextList() {
-  const sampleData = {
-    customerImpact: "Partial degradation - Checkout affected",
-    externalCommunication: "Not required",
-    incidentCommander: "Alice Shen ( SRE Lead )",
-    businessImpact: "£1,800 / min",
-    additionalContext:
-      "Deploy #311 coincided with a marketing campaign launch — traffic is 41% above baseline. Team is aware. DB pool fix is the right path.",
-    labels: ["db-pool", "Deployment", "Checkout"],
-    relatedIncidents: ["SI-0002310", "SI-0001870"],
-    runbookOverrideUrl: "https://wiki.internal/runbooks/db-exhaustion",
-    escalateTo: "Service Owner + Change Manager",
-    evidenceCount: 4,
-  };
+  const submittedAtValue = getIncidentSubmittedAt(context);
+  const submittedAt = submittedAtValue
+    ? new Date(submittedAtValue).toLocaleString()
+    : "Unknown time";
 
   return (
     <div className="p-5">
       <IncidentContextView
-        submittedBy="Alice Shen"
-        submittedAt="19/4/26"
-        data={sampleData}
+        submittedBy={context.submittedBy || "A team member"}
+        submittedAt={submittedAt}
+        data={{
+          customerImpact: context.customerImpact || "Not recorded",
+          externalCommunication:
+            context.externalCommunication || "Not recorded",
+          incidentCommander:
+            context.incidentCommander ||
+            incident.incidentCommander ||
+            "Not assigned",
+          businessImpact: context.businessImpact || "Not recorded",
+          additionalContext: context.additionalContext || "Not recorded",
+          labels: context.labels,
+          relatedIncidents: context.relatedIncidents,
+          runbookOverrideUrl: context.runbookOverrideUrl,
+          escalateTo: context.escalateTo || "Not recorded",
+          evidenceCount: context.attachments.length,
+        }}
       />
     </div>
   );

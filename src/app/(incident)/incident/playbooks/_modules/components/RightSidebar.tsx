@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { Check, CheckCircle2, Circle, TrendingUp, Info } from "lucide-react";
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 // --- Types ---
 
@@ -14,6 +15,10 @@ interface IncidentField {
   label: string;
   value: string;
   colorClass?: string;
+}
+
+interface PlaybookRightSidebarProps {
+  incident: IncidentDetailRecord;
 }
 
 // --- Sub-Components ---
@@ -43,16 +48,67 @@ const MatchRow = ({ label, weight, met }: MatchCriteria) => (
 
 // --- Main Component ---
 
-const PlaybookRightSidebar: React.FC = () => {
+const severityColorClass = (severity?: string) => {
+  if (severity === "P0" || severity === "P1") return "text-red-500";
+  if (severity === "P2") return "text-yellow-500";
+  return "text-blue-400";
+};
+
+const statusColorClass = (status?: string) => {
+  if (status === "RESOLVED" || status === "CLOSED") return "text-emerald-500";
+  if (status === "MITIGATED") return "text-yellow-500";
+  return "text-blue-400";
+};
+
+const deriveIncidentContext = (
+  incident: IncidentDetailRecord
+): IncidentField[] => [
+  { label: "incident_id", value: incident.ticketId || incident.id },
+  {
+    label: "severity",
+    value: incident.severity || incident.priority || "P3",
+    colorClass: severityColorClass(incident.severity),
+  },
+  {
+    label: "service",
+    value: incident.service || incident.affectedSystem || "unknown-service",
+    colorClass: "text-blue-400",
+  },
+  {
+    label: "environment",
+    value: incident.environment || "runtime",
+    colorClass: "text-slate-200",
+  },
+  {
+    label: "region",
+    value: incident.region || "global",
+    colorClass: "text-slate-200",
+  },
+  {
+    label: "elapsed",
+    value: incident.elapsedLabel || "just now",
+    colorClass: "text-yellow-500",
+  },
+  {
+    label: "owner",
+    value:
+      incident.assignedToName ||
+      incident.assignedToEmail ||
+      incident.incidentCommander ||
+      "unassigned",
+  },
+  {
+    label: "state",
+    value: incident.status || incident.sidebarStatus || "investigating",
+    colorClass: statusColorClass(incident.status),
+  },
+];
+
+const PlaybookRightSidebar: React.FC<PlaybookRightSidebarProps> = ({
+  incident,
+}) => {
   const incidentContext: IncidentField[] = [
-    { label: "incident_id", value: "INC-#1298" },
-    { label: "severity", value: "P1", colorClass: "text-red-500" },
-    { label: "service", value: "payments-api", colorClass: "text-blue-400" },
-    { label: "error_rate", value: "12%", colorClass: "text-red-500" },
-    { label: "last_deploy", value: "47m ago", colorClass: "text-yellow-500" },
-    { label: "deploy_version", value: "v2.4.1" },
-    { label: "db_connections", value: "94%", colorClass: "text-yellow-500" },
-    { label: "state", value: "investigating", colorClass: "text-blue-400" },
+    ...deriveIncidentContext(incident),
   ];
 
   return (
@@ -70,10 +126,28 @@ const PlaybookRightSidebar: React.FC = () => {
         </div>
         <div className="bg-white/5 rounded-lg px-3 py-1">
           <MatchRow label="signal_type = error_rate_high" weight="0.90" met />
-          <MatchRow label="service = payments-api" weight="0.80" met />
+          <MatchRow
+            label={`service = ${incident.service || incident.affectedSystem || "unknown-service"}`}
+            weight="0.80"
+            met
+          />
           <MatchRow label="error_rate > 5" weight="0.85" met />
-          <MatchRow label="recent_deployment = true" weight="0.85" met />
-          <MatchRow label="severity in [P1, P2]" weight="0.90" met />
+          <MatchRow
+            label={`recent_deployment = ${
+              /deploy|pipeline|ci\/cd|rollback|release/i.test(
+                `${incident.sourceType ?? ""} ${incident.detection ?? ""} ${incident.title ?? ""}`
+              )
+                ? "true"
+                : "unknown"
+            }`}
+            weight="0.85"
+            met
+          />
+          <MatchRow
+            label={`severity = ${incident.severity || incident.priority || "P3"}`}
+            weight="0.90"
+            met
+          />
         </div>
       </section>
 

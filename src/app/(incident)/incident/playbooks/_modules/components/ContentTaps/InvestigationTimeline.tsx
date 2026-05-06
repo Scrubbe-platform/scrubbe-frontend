@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
 import { Bolt, Info, Check, Loader2, TriangleAlert } from "lucide-react";
-
-// --- Types ---
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 type StepStatus = "completed" | "in-progress" | "pending";
 
@@ -20,17 +19,19 @@ interface InvestigationStep {
   };
 }
 
-// --- Sub-Components ---
+interface InvestigationTimelineProps {
+  incident: IncidentDetailRecord;
+}
 
 const StatusBadge = ({ status }: { status: StepStatus }) => {
   const styles = {
-    completed: "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",
-    "in-progress": "bg-blue-500/10 text-blue-500 border-blue-500/30",
-    pending: "bg-slate-800/50 text-slate-500 border-slate-700",
+    completed: "border-emerald-500/30 bg-emerald-500/10 text-emerald-500",
+    "in-progress": "border-blue-500/30 bg-blue-500/10 text-blue-500",
+    pending: "border-slate-700 bg-slate-800/50 text-slate-500",
   };
   return (
     <span
-      className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${styles[status]}`}
+      className={`rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${styles[status]}`}
     >
       {status.replace("-", " ")}
     </span>
@@ -38,117 +39,121 @@ const StatusBadge = ({ status }: { status: StepStatus }) => {
 };
 
 const StepTag = ({ text }: { text: string }) => (
-  <span className="bg-slate-800/80 border border-slate-700 text-slate-400 text-[10px] px-2 py-1 rounded-md font-mono">
+  <span className="rounded-md border border-slate-700 bg-slate-800/80 px-2 py-1 text-[10px] font-mono text-slate-400">
     {text}
   </span>
 );
 
-// --- Main Component ---
+const buildSteps = (incident: IncidentDetailRecord): InvestigationStep[] => {
+  const serviceName =
+    incident.service || incident.affectedSystem || "unknown-service";
+  const environment = incident.environment || "runtime";
+  const elapsed = incident.elapsedLabel || "moments ago";
+  const recommendedAction =
+    incident.recommendedActions[0] ||
+    incident.aiAnalysis?.suggestion ||
+    "Validate the current mitigation path.";
 
-const InvestigationTimeline: React.FC = () => {
-  const steps: InvestigationStep[] = [
+  return [
     {
       id: 1,
-      title: "Review Recent Deployments",
+      title: "Review Recent Incident Signals",
       description:
-        "Inspect deployment history for the affected service within the last 2 hours. Compare version diff for config changes, dependency updates, or code paths touching the error surface.",
+        "Inspect the latest incident signal changes, ownership data, and telemetry notes before proposing an automation path.",
       status: "completed",
       tags: [
-        "Completed 00:03 UTC",
+        `Completed ${elapsed}`,
         "Agent: deploy-scanner",
-        "completedBy: agent/deploy-scanner-01",
+        `Incident: ${incident.ticketId}`,
       ],
-      outcome:
-        "Outcome: degraded — v2.4.1 deployed 47m ago. NullPointerException in PaymentProcessor.charge() line 247. Agent finding propagated to remediation options.",
+      outcome: `Outcome: context collected for ${serviceName}. ${recommendedAction}`,
     },
     {
       id: 2,
       title: "Inspect Service Logs for Exceptions",
       description:
-        "Stream live logs from the affected service. Filter for ERROR and FATAL levels. Extract full stack traces and correlate exception patterns with the deployment timeline.",
-      status: "in-progress",
+        "Stream live logs from the affected service and correlate exception patterns with the current incident timeline.",
+      status: incident.status === "RESOLVED" || incident.status === "CLOSED" ? "completed" : "in-progress",
       tags: [
         "Agent: log-analyst",
-        "Target: payments-api · prod",
+        `Target: ${serviceName} · ${environment}`,
         "Timeout: 5m",
       ],
-      streamingCmd:
-        "Agent log-analyst-02 streaming — kubectl logs -f deploy/payment-svc --tail=20",
+      streamingCmd: `Agent log-analyst-02 streaming — inspect ${serviceName} in ${environment}`,
       branching: {
         label: "Branch on outcome",
-        options: ["In Progress", "No exceptions → Skip to Step 4"],
+        options: ["In Progress", "No exceptions -> Skip to Step 4"],
       },
     },
     {
       id: 3,
       title: "Verify Downstream Dependency Health",
       description:
-        "Check health of all downstream dependencies: database connection pool, cache hit rates, and upstream auth service latency. Rule out cascading failure before proposing remediation.",
+        "Check dependent services, queue pressure, and data store health to rule out cascading failure before remediation.",
       status: "pending",
-      tags: ["Agent: topology-scanne", "extStepOverride: null"],
+      tags: ["Agent: topology-scanner", `Region: ${incident.region || "global"}`],
     },
     {
       id: 4,
-      title: "Compare Error Rate Before / After Deploy",
+      title: "Compare Before / After Impact",
       description:
-        "Pull metrics for the 30m window before and after v2.4.1 deploy. Confirm the error rate spike is causally linked to the deployment, not an upstream infrastructure event.",
+        "Use the incident timeline and current impact notes to confirm whether the spike is local to this service or part of a wider platform event.",
       status: "pending",
-      tags: ["Agent: metrics-correlator", "Window: -30m / +30m deploy"],
+      tags: ["Agent: metrics-correlator", `Scope: ${incident.ticketId}`],
     },
   ];
+};
+
+const InvestigationTimeline: React.FC<InvestigationTimelineProps> = ({
+  incident,
+}) => {
+  const steps = buildSteps(incident);
 
   return (
-    <div className="w-full max-w-5xl bg-dark border border-white/5 rounded-2xl p-3 text-slate-300">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-8">
+    <div className="w-full max-w-5xl rounded-2xl border border-white/5 bg-dark p-3 text-slate-300">
+      <div className="mb-8 flex items-start justify-between">
         <div className="flex gap-4">
-          <div className="w-10 h-10 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center">
-            <Bolt size={20} className="text-amber-500 fill-amber-500" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10">
+            <Bolt size={20} className="fill-amber-500 text-amber-500" />
           </div>
           <div>
-            <h2 className="text-white font-semibold text-lg">
+            <h2 className="text-lg font-semibold text-white">
               Investigation Steps
             </h2>
-            <p className="text-slate-500 text-xs mt-1">
-              State machine — Step[] with conditional branching · Agent findings
-              modify remediation options
+            <p className="mt-1 text-xs text-slate-500">
+              State machine — Step[] with conditional branching and live incident context
             </p>
           </div>
         </div>
         <div className="flex gap-2">
-          <div className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/30 rounded text-blue-400 text-xs font-bold uppercase tracking-widest">
+          <div className="rounded border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-400">
             2 / 5 IN PROGRESS
           </div>
-          <button className="p-1.5 border border-slate-700 rounded text-slate-400">
+          <button className="rounded border border-slate-700 p-1.5 text-slate-400">
             <TriangleAlert size={16} />
           </button>
         </div>
       </div>
 
-      {/* State Machine Info */}
-      <div className="flex gap-4 p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl mb-10">
-        <Info size={18} className="text-blue-400 shrink-0 mt-0.5" />
+      <div className="mb-10 flex gap-4 rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
+        <Info size={18} className="mt-0.5 shrink-0 text-blue-400" />
         <p className="text-sm leading-relaxed text-slate-400">
           Steps are a state machine, not a checklist. Each step carries status,
-          outcome, and optional nextStepOverride for conditional routing. Agent
-          findings produced here can expand or narrow active remediation options
-          downstream.
+          outcome, and conditional routing so agent findings can expand or narrow
+          remediation options downstream.
         </p>
       </div>
 
-      {/* Timeline Steps */}
-      <div className="relative space-y-12 ml-4 border-l border-slate-800 pl-10 pb-4">
+      <div className="relative ml-4 space-y-12 border-l border-slate-800 pb-4 pl-10">
         {steps.map((step) => (
           <div key={step.id} className="relative">
-            {/* Timeline Connector Dot */}
             <div
-              className={`absolute -left-[53px] top-0 w-6 h-6 rounded-full border-2 flex items-center justify-center z-10 transition-colors
-              ${
+              className={`absolute -left-[53px] top-0 z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors ${
                 step.status === "completed"
-                  ? "bg-emerald-500 border-emerald-500"
+                  ? "border-emerald-500 bg-emerald-500"
                   : step.status === "in-progress"
-                  ? "bg-[#050814] border-blue-500 text-blue-500"
-                  : "bg-[#050814] border-slate-700 text-slate-600"
+                  ? "border-blue-500 bg-[#050814] text-blue-500"
+                  : "border-slate-700 bg-[#050814] text-slate-600"
               }`}
             >
               {step.status === "completed" ? (
@@ -158,8 +163,7 @@ const InvestigationTimeline: React.FC = () => {
               )}
             </div>
 
-            {/* Content Area */}
-            <div className="flex justify-between items-start mb-2">
+            <div className="mb-2 flex items-start justify-between">
               <h3
                 className={`text-base font-semibold ${
                   step.status === "pending" ? "text-slate-500" : "text-white"
@@ -171,58 +175,56 @@ const InvestigationTimeline: React.FC = () => {
             </div>
 
             <p
-              className={`text-sm leading-relaxed mb-4 max-w-3xl ${
+              className={`mb-4 max-w-3xl text-sm leading-relaxed ${
                 step.status === "pending" ? "text-slate-600" : "text-slate-400"
               }`}
             >
               {step.description}
             </p>
 
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="mb-4 flex flex-wrap gap-2">
               {step.tags.map((tag) => (
                 <StepTag key={tag} text={tag} />
               ))}
             </div>
 
-            {/* Status-Specific Blocks */}
-            {step.outcome && (
-              <div className="bg-emerald-500/5 border border-emerald-500/30 rounded-xl p-4 text-emerald-400 text-xs font-mono leading-relaxed">
+            {step.outcome ? (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 text-xs font-mono leading-relaxed text-emerald-400">
                 {step.outcome}
               </div>
-            )}
+            ) : null}
 
-            {step.streamingCmd && (
+            {step.streamingCmd ? (
               <div className="space-y-4">
-                <div className="bg-blue-500/10 border border-blue-500/40 rounded-xl p-4 flex items-center gap-3">
-                  <Loader2 size={16} className="text-blue-400 animate-spin" />
-                  <span className="text-blue-400 text-xs font-mono">
+                <div className="flex items-center gap-3 rounded-xl border border-blue-500/40 bg-blue-500/10 p-4">
+                  <Loader2 size={16} className="animate-spin text-blue-400" />
+                  <span className="text-xs font-mono text-blue-400">
                     {step.streamingCmd}
                   </span>
                 </div>
-                {step.branching && (
-                  <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-4">
-                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-3">
+                {step.branching ? (
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+                    <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-500">
                       {step.branching.label}
                     </p>
                     <div className="flex gap-2">
-                      {step.branching.options.map((opt, i) => (
+                      {step.branching.options.map((option, index) => (
                         <button
-                          key={opt}
-                          className={`px-4 py-2 rounded-lg text-xs font-medium border transition-colors
-                          ${
-                            i === 0
-                              ? "bg-slate-800/50 border-slate-600 text-slate-400"
-                              : "bg-slate-900/20 border-slate-700 text-slate-600"
+                          key={option}
+                          className={`rounded-lg border px-4 py-2 text-xs font-medium transition-colors ${
+                            index === 0
+                              ? "border-slate-600 bg-slate-800/50 text-slate-400"
+                              : "border-slate-700 bg-slate-900/20 text-slate-600"
                           }`}
                         >
-                          {opt}
+                          {option}
                         </button>
                       ))}
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
-            )}
+            ) : null}
           </div>
         ))}
       </div>

@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
 import { Bolt, Info, TriangleAlert } from "lucide-react";
-
-// --- Types ---
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 type AuditType = "Playbook" | "Step" | "Decision" | "Guardrail" | "Execution";
 
@@ -13,135 +12,144 @@ interface AuditEvent {
   actor: string;
 }
 
-// --- Sub-Components ---
+interface AuditTrailProps {
+  incident: IncidentDetailRecord;
+}
 
 const AuditBadge = ({ type }: { type: AuditType }) => {
   const styles: Record<AuditType, string> = {
-    Playbook: "border-amber-500/50 text-amber-500 bg-amber-500/5",
-    Step: "border-purple-500/50 text-purple-400 bg-purple-500/5",
-    Decision: "border-red-500/50 text-red-500 bg-red-500/5",
-    Guardrail: "border-amber-600/40 text-amber-500 bg-amber-600/5",
-    Execution: "border-yellow-500/50 text-yellow-500 bg-yellow-500/5",
+    Playbook: "border-amber-500/50 bg-amber-500/5 text-amber-500",
+    Step: "border-purple-500/50 bg-purple-500/5 text-purple-400",
+    Decision: "border-red-500/50 bg-red-500/5 text-red-500",
+    Guardrail: "border-amber-600/40 bg-amber-600/5 text-amber-500",
+    Execution: "border-yellow-500/50 bg-yellow-500/5 text-yellow-500",
   };
 
   return (
     <span
-      className={`w-24 text-center text-[10px] font-bold px-2 py-1.5 rounded border uppercase tracking-wider ${styles[type]}`}
+      className={`w-24 rounded border px-2 py-1.5 text-center text-[10px] font-bold uppercase tracking-wider ${styles[type]}`}
     >
       {type}
     </span>
   );
 };
 
-// --- Main Component ---
+const buildAuditEvents = (incident: IncidentDetailRecord): AuditEvent[] => {
+  const playbookLabel =
+    incident.title || incident.reason || incident.summary || "Selected incident";
+  const serviceName =
+    incident.service || incident.affectedSystem || "unknown-service";
+  const recommendedAction =
+    incident.recommendedActions[0] ||
+    incident.aiAnalysis?.suggestion ||
+    "Validate the current remediation path";
 
-const AuditTrail: React.FC = () => {
-  const logs: AuditEvent[] = [
+  return [
     {
       timestamp: "00:00",
       type: "Playbook",
-      description:
-        'Playbook "High API Error Rate" matched to INC-#1298 · matchConfidence: 0.91 · alternatives: ["DB Latency Spike" 0.34, "Auth JWT Regression" 0.22]',
+      description: `Playbook "${playbookLabel}" matched to ${incident.ticketId} · matchConfidence: 0.91 · service: ${serviceName}`,
       actor: "system/matcher",
     },
     {
       timestamp: "00:00",
       type: "Step",
       description:
-        'Step 1 "Review Recent Deployments" started · agent/deploy-scanner-01 assigned · status: in_progress',
+        'Step 1 "Review Recent Incident Signals" started · agent/deploy-scanner-01 assigned · status: in_progress',
       actor: "agent/orchestrator",
     },
     {
       timestamp: "00:00",
       type: "Step",
-      description:
-        "Step 1 completed · outcome: degraded · Finding F-8821 created: v2.4.1 NullPointerException @ PaymentProcessor:247 · remediation confidence recalculated",
+      description: `Step 1 completed · outcome: context collected · recommendation: ${recommendedAction}`,
       actor: "agent/deploy-scanner-01",
     },
     {
       timestamp: "00:00",
       type: "Step",
       description:
-        'Step 2 "Inspect Service Logs" started · nextStepOverride: null · branch conditions registered: exception-found → Step 3 · no-exception → Step 4',
+        'Step 2 "Inspect Service Logs" started · branch conditions registered for remediation review',
       actor: "agent/orchestrator",
     },
     {
       timestamp: "00:00",
       type: "Decision",
-      description:
-        "effectiveAutomationLevel computed: min(playbook:3, policy:3, risk:2) = 2 · Execution mode locked to ASSISTED · blast radius: 3 services",
+      description: `effectiveAutomationLevel computed: min(playbook:3, policy:3, risk:2) = 2 · execution mode locked to ASSISTED · incident status: ${incident.status}`,
       actor: "system/execution-gate",
     },
     {
       timestamp: "00:00",
       type: "Guardrail",
       description:
-        "GuardrailCheck: prod.rollback.requires_approval = BLOCK_AUTO · blast_radius policy BLOCK_AUTO · business_hours_escalation APPROVAL_REQUIRED · reversibility PASS",
+        "GuardrailCheck: rollback approval and blast-radius review remain enforced before execution",
       actor: "system/policy-engine",
     },
     {
       timestamp: "00:00",
       type: "Execution",
-      description:
-        "Execution prepared: Rollback v2.4.1 → v2.4.0 · awaiting_approval · on-call notified · outcome: pending · rollbackPlaybookId: PB-rollback-self",
+      description: `Execution prepared for ${incident.ticketId} · awaiting approval · owner: ${
+        incident.assignedToName ||
+        incident.assignedToEmail ||
+        incident.incidentCommander ||
+        "unassigned"
+      }`,
       actor: "system/execution-gate",
     },
   ];
+};
+
+const AuditTrail: React.FC<AuditTrailProps> = ({ incident }) => {
+  const logs = buildAuditEvents(incident);
 
   return (
-    <div className="w-full max-w-6xl bg-dark border border-white/5 rounded-3xl p-3 flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex justify-between items-start">
+    <div className="flex w-full max-w-6xl flex-col gap-6 rounded-3xl border border-white/5 bg-dark p-3">
+      <div className="flex items-start justify-between">
         <div className="flex gap-4">
-          <div className="w-10 h-10 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center">
-            <Bolt size={20} className="text-amber-500 fill-amber-500" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10">
+            <Bolt size={20} className="fill-amber-500 text-amber-500" />
           </div>
           <div>
-            <h2 className="text-white font-semibold text-lg leading-tight">
+            <h2 className="text-lg font-semibold leading-tight text-white">
               Audit Trail
             </h2>
-            <p className="text-slate-500 text-xs mt-1 font-medium">
-              AuditEvent[] — every playbook selection, step, decision, and
-              execution · non-negotiable
+            <p className="mt-1 text-xs font-medium text-slate-500">
+              AuditEvent[] — every playbook selection, step, decision, and execution
             </p>
           </div>
         </div>
         <div className="flex gap-2">
-          <div className="px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded text-emerald-500 text-xs font-bold uppercase tracking-widest">
-            7 EVENTS
+          <div className="rounded border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-500">
+            {logs.length} EVENTS
           </div>
-          <button className="p-1.5 border border-slate-700 rounded text-slate-400 hover:bg-white/5">
+          <button className="rounded border border-slate-700 p-1.5 text-slate-400 hover:bg-white/5">
             <TriangleAlert size={16} />
           </button>
         </div>
       </div>
 
-      {/* Info Notice */}
-      <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl flex gap-4">
-        <Info size={20} className="text-blue-400 shrink-0 mt-0.5" />
-        <p className="text-sm text-slate-400 leading-relaxed">
-          Every event is immutable. AuditEvent records carry: event_type,
-          entity_id, actor (agent or user), timestamp, payload, and a link to
-          the incident timeline. This data underpins the learning capability —
-          resolution outcomes are stored from day one.
+      <div className="flex gap-4 rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
+        <Info size={20} className="mt-0.5 shrink-0 text-blue-400" />
+        <p className="text-sm leading-relaxed text-slate-400">
+          Every event is immutable. Audit records carry event type, actor,
+          timestamp, payload, and a link back to the incident timeline so the
+          learning system can reason from real outcomes.
         </p>
       </div>
 
-      {/* Audit Log Rows */}
-      <div className="flex flex-col border border-white/5 rounded-2xl overflow-hidden">
+      <div className="flex flex-col overflow-hidden rounded-2xl border border-white/5">
         {logs.map((log, index) => (
           <div
-            key={index}
-            className="flex items-center gap-6 p-4 border-b border-white/5 last:border-0 bg-white/[0.01] hover:bg-white/[0.03] transition-colors"
+            key={`${log.type}-${index}`}
+            className="flex items-center gap-6 border-b border-white/5 bg-white/[0.01] p-4 transition-colors last:border-0 hover:bg-white/[0.03]"
           >
-            <span className="text-xs font-mono text-slate-600 w-10">
+            <span className="w-10 text-xs font-mono text-slate-600">
               {log.timestamp}
             </span>
             <AuditBadge type={log.type} />
-            <p className="flex-1 text-xs text-slate-400 leading-relaxed font-medium">
+            <p className="flex-1 text-xs font-medium leading-relaxed text-slate-400">
               {log.description}
             </p>
-            <span className="text-xs font-mono text-slate-600 text-right w-40">
+            <span className="w-40 text-right text-xs font-mono text-slate-600">
               {log.actor}
             </span>
           </div>

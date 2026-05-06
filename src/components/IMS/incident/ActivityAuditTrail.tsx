@@ -1,8 +1,9 @@
 "use client";
+
 import React from "react";
 import { cn } from "@/lib/utils";
+import { IncidentHistoryRecord } from "@/lib/incident/incident.types";
 
-// --- Types ---
 type AuditEventType =
   | "Signal"
   | "Policy"
@@ -55,24 +56,19 @@ const EventRow = ({
 
   return (
     <div className="flex gap-3 md:gap-6 relative">
-      {/* 1. The Connector Line - Centered based on the circle width */}
       {!isLast && (
         <div className="absolute left-[15px] md:left-[19px] top-10 w-[1px] h-[calc(100%-24px)] bg-slate-800 z-0" />
       )}
 
-      {/* 2. The Initial Node - Scaled for mobile */}
       <div
         className={cn(
           "w-8 h-8 md:w-10 md:h-10 rounded-full border-2 flex items-center justify-center shrink-0 z-10 bg-darkEzra transition-all",
           currentStyle.dot
         )}
       >
-        <span className="text-[10px] md:text-xs font-bold">
-          {event.initial}
-        </span>
+        <span className="text-[10px] md:text-xs font-bold">{event.initial}</span>
       </div>
 
-      {/* 3. The Event Card */}
       <div className="flex-1 bg-darkEzra border border-white/5 rounded-xl p-3 md:p-4 mb-6 hover:border-white/10 transition-all min-w-0">
         <div className="flex flex-wrap justify-between items-start gap-x-2 mb-1">
           <span
@@ -95,45 +91,36 @@ const EventRow = ({
   );
 };
 
-const ActivityAuditTrail: React.FC = () => {
-  const events: AuditEvent[] = [
-    {
-      id: "1",
-      type: "Signal",
-      label: "Signal Received",
-      initial: "E",
-      timestamp: "14:32:01",
-      content:
-        "deployment_failed · checkout-service · deploy #311 · eu-west-1 · 3 correlated signals",
-    },
-    {
-      id: "2",
-      type: "Policy",
-      label: "Policy Evaluated",
-      initial: "P",
-      timestamp: "14:32:01",
-      content:
-        "Severity → P1 · Incident created · Routing: sre-oncall · Dedup miss → new incident",
-    },
-    {
-      id: "3",
-      type: "Playbook",
-      label: "Playbook Matched",
-      initial: "D",
-      timestamp: "14:32:01",
-      content:
-        "Playbook RBK-17 · 94% match confidence · Alternatives: RBK-09 (61%), RBK-23 (44%) · EAL: Assisted",
-    },
-    {
-      id: "4",
-      type: "Guardrail",
-      label: "Guardrails Evaluated",
-      initial: "G",
-      timestamp: "14:32:01",
-      content:
-        "Staging auto-apply: permitted · Production auto-deploy: blocked · Reversibility: confirmed · On-call hours: approval required",
-    },
-  ];
+const actionTypeMap: Record<string, AuditEventType> = {
+  created: "Signal",
+  status_changed: "Policy",
+  updated: "Enrichment",
+  resolved: "Playbook",
+  comment_added: "Notification",
+};
+
+const buildAuditEvents = (history: IncidentHistoryRecord[]): AuditEvent[] =>
+  history.map((event) => {
+    const type = actionTypeMap[event.action] ?? "Enrichment";
+    const changeSummary =
+      event.oldValue || event.newValue
+        ? [event.oldValue, event.newValue].filter(Boolean).join(" → ")
+        : event.comment;
+
+    return {
+      id: event.id,
+      type,
+      label: event.action.replaceAll("_", " "),
+      initial: event.actor.slice(0, 1).toUpperCase() || "S",
+      timestamp: event.timestamp,
+      content: `${event.actor} · ${changeSummary || "No details recorded"}`,
+    };
+  });
+
+const ActivityAuditTrail: React.FC<{ history: IncidentHistoryRecord[] }> = ({
+  history,
+}) => {
+  const events = buildAuditEvents(history);
 
   return (
     <div className="p-4 md:p-6">
@@ -142,13 +129,19 @@ const ActivityAuditTrail: React.FC = () => {
           Activity & Audit Trail
         </h2>
         <div className="w-full flex flex-col pt-2">
-          {events.map((event, idx) => (
-            <EventRow
-              key={event.id}
-              event={event}
-              isLast={idx === events.length - 1}
-            />
-          ))}
+          {events.length > 0 ? (
+            events.map((event, idx) => (
+              <EventRow
+                key={event.id}
+                event={event}
+                isLast={idx === events.length - 1}
+              />
+            ))
+          ) : (
+            <div className="rounded-xl border border-dashed border-white/10 px-4 py-5 text-sm text-slate-400">
+              No audit events have been recorded for this incident yet.
+            </div>
+          )}
         </div>
       </div>
     </div>

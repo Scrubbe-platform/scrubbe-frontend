@@ -20,6 +20,7 @@ const ContactUs = () => {
     first_name: "",
     last_name: "",
     email: "",
+    subject: "",
     message: "",
   });
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,13 @@ const ContactUs = () => {
     setLoading(false);
     if (res.success) {
       toast.success(res.data.message);
-      setFormData({ first_name: "", last_name: "", email: "", message: "" });
+      setFormData({
+        first_name: "",
+        last_name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
     }
   };
   return (
@@ -135,7 +142,12 @@ const ContactUs = () => {
               <Input label="Company's Name" labelClassName="text-white" />
               <Input label="Job Title" labelClassName="text-white" />
             </div>
-            <Input label="Subject" labelClassName="text-white" />
+            <Input
+              label="Subject"
+              labelClassName="text-white"
+              value={formData.subject}
+              onChange={(e) => handleChange(e.target.value, "subject")}
+            />
             <TextArea
               label="Message"
               required

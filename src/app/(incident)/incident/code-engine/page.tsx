@@ -1,213 +1,163 @@
 "use client";
+
 import React, { ReactNode, useState } from "react";
 import {
   Bell,
+  BookOpen,
   Info,
-  Shield,
-  Zap,
   Layout,
   Phone,
-  Workflow,
-  BookOpen,
-  Logs,
+  Shield,
   ShieldCheck,
+  Workflow,
   WorkflowIcon,
+  Zap,
 } from "lucide-react";
-import CodeEngineRecommendation from "./_modules/components/code-engine-recommendation";
 import { BiGitBranch } from "react-icons/bi";
+import { FiGitPullRequest } from "react-icons/fi";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { PiSpiral } from "react-icons/pi";
-import { TiFlowMerge } from "react-icons/ti";
 import { IoCodeSlash } from "react-icons/io5";
 import { LuClock2 } from "react-icons/lu";
-import { FiGitPullRequest } from "react-icons/fi";
-import moment from "moment";
+import { PiSpiral } from "react-icons/pi";
+import { TiFlowMerge } from "react-icons/ti";
 import SideModal from "@/components/ui/SideModal";
 import Pipeline from "./_modules/components/Pipeline";
+import ConfidenceSidebar from "./_modules/components/ConfidenceSidebar";
+import CodeEngineRecommendation from "./_modules/components/code-engine-recommendation";
+import IncidentRouteShell from "@/components/IMS/incident/IncidentRouteShell";
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 import { useQuery } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
-import { querykeys } from "@/lib/constant";
-import ConfidenceSidebar from "./_modules/components/ConfidenceSidebar";
 
-type Incident = {
-  id: string;
-  ticketId: string;
-  reason?: string;
-  summary?: string;
-  region?: string;
-  priority?: string;
-  status?: string;
-  sourceType?: string;
-  createdAt: string;
-};
-
-const priorityLabel = (p?: string) => {
-  if (!p) return "P3";
-  if (p === "CRITICAL") return "P1";
-  if (p === "HIGH") return "P2";
-  if (p === "MEDIUM") return "P3";
+const priorityLabel = (priority?: string) => {
+  if (!priority) return "P3";
+  if (priority === "CRITICAL") return "P1";
+  if (priority === "HIGH") return "P2";
+  if (priority === "MEDIUM") return "P3";
   return "P4";
 };
 
-export default function IncidentOverview() {
+function IncidentOverview({
+  activeIncident,
+}: {
+  activeIncident: IncidentDetailRecord;
+}) {
   const [openPipeline, setOpenPipeline] = useState(false);
-  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(
-    null
-  );
   const { get } = useFetch();
 
-  const { data, isLoading } = useQuery({
-    queryKey: [querykeys.INCIDENT_TICKET, "code-engine"],
+  const { data: analysis } = useQuery({
+    queryKey: ["ezra-analysis-code-engine", activeIncident.id],
     queryFn: async () => {
-      const res = await get(endpoint.incident_ticket.get + "?page=1&limit=10");
-      if (res.success) {
-        const payload = res.data?.data ?? res.data;
-        return (payload?.incidents ?? []) as Incident[];
-      }
-      return [] as Incident[];
+      const res = await get(`${endpoint.ezra.analysis}/${activeIncident.id}`);
+      if (res.success) return res.data?.data ?? null;
+      return null;
     },
+    enabled: !!activeIncident.id,
     refetchOnWindowFocus: false,
   });
 
-  const incidents = data ?? [];
-  const activeIncident = selectedIncident ?? incidents[0] ?? null;
+  const remediation = analysis?.remediation;
+  const confidence = remediation?.confidence ?? analysis?.situation?.confidence ?? undefined;
+
+  const serviceName =
+    activeIncident.service || activeIncident.affectedSystem || "service";
+  const blastRadiusLabel =
+    activeIncident.blastRadius ||
+    [activeIncident.service, activeIncident.region].filter(Boolean).join(" / ") ||
+    "Scoped incident";
+  const insightText =
+    activeIncident.aiAnalysis?.suggestion ||
+    activeIncident.impactSummary ||
+    activeIncident.techDescription ||
+    activeIncident.description ||
+    "Scrubbe is still collecting enough context to recommend a remediation path.";
+  const runbookSuggestion =
+    activeIncident.recommendedActions[0] ||
+    activeIncident.category ||
+    "No specific runbook recommendation is available yet.";
+  const isDeploymentAware = /deploy|pipeline|ci\/cd|rollback|release/i.test(
+    `${activeIncident.sourceType ?? ""} ${activeIncident.detection ?? ""} ${
+      activeIncident.title ?? ""
+    }`
+  );
 
   return (
-    <div className="min-h-screen text-slate-300 p-6 font-sans selection:bg-green-500/30">
-      <div className="flex md:flex-row flex-col gap-6  mx-auto relative">
-        {/* LEFT SIDEBAR - STICKY */}
-        {/* <aside className="w-52 shrink-0 self-start sticky top-6 space-y-4">
-          <div className="flex items-center gap-2 mb-6 px-2">
-            <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-              Active Incidents{" "}
-              {incidents.length > 0 ? `(${incidents.length})` : ""}
-            </h2>
-          </div>
-
-          <div className="space-y-3 overflow-y-auto max-h-[60vh]">
-            {isLoading && (
-              <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-16 bg-white/5 rounded-2xl animate-pulse"
-                  />
-                ))}
-              </div>
-            )}
-            {incidents.map((incident) => (
-              <ActiveIncidentCard
-                id={incident.ticketId}
-                priority={priorityLabel(incident.priority)}
-                title={incident.reason ?? incident.summary ?? incident.ticketId}
-                timezone={incident.region ?? "—"}
-                date={new Date(incident.createdAt)}
-                active={activeIncident?.id === incident.id}
-                key={incident.id}
-                onClick={() => setSelectedIncident(incident)}
-              />
-            ))}
-          </div>
-
-          <button
-            onClick={() => setOpenPipeline(true)}
-            className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl border border-green-500/30 bg-green-500/5 text-green-400 text-xs font-bold hover:bg-green-500/10 transition-all"
-          >
-            <Layout size={14} /> View Pipeline{" "}
-            {activeIncident ? `#${activeIncident.ticketId}` : ""}
-          </button>
-        </aside> */}
-
-        {/* MAIN CONTENT AREA */}
+    <div className="min-h-screen p-6 font-sans text-slate-300 selection:bg-green-500/30">
+      <div className="relative mx-auto flex flex-col gap-6 md:flex-row">
         <main className="flex-1 space-y-6">
-          {/* TOP HEADER */}
-          <section className="flex md:flex-row flex-col gap-3 justify-between items-start">
+          <section className="flex flex-col items-start justify-between gap-3 md:flex-row">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-black text-white tracking-tighter">
-                  {activeIncident?.ticketId ?? "—"}
+                <h1 className="text-2xl font-black tracking-tighter text-white">
+                  {activeIncident.ticketId}
                 </h1>
-                {activeIncident && (
-                  <span className="px-2 py-0.5 rounded bg-rose-500 text-[10px] text-black uppercase border border-rose-500/30">
-                    {priorityLabel(activeIncident.priority)} •{" "}
-                    {activeIncident.status ?? "Open"}
-                  </span>
-                )}
+                <span className="rounded border border-rose-500/30 bg-rose-500 px-2 py-0.5 text-[10px] uppercase text-black">
+                  {priorityLabel(activeIncident.priority)} •{" "}
+                  {activeIncident.status || "Open"}
+                </span>
               </div>
-              <p className="text-slate-400 text-sm">
-                {activeIncident?.reason ??
-                  activeIncident?.summary ??
+              <p className="text-sm text-slate-400">
+                {activeIncident.reason ||
+                  activeIncident.summary ||
                   "Select an incident from the sidebar to view details."}
               </p>
             </div>
             <div className="flex gap-2">
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-IMSCyan text-IMSCyan text-xs transition-all">
+              <button className="flex items-center gap-2 rounded-lg border border-IMSCyan px-4 py-2 text-xs text-IMSCyan transition-all">
                 <Bell size={14} /> Notify
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-400 text-black text-xs transition-all hover:bg-green-300">
+              <button className="flex items-center gap-2 rounded-lg bg-green-400 px-4 py-2 text-xs text-black transition-all hover:bg-green-300">
                 <Phone size={14} /> Declare Incident
               </button>
             </div>
           </section>
 
-          {/* KPI GRID */}
-          <section className="grid md:grid-cols-4 gap-4 overflow-hidden">
+          <section className="grid gap-4 overflow-hidden md:grid-cols-4">
             <StatBox label="Org MTTR (last 30 days)" value="27m" />
             <StatBox
               label="This incident"
-              value="18m elapsed"
+              value={`${activeIncident.elapsedLabel} elapsed`}
               valueClass="text-yellow-500"
             />
             <StatBox
-              label="checkout-service SLO"
-              value="99.9% / 30d"
-              sub="Error budget used: 61%"
+              label={`${serviceName} SLO`}
+              value={activeIncident.environment || "Live environment"}
+              sub={`Region: ${activeIncident.region || "global"}`}
               subClass="text-rose-500"
             />
             <StatBox
               label="Current blast radius"
-              value="Checkout only"
-              sub="View topology"
+              value={blastRadiusLabel}
+              sub={activeIncident.ticketId}
               subIcon={<BiGitBranch size={16} />}
             />
           </section>
 
-          {/* SCRUBBE INSIGHT (PURPLE) */}
-          <section className="p-5 rounded-2xl border border-purple-500/30 bg-purple-500/5 space-y-3">
-            <div className="flex items-center gap-2 ">
+          <section className="space-y-3 rounded-2xl border border-purple-500/30 bg-purple-500/5 p-5">
+            <div className="flex items-center gap-2">
               <Zap size={16} fill="currentColor" className="text-yellow-400" />
               <span className="text-sm font-bold uppercase tracking-widest">
-                Scrubbe Insight • 94% confidence
+                Scrubbe Insight •{" "}
+                {Math.max(activeIncident.score || 0, activeIncident.riskScore || 0) || 94}
+                % confidence
               </span>
             </div>
-            <p className="text-sm text-slate-300">
-              This is the same DB connection pool exhaustion seen in{" "}
-              <span className="text-purple-400 underline cursor-pointer">
-                INC-231
-              </span>{" "}
-              and{" "}
-              <span className="text-purple-400 underline cursor-pointer">
-                INC-187
-              </span>
-              . Code Intelligence has a production-safe fix below — expected
-              MTTR: &lt; 4 minutes.
-            </p>
+            <p className="text-sm text-slate-300">{insightText}</p>
           </section>
 
-          {/* SECONDARY INFO GRID */}
-          <section className="grid md:grid-cols-3 gap-4">
+          <section className="grid gap-4 md:grid-cols-3">
             <InfoCard
               icon={<PiSpiral size={16} />}
               title="SLO & error budget"
               desc={
                 <div>
                   <p>
-                    This failure consumes ~7% of the remaining monthly error
-                    budget for checkout-service.
+                    {activeIncident.ticketId} is currently scoped against{" "}
+                    <span className="text-green">{serviceName}</span> in{" "}
+                    {activeIncident.environment || "the live environment"}.
                   </p>
-                  <div className="flex text-white gap-2 items-center cursor-pointer mt-2">
+                  <div className="mt-2 flex items-center gap-2 text-white">
                     <p>Open SLO Context</p>
                     <GiHamburgerMenu className="text-IMSCyan" />
                   </div>
@@ -220,16 +170,13 @@ export default function IncidentOverview() {
               desc={
                 <div>
                   <p>
-                    Impacted:{" "}
-                    <span className="text-green">
-                      checkout-service → db-core
-                    </span>
-                     in eu-west-1. No evidence of cross-region or cross-service
-                    spread yet.
+                    Impacted: <span className="text-green">{blastRadiusLabel}</span>.
+                    No confirmed cross-service spread is recorded beyond the
+                    current incident context.
                   </p>
                   <p className="mt-2">
-                    If this drags on, payments-api and order-service may breach
-                    latency SLO.
+                    Source: {activeIncident.sourceType || "manual"} / Status:{" "}
+                    {activeIncident.status}
                   </p>
                 </div>
               }
@@ -237,164 +184,110 @@ export default function IncidentOverview() {
             <InfoCard
               icon={<BookOpen size={16} />}
               title="Runbook suggestion"
-              desc="Match found: RBK-17 - 'DB pool exhaustion during campaign'. Steps 2-4 are already covered."
+              desc={runbookSuggestion}
             />
           </section>
 
           <section>
-            <CodeEngineRecommendation />
+            <CodeEngineRecommendation
+              incidentId={activeIncident.id}
+              service={activeIncident.service ?? activeIncident.affectedSystem}
+              environment={activeIncident.environment}
+              severity={activeIncident.severity}
+              confidence={confidence}
+              playbook={analysis?.remediation?.playbook}
+              patternMatch={analysis?.rootCause?.hypothesis}
+            />
           </section>
 
-          {/* CODE INTELLIGENCE ENGINE (GREEN) */}
-          <section className="p-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 space-y-6">
+          <section className="space-y-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-6">
             <div className="flex items-center gap-2 text-emerald-400">
               <Shield size={16} />
               <span className="text-sm font-bold uppercase tracking-widest">
-                Code Intelligence Engine • 3 Suggested Fixes
+                Code Intelligence Engine • Live incident context
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
-              <FixTag
-                icon={<BiGitBranch size={14} />}
-                label="Diff-based meaning"
-              />
+              <FixTag icon={<BiGitBranch size={14} />} label="Diff-aware reasoning" />
               <FixTag icon={<BookOpen size={14} />} label="Pattern matching" />
-              <FixTag
-                icon={<Logs size={14} />}
-                label="Logs / metrics / fraud context"
-              />
-              <FixTag
-                icon={<ShieldCheck size={14} />}
-                label="Env guardrails & RBAC"
-              />
-              <FixTag
-                icon={<WorkflowIcon size={14} />}
-                label="Remediation Workflow"
-              />
-              <FixTag
-                icon={<WorkflowIcon size={14} />}
-                label="Service Topology"
-                active
-              />
-              <FixTag
-                icon={<TiFlowMerge size={14} />}
-                label="Multi-step auto-remediation"
-              />
-              <FixTag
-                icon={<IoCodeSlash size={14} />}
-                label="Developer tooling integration"
-              />
-              <FixTag
-                icon={<LuClock2 size={14} />}
-                label="Rationale & Confidence Model"
-              />
-              <FixTag
-                icon={<BookOpen size={14} />}
-                label="Enterprise approval & RBAC"
-              />
-              <FixTag
-                icon={<FiGitPullRequest size={14} />}
-                label="SLO Impact"
-              />
+              <FixTag icon={<ShieldCheck size={14} />} label="Env guardrails" />
+              <FixTag icon={<WorkflowIcon size={14} />} label="Remediation workflow" />
+              <FixTag icon={<TiFlowMerge size={14} />} label="Multi-step execution" />
+              <FixTag icon={<IoCodeSlash size={14} />} label="Developer tooling" />
+              <FixTag icon={<LuClock2 size={14} />} label="Confidence model" />
+              <FixTag icon={<FiGitPullRequest size={14} />} label="Change review" />
             </div>
           </section>
 
-          {/* INFO WARNING (ORANGE) */}
-          <section className="p-6 rounded-2xl border border-orange-500/20 bg-orange-500/5 space-y-4">
+          <section className="space-y-4 rounded-2xl border border-orange-500/20 bg-orange-500/5 p-6">
             <div className="flex items-center gap-2 text-orange-400">
               <Info size={16} />
               <span className="text-xs font-black uppercase tracking-widest">
-                Code Intelligence is scoped to deployment-aware incidents
+                {isDeploymentAware
+                  ? "Code Intelligence has deployment context"
+                  : "Code Intelligence is waiting for clearer deploy context"}
               </span>
             </div>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              This incident wasn&apos;t triggered by a failed CI/CD deployment,
-              so Scrubbe can&apos;t safely propose a code diff. Code
-              Intelligence only makes changes when it has a clear deploy,
-              service, and blast radius.
+            <p className="text-sm leading-relaxed text-slate-400">
+              {isDeploymentAware
+                ? `This incident already carries enough source context (${activeIncident.sourceType || "incident source"}) for Code Intelligence to reason about a safer remediation path for ${serviceName}.`
+                : "This incident is not yet strongly tied to a failed CI/CD deployment, so Scrubbe stays in guidance mode instead of proposing a code diff."}
             </p>
             <ul className="space-y-2">
               {[
-                "Review retry and timeout configuration for auth-service.",
-                "Check recent config changes in config/auth.yml.",
-                "Use Magic Insight and the unified timeline to identify the exact change that caused the spike.",
-              ].map((text, i) => (
+                `Review ${serviceName} telemetry and signal correlations first.`,
+                activeIncident.recommendedActions[0] ||
+                  `Check the most recent changes affecting ${serviceName}.`,
+                `Use ${activeIncident.ticketId} in the shared workspace timeline to confirm blast radius before execution.`,
+              ].map((text, index) => (
                 <li
-                  key={i}
-                  className="flex items-center gap-3 text-xs text-slate-500 font-medium"
+                  key={index}
+                  className="flex items-center gap-3 text-xs font-medium text-slate-500"
                 >
-                  <div className="w-1 h-1 rounded-full bg-slate-700" /> {text}
+                  <div className="h-1 w-1 rounded-full bg-slate-700" /> {text}
                 </li>
               ))}
             </ul>
           </section>
+
+          <button
+            type="button"
+            onClick={() => setOpenPipeline(true)}
+            className="flex items-center gap-2 rounded-xl border border-green-500/30 bg-green-500/5 px-4 py-3 text-xs font-bold text-green-400 transition-all hover:bg-green-500/10"
+          >
+            <Layout size={14} /> View Pipeline {activeIncident.ticketId}
+          </button>
         </main>
+
         <aside className="md:w-72">
-          <ConfidenceSidebar />
+          <ConfidenceSidebar
+            confidence={typeof confidence === "number" ? Math.round(confidence * 100) : undefined}
+            riskLevel={analysis?.rootCause?.riskLevel ?? activeIncident.priority ?? "MEDIUM"}
+            approvalMode={analysis?.remediation?.approvalMode ?? "HUMAN_REQUIRED"}
+            reasoningSummary={analysis?.rootCause?.hypothesis}
+            playbook={analysis?.remediation?.playbook}
+            patternMatch={analysis?.rootCause?.pattern}
+            incident={activeIncident.ticketId}
+          />
         </aside>
       </div>
 
-      <>
-        {openPipeline && (
-          <SideModal
-            title=""
-            isOpen={openPipeline}
-            onClose={() => setOpenPipeline(false)}
-          >
-            <Pipeline />
-          </SideModal>
-        )}
-      </>
+      {openPipeline ? (
+        <SideModal title="" isOpen={openPipeline} onClose={() => setOpenPipeline(false)}>
+          <Pipeline />
+        </SideModal>
+      ) : null}
     </div>
   );
 }
 
-// Sub-components
-const ActiveIncidentCard = ({
-  id,
-  priority,
-  title,
-  active = false,
-  timezone,
-  date,
-  onClick,
-}: {
-  id: string;
-  priority: string;
-  title: string;
-  active?: boolean;
-  timezone?: string;
-  date: Date;
-  onClick?: (value: any) => void;
-}) => (
-  <div
-    onClick={onClick}
-    className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-      active
-        ? "bg-white/[0.04] border-white/20 ring-1 ring-white/10 shadow-2xl"
-        : "bg-transparent border-white/5 hover:border-white/20 hover:bg-white/[0.02]"
-    }`}
-  >
-    <div className="flex justify-between items-start mb-2">
-      <span className="text-[10px] font-black text-slate-500 tracking-tighter">
-        {id}
-      </span>
-      <span
-        className={`px-1.5 py-0.5 rounded text-[8px] font-black border text-black ${
-          priority === "P1"
-            ? " bg-rose-500 border-rose-500/30"
-            : "bg-amber-500 border-amber-500/30"
-        }`}
-      >
-        {priority}
-      </span>
-    </div>
-    <h3 className="text-[11px] font-bold text-white leading-snug">{title}</h3>
-    <p className="text-[9px] text-slate-300 mt-1 uppercase">
-      {timezone} • {moment(date).fromNow()}
-    </p>
-  </div>
-);
+export default function CodeEnginePage() {
+  return (
+    <IncidentRouteShell title="Code Engine">
+      {(incident) => <IncidentOverview activeIncident={incident} />}
+    </IncidentRouteShell>
+  );
+}
 
 const StatBox = ({
   label,
@@ -403,24 +296,27 @@ const StatBox = ({
   subClass,
   valueClass = "text-white",
   subIcon,
-}: any) => (
-  <div className="p-5 border rounded-xl border-slate-400 flex flex-col justify-between">
-    <span className="text-[9px] font-bold text-slate-500 uppercase ">
-      {label}
-    </span>
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  subClass?: string;
+  valueClass?: string;
+  subIcon?: ReactNode;
+}) => (
+  <div className="flex flex-col justify-between rounded-xl border border-slate-400 p-5">
+    <span className="text-[9px] font-bold uppercase text-slate-500">{label}</span>
     <div className="space-y-1">
-      {value && (
-        <div className={`text-lg font-black  ${valueClass}`}>{value}</div>
-      )}
-      {sub && (
+      <div className={`text-lg font-black ${valueClass}`}>{value}</div>
+      {sub ? (
         <div
-          className={`text-[10px] flex items-center gap-1 font-bold ${
+          className={`flex items-center gap-1 text-[10px] font-bold ${
             subClass || "text-slate-500"
           }`}
         >
           {subIcon} {sub}
         </div>
-      )}
+      ) : null}
     </div>
   </div>
 );
@@ -434,50 +330,26 @@ const InfoCard = ({
   title: string;
   desc: string | ReactNode;
 }) => (
-  <div className="p-5 rounded-2xl border border-white/5 bg-white/[0.02] space-y-3">
+  <div className="space-y-3 rounded-2xl border border-white/5 bg-white/[0.02] p-5">
     <div className="flex items-center gap-2 text-slate-200">
-      {icon}{" "}
+      {icon}
       <span className="text-[10px] font-black uppercase tracking-widest">
         {title}
       </span>
     </div>
-    <p className="text-[11px] text-slate-500 leading-relaxed">{desc}</p>
+    <p className="text-[11px] leading-relaxed text-slate-500">{desc}</p>
   </div>
 );
 
 const FixTag = ({
   label,
-  active = false,
   icon,
 }: {
   label: string;
-  active?: boolean;
   icon: ReactNode;
 }) => (
-  <div
-    className={`px-3 py-1.5 rounded-lg border flex items-center gap-2 text-[9px] font-bold text-center transition-all cursor-pointer ${
-      active
-        ? "bg-emerald-500/20 border-emerald-400 text-emerald-400"
-        : "bg-white/5 border-white/10 text-slate-500 hover:border-emerald-500/30"
-    }`}
-  >
+  <div className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[9px] font-bold text-slate-500 transition-all hover:border-emerald-500/30">
     {icon}
     {label}
   </div>
-);
-
-const GaugeIcon = ({ size }: any) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m12 14 4-4" />
-    <path d="M3.34 19a10 10 0 1 1 17.32 0" />
-  </svg>
 );

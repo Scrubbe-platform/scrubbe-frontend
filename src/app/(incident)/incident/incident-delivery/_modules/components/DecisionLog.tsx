@@ -1,5 +1,9 @@
+"use client";
 import React from "react";
-import { ShieldCheck, Lightbulb, Activity, LucideIcon } from "lucide-react";
+import { ShieldCheck, Lightbulb, Activity } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 
 interface LogPayload {
   [key: string]: any;
@@ -13,7 +17,29 @@ interface LogEntryProps {
   payload?: LogPayload;
 }
 
-const DecisionLog: React.FC = () => {
+const iconForType = (type: string) => {
+  if (type?.includes("policy")) return <ShieldCheck className="text-green" size={16} />;
+  if (type?.includes("insight") || type?.includes("hypothesis")) return <Lightbulb className="text-yellow-400" size={16} />;
+  return <Activity className="text-blue-400" size={16} />;
+};
+
+const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
+  const { get } = useFetch();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["decisions-log", incidentId],
+    queryFn: async () => {
+      const url = incidentId
+        ? `${endpoint.decisions.log}?incidentId=${incidentId}`
+        : endpoint.decisions.log;
+      const res = await get(url);
+      if (res.success) return (res.data?.data?.decisions ?? res.data?.data ?? []) as any[];
+      return [] as any[];
+    },
+  });
+
+  const entries = data ?? [];
+
   return (
     <div className=" p-5 border border-IMSCyan/40 rounded-xl text-slate-300 bg-gradient-to-b from-[#0074834D] to-[#004B571A] flex items-start justify-center">
       <div className="w-full ">
@@ -37,79 +63,67 @@ const DecisionLog: React.FC = () => {
               Recent entries
             </h3>
             <span className="px-3 py-1 bg-slate-900 border border-slate-800 rounded-full text-xs font-bold text-slate-400">
-              14 events
+              {isLoading ? "…" : `${entries.length} events`}
             </span>
           </div>
 
-          <LogEntry
-            icon={<ShieldCheck className="text-green" size={16} />}
-            title="policy.evaluated"
-            desc="Policy evaluated for incident."
-            time="10:45:55 PM"
-            payload={{
-              autoActivate: false,
-              humanGate: true,
-              scope: "pr-only",
-            }}
-          />
+          {isLoading && (
+            <p className="text-xs text-slate-500 animate-pulse">Loading decisions…</p>
+          )}
 
-          <LogEntry
-            icon={<ShieldCheck className="text-green" size={16} />}
-            title="policy.mode"
-            desc="Policy mode set to standard."
-            time="10:45:55 PM"
-          />
+          {!isLoading && entries.length === 0 && (
+            <>
+              <LogEntry
+                icon={<ShieldCheck className="text-green" size={16} />}
+                title="policy.evaluated"
+                desc="Policy evaluated for incident."
+                time="—"
+                payload={{ autoActivate: false, humanGate: true, scope: "pr-only" }}
+              />
+              <LogEntry
+                icon={<ShieldCheck className="text-green" size={16} />}
+                title="policy.mode"
+                desc="Policy mode set to standard."
+                time="—"
+              />
+              <LogEntry
+                icon={<ShieldCheck className="text-green" size={16} />}
+                title="hypotheses.generated"
+                desc="Generated top 3 likely causes (not final RCA)."
+                time="—"
+                payload={{ top: [{ title: "Competing refactors touching same module", conf: 0.72 }] }}
+              />
+            </>
+          )}
 
-          <LogEntry
-            icon={<ShieldCheck className="text-green" size={16} />}
-            title="hypotheses.generated"
-            desc="Generated top 3 likely causes (not final RCA)."
-            time="10:45:55 PM"
-            payload={{
-              top: [
-                {
-                  title: "Competing refactors touching same module",
-                  conf: 0.72,
-                },
-                { title: "Policy/route changes diverged", conf: 0.7 },
-                { title: "Backport/cherry-pick drift", conf: 0.62 },
-              ],
-            }}
-          />
-
-          <LogEntry
-            icon={<ShieldCheck className="text-green" size={16} />}
-            title="Event"
-            desc="Policy mode set to standard."
-            time="10:45:55 PM"
-          />
+          {!isLoading &&
+            entries.map((entry: any, i: number) => (
+              <LogEntry
+                key={entry.id ?? i}
+                icon={iconForType(entry.type ?? entry.action ?? "")}
+                title={entry.type ?? entry.action ?? "event"}
+                desc={entry.summary ?? entry.reason ?? entry.description ?? "Decision recorded."}
+                time={entry.createdAt ? new Date(entry.createdAt).toLocaleTimeString() : "—"}
+                payload={entry.context ?? entry.metadata ?? undefined}
+              />
+            ))}
         </div>
       </div>
     </div>
   );
 };
 
-const LogEntry: React.FC<LogEntryProps> = ({
-  icon,
-  title,
-  desc,
-  time,
-  payload,
-}) => (
+const LogEntry: React.FC<LogEntryProps> = ({ icon, title, desc, time, payload }) => (
   <div className="border border-slate-800 rounded-xl p-4 bg-black hover:border-slate-700 transition-colors group">
     <div className="flex justify-between items-start mb-2">
       <div className="flex items-start gap-3">
         <div className="mt-1">{icon}</div>
         <div>
-          <h4 className="text-sm font-black text-slate-100 font-mono tracking-tight">
-            {title}
-          </h4>
+          <h4 className="text-sm font-black text-slate-100 font-mono tracking-tight">{title}</h4>
           <p className="text-[13px] text-slate-400 mt-0.5">{desc}</p>
         </div>
       </div>
-      <span className="text-[11px] font-medium text-slate-600 font-mono">
-        {time}
-      </span>
+      <span className="text-[11px] font-medium text-slate-600 font-mono">{time}</span>
     </div>
 
     {payload && (

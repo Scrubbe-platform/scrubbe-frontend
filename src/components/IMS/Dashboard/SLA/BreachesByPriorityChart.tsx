@@ -3,12 +3,20 @@
 import React from "react";
 import { Pie } from "react-chartjs-2";
 
-const BreachesByPriorityChart = () => {
+type BreachesByPriorityChartProps = {
+  labels?: string[];
+  values?: number[];
+};
+
+const BreachesByPriorityChart = ({
+  labels = ["P1", "P2", "P3", "P4"],
+  values = [0, 0, 0, 0],
+}: BreachesByPriorityChartProps) => {
   const data = {
-    labels: ["P1", "P2", "P3", "P4"],
+    labels,
     datasets: [
       {
-        data: [15, 25, 40, 20], // Mock size approximation (P3 is largest)
+        data: values,
         backgroundColor: [
           "#EF4444", // Red (P1)
           "#10B981", // Green (P2)

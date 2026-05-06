@@ -2,18 +2,18 @@
 import React from "react";
 import { Bar } from "react-chartjs-2";
 
-// --- Mock Data ---
-// This data simulates the structure for the chart's appearance.
-const mockTeamMTTRData = {
-  labels: ["Devops", "Support", "Ops"],
-  data: [32, 10, 25],
+type ByTeamChartProps = {
+  labels?: string[];
+  values?: number[];
 };
 
-const ByTeamChart = () => {
-  const { labels, data: chartData } = mockTeamMTTRData;
+const ByTeamChart = ({ labels = [], values = [] }: ByTeamChartProps) => {
+  const chartLabels = labels.length > 0 ? labels : ["No team data"];
+  const chartData = values.length > 0 ? values : [0];
+  const maxValue = Math.max(...chartData, 0);
 
   const data = {
-    labels: labels,
+    labels: chartLabels,
     datasets: [
       {
         label: "Avg MTTR (min)",
@@ -35,7 +35,7 @@ const ByTeamChart = () => {
     scales: {
       y: {
         beginAtZero: true,
-        max: 40,
+        max: Math.max(40, Math.ceil(maxValue / 10) * 10 + 10),
       },
       x: {
         grid: { display: false },

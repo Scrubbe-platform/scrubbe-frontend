@@ -9,8 +9,7 @@ import {
   CheckCircle2,
   Circle,
 } from "lucide-react";
-
-// --- Types ---
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 type PlaybookStatus = "warning" | "info" | "success" | "danger" | "default";
 
@@ -28,8 +27,6 @@ interface LegendItem {
   label: string;
   status: "completed" | "active" | "pending";
 }
-
-// --- Sub-Components ---
 
 const StatusCard: React.FC<PlaybookItem> = ({
   title,
@@ -56,37 +53,42 @@ const StatusCard: React.FC<PlaybookItem> = ({
 
   return (
     <div
-      className={`flex items-center gap-4 p-4 rounded-xl border transition-all hover:brightness-110 cursor-pointer ${statusStyles[status]}`}
+      className={`cursor-pointer rounded-xl border p-4 transition-all hover:brightness-110 ${statusStyles[status]}`}
     >
-      <div
-        className={`p-2 rounded-lg border flex items-center justify-center ${badgeStyles[status]}`}
-      >
-        {icon}
-      </div>
-      <div className="flex flex-col gap-1">
-        <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
-        <div className="flex items-center gap-3">
-          <span
-            className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${badgeStyles[status]}`}
-          >
-            Stage {stage}
-          </span>
-          <span className="text-xs text-slate-400 font-medium">{service}</span>
+      <div className="flex items-center gap-4">
+        <div
+          className={`flex items-center justify-center rounded-lg border p-2 ${badgeStyles[status]}`}
+        >
+          {icon}
+        </div>
+        <div className="flex flex-col gap-1">
+          <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
+          <div className="flex items-center gap-3">
+            <span
+              className={`rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${badgeStyles[status]}`}
+            >
+              Stage {stage}
+            </span>
+            <span className="text-xs font-medium text-slate-400">{service}</span>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-// --- Main Component ---
+const buildPlaybooks = (incident: IncidentDetailRecord): PlaybookItem[] => {
+  const serviceName =
+    incident.service || incident.affectedSystem || "unknown-service";
+  const title =
+    incident.title || incident.reason || incident.summary || incident.ticketId;
 
-const PlaybookSidebar: React.FC = () => {
-  const playbooks: PlaybookItem[] = [
+  return [
     {
       id: "1",
-      title: "High API Error Rate",
+      title,
       stage: 3,
-      service: "payments-api",
+      service: serviceName,
       icon: <AlertTriangle size={18} />,
       status: "warning",
     },
@@ -94,43 +96,53 @@ const PlaybookSidebar: React.FC = () => {
       id: "2",
       title: "Deployment Rollback",
       stage: 3,
-      service: "all-services",
+      service: incident.environment || "all-services",
       icon: <RefreshCw size={18} />,
       status: "info",
     },
     {
       id: "3",
-      title: "DB Connection Exhaustion",
+      title: "Dependency Health Check",
       stage: 3,
-      service: "postgres-primary",
+      service: incident.region || "shared-infra",
       icon: <Database size={18} />,
       status: "success",
     },
     {
       id: "4",
-      title: "Pod CrashLoop Recovery",
+      title: "Pod Recovery",
       stage: 3,
-      service: "k8s-prod",
+      service: serviceName,
       icon: <Plus size={18} />,
       status: "warning",
     },
     {
       id: "5",
-      title: "Cache Eviction Storm",
+      title: "Traffic Stabilization",
       stage: 3,
-      service: "redis-cluster",
+      service: incident.blastRadius || "impacted services",
       icon: <Activity size={18} />,
       status: "success",
     },
     {
       id: "6",
-      title: "Auth JWT Regression",
+      title: "Auth / Access Check",
       stage: 2,
-      service: "auth-service",
+      service:
+        incident.assignedToName ||
+        incident.assignedToEmail ||
+        incident.incidentCommander ||
+        "response-owner",
       icon: <Shield size={18} />,
       status: "danger",
     },
   ];
+};
+
+const PlaybookSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({
+  incident,
+}) => {
+  const playbooks = buildPlaybooks(incident);
 
   const legends: LegendItem[] = [
     { id: 1, label: "Lifecycle Stages", status: "completed" },
@@ -143,48 +155,43 @@ const PlaybookSidebar: React.FC = () => {
   ];
 
   return (
-    <div className="w-80 h-full flex flex-col p-6 gap-6 overflow-y-auto border-r border-white/5">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-bold text-white tracking-tight">
+    <div className="flex h-full w-80 flex-col gap-6 overflow-y-auto border-r border-white/5 p-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold tracking-tight text-white">
           Playbooks
         </h2>
-        <div className="w-8 h-8 rounded border border-white/20 flex items-center justify-center text-xs font-bold text-white">
+        <div className="flex h-8 w-8 items-center justify-center rounded border border-white/20 text-xs font-bold text-white">
           3
         </div>
       </div>
 
-      {/* Playbook List */}
       <div className="flex flex-col gap-3">
-        {playbooks.map((pb) => (
-          <StatusCard key={pb.id} {...pb} />
+        {playbooks.map((playbook) => (
+          <StatusCard key={playbook.id} {...playbook} />
         ))}
       </div>
 
-      <hr className="border-white/5 my-2" />
+      <hr className="my-2 border-white/5" />
 
-      {/* Legend Section */}
       <div className="flex flex-col gap-4">
         <h3 className="text-sm font-semibold text-slate-200">Legend</h3>
         <div className="flex flex-col gap-3">
           {legends.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between group cursor-default"
+              className="group flex cursor-default items-center justify-between"
             >
-              <span className="text-xs text-slate-400 group-hover:text-slate-200 transition-colors">
+              <span className="text-xs text-slate-400 transition-colors group-hover:text-slate-200">
                 {item.id}. {item.label}
               </span>
-              {item.status === "completed" && (
+              {item.status === "completed" ? (
                 <CheckCircle2 size={16} className="text-emerald-500" />
-              )}
-              {item.status === "active" && (
+              ) : item.status === "active" ? (
                 <div className="relative flex items-center justify-center">
                   <Circle size={16} className="text-green-400" />
-                  <div className="absolute w-1.5 h-1.5 rounded-full bg-green-400" />
+                  <div className="absolute h-1.5 w-1.5 rounded-full bg-green-400" />
                 </div>
-              )}
-              {item.status === "pending" && (
+              ) : (
                 <Circle size={16} className="text-slate-700" />
               )}
             </div>
