@@ -1,49 +1,289 @@
 "use client";
-import React, { useState } from "react";
-import Input from "../ui/input";
-import TextArea from "../ui/text-area";
-import CButton from "../ui/Cbutton";
-import Link from "next/link";
-import { BiChat, BiEnvelope } from "react-icons/bi";
-import { MdPhoneInTalk } from "react-icons/md";
-import { useFetch } from "@/hooks/useFetch";
-import { endpoint } from "@/lib/api/endpoint";
-import { toast } from "sonner";
 
-const ContactUs = () => {
-  const [type, setType] = useState<
-    "technical-support" | "sales-inquiry" | "general-support"
-  >("technical-support");
-  const { post } = useFetch();
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    subject: "",
+import { useState, useEffect } from "react";
+import {
+  ChevronDown,
+  ChevronUp,
+  ArrowRight,
+  Calendar,
+  MessageSquare,
+  Users,
+  Mail,
+  Shield,
+} from "lucide-react";
+import { getCalApi } from "@calcom/embed-react";
+import { FaSlack } from "react-icons/fa";
+
+interface WayItem {
+  iconBg: string;
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  badge?: string;
+  href?: string; // optional — renders as <a> when present
+}
+
+interface FAQItem {
+  q: string;
+  a: string;
+}
+
+const WAYS: WayItem[] = [
+  {
+    iconBg: "bg-emerald-50 text-emerald-600",
+    icon: <FaSlack size={20} />,
+    title: "Message us on Slack",
+    desc: "Chat with us instantly on Slack",
+    href: "https://scrubbecommunity.slack.com/archives/C0B0ZSFG7M0",
+  },
+  {
+    iconBg: "bg-emerald-50 text-emerald-600",
+    icon: <Users size={20} />,
+    title: "Join our community",
+    desc: "Connect with other engineers, share ideas and get help",
+  },
+  {
+    iconBg: "bg-emerald-50 text-emerald-600",
+    icon: <Mail size={20} />,
+    title: "Email us",
+    desc: "support@scrubbe.com",
+    href: "mailto:support@scrubbe.com", // ← opens email client
+  },
+  {
+    iconBg: "bg-emerald-50 text-emerald-600",
+    icon: <MessageSquare size={20} />,
+    title: "Live Chat",
+    desc: "Available Mon-Fri, 9am-6pm UTC",
+  },
+];
+
+const FAQ_ITEMS: FAQItem[] = [
+  {
+    q: "What is Scrubbe?",
+    a: "Scrubbe is a governed multi-agent orchestration platform for engineering incidents. It connects signals across your stack, analyses root cause, proposes fixes, and executes remediation safely under policy control.",
+  },
+  {
+    q: "How is Scrubbe different from incident management tools?",
+    a: "Traditional tools help you coordinate people during incidents. Scrubbe coordinates systems and actions — from detection to resolution — while enforcing policies, approvals, and auditability.",
+  },
+  {
+    q: "What problem does Scrubbe solve?",
+    a: "Engineering teams spend too much time:\n* investigating alerts manually\n* correlating signals across teams\n* deciding what action is safe\nScrubbe reduces this by turning signals into governed, executable decisions.",
+  },
+  {
+    q: "Who is Scrubbe for?",
+    a: "* SRE teams\n* Engineering platforms\n* DevOps teams\n* Infrastructure teams\n* High-scale engineering orgs with production systems",
+  },
+  {
+    q: "How It Works",
+    a: "Scrubbe follows a structured pipeline:\n1. Ingest signals (alerts, logs, metrics, code changes)\n2. Correlate and identify root cause\n3. Evaluate policies and risk\n4. Propose fixes or actions\n5. Execute safely (with approval if required)",
+  },
+  {
+    q: "What are 'agents' in Scrubbe?",
+    a: "Agents are specialised components that:\n* analyse signals\n* generate fixes\n* validate outcomes\n* explain decisions\n\nEach agent operates under governance rules.",
+  },
+  {
+    q: "What is meant by 'governed execution'?",
+    a: "Every action in Scrubbe is:\n* checked against policies\n* optionally gated by approvals\n* logged in an audit trail\n\nNothing runs blindly.",
+  },
+  {
+    q: "Can Scrubbe automatically fix issues?",
+    a: "Yes—but only when policies allow it.\nYou control:\n* what can be automated\n* what requires approval\n* what is restricted",
+  },
+  {
+    q: "What tools does Scrubbe integrate with?",
+    a: "Scrubbe connects to:\n* observability tools (metrics, logs, alerts)\n* code repositories\n* CI/CD pipelines\n* cloud infrastructure\n* communication tools",
+  },
+  {
+    q: "Do we need to replace our existing tools?",
+    a: "No. Scrubbe sits on top of your stack and orchestrates it.",
+  },
+  {
+    q: "How does Scrubbe use our data?",
+    a: "Scrubbe processes operational signals to:\n* understand incidents\n* generate decisions\n* execute actions\n\nData usage is scoped, controlled, and auditable.",
+  },
+  {
+    q: "Is our data secure?",
+    a: "Yes. Scrubbe is built with:\n* strict access controls\n* encrypted data handling\n* audit logging\n* policy enforcement",
+  },
+  {
+    q: "Does Scrubbe support approvals and access control?",
+    a: "Yes. You can define:\n* who can approve actions\n* what actions require approval\n* role-based permissions",
+  },
+  {
+    q: "Is there an audit trail?",
+    a: "Every action is recorded:\n* what happened\n* why it happened\n* who approved it\n* what system executed it",
+  },
+  {
+    q: "What outcomes can we expect?",
+    a: "* Faster incident resolution (lower MTTR)\n* Reduced manual investigation\n* Consistent, repeatable responses\n* Lower operational risk\n* Better system reliability",
+  },
+  {
+    q: "How does Scrubbe reduce MTTR?",
+    a: "By:\n* correlating signals automatically\n* identifying root cause faster\n* proposing actionable fixes\n* removing manual coordination delays",
+  },
+  {
+    q: "Does Scrubbe replace engineers?",
+    a: "No. It augments engineers by:\n* removing repetitive work\n* accelerating decision-making\n* enforcing safety\n\nEngineers remain in control.",
+  },
+  {
+    q: "How long does it take to get started?",
+    a: "Initial setup can take hours to days depending on:\n* integrations\n* policy configuration\n* environment complexity",
+  },
+  {
+    q: "Do we need to define policies upfront?",
+    a: "Yes—policies are central to Scrubbe. They define:\n* what's allowed\n* what's risky\n* what needs approval",
+  },
+  {
+    q: "Can we start small?",
+    a: "Yes. You can:\n* start with visibility only\n* enable suggestions\n* gradually move to execution",
+  },
+  {
+    q: "How does a demo work?",
+    a: "A guided session where we:\n* connect sample signals\n* show correlation and analysis\n* demonstrate policy evaluation\n* walk through fix generation and execution",
+  },
+  {
+    q: "Can we use our own environment in the demo?",
+    a: "Yes, depending on readiness and security requirements.",
+  },
+  {
+    q: "How is Scrubbe priced?",
+    a: "Pricing is typically based on:\n* scale of systems monitored\n* number of environments\n* usage of orchestration/execution features",
+  },
+  {
+    q: "Is there a free trial?",
+    a: "Available depending on onboarding stage and use case.",
+  },
+  {
+    q: "What makes Scrubbe defensible?",
+    a: "* Policy-driven account of actions\n* Multi-agent orchestration architecture\n* Deep integration across systems\n* Audit-first design",
+  },
+  {
+    q: "Why now?",
+    a: "* Increasing system complexity\n* Alert fatigue across teams\n* Rise of AI-generated actions without governance\n* Need for safe, automated remediation",
+  },
+  {
+    q: "What category does Scrubbe belong to?",
+    a: "Scrubbe defines a new category: Governed AI Incident Orchestration.",
+  },
+  {
+    q: "Why not just use alerts and runbooks?",
+    a: "Because alerts tell you something is wrong, runbooks tell you what to try, but Scrubbe decides, validates, and executes — safely.",
+  },
+];
+
+// ── FAQ Row ────────────────────────────────────────────────────────
+
+function FAQRow({ item }: { item: FAQItem }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-gray-200 last:border-0">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-start justify-between gap-4 py-5 text-left bg-transparent border-none cursor-pointer group"
+      >
+        <span className="text-lg font-semibold text-gray-800 leading-snug group-hover:text-emerald-600 transition-colors flex-1">
+          {item.q}
+        </span>
+        {open ? (
+          <ChevronUp size={20} className="text-emerald-500 shrink-0 mt-0.5" />
+        ) : (
+          <ChevronDown size={20} className="text-gray-400 shrink-0 mt-0.5" />
+        )}
+      </button>
+      {open && (
+        <p className="text-base text-gray-500 leading-relaxed pb-5 whitespace-pre-line pr-6">
+          {item.a}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Way Item — renders as <a> if href is set, else plain div ───────
+
+function WayRow({ w }: { w: WayItem }) {
+  const sharedCls = "flex items-start gap-4 group cursor-pointer no-underline";
+
+  const inner = (
+    <>
+      <div
+        className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${w.iconBg}`}
+      >
+        {w.icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors">
+            {w.title}
+          </span>
+          {w.badge && (
+            <span className="text-xs font-bold bg-purple-100 text-purple-600 border border-purple-300 rounded px-2 py-0.5">
+              {w.badge}
+            </span>
+          )}
+        </div>
+        <p className="text-base text-gray-400">{w.desc}</p>
+      </div>
+      <ArrowRight
+        size={18}
+        className="text-gray-300 group-hover:text-emerald-400 transition-colors mt-3 shrink-0"
+      />
+    </>
+  );
+
+  if (w.href) {
+    return (
+      <a href={w.href} className={sharedCls}>
+        {inner}
+      </a>
+    );
+  }
+
+  return <div className={sharedCls}>{inner}</div>;
+}
+
+// ── Main Page ──────────────────────────────────────────────────────
+
+export default function ContactPage() {
+  const [form, setForm] = useState({
+    fullName: "",
+    workEmail: "",
+    companyName: "",
+    role: "",
     message: "",
   });
-  const [loading, setLoading] = useState(false);
 
-  const handleChange = (value: string, name: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleContactUs = async (e: any) => {
-    e.preventDefault();
-    setLoading(true);
-    const res = await post(endpoint.contact_us, formData);
-    setLoading(false);
-    if (res.success) {
-      toast.success(res.data.message);
-      setFormData({
-        first_name: "",
-        last_name: "",
-        email: "",
-        subject: "",
-        message: "",
+  useEffect(() => {
+    (async () => {
+      const cal = await getCalApi({ namespace: "demo" });
+      cal("ui", {
+        theme: "light",
+        styles: { branding: { brandColor: "#10b981" } },
+        hideEventTypeDetails: false,
+        layout: "month_view",
       });
-    }
-  };
+    })();
+  }, []);
+
+  const set =
+    (k: keyof typeof form) =>
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
+    ) =>
+      setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const inputCls =
+    "w-full border-2 border-gray-200 rounded-lg px-4 py-3.5 text-base text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all bg-white";
+
+  const labelCls = "text-base text-gray-500 font-medium block mb-2";
+
+  const half = Math.ceil(FAQ_ITEMS.length / 2);
+  const leftFAQ = FAQ_ITEMS.slice(0, half);
+  const rightFAQ = FAQ_ITEMS.slice(half);
+
   return (
     <div className="bg-white min-h-screen font-sans pt-20">
       {/* ── CONTACT SECTION ── */}
@@ -110,64 +350,21 @@ const ContactUs = () => {
             </button>
           </div>
 
-            <div className="grid sm:grid-cols-2 mt-10 gap-4">
-              <Input
-                label="First Name"
-                required
-                value={formData.first_name}
-                labelClassName="text-white"
-                onChange={(e) => handleChange(e.target.value, "first_name")}
-              />
-              <Input
-                label="Last Name"
-                required
-                value={formData.last_name}
-                labelClassName="text-white"
-                onChange={(e) => handleChange(e.target.value, "last_name")}
-              />
-              <Input
-                label="Email Address"
-                type="email"
-                required
-                value={formData.email}
-                labelClassName="text-white"
-                onChange={(e) => handleChange(e.target.value, "email")}
-              />
-              <Input label="Phone Number" labelClassName="text-white" />
-              <Input label="Company's Name" labelClassName="text-white" />
-              <Input label="Job Title" labelClassName="text-white" />
-            </div>
-            <Input
-              label="Subject"
-              labelClassName="text-white"
-              value={formData.subject}
-              onChange={(e) => handleChange(e.target.value, "subject")}
-            />
-            <TextArea
-              label="Message"
-              required
-              value={formData.message}
-              labelClassName="text-white"
-              onChange={(e) => handleChange(e.target.value, "message")}
-            />
+          {/* Form body */}
+          <div className="p-6 sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6">
+              Your Details
+            </p>
 
-            <div className="flex justify-end">
-              <CButton isLoading={loading} type="submit" className="w-fit">
-                Send Message
-              </CButton>
-            </div>
-          </form>
-          <div className="bg-gradient-to-b from-[#0074834D] to-[#004B571A] border rounded-xl transition-all border-IMSCyan/40 overflow-clip text-white p-10">
-            <p className=" font-semibold text-xl">Send us a message</p>
-            <div className="flex flex-col gap-3 mt-3">
-              <div className="p-4 py-6 border border-IMSCyan rounded-xl  flex-row flex gap-3 items-center">
-                <BiEnvelope size={23} />
-                <div className=" space-y-2">
-                  <p className=" font-medium">Email Support</p>
-                  <Link href={"mailto:support@scrubbe.com"}>
-                    Support@scrubbe.com
-                  </Link>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className={labelCls}>Full Name</label>
+                <input
+                  className={inputCls}
+                  placeholder="Enter your full name"
+                  value={form.fullName}
+                  onChange={set("fullName")}
+                />
               </div>
               <div>
                 <label className={labelCls}>Work Email</label>
