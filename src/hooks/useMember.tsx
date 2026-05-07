@@ -19,16 +19,15 @@ const useMember = () => {
     queryFn: async () => {
       try {
         const res = await get(endpoint.incident_ticket.get_members);
-        console.log({ memeber: res });
         if (res.success) {
           return res.data.data ?? [];
         }
         return [];
       } catch (error) {
-        console.log(error);
         return [];
       }
     },
+    refetchOnWindowFocus: false,
   });
 };
 

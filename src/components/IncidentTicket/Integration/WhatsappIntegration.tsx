@@ -77,10 +77,13 @@ const WhatsappIntegration: React.FC = () => {
   }, [data]);
 
   useEffect(() => {
-    if (whatsAppConfig?.metadata?.recipents.length > 0) {
-      setValue("recipients", [...whatsAppConfig?.metadata?.recipents], {
-        shouldValidate: true,
-      });
+    const recipients = (whatsAppConfig?.config as any)?.recipients;
+    if (Array.isArray(recipients) && recipients.length > 0) {
+      setValue("recipients", recipients, { shouldValidate: true });
+    }
+    const enabled = (whatsAppConfig?.config as any)?.enabled;
+    if (typeof enabled === "boolean") {
+      setValue("enabled", enabled, { shouldValidate: true });
     }
   }, [setValue, whatsAppConfig]);
 

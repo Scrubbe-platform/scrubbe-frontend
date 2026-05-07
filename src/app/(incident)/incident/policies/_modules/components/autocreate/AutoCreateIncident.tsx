@@ -13,6 +13,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import SideModal from '@/components/ui/SideModal'
 import { BiInfoCircle } from 'react-icons/bi'
 import TextArea from '@/components/ui/text-area'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useFetch } from '@/hooks/useFetch'
+import { endpoint } from '@/lib/api/endpoint'
+import { toast } from 'sonner'
 
 const formScheme = z.object({
   name: z.string().nonempty(),
@@ -27,67 +31,69 @@ const formScheme = z.object({
 })
 
 type TformScheme = z.infer<typeof formScheme>
+
 const AutoCreateIncident = () => {
-  const columns = [
-    {
-      accessorKey: "trigger",
-      header: () => <span className="font-semibold">Trigger</span>,
-      cell: (info: CellContext<Record<string, any>, unknown>) => info.getValue(),
-    },
-
-    {
-      accessorKey: "condition",
-      header: () => <span className="font-semibold">Condition</span>,
-      cell: (info: CellContext<Record<string, any>, unknown>) => (
-        <div className=" truncate text-nowrap max-w-sm">
-          {info.getValue() as string}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "then",
-      header: () => <span className="font-semibold">Then</span>,
-      cell: (info: CellContext<Record<string, any>, unknown>) => (
-        <div className=" truncate text-nowrap max-w-sm">
-          {info.getValue() as string}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "dedup",
-      header: () => <span className="font-semibold">Dedup</span>,
-      cell: (info: CellContext<Record<string, any>, unknown>) => (
-        <div className="flex items-center gap-2">
-          {/* {priorityColors((info.getValue() as string) ?? "low")} */}
-        </div>
-      ),
-    },
-
-
-    {
-      accessorKey: "Action",
-      header: () => <span className="font-semibold">Action</span>,
-      cell: () => (
-        <div className="flex items-center gap-3">
-          <CButton className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
-            {/* <AiStarIcon stroke="#06eefd"/> */}
-            Edit
-          </CButton>
-          <CButton className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
-            {/* <AiStarIcon stroke="#06eefd"/> */}
-            Delete
-          </CButton>
-        </div>
-      ),
-    },
-  ];
+  const { get, post, remove } = useFetch()
+  const queryClient = useQueryClient()
   const [openModal, setOpenModal] = useState(false)
+
+  const { data: rules = [] } = useQuery({
+    queryKey: ['guardrails', 'auto-create'],
+    queryFn: async () => {
+      const res = await get(endpoint.guardrails.list + '?ruleType=AUTO_CREATE')
+      if (res.success) return (res.data?.data?.guardrails ?? res.data?.data ?? []) as any[]
+      return [] as any[]
+    },
+    refetchOnWindowFocus: false,
+  })
+
+  const { mutateAsync: createRule, isPending: saving } = useMutation({
+    mutationFn: async (data: TformScheme) => {
+      const res = await post(endpoint.guardrails.create, {
+        name: data.name,
+        description: data.condition,
+        ruleType: 'AUTO_CREATE',
+        triggerSource: data.triggerSource,
+        condition: data.condition,
+        state: data.state,
+        environment: data.environment,
+        deduplication: data.deduplication,
+        severity: data.severity,
+        enable: data.enable,
+        note: data.note,
+      })
+      if (!res.success) throw new Error(res.data?.message ?? 'Failed to save rule')
+      return res.data
+    },
+    onSuccess: () => {
+      toast.success('Auto-create rule saved')
+      queryClient.invalidateQueries({ queryKey: ['guardrails', 'auto-create'] })
+      setOpenModal(false)
+      reset()
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
+  const { mutateAsync: deleteRule } = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await remove(endpoint.guardrails.delete, id)
+      if (!res.success) throw new Error('Failed to delete')
+      return res.data
+    },
+    onSuccess: () => {
+      toast.success('Rule deleted')
+      queryClient.invalidateQueries({ queryKey: ['guardrails', 'auto-create'] })
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
   const [codeEngineActions, setCodeEngineActions] = useState<{ label: string, value: boolean }[]>([
-    { label: "Allow “suggest fix” on P1/P2", value: false },
+    { label: "Allow "suggest fix" on P1/P2", value: false },
     { label: "Auto-open PR (never merge)", value: false },
     { label: "Only in staging by default", value: false }
   ])
-  const { control, formState: { isValid, errors }, setValue, watch } = useForm({
+
+  const { control, handleSubmit, formState: { isValid, errors }, reset } = useForm<TformScheme>({
     resolver: zodResolver(formScheme),
     mode: "onChange",
     defaultValues: {
@@ -99,20 +105,62 @@ const AutoCreateIncident = () => {
       triggerSource: "",
       name: "",
       note: "",
-      severity: "",
+      severity: "P1",
     }
   })
+
+  const columns = [
+    {
+      accessorKey: "name",
+      header: () => <span className="font-semibold">Trigger</span>,
+      cell: (info: CellContext<Record<string, any>, unknown>) => info.getValue(),
+    },
+    {
+      accessorKey: "config.condition",
+      header: () => <span className="font-semibold">Condition</span>,
+      cell: (info: CellContext<Record<string, any>, unknown>) => (
+        <div className="truncate text-nowrap max-w-sm">{info.getValue() as string}</div>
+      ),
+    },
+    {
+      accessorKey: "config.state",
+      header: () => <span className="font-semibold">Then</span>,
+      cell: (info: CellContext<Record<string, any>, unknown>) => (
+        <div className="truncate text-nowrap max-w-sm">{info.getValue() as string}</div>
+      ),
+    },
+    {
+      accessorKey: "config.deduplication",
+      header: () => <span className="font-semibold">Dedup</span>,
+      cell: (info: CellContext<Record<string, any>, unknown>) => info.getValue() as string,
+    },
+    {
+      accessorKey: "Action",
+      header: () => <span className="font-semibold">Action</span>,
+      cell: (info: CellContext<Record<string, any>, unknown>) => (
+        <div className="flex items-center gap-3">
+          <CButton
+            onClick={() => deleteRule((info.row.original as any).id)}
+            className="border bg-transparent hover:bg-transparent border-rose-500 text-rose-500"
+          >
+            Delete
+          </CButton>
+        </div>
+      ),
+    },
+  ]
+
   return (
     <div>
       <FormWrapper
         title='C. Auto-create incidents'
         subtitle='When should Scrubbe create an incident automatically?'
-        label='Rules here connect the dots: pipeline failure → incident severity. This prevents “every red build” turning into noise.'
+        label='Rules here connect the dots: pipeline failure → incident severity. This prevents "every red build" turning into noise.'
         actionText={"Add auto-create rule"}
         action={() => setOpenModal(true)}
       >
         <div className='space-y-3'>
-          <Table columns={columns} data={[]} />
+          <Table columns={columns} data={rules} />
 
           <div className='border border-gray-400 p-3 rounded-lg space-y-3'>
             <div className='flex justify-between'>
@@ -149,27 +197,30 @@ const AutoCreateIncident = () => {
             <p className='text-sm'>Code Engine actions</p>
             <p className='text-xs'>Policy for what remediation paths are allowed by default.</p>
             <div className='space-y-2'>
-              {
-                codeEngineActions.map((actions) => (
-                  <div key={actions.label} className='flex items-center justify-between'>
-                    <p className='text-sm'>{actions.label}</p>
-                    <Switch size='sm' color="success" checked={actions.value} onChange={(e) => setCodeEngineActions((prev) =>
-                      prev.map((item) =>
-                        item.label === actions.label
-                          ? { ...item, value: !actions.value } // Update the matched item
-                          : item // Keep others as they are
+              {codeEngineActions.map((action) => (
+                <div key={action.label} className='flex items-center justify-between'>
+                  <p className='text-sm'>{action.label}</p>
+                  <Switch
+                    size='sm'
+                    color="success"
+                    isSelected={action.value}
+                    onChange={() =>
+                      setCodeEngineActions((prev) =>
+                        prev.map((item) =>
+                          item.label === action.label ? { ...item, value: !item.value } : item
+                        )
                       )
-                    )} />
-                  </div>
-                ))
-              }
+                    }
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </FormWrapper>
 
-      {
-        openModal && <SideModal isOpen={openModal} onClose={() => setOpenModal(false)} title='Add severity rule' subTitle='Map signals to P1–P4 and optionally mark as major.'>
+      {openModal && (
+        <SideModal isOpen={openModal} onClose={() => setOpenModal(false)} title='Add auto-create rule' subTitle='When should Scrubbe auto-raise an incident?'>
           <div>
             <div className='border border-gray-300 rounded-md p-2'>
               <div className='flex gap-2 items-center text-sm font-semibold'>
@@ -179,29 +230,32 @@ const AutoCreateIncident = () => {
               <p className='pt-2 text-sm'>Evaluates triggers (pipelines/alerts/risk) to auto-create incidents.</p>
             </div>
 
-            <div className=' mt-4'>
+            <div className='mt-4'>
               <div className='grid grid-cols-2 gap-x-3'>
                 <Controller
                   name="name"
                   control={control}
                   render={({ field }) => (
-                    <Input {...field} placeholder='Pipeline fall in prod- P1' label='Name' labelClassName='text-white' error={errors.name?.message} />
+                    <Input {...field} placeholder='Pipeline fail in prod - P1' label='Name' labelClassName='text-white' error={errors.name?.message} />
                   )}
                 />
-
                 <Controller
                   name="enable"
                   control={control}
                   render={({ field }) => (
                     <Select
                       options={[
-                        { value: "false", label: "Enable" },
-                        { value: "true", label: "Disable" }
+                        { value: "true", label: "Enable" },
+                        { value: "false", label: "Disable" }
                       ]}
                       label='Enabled'
                       labelClassName='text-white'
-                      error={errors.enable?.message} />
-                  )} />
+                      value={field.value ? "true" : "false"}
+                      onChange={(e: any) => field.onChange(e.target.value === "true")}
+                      error={errors.enable?.message}
+                    />
+                  )}
+                />
                 <Controller
                   name="triggerSource"
                   control={control}
@@ -215,14 +269,15 @@ const AutoCreateIncident = () => {
                       ]}
                       label='Trigger Source'
                       labelClassName='text-white'
-                      error={errors.triggerSource?.message} />
+                      error={errors.triggerSource?.message}
+                    />
                   )}
                 />
                 <Controller
                   name="condition"
                   control={control}
                   render={({ field }) => (
-                    <Input {...field} placeholder='eg >5% for 5m' label='Condition' labelClassName='text-white' error={errors.condition?.message} />
+                    <Input {...field} placeholder='e.g. >5% for 5m' label='Condition' labelClassName='text-white' error={errors.condition?.message} />
                   )}
                 />
               </div>
@@ -240,7 +295,8 @@ const AutoCreateIncident = () => {
                       ]}
                       label='Create Severity'
                       labelClassName='text-white'
-                      error={errors.severity?.message} />
+                      error={errors.severity?.message}
+                    />
                   )}
                 />
                 <Controller
@@ -266,45 +322,42 @@ const AutoCreateIncident = () => {
                       ]}
                       label="Dedup window"
                       labelClassName='text-white'
-                      error={errors.severity?.message} />
+                      error={errors.deduplication?.message}
+                    />
                   )}
                 />
               </div>
-              {/* <div className='border border-zinc-300 rounded-lg p-3 flex items-center justify-between'>
-                                <div>
-                                    <div>
-                                        <p className='text-sm font-semibold'>Mark as Major Incident when matched</p>
-                                    </div>
-                                    <p className='text-xs'>Overrides major threshold if checked.</p>
-                                </div>
-                                <Switch checked={watch("isMajor")} onChange={(e) => setValue("isMajor", e.target.checked)} size="sm" color="success" />
-                            </div> */}
               <div className='mt-3'>
                 <Controller
                   name="note"
                   control={control}
                   render={({ field }) => (
-                    <TextArea {...field} placeholder='Explain intent so future readers don’t guess' label='Note (optional)' labelClassName='text-white' />
+                    <TextArea {...field} placeholder="Explain intent so future readers don't guess" label='Note (optional)' labelClassName='text-white' />
                   )}
                 />
               </div>
-              <div className='flex items-center gap-2 text-sm'>
+              <div className='flex items-center gap-2 text-sm mt-2'>
                 <BiInfoCircle className='size-4' />
-                <p>Rules are evaluated in order. Put stricter rules above looser one</p>
+                <p>Rules are evaluated in order. Put stricter rules above looser ones.</p>
               </div>
 
               <div className='flex justify-end gap-3 mt-3'>
                 <CButton onClick={() => setOpenModal(false)} className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan w-fit">
                   Cancel
                 </CButton>
-                <CButton disabled={!isValid} className=" hover:bg-IMSCyan bg-IMSCyan text-black w-fit">
+                <CButton
+                  disabled={!isValid || saving}
+                  isLoading={saving}
+                  onClick={handleSubmit((data) => createRule(data))}
+                  className="hover:bg-IMSCyan bg-IMSCyan text-black w-fit"
+                >
                   Save Rule
                 </CButton>
               </div>
             </div>
           </div>
         </SideModal>
-      }
+      )}
     </div>
   )
 }

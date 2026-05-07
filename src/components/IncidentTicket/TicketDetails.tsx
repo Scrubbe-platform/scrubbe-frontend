@@ -15,7 +15,7 @@ import useTicketDetails from "@/hooks/useTicketDetails";
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import EditIncidentTicket from "../IMS/EditIncidentTicket";
-import { Ticket } from "@/types";
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 // import { Ticket } from './IncidateTicketPage';
 
 const TABS = [
@@ -41,7 +41,7 @@ const TicketDetails = () => {
   const [isEscalateTicket, setIsEscalateTicket] = useState(false);
   const [openPostMortem, setOpenPostMortem] = useState(false);
   const { data, isLoading } = useTicketDetails();
-  const ticket = data as Ticket;
+  const ticket = data as IncidentDetailRecord;
   const router = useRouter();
 
   if (isLoading) {
@@ -151,7 +151,7 @@ const TicketDetails = () => {
                   SLA status:
                 </div>
                 <div className="text-right dark:text-white">
-                  Due {ticket?.slaStatus}
+                  Due {ticket?.state ?? ticket?.status}
                 </div>
                 <div className="text-gray-500 dark:text-gray-200">
                   Recommended Actions :
@@ -263,7 +263,7 @@ const TicketDetails = () => {
           {/* {tab === 1 && <TicketComments ticket={ticket} />} */}
 
           {/* Collaboration Tab */}
-          {tab === 2 && <Collaboration ticket={ticket} />}
+          {tab === 2 && ticket && <Collaboration ticket={ticket} />}
 
           {/* History Tab */}
           {tab === 3 && <History />}
@@ -324,7 +324,9 @@ const TicketDetails = () => {
         isOpen={openPostMortem}
         onClose={() => setOpenPostMortem(false)}
       >
-        <PostMortem ticket={ticket} onClose={() => setOpenPostMortem(false)} />
+        {ticket && (
+          <PostMortem ticket={ticket} onClose={() => setOpenPostMortem(false)} />
+        )}
       </Modal>
 
       <Modal isOpen={isMergeTicket} onClose={() => setIsMergeTicket(false)}>

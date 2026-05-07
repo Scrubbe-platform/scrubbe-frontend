@@ -1,8 +1,11 @@
 "use client";
+
 import React from "react";
 import { cn } from "@/lib/utils";
-
-// --- Types ---
+import {
+  IncidentContextRecord,
+  IncidentDetailRecord,
+} from "@/lib/incident/incident.types";
 
 interface ContextField {
   label: string;
@@ -10,8 +13,6 @@ interface ContextField {
   valueColor?: string;
   isDescription?: boolean;
 }
-
-// --- Sub-Components ---
 
 const ContextBox = ({
   label,
@@ -40,30 +41,43 @@ const ContextBox = ({
   </div>
 );
 
-// --- Main Component ---
-
-const IncidentContextModule: React.FC = () => {
+const IncidentContextModule: React.FC<{
+  incident: IncidentDetailRecord;
+  context: IncidentContextRecord | null;
+}> = ({ incident, context }) => {
   const fields: ContextField[] = [
     {
       label: "Affected Service",
-      value: "checkout-service",
+      value: incident.service,
       valueColor: "text-blue-400",
     },
-    { label: "Environment", value: "K8s · prod · eu-west-1" },
     {
-      label: "Triggering Event",
-      value: "deployment_failed - deploy #311",
+      label: "Environment",
+      value: [incident.environment, incident.region].filter(Boolean).join(" · "),
+    },
+    {
+      label: "Source",
+      value: incident.sourceType || incident.source,
       valueColor: "text-blue-400",
     },
-    { label: "Commit", value: "4f3a91c - main" },
     {
-      label: "Error Budget Consumed",
-      value: "81% (112% this incident)",
-      valueColor: "text-red-500",
+      label: "Business Impact",
+      value:
+        context?.businessImpact ||
+        incident.financialExposure ||
+        "Not captured yet",
     },
     {
-      label: "Impact Classification",
-      value: "1 service - Contained - Reversible",
+      label: "Blast Radius",
+      value: incident.blastRadius || "Not captured yet",
+      valueColor: incident.blastRadius ? "text-amber-400" : "text-slate-400",
+    },
+    {
+      label: "Incident Commander",
+      value:
+        context?.incidentCommander ||
+        incident.incidentCommander ||
+        "No incident commander assigned",
       valueColor: "text-amber-400",
     },
   ];
@@ -75,40 +89,37 @@ const IncidentContextModule: React.FC = () => {
           Incident Context
         </h2>
 
-        {/* Grid Logic:
-            - 1 column on small mobile
-            - 2 columns on tablets/small laptops (sm and up)
-            - Keeps 2 columns on large screens to match your original design
-        */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
           {fields.map((field, idx) => (
             <ContextBox key={idx} {...field} />
           ))}
 
-          {/* Description Row (Full Width) */}
           <ContextBox
             label="Description"
             isDescription
-            value="checkout-service failed Integration tests after deploying commit 4f3a91c. Tests timeout on db-core (eu-west-1) — pool of 50 connections fully exhausted within 8 seconds of increased load. Error rate spiked to 7.8%. Pattern matches DB pool exhaustion class — 9 prior resolutions on record."
+            value={
+              context?.additionalContext ||
+              incident.techDescription ||
+              incident.description ||
+              "No additional incident context has been captured yet."
+            }
           />
 
-          {/* Footer Metrics - Assigned to */}
           <div className="col-span-1 p-4 md:p-5 bg-darkEzra border border-white/5 rounded-2xl">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
               Assigned to
             </p>
             <p className="text-[12px] md:text-[13px] font-semibold text-white">
-              Alice Chen - SRE Lead
+              {incident.assignedToName || incident.assignedToEmail || "Unassigned"}
             </p>
           </div>
 
-          {/* Footer Metrics - Priority */}
           <div className="col-span-1 p-4 md:p-5 bg-darkEzra border border-white/5 rounded-2xl">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
               Priority
             </p>
             <p className="text-[12px] md:text-[13px] font-bold text-red-500">
-              P1-Critical
+              {incident.severity} · {incident.priority}
             </p>
           </div>
         </div>

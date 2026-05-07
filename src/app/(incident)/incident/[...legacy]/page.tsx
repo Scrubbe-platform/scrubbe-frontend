@@ -7,11 +7,11 @@ const LEGACY_ROUTE_MAP: Record<string, string> = {
   "service-map": "/incident/code-engine",
   notification: "/incident/settings/notification",
   "post-mortems": "/incident/postmortems",
-  ezra: "/incident/ai-suggestion",
-  "ezra/incident-summaries": "/incident/ai-suggestion",
+  ezra: "/incident/ezra",
+  "ezra/incident-summaries": "/incident/ezra",
   "runbooks": "/incident/playbooks",
   "runtime-warning": "/incident/code-engine",
-  "signal-graph": "/incident/code-engine",
+  "signal-graph": "/incident/signal-graph",
   guardrails: "/incident/policies",
   workflows: "/incident/pipelines",
   "past-incidents": "/incident/postmortems",
@@ -34,9 +34,40 @@ type Props = {
   params: {
     legacy: string[];
   };
+  searchParams?: Record<string, string | string[] | undefined>;
 };
 
-export default function LegacyIncidentRoute({ params }: Props) {
+const appendSearchParams = (
+  target: string,
+  searchParams?: Record<string, string | string[] | undefined>
+) => {
+  if (!searchParams) {
+    return target;
+  }
+
+  const nextSearchParams = new URLSearchParams();
+
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (typeof value === "undefined") {
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach((entry) => nextSearchParams.append(key, entry));
+      return;
+    }
+
+    nextSearchParams.set(key, value);
+  });
+
+  const queryString = nextSearchParams.toString();
+  return queryString ? `${target}?${queryString}` : target;
+};
+
+export default function LegacyIncidentRoute({
+  params,
+  searchParams,
+}: Props) {
   const legacyPath = params.legacy.join("/");
   const target = LEGACY_ROUTE_MAP[legacyPath];
 
@@ -44,5 +75,5 @@ export default function LegacyIncidentRoute({ params }: Props) {
     notFound();
   }
 
-  redirect(target);
+  redirect(appendSearchParams(target, searchParams));
 }

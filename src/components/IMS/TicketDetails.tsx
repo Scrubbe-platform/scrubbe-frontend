@@ -12,7 +12,7 @@ import useTicketDetails from "@/hooks/useTicketDetails";
 import Collaboration from "../IncidentTicket/Collaboration";
 import History from "../IncidentTicket/History";
 import TreatIntel from "../IncidentTicket/TreatIntel";
-import { Ticket } from "@/types";
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 const TABS = [
   "Details",
@@ -29,7 +29,7 @@ const TicketDetails = () => {
   const [isEscalateTicket, setIsEscalateTicket] = useState(false);
   const router = useRouter();
   const { data } = useTicketDetails();
-  const ticket = data as Ticket;
+  const ticket = data as IncidentDetailRecord;
 
   return (
     <div className="">
@@ -70,7 +70,7 @@ const TicketDetails = () => {
           {/* {tab === 1 && <TicketComments ticket={ticket} />} */}
 
           {/* Collaboration Tab */}
-          {tab === 2 && <Collaboration ticket={ticket} />}
+          {tab === 2 && ticket && <Collaboration ticket={ticket} />}
 
           {/* History Tab */}
           {tab === 3 && <History />}

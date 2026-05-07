@@ -1,16 +1,17 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SettingWrapper from "../_module/setting-wrapper";
-import {
-  CheckCircle,
-  ChevronDown,
-  List,
-  Settings2,
-  Shield,
-} from "lucide-react";
+import { CheckCircle, List, Settings2, Shield } from "lucide-react";
 import CButton from "@/components/ui/Cbutton";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { toast } from "sonner";
 
 const Page = () => {
+  const { get, put } = useFetch();
+  const queryClient = useQueryClient();
+
   const [mfaEnabled, setMfaEnabled] = useState(true);
   const [sessionDuration, setSessionDuration] = useState("24 hrs");
 
@@ -21,6 +22,39 @@ const Page = () => {
     { label: "7 days", value: "7d" },
   ];
 
+  const { data: config } = useQuery({
+    queryKey: ["ims-roles-config"],
+    queryFn: async () => {
+      const res = await get(endpoint.auth.ims_config);
+      if (res.success) return res.data?.data ?? res.data ?? {};
+      return {};
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    if (config) {
+      setMfaEnabled(config.requireMFA ?? true);
+      setSessionDuration(config.sessionDuration ?? "24 hrs");
+    }
+  }, [config]);
+
+  const { mutateAsync: save, isPending } = useMutation({
+    mutationFn: async () => {
+      const res = await put(endpoint.auth.ims_config, {
+        requireMFA: mfaEnabled,
+        sessionDuration,
+      });
+      if (!res.success) throw new Error(res.data?.message ?? "Failed to save");
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Roles & session settings saved");
+      queryClient.invalidateQueries({ queryKey: ["ims-roles-config"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <div>
       <SettingWrapper
@@ -28,17 +62,13 @@ const Page = () => {
         description="Access model for analysts, approvers, and admins"
         sub="Role-based access that powers approvals, merges, and governance."
       >
-        {/* HEADER */}
-
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-8 pt-5">
           {/* LEFT COLUMN: ROLE TEMPLATES */}
           <div className="border border-[#1F2937] rounded-2xl p-4 space-y-6">
             <div className="flex justify-between items-center">
               <div className="space-y-1">
                 <h3 className="text-white font-bold text-lg">Role templates</h3>
-                <p className="text-[#64748B] text-sm">
-                  You can customize these later.
-                </p>
+                <p className="text-[#64748B] text-sm">You can customize these later.</p>
               </div>
               <Settings2 size={20} className="text-[#64748B]" />
             </div>
@@ -69,9 +99,7 @@ const Page = () => {
           <div className="border border-[#1F2937] rounded-2xl p-4 space-y-6">
             <div className="space-y-1">
               <h3 className="text-white font-bold text-lg">Session controls</h3>
-              <p className="text-[#64748B] text-sm">
-                Security defaults applied org-wide.
-              </p>
+              <p className="text-[#64748B] text-sm">Security defaults applied org-wide.</p>
             </div>
 
             <div className="space-y-4">
@@ -99,34 +127,36 @@ const Page = () => {
                 </p>
               </div>
 
-              {/* SESSION DURATION DROPDOWN */}
+              {/* SESSION DURATION */}
               <div className="p-5 border border-[#1F2937] rounded-xl space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-white text-sm font-medium">
-                    Session duration
-                  </span>
-                  <div className="relative group">
-                    <button className="flex items-center gap-3 bg-[#0B1224] border border-[#94A3B8]/40 px-3 py-1.5 rounded-lg text-sm text-[#D1D5DB] hover:border-[#00CAD8] transition-colors">
-                      {sessionDuration}
-                      <ChevronDown size={16} className="text-[#64748B]" />
-                    </button>
+                  <span className="text-white text-sm font-medium">Session duration</span>
+                  <div className="flex gap-2">
+                    {durations.map((d) => (
+                      <button
+                        key={d.value}
+                        onClick={() => setSessionDuration(d.label)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                          sessionDuration === d.label
+                            ? "border-[#00CAD8] text-[#00CAD8] bg-[#00CAD8]/10"
+                            : "border-[#94A3B8]/40 text-[#D1D5DB] hover:border-[#00CAD8]"
+                        }`}
+                      >
+                        {d.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
-                <p className="text-[#64748B] text-xs">
-                  How long a login stays valid.
-                </p>
+                <p className="text-[#64748B] text-xs">How long a login stays valid.</p>
               </div>
 
               {/* ANALYST CONFIG */}
               <div className="p-5 border border-[#1F2937] rounded-xl space-y-3">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <span className="text-white text-sm font-medium">
-                      Analyst
-                    </span>
+                    <span className="text-white text-sm font-medium">Analyst</span>
                     <p className="text-[#64748B] text-xs leading-normal">
-                      Investigate delivery incidents, request approvals,
-                      generate summaries.
+                      Investigate delivery incidents, request approvals, generate summaries.
                     </p>
                   </div>
                   <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
@@ -140,28 +170,26 @@ const Page = () => {
 
         {/* SAVE BUTTON */}
         <div className="pt-5 flex justify-end">
-          <CButton className="w-fit">Save</CButton>
+          <CButton className="w-fit" onClick={() => save()} isLoading={isPending} disabled={isPending}>
+            Save
+          </CButton>
         </div>
       </SettingWrapper>
     </div>
   );
 };
 
-export default Page;
-
 const RoleCard = ({ title, badge, icon, desc }: any) => (
   <div className="p-4 border border-[#1F2937] rounded-xl space-y-3 hover:border-[#00CAD8]/40 transition-colors group">
     <div className="flex justify-between items-center">
-      <span className="text-white text-sm font-bold group-hover:text-[#00CAD8] transition-colors">
-        {title}
-      </span>
+      <span className="text-white text-sm font-bold group-hover:text-[#00CAD8] transition-colors">{title}</span>
       <div className="flex items-center gap-2 px-3 py-1 border border-[#00CAD8]/50 rounded-full bg-[#0B1224]">
         <span className="text-lime-400">{icon}</span>
-        <span className="text-[10px] font-medium text-white uppercase tracking-wider">
-          {badge}
-        </span>
+        <span className="text-[10px] font-medium text-white uppercase tracking-wider">{badge}</span>
       </div>
     </div>
     <p className="text-[#64748B] text-xs leading-normal">{desc}</p>
   </div>
 );
+
+export default Page;

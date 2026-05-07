@@ -2,44 +2,42 @@
 import { useState, useEffect, useRef } from "react";
 
 const events = [
-  "load",
   "mousemove",
   "mousedown",
   "click",
   "scroll",
-  "keypress",
+  "keydown",
+  "touchstart",
 ];
 
-const useIdle = (idleTime = 300000, onIdle: () => void) => {
-  // idleTime is 5 minutes (300,000 milliseconds)
+const useIdle = (idleTime = 900000, onIdle: () => void, onReset?: () => void) => {
   const [isIdle, setIsIdle] = useState(false);
   const timeoutRef = useRef<any | null>(null);
+  const onIdleRef = useRef(onIdle);
+  const onResetRef = useRef(onReset);
 
-  const resetTimer = () => {
-    clearTimeout(timeoutRef.current);
-    setIsIdle(false);
-    timeoutRef.current = setTimeout(() => {
-      setIsIdle(true);
-      if (onIdle && typeof onIdle === "function") {
-        onIdle();
-      }
-    }, idleTime);
-  };
+  useEffect(() => { onIdleRef.current = onIdle; }, [onIdle]);
+  useEffect(() => { onResetRef.current = onReset; }, [onReset]);
 
   useEffect(() => {
-    resetTimer();
+    const resetTimer = () => {
+      clearTimeout(timeoutRef.current);
+      setIsIdle(false);
+      onResetRef.current?.();
+      timeoutRef.current = setTimeout(() => {
+        setIsIdle(true);
+        onIdleRef.current?.();
+      }, idleTime);
+    };
 
-    events.forEach((event) => {
-      window.addEventListener(event, resetTimer);
-    });
+    resetTimer();
+    events.forEach((event) => window.addEventListener(event, resetTimer, { passive: true }));
 
     return () => {
       clearTimeout(timeoutRef.current);
-      events.forEach((event) => {
-        window.removeEventListener(event, resetTimer);
-      });
+      events.forEach((event) => window.removeEventListener(event, resetTimer));
     };
-  }, []);
+  }, [idleTime]);
 
   return isIdle;
 };

@@ -115,9 +115,9 @@ export default function EzraConsole() {
     addMessage("user", query);
 
     // Try to extract an incident ID from the query
-    const incidentMatch = query.match(/INC[-–]?\d+/i);
+    const incidentMatch = query.match(/INC[-–]?[A-Z0-9]+/i);
     const incidentId = incidentMatch
-      ? incidentMatch[0].replace(/–/, "-").toUpperCase()
+      ? incidentMatch[0].replace(/–/g, "-").toUpperCase()
       : selectedAnalysis?.incidentId ?? null;
 
     if (!incidentId) {

@@ -3,7 +3,7 @@
 
 import React, { useMemo, useEffect, useState } from "react";
 import { z } from "zod";
-import { useForm, Controller, get } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FiX } from "react-icons/fi";
 import { toast } from "sonner";
@@ -54,7 +54,7 @@ const SMSIntegration: React.FC = () => {
     mode: "onChange",
   });
 
-  const { post } = useFetch();
+  const { post, get } = useFetch();
   const { user } = useAuthStore();
   const { data } = useQuery({
     queryKey: [querykeys.INTEGRATIONS],
@@ -71,18 +71,21 @@ const SMSIntegration: React.FC = () => {
     enabled: !!user?.id,
   });
 
-  const whatsAppConfig = useMemo(() => {
+  const smsConfig = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return data?.find((value: any) => value.provider === "WHATSAPP");
+    return data?.find((value: any) => value.provider === "SMS");
   }, [data]);
 
   useEffect(() => {
-    if (whatsAppConfig?.metadata?.recipents.length > 0) {
-      setValue("recipients", [...whatsAppConfig?.metadata?.recipents], {
-        shouldValidate: true,
-      });
+    const recipients = (smsConfig?.config as any)?.recipients;
+    if (Array.isArray(recipients) && recipients.length > 0) {
+      setValue("recipients", recipients, { shouldValidate: true });
     }
-  }, [setValue, whatsAppConfig]);
+    const enabled = (smsConfig?.config as any)?.enabled;
+    if (typeof enabled === "boolean") {
+      setValue("enabled", enabled, { shouldValidate: true });
+    }
+  }, [setValue, smsConfig]);
   // ---
   // 2. Helper Functions for Recipient Tags
   // ---

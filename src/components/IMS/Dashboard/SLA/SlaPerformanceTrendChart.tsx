@@ -3,13 +3,29 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
 
-const PerformanceTrendChart = () => {
+type PerformanceTrendChartProps = {
+  labels?: string[];
+  values?: number[];
+};
+
+const PerformanceTrendChart = ({
+  labels = [],
+  values = [],
+}: PerformanceTrendChartProps) => {
+  const chartLabels =
+    labels.length > 0
+      ? labels
+      : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
+  const chartValues = values.length > 0 ? values : [0, 0, 0, 0, 0, 0, 0];
+  const maxValue = Math.max(...chartValues, 100);
+  const minValue = Math.min(...chartValues, 60);
+
   const data = {
-    labels: ["Jan", "Feb", "Marc", "April", "May", "June", "July"],
+    labels: chartLabels,
     datasets: [
       {
         label: "SLA Performance",
-        data: [100, 80, 110, 85, 95, 120, 115], // Mock data for a wavy trend
+        data: chartValues,
         borderColor: "#00A3A3", // Teal/Green line color
         backgroundColor: "rgba(0, 163, 163, 0.2)", // Light fill color
         fill: true,
@@ -32,8 +48,8 @@ const PerformanceTrendChart = () => {
     scales: {
       y: {
         beginAtZero: false,
-        min: 60,
-        max: 140,
+        min: Math.max(0, Math.floor(minValue / 10) * 10 - 10),
+        max: Math.max(100, Math.ceil(maxValue / 10) * 10 + 10),
       },
       x: {
         grid: { display: false },

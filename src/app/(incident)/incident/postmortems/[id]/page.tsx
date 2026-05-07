@@ -1,9 +1,10 @@
 "use client";
-import { usePostMortermForm } from "@/lib/stores/post-morterm";
+
 import { motion } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useIncidentDetail } from "@/hooks/useIncidentWorkspace";
 
 const TABS = [
   "Basic Details",
@@ -12,42 +13,116 @@ const TABS = [
   "Knowledge base draft",
   "Follow up actions",
 ];
+
+const DetailSection = ({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | null;
+}) => (
+  <div>
+    <h2 className="text-lg font-medium mb-1">{label}</h2>
+    <p className="text-base font-light whitespace-pre-wrap">
+      {value?.trim() ? value : "Not recorded"}
+    </p>
+  </div>
+);
+
 const Page = () => {
   const [tab, setTab] = useState(1);
-  const { back } = useRouter();
-  const { incident } = usePostMortermForm();
-  const { id } = useParams();
-  console.log({ incident });
-  useEffect(() => {
-    if (!incident) {
-      back();
-    }
-  }, []);
+  const { push } = useRouter();
+  const params = useParams<{ id: string | string[] }>();
+  const routeId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const detailQuery = useIncidentDetail(routeId);
+  const incident = detailQuery.data ?? null;
+  const postMortem = incident?.ResolveIncident ?? incident?.postMortem ?? null;
+
+  if (detailQuery.isLoading) {
+    return (
+      <div className="p-4 space-y-4">
+        <div className="h-8 w-48 rounded bg-white/10" />
+        <div className="h-96 rounded-xl bg-white/5" />
+      </div>
+    );
+  }
+
+  if (!incident) {
+    return (
+      <div className="p-6">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-white">
+          <h1 className="text-2xl font-bold">Postmortem not found</h1>
+          <p className="mt-3 text-sm text-slate-400">
+            This incident could not be resolved from the current route id.
+          </p>
+          <button
+            onClick={() => push("/incident/postmortems")}
+            className="mt-6 inline-flex items-center gap-2 rounded-lg border border-green-500/40 px-4 py-2 text-sm font-semibold text-green-400"
+          >
+            <ChevronLeft size={16} />
+            Back to postmortems
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!postMortem) {
+    return (
+      <div className="p-6">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-white">
+          <h1 className="text-2xl font-bold">{incident.ticketId}</h1>
+          <p className="mt-3 text-sm text-slate-400">
+            This incident does not have a saved postmortem yet.
+          </p>
+          <button
+            onClick={() => push("/incident/postmortems")}
+            className="mt-6 inline-flex items-center gap-2 rounded-lg border border-green-500/40 px-4 py-2 text-sm font-semibold text-green-400"
+          >
+            <ChevronLeft size={16} />
+            Back to postmortems
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 space-y-4">
       <div className="text-xl font-bold dark:text-white text-black">
         Postmortems
       </div>
-      <div className=" p-4 bg-white rounded-lg space-y-4">
-        <div
-          onClick={() => back()}
+      <div className="p-4 bg-white rounded-lg space-y-4">
+        <button
+          onClick={() => push("/incident/postmortems")}
           className="flex items-center gap-1 text-sm cursor-pointer"
         >
           <ChevronLeft size={18} />
           Back
+        </button>
+
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            Incident
+          </p>
+          <h1 className="mt-2 text-2xl font-bold text-slate-900">
+            {incident.ticketId}
+          </h1>
+          <p className="mt-2 text-sm text-slate-600">{incident.title}</p>
         </div>
-        <div className="flex gap-8 border-b border-gray-200 mb-6">
-          {TABS.map((t, i) => (
+
+        <div className="flex gap-8 border-b border-gray-200 mb-6 overflow-x-auto">
+          {TABS.map((item, index) => (
             <button
-              key={t}
-              className={`py-2 px-2 text-sm font-medium border-b-2 transition-colors ${
-                tab === i + 1
+              key={item}
+              className={`py-2 px-2 whitespace-nowrap text-sm font-medium border-b-2 transition-colors ${
+                tab === index + 1
                   ? "border-green text-green"
-                  : "border-transparent  dark:text-gray-400 hover:text-green"
+                  : "border-transparent dark:text-gray-400 hover:text-green"
               }`}
-              onClick={() => setTab(i + 1)}
+              onClick={() => setTab(index + 1)}
             >
-              {t}
+              {item}
             </button>
           ))}
         </div>
@@ -60,232 +135,141 @@ const Page = () => {
         >
           {tab === 1 && (
             <div className="space-y-6">
-              {/* Incident ID */}
-              <div>
-                <h2 className="text-lg font-medium  mb-1">Incident ID :</h2>
-                <p className=" text-base font-light">{id}</p>
-              </div>
-
-              {/* Date Resolved */}
-              <div>
-                <h2 className="text-lg font-medium  mb-1">Date Resolved :</h2>
-                <p className=" text-base font-light">
-                  {incident?.ResolveIncident.updatedAt}
-                </p>
-              </div>
-
-              {/* Incident Title */}
-              <div>
-                <h2 className="text-lg font-medium  mb-1">Incident Title</h2>
-                <p className=" text-base font-light">{incident?.reason}</p>
-              </div>
-
-              {/* Incident Description */}
-              <div>
-                <h2 className="text-lg font-medium  mb-1">
-                  Incident Description
-                </h2>
-                <p className=" text-base font-light">{incident?.description}</p>
-              </div>
-
-              {/* Priority */}
-              <div>
-                <h2 className="text-lg font-medium  mb-1">Priority :</h2>
-                <p className=" text-base font-light">{incident?.priority}</p>
-              </div>
-
-              {/* Assigned to */}
-              <div>
-                <h2 className="text-lg font-medium  mb-1">Assigned to :</h2>
-                <p className=" text-base font-light">
-                  {incident?.assignedToEmail ?? "N/A"}
-                </p>
-              </div>
+              <DetailSection label="Incident ID" value={incident.ticketId} />
+              <DetailSection
+                label="Date Resolved"
+                value={
+                  postMortem.updatedAt
+                    ? new Date(postMortem.updatedAt).toLocaleString()
+                    : null
+                }
+              />
+              <DetailSection label="Incident Title" value={incident.title} />
+              <DetailSection
+                label="Incident Description"
+                value={incident.techDescription || incident.description}
+              />
+              <DetailSection label="Priority" value={incident.priority} />
+              <DetailSection
+                label="Assigned to"
+                value={incident.assignedToName || incident.assignedToEmail}
+              />
             </div>
           )}
+
           {tab === 2 && (
             <div className="space-y-6">
-              {/* Cause Category */}
+              <DetailSection
+                label="Cause Category"
+                value={postMortem.causeCategory}
+              />
+              <DetailSection label="Root cause" value={postMortem.rootCause} />
+
               <div>
-                <h2 className=" text-base font-bold text-gray-700">
-                  Cause Category :
-                </h2>
-                <p className="text-gray-900 mt-1 text-base ">
-                  {incident?.ResolveIncident.causeCategory}
-                </p>
-              </div>
-
-              {/* Root cause */}
-              <div>
-                <h2 className=" text-base font-bold text-gray-700">
-                  Root cause :
-                </h2>
-                <p className="text-gray-900 mt-1">
-                  {incident?.ResolveIncident.rootCause}
-                </p>
-              </div>
-
-              {/* 5 Whys Section */}
-              <div>
-                <h2 className="text-lg font-bold text-gray-900 mb-4">
-                  5 Whys:
-                </h2>
-
-                {/* Why 1 */}
-                <div className="mb-4">
-                  <h3 className=" text-base font-bold text-gray-900">Why 1</h3>
-                  <p className="text-gray-700 mt-1">
-                    {incident?.ResolveIncident.why1}
-                  </p>
-                </div>
-
-                {/* Why 2 */}
-                <div className="mb-4">
-                  <h3 className=" text-base font-bold text-gray-900">Why 2:</h3>
-                  <p className="text-gray-700 mt-1">
-                    {incident?.ResolveIncident.why2}
-                  </p>
-                </div>
-
-                {/* Why 3 */}
-                <div className="mb-4">
-                  <h3 className=" text-base font-bold text-gray-900">Why 3:</h3>
-                  <p className="text-gray-700 mt-1">
-                    {incident?.ResolveIncident.why3}
-                  </p>
-                </div>
-
-                {/* Why 4 */}
-                <div className="mb-4">
-                  <h3 className=" text-base font-bold text-gray-900">Why 4:</h3>
-                  <p className="text-gray-700 mt-1">
-                    {incident?.ResolveIncident.why4}
-                  </p>
-                </div>
-
-                {/* Why 5 */}
-                <div className="mb-4">
-                  <h3 className=" text-base font-bold text-gray-900">Why 5:</h3>
-                  <p className="text-gray-700 mt-1">
-                    {incident?.ResolveIncident.why5}
-                  </p>
+                <h2 className="text-lg font-bold text-gray-900 mb-4">5 Whys</h2>
+                <div className="space-y-4">
+                  <DetailSection label="Why 1" value={postMortem.why1} />
+                  <DetailSection label="Why 2" value={postMortem.why2} />
+                  <DetailSection label="Why 3" value={postMortem.why3} />
+                  <DetailSection label="Why 4" value={postMortem.why4} />
+                  <DetailSection label="Why 5" value={postMortem.why5} />
                 </div>
               </div>
             </div>
           )}
+
           {tab === 3 && (
             <div className="space-y-6">
-              {/* Temporary Fix section */}
-              <div>
-                <h2 className="text-lg font-bold mb-2">Temporary Fix :</h2>
-                <div className="list-none space-y-1  text-base font-light">
-                  <p>{incident?.ResolveIncident.temporaryFix}</p>
-                </div>
-              </div>
-
-              {/* Permanent Fix section */}
-              <div>
-                <h2 className="text-lg font-bold mb-2">Permanent Fix</h2>
-                <p className="list-none space-y-1  text-base font-light">
-                  {incident?.ResolveIncident?.permanentFix}
-                </p>
-              </div>
+              <DetailSection
+                label="Temporary Fix"
+                value={postMortem.temporaryFix}
+              />
+              <DetailSection
+                label="Permanent Fix"
+                value={postMortem.permanentFix}
+              />
             </div>
           )}
 
           {tab === 4 && (
             <div className="space-y-6">
-              {/* Title Section */}
-              <div>
-                <h2 className="text-lg font-bold mb-1">Title :</h2>
-                <p className=" text-base">
-                  {incident?.ResolveIncident?.knowledgeTitleInternal}
-                </p>
-              </div>
+              <DetailSection
+                label="Title"
+                value={postMortem.knowledgeTitleInternal}
+              />
+              <DetailSection
+                label="Summary"
+                value={postMortem.knowledgeSummaryInternal}
+              />
+              <DetailSection
+                label="Identification Steps"
+                value={postMortem.identificationStepsInternal}
+              />
+              <DetailSection
+                label="Resolution Steps"
+                value={postMortem.resolutionStepsInternal}
+              />
+              <DetailSection
+                label="Preventive measures"
+                value={postMortem.preventiveMeasuresInternal}
+              />
 
-              {/* Summary Section */}
-              <div>
-                <h2 className="text-lg font-bold mb-1">Summary</h2>
-                <p className=" text-base">
-                  {incident?.ResolveIncident?.knowledgeSummaryInternal}
-                </p>
-              </div>
-
-              {/* Identification Steps Section */}
-              <div>
-                <h2 className="text-lg font-bold mb-2">
-                  Identification Steps:
-                </h2>
-                <p>{incident?.ResolveIncident?.resolutionStepsInternal}</p>
-              </div>
-
-              {/* Resolution Steps Section */}
-              <div>
-                <h2 className="text-lg font-bold mb-2">Resolution Steps:</h2>
-                <div className="list-disc list-inside space-y-1">
-                  {incident?.ResolveIncident?.resolutionStepsInternal}
-                </div>
-              </div>
-
-              {/* Preventive Measures Section */}
-              <div>
-                <h2 className="text-lg font-bold mb-2">Preventive measures</h2>
-                <p className="list-disc list-inside space-y-1">
-                  {incident?.ResolveIncident?.preventiveMeasuresInternal}
-                </p>
-              </div>
-
-              {/* Tags Section */}
               <div>
                 <h2 className="text-lg font-bold mb-2">Tags</h2>
-                <div className="flex space-x-2">
-                  {incident?.ResolveIncident?.knowledgeTagsInternal?.map(
-                    (tag) => (
+                <div className="flex flex-wrap gap-2">
+                  {postMortem.knowledgeTagsInternal.length > 0 ? (
+                    postMortem.knowledgeTagsInternal.map((tag) => (
                       <span
                         key={tag}
                         className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm"
                       >
                         {tag}
                       </span>
-                    )
+                    ))
+                  ) : (
+                    <p className="text-base font-light">No tags recorded</p>
                   )}
                 </div>
               </div>
             </div>
           )}
+
           {tab === 5 && (
             <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-bold mb-2">Follow up task</h2>
-                <p className=" text-base">
-                  {incident?.ResolveIncident?.followUpTask}
-                </p>
-              </div>
-              <div>
-                <h2 className="text-lg font-bold mb-2">Follow up owner</h2>
-                <p className=" text-base">
-                  {incident?.ResolveIncident?.followUpOwner}
-                </p>
-              </div>
-              <div>
-                <h2 className="text-lg font-bold mb-2">Follow up due date</h2>
-                <p className=" text-base">
-                  {incident?.ResolveIncident?.followUpDueDate}
-                </p>
-              </div>
-              <div>
-                <h2 className="text-lg font-bold mb-2">Follow up status</h2>
-                <p className=" text-base">
-                  {incident?.ResolveIncident?.followUpStatus}
-                </p>
-              </div>
+              <DetailSection
+                label="Follow up task"
+                value={postMortem.followUpTask}
+              />
+              <DetailSection
+                label="Follow up owner"
+                value={postMortem.followUpOwner}
+              />
+              <DetailSection
+                label="Follow up due date"
+                value={postMortem.followUpDueDate}
+              />
+              <DetailSection
+                label="Follow up status"
+                value={postMortem.followUpStatus}
+              />
               <div>
                 <h2 className="text-lg font-bold mb-2">
                   Follow up ticketing systems
                 </h2>
-                <p className=" text-base">
-                  {incident?.ResolveIncident?.followUpTicketingSystems}
-                </p>
+                {postMortem.followUpTicketingSystems.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {postMortem.followUpTicketingSystems.map((system) => (
+                      <span
+                        key={system}
+                        className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm"
+                      >
+                        {system}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-base font-light">No follow-up systems recorded</p>
+                )}
               </div>
             </div>
           )}

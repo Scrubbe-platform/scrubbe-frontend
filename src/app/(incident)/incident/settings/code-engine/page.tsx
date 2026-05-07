@@ -1,16 +1,64 @@
-import React, { ReactNode } from "react";
+"use client";
+import React, { ReactNode, useEffect, useState } from "react";
 import SettingWrapper from "../_module/setting-wrapper";
-import {
-  ChevronDown,
-  GitBranch,
-  LayoutPanelLeft,
-  ShieldCheck,
-} from "lucide-react";
+import { GitBranch, LayoutPanelLeft, ShieldCheck } from "lucide-react";
 import Select from "@/components/ui/select";
-import { Switch } from "@heroui/react";
 import CButton from "@/components/ui/Cbutton";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { toast } from "sonner";
+import { Switch } from "@heroui/react";
 
 const page = () => {
+  const { get, put } = useFetch();
+  const queryClient = useQueryClient();
+
+  const [mergeMethod, setMergeMethod] = useState("Squash");
+  const [maxSuggestions, setMaxSuggestions] = useState("3");
+  const [postAsPrComment, setPostAsPrComment] = useState(true);
+  const [createPatchBranch, setCreatePatchBranch] = useState(true);
+  const [requireApprovalBelowThreshold, setRequireApprovalBelowThreshold] = useState(true);
+
+  const { data: config } = useQuery({
+    queryKey: ["ims-code-engine-config"],
+    queryFn: async () => {
+      const res = await get(endpoint.auth.ims_config);
+      if (res.success) return res.data?.data ?? res.data ?? {};
+      return {};
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    if (config) {
+      setMergeMethod(config.allowedMergeMethod ?? "Squash");
+      setMaxSuggestions(String(config.maxSuggestionsPerIncident ?? "3"));
+      setPostAsPrComment(config.postSuggestionAsPrComment ?? true);
+      setCreatePatchBranch(config.createPatchBranchAutomatically ?? true);
+      setRequireApprovalBelowThreshold(config.requireApprovalBelowThreshold ?? true);
+    }
+  }, [config]);
+
+  const { mutateAsync: save, isPending } = useMutation({
+    mutationFn: async () => {
+      const res = await put(endpoint.auth.ims_config, {
+        allowedMergeMethod: mergeMethod,
+        maxSuggestionsPerIncident: Number(maxSuggestions),
+        postSuggestionAsPrComment: postAsPrComment,
+        createPatchBranchAutomatically: createPatchBranch,
+        requireApprovalBelowThreshold,
+      });
+      if (!res.success) throw new Error(res.data?.message ?? "Failed to save");
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Code Engine settings saved");
+      queryClient.invalidateQueries({ queryKey: ["ims-code-engine-config"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <div>
       <SettingWrapper
@@ -22,22 +70,18 @@ const page = () => {
           {/* LEFT COLUMN: MERGE BEHAVIOR */}
           <section className="space-y-6">
             <div className="bg-transparent border border-neutal-500 rounded-[24px] p-6 space-y-6">
-              <h3 className="text-white font-bold text-lg px-1">
-                Merge behavior
-              </h3>
+              <h3 className="text-white font-bold text-lg px-1">Merge behavior</h3>
 
               {/* ALLOWED MERGE METHOD */}
               <div className="space-y-3">
                 <div className="space-y-1">
-                  <label className="text-white text-sm font-medium ml-1">
-                    Allowed merge method
-                  </label>
-                  <p className="text-[#64748B] text-xs ml-1">
-                    Applies when an approval is granted.
-                  </p>
+                  <label className="text-white text-sm font-medium ml-1">Allowed merge method</label>
+                  <p className="text-[#64748B] text-xs ml-1">Applies when an approval is granted.</p>
                 </div>
                 <Select
                   className="text-white"
+                  value={mergeMethod}
+                  onChange={(e: any) => setMergeMethod(e.target.value)}
                   options={[
                     { label: "Squash", value: "Squash" },
                     { label: "Merge Commit", value: "Merge Commit" },
@@ -49,12 +93,8 @@ const page = () => {
               {/* PROTECTED PATHS */}
               <div className="p-5 bg-[#020817] border border-neutal-500 rounded-2xl space-y-4">
                 <div className="space-y-1">
-                  <span className="text-white text-[15px] font-bold">
-                    Protected paths
-                  </span>
-                  <p className="text-[#64748B] text-xs">
-                    Touching these requires stricter approvals.
-                  </p>
+                  <span className="text-white text-[15px] font-bold">Protected paths</span>
+                  <p className="text-[#64748B] text-xs">Touching these requires stricter approvals.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <PathTag label="/policy/**" />
@@ -70,15 +110,11 @@ const page = () => {
             {/* VERIFICATION REQUIREMENT */}
             <div className="bg-transparent border border-neutal-500 rounded-[24px] p-6 space-y-4">
               <div className="space-y-1">
-                <h3 className="text-white font-bold text-lg">
-                  Verification requirement
-                </h3>
-                <p className="text-white text-sm">
-                  Before merge: CI must be green for required checks.ls.
-                </p>
+                <h3 className="text-white font-bold text-lg">Verification requirement</h3>
+                <p className="text-white text-sm">Before merge: CI must be green for required checks.</p>
               </div>
-              <div className="w-full  border border-neutal-500 p-3.5 rounded-xl text-sm text-[#D1D5DB]">
-                required checks:lint, typecheck, unit
+              <div className="w-full border border-neutal-500 p-3.5 rounded-xl text-sm text-[#D1D5DB]">
+                required checks: lint, typecheck, unit
               </div>
               <button className="text-[#00CAD8] border border-[#00CAD8] px-6 py-2 rounded-xl text-sm font-bold hover:bg-[#00CAD8]/5 transition-all">
                 Configure
@@ -88,16 +124,14 @@ const page = () => {
 
           {/* RIGHT COLUMN: SUGGESTION GENERATION */}
           <section className="bg-transparent border border-neutal-500 rounded-[24px] p-6 space-y-6">
-            <h3 className="text-white font-bold text-lg px-1">
-              Suggestion generation
-            </h3>
+            <h3 className="text-white font-bold text-lg px-1">Suggestion generation</h3>
 
             {/* MAX SUGGESTIONS DROPDOWN */}
             <div className="space-y-3">
-              <label className="text-white text-sm font-medium ml-1">
-                Max suggestions per incident
-              </label>
+              <label className="text-white text-sm font-medium ml-1">Max suggestions per incident</label>
               <Select
+                value={maxSuggestions}
+                onChange={(e: any) => setMaxSuggestions(e.target.value)}
                 options={[
                   { value: "1", label: "1" },
                   { value: "3", label: "3" },
@@ -112,32 +146,33 @@ const page = () => {
               <IconToggleRow
                 icon={<GitBranch size={16} className="text-[#F472B6]" />}
                 label="Post suggestion as PR comment"
-                active={true}
+                active={postAsPrComment}
+                onToggle={() => setPostAsPrComment((v) => !v)}
               />
               <IconToggleRow
                 icon={<LayoutPanelLeft size={16} className="text-[#FF7ED4]" />}
                 label="Create patch branch automatically"
-                active={true}
+                active={createPatchBranch}
+                onToggle={() => setCreatePatchBranch((v) => !v)}
               />
               <IconToggleRow
                 icon={<ShieldCheck size={16} className="text-[#FDE047]" />}
                 label="Require approval when confidence < threshold"
-                active={true}
+                active={requireApprovalBelowThreshold}
+                onToggle={() => setRequireApprovalBelowThreshold((v) => !v)}
               />
             </div>
 
             {/* CODE ENGINE UI PROMO */}
             <div className="mt-8 p-6 bg-[#020817] border border-neutal-500 rounded-2xl space-y-4">
               <div className="space-y-1">
-                <span className="text-white text-[15px] font-bold">
-                  Open Code Engine UI
-                </span>
+                <span className="text-white text-[15px] font-bold">Open Code Engine UI</span>
                 <p className="text-[#64748B] text-xs leading-normal">
                   Shows diff, affected files, risk, approvals, merge action.
                 </p>
               </div>
-              <div className=" border border-neutal-500 p-3 rounded-xl text-[11px] text-[#D1D5DB] text-center">
-                required checks:lint, typecheck, unit
+              <div className="border border-neutal-500 p-3 rounded-xl text-[11px] text-[#D1D5DB] text-center">
+                required checks: lint, typecheck, unit
               </div>
               <button className="w-full py-3 rounded-xl border border-[#00CAD8] text-[#00CAD8] font-bold text-sm hover:bg-[#00CAD8]/5 transition-all">
                 Review in Code engine
@@ -148,7 +183,9 @@ const page = () => {
 
         {/* SAVE BUTTON */}
         <div className="pt-6 flex justify-end">
-          <CButton className="w-fit px-4">Save</CButton>
+          <CButton className="w-fit px-4" onClick={() => save()} isLoading={isPending} disabled={isPending}>
+            Save
+          </CButton>
         </div>
       </SettingWrapper>
     </div>
@@ -156,28 +193,26 @@ const page = () => {
 };
 
 const PathTag = ({ label }: { label: string }) => (
-  <span className="px-3 py-1.5  border border-neutal-500 rounded-lg text-xs text-[#D1D5DB] font-mono">
-    {label}
-  </span>
+  <span className="px-3 py-1.5 border border-neutal-500 rounded-lg text-xs text-[#D1D5DB] font-mono">{label}</span>
 );
 
 const IconToggleRow = ({
   icon,
   label,
   active,
+  onToggle,
 }: {
   icon: ReactNode;
   label: string;
   active: boolean;
+  onToggle: () => void;
 }) => (
   <div className="flex justify-between items-center group">
     <div className="flex items-center gap-3">
       {icon}
-      <span className="text-white text-xs font-medium leading-tight max-w-[140px]">
-        {label}
-      </span>
+      <span className="text-white text-xs font-medium leading-tight max-w-[140px]">{label}</span>
     </div>
-    <Switch color="success" size="sm" />
+    <Switch color="success" size="sm" isSelected={active} onChange={onToggle} />
   </div>
 );
 

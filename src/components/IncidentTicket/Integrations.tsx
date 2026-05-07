@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import useAuthStore from "@/lib/stores/auth.store";
 import GitlabConfiguration from "./Configuration/GitlabConfiguration";
 import GithubConfiguration from "./Configuration/GithubConfiguration";
+import EmailIntegration from "./Integration/EmailIntegration";
 import CButton from "../ui/Cbutton";
 import { Filter, SearchIcon } from "lucide-react";
 import Input from "../ui/input";
@@ -337,6 +338,15 @@ const Integrations: React.FC = () => {
           onClose={() => setSelectedIntegration(undefined)}
         >
           <GitlabIntegration />
+        </Modal>
+      );
+    case "Email Services":
+      return (
+        <Modal
+          isOpen={selectedIntegration === "Email Services"}
+          onClose={() => setSelectedIntegration(undefined)}
+        >
+          <EmailIntegration />
         </Modal>
       );
     default:

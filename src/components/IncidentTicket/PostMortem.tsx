@@ -21,7 +21,7 @@ import { endpoint } from "@/lib/api/endpoint";
 import { usePostMortermForm } from "@/lib/stores/post-morterm";
 import { toast } from "sonner";
 import { FaRegFilePdf } from "react-icons/fa6";
-import { Ticket } from "@/types";
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 const resolutionSteps = [
   {
@@ -61,7 +61,7 @@ const resolutionSteps = [
   },
 ];
 type PostMortemProps = {
-  ticket: Ticket;
+  ticket: IncidentDetailRecord;
   onClose: () => void;
 };
 const PostMortem = ({ ticket, onClose }: PostMortemProps) => {
@@ -125,7 +125,7 @@ const PostMortem = ({ ticket, onClose }: PostMortemProps) => {
 
 type Props = {
   setSteps: (step: string) => void;
-  ticket: Ticket;
+  ticket: IncidentDetailRecord;
 };
 
 export default PostMortem;
@@ -1243,7 +1243,7 @@ const Review = ({
   ticket,
   onClose,
 }: {
-  ticket: Ticket;
+  ticket: IncidentDetailRecord;
   onClose: () => void;
 }) => {
   const { formValue } = usePostMortermForm();

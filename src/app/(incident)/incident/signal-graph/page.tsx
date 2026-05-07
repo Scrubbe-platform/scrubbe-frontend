@@ -1,99 +1,117 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  ReactFlow,
   Background,
+  BackgroundVariant,
   Controls,
-  Panel,
-  useNodesState,
-  useEdgesState,
-  MarkerType,
-  Node,
   Edge,
   Handle,
+  MarkerType,
+  Node,
   Position,
+  ReactFlow,
+  useEdgesState,
+  useNodesState,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import {
-  AlertCircle,
-  Zap,
-  Database,
-  ShieldCheck,
-  RefreshCcw,
-  LayoutDashboard,
-  Search,
-  Bell,
-  Settings,
-  ChevronRight,
-  Clock,
   Activity,
+  AlertTriangle,
+  Database,
+  RefreshCcw,
+  ShieldCheck,
+  UserRound,
+  Zap,
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { RightPanel } from "./_module/component/RightPanel";
+import IncidentRouteShell from "@/components/IMS/incident/IncidentRouteShell";
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
-/** * Utility for Tailwind classes
- */
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- Types ---
 type NodeStatus =
   | "HEALTHY"
   | "WARNING"
   | "CRITICAL"
   | "DEGRADED"
-  | "STRESSED"
-  | "CRASHLOOP";
+  | "STRESSED";
 
 interface ServiceNodeData {
   label: string;
   kind: string;
   status: NodeStatus;
-  metrics: { label: string; value: string; color: string }[];
-  uptime?: string;
   incidentId?: string;
+  metrics: { label: string; value: string; color: string }[];
   icon: React.ReactNode;
 }
 
-// --- Custom Node Component ---
+const shortText = (value: string, max = 120) =>
+  value.length > max ? `${value.slice(0, max).trim()}...` : value;
+
+const severityColor = (severity?: string) => {
+  if (severity === "P0" || severity === "P1") return "text-rose-400";
+  if (severity === "P2") return "text-amber-400";
+  return "text-emerald-400";
+};
+
+const resolveNodeStatus = (incident: IncidentDetailRecord): NodeStatus => {
+  if (incident.status === "RESOLVED" || incident.status === "CLOSED") {
+    return "HEALTHY";
+  }
+
+  if (incident.status === "INVESTIGATION") {
+    return "STRESSED";
+  }
+
+  if (incident.status === "MITIGATED") {
+    return "DEGRADED";
+  }
+
+  if (incident.severity === "P0" || incident.severity === "P1") {
+    return "CRITICAL";
+  }
+
+  return "WARNING";
+};
+
 const SignalNode = ({ data }: { data: ServiceNodeData }) => {
-  const statusColors = {
+  const statusColors: Record<NodeStatus, string> = {
     HEALTHY: "border-emerald-500/30 bg-emerald-950/20 text-emerald-400",
     WARNING: "border-amber-500/30 bg-amber-950/20 text-amber-400",
-    CRITICAL: "border-rose-500/45 bg-rose-950/30 text-rose-400 animate-pulse",
+    CRITICAL: "border-rose-500/45 bg-rose-950/30 text-rose-400",
     DEGRADED: "border-orange-500/30 bg-orange-950/20 text-orange-400",
     STRESSED: "border-purple-500/30 bg-purple-950/20 text-purple-400",
-    CRASHLOOP:
-      "border-rose-600 bg-rose-950/40 text-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)]",
   };
 
   return (
     <div
       className={cn(
-        "min-w-[180px] rounded-xl border backdrop-blur-md transition-all hover:shadow-2xl",
-        statusColors[data.status] || "border-slate-700 bg-slate-900"
+        "min-w-[200px] rounded-xl border backdrop-blur-md transition-all hover:shadow-2xl",
+        statusColors[data.status]
       )}
     >
       <Handle type="target" position={Position.Top} />
-      <div className="p-3 border-b border-white/5 flex items-center gap-3">
-        <div className="p-1.5 rounded-lg bg-white/5">{data.icon}</div>
+      <div className="flex items-center gap-3 border-b border-white/5 p-3">
+        <div className="rounded-lg bg-white/5 p-1.5">{data.icon}</div>
         <div>
           <div className="text-xs font-bold text-slate-100 leading-tight">
             {data.label}
           </div>
-          <div className="text-[10px] font-mono opacity-50 uppercase tracking-wider">
+          <div className="text-[10px] font-mono uppercase tracking-wider opacity-50">
             {data.kind}
           </div>
         </div>
       </div>
-      <div className="px-3 py-2 flex items-center justify-between">
+
+      <div className="flex items-center justify-between px-3 py-2">
         <div className="flex items-center gap-1.5">
           <div
             className={cn(
-              "w-1.5 h-1.5 rounded-full shadow-sm",
+              "h-1.5 w-1.5 rounded-full shadow-sm",
               data.status === "HEALTHY" ? "bg-emerald-400" : "bg-current"
             )}
           />
@@ -101,305 +119,419 @@ const SignalNode = ({ data }: { data: ServiceNodeData }) => {
             {data.status}
           </span>
         </div>
-        {data.incidentId && (
+        {data.incidentId ? (
           <span className="text-[9px] font-mono opacity-80">
             {data.incidentId}
           </span>
-        )}
+        ) : null}
       </div>
-      <div className="grid grid-cols-2 border-t border-white/5 divide-x divide-white/5">
-        {data.metrics.map((m, i) => (
-          <div key={i} className="p-2 flex flex-col items-center">
-            <span className="text-[8px] uppercase text-slate-500 font-mono tracking-widest">
-              {m.label}
+
+      <div className="grid grid-cols-2 divide-x divide-white/5 border-t border-white/5">
+        {data.metrics.map((metric) => (
+          <div key={metric.label} className="flex flex-col items-center p-2">
+            <span className="text-[8px] font-mono uppercase tracking-widest text-slate-500">
+              {metric.label}
             </span>
-            <span className={cn("text-xs font-bold", m.color)}>{m.value}</span>
+            <span className={cn("text-xs font-bold", metric.color)}>
+              {metric.value}
+            </span>
           </div>
         ))}
       </div>
+
       <Handle type="source" position={Position.Bottom} id="bottom" />
     </div>
   );
 };
 
-// --- Mock Data ---
-const initialNodes: Node[] = [
-  {
-    id: "gateway",
-    type: "signalNode",
-    position: { x: 50, y: 150 },
-    data: {
-      label: "Gateway",
-      kind: "INGRESS",
-      status: "HEALTHY",
-      metrics: [
-        { label: "REQ/S", value: "1.2k", color: "text-blue-400" },
-        { label: "P99", value: "45ms", color: "text-emerald-400" },
-      ],
-      icon: <ShieldCheck size={14} />,
+const buildSignalNodes = (incident: IncidentDetailRecord): Node[] => {
+  const serviceStatus = resolveNodeStatus(incident);
+
+  return [
+    {
+      id: "source",
+      type: "signalNode",
+      position: { x: 40, y: 190 },
+      data: {
+        label: incident.sourceType || "Manual raise",
+        kind: "SIGNAL SOURCE",
+        status:
+          incident.status === "RESOLVED" || incident.status === "CLOSED"
+            ? "HEALTHY"
+            : "WARNING",
+        incidentId: incident.ticketId,
+        metrics: [
+          {
+            label: "DETECTED",
+            value: incident.elapsedLabel,
+            color: "text-emerald-400",
+          },
+          {
+            label: "STATUS",
+            value: incident.status,
+            color: "text-blue-400",
+          },
+        ],
+        icon: <ShieldCheck size={14} />,
+      },
     },
+    {
+      id: "service",
+      type: "signalNode",
+      position: { x: 330, y: 80 },
+      data: {
+        label: incident.service || "Primary Service",
+        kind: "SERVICE",
+        status: serviceStatus,
+        incidentId: incident.ticketId,
+        metrics: [
+          {
+            label: "SEVERITY",
+            value: incident.severity,
+            color: severityColor(incident.severity),
+          },
+          {
+            label: "REGION",
+            value: incident.region || "GLOBAL",
+            color: "text-amber-400",
+          },
+        ],
+        icon: <Zap size={14} />,
+      },
+    },
+    {
+      id: "response",
+      type: "signalNode",
+      position: { x: 620, y: 200 },
+      data: {
+        label:
+          incident.assignedToName ||
+          incident.incidentCommander ||
+          incident.assignedToEmail ||
+          "Response owner",
+        kind: "OWNERSHIP",
+        status:
+          incident.assignedToName ||
+          incident.assignedToEmail ||
+          incident.incidentCommander
+            ? "HEALTHY"
+            : "WARNING",
+        incidentId: incident.environment || incident.ticketId,
+        metrics: [
+          {
+            label: "ENV",
+            value: incident.environment || "N/A",
+            color: "text-blue-400",
+          },
+          {
+            label: "COMMENTS",
+            value: String(incident.commentsCount),
+            color: "text-purple-400",
+          },
+        ],
+        icon: <UserRound size={14} />,
+      },
+    },
+  ];
+};
+
+const buildSignalEdges = (incident: IncidentDetailRecord): Edge[] => [
+  {
+    id: `${incident.id}-source-service`,
+    source: "source",
+    target: "service",
+    label: "TRIGGERED",
+    animated: true,
+    style: { stroke: "#0ea5e9", strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#0ea5e9" },
   },
   {
-    id: "payment",
-    type: "signalNode",
-    position: { x: 300, y: 50 },
-    data: {
-      label: "Payment Service",
-      kind: "MICROSERVICE",
-      status: "CRITICAL",
-      incidentId: "INC-#1298",
-      metrics: [
-        { label: "ERR RATE", value: "12%", color: "text-rose-400" },
-        { label: "LATENCY", value: "120ms", color: "text-rose-400" },
-      ],
-      icon: <Zap size={14} />,
+    id: `${incident.id}-service-response`,
+    source: "service",
+    target: "response",
+    label: "OWNED BY",
+    animated: true,
+    style: {
+      stroke:
+        incident.status === "RESOLVED" || incident.status === "CLOSED"
+          ? "#10b981"
+          : "#f59e0b",
+      strokeWidth: 1.5,
     },
-  },
-  {
-    id: "db",
-    type: "signalNode",
-    position: { x: 550, y: 180 },
-    data: {
-      label: "PostgreSQL",
-      kind: "DATABASE",
-      status: "DEGRADED",
-      incidentId: "INC-#1291",
-      metrics: [
-        { label: "CONN", value: "94%", color: "text-amber-400" },
-        { label: "LATENCY", value: "350ms", color: "text-amber-400" },
-      ],
-      icon: <Database size={14} />,
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      color:
+        incident.status === "RESOLVED" || incident.status === "CLOSED"
+          ? "#10b981"
+          : "#f59e0b",
     },
   },
 ];
 
-const initialEdges: Edge[] = [
+const buildAlertFeed = (incident: IncidentDetailRecord) => [
   {
-    id: "e1-2",
-    source: "gateway",
-    target: "payment",
-    label: "DEPENDS ON",
-    animated: true,
-    style: { stroke: "#f43f5e", strokeWidth: 2 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: "#f43f5e" },
+    id: "identity",
+    level: `${incident.severity} ${incident.status}`,
+    title: incident.title || incident.ticketId,
+    timestamp: incident.elapsedLabel,
   },
   {
-    id: "e2-3",
-    source: "payment",
-    target: "db",
-    label: "DB CALL",
-    animated: true,
-    style: { stroke: "#f59e0b", strokeWidth: 1.5 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: "#f59e0b" },
+    id: "impact",
+    level: incident.service || "Impact",
+    title:
+      incident.impactSummary ||
+      incident.description ||
+      "Impact details are still being collected.",
+    timestamp: incident.region || "live",
+  },
+  {
+    id: "response",
+    level: incident.sourceType || "Response",
+    title:
+      incident.recommendedActions[0] ||
+      incident.aiAnalysis?.suggestion ||
+      "No automated remediation recommendation yet.",
+    timestamp: incident.environment || "runtime",
   },
 ];
 
-// --- Main Component ---
-export default function IncidentIntelligence() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) {
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [selectedNodeId, setSelectedNodeId] = useState<string>("service");
 
+  const alertFeed = useMemo(() => buildAlertFeed(incident), [incident]);
   const nodeTypes = useMemo(() => ({ signalNode: SignalNode }), []);
 
-  const onNodeClick = useCallback((_: any, node: Node) => {
-    setSelectedNode(node);
-  }, []);
+  useEffect(() => {
+    setNodes(buildSignalNodes(incident));
+    setEdges(buildSignalEdges(incident));
+    setSelectedNodeId("service");
+  }, [incident, setEdges, setNodes]);
+
+  const selectedNode = nodes.find((node) => node.id === selectedNodeId) ?? null;
+  const selectedNodeData = selectedNode?.data as ServiceNodeData | undefined;
 
   return (
-    <div className="flex flex-col h-screen w-full bg-dark text-slate-200 overflow-hidden font-sans">
-      {/* Top Nav */}
-      <nav className="h-14 border-b border-blue-500/10 bg-darkEzra flex items-center px-4 justify-between shrink-0 relative">
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-emerald-500 opacity-30" />
-
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <span className="font-bold tracking-tight text-lg bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-              Signal Graph
-            </span>
-          </div>
-
-          <div className="flex gap-2">
-            <div className="px-3 py-1.5 rounded bg-rose-500/10 border border-rose-500/20 flex items-center gap-2 cursor-pointer hover:bg-rose-500/20 transition-colors">
-              <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-              <span className="text-[10px] font-mono font-bold text-rose-500 uppercase tracking-wider">
-                INC-#1298 · PAYMENT API
+    <div className="flex min-h-[760px] flex-col bg-dark text-slate-200">
+      <div className="grid flex-1 gap-0 md:grid-cols-[280px_minmax(0,1fr)_320px]">
+        <aside className="border-r border-white/10 bg-darkEzra/70 p-5">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
+              Active Incident
+            </p>
+            <h2 className="mt-3 text-xl font-black text-white">
+              {incident.ticketId}
+            </h2>
+            <p className="mt-2 text-sm text-slate-300">{incident.title}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="rounded-full border border-rose-500/30 bg-rose-500/5 px-3 py-1 text-[10px] font-bold uppercase text-rose-400">
+                {incident.severity} / {incident.priority}
+              </span>
+              <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-bold uppercase text-slate-400">
+                {incident.status}
               </span>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-48 bg-slate-900 border border-slate-800 rounded flex items-center px-3 gap-2 text-slate-500 cursor-pointer">
-            <Search size={12} />
-            <span className="text-[10px] font-mono">CMD + K</span>
-          </div>
-          <div className="flex gap-2">
-            <div className="px-3 py-1.5 rounded bg-rose-500/10 border border-rose-500/20 flex items-center gap-2 cursor-pointer hover:bg-rose-500/20 transition-colors">
-              <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-              <span className="text-[10px] font-mono font-bold text-rose-500 uppercase tracking-wider">
-                P1-Live
-              </span>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                Signals
+              </p>
+              <p className="mt-2 text-3xl font-black text-purple-400">
+                {Math.max(alertFeed.length, incident.correlatedSignalIds.length || 0)}
+              </p>
             </div>
-          </div>
-        </div>
-      </nav>
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-64 border-r border-blue-500/10 bg-darkEzra flex flex-col shrink-0 overflow-y-auto">
-          <div className="grid grid-cols-2 border-b border-blue-500/10">
-            <div className="p-4 border-r border-blue-500/10 hover:bg-white/5 cursor-pointer">
-              <div className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-1">
-                Incidents
-              </div>
-              <div className="text-2xl font-bold text-rose-500">3</div>
-            </div>
-            <div className="p-4 hover:bg-white/5 cursor-pointer">
-              <div className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-1">
-                Impact
-              </div>
-              <div className="text-2xl font-bold text-purple-500">4</div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                Comments
+              </p>
+              <p className="mt-2 text-3xl font-black text-emerald-400">
+                {incident.commentsCount}
+              </p>
             </div>
           </div>
 
-          <div className="p-4 bg-white/[0.02] border-b border-blue-500/10">
-            <h3 className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest mb-4">
-              Active Alerts
+          <div className="mt-6">
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
+              Live Alert Feed
             </h3>
-            <div className="space-y-2">
-              {[1, 2, 3].map((i) => (
+            <div className="mt-4 space-y-3">
+              {alertFeed.map((alert) => (
                 <div
-                  key={i}
-                  className="p-2.5 rounded-lg border border-white/5 bg-slate-900/50 hover:border-blue-500/30 transition-all cursor-pointer group"
+                  key={alert.id}
+                  className="rounded-xl border border-white/10 bg-white/[0.03] p-3"
                 >
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="text-[10px] font-mono text-rose-400 font-bold">
-                      P1 CRITICAL
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400">
+                      {alert.level}
                     </span>
-                    <span className="text-[9px] text-slate-600">12m</span>
+                    <span className="text-[10px] font-mono text-slate-500">
+                      {alert.timestamp}
+                    </span>
                   </div>
-                  <div className="text-xs font-semibold group-hover:text-blue-400 transition-colors">
-                    Payment API Failures
-                  </div>
+                  <p className="mt-2 text-sm font-semibold text-slate-100">
+                    {shortText(alert.title, 88)}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
         </aside>
 
-        {/* Graph Area */}
-        <main className="flex-1 relative bg-[#020408]">
+        <main className="relative min-h-[680px] bg-[#020408]">
           <ReactFlow
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
-            onNodeClick={onNodeClick}
             nodeTypes={nodeTypes}
+            onNodeClick={(_, node) => setSelectedNodeId(node.id)}
             fitView
           >
-            <Background color="#02091B" gap={20} variant={undefined} />
+            <Background
+              color="#0f172a"
+              gap={22}
+              size={1}
+              variant={BackgroundVariant.Dots}
+            />
             <Controls className="!bg-slate-900 !border-slate-800 !fill-blue-400" />
-
-            <Panel
-              position="top-left"
-              className="bg-slate-950/80 p-2 rounded flex items-center gap-2"
-            >
-              <div className="w-fit flex items-center gap-2 px-2 py-1 border border-emerald-500 rounded-sm">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]" />
-                <span className="text-[10px] text-emerald-500 font-mono font-bold tracking-widest uppercase">
-                  P1 LIVE
-                </span>
-              </div>
-              <p className="text-sm">Service Dependency Graph</p>
-            </Panel>
           </ReactFlow>
 
-          {/* Right Panel / Drawer (Overlay on Mobile/Overlaying Graph on desktop) */}
-          {selectedNode && (
-            <div className="absolute right-4 top-4 bottom-4 w-80 bg-slate-950/95 border border-blue-500/30 rounded-xl shadow-2xl z-50 flex flex-col backdrop-blur-xl animate-in fade-in slide-in-from-right-4">
-              <div className="p-4 border-b border-white/10 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Activity size={14} className="text-blue-400" />
-                  <span className="font-bold text-sm">Service Details</span>
-                </div>
-                <button
-                  onClick={() => setSelectedNode(null)}
-                  className="text-slate-500 hover:text-white"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-4">
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold mb-1">
-                    {selectedNode.data.label as string}
-                  </h2>
-                  <p className="text-xs text-slate-400 font-mono tracking-tight">
-                    System Status: {selectedNode.data.status as string}
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <section>
-                    <h4 className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest mb-3">
-                      Suggested Remediation
-                    </h4>
-                    <div className="space-y-2">
-                      <button className="w-full p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold flex items-center gap-3 hover:bg-rose-500/20 transition-all">
-                        <RefreshCcw size={14} />
-                        Rollback to v2.4.0
-                      </button>
-                      <button className="w-full p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold flex items-center gap-3 hover:bg-blue-500/20 transition-all">
-                        <LayoutDashboard size={14} />
-                        Open Grafana Dashboard
-                      </button>
-                    </div>
-                  </section>
-
-                  <section>
-                    <h4 className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest mb-3">
-                      Recent Logs
-                    </h4>
-                    <div className="space-y-2 font-mono">
-                      <div className="p-2 bg-black/40 rounded border-l-2 border-rose-500 text-[10px]">
-                        <span className="text-slate-500">12:44:02</span>{" "}
-                        NullPointerException at PaymentProcessor.java:247
-                      </div>
-                      <div className="p-2 bg-black/40 rounded border-l-2 border-amber-500 text-[10px]">
-                        <span className="text-slate-500">12:43:58</span> Latency
-                        threshold exceeded (150ms)
-                      </div>
-                    </div>
-                  </section>
-                </div>
-              </div>
+          <div className="pointer-events-none absolute left-4 top-4 flex flex-wrap gap-2">
+            <div className="rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-rose-400">
+              {incident.ticketId} / {incident.service || "Incident"}
             </div>
-          )}
+            <div className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-300">
+              {incident.environment || "runtime"} / {incident.region || "global"}
+            </div>
+          </div>
         </main>
 
-        <RightPanel />
+        <aside className="border-l border-white/10 bg-darkEzra/70 p-5">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="flex items-center gap-2">
+              <Activity size={16} className="text-blue-400" />
+              <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-300">
+                Node Detail
+              </h3>
+            </div>
+
+            {selectedNodeData ? (
+              <>
+                <h4 className="mt-4 text-xl font-black text-white">
+                  {selectedNodeData.label}
+                </h4>
+                <p className="mt-1 text-xs font-mono uppercase tracking-[0.16em] text-slate-500">
+                  {selectedNodeData.kind} / {selectedNodeData.status}
+                </p>
+
+                <div className="mt-4 space-y-2">
+                  {selectedNodeData.metrics.map((metric) => (
+                    <div
+                      key={metric.label}
+                      className="flex items-center justify-between rounded-lg border border-white/10 bg-black/20 px-3 py-2"
+                    >
+                      <span className="text-[11px] font-mono text-slate-500">
+                        {metric.label}
+                      </span>
+                      <span className={cn("text-sm font-semibold", metric.color)}>
+                        {metric.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="flex items-center gap-2 text-amber-400">
+              <AlertTriangle size={16} />
+              <h3 className="text-sm font-bold uppercase tracking-[0.18em]">
+                Response Guidance
+              </h3>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-sm font-semibold text-rose-300">
+                {incident.recommendedActions[0] ||
+                  incident.aiAnalysis?.suggestion ||
+                  "No automated remediation recommendation is available yet."}
+              </div>
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/10 p-3 text-left text-sm font-semibold text-blue-300"
+              >
+                <RefreshCcw size={14} />
+                Review {incident.service || "service"} telemetry and recent change path
+              </button>
+              <div className="rounded-xl border border-white/10 bg-black/20 p-3 text-sm text-slate-400">
+                {shortText(
+                  incident.techDescription ||
+                    incident.description ||
+                    "Technical context has not been captured for this incident yet.",
+                  180
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="flex items-center gap-2 text-purple-400">
+              <Database size={16} />
+              <h3 className="text-sm font-bold uppercase tracking-[0.18em]">
+                Shared Context
+              </h3>
+            </div>
+            <div className="mt-4 space-y-2 text-sm text-slate-300">
+              <p>
+                Service: <span className="text-white">{incident.service || "N/A"}</span>
+              </p>
+              <p>
+                Owner:{" "}
+                <span className="text-white">
+                  {incident.assignedToName ||
+                    incident.incidentCommander ||
+                    incident.assignedToEmail ||
+                    "Unassigned"}
+                </span>
+              </p>
+              <p>
+                Source:{" "}
+                <span className="text-white">
+                  {incident.sourceType || incident.source || "Manual"}
+                </span>
+              </p>
+            </div>
+          </div>
+        </aside>
       </div>
 
-      {/* Footer Status Bar */}
-      <footer className="h-7 bg-[#060b12] border-t border-blue-500/10 px-4 flex items-center justify-between shrink-0 text-[10px] font-mono text-slate-500">
-        <div className="flex gap-6">
+      <footer className="flex h-8 items-center justify-between border-t border-white/10 bg-[#060b12] px-4 text-[10px] font-mono text-slate-500">
+        <div className="flex items-center gap-6">
           <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>Neo4j Connected</span>
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span>{incident.ticketId} graph hydrated</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Activity size={10} className="text-blue-500" />
-            <span>11 nodes · 14 edges</span>
+            <span>
+              {nodes.length} nodes / {edges.length} edges
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Clock size={10} />
-          <span>{new Date().toISOString()}</span>
-        </div>
+        <span>{new Date().toISOString()}</span>
       </footer>
     </div>
+  );
+}
+
+export default function SignalGraphPage() {
+  return (
+    <IncidentRouteShell title="Signal Graph">
+      {(incident) => <SignalGraphWorkspace incident={incident} />}
+    </IncidentRouteShell>
   );
 }

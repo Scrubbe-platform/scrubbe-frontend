@@ -1,9 +1,53 @@
+"use client";
+
 import React, { ReactNode } from "react";
 import SettingWrapper from "../_module/setting-wrapper";
-import { Book, Check, ChevronRight, Database, Minus } from "lucide-react";
+import { Book, Check, ChevronRight, Database, Loader2 } from "lucide-react";
 import CButton from "@/components/ui/Cbutton";
+import { useQuery } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { querykeys } from "@/lib/constant";
+import useAuthStore from "@/lib/stores/auth.store";
+import { toast } from "sonner";
 
 const page = () => {
+  const { get } = useFetch();
+  const { user } = useAuthStore();
+
+  const { data: integrations = [], isLoading } = useQuery({
+    queryKey: [querykeys.INTEGRATIONS],
+    queryFn: async () => {
+      const res = await get(
+        endpoint.incident_ticket.integrations + "/" + user?.id
+      );
+      if (res.success) return res.data.data ?? [];
+      return [];
+    },
+    enabled: !!user?.id,
+  });
+
+  const isConnected = (providerName: string) =>
+    (integrations as { provider: string; isActive: boolean }[]).some(
+      (i) => i.provider.toLowerCase() === providerName.toLowerCase() && i.isActive
+    );
+
+  const handleConnect = async (oauthEndpoint: string, label: string) => {
+    const res = await get(oauthEndpoint);
+    if (res.success) {
+      const url = res.data?.data?.url ?? res.data?.url;
+      if (url) {
+        window.location.href = url;
+        return;
+      }
+    }
+    toast.error(`Failed to start ${label} connection`);
+  };
+
+  const githubConnected = isConnected("github");
+  const gitlabConnected = isConnected("gitlab");
+  const bitbucketConnected = isConnected("bitbucket");
+
   return (
     <div>
       <SettingWrapper
@@ -20,15 +64,29 @@ const page = () => {
             </div>
 
             <div className="space-y-4">
-              {/* GITHUB - CONNECTED */}
+              {/* GITHUB */}
               <div className="p-5 border border-neutral-600 rounded-2xl space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-white text-[15px] font-bold">
                     GitHub
                   </span>
                   <div className="flex items-center gap-2">
-                    <StatusBadge label="Connected" icon={<Check size={14} />} />
-                    <ActionButton label="Configure" />
+                    {isLoading ? (
+                      <Loader2 size={16} className="animate-spin text-[#64748B]" />
+                    ) : githubConnected ? (
+                      <>
+                        <StatusBadge label="Connected" icon={<Check size={14} />} />
+                        <ActionButton label="Configure" />
+                      </>
+                    ) : (
+                      <ActionButton
+                        label="Connect"
+                        color="cyan"
+                        onClick={() =>
+                          handleConnect(endpoint.integration.github, "GitHub")
+                        }
+                      />
+                    )}
                   </div>
                 </div>
                 <p className="text-[#64748B] text-xs leading-normal">
@@ -36,14 +94,61 @@ const page = () => {
                 </p>
               </div>
 
-              <SimpleConnectCard
-                title="GitLab"
-                desc="Merge request hooks, pipelines, approvals."
-              />
-              <SimpleConnectCard
-                title="Bitbucket"
-                desc="PR status, pipelines, and merge gates."
-              />
+              {/* GITLAB */}
+              <div className="p-5 border border-neutral-600 rounded-2xl space-y-3 group hover:border-[#00CAD8]/30 transition-colors">
+                <div className="flex justify-between items-center">
+                  <span className="text-white text-[15px] font-bold">GitLab</span>
+                  <div className="flex items-center gap-2">
+                    {isLoading ? (
+                      <Loader2 size={16} className="animate-spin text-[#64748B]" />
+                    ) : gitlabConnected ? (
+                      <>
+                        <StatusBadge label="Connected" icon={<Check size={14} />} />
+                        <ActionButton label="Configure" />
+                      </>
+                    ) : (
+                      <ActionButton
+                        label="Connect"
+                        color="cyan"
+                        onClick={() =>
+                          handleConnect(endpoint.integration.gitlab, "GitLab")
+                        }
+                      />
+                    )}
+                  </div>
+                </div>
+                <p className="text-[#64748B] text-xs leading-normal">
+                  Merge request hooks, pipelines, approvals.
+                </p>
+              </div>
+
+              {/* BITBUCKET */}
+              <div className="p-5 border border-neutral-600 rounded-2xl space-y-3 group hover:border-[#00CAD8]/30 transition-colors">
+                <div className="flex justify-between items-center">
+                  <span className="text-white text-[15px] font-bold">Bitbucket</span>
+                  <div className="flex items-center gap-2">
+                    {isLoading ? (
+                      <Loader2 size={16} className="animate-spin text-[#64748B]" />
+                    ) : bitbucketConnected ? (
+                      <>
+                        <StatusBadge label="Connected" icon={<Check size={14} />} />
+                        <ActionButton label="Configure" />
+                      </>
+                    ) : (
+                      <ActionButton
+                        label="Connect"
+                        color="cyan"
+                        onClick={() =>
+                          handleConnect(endpoint.integration.bitbucket, "Bitbucket")
+                        }
+                      />
+                    )}
+                  </div>
+                </div>
+                <p className="text-[#64748B] text-xs leading-normal">
+                  PR status, pipelines, and merge gates.
+                </p>
+              </div>
             </div>
           </section>
 
@@ -102,7 +207,7 @@ const page = () => {
                   <div className="flex items-center gap-3 p-2.5 border border-neutral-600 rounded-xl bg-[#0B1224]/50">
                     <Database size={14} className="text-[#FF7ED4]" />
                     <span className="text-[11px] text-[#D1D5DB]">
-                      payments-api{" "}
+                      billing-service{" "}
                       <span className="mx-1 text-[#64748B]">→</span> Payments
                       Platform
                     </span>
@@ -139,8 +244,17 @@ const StatusBadge = ({ label, icon }: { label: string; icon: ReactNode }) => (
   </div>
 );
 
-const ActionButton = ({ label, color }: { label: string; color?: string }) => (
+const ActionButton = ({
+  label,
+  color,
+  onClick,
+}: {
+  label: string;
+  color?: string;
+  onClick?: () => void;
+}) => (
   <button
+    onClick={onClick}
     className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all border ${
       color === "cyan"
         ? "text-[#3EE9FF] border-[#3EE9FF] hover:bg-[#3EE9FF]/5"
@@ -149,22 +263,6 @@ const ActionButton = ({ label, color }: { label: string; color?: string }) => (
   >
     {label}
   </button>
-);
-
-const SimpleConnectCard = ({
-  title,
-  desc,
-}: {
-  title: string;
-  desc: string;
-}) => (
-  <div className="p-5 border border-neutral-600 rounded-2xl space-y-3 group hover:border-[#00CAD8]/30 transition-colors">
-    <div className="flex justify-between items-center">
-      <span className="text-white text-[15px] font-bold">{title}</span>
-      <ActionButton label="Connect" color="cyan" />
-    </div>
-    <p className="text-[#64748B] text-xs leading-normal">{desc}</p>
-  </div>
 );
 
 export default page;

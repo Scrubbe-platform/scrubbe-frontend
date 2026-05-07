@@ -1,8 +1,8 @@
 "use client";
+
 import React from "react";
 import { GitBranch, BarChart3, Zap, Workflow } from "lucide-react";
-
-// --- Types ---
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 interface DetectionSignal {
   id: string;
@@ -14,11 +14,8 @@ interface DetectionSignal {
   iconColor: string;
 }
 
-// --- Sub-Components ---
-
 const SignalCard = ({ signal }: { signal: DetectionSignal }) => (
   <div className="bg-darkEzra border border-white/5 rounded-xl p-3 md:p-4 flex gap-3 md:gap-4 items-start hover:border-white/10 transition-all group">
-    {/* Icon Container - Scaled for Mobile */}
     <div
       className={`
       w-10 h-10 md:w-12 md:h-12 rounded-lg border flex items-center justify-center shrink-0
@@ -32,7 +29,6 @@ const SignalCard = ({ signal }: { signal: DetectionSignal }) => (
       </div>
     </div>
 
-    {/* Content Area */}
     <div className="flex-1 min-w-0">
       <div className="flex justify-between items-center mb-1">
         <p className="text-[10px] md:text-[11px] font-medium text-slate-500 truncate pr-2">
@@ -50,51 +46,68 @@ const SignalCard = ({ signal }: { signal: DetectionSignal }) => (
   </div>
 );
 
-// --- Main Component ---
+const buildDetectionSignals = (incident: IncidentDetailRecord): DetectionSignal[] => {
+  const signals: DetectionSignal[] = [];
 
-const DetectionSignals: React.FC = () => {
-  const signals: DetectionSignal[] = [
-    {
-      id: "1",
-      source: "GitHub Actions",
-      subSource: "Pipeline #311",
+  if (incident.sourceType || incident.detection) {
+    signals.push({
+      id: "source",
+      source: incident.sourceType || "Incident Source",
+      subSource: incident.source || "Detection",
       content:
-        "Integration tests failed — 12 failures · timeout on db-core (eu-west-1) · commit 4f3a91c on main",
-      timestamp: "14:32:01",
+        incident.detection ||
+        `${incident.title} triggered from ${incident.sourceType || "manual input"}.`,
+      timestamp: incident.elapsedLabel,
       icon: <GitBranch />,
       iconColor: "text-emerald-500",
-    },
-    {
-      id: "2",
-      source: "Prometheus",
-      subSource: "Alertmanager",
+    });
+  }
+
+  if (incident.impactSummary || incident.service || incident.region) {
+    signals.push({
+      id: "impact",
+      source: "Impact",
+      subSource: incident.environment || "Runtime",
       content:
-        "db_core_connections_in_use: 100% of pool (50/50) for 11 seconds · checkout-service → db-core eu-west-1",
-      timestamp: "14:32:01",
+        incident.impactSummary ||
+        `${incident.service} is affected in ${incident.region}.`,
+      timestamp: incident.elapsedLabel,
       icon: <BarChart3 />,
       iconColor: "text-amber-500",
-    },
-    {
-      id: "3",
-      source: "DataDog",
-      subSource: "Monitor #2841",
-      content:
-        "checkout-service error_rate_5xx: 0.4% → 7.8% · latency_p95: 220ms → 1,450ms · deployment correlation detected",
-      timestamp: "14:32:01",
+    });
+  }
+
+  if (incident.techDescription || incident.description) {
+    signals.push({
+      id: "technical",
+      source: "Technical Context",
+      subSource: incident.category || "Analysis",
+      content: incident.techDescription || incident.description,
+      timestamp: incident.elapsedLabel,
       icon: <Zap />,
       iconColor: "text-red-500",
-    },
-    {
-      id: "4",
-      source: "Scrubbe",
-      subSource: "Pattern Match",
-      content:
-        "Signal signature matches SI-0002310 (97%) and SI-0001870 (93%) — DB pool exhaustion class · Playbook RBK-17 activated",
-      timestamp: "14:32:01",
+    });
+  }
+
+  if (incident.recommendedActions.length > 0) {
+    signals.push({
+      id: "action",
+      source: "Recommended Action",
+      subSource: incident.owningSquad || "Response",
+      content: incident.recommendedActions[0],
+      timestamp: incident.elapsedLabel,
       icon: <Workflow />,
       iconColor: "text-blue-500",
-    },
-  ];
+    });
+  }
+
+  return signals;
+};
+
+const DetectionSignals: React.FC<{ incident: IncidentDetailRecord }> = ({
+  incident,
+}) => {
+  const signals = buildDetectionSignals(incident);
 
   return (
     <div className="p-4 md:p-6">
@@ -104,9 +117,13 @@ const DetectionSignals: React.FC = () => {
         </h2>
 
         <div className="flex flex-col gap-3">
-          {signals.map((signal) => (
-            <SignalCard key={signal.id} signal={signal} />
-          ))}
+          {signals.length > 0 ? (
+            signals.map((signal) => <SignalCard key={signal.id} signal={signal} />)
+          ) : (
+            <div className="rounded-xl border border-dashed border-white/10 px-4 py-5 text-sm text-slate-400">
+              No live detection signals are available for this incident yet.
+            </div>
+          )}
         </div>
       </div>
     </div>

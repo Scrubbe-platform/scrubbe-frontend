@@ -2,12 +2,21 @@
 import React from "react";
 import { Doughnut } from "react-chartjs-2";
 
-const OverallComplianceChart = () => {
+type OverallComplianceChartProps = {
+  compliance?: number;
+};
+
+const OverallComplianceChart = ({
+  compliance = 94,
+}: OverallComplianceChartProps) => {
+  const safeCompliance = Math.min(100, Math.max(0, compliance));
+  const nonCompliance = Math.max(0, 100 - safeCompliance);
+
   const data = {
     labels: ["Compliance", "Non-Compliance"],
     datasets: [
       {
-        data: [94, 6], // 94% compliant, 6% non-compliant
+        data: [safeCompliance, nonCompliance],
         backgroundColor: [
           "#00A3A3", // Teal/Green
           "#E5E7EB", // Light Gray (for the remaining 6%)
@@ -34,7 +43,9 @@ const OverallComplianceChart = () => {
     <div className="relative h-48 w-full flex items-center justify-center">
       <Doughnut data={data} options={options} />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-2 text-center">
-        <span className="text-4xl font-bold text-gray-800">94%</span>
+        <span className="text-4xl font-bold text-gray-800">
+          {safeCompliance}%
+        </span>
       </div>
     </div>
   );
