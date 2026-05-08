@@ -3,10 +3,6 @@
 import { useRef, useState } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 
-// ─────────────────────────────────────────────────────────────────
-// Data
-// ─────────────────────────────────────────────────────────────────
-
 const PRIMARY_USERS = [
   {
     id: 1,
@@ -142,6 +138,122 @@ const SECONDARY_USERS = [
 const ALL_USERS = [...PRIMARY_USERS, ...SECONDARY_USERS];
 
 // ─────────────────────────────────────────────────────────────────
+// Chevron — rotates when open
+// ─────────────────────────────────────────────────────────────────
+
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <motion.svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      animate={{ rotate: open ? 180 : 0 }}
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <path
+        d="M3 5l4 4 4-4"
+        stroke="#9ca3af"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </motion.svg>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Collapsible group header
+// ─────────────────────────────────────────────────────────────────
+
+function GroupHeader({
+  label,
+  open,
+  count,
+  onToggle,
+}: {
+  label: string;
+  open: boolean;
+  count: number;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      className="w-full flex items-center justify-between px-5 py-3 border-b border-gray-200 cursor-pointer text-left"
+      style={{
+        background: "#f9fafb",
+        border: "none",
+        borderBottom: "1px solid #e5e7eb",
+      }}
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+          {label}
+        </span>
+        <span
+          className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+          style={{ background: "#e5e7eb", color: "#6b7280" }}
+        >
+          {count}
+        </span>
+      </div>
+      <Chevron open={open} />
+    </button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// User tab button
+// ─────────────────────────────────────────────────────────────────
+
+function UserTab({
+  user,
+  active,
+  onClick,
+}: {
+  user: (typeof ALL_USERS)[0];
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-start gap-3 px-5 py-4 text-left border-b border-gray-100 last:border-0 cursor-pointer transition-all duration-200"
+      style={{
+        background: active ? "#111827" : "white",
+        border: "none",
+        borderBottom: "1px solid #f3f4f6",
+      }}
+    >
+      <span
+        className="text-[11px] font-bold shrink-0 w-6 h-6 rounded flex items-center justify-center mt-0.5"
+        style={{
+          background: active ? "#374151" : "#f3f4f6",
+          color: active ? "#f9fafb" : "#6b7280",
+        }}
+      >
+        {String(user.id).padStart(2, "0")}
+      </span>
+      <span>
+        <span
+          className="text-[13.5px] font-semibold block"
+          style={{ color: active ? "#f9fafb" : "#111827" }}
+        >
+          {user.label}
+        </span>
+        <span
+          className="text-[10px] font-bold tracking-widest uppercase"
+          style={{ color: "#9ca3af" }}
+        >
+          {user.tag}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
 // Workflow mini-grid
 // ─────────────────────────────────────────────────────────────────
 
@@ -183,7 +295,7 @@ function WorkflowGrid({ rows }: { rows: string[][] }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Right panel detail
+// Right detail panel
 // ─────────────────────────────────────────────────────────────────
 
 function DetailPanel({ user }: { user: (typeof ALL_USERS)[0] }) {
@@ -197,7 +309,6 @@ function DetailPanel({ user }: { user: (typeof ALL_USERS)[0] }) {
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
         className="h-full flex flex-col"
       >
-        {/* Teal glow top-right */}
         <div
           className="absolute top-0 right-0 w-40 h-40 pointer-events-none"
           style={{
@@ -206,20 +317,16 @@ function DetailPanel({ user }: { user: (typeof ALL_USERS)[0] }) {
           }}
         />
 
-        {/* Title */}
         <h3
           className="font-black text-gray-900 leading-[1.1] tracking-tight mb-4"
           style={{ fontSize: "clamp(22px, 2.4vw, 34px)" }}
         >
           {user.title}
         </h3>
-
-        {/* Desc */}
         <p className="text-[14px] text-gray-500 leading-relaxed mb-6 max-w-sm">
           {user.desc}
         </p>
 
-        {/* 2x2 info grid */}
         <div className="grid grid-cols-2 gap-px border border-gray-200 rounded-lg overflow-hidden">
           {[
             { label: "Current pain", value: user.currentPain },
@@ -245,10 +352,8 @@ function DetailPanel({ user }: { user: (typeof ALL_USERS)[0] }) {
           ))}
         </div>
 
-        {/* Workflow */}
         <WorkflowGrid rows={user.workflow} />
 
-        {/* CTA */}
         <div className="mt-5">
           {user.ctaStyle === "link" ? (
             <button className="text-[13px] font-semibold text-gray-700 underline underline-offset-4 bg-transparent border-none cursor-pointer hover:text-emerald-600 transition-colors">
@@ -256,14 +361,14 @@ function DetailPanel({ user }: { user: (typeof ALL_USERS)[0] }) {
             </button>
           ) : user.ctaStyle === "outline-green" ? (
             <button
-              className="w-full py-3 rounded-lg font-semibold text-[14px] text-emerald-600 transition-colors border cursor-pointer"
+              className="w-full py-3 rounded-lg font-semibold text-[14px] text-emerald-600 transition-colors border cursor-pointer hover:bg-emerald-50"
               style={{ borderColor: "#22c55e", background: "transparent" }}
             >
               {user.cta}
             </button>
           ) : (
-            <button className="w-full p-0.5 cursor-pointer bg-gradient-to-r from-zinc-700 to-teal-500">
-              <div className="py-3 bg-white text-[14px] text-gray-800 font-semibold ">
+            <button className="w-full p-0.5 cursor-pointer bg-gradient-to-r from-zinc-700 to-teal-500 border-none">
+              <div className="py-3 bg-white text-[14px] text-gray-800 font-semibold text-center">
                 {user.cta}
               </div>
             </button>
@@ -280,6 +385,8 @@ function DetailPanel({ user }: { user: (typeof ALL_USERS)[0] }) {
 
 export default function WhoUsesScrubbe() {
   const [active, setActive] = useState(1);
+  const [primaryOpen, setPrimaryOpen] = useState(true);
+  const [secondaryOpen, setSecondaryOpen] = useState(true);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
@@ -323,7 +430,7 @@ export default function WhoUsesScrubbe() {
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           className="bg-white border border-gray-200 rounded-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-[420px_1fr_1fr] min-h-[680px]"
         >
-          {/* ── LEFT: Headline + footnote ── */}
+          {/* LEFT */}
           <div
             className="p-8 flex flex-col justify-between"
             style={{ borderRight: "1px solid #e5e7eb" }}
@@ -342,130 +449,73 @@ export default function WhoUsesScrubbe() {
                 Scrubbe fits their workflow.
               </p>
             </div>
-            <p
-              className="text-[12px] text-gray-400 leading-relaxed mt-8"
-              style={{ fontFamily: "monospace" }}
-            >
-              Primary users operate the incident loop. Secondary users consume
-              decisions, approve action, or measure risk reduction.
-            </p>
           </div>
 
-          {/* ── MIDDLE: Tab list ── */}
+          {/* MIDDLE — collapsible groups */}
           <div
             className="flex flex-col"
             style={{ borderRight: "1px solid #e5e7eb" }}
           >
-            {/* Primary users header */}
-            <div
-              className="flex items-center justify-between px-5 py-3 border-b border-gray-200"
-              style={{ background: "#f9fafb" }}
-            >
-              <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
-                Primary Users
-              </span>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path
-                  d="M3 5l4 4 4-4"
-                  stroke="#9ca3af"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-
-            {/* Primary user tabs */}
-            {PRIMARY_USERS.map((u) => (
-              <button
-                key={u.id}
-                onClick={() => setActive(u.id)}
-                className="flex items-start gap-3 px-5 py-4 text-left border-b border-gray-100 cursor-pointer transition-colors"
-                style={{
-                  background: active === u.id ? "#111827" : "white",
-                  border: active === u.id ? "none" : undefined,
-                }}
-              >
-                <span
-                  className="text-[11px] font-bold shrink-0 w-6 h-6 rounded flex items-center justify-center mt-0.5"
-                  style={{
-                    background: active === u.id ? "#374151" : "#f3f4f6",
-                    color: active === u.id ? "#f9fafb" : "#6b7280",
-                  }}
+            {/* Primary group */}
+            <GroupHeader
+              label="Primary Users"
+              open={primaryOpen}
+              count={PRIMARY_USERS.length}
+              onToggle={() => setPrimaryOpen((o) => !o)}
+            />
+            <AnimatePresence initial={false}>
+              {primaryOpen && (
+                <motion.div
+                  key="primary"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ overflow: "hidden" }}
                 >
-                  {String(u.id).padStart(2, "0")}
-                </span>
-                <span>
-                  <span
-                    className="text-[13.5px] font-semibold block"
-                    style={{ color: active === u.id ? "#f9fafb" : "#111827" }}
-                  >
-                    {u.label}
-                  </span>
-                  <span
-                    className="text-[10px] font-bold tracking-widest uppercase"
-                    style={{ color: active === u.id ? "#9ca3af" : "#9ca3af" }}
-                  >
-                    {u.tag}
-                  </span>
-                </span>
-              </button>
-            ))}
+                  {PRIMARY_USERS.map((u) => (
+                    <UserTab
+                      key={u.id}
+                      user={u}
+                      active={active === u.id}
+                      onClick={() => setActive(u.id)}
+                    />
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            {/* Secondary users header */}
-            <div
-              className="flex items-center justify-between px-5 py-3 border-b border-t border-gray-200"
-              style={{ background: "#f9fafb" }}
-            >
-              <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
-                Secondary Users
-              </span>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path
-                  d="M3 5l4 4 4-4"
-                  stroke="#9ca3af"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-
-            {/* Secondary user tabs */}
-            {SECONDARY_USERS.map((u) => (
-              <button
-                key={u.id}
-                onClick={() => setActive(u.id)}
-                className="flex items-start gap-3 px-5 py-4 text-left border-b border-gray-100 last:border-0 cursor-pointer transition-colors"
-                style={{
-                  background: active === u.id ? "#111827" : "white",
-                }}
-              >
-                <span
-                  className="text-[11px] font-bold shrink-0 w-6 h-6 rounded flex items-center justify-center mt-0.5"
-                  style={{
-                    background: active === u.id ? "#374151" : "#f3f4f6",
-                    color: active === u.id ? "#f9fafb" : "#6b7280",
-                  }}
+            {/* Secondary group */}
+            <GroupHeader
+              label="Secondary Users"
+              open={secondaryOpen}
+              count={SECONDARY_USERS.length}
+              onToggle={() => setSecondaryOpen((o) => !o)}
+            />
+            <AnimatePresence initial={false}>
+              {secondaryOpen && (
+                <motion.div
+                  key="secondary"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ overflow: "hidden" }}
                 >
-                  {String(u.id).padStart(2, "0")}
-                </span>
-                <span>
-                  <span
-                    className="text-[13.5px] font-semibold block"
-                    style={{ color: active === u.id ? "#f9fafb" : "#111827" }}
-                  >
-                    {u.label}
-                  </span>
-                  <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400">
-                    {u.tag}
-                  </span>
-                </span>
-              </button>
-            ))}
+                  {SECONDARY_USERS.map((u) => (
+                    <UserTab
+                      key={u.id}
+                      user={u}
+                      active={active === u.id}
+                      onClick={() => setActive(u.id)}
+                    />
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* ── RIGHT: Detail panel ── */}
+          {/* RIGHT */}
           <div className="relative p-8 overflow-hidden">
             <DetailPanel user={activeUser} />
           </div>

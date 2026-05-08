@@ -1,507 +1,478 @@
 "use client";
-import Image from "next/image";
+
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { GiHamburgerMenu } from "react-icons/gi";
-import { IoMdClose } from "react-icons/io";
-import { VscChevronDown, VscChevronUp } from "react-icons/vsc";
-import { RiSearchLine } from "react-icons/ri";
-import { FiGlobe } from "react-icons/fi";
-import SearchModal from "@/components/landing/SearchModal";
-import { motion } from "framer-motion";
+import { ChevronDown, X, Menu } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+// ─────────────────────────────────────────────────────────────────
+// Nav data
+// ─────────────────────────────────────────────────────────────────
 
-type MenuItem = {
-  label: string;
-  href?: string;
-  dropdownOptions?: {
-    label: string;
-    href: string;
-    description?: string; // Adding optional description field
-  }[];
-};
+const NAV_ITEMS = [
+  {
+    label: "PRODUCT",
+    links: [
+      {
+        title: "How it works",
+        desc: "The full incident decision loop",
+        href: "/how-it-works",
+      },
+      {
+        title: "Platform",
+        desc: "Core orchestration engine",
+        href: "/platform",
+      },
+      {
+        title: "Ezra",
+        desc: "AI code & root cause intelligence",
+        href: "/ezra",
+      },
+      {
+        title: "Playbooks",
+        desc: "Reusable, versioned response plans",
+        href: "/playbooks",
+      },
+      {
+        title: "Connectors",
+        desc: "Native integrations across your stack",
+        href: "/connectors",
+      },
+    ],
+  },
+  {
+    label: "CHALLENGES",
+    links: [
+      {
+        title: "Alert fatigue",
+        desc: "Collapse noise into signal",
+        href: "/challenges/alert-fatigue",
+      },
+      {
+        title: "Manual triage",
+        desc: "Automate detection-to-decision",
+        href: "/challenges/manual-triage",
+      },
+      {
+        title: "Ungoverned automation",
+        desc: "Policy-first AI execution",
+        href: "/challenges/governance",
+      },
+      {
+        title: "Blast radius risk",
+        desc: "Map impact before acting",
+        href: "/challenges/blast-radius",
+      },
+    ],
+  },
+  {
+    label: "SOLUTIONS",
+    links: [
+      {
+        title: "For SRE teams",
+        desc: "Lower MTTR, safer remediation",
+        href: "/solutions/sre",
+      },
+      {
+        title: "For Platform teams",
+        desc: "Governed incident control layer",
+        href: "/solutions/platform",
+      },
+      {
+        title: "For Engineering leaders",
+        desc: "Reliability without heroics",
+        href: "/solutions/leaders",
+      },
+      {
+        title: "For Compliance teams",
+        desc: "Audit-first execution evidence",
+        href: "/solutions/compliance",
+      },
+    ],
+  },
+  {
+    label: "CONNECTIONS",
+    links: [
+      {
+        title: "GitHub",
+        desc: "Push events & deployment signals",
+        href: "/connectors/github",
+      },
+      {
+        title: "Datadog",
+        desc: "Metric alerts & SLO breaches",
+        href: "/connectors/datadog",
+      },
+      {
+        title: "PagerDuty",
+        desc: "Incident triggers & escalations",
+        href: "/connectors/pagerduty",
+      },
+      {
+        title: "Slack",
+        desc: "War room & approval workflows",
+        href: "/connectors/slack",
+      },
+      { title: "All connectors →", desc: "", href: "/connectors" },
+    ],
+  },
+  {
+    label: "PRICING",
+    links: [
+      { title: "Plans", desc: "Compare tiers and features", href: "/pricing" },
+      {
+        title: "Enterprise",
+        desc: "Custom contracts & SLAs",
+        href: "/pricing/enterprise",
+      },
+    ],
+  },
+  {
+    label: "RESOURCES",
+    links: [
+      { title: "Documentation", desc: "Guides, APIs, and SDKs", href: "/docs" },
+      { title: "Blog", desc: "Engineering deep-dives", href: "/blog" },
+      { title: "Changelog", desc: "What's new in Scrubbe", href: "/changelog" },
+      { title: "Status", desc: "Live system health", href: "/status" },
+    ],
+  },
+  {
+    label: "SECURITY",
+    links: [
+      {
+        title: "SOC 2 Type II",
+        desc: "Certified compliance",
+        href: "/security/soc2",
+      },
+      {
+        title: "GDPR",
+        desc: "Data residency & privacy",
+        href: "/security/gdpr",
+      },
+      {
+        title: "Audit Trail",
+        desc: "Immutable action logging",
+        href: "/security/audit-trail",
+      },
+    ],
+  },
+];
 
-const NewNavbar = () => {
-  // Existing state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>(
-    {}
+// ─────────────────────────────────────────────────────────────────
+// Scrubbe logo
+// ─────────────────────────────────────────────────────────────────
+
+function ScrubbeLogo() {
+  return (
+    <Link href="/">
+      <div className="relative w-32 h-8 xl:w-40 xl:h-10">
+        <Image
+          src="/IMS/blacklogo.png"
+          alt="Scrubbe Logo"
+          fill
+          sizes="(max-width: 1280px) 128px, 160px"
+          className="object-contain"
+        />
+      </div>
+    </Link>
   );
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
-  const textColor = "text-gray-800";
-  const statusFilterRef = useRef<HTMLDivElement>(null);
+}
 
+// ─────────────────────────────────────────────────────────────────
+// Desktop dropdown
+// ─────────────────────────────────────────────────────────────────
+
+function DropdownMenu({
+  item,
+  open,
+}: {
+  item: (typeof NAV_ITEMS)[0];
+  open: boolean;
+}) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0, y: 8, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 6, scale: 0.98 }}
+          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50"
+          style={{ minWidth: 260, boxShadow: "0 8px 40px rgba(0,0,0,0.1)" }}
+        >
+          <div className="p-2">
+            {item.links.map((link) => (
+              <Link
+                key={link.href}
+                href={"/#"}
+                className="flex flex-col px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors group"
+              >
+                <span className="text-[13.5px] font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors">
+                  {link.title}
+                </span>
+                {link.desc && (
+                  <span className="text-[12px] text-gray-400 mt-0.5">
+                    {link.desc}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Desktop nav item with dropdown
+// ─────────────────────────────────────────────────────────────────
+
+function NavItem({ item }: { item: (typeof NAV_ITEMS)[0] }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close on outside click
   useEffect(() => {
-    if (!isLanguageModalOpen) return;
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        statusFilterRef.current &&
-        !statusFilterRef.current.contains(event.target as Node)
-      ) {
-        setIsLanguageModalOpen(false);
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
       }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isLanguageModalOpen]);
-
-  // Toggle dropdown visibility in mobile menu
-  const toggleMobileDropdown = (label: string) => {
-    setExpandedMenus((prev) => {
-      // If the clicked menu is already open, close it
-      if (prev[label]) {
-        return {
-          ...prev,
-          [label]: false,
-        };
-      }
-
-      // Otherwise, close all menus and open the clicked one
-      const newState: Record<string, boolean> = {};
-      menuItems.forEach((item) => {
-        if (item.dropdownOptions) {
-          newState[item.label] = false;
-        }
-      });
-
-      return {
-        ...newState,
-        [label]: true,
-      };
-    });
-  };
-
-  // Menu items configuration
-  const menuItems: MenuItem[] = [
-    {
-      label: "Products",
-      dropdownOptions: [
-        {
-          label: "SIEM Platform",
-          href: "/products/siem",
-          description:
-            "Real-time threat detection, log analysis, and centralized monitoring",
-        },
-        {
-          label: "SOAR Automation",
-          href: "/products/soar",
-          description:
-            "Automated workflows to respond to incidents faster and smarter",
-        },
-        {
-          label: "Incident Management",
-          href: "/products/incident-management",
-          description:
-            "End-to-end visibility, manage security events from detection to resolution",
-        },
-        {
-          label: "Fraud Detection",
-          href: "#",
-          description:
-            "Tools to detect and block suspicious behavior across digital platforms",
-        },
-        {
-          label: "Authentication SDK",
-          href: "/products/authentication-sdk",
-          description:
-            "Secure user and system authentication for integrated apps",
-        },
-        {
-          label: "Compliance Tools",
-          href: "/products/compliance",
-          description:
-            "Automate reporting and meet standards like SOC 2, ISO 27001",
-        },
-        {
-          label: "Dashboard Preview",
-          href: "/products/dashboard-preview",
-          description:
-            "Get a sneak peak of the Scrubbe control center in action",
-        },
-      ],
-    },
-    {
-      label: "Solutions",
-      dropdownOptions: [
-        {
-          label: "For Fintech",
-          href: "#",
-          description: "Monitor Fraud, ensure compliance and Scale securely",
-        },
-        {
-          label: "For SaaS Companies",
-          href: "#",
-          description:
-            "Protect customer data and respond to security threats in real time",
-        },
-        {
-          label: "For Security Teams",
-          href: "#",
-          description:
-            "Centralize visibility, automate playbooks, and reduce manual triage",
-        },
-        {
-          label: "Real-time Threat Monitoring",
-          href: "#",
-          description: "Spot and act on threats as they happen",
-        },
-        {
-          label: "KYC & Fraud Protection",
-          href: "#",
-          description:
-            "Detect identity fraud and malicious account behavior early",
-        },
-      ],
-    },
-    {
-      label: "Documentation",
-      dropdownOptions: [
-        {
-          label: "Fraud APIs",
-          href: "#",
-          description:
-            "Fraud-aware APIs equipped with tools to monitor, detect and block suspicious behavior across digital platforms",
-        },
-        {
-          label: "Authentication SDK",
-          href: "#",
-          description:
-            "Secure user and system with scrubbe authentication with features",
-        },
-      ],
-    },
-    // {
-    //   label: "Pricing",
-    //   dropdownOptions: [
-    //     {
-    //       label: "Authentication SDK Pricing",
-    //       href: "#",
-    //     },
-    //     {
-    //       label: "SIEM and SOAR Monitoring Pricing",
-    //       href: "#",
-    //     },
-    //     {
-    //       label: "Talk To Sales",
-    //       href: "#",
-    //     },
-    //   ],
-    // },
-    // {
-    //   label: "More",
-    //   dropdownOptions: [
-    //     { label: "Knowledge base", href: "#" },
-    //     { label: "Security and Trust", href: "#" },
-    //     { label: "Case Studies", href: "#" },
-    //     { label: "Blog (Technical and Industry Post)", href: "#" },
-    //     { label: "White Papers", href: "#" },
-    //     { label: "Careers", href: "#" },
-    //     { label: "Compliance Checklist", href: "#" },
-    //     { label: "About Us", href: "#" },
-    //   ],
-    // },
-  ];
-
-  // Handle search button click
-  const handleSearchClick = () => {
-    setIsSearchModalOpen(true);
-  };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   return (
-    <>
-      {/* NewNavbar Container */}
-      <section className="w-full h-auto bg-white xl:bg-colorScBlack py-3  sticky top-0 z-50">
+    <div
+      ref={ref}
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1 px-0.5 py-1 text-[11.5px] font-bold tracking-wider text-gray-600 hover:text-gray-900 transition-colors bg-transparent border-none cursor-pointer"
+      >
+        {item.label}
         <motion.div
-          initial={{ y: -10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{
-            duration: 1,
-            type: "tween",
-          }}
-          className=" w-full  flex justify-center"
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
         >
-          <nav
-            className={`flex ${textColor} h-16 w-full max-w-[1540px] justify-between items-center px-4 md:px-6 lg:px-10 xl:px-20 sticky top-0 z-50  shadow-sm`}
-          >
-            {/* Line throught the navbar */}
-            <div className=" absolute bg-white w-[80%] h-[33px] mx-4 left-[10%] hidden xl:flex " />
-            {/* Logo */}
-            <Link
-              href="/"
-              className="relative  w-[130px] h-[40px] sm:w-[160px] sm:h-[50px] lg:w-[180px] lg:h-[60px] bg-white rounded-full "
-            >
-              <Image
-                src="/scrubbe-logo-01.png"
-                alt="scrubbe-logo-01.png"
-                fill
-                sizes="(min-width: 300px) 100vw"
-                className="object-contain scale-75 "
-              />
-            </Link>
-
-            {/* Mobile Menu Button */}
-            <div className="flex items-center gap-3 xl:hidden">
-              <button
-                className="p-2 rounded-full hover:bg-gray-100 cursor-pointer"
-                onClick={handleSearchClick}
-              >
-                <RiSearchLine size={20} />
-              </button>
-              <div className="relative group" ref={statusFilterRef}>
-                <button
-                  onClick={() => setIsLanguageModalOpen((prev) => !prev)}
-                  className="p-2 rounded-full text-black cursor-pointer"
-                >
-                  <FiGlobe size={24} />
-                </button>
-                {isLanguageModalOpen && (
-                  <div className=" w-[130px] border z-50 border-gray-200 p-2 absolute   h-fit bg-white rounded-md top-full left-1/2 transform -translate-x-1/2 mt-1">
-                    <div className="text-sm cursor-pointer text-gray-500 px-2 py-1 hover:bg-colorScBlue hover:text-white rounded-md transition-colors">
-                      English
-                    </div>
-                    <div className="text-sm cursor-pointer text-gray-500 px-2 py-1 hover:bg-colorScBlue hover:text-white rounded-md transition-colors">
-                      French
-                    </div>
-                    <div className="text-sm cursor-pointer text-gray-500 px-2 py-1 hover:bg-colorScBlue hover:text-white rounded-md transition-colors">
-                      Spanish
-                    </div>
-                    <div className="text-sm cursor-pointer text-gray-500 px-2 py-1 hover:bg-colorScBlue hover:text-white rounded-md transition-colors">
-                      German
-                    </div>
-                  </div>
-                )}
-              </div>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
-              >
-                <GiHamburgerMenu size={20} />
-              </button>
-            </div>
-
-            {/* Desktop Navigation Menu */}
-            <div className="hidden xl:flex items-center justify-center flex-1 ml-8">
-              {menuItems.map((item) => (
-                <div key={item.label} className="relative group">
-                  {item.dropdownOptions ? (
-                    <>
-                      <button
-                        className={`${textColor} hover:text-blue-600 font-medium transition-colors flex justify-center gap-1 items-center cursor-pointer whitespace-nowrap py-2   w-[141px] h-[40px]  sm:h-[50px] lg:w-[155px] lg:h-[60px] bg-white rounded-3xl`}
-                      >
-                        {item.label} <VscChevronDown />
-                      </button>
-
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 bg-white shadow-lg rounded-lg w-[630px] z-50 border border-gray-200 py-4 px-6 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
-                        <div className="grid grid-cols-2 gap-2">
-                          {item.dropdownOptions.map((option) => (
-                            <Link
-                              key={option.label}
-                              href={option.href}
-                              className={`block rounded-lg hover:bg-blue-50 transition-colors relative overflow-hidden group/item ${
-                                option.description ? "p-3" : "py-1 px-3"
-                              }`}
-                            >
-                              {/* Left border that appears on hover */}
-                              <div className="absolute left-0 top-0 h-full w-1 bg-transparent group-hover/item:bg-blue-600 transition-colors"></div>
-
-                              <h3
-                                className={`font-medium ${textColor} group-hover/item:text-blue-600 group-hover/item:underline transition-colors`}
-                              >
-                                {option.label}
-                              </h3>
-                              {option.description && (
-                                <p className="text-sm text-gray-500 mt-1 group-hover/item:text-blue-500 transition-colors">
-                                  {option.description}
-                                </p>
-                              )}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <Link
-                      href={item.href || "#"}
-                      className={`${textColor} hover:text-blue-600 transition-colors flex justify-center items-center cursor-pointer whitespace-nowrap py-2`}
-                    >
-                      {item.label}
-                    </Link>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Desktop Right Menu */}
-            <div className="hidden xl:flex items-center z-10 ">
-              <div className="flex justify-center items-center gap-2  h-[40px] sm:h-[50px] sm:w-[140px] lg:h-[60px] bg-white rounded-3xl">
-                <button
-                  className="p-2 rounded-full text-black cursor-pointer"
-                  onClick={handleSearchClick}
-                >
-                  <RiSearchLine size={24} />
-                </button>
-                <div className="relative group" ref={statusFilterRef}>
-                  <button
-                    onClick={() => setIsLanguageModalOpen((prev) => !prev)}
-                    className="p-2 rounded-full text-black cursor-pointer"
-                  >
-                    <FiGlobe size={24} />
-                  </button>
-                  {isLanguageModalOpen && (
-                    <div className=" w-[130px] border z-50 border-gray-200 p-2 absolute   h-fit bg-white rounded-md top-full left-1/2 transform -translate-x-1/2 mt-1">
-                      <div className="text-sm cursor-pointer text-gray-500 px-2 py-1 hover:bg-colorScBlue hover:text-white rounded-md transition-colors">
-                        English
-                      </div>
-                      <div className="text-sm cursor-pointer text-gray-500 px-2 py-1 hover:bg-colorScBlue hover:text-white rounded-md transition-colors">
-                        French
-                      </div>
-                      <div className="text-sm cursor-pointer text-gray-500 px-2 py-1 hover:bg-colorScBlue hover:text-white rounded-md transition-colors">
-                        Spanish
-                      </div>
-                      <div className="text-sm cursor-pointer text-gray-500 px-2 py-1 hover:bg-colorScBlue hover:text-white rounded-md transition-colors">
-                        German
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-center items-center gap-2  min-w-[141px] h-[40px] sm:min-w-[176px] sm:h-[50px] lg:min-w-[180px] lg:h-[60px] bg-white rounded-3xl px-4">
-                <div className="animated-gradient p-[2px] rounded-3xl">
-                  <Link
-                    href={"/ezra"}
-                    className=" bg-[#111827] gap-2 px-6 py-2 text-white rounded-3xl font-medium flex items-center"
-                  >
-                    Ezra Ai
-                    <img src="/ezrastar1.svg" alt="ezrastar1.svg" />
-                    {/* <PiStarFourFill className=" text-blue-500" size={22} /> */}
-                  </Link>
-                </div>
-                <Link
-                  href="/auth/signin"
-                  className="px-6 py-2 rounded-2xl font-medium text-colorScBlue border border-colorScBlue hover:border-blue-700 transition-colors whitespace-nowrap focus:outline-none"
-                >
-                  Get Started
-                </Link>
-              </div>
-            </div>
-          </nav>
+          <ChevronDown size={12} className="text-gray-400" />
         </motion.div>
+      </button>
+      <DropdownMenu item={item} open={open} />
+    </div>
+  );
+}
 
-        {/* Mobile Menu Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-white z-50 xl:hidden ">
-            {/* Modal Header */}
-            <div className="flex justify-between items-center px-4 h-16 border-b border-gray-200">
-              <Link
-                href="/"
-                onClick={() => setIsModalOpen(false)}
-                className="relative w-[141px] h-[40px] sm:w-[176px] sm:h-[50px] lg:w-[211px] lg:h-[60px]"
-              >
-                <Image
-                  src="/scrubbe-logo-01.png"
-                  alt="scrubbe-logo-01.png"
-                  fill
-                  sizes="(min-width: 360px) 100vw"
-                  className="object-contain"
-                />
-              </Link>
+// ─────────────────────────────────────────────────────────────────
+// Mobile menu
+// ─────────────────────────────────────────────────────────────────
+
+function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/20 z-40"
+            onClick={onClose}
+          />
+
+          {/* Drawer */}
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 320, damping: 34 }}
+            className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-[360px] bg-white z-50 flex flex-col shadow-2xl overflow-y-auto"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <ScrubbeLogo />
               <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                onClick={onClose}
+                className="w-9 h-9 rounded-lg flex items-center justify-center bg-gray-100 border-none cursor-pointer hover:bg-gray-200 transition-colors"
               >
-                <IoMdClose size={24} className={textColor} />
+                <X size={18} className="text-gray-600" />
               </button>
             </div>
 
-            {/* Modal Content */}
-            <div className="px-4 py-6 space-y-4 overflow-y-auto max-h-[calc(100vh-64px)]">
-              {menuItems.map((item) => (
-                <div key={item.label} className="w-full">
-                  {item.dropdownOptions ? (
-                    <>
-                      <button
-                        onClick={() => toggleMobileDropdown(item.label)}
-                        className={`flex items-center justify-between w-full text-lg font-medium ${textColor} hover:text-blue-600 transition-colors py-2`}
-                      >
-                        <span>{item.label}</span>
-                        {expandedMenus[item.label] ? (
-                          <VscChevronUp className="ml-2" />
-                        ) : (
-                          <VscChevronDown className="ml-2" />
-                        )}
-                      </button>
+            {/* Nav items */}
+            <div className="flex-1 px-4 py-4 space-y-1">
+              {NAV_ITEMS.map((item, i) => (
+                <div key={item.label}>
+                  <button
+                    onClick={() =>
+                      setExpandedIndex(expandedIndex === i ? null : i)
+                    }
+                    className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-left bg-transparent border-none cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-[13px] font-bold tracking-wider text-gray-700">
+                      {item.label}
+                    </span>
+                    <motion.div
+                      animate={{ rotate: expandedIndex === i ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ChevronDown size={14} className="text-gray-400" />
+                    </motion.div>
+                  </button>
 
-                      {expandedMenus[item.label] && (
-                        <div className="mt-1 space-y-2">
-                          {item.dropdownOptions.map((option) => (
+                  <AnimatePresence initial={false}>
+                    {expandedIndex === i && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{
+                          duration: 0.25,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <div className="pl-3 pb-2 space-y-0.5">
+                          {item.links.map((link) => (
                             <Link
-                              key={option.label}
-                              href={option.href}
-                              onClick={() => setIsModalOpen(false)}
-                              className={`block px-4 py-3 rounded-lg bg-gray-50 hover:bg-blue-50 transition-colors group relative`}
+                              key={link.href}
+                              href={link.href}
+                              onClick={onClose}
+                              className="flex flex-col px-3 py-2.5 rounded-lg hover:bg-emerald-50 transition-colors group"
                             >
-                              <div className="absolute left-0 top-0 h-full w-1 bg-transparent group-hover:bg-blue-600 transition-colors"></div>
-                              <span
-                                className={`block font-medium ${textColor} group-hover:text-blue-600 group-hover:underline transition-colors`}
-                              >
-                                {option.label}
+                              <span className="text-[13px] font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors">
+                                {link.title}
                               </span>
-                              {option.description && (
-                                <span className="block text-sm text-gray-500 mt-1 group-hover:text-blue-500 transition-colors">
-                                  {option.description}
+                              {link.desc && (
+                                <span className="text-[11.5px] text-gray-400 mt-0.5">
+                                  {link.desc}
                                 </span>
                               )}
                             </Link>
                           ))}
                         </div>
-                      )}
-                    </>
-                  ) : (
-                    <Link
-                      href={item.href || "#"}
-                      onClick={() => setIsModalOpen(false)}
-                      className={`block py-2 text-lg font-medium ${textColor} hover:text-blue-600 transition-colors`}
-                    >
-                      {item.label}
-                    </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom CTAs */}
+            <div className="px-5 py-5 border-t border-gray-100 space-y-3">
+              <Link
+                href="/docs"
+                onClick={onClose}
+                className="block w-full text-center py-3 rounded-xl text-[14px] font-bold text-emerald-600 border border-emerald-500 hover:bg-emerald-50 transition-colors"
+              >
+                Docs
+              </Link>
+              <Link
+                href="/get-started"
+                onClick={onClose}
+                className="block w-full text-center py-3 rounded-xl text-[14px] font-bold text-white border-none"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
+                }}
+              >
+                Get Started
+              </Link>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Main Navbar
+// ─────────────────────────────────────────────────────────────────
+
+export default function Navbar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <>
+      <header
+        className="fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200"
+        style={{ backdropFilter: "blur(12px)" }}
+      >
+        <div className="max-w-[1400px] mx-auto px-5 h-[60px] flex items-center">
+          {/* Logo */}
+          <ScrubbeLogo />
+
+          {/* Desktop nav — divider after logo */}
+          <div className="hidden xl:flex items-center flex-1">
+            <div className="w-px h-8 bg-gray-200 mx-5 shrink-0" />
+
+            {/* Nav items with vertical dividers between each */}
+            <nav className="flex items-center">
+              {NAV_ITEMS.map((item, i) => (
+                <div key={item.label} className="flex items-center">
+                  <NavItem item={item} />
+                  {i < NAV_ITEMS.length - 1 && (
+                    <div className="w-px h-5 bg-gray-200 mx-3 shrink-0" />
                   )}
                 </div>
               ))}
-
-              <div className="pt-6 border-t border-gray-200 space-y-3">
-                <div className="animated-gradient p-[2px] rounded-3xl">
-                  <Link
-                    href={"/ezra"}
-                    className=" bg-[#111827] w-full gap-2 px-6 py-2 text-white rounded-3xl font-medium flex items-center justify-center"
-                  >
-                    Ezra Ai
-                    <img src="/ezrastar1.svg" />
-                    {/* <PiStarFourFill className=" text-blue-500" size={22} /> */}
-                  </Link>
-                </div>
-                <Link
-                  href="/auth/signin"
-                  onClick={() => setIsModalOpen(false)}
-                  className="block w-full text-center py-3 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors focus:outline-none text-lg font-medium"
-                >
-                  Login
-                </Link>
-              </div>
-            </div>
+            </nav>
           </div>
-        )}
 
-        {/* Search Modal Component */}
-        <SearchModal
-          isOpen={isSearchModalOpen}
-          onClose={() => setIsSearchModalOpen(false)}
-        />
-      </section>
+          {/* Desktop CTAs */}
+          <div className="hidden xl:flex items-center gap-3 ml-auto">
+            <Link
+              href="/docs"
+              className="px-5 py-2 rounded-lg text-[13.5px] font-bold text-emerald-600 border border-emerald-500 hover:bg-emerald-50 transition-colors"
+            >
+              Docs
+            </Link>
+            <Link
+              href="/get-started"
+              className="px-5 py-2.5 rounded-lg text-[13.5px] font-bold text-white border-none transition-all hover:brightness-110"
+              style={{
+                background:
+                  "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
+              }}
+            >
+              Get Started
+            </Link>
+          </div>
+
+          {/* Mobile: right-side CTAs + hamburger */}
+          <div className="flex xl:hidden items-center gap-3 ml-auto">
+            <Link
+              href="/get-started"
+              className="px-4 py-2 rounded-lg text-[13px] font-bold text-white border-none"
+              style={{
+                background: "linear-gradient(90deg, #1a2a1a 0%, #22c55e 100%)",
+              }}
+            >
+              Get Started
+            </Link>
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="w-9 h-9 rounded-lg flex items-center justify-center bg-gray-100 border-none cursor-pointer hover:bg-gray-200 transition-colors"
+            >
+              <Menu size={18} className="text-gray-700" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Spacer so page content doesn't hide under fixed nav */}
+      <div className="h-[60px]" />
+
+      {/* Mobile drawer */}
+      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
     </>
   );
-};
-
-export default NewNavbar;
+}

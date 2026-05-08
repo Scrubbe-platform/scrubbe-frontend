@@ -398,7 +398,7 @@ export default function APISection() {
   const [activeLang, setActiveLang] = useState<Lang>("TypeScript");
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
-
+  const [showResponse, setShowResponse] = useState(false);
   return (
     <div ref={ref} className="w-full bg-white">
       {/* ── HERO BLOCK ── */}
@@ -498,6 +498,7 @@ export default function APISection() {
                 background: "linear-gradient(90deg, #1a2a1a, #22c55e)",
                 color: "#fff",
               }}
+              onClick={() => setShowResponse(true)}
             >
               Try it
             </button>
@@ -551,9 +552,11 @@ export default function APISection() {
                   201 CREATED
                 </span>
               </div>
-              <pre className="p-5 text-[12px] font-mono text-gray-600 leading-6 overflow-auto">
-                {RESPONSE_CODE}
-              </pre>
+              {showResponse && (
+                <pre className="p-5 text-[12px] font-mono text-gray-600 leading-6 overflow-auto">
+                  {RESPONSE_CODE}
+                </pre>
+              )}
             </div>
           </div>
         </motion.div>
@@ -620,7 +623,7 @@ export default function APISection() {
               transition={{ duration: 0.45, delay: 0.07 * i }}
               className="border border-gray-200 rounded-xl p-5"
             >
-              <div className="text-2xl mb-3">{cap.icon}</div>
+              {/* <div className="text-2xl mb-3">{cap.icon}</div> */}
               <h4 className="text-[14px] font-bold text-gray-900 mb-4">
                 {cap.title}
               </h4>

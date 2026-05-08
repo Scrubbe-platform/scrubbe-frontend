@@ -370,7 +370,7 @@ export default function HeroSection() {
       </div>
 
       {/* Floating card */}
-      <FloatingCard text={slide.card} />
+      {/* <FloatingCard text={slide.card} /> */}
     </section>
   );
 }

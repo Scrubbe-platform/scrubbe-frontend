@@ -224,7 +224,7 @@ export default function HowItWorks() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.97 }}
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative w-full h-full min-h-[220px]"
+                  className="relative w-full h-full min-h-[310px]"
                 >
                   <Image
                     src={tab.image}

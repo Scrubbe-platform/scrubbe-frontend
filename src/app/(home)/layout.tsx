@@ -10,7 +10,7 @@ const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 const HomeLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
-      {IS_STANDALONE ? <Navbar /> : <NewNavbar />}
+      <NewNavbar />
       {children}
       <CookieConsentModal />
       <CookieToggleButton />
