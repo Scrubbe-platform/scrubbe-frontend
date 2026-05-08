@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import PlaybookHeader from "./_modules/components/Header";
 import PlaybookSidebar from "./_modules/components/Sidebar";
@@ -27,7 +28,8 @@ const page = () => {
               <span>/{incident.severity}</span>
               <span>/{incident.status}</span>
               <span className="text-slate-500">
-                Playbook intelligence is anchored to the selected incident identity.
+                Playbook intelligence is anchored to the selected incident
+                identity.
               </span>
             </div>
           </div>

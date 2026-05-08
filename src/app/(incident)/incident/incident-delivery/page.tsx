@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import IncidentDelivery from "./_modules/components/IncidentDelivery";
 import IncidentRouteShell from "@/components/IMS/incident/IncidentRouteShell";
@@ -16,7 +17,8 @@ const page = () => {
               <span>/{incident.environment || "runtime"}</span>
               <span>/{incident.region || "global"}</span>
               <span className="text-slate-500">
-                Delivery routing is following the currently selected live incident.
+                Delivery routing is following the currently selected live
+                incident.
               </span>
             </div>
           </div>
