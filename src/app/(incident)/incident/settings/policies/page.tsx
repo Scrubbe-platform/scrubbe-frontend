@@ -66,7 +66,7 @@ const PoliciesModule = () => {
     <SettingWrapper
       title="Policies"
       description="When and how Scrubbe can act"
-      sub="These settings are the "governor" of multi-agent orchestration."
+      sub='These settings are the "governor" of multi-agent orchestration.'
     >
       <div className="grid 2xl:grid-cols-2 gap-8 items-start pt-4">
         {/* LEFT COLUMN: AUTO-ACTIVATION */}
@@ -221,7 +221,7 @@ const GateToggle = ({ label, active, onToggle }: { label: string; active: boolea
     <p className="text-[#64748B] text-xs leading-normal">
       {label === "Require approval for merges"
         ? "Even if a patch is safe, humans should approve merging to main."
-        : "Block "execute" in production unless approver signs off."}
+        : 'Block "execute" in production unless approver signs off.'}
     </p>
   </div>
 );

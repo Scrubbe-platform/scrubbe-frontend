@@ -58,7 +58,8 @@ function IncidentOverview({
   });
 
   const remediation = analysis?.remediation;
-  const confidence = remediation?.confidence ?? analysis?.situation?.confidence ?? undefined;
+  const confidence =
+    remediation?.confidence ?? analysis?.rootCause?.confidence ?? undefined;
 
   const serviceName =
     activeIncident.service || activeIncident.affectedSystem || "service";
