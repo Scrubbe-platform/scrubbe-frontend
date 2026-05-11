@@ -66,7 +66,7 @@ const PoliciesModule = () => {
     <SettingWrapper
       title="Policies"
       description="When and how Scrubbe can act"
-      sub='These settings are the "governor" of multi-agent orchestration.'
+      sub="These settings are the governor of multi-agent orchestration."
     >
       <div className="grid 2xl:grid-cols-2 gap-8 items-start pt-4">
         {/* LEFT COLUMN: AUTO-ACTIVATION */}
@@ -80,7 +80,10 @@ const PoliciesModule = () => {
                 <span className="text-white text-[15px] font-bold leading-tight max-w-[180px]">
                   Auto-activate playbooks for delivery incidents
                 </span>
-                <Toggle active={autoActivate} onToggle={() => setAutoActivate((v) => !v)} />
+                <Toggle
+                  active={autoActivate}
+                  onToggle={() => setAutoActivate((v) => !v)}
+                />
               </div>
               <p className="text-[#64748B] text-xs leading-normal">
                 Creates a remediation plan immediately after incident creation.
@@ -103,7 +106,9 @@ const PoliciesModule = () => {
                 />
                 <div className="flex justify-between text-[10px] text-[#64748B] mt-2 font-bold uppercase tracking-wider">
                   <span>0</span>
-                  <span className="text-[#D1D5DB]">threshold: {threshold}%</span>
+                  <span className="text-[#D1D5DB]">
+                    threshold: {threshold}%
+                  </span>
                   <span>100</span>
                 </div>
               </div>
@@ -112,7 +117,9 @@ const PoliciesModule = () => {
             {/* SUPPRESSION RULES */}
             <div className="p-5 border border-neutral-500 rounded-2xl space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-white text-[15px] font-bold">Suppression rules</span>
+                <span className="text-white text-[15px] font-bold">
+                  Suppression rules
+                </span>
                 <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
                   Edit
                 </button>
@@ -122,7 +129,9 @@ const PoliciesModule = () => {
               </p>
               <div className="flex items-center gap-3 p-2.5 border border-neutral-500 rounded-xl bg-[#0B1224]/50">
                 <List size={14} className="text-[#A5B4FC]" />
-                <span className="text-[11px] text-[#D1D5DB]">suppress after 5 repeats / 10 min</span>
+                <span className="text-[11px] text-[#D1D5DB]">
+                  suppress after 5 repeats / 10 min
+                </span>
               </div>
             </div>
           </div>
@@ -131,8 +140,12 @@ const PoliciesModule = () => {
         {/* RIGHT COLUMN: HUMAN GATES */}
         <section className="bg-transparent border border-neutral-500 rounded-[24px] p-6 space-y-6">
           <div className="space-y-1 px-1">
-            <h3 className="text-white font-bold text-lg">Human gates + blast radius</h3>
-            <p className="text-[#64748B] text-xs">Security defaults applied org-wide.</p>
+            <h3 className="text-white font-bold text-lg">
+              Human gates + blast radius
+            </h3>
+            <p className="text-[#64748B] text-xs">
+              Security defaults applied org-wide.
+            </p>
           </div>
 
           <div className="space-y-4">
@@ -150,12 +163,16 @@ const PoliciesModule = () => {
             {/* BLAST RADIUS LIMITS */}
             <div className="p-6 border border-neutral-500 rounded-2xl space-y-5">
               <div className="flex justify-between items-center">
-                <span className="text-white text-[15px] font-bold">Blast radius limits</span>
+                <span className="text-white text-[15px] font-bold">
+                  Blast radius limits
+                </span>
                 <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
                   Configure
                 </button>
               </div>
-              <p className="text-[#64748B] text-xs">Prevent large-scale changes by default.</p>
+              <p className="text-[#64748B] text-xs">
+                Prevent large-scale changes by default.
+              </p>
 
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -180,7 +197,10 @@ const PoliciesModule = () => {
                     options={[
                       { value: "PR-only", label: "PR-only" },
                       { value: "Staging only", label: "Staging only" },
-                      { value: "Production (gated)", label: "Production (gated)" },
+                      {
+                        value: "Production (gated)",
+                        label: "Production (gated)",
+                      },
                     ]}
                   />
                 </div>
@@ -192,7 +212,12 @@ const PoliciesModule = () => {
 
       {/* SAVE BUTTON */}
       <div className="pt-6 flex justify-end">
-        <CButton className="w-fit px-4" onClick={() => save()} isLoading={isPending} disabled={isPending}>
+        <CButton
+          className="w-fit px-4"
+          onClick={() => save()}
+          isLoading={isPending}
+          disabled={isPending}
+        >
           Save
         </CButton>
       </div>
@@ -200,16 +225,36 @@ const PoliciesModule = () => {
   );
 };
 
-const Toggle = ({ active, onToggle }: { active: boolean; onToggle: () => void }) => (
+const Toggle = ({
+  active,
+  onToggle,
+}: {
+  active: boolean;
+  onToggle: () => void;
+}) => (
   <button
     onClick={onToggle}
-    className={`w-12 h-6 rounded-full relative transition-colors duration-200 ${active ? "bg-[#4ADE80]" : "bg-neutral-500"}`}
+    className={`w-12 h-6 rounded-full relative transition-colors duration-200 ${
+      active ? "bg-[#4ADE80]" : "bg-neutral-500"
+    }`}
   >
-    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 ${active ? "left-7" : "left-1"}`} />
+    <div
+      className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 ${
+        active ? "left-7" : "left-1"
+      }`}
+    />
   </button>
 );
 
-const GateToggle = ({ label, active, onToggle }: { label: string; active: boolean; onToggle: () => void }) => (
+const GateToggle = ({
+  label,
+  active,
+  onToggle,
+}: {
+  label: string;
+  active: boolean;
+  onToggle: () => void;
+}) => (
   <div className="p-5 border border-neutral-500 rounded-2xl space-y-3">
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-2 px-3 py-1.5 border border-neutral-500 rounded-xl bg-[#0B1224]/50">
@@ -221,7 +266,7 @@ const GateToggle = ({ label, active, onToggle }: { label: string; active: boolea
     <p className="text-[#64748B] text-xs leading-normal">
       {label === "Require approval for merges"
         ? "Even if a patch is safe, humans should approve merging to main."
-        : 'Block "execute" in production unless approver signs off.'}
+        : "Block execute in production unless approver signs off."}
     </p>
   </div>
 );

@@ -1,356 +1,244 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
-import React from "react";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2, // Stagger delay for each major section
-    },
-  },
-};
+import { useRef, useState } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
+import Image from "next/image";
 
-const itemVariants = {
-  hidden: { y: 50, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.6,
-      ease: "easeOut",
-    },
+// ─────────────────────────────────────────────────────────────────
+// Tab data
+// ─────────────────────────────────────────────────────────────────
+
+const TABS = [
+  {
+    id: 1,
+    num: "01",
+    label: "Detect",
+    title: "Detect",
+    desc: "Webhooks from GitHub, Kubernetes, Datadog, and PagerDuty arrive simultaneously. Scrubbe absorbs them all and collapses 40 duplicate alerts in 30 seconds into a single incident. Your engineers see one clear signal, not a flood.",
+    image: "/IMS/how/detect.jpg",
   },
-};
-const HowItWorks = () => {
+  {
+    id: 2,
+    num: "02",
+    label: "Pattern Match",
+    title: "Pattern Match",
+    desc: "Scrubbe checks the signal against your organisation's policy rules to decide whether an incident should be raised. A single pod restart isn't automatically a crisis. Context matters — and Scrubbe applies it deterministically every time.",
+    image: "/IMS/how/pattern.jpg",
+  },
+  {
+    id: 3,
+    num: "03",
+    label: "Investigate",
+    title: "Investigate",
+    desc: "The right playbooks are matched against the incident with a confidence score. Ranked remediation options are surfaced — including past resolutions for the same pattern. Your team sees what worked last time, immediately.",
+    image: "/IMS/how/investigate.jpg",
+  },
+  {
+    id: 4,
+    num: "04",
+    label: "Blast Radius",
+    title: "Blast Radius",
+    desc: "Before any fix is proposed, Scrubbe maps exactly which services would be affected. If the impact is unclear, the execution gate holds — it never assumes a fix is safe. Unknowns block action, not enable it.",
+    image: "/IMS/how/blast-radius.jpg",
+  },
+  {
+    id: 5,
+    num: "05",
+    label: "Guardrails",
+    title: "Guardrails",
+    desc: "Every proposed action passes through governance rules you define — operating hours, risk classification, reversibility, required approvers. Rules are stored as versioned data, not code. Results are logged with the exact rule version that evaluated them.",
+    image: "/IMS/how/guadrail.jpg",
+  },
+  {
+    id: 6,
+    num: "06",
+    label: "Execute & Learn",
+    title: "Execute & Learn",
+    desc: "The right playbooks are matched against the incident with a confidence score. Ranked remediation options are surfaced — including past resolutions for the same pattern. Your team sees what worked last time, immediately.",
+    image: "/IMS/how/execute.jpg",
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────
+// Main Section
+// ─────────────────────────────────────────────────────────────────
+
+export default function HowItWorks() {
+  const [active, setActive] = useState(1);
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  const tab = TABS.find((t) => t.id === active)!;
+
   return (
-    <div className="min-h-[700px] bg-[#060709]">
-      <motion.div
-        className="container mx-auto py-10 px-5 flex-col gap-6 flex max-w-7xl"
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-      >
-        <div>
-          <motion.h2
-            variants={itemVariants as any}
-            className=" text-4xl md:text-5xl text-white font-bigshotOne"
-          >
-            The{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-[#8250BE] to-[#8250BE]">
-              Incident Platform{" "}
-            </span>{" "}
-            Built Around How Teams Actually Work
-          </motion.h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 py-5 md:py-10">
-            <motion.div
-              variants={itemVariants as any}
-              className="flex flex-col justify-center gap-4"
+    <section
+      ref={ref}
+      className="relative w-full py-16 px-6 overflow-hidden"
+      style={{ background: "#f9fafb" }}
+    >
+      {/* Grid background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <svg
+          className="w-full h-full opacity-60"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern
+              id="hwgrid"
+              width="48"
+              height="48"
+              patternUnits="userSpaceOnUse"
             >
-              <div className="flex flex-col gap-3">
-                <p className="text-lg font-semibold text-white">
-                  Auto-Deployment Failure Tickets
-                </p>
-                <p className="text-base text-white max-w-lg">
-                  Failed deploys from GitHub, GitLab and other repos
-                  automatically create incidents with linked commits, diff
-                  context, and code intelligence attached
-                </p>
-                <Link href={""}>
-                  <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
-                    <p>See code intelligence</p>
-                    <ArrowRight className="size-3" />
-                  </div>
-                </Link>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <p className="text-lg font-semibold text-white">
-                  Code Intelligence Engine
-                </p>
-                <p className="text-base text-white max-w-lg">
-                  Scrubbe inspects failing deployments and proposes likely
-                  patches, rollbacks, or config changes so engineers move faster
-                  than generic runbooks.
-                </p>
-                <Link href={""}>
-                  <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
-                    <p>How it compares</p>
-                    <ArrowRight className="size-3" />
-                  </div>
-                </Link>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <p className="text-lg font-semibold text-white">
-                  Fraud & Risk-Triggered Incidents
-                </p>
-                <p className="text-base text-white max-w-lg">
-                  Connect fraud metrics, risk scores, or custom KPIs. Configure
-                  thresholds to auto-open incidents and trigger workflows.
-                </p>
-                <Link href={""}>
-                  <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
-                    <p>Connect Fraud Signals</p>
-                    <ArrowRight className="size-3" />
-                  </div>
-                </Link>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <p className="text-lg font-semibold text-white">
-                  Unified Timeline with Ezra
-                </p>
-                <p className="text-base text-white max-w-lg">
-                  Logs, metrics, deploys, fraud events, chat, and manual notes
-                  stitched together and visualized through Ezra — one place to
-                  see what actually happened.
-                </p>
-                {/* <Link href={""}>
-                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
-                  <p>Connect Fraud Signals</p>
-                  <ArrowRight className="size-3" />
-                </div>
-              </Link> */}
-              </div>
-            </motion.div>
-            <motion.div
-              variants={itemVariants as any}
-              className="relative group z-10"
-            >
-              <div className="w-full h-full absolute -z-10 bg-cyan-500 scale-50 group-hover:scale-80 blur-3xl transition-all duration-200 ease-linear" />
-              <img
-                src="/IMS/incident-widget.jpg"
-                alt="timeline"
-                className="border border-cyan-500/30 rounded-2xl"
+              <path
+                d="M 48 0 L 0 0 0 48"
+                fill="none"
+                stroke="#e5e7eb"
+                strokeWidth="1"
               />
-            </motion.div>
-          </div>
-        </div>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#hwgrid)" />
+        </svg>
+      </div>
 
-        <div className=" py-10">
-          <motion.h2
-            variants={itemVariants as any}
-            className=" text-4xl md:text-5xl text-white font-bigshotOne"
-          >
-            See the{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500  to-[#8250BE]">
-              {" "}
-              Real Root Cause
-            </span>{" "}
-            — Not Just the Alert{" "}
-          </motion.h2>
-          <motion.div variants={itemVariants as any} className="py-5">
-            <div className="flex flex-col gap-3">
-              <p className="text-lg font-semibold text-white">
-                Most tools stop at alerting. Scrubbe’s Magic Insight Engine
-                reconstructs the incident from before the alert fired —
-                correlating deploys, latency, error spikes, chat messages, and
-                fraud signals into one clear story.
-              </p>
-              <ul className=" list-disc space-y-3 text-white text-base pl-4">
-                <li>Automatic timeline reconstruction </li>
-                <li>Single-sentence root cause explanation</li>
-                <li>Similarity detection with past incidents</li>
-                <li>Service impact and blast radius view</li>
-              </ul>
-              <Link href={""}>
-                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
-                  <p>See how we compare</p>
-                  <ArrowRight className="size-3" />
-                </div>
-              </Link>
+      <div className="relative z-10 max-w-[1200px] mx-auto">
+        {/* Heading */}
+        <motion.h2
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="font-bold text-gray-950 leading-[1.08] tracking-[-0.03em] mb-4"
+          style={{ fontSize: "clamp(28px, 3.5vw, 60px)" }}
+        >
+          A system that replaces manual incident response.
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0, y: 14 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+          className="text-[14.5px] text-gray-500 leading-relaxed mb-10 max-w-lg"
+        >
+          Scrubbe performs the full decision loop under policy: it understands
+          the incident, selects the safest action, validates risk, and executes
+          only when the gate clears.
+        </motion.p>
+
+        {/* Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="border border-gray-200 rounded-xl overflow-hidden bg-white"
+        >
+          {/* Tab bar */}
+          <div className="grid grid-cols-6 border-b border-gray-200">
+            {TABS.map((t) => {
+              const isActive = t.id === active;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setActive(t.id)}
+                  className="relative flex flex-col gap-0.5 px-4 py-4 text-left cursor-pointer border-none bg-transparent transition-colors"
+                  style={{
+                    borderRight: t.id < 6 ? "1px solid #e5e7eb" : "none",
+                  }}
+                >
+                  {/* Step number — green when active */}
+                  <span
+                    className="text-[11px] font-bold block mb-0.5"
+                    style={{
+                      color: isActive ? "#22c55e" : "#9ca3af",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    {t.num}
+                  </span>
+
+                  {/* Tab label */}
+                  <span
+                    className="text-[13px] font-semibold leading-snug"
+                    style={{ color: isActive ? "#111827" : "#6b7280" }}
+                  >
+                    {t.label}
+                  </span>
+
+                  {/* Active green underline */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="tab-underline"
+                      className="absolute bottom-0 left-0 right-0 h-[2.5px] rounded-t"
+                      style={{ background: "#22c55e" }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 34,
+                      }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tab content */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[320px]">
+            {/* Left: number + title + desc */}
+            <div
+              className="flex items-start gap-6 "
+              style={{ borderRight: "1px solid #e5e7eb" }}
+            >
+              {/* Large background number */}
+              <span
+                className="font-bold leading-none shrink-0 select-none mt-1 text-center px-2 md:px-3"
+                style={{ fontSize: "clamp(52px, 5vw, 80px)", color: "#e5e7eb" }}
+              >
+                {tab.num}
+              </span>
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={tab.id}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="bg-gray-50 p-8 w-full h-full"
+                >
+                  <h3 className="text-[22px] font-black text-gray-900 tracking-tight mb-4">
+                    {tab.title}
+                  </h3>
+                  <p className="text-[14.5px] text-gray-500 leading-relaxed max-w-sm">
+                    {tab.desc}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
             </div>
-          </motion.div>
-        </div>
 
-        <div className=" py-10">
-          <motion.h2
-            variants={itemVariants as any}
-            className=" text-4xl md:text-5xl text-white font-bigshotOne max-w-4xl"
-          >
-            Code Intelligence — From Failed Deploy to{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500  to-[#8250BE]">
-              Suggested Fix{" "}
-            </span>
-          </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 py-5 md:py-10">
-            <motion.div
-              variants={itemVariants as any}
-              className="relative group z-10"
-            >
-              <div className="w-full h-full absolute -z-10 bg-cyan-500 scale-50 group-hover:scale-80 blur-3xl transition-all duration-200 ease-linear" />
-
-              <img
-                src="/IMS/intelligent-suggestion.svg"
-                alt="timeline"
-                className=""
-              />
-            </motion.div>
-
-            <motion.div
-              variants={itemVariants as any}
-              className="flex flex-col justify-center gap-4"
-            >
-              <p className="text-base font-semibold text-white">
-                When a deployment fails, Scrubbe’s Code Intelligence Engine
-                doesn’t just raise an incident — it inspects the failure,
-                understands what broke, and proposes a fix that’s ready to ship
-                through your pipeline.
-              </p>
-
-              <p className="text-lg font-semibold text-white">Pipeline-Aware</p>
-              <p className=" text-base text-white">
-                Ingests logs, stack traces, test output, and deploy metadata
-                from GitHub, GitLab, Bitbucket and more. Every suggestion is
-                grounded in the actual failure, not generic code samples.
-              </p>
-              <p className="text-lg font-semibold text-white">
-                PR-Ready Intelligence
-              </p>
-              <p className=" text-base text-white">
-                Generates diff-style patches you can review, approve, and merge
-                as a pull request — or apply to a staging branch for automatic
-                re-runs.
-              </p>
-              <p className="text-lg font-semibold text-white">Safe by Design</p>
-              <p className=" text-base text-white">
-                Configure behaviour by environment: auto-apply and re-test in
-                staging, intelligence-only for production, with full audit
-                trails and team approvals.{" "}
-              </p>
-              <ul className=" list-disc space-y-3 text-white text-base pl-4">
-                <li>
-                  Detects failing deploys and opens incidents automatically{" "}
-                </li>
-                <li>Proposes multiple fix options with confidence scores</li>
-                <li>Explains why the change works in plain language</li>
-                <li>Routes intelligence to the right team or channel</li>
-              </ul>
-
-              <Link href={""}>
-                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
-                  <p>Compare with copilot & more</p>
-                  <ArrowRight className="size-3" />
-                </div>
-              </Link>
-            </motion.div>
+            {/* Right: image slot */}
+            <div className="relative flex items-center justify-center p-8 bg-white">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={tab.id}
+                  initial={{ opacity: 0, scale: 0.97 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.97 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative w-full h-full min-h-[310px]"
+                >
+                  <Image
+                    src={tab.image}
+                    alt={tab.title}
+                    fill
+                    className="object-contain"
+                    priority={tab.id === 1}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
-        </div>
-
-        <div className=" py-10">
-          <motion.h2
-            variants={itemVariants as any}
-            className=" text-4xl md:text-5xl text-white font-bigshotOne"
-          >
-            On-Call Handover That{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-[#8250BE] to-[#8250BE]">
-              {" "}
-              Writes
-            </span>{" "}
-            Itself
-          </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 py-5 md:py-10">
-            <motion.div
-              variants={itemVariants as any}
-              className="flex flex-col justify-center gap-3"
-            >
-              <p className="text-lg font-semibold text-white max-w-lg">
-                Handover shouldn’t depend on how tired the last engineer was.
-                Scrubbe tracks incidents, actions, system health, and open
-                investigations then generates a clean summary for the next
-                on-call.
-              </p>
-              <p className="text-base text-white">Shift-level summaries</p>
-              <p className="text-base text-white">
-                Open incidents + next actions
-              </p>
-              <p className="text-base text-white">System health snapshot</p>
-              <p className="text-base text-white">
-                Mobile-ready handover view{" "}
-              </p>
-              <p className="text-base text-white">
-                Eliminates “what happened overnight?” confusion{" "}
-              </p>
-
-              <Link href={""}>
-                <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
-                  <p>See how we compare</p>
-                  <ArrowRight className="size-3" />
-                </div>
-              </Link>
-            </motion.div>
-            <motion.div
-              variants={itemVariants as any}
-              className="relative group z-10"
-            >
-              <div className="w-full h-full absolute -z-10 bg-cyan-500 scale-50 group-hover:scale-80 blur-3xl transition-all duration-200 ease-linear" />
-
-              <img
-                src="/IMS/on-call-schedule.svg"
-                alt="timeline"
-                className=""
-              />
-            </motion.div>
-          </div>
-        </div>
-
-        <div className=" py-10">
-          <motion.h2
-            variants={itemVariants as any}
-            className=" text-4xl md:text-5xl text-white font-bigshotOne"
-          >
-            Train for{" "}
-            <span className=" text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-[#8250BE] to-[#8250BE]">
-              {" "}
-              Real Outages{" "}
-            </span>{" "}
-            Before They Happen{" "}
-          </motion.h2>
-
-          <motion.div
-            variants={itemVariants as any}
-            className="flex flex-col justify-center gap-3"
-          >
-            <p className="text-lg font-semibold text-white max-w-lg">
-              Scrubbe analyzes your past incidents, clusters patterns, and turns
-              them into realistic simulations. Teams can rehearse real failures
-              in staging or shadow environments and actually get better at
-              incident response.
-            </p>
-            <p className="text-base text-white">
-              Patterns generated from real history
-            </p>
-            <p className="text-base text-white">
-              Chaos scenarios created automatically
-            </p>
-            <p className="text-base text-white">
-              Team scoring and response metrics
-            </p>
-            <p className="text-base text-white">Mobile-ready handover view</p>
-            <p className="text-base text-white">
-              Replay key incidents as drills
-            </p>
-            <p className="text-base text-white">
-              Use for onboarding junior engineers{" "}
-            </p>
-
-            <Link href={""}>
-              <div className="px-2 py-1 w-fit text-sm flex gap-2 items-center border border-cyan-500 text-cyan-500 rounded-md">
-                <p>Explore Simulations</p>
-                {/* <ArrowRight className="size-3" /> */}
-              </div>
-            </Link>
-          </motion.div>
-        </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+    </section>
   );
-};
-
-export default HowItWorks;
+}

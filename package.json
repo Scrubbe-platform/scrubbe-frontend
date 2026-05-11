@@ -10,6 +10,7 @@
     "test": "next test"
   },
   "dependencies": {
+    "@calcom/embed-react": "^1.5.3",
     "@heroui/react": "^2.7.5",
     "@hookform/resolvers": "^5.0.1",
     "@monaco-editor/react": "^4.7.0",

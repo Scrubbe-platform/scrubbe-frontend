@@ -75,7 +75,7 @@ const airbnbCereal = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Scrubbe",
+  title: "Scrubbe | Governed Incident Intelligence platform",
   description:
     "AI-Powered Engineering Incident Management & Code Intelligence Platform",
 };
