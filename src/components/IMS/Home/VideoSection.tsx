@@ -204,7 +204,6 @@ export default function VideoSection() {
             className="grid grid-cols-3 divide-x"
             style={{
               borderTop: "1px solid #1f2937",
-              divideColor: "#1f2937",
             }}
           >
             {VIDEOS.map((v, i) => {
