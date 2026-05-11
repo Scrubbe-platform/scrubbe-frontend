@@ -24,9 +24,9 @@ const formScheme = z.object({
   triggerSource: z.string().nonempty(),
   condition: z.string().nonempty(),
   state: z.string().nonempty(),
-  environment: z.string().default("production"),
+  environment: z.string().nonempty(),
   deduplication: z.string().nonempty(),
-  severity: z.string().nonempty().default("P1"),
+  severity: z.string().nonempty(),
   note: z.string().optional(),
 });
 

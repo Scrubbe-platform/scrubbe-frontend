@@ -91,6 +91,16 @@ export const endpoint = {
     bitbucket_callback: "/integrations/bitbucket/callback",
     bitbucket_repos: "/integrations/bitbucket/repos",
   },
+  connectors: {
+    catalog: "/connectors/connectors",
+    catalog_item: "/connectors/connectors",
+    connections: "/connectors/connections",
+    connection: "/connectors/connections",
+    test: "/connectors/connections",
+    rotate: "/connectors/connections",
+    health: "/connectors/connections",
+    events: "/connectors/connections",
+  },
   plans: {
     get: "/pricing/plans",
     create_subscription: "/pricing/subscriptions",

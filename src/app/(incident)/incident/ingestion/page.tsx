@@ -12,6 +12,14 @@ const PROVIDER_LABELS: Record<string, string> = {
   googlemeet: "Google Meet",
 };
 
+const PROVIDER_TARGETS: Record<string, string> = {
+  slack: "/incident/settings/integrations",
+  github: "/incident/settings/ingestion",
+  gitlab: "/incident/settings/ingestion",
+  bitbucket: "/incident/settings/ingestion",
+  googlemeet: "/incident/settings/integrations",
+};
+
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-[#08132F]">
     <div className="text-center space-y-4">
@@ -30,15 +38,17 @@ const OAuthCallbackInner = () => {
     const connected = Array.from(searchParams.entries()).find(
       ([, value]) => value === "connected"
     );
+    const provider = connected?.[0];
 
-    if (connected) {
-      const [provider] = connected;
+    if (connected && provider) {
       const label = PROVIDER_LABELS[provider] ?? provider;
       toast.success(`${label} connected successfully!`);
     }
 
     const timer = setTimeout(() => {
-      router.replace("/incident");
+      router.replace(
+        provider ? PROVIDER_TARGETS[provider] ?? "/incident/settings/ingestion" : "/incident/settings/ingestion"
+      );
     }, 1500);
 
     return () => clearTimeout(timer);
