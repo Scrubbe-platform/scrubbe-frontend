@@ -1,102 +1,170 @@
 "use client";
+
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import * as z from "zod";
-import Input from "../ui/input";
-import CButton from "../ui/Cbutton";
-import Select from "../ui/select";
-import { PasswordInput } from "../ui/password-input";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+  User,
+  Mail,
+  Lock,
+  Building2,
+  Globe,
+  Eye,
+  EyeOff,
+  Info,
+} from "lucide-react";
+import { AxiosError } from "axios";
+import { BiCheck } from "react-icons/bi";
 import useAuthStore from "@/lib/stores/auth.store";
 import CompleteBusinessProfile, {
   BusinessProfileSignupFormData,
 } from "./CompleteBusinessProfile";
 import OtpInput from "../ui/OtpInput";
-import { AxiosError } from "axios";
-import { BiCheck } from "react-icons/bi";
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
 
 const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 
-// Define the form schema using zod
+// ─────────────────────────────────────────────────────────────────
+// Schema
+// ─────────────────────────────────────────────────────────────────
+
+const PUBLIC_DOMAINS = [
+  "gmail.com",
+  "yahoo.com",
+  "hotmail.com",
+  "outlook.com",
+  "aol.com",
+  "icloud.com",
+  "mail.com",
+  "gmx.com",
+  "protonmail.com",
+  "zoho.com",
+  "yandex.com",
+  "msn.com",
+  "live.com",
+  "ymail.com",
+  "inbox.com",
+  "me.com",
+];
+
 export const businessSignupSchema = z.object({
-  firstName: z.string().min(1, { message: "First name is required" }),
+  firstName: z.string().min(1, "Full name is required"),
   lastName: z.string().optional(),
   businessEmail: z
     .string()
-    .email({ message: "Please enter a valid email address" })
-    .refine(
-      (email) => {
-        // List of common public email domains
-        const publicDomains = [
-          "gmail.com",
-          "yahoo.com",
-          "hotmail.com",
-          "outlook.com",
-          "aol.com",
-          "icloud.com",
-          "mail.com",
-          "gmx.com",
-          "protonmail.com",
-          "zoho.com",
-          "yandex.com",
-          "msn.com",
-          "live.com",
-          "ymail.com",
-          "inbox.com",
-          "me.com",
-        ];
-        const domain = email.split("@")[1]?.toLowerCase();
-        return domain && !publicDomains.includes(domain);
-      },
-      {
-        message:
-          "Please use your business email address (not a public provider)",
-      }
-    ),
-  businessName: z
+    .email("Please enter a valid email address")
+    .refine((email) => {
+      const domain = email.split("@")[1]?.toLowerCase();
+      return domain && !PUBLIC_DOMAINS.includes(domain);
+    }, "Please use your business email address (not a public provider)"),
+  businessName: z.string().min(3, "Please provide a valid workspace name"),
+  workspaceUrl: z
     .string()
-    .min(3, { message: "Please provide a valid address" }),
-  // companySize: z.string().min(1, { message: "Please select company size" }),
-  // purpose: z.string().optional(),
+    .min(2, "Workspace URL must be at least 2 characters")
+    .max(63)
+    .regex(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens"),
   password: z
     .string()
-    .min(8, { message: "Password must be at least 8 characters" })
-    .max(100, { message: "Password must be less than 100 characters" })
+    .min(8, "Password must be at least 8 characters")
+    .max(100)
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/,
-      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+      "Must include uppercase, lowercase, number, and symbol"
     ),
-  // confirmPassword: z.string().min(1, { message: "Confirm password is required" }),
+  acceptTerms: z.literal(true, {
+    errorMap: () => ({ message: "You must accept the terms" }),
+  }),
 });
-// .refine((data) => data.password === data.confirmPassword, {
-//   message: "Passwords don't match",
-//   path: ["confirmPassword"],
-// });
 
-// TypeScript type based on the schema
 type BusinessSignupFormData = z.infer<typeof businessSignupSchema>;
 
-// Success Page Component Props Type
-interface SuccessPageProps {
+// ─────────────────────────────────────────────────────────────────
+// Field components
+// ─────────────────────────────────────────────────────────────────
+
+function FieldLabel({ label, info }: { label: string; info?: string }) {
+  return (
+    <div className="flex items-center justify-between mb-1.5">
+      <label className="text-sm font-semibold text-gray-900">{label}</label>
+      {info && (
+        <button
+          type="button"
+          title={info}
+          className="text-emerald-600 hover:text-emerald-700 transition-colors"
+        >
+          <Info size={16} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function FieldHint({ children }: { children: React.ReactNode }) {
+  return <p className="mt-1.5 text-xs text-gray-500">{children}</p>;
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="mt-1 text-xs text-red-500">{message}</p>;
+}
+
+const inputCls =
+  "w-full flex items-center gap-2.5 border border-gray-200 rounded-lg px-3.5 py-3 text-sm text-gray-800 placeholder-gray-400 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all bg-white";
+
+// ─────────────────────────────────────────────────────────────────
+// Success page
+// ─────────────────────────────────────────────────────────────────
+
+function SuccessPage({
+  firstName,
+  lastName,
+}: {
   firstName: string;
   lastName: string;
+}) {
+  const name = [firstName, lastName].filter(Boolean).join(" ");
+  return (
+    <div className="w-full flex flex-col items-center justify-center min-h-96 py-12">
+      <div className="relative flex items-center justify-center mb-10">
+        <div className="size-[150px] rounded-full bg-emerald-100 absolute animate-ping" />
+        <div className="size-[130px] rounded-full bg-emerald-200 absolute" />
+        <div className="size-[110px] rounded-full bg-emerald-300 absolute" />
+        <div className="size-[90px] rounded-full bg-emerald-500 absolute" />
+        <BiCheck className="absolute text-white" size={40} />
+      </div>
+      <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+        Workspace created!
+      </h1>
+      <p className="text-gray-500 text-center text-sm">
+        Welcome {name}! Setting up your Scrubbe workspace…
+      </p>
+    </div>
+  );
 }
+
+// ─────────────────────────────────────────────────────────────────
+// Main form
+// ─────────────────────────────────────────────────────────────────
 
 export default function BusinessSignupForm() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [formData, setFormData] =
     useState<Partial<BusinessSignupFormData> | null>(null);
-  const router = useRouter();
-  const [profileComplete, setProfileComplete] = useState(false);
   const [isOTP, setIsOTP] = useState(false);
-  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [profileComplete, setProfileComplete] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteEmail = searchParams.get("email");
+  const session = useSession();
+
   const {
     businessSignup,
     businessProfileSignup,
@@ -105,17 +173,13 @@ export default function BusinessSignupForm() {
     resendOTP,
     error,
   } = useAuthStore();
-  const [refreshing, setRefreshing] = useState(false);
-  const searchParams = useSearchParams();
-  const path = searchParams.get("to");
-  const inviteEmail = searchParams.get("email");
+
   const {
-    handleSubmit,
     control,
-    formState: { errors, isValid },
+    handleSubmit,
     setValue,
     watch,
-    reset,
+    formState: { errors, isValid },
   } = useForm<BusinessSignupFormData>({
     resolver: zodResolver(businessSignupSchema),
     defaultValues: {
@@ -123,33 +187,65 @@ export default function BusinessSignupForm() {
       lastName: "",
       businessEmail: "",
       businessName: "",
-      // companySize: "",
-      // purpose: "",
+      workspaceUrl: "",
       password: "",
-      // confirmPassword: "",
+      acceptTerms: undefined,
     },
     mode: "onChange",
   });
-  const session = useSession();
+
+  // Auto-generate workspace URL from workspace name
+  const watchedName = watch("businessName");
+  useEffect(() => {
+    if (watchedName) {
+      const slug = watchedName
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .slice(0, 63);
+      setValue("workspaceUrl", slug, { shouldValidate: true });
+    }
+  }, [watchedName, setValue]);
+
+  useEffect(() => {
+    if (inviteEmail) setValue("businessEmail", inviteEmail);
+  }, [inviteEmail, setValue]);
+
+  // OAuth business email check
+  useEffect(() => {
+    if (
+      session.status === "authenticated" &&
+      session.data?.user &&
+      !profileComplete
+    ) {
+      const domain = session.data.user.email?.split("@")[1]?.toLowerCase();
+      if (domain && !PUBLIC_DOMAINS.includes(domain)) {
+        setProfileComplete(true);
+        return;
+      }
+      toast.error("Please use your business email address");
+      setTimeout(() => signOut(), 4000);
+    }
+  }, [session, profileComplete]);
+
+  useEffect(() => {
+    if (showSuccess) {
+      const t = setTimeout(() => router.replace("/auth/account-setup"), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [showSuccess, router]);
 
   const onSubmit = async (data: BusinessSignupFormData) => {
     try {
-      // Set loading state
-      // Log form values
-      // Simulate a 5-second delay
       await businessSignup(data);
-
-      // Store form data and show success page
       setFormData(data);
       setIsOTP(true);
-
-      // Reset loading state
-    } catch (error) {
-      console.error("Registration error:", error);
+    } catch (err) {
       toast.error("Registration failed", {
         description:
-          error instanceof AxiosError
-            ? error.response?.data?.message
+          err instanceof AxiosError
+            ? err.response?.data?.message
             : "Signup failed",
       });
     }
@@ -157,133 +253,34 @@ export default function BusinessSignupForm() {
 
   const onProfileSubmit = async (data: BusinessProfileSignupFormData) => {
     try {
-      const details = {
-        ...data,
-        ...session.data?.user,
-      };
-      await businessProfileSignup(details);
-
-      // Store form data and show success page
-      setFormData({ ...data, ...session.data?.user });
+      await businessProfileSignup({ ...data, ...session.data?.user });
+      setFormData({ ...data, ...session.data?.user } as any);
       await signOut({ redirect: false });
       setShowSuccess(true);
-
-      // Reset loading state
-    } catch (error) {
-      console.error("Registration error:", error);
+    } catch (err) {
       toast.error("Registration failed", {
         description:
-          error instanceof AxiosError
-            ? error.response?.data?.message
+          err instanceof AxiosError
+            ? err.response?.data?.message
             : "Signup failed",
       });
     }
   };
 
-  // Check if email from oauth is not a business mail
-  useEffect(() => {
-    const publicDomains = [
-      "gmail.com",
-      "yahoo.com",
-      "hotmail.com",
-      "outlook.com",
-      "aol.com",
-      "icloud.com",
-      "mail.com",
-      "gmx.com",
-      "protonmail.com",
-      "zoho.com",
-      "yandex.com",
-      "msn.com",
-      "live.com",
-      "ymail.com",
-      "inbox.com",
-      "me.com",
-    ];
-
-    if (
-      session.status == "authenticated" &&
-      session.data.user &&
-      !profileComplete
-    ) {
-      const domain = session?.data?.user.email?.split("@")[1]?.toLowerCase();
-      if (domain && !publicDomains.includes(domain)) {
-        setProfileComplete(true);
-        return;
-      }
-      toast.error(
-        "Please use your business email address (not a public provider)"
-      );
-
-      const interval = setTimeout(() => {
-        signOut();
-      }, 4000);
-
-      return () => {
-        clearTimeout(interval);
-      };
-    }
-  }, [session, profileComplete]);
-
-  useEffect(() => {
-    if (showSuccess) {
-      const timeout = setTimeout(() => {
-        router.replace("/auth/account-setup");
-        return;
-      }, 3000);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [showSuccess, router]);
-
-  useEffect(() => {
-    if (inviteEmail) {
-      setValue("businessEmail", inviteEmail);
-    }
-  }, [inviteEmail, setValue]);
-
-  const SuccessPage = ({ firstName, lastName }: SuccessPageProps) => {
-    const displayName = [firstName, lastName].filter(Boolean).join(" ");
-    return (
-      <Suspense fallback={<div>Loading...</div>}>
-        <div className="w-full p-6 flex flex-col items-center justify-center min-h-96">
-          <div className="mb-8">
-            {/* Enhanced Success Icon with concentric circles */}
-            <div className="relative flex items-center justify-center translate-y-[-50px]">
-              <div className=" size-[150px] rounded-full bg-emerald-100 absolute animate-ping" />
-              <div className=" size-[130px] rounded-full bg-emerald-200 absolute" />
-              <div className=" size-[110px] rounded-full bg-emerald-300 absolute" />
-              <div className=" size-[90px] rounded-full bg-emerald-500 absolute" />
-              <BiCheck className=" absolute text-white" size={40} />
-            </div>
-          </div>
-
-          <h1 className="text-2xl font-semibold text-gray-900 text-white mb-2">
-            Successful
-          </h1>
-
-          <p className="text-gray-300 text-center">
-            Welcome {displayName}! You have successfully created an account.
-          </p>
-        </div>
-      </Suspense>
-    );
-  };
-
   const handleVerifyOTP = async (code: string) => {
+    if (code.length !== 6) {
+      toast.error("Incorrect OTP code");
+      return;
+    }
     try {
-      if (code.length != 6) {
-        toast.error("Incorrect OTP code");
-        return;
-      }
       setRefreshing(true);
       await verifyEmail(code);
-      setRefreshing(false);
       toast.success("Email verified successfully");
       setShowSuccess(true);
-    } catch (_) {
-      console.log(_);
+    } catch {
       toast.error(JSON.stringify(error));
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -291,237 +288,302 @@ export default function BusinessSignupForm() {
     try {
       setRefreshing(true);
       await resendOTP();
-      setRefreshing(false);
       toast.success("OTP sent successfully");
-    } catch (_) {
-      console.log(_);
+    } catch {
       toast.error(JSON.stringify(error));
+    } finally {
+      setRefreshing(false);
     }
   };
-  const VerifyAccount = async () => {
+
+  // ── Render states ──────────────────────────────────────────────
+
+  if (showSuccess && formData) {
     return (
-      <div>
-        <OtpInput
-          email={formData?.businessEmail ?? ""}
-          handleResend={handleResendOTP}
-          onSubmit={handleVerifyOTP}
-          isLoading={refreshing}
+      <SuccessPage
+        firstName={formData.firstName ?? ""}
+        lastName={formData.lastName ?? ""}
+      />
+    );
+  }
+
+  if (profileComplete) {
+    return (
+      <div className="w-full">
+        <h1 className="text-xl font-semibold text-gray-900 mb-1">
+          Complete your profile
+        </h1>
+        <p className="text-sm text-gray-500 mb-6">
+          Just a few more details to get started
+        </p>
+        <CompleteBusinessProfile
+          onSubmit={onProfileSubmit}
+          isLoading={isLoading}
         />
       </div>
     );
-  };
+  }
+
+  if (isOTP) {
+    return (
+      <OtpInput
+        email={formData?.businessEmail ?? ""}
+        handleResend={handleResendOTP}
+        onSubmit={handleVerifyOTP}
+        isLoading={refreshing}
+      />
+    );
+  }
+
+  // ── Main form ──────────────────────────────────────────────────
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <div className="w-full p-6">
-        {session.status == "loading" && (
-          <div className=" absolute inset-0 bg-black/20 z-[1000] flex justify-center pt-[20%] ">
-            <Loader2 className=" animate-spin text-primary-500" size={30} />
+    <Suspense fallback={<div>Loading…</div>}>
+      <div className="w-full">
+        {/* Loading overlay for OAuth */}
+        {session.status === "loading" && (
+          <div className="absolute inset-0 bg-black/20 z-[1000] flex justify-center pt-[20%]">
+            <Loader2 className="animate-spin text-emerald-500" size={30} />
           </div>
         )}
-        {showSuccess && formData && (
-          <SuccessPage
-            firstName={formData.firstName || ""}
-            lastName={formData.lastName || ""}
-          />
-        )}
 
-        <>
-          {profileComplete && !showSuccess && (
-            <>
-              <h1 className="text-xl md:text-2xl text-white font-semibold mb-2 ">
-                Complete Your Profile
-              </h1>
-              <p className="text-gray-300 mb-6">
-                Just a few more details to get started
-              </p>
+        {/* Help link */}
+        <div className="text-right mb-6 text-sm text-gray-500">
+          Need help?{" "}
+          <Link
+            href="/support"
+            className="text-emerald-600 font-semibold hover:underline"
+          >
+            contact support
+          </Link>
+        </div>
 
-              <CompleteBusinessProfile
-                onSubmit={onProfileSubmit}
-                isLoading={isLoading}
-              />
-            </>
-          )}
-        </>
+        {/* Page heading */}
+        <div className="text-center mb-8">
+          <h1 className="text-[28px] font-black text-gray-900 tracking-tight mb-1">
+            Create your workspace
+          </h1>
+          <p className="text-sm text-gray-500">
+            Set up your organization to start using Scrubbe
+          </p>
+        </div>
 
-        {!profileComplete && !showSuccess && (
-          <>
-            {isOTP ? (
-              <VerifyAccount />
-            ) : (
-              <>
-                <h1 className="text-xl md:text-2xl text-white font-semibold text-center mb-3">
-                  Create your workspace
-                </h1>
-
-                <form onSubmit={handleSubmit(onSubmit)}>
-                  {/* First Name and Last Name Row */}
-                  <Controller
-                    name="firstName"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        label="Full name"
-                        placeholder="Your name"
-                        {...field}
-                        error={errors.firstName?.message}
-                        labelClassName="text-white"
-                        className="text-white"
-                      />
-                    )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {/* Full name */}
+          <div>
+            <FieldLabel label="Full name" />
+            <Controller
+              name="firstName"
+              control={control}
+              render={({ field }) => (
+                <div className={inputCls}>
+                  <User size={15} className="text-gray-400 shrink-0" />
+                  <input
+                    {...field}
+                    className="flex-1 bg-transparent outline-none text-sm"
+                    placeholder="Enter your full name"
                   />
+                </div>
+              )}
+            />
+            <FieldError message={errors.firstName?.message} />
+            <FieldHint>Use your legal or company display name.</FieldHint>
+          </div>
 
-                  {/* Business Email and Address Row */}
-                  <div className="grid grid-cols-1">
-                    <Controller
-                      name="businessEmail"
-                      control={control}
-                      render={({ field }) => (
-                        <Input
-                          label="Work Email"
-                          placeholder="name@company.com"
-                          {...field}
-                          error={errors.businessEmail?.message}
-                          labelClassName="text-white"
-                          className="text-white"
-                        />
-                      )}
-                    />
-                    <Controller
-                      name="businessName"
-                      control={control}
-                      render={({ field }) => (
-                        <Input
-                          label="Company / organization"
-                          placeholder="Company name"
-                          {...field}
-                          error={errors.businessName?.message}
-                          labelClassName="text-white"
-                          className="text-white"
-                        />
-                      )}
-                    />
-                  </div>
+          {/* Work email */}
+          <div>
+            <FieldLabel label="Work email" />
+            <Controller
+              name="businessEmail"
+              control={control}
+              render={({ field }) => (
+                <div className={inputCls}>
+                  <Mail size={15} className="text-gray-400 shrink-0" />
+                  <input
+                    {...field}
+                    type="email"
+                    className="flex-1 bg-transparent outline-none text-sm"
+                    placeholder="Enter your work email address"
+                  />
+                </div>
+              )}
+            />
+            <FieldError message={errors.businessEmail?.message} />
+            <FieldHint>
+              We will use this to set up your account and workspace.
+            </FieldHint>
+          </div>
 
-                  {/* Company Size and Purpose Row */}
-                  {/* <div className="grid grid-cols-1 gap-4 mb-4">
-                    <Controller
-                      name="companySize"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          label="Company's size"
-                          options={[
-                            { value: "", label: "Select Size" },
-                            { value: "1-10", label: "1-10 employees" },
-                            { value: "11-50", label: "11-50 employees" },
-                            { value: "51-200", label: "51-200 employees" },
-                            { value: "201-500", label: "201-500 employees" },
-                            { value: "500+", label: "500+ employees" },
-                          ]}
-                          error={errors.companySize?.message}
-                          isLoading={isLoading}
-                          labelClassName="text-white"
-                          className="text-white"
-                          {...field}
-                        />
-                      )}
-                    />
-                    <Controller
-                      name="purpose"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          label="What do you need scrubbe for?"
-                          options={[
-                            { value: "", label: "Select Purpose" },
-                            {
-                              value: "IMS",
-                              label: "Incident Management System (IMS)",
-                            },
-                            {
-                              value: "FRAUD_MANAGEMENT_IMS",
-                              label: "Fraud Management + Incident Management",
-                            },
-                          ]}
-                          error={errors.purpose?.message}
-                          isLoading={isLoading}
-                          labelClassName="text-white"
-                          className="text-white"
-                          {...field}
-                        />
-                      )}
-                    />
-                  </div> */}
-
-                  {/* Password Fields Row */}
-                  <div className="grid grid-cols-1 gap-4 mb-6">
-                    <PasswordInput
-                      label="Password"
-                      value={watch("password")}
-                      placeholder="*********"
-                      onValueChange={(value) => setValue("password", value)}
-                      onValidationChange={setIsPasswordValid}
-                      error={
-                        !isPasswordValid ? "Complete all requirements" : ""
-                      }
-                    />
-                    {/* <Controller
-                      name="confirmPassword"
-                      control={control}
-                      render={({ field }) => (
-                        <Input
-                          label="Confirm Password"
-                          placeholder="Confirm Password"
-                          type="password"
-                          error={errors.confirmPassword?.message}
-                          isLoading={isLoading}
-                          {...field}
-                          labelClassName="text-white"
-                          className="text-white"
-                        />
-                      )}
-                    /> */}
-                  </div>
-
-                  {/* Submit Button */}
-                  <CButton
-                    type="submit"
-                    disabled={isLoading || !isValid || !isPasswordValid}
-                    isLoading={isLoading}
+          {/* Password */}
+          <div>
+            <FieldLabel label="Create Password" />
+            <Controller
+              name="password"
+              control={control}
+              render={({ field }) => (
+                <div className={inputCls}>
+                  <Lock size={15} className="text-gray-400 shrink-0" />
+                  <input
+                    {...field}
+                    type={showPassword ? "text" : "password"}
+                    className="flex-1 bg-transparent outline-none text-sm"
+                    placeholder="Enter password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
                   >
-                    {isLoading ? "Processing..." : "Create Workspace"}
-                  </CButton>
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              )}
+            />
+            <FieldError message={errors.password?.message} />
+            <FieldHint>
+              Minimum 8 characters with uppercase, lowercase, number, and
+              symbol.
+            </FieldHint>
+          </div>
 
-                  {/* Divider */}
-                  {/* <div className="relative my-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white text-gray-500">OR</span>
-                    </div>
-                  </div> */}
+          {/* Workspace name */}
+          <div>
+            <FieldLabel
+              label="Workspace name"
+              info="This will be the display name for your Scrubbe workspace"
+            />
+            <Controller
+              name="businessName"
+              control={control}
+              render={({ field }) => (
+                <div className={inputCls}>
+                  <Building2 size={15} className="text-gray-400 shrink-0" />
+                  <input
+                    {...field}
+                    className="flex-1 bg-transparent outline-none text-sm"
+                    placeholder="Enter your organization or company name"
+                  />
+                </div>
+              )}
+            />
+            <FieldError message={errors.businessName?.message} />
+            <FieldHint>This is the name of your Scrubbe workspace.</FieldHint>
+          </div>
 
-                  {/* OAuth Buttons */}
-
-                  {/* Demo Page Link */}
-                  <div className="text-center text-white mt-3 text-base">
-                    Already have an account?{" "}
-                    <Link
-                      href="/auth/signin"
-                      className={`${
-                        IS_STANDALONE ? "text-IMSCyan" : "text-blue-600"
-                      } underline hover:underline inline-flex items-center`}
-                    >
-                      Sign in
-                    </Link>
+          {/* Workspace URL */}
+          <div>
+            <FieldLabel
+              label="Workspace url"
+              info="Your workspace will be accessible at this URL"
+            />
+            <Controller
+              name="workspaceUrl"
+              control={control}
+              render={({ field }) => (
+                <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all">
+                  <div className="flex items-center gap-2 flex-1 px-3.5 py-3">
+                    <Globe size={15} className="text-gray-400 shrink-0" />
+                    <input
+                      {...field}
+                      className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400 min-w-0"
+                      placeholder="acme"
+                    />
                   </div>
-                </form>
-              </>
+                  <div
+                    className="px-4 py-3 text-sm font-medium shrink-0 border-l border-gray-200"
+                    style={{ background: "#f9fafb", color: "#6b7280" }}
+                  >
+                    .scrubbe.com
+                  </div>
+                </div>
+              )}
+            />
+            <FieldError message={errors.workspaceUrl?.message} />
+            <FieldHint>
+              Example:{" "}
+              <span className="text-gray-700">
+                {watch("workspaceUrl") || "acme"}.scrubbe.com
+              </span>
+              .
+            </FieldHint>
+          </div>
+
+          {/* Terms checkbox */}
+          <div className="flex items-start gap-3">
+            <Controller
+              name="acceptTerms"
+              control={control}
+              render={({ field }) => (
+                <button
+                  type="button"
+                  onClick={() => field.onChange(field.value ? undefined : true)}
+                  className="mt-0.5 w-5 h-5 rounded flex items-center justify-center shrink-0 border transition-all"
+                  style={{
+                    borderColor: field.value ? "#22c55e" : "#d1d5db",
+                    background: field.value ? "#22c55e" : "transparent",
+                  }}
+                >
+                  {field.value && <BiCheck size={14} color="white" />}
+                </button>
+              )}
+            />
+            <p className="text-sm text-gray-600 leading-relaxed">
+              By creating a workspace, you agree to Scrubbe's{" "}
+              <Link
+                href="/terms"
+                className="underline text-gray-800 hover:text-emerald-600"
+              >
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/privacy"
+                className="underline text-gray-800 hover:text-emerald-600"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+          {errors.acceptTerms && (
+            <p className="text-xs text-red-500 -mt-3">
+              {errors.acceptTerms.message}
+            </p>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={isLoading || !isValid}
+            className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
+            style={{
+              background:
+                isLoading || !isValid
+                  ? "#374151"
+                  : "linear-gradient(90deg, #1a2a1a 0%, #14532d 55%, #22c55e 100%)",
+            }}
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 size={16} className="animate-spin" />
+                Creating workspace…
+              </span>
+            ) : (
+              "Sign-up"
             )}
-          </>
-        )}
+          </button>
+
+          {/* Sign in link */}
+          <p className="text-center text-sm text-gray-600 pb-2">
+            Already created an account?{" "}
+            <Link
+              href="/auth/signin"
+              className="text-emerald-600 font-semibold hover:underline"
+            >
+              Sign in
+            </Link>
+          </p>
+        </form>
       </div>
     </Suspense>
   );

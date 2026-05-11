@@ -109,6 +109,11 @@ const CONNECTORS = [
     icon: "/integration/bitbucket.png",
     desc: "Repository push, pipeline failures, pull request events",
   },
+  {
+    name: "Linear",
+    icon: "/integration/linear.png",
+    desc: "Team’s execution workflow, structured follow-up issues for hardening actions and operational improvements",
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────

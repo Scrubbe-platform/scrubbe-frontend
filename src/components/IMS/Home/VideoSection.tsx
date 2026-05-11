@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 
 // ─────────────────────────────────────────────────────────────────
-// Video data — swap src/poster/transcript with real content
+// Video data
 // ─────────────────────────────────────────────────────────────────
 
 const VIDEOS = [
@@ -16,19 +16,6 @@ const VIDEOS = [
     tag: "Getting started",
     src: "/IMS/videos/policies-automation.mp4",
     poster: "/IMS/images/videos/thumb-policies.png",
-    transcript: `[0:00] In this walkthrough we'll configure the maxAutomationLevel for your production environment.
-
-[0:42] Navigate to Settings → Environments and select your production workspace.
-
-[1:15] The EAL (Effective Automation Level) is computed from three factors: risk classification, blast radius score, and the approval matrix you've defined.
-
-[2:30] Setting maxAutomationLevel to 2 means Scrubbe will propose fixes but require human approval before executing in production.
-
-[3:45] We'll walk through what happens when an incident triggers at level 3 — the gate holds and routes to the approver on-call.
-
-[5:10] Finally, we'll verify the policy is enforced by replaying a recent incident through the simulation mode.
-
-[6:10] That's it — your automation governance is now fully configured and auditable.`,
   },
   {
     id: 2,
@@ -38,17 +25,6 @@ const VIDEOS = [
     tag: "Deep dive",
     src: "/IMS/videos/ezra-dual-view.mp4",
     poster: "/IMS/images/videos/thumb-ezra.png",
-    transcript: `[0:00] Ezra surfaces intelligence in two modes depending on who is viewing the incident.
-
-[0:55] The Analyst view renders a real-time line chart of the affected metrics alongside a typewriter-style reasoning trace — you can watch Ezra correlate signals as it works.
-
-[2:30] Switching to Leadership view transforms the output: bar charts replace the time-series, and technical language is translated into business impact statements.
-
-[4:00] Both views share the same underlying evidence. The data is identical — only the presentation layer changes.
-
-[6:20] You can configure which view is default per role in the team settings panel.
-
-[7:50] In the next section we'll look at how the output feeds directly into the approval workflow.`,
   },
   {
     id: 3,
@@ -58,43 +34,34 @@ const VIDEOS = [
     tag: "Compliance",
     src: "/IMS/videos/audit-trail.mp4",
     poster: "/IMS/images/videos/thumb-audit.png",
-    transcript: `[0:00] Every action Scrubbe takes — or considers taking — is written to an immutable audit log.
-
-[0:40] The log captures: the incident state at each transition, the policy version that evaluated the action, the approver identity, and the exact timestamp.
-
-[1:30] From the Audit panel, you can filter by incident, date range, actor, or policy version.
-
-[2:15] Exporting for SOC 2 reviewers is a single click — the report formats to the standard evidence structure auditors expect.
-
-[3:00] We'll look at a real incident audit from last week and walk through every logged event in order.
-
-[4:30] Audit trails are retained for 24 months by default and can be extended in your data retention settings.`,
   },
 ];
 
 // ─────────────────────────────────────────────────────────────────
-// Play icon SVG
+// Play button circle
 // ─────────────────────────────────────────────────────────────────
 
-function PlayIcon({ size = 40 }: { size?: number }) {
+function PlayCircle({ size = 52 }: { size?: number }) {
   return (
     <div
       className="rounded-full flex items-center justify-center"
       style={{
         width: size,
         height: size,
-        background: "rgba(255,255,255,0.15)",
-        border: "1.5px solid rgba(255,255,255,0.3)",
-        backdropFilter: "blur(6px)",
+        background: "rgba(255,255,255,0.12)",
+        border: "1.5px solid rgba(255,255,255,0.25)",
+        backdropFilter: "blur(8px)",
       }}
     >
+      {/* Offset triangle for optical centering */}
       <svg
-        width={size * 0.4}
-        height={size * 0.4}
+        width={size * 0.38}
+        height={size * 0.38}
         viewBox="0 0 16 16"
         fill="none"
+        style={{ marginLeft: "10%" }}
       >
-        <path d="M5 3l9 5-9 5V3z" fill="white" />
+        <path d="M4 2.5l10 5.5-10 5.5V2.5z" fill="white" />
       </svg>
     </div>
   );
@@ -114,6 +81,7 @@ export default function VideoSection() {
   const active = VIDEOS.find((v) => v.id === activeId)!;
 
   const handleSelect = (id: number) => {
+    if (id === activeId) return;
     setActiveId(id);
     setPlaying(false);
     if (videoRef.current) {
@@ -134,7 +102,7 @@ export default function VideoSection() {
       style={{ background: "#0a0a0a" }}
     >
       <div className="max-w-[1100px] mx-auto">
-        {/* Heading */}
+        {/* ── Heading ── */}
         <motion.h2
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -158,109 +126,98 @@ export default function VideoSection() {
           resolution — end to end, no narration required.
         </motion.p>
 
-        {/* Player card */}
+        {/* ── Main card ── */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.65, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="border border-[#1f2937] rounded-xl overflow-hidden grid grid-cols-1 lg:grid-cols-[1fr_300px]"
-          // style={{ background: "#111827" }}
+          transition={{ duration: 0.65, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          className="rounded-2xl overflow-hidden"
+          style={{ border: "1px solid #1f2937" }}
         >
-          {/* ── LEFT: main player + transcript ── */}
-          <div style={{ borderRight: "1px solid #1f2937" }}>
-            {/* Video area */}
-            <div
-              className="relative bg-[#0d1117]"
-              style={{ aspectRatio: "16/9" }}
-            >
-              {/* LIVE DEMO badge */}
-
-              {/* Duration */}
-              <div className="absolute top-4 right-4 z-20">
-                <span
-                  className="text-[11px] font-mono"
-                  style={{ color: "#9ca3af" }}
-                >
-                  {active.duration}
-                </span>
-              </div>
-
-              {/* Video element */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeId}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="absolute inset-0"
-                >
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover"
-                    poster={active.poster}
-                    controls={playing}
-                    playsInline
-                    onEnded={() => setPlaying(false)}
-                  >
-                    <source src={active.src} type="video/mp4" />
-                  </video>
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Play button overlay — hidden when playing */}
-              {!playing && (
-                <button
-                  onClick={handlePlay}
-                  className="absolute inset-0 flex items-center justify-center z-10 bg-transparent border-none cursor-pointer"
-                  aria-label="Play video"
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <PlayIcon size={52} />
-                  </motion.div>
-                </button>
-              )}
+          {/* ── Large player ── */}
+          <div
+            className="relative w-full"
+            style={{ background: "#0d1117", aspectRatio: "16/7" }}
+          >
+            {/* LIVE DEMO badge */}
+            <div className="absolute top-4 left-4 z-20">
+              <span
+                className="text-[10px] font-black tracking-widest uppercase px-2.5 py-1 rounded"
+                style={{ background: "#ef4444", color: "#fff" }}
+              >
+                Live Demo
+              </span>
             </div>
 
-            {/* Transcript */}
-            <div className="p-5 border-t border-[#1f2937]">
-              <p className="text-[13px] font-bold text-white mb-3">
-                Transcript here
-              </p>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeId}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                >
-                  <pre
-                    className="text-[12.5px] leading-relaxed whitespace-pre-wrap font-mono"
-                    style={{ color: "#6b7280" }}
-                  >
-                    {active.transcript}
-                  </pre>
-                </motion.div>
-              </AnimatePresence>
+            {/* Duration */}
+            <div className="absolute top-4 right-4 z-20">
+              <span
+                className="text-[11px] font-mono"
+                style={{ color: "#6b7280" }}
+              >
+                {active.duration}
+              </span>
             </div>
+
+            {/* Video element */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeId}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0"
+              >
+                <video
+                  ref={videoRef}
+                  className="w-full h-full object-cover"
+                  poster={active.poster}
+                  controls={playing}
+                  playsInline
+                  onEnded={() => setPlaying(false)}
+                >
+                  <source src={active.src} type="video/mp4" />
+                </video>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Play overlay — hidden once playing */}
+            {!playing && (
+              <button
+                onClick={handlePlay}
+                className="absolute inset-0 flex items-center justify-center z-10 border-none bg-transparent cursor-pointer"
+                aria-label="Play video"
+              >
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <PlayCircle size={56} />
+                </motion.div>
+              </button>
+            )}
           </div>
 
-          {/* ── RIGHT: video list ── */}
-          <div className="flex flex-col divide-y divide-[#1f2937]">
-            {VIDEOS.map((v) => {
+          {/* ── 3 thumbnail cards below ── */}
+          <div
+            className="grid grid-cols-3 divide-x"
+            style={{
+              borderTop: "1px solid #1f2937",
+              divideColor: "#1f2937",
+            }}
+          >
+            {VIDEOS.map((v, i) => {
               const isActive = v.id === activeId;
               return (
                 <button
                   key={v.id}
                   onClick={() => handleSelect(v.id)}
-                  className="flex flex-col text-left p-0 bg-transparent border-none cursor-pointer group"
+                  className="flex flex-col text-left p-0 bg-transparent border-none cursor-pointer group transition-colors"
                   style={{
-                    background: isActive ? "#1f2937" : "transparent",
-                    transition: "background 0.2s ease",
+                    background: isActive ? "#111827" : "transparent",
+                    borderRight:
+                      i < VIDEOS.length - 1 ? "1px solid #1f2937" : "none",
                   }}
                 >
                   {/* Thumbnail */}
@@ -272,32 +229,35 @@ export default function VideoSection() {
                       <img
                         src={v.poster}
                         alt={v.title}
-                        className="w-full h-full object-cover absolute inset-0"
+                        className="absolute inset-0 w-full h-full object-cover"
                       />
                     )}
-                    {/* Play icon on thumbnails */}
-                    <div className="relative z-10 opacity-70 group-hover:opacity-100 transition-opacity">
-                      <PlayIcon size={32} />
-                    </div>
-                    {/* Active green left border */}
+                    {/* Active green top bar */}
                     {isActive && (
                       <div
-                        className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r"
+                        className="absolute top-0 left-0 right-0 h-[2px]"
                         style={{ background: "#22c55e" }}
                       />
                     )}
+                    {/* Play icon */}
+                    <div
+                      className="relative z-10 transition-opacity"
+                      style={{ opacity: isActive ? 0 : 0.7 }}
+                    >
+                      <PlayCircle size={30} />
+                    </div>
                   </div>
 
                   {/* Meta */}
-                  <div className="px-4 py-3">
+                  <div className="px-5 py-4">
                     <p
-                      className="text-[13px] font-bold leading-snug mb-1"
+                      className="text-[13px] font-bold leading-snug mb-1.5 transition-colors"
                       style={{ color: isActive ? "#f9fafb" : "#d1d5db" }}
                     >
                       {v.title}
                     </p>
                     <p
-                      className="text-[11.5px] leading-relaxed mb-2"
+                      className="text-[11.5px] leading-relaxed mb-2 line-clamp-2"
                       style={{ color: "#6b7280" }}
                     >
                       {v.desc}
@@ -307,8 +267,10 @@ export default function VideoSection() {
                       style={{ color: "#4b5563" }}
                     >
                       {v.duration}
-                      {" · "}
-                      <span style={{ color: "#22c55e" }}>{v.tag}</span>
+                      <span className="mx-1.5">·</span>
+                      <span style={{ color: isActive ? "#22c55e" : "#4b5563" }}>
+                        {v.tag}
+                      </span>
                     </p>
                   </div>
                 </button>

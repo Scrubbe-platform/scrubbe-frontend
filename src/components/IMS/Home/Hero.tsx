@@ -312,7 +312,7 @@ export default function HeroSection() {
           <rect width="100%" height="100%" fill="url(#tgrid)" />
         </svg>
       </div>
-      <div className="relative z-10 w-full max-w-[1280px] mx-auto px-8 lg:px-16 py-20">
+      <div className="relative z-10 w-full max-w-[1480px] mx-auto px-8 lg:px-16 py-20">
         <div className="max-w-[700px] ">
           {/* Headline */}
           <div className="mb-5" style={{ minHeight: 200 }}>

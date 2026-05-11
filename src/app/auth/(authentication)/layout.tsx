@@ -6,28 +6,16 @@ import Link from "next/link";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full h-auto relative">
+    <div className="w-full relative">
       <Suspense fallback={<div>Loading...</div>}>
-        <ParticleCanvas />
-        {/* <OverlayWrapper
-          sidebarContent={IS_STANDALONE ? <ImsSidebar /> : <AnalyticsSidebar />}
-        >
-          {IS_STANDALONE ? null : <AuthTabs />} */}
-        <div className=" w-full min-h-screen flex justify-center items-center">
-          <div className="mx-auto max-w-sm bg-neutral-900 rounded-lg z-50 w-full">
-            <div className="flex justify-center pt-3">
-              <Link href={"/"} className="">
-                <img
-                  src="/IMS/whitelogo.png"
-                  alt="scrubbe.png"
-                  className="object-contain h-[30px] w-[100px]"
-                />
-              </Link>
-            </div>
+        <div className="grid md:grid-cols-2">
+          <div className="hidden md:flex justify-center items-center">
+            <img className="" src="/IMS/auth/Frame.png" />
+          </div>
+          <div className=" w-full flex justify-center items-center px-6 md:px-20 md:py-0 py-5">
             {children}
           </div>
         </div>
-        {/* </OverlayWrapper> */}
       </Suspense>
     </div>
   );
