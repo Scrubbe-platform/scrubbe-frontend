@@ -12,7 +12,7 @@ import clsx from "clsx";
 import { BsArrowBarLeft } from "react-icons/bs";
 import DesktopRestrictionScreen from "./DesktopRetrictionScreen";
 
-const includedPage = ["code-engine", "ticket"];
+const includedPage = [];
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const { collapse, toggle } = useSidebar();
   const pathname = usePathname();
@@ -72,7 +72,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
 
       <div className="flex flex-1 w-full h-full overflow-hidden">
         {/* Sidebar Component */}
-        <Sidebar />
+        {!isMobile && <Sidebar />}
 
         {/* 3. MAIN CONTENT AREA */}
         <div className="flex-1 h-full overflow-hidden flex flex-col">
@@ -82,11 +82,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
             animate={{ opacity: 1 }}
             className="w-full h-full overflow-y-auto relative p-4 md:p-0"
           >
-            {includedPage.some((page) => pathname.includes(page)) ? (
-              children
-            ) : (
-              <>{isMobile ? <DesktopRestrictionScreen /> : children}</>
-            )}
+            <>{isMobile ? <DesktopRestrictionScreen /> : children}</>
 
             {/* Command Palette Floating Button */}
             <div className="fixed bottom-6 right-6 z-40">
