@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getCalApi } from "@calcom/embed-react";
 import { card } from "@heroui/react";
 
 // ─────────────────────────────────────────────────────────────────
@@ -167,6 +166,7 @@ function FloatingCard({ text }: { text: string }) {
 function CTAButton() {
   useEffect(() => {
     (async () => {
+      const { getCalApi } = await import("@calcom/embed-react");
       const cal = await getCalApi({ namespace: "hero-demo" });
       cal("ui", {
         theme: "light",

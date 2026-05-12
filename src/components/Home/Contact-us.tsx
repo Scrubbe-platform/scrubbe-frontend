@@ -11,7 +11,6 @@ import {
   Mail,
   Shield,
 } from "lucide-react";
-import { getCalApi } from "@calcom/embed-react";
 import { FaSlack } from "react-icons/fa";
 
 interface WayItem {
@@ -256,6 +255,7 @@ export default function ContactPage() {
 
   useEffect(() => {
     (async () => {
+      const { getCalApi } = await import("@calcom/embed-react");
       const cal = await getCalApi({ namespace: "demo" });
       cal("ui", {
         theme: "light",

@@ -21,8 +21,6 @@ const PUBLIC_ROUTES = [
   "/contact",
   "/api/auth",
   "/api-docs",
-  "/incident",
-  "/auth/account-setup",
 ];
 
 // Define auth routes that should redirect to dashboard if already logged in
