@@ -36,12 +36,12 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
     <div className="w-full bg-dark h-screen overflow-hidden flex flex-col md:flex-row relative">
       {/* 1. MOBILE NAVBAR (Logo Left, Menu Right) */}
       <div className="md:hidden w-full h-16 flex items-center px-5 gap-4 border-b border-white/10 bg-dark z-[55]">
-        <button
+        {/* <button
           onClick={toggle}
           className="p-2 text-white bg-white/5 rounded-lg active:scale-95 transition-transform"
         >
           {collapse ? <Menu size={20} /> : <X size={20} />}
-        </button>
+        </button> */}
         <div className="h-6">
           <img
             src="/IMS/whitelogo.png"
