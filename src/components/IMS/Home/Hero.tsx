@@ -180,7 +180,7 @@ function CTAButton() {
   return (
     <motion.button
       data-cal-namespace="hero-demo"
-      data-cal-link="scrubbe/scrubbe-demo"
+      data-cal-link="scrubbe/decision-system-demo"
       data-cal-config='{"layout":"month_view","theme":"light"}'
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}

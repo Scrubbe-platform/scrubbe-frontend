@@ -55,13 +55,7 @@ export default function NotFound() {
             onClick={() => router.back()}
             className="w-full sm:w-auto border border-white/10 bg-white/5 text-white hover:bg-white/10"
           >
-            <ArrowLeft className="size-4 mr-2" /> Previous Page
-          </CButton>
-          <CButton
-            onClick={() => router.push("/incident")}
-            className="w-full sm:w-auto bg-IMSCyan text-black font-bold hover:brightness-110"
-          >
-            <Home className="size-4 mr-2" /> Dashboard
+            <ArrowLeft className="size-4 mr-2" /> Back
           </CButton>
         </div>
       </div>

@@ -12,7 +12,7 @@ import clsx from "clsx";
 import { BsArrowBarLeft } from "react-icons/bs";
 import DesktopRestrictionScreen from "./DesktopRetrictionScreen";
 
-const includedPage = ["code-engine", "ticket"];
+const includedPage = [];
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const { collapse, toggle } = useSidebar();
   const pathname = usePathname();
@@ -36,12 +36,12 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
     <div className="w-full bg-dark h-screen overflow-hidden flex flex-col md:flex-row relative">
       {/* 1. MOBILE NAVBAR (Logo Left, Menu Right) */}
       <div className="md:hidden w-full h-16 flex items-center px-5 gap-4 border-b border-white/10 bg-dark z-[55]">
-        <button
+        {/* <button
           onClick={toggle}
           className="p-2 text-white bg-white/5 rounded-lg active:scale-95 transition-transform"
         >
           {collapse ? <Menu size={20} /> : <X size={20} />}
-        </button>
+        </button> */}
         <div className="h-6">
           <img
             src="/IMS/whitelogo.png"
@@ -72,7 +72,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
 
       <div className="flex flex-1 w-full h-full overflow-hidden">
         {/* Sidebar Component */}
-        <Sidebar />
+        {!isMobile && <Sidebar />}
 
         {/* 3. MAIN CONTENT AREA */}
         <div className="flex-1 h-full overflow-hidden flex flex-col">
@@ -82,11 +82,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
             animate={{ opacity: 1 }}
             className="w-full h-full overflow-y-auto relative p-4 md:p-0"
           >
-            {includedPage.some((page) => pathname.includes(page)) ? (
-              children
-            ) : (
-              <>{isMobile ? <DesktopRestrictionScreen /> : children}</>
-            )}
+            <>{isMobile ? <DesktopRestrictionScreen /> : children}</>
 
             {/* Command Palette Floating Button */}
             <div className="fixed bottom-6 right-6 z-40">

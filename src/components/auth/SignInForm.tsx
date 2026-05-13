@@ -1,18 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import {
+  ReactNode,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import useAuthStore from "@/lib/stores/auth.store";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { Loader2, Mail, ChevronRight, ArrowLeft } from "lucide-react";
+import { Loader2, Mail, ChevronDown, Shield, Lock } from "lucide-react";
 import { AxiosError } from "axios";
-import { getEmailDomain } from "@/lib/utils";
-import { FaBuilding } from "react-icons/fa";
-import { MdOutlineEmail } from "react-icons/md";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub, FaGitlab } from "react-icons/fa";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth.schema";
@@ -20,7 +24,7 @@ import { getCookie } from "cookies-next";
 import { COOKIE_KEYS } from "@/lib/constant";
 import { endpoint } from "@/lib/api/endpoint";
 import { apiClient } from "@/lib/api/client";
-import { SsoProviderModal, SsoSlug } from "./SSOProvideModal";
+import { motion, AnimatePresence } from "framer-motion";
 
 const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 
@@ -81,58 +85,138 @@ function ProviderIcon({ type }: { type: string }) {
   return null;
 }
 
+function EnterpriseSsoIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect
+        x="2"
+        y="7"
+        width="16"
+        height="11"
+        rx="2"
+        stroke="#16a34a"
+        strokeWidth="1.4"
+        fill="none"
+      />
+      <path
+        d="M6 7V5a4 4 0 018 0v2"
+        stroke="#16a34a"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <circle cx="10" cy="13" r="2" fill="#16a34a" />
+    </svg>
+  );
+}
+
+function BitbucketIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect width="20" height="20" rx="4" fill="#2684FF" />
+      <path d="M3 4l2 12 5-6 5 6 2-12z" fill="white" opacity="0.9" />
+    </svg>
+  );
+}
+
+// ─── Shared row ───────────────────────────────────────────────────
+
 function ProviderRow({
   icon,
   label,
-  sub,
   onClick,
-  disabled,
-  highlighted,
 }: {
-  icon: string;
+  icon: React.ReactNode;
   label: string;
-  sub: string;
   onClick: () => void;
-  disabled?: boolean;
-  highlighted?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
-      className="w-full flex items-center gap-3.5 px-4 py-3.5 border rounded-xl text-left transition-all group disabled:opacity-40 disabled:cursor-not-allowed"
-      style={{
-        borderColor: highlighted ? "#22c55e" : "#e5e7eb",
-        background: highlighted ? "#f0fdf4" : "#fff",
-      }}
+      className="w-full flex items-center gap-3.5 px-4 py-3.5 text-left hover:bg-gray-50 transition-colors group border-b border-gray-100 last:border-0 bg-transparent cursor-pointer"
     >
-      <div className="w-9 h-9 rounded-lg border border-gray-100 bg-white flex items-center justify-center shrink-0 shadow-sm">
-        <ProviderIcon type={icon} />
+      <div className="w-8 h-8 rounded-lg border border-gray-100 bg-white flex items-center justify-center shrink-0 shadow-sm">
+        {icon}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-gray-900 leading-snug">{label}</p>
-        <p className="text-[11.5px] text-gray-400 mt-0.5">{sub}</p>
-      </div>
-      <ChevronRight
-        size={15}
-        className="text-gray-300 group-hover:text-gray-500 transition-colors shrink-0"
-      />
+      <span className="flex-1 text-[14px] font-medium text-gray-800 group-hover:text-gray-900">
+        {label}
+      </span>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        className="text-gray-300 group-hover:text-gray-500 transition-colors"
+      >
+        <path
+          d="M5 3l4 4-4 4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     </button>
   );
 }
 
-function Divider({ label }: { label: string }) {
+// ─── Provider group card ─────────────────────────────────────────
+
+function ProviderGroup({
+  title,
+  badge,
+  badgeColor,
+  subtitle,
+  children,
+}: {
+  title: string;
+  badge: string;
+  badgeColor: string;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="px-4 py-3.5 bg-white">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="text-[15px] font-black text-gray-900">{title}</span>
+          <span
+            className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+            style={{
+              background: badgeColor === "green" ? "#f0fdf4" : "#eff6ff",
+              color: badgeColor === "green" ? "#16a34a" : "#2563eb",
+            }}
+          >
+            {badge}
+          </span>
+        </div>
+        <p className="text-[12.5px] text-gray-400">{subtitle}</p>
+      </div>
+      <div className="border-t border-gray-100">{children}</div>
+    </div>
+  );
+}
+
+// ─── Divider ─────────────────────────────────────────────────────
+
+function Divider({ label, icon }: { label?: string; icon?: ReactNode }) {
   return (
     <div className="flex items-center gap-3 my-5">
       <div className="flex-1 h-px bg-gray-200" />
-      <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 whitespace-nowrap">
-        {label}
-      </span>
+      {label ? (
+        <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 whitespace-nowrap">
+          {label}
+        </span>
+      ) : (
+        <>{icon}</>
+      )}
       <div className="flex-1 h-px bg-gray-200" />
     </div>
   );
 }
+
+// ─── Main ────────────────────────────────────────────────────────
 
 export default function SignInForm() {
   const { oauthLogin, requestMagicLink, consumeMagicLink } = useAuthStore();
@@ -144,15 +228,11 @@ export default function SignInForm() {
   const inviteEmail = searchParams.get("email");
   const isAuthRef = useRef(false);
   const shownErrorRef = useRef<string | null>(null);
-  const [steps, setSteps] = useState<"email" | "authenticate">("email");
-  const [ssoDiscovery, setSsoDiscovery] = useState<SsoDiscoveryResult | null>(
-    null
-  );
-  const [ssoModal, setSsoModal] = useState<SsoSlug | null>(null);
 
   const [isDiscoveryLoading, setIsDiscoveryLoading] = useState(false);
-  const [isSsoLoading, setIsSsoLoading] = useState(false);
   const [isMagicLinkLoading, setIsMagicLinkLoading] = useState(false);
+  const [altExpanded, setAltExpanded] = useState(false);
+
   const {
     control,
     setValue,
@@ -164,6 +244,7 @@ export default function SignInForm() {
     resolver: zodResolver(loginSchema),
     mode: "onChange",
   });
+
   const session = useSession();
 
   const redirectAfterLogin = useCallback(
@@ -189,7 +270,8 @@ export default function SignInForm() {
           const url =
             process.env.NEXT_PUBLIC_INCIDENT_URL ??
             "https://incidents.scrubbe.com";
-          window.location.href = `${url}/incident/tickets?token=${token ?? ""}`;
+          window.location.href =
+            url + "/incident/tickets?token=" + (token ?? "");
           return;
         }
         router.push("/incident");
@@ -212,94 +294,18 @@ export default function SignInForm() {
     }
     try {
       setIsDiscoveryLoading(true);
-      const res = await apiClient.get(endpoint.auth.sso_discover, {
-        params: { email },
-      });
-      setSsoDiscovery(res.data?.data ?? res.data ?? null);
+      await apiClient.get(endpoint.auth.sso_discover, { params: { email } });
     } catch {
-      setSsoDiscovery(null);
+      /* no-op */
     } finally {
       setIsDiscoveryLoading(false);
-      setSteps("authenticate");
     }
   };
 
-  const handleContinueWithSso = async ({
-    email,
-    tenant,
-  }: {
-    email?: string;
-    tenant?: string;
-  }) => {
-    try {
-      setIsSsoLoading(true);
-      const res = await apiClient.get(endpoint.auth.sso_login, {
-        params: {
-          ...(email ? { email } : {}),
-          ...(tenant ? { tenant } : {}),
-          ...(path ? { to: path } : {}),
-          dryrun: 1,
-        },
-      });
-      const url = (res.data?.data ?? res.data)?.redirectUrl as string;
-      if (!url) throw new Error();
-      window.location.href = url;
-    } catch {
-      toast.error("SSO login failed");
-    } finally {
-      setIsSsoLoading(false);
-    }
-  };
-
-  const handleRequestMagicLink = async () => {
-    try {
-      setIsMagicLinkLoading(true);
-      await requestMagicLink(watch("email").trim(), path);
-      toast.success("Check your inbox", {
-        description: "If your account exists, we sent a magic sign-in link.",
-      });
-    } catch {
-      toast.error("Unable to send magic link");
-    } finally {
-      setIsMagicLinkLoading(false);
-    }
-  };
-
-  const workspaceProviderSlug = ssoDiscovery?.providerSlug ?? null;
-  const enforceWorkspaceSso = Boolean(ssoDiscovery?.enforced);
-  const ssoBridgeUnavailable = Boolean(
-    ssoDiscovery?.available && !ssoDiscovery?.providerSlug
-  );
-  const lockProviderButtons = Boolean(
-    enforceWorkspaceSso && workspaceProviderSlug
-  );
-  const disableProviderButtons = Boolean(
-    enforceWorkspaceSso && ssoBridgeUnavailable
-  );
-  const startDirect = useCallback(
-    (p: string) =>
-      signIn(p, {
-        callbackUrl: `/auth/signin${
-          path ? `?to=${encodeURIComponent(path)}` : ""
-        }`,
-      }),
-    [path]
-  );
-
-  const handleProviderSelection = async (provider: string) => {
-    if (disableProviderButtons) {
-      toast.error("Workspace SSO not available");
-      return;
-    }
-    if (workspaceProviderSlug && provider === workspaceProviderSlug) {
-      await handleContinueWithSso({ email: watch("email").trim() });
-      return;
-    }
-    if (lockProviderButtons && provider !== workspaceProviderSlug) {
-      toast.info("Use your workspace provider");
-      return;
-    }
-    await startDirect(provider);
+  const handleComingSoon = (name: string) => {
+    toast.info(name + " sign-in coming soon", {
+      description: "This provider will be available shortly.",
+    });
   };
 
   const onSubmitOAuth = useCallback(async () => {
@@ -321,7 +327,7 @@ export default function SignInForm() {
         const p = new URLSearchParams();
         if (session.data?.user.email) p.set("email", session.data.user.email);
         if (path) p.set("to", path);
-        router.push(`/auth/business-signup?${p.toString()}`);
+        router.push("/auth/business-signup?" + p.toString());
         return;
       }
       toast.error("Login failed");
@@ -343,7 +349,6 @@ export default function SignInForm() {
   useEffect(() => {
     if (inviteEmail) {
       setValue("email", inviteEmail);
-      setSsoDiscovery(null);
     }
   }, [inviteEmail, setValue]);
 
@@ -371,7 +376,7 @@ export default function SignInForm() {
       } catch {
         if (!mounted) return;
         toast.error("Magic link failed");
-        router.replace(`/auth/signin${path ? `?to=${path}` : ""}`);
+        router.replace("/auth/signin" + (path ? "?to=" + path : ""));
       } finally {
         if (mounted) setIsMagicLinkLoading(false);
       }
@@ -386,177 +391,195 @@ export default function SignInForm() {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div className="w-full relative">
+      <div className="w-full relative ">
         {isSpinning && (
           <div className="absolute inset-0 bg-white/70 z-50 flex items-center justify-center rounded-2xl">
             <Loader2 className="animate-spin text-emerald-500" size={28} />
           </div>
         )}
 
+        {/* Help */}
         <div className="text-right mb-6 text-sm text-gray-500">
           Need help?{" "}
           <Link
-            href="/support"
+            href="/contact-us"
             className="text-emerald-600 font-semibold hover:underline"
           >
             contact support
           </Link>
         </div>
 
-        <div className="text-center mb-7">
+        {/* Heading */}
+        <div className="text-center mb-8">
           <h1 className="text-[28px] font-black text-gray-900 tracking-tight mb-1">
             Welcome to Scrubbe
           </h1>
-          <p className="text-sm text-gray-500">
-            Sign in to your workspace to continue
+          <p className="text-sm text-gray-400 mb-5">
+            Secure access for engineering workspace
+          </p>
+          <p className="text-[17px] font-bold text-gray-900">
+            Sign in to your workspace
+          </p>
+          <p className="text-sm text-gray-400 mt-1">
+            Enter your work email to continue
           </p>
         </div>
 
-        {steps === "email" && (
-          <>
-            <Divider label="Single Sign-On" />
-            <div className="space-y-2.5">
-              {SSO_PROVIDERS.map((p) => (
-                <ProviderRow
-                  key={p.slug}
-                  icon={p.icon}
-                  label={p.label}
-                  sub={p.sub}
-                  onClick={() => setSsoModal(p.slug)}
-                  disabled={isSsoLoading}
+        {/* Email + Continue */}
+        <form
+          onSubmit={handleSubmit(handleContinue)}
+          className="space-y-3 mb-2"
+        >
+          <div className="flex items-center gap-2.5 border border-gray-200 rounded-xl px-3.5 py-3.5 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all bg-white">
+            <Mail size={15} className="text-gray-400 shrink-0" />
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="email"
+                  className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
+                  placeholder="name@company.com"
                 />
-              ))}
-            </div>
-            <Divider label="Or with work email" />
-            <form onSubmit={handleSubmit(handleContinue)}>
-              <label className="text-sm font-semibold text-gray-900 block mb-2">
-                Continue with work email
-              </label>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 flex items-center gap-2.5 border border-gray-200 rounded-xl px-3.5 py-3 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all bg-white">
-                  <Mail size={15} className="text-gray-400 shrink-0" />
-                  <Controller
-                    name="email"
-                    control={control}
-                    render={({ field }) => (
-                      <input
-                        {...field}
-                        type="email"
-                        className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
-                        placeholder="name@company.com"
-                      />
-                    )}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={!isValid || isDiscoveryLoading}
-                  className="shrink-0 px-5 py-3 rounded-xl font-bold text-sm text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
-                  style={{
-                    background:
-                      "linear-gradient(90deg,#1a2a1a 0%,#14532d 55%,#22c55e 100%)",
-                    minWidth: 100,
-                  }}
-                >
-                  {isDiscoveryLoading ? (
-                    <Loader2 size={15} className="animate-spin mx-auto" />
-                  ) : (
-                    "Continue"
-                  )}
-                </button>
-              </div>
-              {errors.email && (
-                <p className="text-xs text-red-500 mt-1.5">
-                  {errors.email.message}
-                </p>
               )}
-            </form>
-            <p className="text-center text-sm text-gray-600 mt-6">
-              {"Don't have access? "}
-              <Link
-                href="/support"
-                className="text-emerald-600 font-semibold hover:underline"
-              >
-                Contact your administrator
-              </Link>
-            </p>
-          </>
-        )}
-
-        {steps === "authenticate" && (
-          <>
-            <div className="flex items-center justify-between mb-5">
-              <button
-                type="button"
-                onClick={() => {
-                  setSsoDiscovery(null);
-                  setSteps("email");
-                }}
-                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors bg-transparent border-none cursor-pointer"
-              >
-                <ArrowLeft size={14} /> Back
-              </button>
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1.5 border border-gray-200 px-3 py-1.5 rounded-full text-xs text-gray-600 bg-gray-50">
-                  <FaBuilding size={11} className="text-gray-400" />
-                  {getEmailDomain(watch("email")).domain}
-                </span>
-                <span className="flex items-center gap-1.5 border border-gray-200 px-3 py-1.5 rounded-full text-xs text-gray-600 bg-gray-50">
-                  <MdOutlineEmail size={12} className="text-gray-400" />
-                  {watch("email")}
-                </span>
-              </div>
-            </div>
-            {ssoDiscovery?.available && (
-              <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm">
-                <p className="font-semibold text-emerald-800">
-                  {ssoDiscovery.businessName ?? ssoDiscovery.ssoDomain}{" "}
-                  {enforceWorkspaceSso ? "requires" : "supports"} workspace SSO.
-                </p>
-              </div>
+            />
+          </div>
+          {errors.email && (
+            <p className="text-xs text-red-500">{errors.email.message}</p>
+          )}
+          <button
+            type="submit"
+            disabled={!isValid || isDiscoveryLoading}
+            className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
+            style={{
+              background:
+                "linear-gradient(90deg,#1a2a1a 0%,#14532d 55%,#22c55e 100%)",
+            }}
+          >
+            {isDiscoveryLoading ? (
+              <Loader2 size={16} className="animate-spin mx-auto" />
+            ) : (
+              "Continue"
             )}
-            <Divider label="Single Sign-On" />
-            <div className="space-y-2.5">
-              {SSO_PROVIDERS.map((p) => {
-                const matched = p.slug === workspaceProviderSlug;
-                const locked = lockProviderButtons && !matched;
-                return (
-                  <ProviderRow
-                    key={p.slug}
-                    icon={p.icon}
-                    label={
-                      matched && ssoDiscovery?.available
-                        ? `${p.label} (Workspace SSO)`
-                        : p.label
-                    }
-                    sub={p.sub}
-                    onClick={() => void handleProviderSelection(p.slug)}
-                    disabled={isSsoLoading || locked || disableProviderButtons}
-                    highlighted={matched && Boolean(ssoDiscovery?.available)}
-                  />
-                );
-              })}
-            </div>
-            <Divider label="Or" />
-            <button
-              type="button"
-              onClick={handleRequestMagicLink}
-              disabled={isMagicLinkLoading || enforceWorkspaceSso}
-              className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-white"
+          </button>
+        </form>
+
+        <Divider label="OR" />
+
+        {/* Collapsible alternative sign-in */}
+        <button
+          type="button"
+          onClick={() => setAltExpanded((v) => !v)}
+          className="w-full flex items-center gap-3 px-4 py-3.5 border border-gray-200 rounded-xl text-left hover:bg-gray-50 transition-colors bg-white cursor-pointer mb-4"
+        >
+          <Shield size={17} className="text-gray-500 shrink-0" />
+          <span className="flex-1 text-[14px] font-medium text-gray-700">
+            Sign in via different way
+          </span>
+          <motion.div
+            animate={{ rotate: altExpanded ? 180 : 0 }}
+            transition={{ duration: 0.22 }}
+          >
+            <ChevronDown size={16} className="text-gray-400" />
+          </motion.div>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {altExpanded && (
+            <motion.div
+              key="alt"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              style={{ overflow: "hidden" }}
             >
-              <Mail size={15} /> Email me a magic link
-            </button>
-            <p className="text-center text-sm text-gray-600 mt-5">
-              {"Don't have access? "}
-              <Link
-                href="/support"
-                className="text-emerald-600 font-semibold hover:underline"
-              >
-                Contact your administrator
-              </Link>
-            </p>
-          </>
-        )}
+              <div className="space-y-4 pb-2">
+                {/* Enterprise SSO group */}
+                <ProviderGroup
+                  title="Enterprise SSO"
+                  badge="For organizations"
+                  badgeColor="green"
+                  subtitle="Use your organization's identity provider"
+                >
+                  <ProviderRow
+                    icon={<FcGoogle size={20} />}
+                    label="Google Workspace"
+                    onClick={() => handleComingSoon("Google Workspace")}
+                  />
+                  <ProviderRow
+                    icon={<MsIcon />}
+                    label="Microsoft / Entra ID"
+                    onClick={() => handleComingSoon("Microsoft / Entra ID")}
+                  />
+                  <ProviderRow
+                    icon={<OktaIcon />}
+                    label="Okta"
+                    onClick={() => handleComingSoon("Okta")}
+                  />
+                  <ProviderRow
+                    icon={<OneLoginIcon />}
+                    label="Onelogin"
+                    onClick={() => handleComingSoon("OneLogin")}
+                  />
+                  <ProviderRow
+                    icon={<EnterpriseSsoIcon />}
+                    label="Enterprise SSO (OIDC/SAML)"
+                    onClick={() =>
+                      handleComingSoon("Enterprise SSO (OIDC/SAML)")
+                    }
+                  />
+                </ProviderGroup>
+
+                {/* Engineering sign-in group */}
+                <ProviderGroup
+                  title="Engineering sign-in"
+                  badge="For developers"
+                  badgeColor="blue"
+                  subtitle="Use your developer account"
+                >
+                  <ProviderRow
+                    icon={<FaGithub size={20} className="text-gray-900" />}
+                    label="Github"
+                    onClick={() => handleComingSoon("GitHub")}
+                  />
+                  <ProviderRow
+                    icon={<FaGitlab size={20} className="text-orange-500" />}
+                    label="Gitlab"
+                    onClick={() => handleComingSoon("GitLab")}
+                  />
+                  <ProviderRow
+                    icon={<BitbucketIcon />}
+                    label="Bitbucket"
+                    onClick={() => handleComingSoon("Bitbucket")}
+                  />
+                </ProviderGroup>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Bottom */}
+        <div className="text-center">
+          <Divider icon={<Lock size={16} className="text-gray-300 w-10" />} />
+          <p className="text-sm text-gray-400 mb-3">Don't have access yet?</p>
+          <div className="flex items-center justify-center gap-4">
+            <Link
+              href="/contact-admin"
+              className="text-sm font-semibold text-emerald-600 hover:underline"
+            >
+              Contact your administrator
+            </Link>
+            <div className="w-px h-4 bg-gray-200" />
+            <Link
+              href="/auth/business-signup"
+              className="text-sm font-semibold text-emerald-600 hover:underline"
+            >
+              Create a workspace
+            </Link>
+          </div>
+        </div>
       </div>
 
       <SsoProviderModal

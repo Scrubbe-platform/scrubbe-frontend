@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
+import Link from "next/link";
 
 const PRIMARY_USERS = [
   {
@@ -356,22 +357,27 @@ function DetailPanel({ user }: { user: (typeof ALL_USERS)[0] }) {
 
         <div className="mt-5">
           {user.ctaStyle === "link" ? (
-            <button className="text-[13px] font-semibold text-gray-700 underline underline-offset-4 bg-transparent border-none cursor-pointer hover:text-emerald-600 transition-colors">
-              {user.cta}
-            </button>
-          ) : user.ctaStyle === "outline-green" ? (
-            <button
-              className="w-full py-3 rounded-lg font-semibold text-[14px] text-emerald-600 transition-colors border cursor-pointer hover:bg-emerald-50"
-              style={{ borderColor: "#22c55e", background: "transparent" }}
-            >
-              {user.cta}
-            </button>
-          ) : (
-            <button className="w-full p-0.5 cursor-pointer bg-gradient-to-r from-zinc-700 to-teal-500 border-none">
-              <div className="py-3 bg-white text-[14px] text-gray-800 font-semibold text-center">
+            <Link href={"/auth/signin"}>
+              <div className="text-[13px] text-center font-semibold text-gray-700 underline underline-offset-4 bg-transparent border-none cursor-pointer hover:text-emerald-600 transition-colors">
                 {user.cta}
               </div>
-            </button>
+            </Link>
+          ) : user.ctaStyle === "outline-green" ? (
+            <Link href={"/auth/signin"}>
+              <div className="w-full p-0.5 cursor-pointer bg-gradient-to-r from-zinc-700 to-teal-500 border-none">
+                <div className="py-3 bg-white text-[14px] text-gray-800 font-semibold text-center">
+                  {user.cta}
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <Link href={"/auth/signin"}>
+              <div className="w-full p-0.5 cursor-pointer bg-gradient-to-r from-zinc-700 to-teal-500 border-none">
+                <div className="py-3 bg-white text-[14px] text-gray-800 font-semibold text-center">
+                  {user.cta}
+                </div>
+              </div>
+            </Link>
           )}
         </div>
       </motion.div>
