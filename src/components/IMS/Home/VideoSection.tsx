@@ -201,7 +201,7 @@ export default function VideoSection() {
 
           {/* ── 3 thumbnail cards below ── */}
           <div
-            className="grid grid-cols-3 divide-x"
+            className="grid sm:grid-cols-3 divide-x"
             style={{
               borderTop: "1px solid #1f2937",
             }}

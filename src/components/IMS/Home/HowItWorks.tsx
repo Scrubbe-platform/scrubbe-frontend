@@ -132,7 +132,7 @@ export default function HowItWorks() {
           className="border border-gray-200 rounded-xl overflow-hidden bg-white"
         >
           {/* Tab bar */}
-          <div className="grid grid-cols-6 border-b border-gray-200">
+          <div className="flex flex-row md:grid grid-cols-6 overflow-x-scroll border-b border-gray-200">
             {TABS.map((t) => {
               const isActive = t.id === active;
               return (

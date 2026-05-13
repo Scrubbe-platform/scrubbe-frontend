@@ -567,7 +567,7 @@ export default function SignInForm() {
           <p className="text-sm text-gray-400 mb-3">Don't have access yet?</p>
           <div className="flex items-center justify-center gap-4">
             <Link
-              href="/contact-us"
+              href="/contact-admin"
               className="text-sm font-semibold text-emerald-600 hover:underline"
             >
               Contact your administrator
