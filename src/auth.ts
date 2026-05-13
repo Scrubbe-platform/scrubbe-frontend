@@ -21,6 +21,9 @@ export const {
 } = NextAuth({
   providers: [
     Github({
+      clientId: process.env.AUTH_GITHUB_ID ?? process.env.GITHUB_CLIENT_ID,
+      clientSecret:
+        process.env.AUTH_GITHUB_SECRET ?? process.env.GITHUB_CLIENT_SECRET,
       authorization: {
         params: {
           scope: "read:user user:email",
@@ -42,6 +45,9 @@ export const {
       },
     }),
     Google({
+      clientId: process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID,
+      clientSecret:
+        process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET,
       async profile(profile):Promise<any>  {
         return {
           id: profile.sub,
@@ -57,6 +63,9 @@ export const {
       },
     }),
     Gitlab({
+      clientId: process.env.AUTH_GITLAB_ID ?? process.env.GITLAB_CLIENT_ID,
+      clientSecret:
+        process.env.AUTH_GITLAB_SECRET ?? process.env.GITLAB_CLIENT_SECRET,
       async profile(profile):Promise<any>  {
         return {
           id: profile.id.toString(),
@@ -72,9 +81,15 @@ export const {
       },
     }),
     MicrosoftEntraID({
-      clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
-      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
-      issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
+      clientId:
+        process.env.AUTH_MICROSOFT_ENTRA_ID_ID ??
+        process.env.MICROSOFT_ENTRA_ID_ID,
+      clientSecret:
+        process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET ??
+        process.env.MICROSOFT_ENTRA_ID_SECRET,
+      issuer:
+        process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER ??
+        process.env.MICROSOFT_ENTRA_ID_ISSUER,
       async profile(profile):Promise<any>  {
         return {
           id: profile.oid,

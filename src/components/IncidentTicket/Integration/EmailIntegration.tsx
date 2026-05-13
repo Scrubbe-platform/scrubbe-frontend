@@ -46,7 +46,7 @@ const EmailIntegration: React.FC = () => {
   const { user } = useAuthStore();
 
   const { data } = useQuery({
-    queryKey: [querykeys.INTEGRATIONS],
+    queryKey: [querykeys.INTEGRATIONS, user?.id],
     queryFn: async () => {
       const res = await get(
         endpoint.incident_ticket.integrations + "/" + user?.id
@@ -101,7 +101,9 @@ const EmailIntegration: React.FC = () => {
     const res = await post(endpoint.integration.email, values);
     setIsLoading(false);
     if (res.success) {
-      queryClient.refetchQueries({ queryKey: [querykeys.INTEGRATIONS] });
+      queryClient.refetchQueries({
+        queryKey: [querykeys.INTEGRATIONS, user?.id],
+      });
       return toast.success("Email integration saved!");
     }
     return toast.error("Integration failed");

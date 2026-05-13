@@ -45,6 +45,7 @@ export const endpoint = {
     integrations: "/integrations",
     gitlab_projects: "/integrations/gitlab/projects",
     github_repos: "/integrations/github/repos",
+    bitbucket_repos: "/integrations/bitbucket/repos",
     postmorterm: {
       five_why: "/incident-ticket/resolve/ai/five-whys",
       suggestion: "/incident-ticket/resolve/ai/suggestion",

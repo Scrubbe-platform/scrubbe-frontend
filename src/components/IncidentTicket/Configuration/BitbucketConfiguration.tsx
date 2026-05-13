@@ -1,37 +1,32 @@
-// components/MonitorRepositories.tsx
-
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import { FiCheckCircle } from "react-icons/fi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import useAuthStore from "@/lib/stores/auth.store";
 import { querykeys } from "@/lib/constant";
-import { toast } from "sonner";
 
 type IRepo = {
-  id: number;
+  id: string;
   name: string;
-  visibility: boolean;
-  nameWithNamespace?: string;
-  private?: boolean;
+  private: boolean;
+  fullName?: string;
   url?: string;
-  defaultBranch?: string;
+  mainBranch?: string | null;
 };
 
 type IntegrationRecord = {
   provider: string;
   config?: {
-    repos?: Array<{
-      id: number;
-    }>;
+    repos?: IRepo[];
   } | null;
 };
 
-function GitlabConfiguration() {
+function BitbucketConfiguration() {
   const [selectedRepoIds, setSelectedRepoIds] = useState<IRepo[] | undefined>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [hasHydratedSelection, setHasHydratedSelection] = useState(false);
@@ -40,9 +35,9 @@ function GitlabConfiguration() {
   const queryClient = useQueryClient();
 
   const { data: repositories = [] } = useQuery<IRepo[]>({
-    queryKey: ["GITLAB_REPO"],
+    queryKey: [querykeys.BITBUCKET_REPO],
     queryFn: async () => {
-      const res = await get(endpoint.incident_ticket.gitlab_projects);
+      const res = await get(endpoint.incident_ticket.bitbucket_repos);
       if (res.success) {
         return (res.data?.data ?? []) as IRepo[];
       }
@@ -52,26 +47,26 @@ function GitlabConfiguration() {
 
   const { data: integrations = [], isLoading: isLoadingIntegrations } =
     useQuery<IntegrationRecord[]>({
-    queryKey: [querykeys.INTEGRATIONS, user?.id],
-    queryFn: async () => {
-      const res = await get(`${endpoint.incident_ticket.integrations}/${user?.id}`);
-      if (res.success) {
-        return (res.data?.data ?? []) as IntegrationRecord[];
-      }
-      return [];
-    },
-    enabled: !!user?.id,
-  });
+      queryKey: [querykeys.INTEGRATIONS, user?.id],
+      queryFn: async () => {
+        const res = await get(`${endpoint.incident_ticket.integrations}/${user?.id}`);
+        if (res.success) {
+          return (res.data?.data ?? []) as IntegrationRecord[];
+        }
+        return [];
+      },
+      enabled: !!user?.id,
+    });
 
-  const savedProjectIds = useMemo(() => {
-    const gitlabIntegration = integrations.find(
-      (integration) => integration.provider.toLowerCase() === "gitlab"
+  const savedRepoIds = useMemo(() => {
+    const bitbucketIntegration = integrations.find(
+      (integration) => integration.provider.toLowerCase() === "bitbucket"
     );
 
     return new Set(
-      (gitlabIntegration?.config?.repos ?? [])
+      (bitbucketIntegration?.config?.repos ?? [])
         .map((repo) => repo.id)
-        .filter((repoId): repoId is number => Number.isFinite(repoId))
+        .filter((repoId): repoId is string => typeof repoId === "string" && repoId.length > 0)
     );
   }, [integrations]);
 
@@ -81,22 +76,21 @@ function GitlabConfiguration() {
     }
 
     const preselectedRepositories = repositories.filter((repo) =>
-      savedProjectIds.has(repo.id)
+      savedRepoIds.has(repo.id)
     );
 
     setSelectedRepoIds(
       preselectedRepositories.length > 0 ? preselectedRepositories : repositories
     );
     setHasHydratedSelection(true);
-  }, [hasHydratedSelection, isLoadingIntegrations, repositories, savedProjectIds]);
+  }, [hasHydratedSelection, isLoadingIntegrations, repositories, savedRepoIds]);
 
   const handleToggleRepo = (repo: IRepo) => {
     setSelectedRepoIds((prevSelected) => {
       if (!!prevSelected?.find((value) => repo.id === value.id)) {
         return prevSelected?.filter((value) => value.id !== repo.id);
-      } else {
-        return [...(prevSelected ?? []), repo];
       }
+      return [...(prevSelected ?? []), repo];
     });
   };
 
@@ -104,8 +98,7 @@ function GitlabConfiguration() {
     if (selectedRepoIds?.length === repositories.length) {
       setSelectedRepoIds([]);
     } else {
-      const allIds = repositories;
-      setSelectedRepoIds(allIds);
+      setSelectedRepoIds(repositories);
     }
   };
 
@@ -117,25 +110,25 @@ function GitlabConfiguration() {
 
     setIsSaving(true);
     try {
-      const res = await patch(endpoint.incident_ticket.gitlab_projects, {
-        projectIds: selectedRepoIds.map((repo) => repo.id),
+      const res = await patch(endpoint.incident_ticket.bitbucket_repos, {
+        repoIds: selectedRepoIds.map((repo) => repo.id),
       });
 
       if (!res.success) {
         toast.error(
           typeof res.data === "string"
             ? res.data
-            : "Unable to save monitored GitLab projects"
+            : "Unable to save monitored Bitbucket repositories"
         );
         return;
       }
 
-      toast.success("GitLab monitored projects updated");
+      toast.success("Bitbucket monitored repositories updated");
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: [querykeys.INTEGRATIONS, user?.id],
         }),
-        queryClient.invalidateQueries({ queryKey: ["GITLAB_REPO"] }),
+        queryClient.invalidateQueries({ queryKey: [querykeys.BITBUCKET_REPO] }),
       ]);
     } finally {
       setIsSaving(false);
@@ -144,18 +137,16 @@ function GitlabConfiguration() {
 
   return (
     <div className="w-full mx-auto">
-      {/* Header */}
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-800">
           Monitor Repositories
         </h2>
         <p className="text-gray-500 text-sm mt-1">
-          Link your code repositories to enable real-time monitoring and
-          proactive threat detection.
+          Select the Bitbucket repositories that should raise incidents and
+          feed remediation context into Scrubbe.
         </p>
       </div>
 
-      {/* Select All */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-sm text-gray-700 font-medium">
           {selectedCount} selected{" "}
@@ -165,11 +156,10 @@ function GitlabConfiguration() {
         </span>
       </div>
 
-      {/* Repository List */}
       <div className="space-y-4">
         {repositories.map((repo) => {
           const isSelected = !!selectedRepoIds?.find(
-            (value) => value.id == repo.id
+            (value) => value.id === repo.id
           );
 
           return (
@@ -193,14 +183,17 @@ function GitlabConfiguration() {
                       className={clsx(
                         "text-xs px-2 py-0.5 rounded-full font-medium",
                         {
-                          "bg-emerald-100 text-emerald-600": !repo.visibility,
-                          "bg-blue-100 text-blue-600": repo.visibility,
+                          "bg-emerald-100 text-emerald-600": !repo.private,
+                          "bg-blue-100 text-blue-600": repo.private,
                         }
                       )}
                     >
-                      {repo.visibility ? "Private" : "Public"}
+                      {repo.private ? "Private" : "Public"}
                     </span>
                   </div>
+                  {repo.fullName ? (
+                    <p className="text-xs text-gray-500 mt-1">{repo.fullName}</p>
+                  ) : null}
                 </div>
               </div>
               <button
@@ -223,7 +216,6 @@ function GitlabConfiguration() {
         })}
       </div>
 
-      {/* Action Button */}
       <div className="mt-6">
         <button
           disabled={!selectedRepoIds || selectedRepoIds.length <= 0 || isSaving}
@@ -237,4 +229,4 @@ function GitlabConfiguration() {
   );
 }
 
-export default GitlabConfiguration;
+export default BitbucketConfiguration;

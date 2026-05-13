@@ -14,6 +14,7 @@ import { getEmailDomain } from "@/lib/utils";
 import { FaBuilding } from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
 import { FcGoogle } from "react-icons/fc";
+import { FaGithub, FaGitlab } from "react-icons/fa";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth.schema";
 import { getCookie } from "cookies-next";
 import { COOKIE_KEYS } from "@/lib/constant";
@@ -41,43 +42,33 @@ const SSO_PROVIDERS = [
   {
     slug: "google",
     label: "Continue with Google",
-    sub: "Google Workspace · oAuth 2.0",
+    sub: "Google Workspace - OAuth 2.0",
     icon: "google",
+  },
+  {
+    slug: "github",
+    label: "Continue with GitHub",
+    sub: "GitHub org sign-in",
+    icon: "github",
+  },
+  {
+    slug: "gitlab",
+    label: "Continue with GitLab",
+    sub: "GitLab cloud or self-managed",
+    icon: "gitlab",
   },
   {
     slug: "microsoft-entra-id",
     label: "Continue with Microsoft",
-    sub: "Microsoft 365 · Personal account",
+    sub: "Microsoft 365 - Personal account",
     icon: "microsoft",
-  },
-  {
-    slug: "okta",
-    label: "Continue with Okta",
-    sub: "SAML 2.0 · OIDC · SCIM provisioning",
-    icon: "okta",
-  },
-  {
-    slug: "entra-id",
-    label: "Continue with Entra ID",
-    sub: "Azure AD · Conditional Access",
-    icon: "entraid",
-  },
-  {
-    slug: "onelogin",
-    label: "Continue with OneLogin",
-    sub: "SAML 2.0 · OIDC",
-    icon: "onelogin",
-  },
-  {
-    slug: "cisco-duo",
-    label: "Continue with Cisco Duo",
-    sub: "SAML 2.0 · Push-based MFA",
-    icon: "duo",
   },
 ] as const;
 
 function ProviderIcon({ type }: { type: string }) {
   if (type === "google") return <FcGoogle size={22} />;
+  if (type === "github") return <FaGithub size={20} className="text-gray-900" />;
+  if (type === "gitlab") return <FaGitlab size={20} className="text-[#FC6D26]" />;
   if (type === "microsoft")
     return (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
@@ -87,71 +78,7 @@ function ProviderIcon({ type }: { type: string }) {
         <rect x="12" y="12" width="9" height="9" fill="#FFB900" />
       </svg>
     );
-  if (type === "okta")
-    return (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <circle
-          cx="11"
-          cy="11"
-          r="9.5"
-          stroke="#1d1d1b"
-          strokeWidth="1.5"
-          fill="none"
-        />
-        <circle cx="11" cy="11" r="4" fill="#1d1d1b" />
-        <circle cx="11" cy="2.5" r="1.5" fill="#1d1d1b" />
-        <circle cx="11" cy="19.5" r="1.5" fill="#1d1d1b" />
-        <circle cx="2.5" cy="11" r="1.5" fill="#1d1d1b" />
-        <circle cx="19.5" cy="11" r="1.5" fill="#1d1d1b" />
-      </svg>
-    );
-  if (type === "entraid")
-    return (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <path d="M11 2L2 8l4 2-4 6h18l-4-6 4-2-9-6z" fill="#0078D4" />
-      </svg>
-    );
-  if (type === "onelogin")
-    return (
-      <div
-        style={{
-          width: 22,
-          height: 22,
-          fontSize: 7,
-          fontWeight: 900,
-          background: "#f3f4f6",
-          borderRadius: 4,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          lineHeight: 1.1,
-          textAlign: "center",
-          color: "#374151",
-        }}
-      >
-        one
-        <br />
-        login
-      </div>
-    );
-  return (
-    <div
-      style={{
-        width: 22,
-        height: 22,
-        fontSize: 7,
-        fontWeight: 900,
-        background: "#111827",
-        borderRadius: 4,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#fff",
-      }}
-    >
-      DUO
-    </div>
-  );
+  return null;
 }
 
 function ProviderRow({
@@ -297,12 +224,19 @@ export default function SignInForm() {
     }
   };
 
-  const handleContinueWithSso = async () => {
+  const handleContinueWithSso = async ({
+    email,
+    tenant,
+  }: {
+    email?: string;
+    tenant?: string;
+  }) => {
     try {
       setIsSsoLoading(true);
       const res = await apiClient.get(endpoint.auth.sso_login, {
         params: {
-          email: watch("email").trim(),
+          ...(email ? { email } : {}),
+          ...(tenant ? { tenant } : {}),
           ...(path ? { to: path } : {}),
           dryrun: 1,
         },
@@ -358,7 +292,7 @@ export default function SignInForm() {
       return;
     }
     if (workspaceProviderSlug && provider === workspaceProviderSlug) {
-      await handleContinueWithSso();
+      await handleContinueWithSso({ email: watch("email").trim() });
       return;
     }
     if (lockProviderButtons && provider !== workspaceProviderSlug) {
@@ -628,9 +562,9 @@ export default function SignInForm() {
       <SsoProviderModal
         providerSlug={ssoModal}
         onClose={() => setSsoModal(null)}
-        onContinue={(workspace, slug) => {
+        onContinue={(workspace) => {
           setSsoModal(null);
-          void handleProviderSelection(slug);
+          void handleContinueWithSso({ tenant: workspace });
         }}
       />
     </Suspense>

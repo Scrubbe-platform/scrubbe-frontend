@@ -1,77 +1,44 @@
-import CButton from "@/components/ui/Cbutton";
-import Input from "@/components/ui/input";
-import TextArea from "@/components/ui/text-area";
 import React from "react";
-import { BiGitRepoForked } from "react-icons/bi";
+import ConnectionConfigurationForm from "./ConnectionConfigurationForm";
 
 type Props = {
   integration: string;
+  integrationType: string;
+  onSuccess?: () => void;
 };
 
-const CiCdConfigurationForm = ({ integration }: Props) => {
-  return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <h2 className="text-lg text-white">{integration}</h2>
-      </div>
-      <div className="border border-gray-400 rounded-lg p-4 space-y-2">
-        <div className="flex items-center gap-2 text-white text-base font-bold">
-          <BiGitRepoForked />
-          <p>CI/CD pipelines</p>
-        </div>
-        <p className="text-sm text-white">
-          Scrubbe reads pipeline runs, job outcomes and deployment stages so it
-          can correlate failed runs with incidents and compute MTTR and
-          deployment velocity.
-        </p>
-      </div>
+const CICD_DEFAULT_BASE_URLS: Record<string, string> = {
+  "github-actions": "https://api.github.com",
+  "gitlab-ci": "https://gitlab.com",
+  "circle-ci": "https://circleci.com",
+  jenkins: "https://jenkins.example.com",
+  "azure-pipelines": "https://dev.azure.com",
+  "cicd-custom": "https://ci.example.com",
+};
 
-      <div>
-        <Input
-          label="Display Name"
-          placeholder="eg GitHub . Core Org"
-          labelClassName="text-white"
-          className="text-white"
-        />
-        <Input
-          label="Base URL / host ( if self - hosted )"
-          placeholder="eg  https://github.com / db. example.com"
-          labelClassName="text-white"
-          className="text-white"
-        />
-        <Input
-          label="App installation / PAT / token"
-          placeholder="Paste a read-only  token or key"
-          labelClassName="text-white"
-          className="text-white"
-        />
-        <p className="text-white text-sm pb-4">
-          Scrubbe uses this to read metadata , pipeline results and metrics -
-          never to push changes{" "}
-        </p>
-        <div className="grid grid-cols-2 gap-5">
-          <Input
-            label="Org/Project/ Workspace"
-            placeholder="eg scrubbe-core , analytics -d"
-            labelClassName="text-white"
-            className="text-white"
-          />
-          <Input
-            label="Environment tags"
-            placeholder="eg prod , staging"
-            labelClassName="text-white"
-            className="text-white"
-          />
-        </div>
-        <TextArea
-          label="Notes  for your team ( optional )"
-          placeholder="Example : Github Org  for customer - facing services only . Jenkins instance is internal only"
-          labelClassName="text-white"
-          className="text-white"
-        />
-        <CButton>Save</CButton>
-      </div>
-    </div>
+const CiCdConfigurationForm = ({
+  integration,
+  integrationType,
+  onSuccess,
+}: Props) => {
+  return (
+    <ConnectionConfigurationForm
+      integration={integration}
+      integrationType={integrationType}
+      category="cicd"
+      sectionTitle="CI/CD pipelines"
+      description="Scrubbe reads pipeline runs, job outcomes and deployment stages so it can correlate failed runs with incidents and compute MTTR and deployment velocity."
+      baseUrlLabel="Base URL / host"
+      baseUrlPlaceholder="eg https://github.com or https://jenkins.example.com"
+      credentialLabel="App installation / PAT / token"
+      credentialPlaceholder="Paste a read-only token or key"
+      scopeLabel="Org / project / workspace"
+      scopePlaceholder="eg scrubbe-core, analytics-d"
+      notesPlaceholder="Example: GitHub org for customer-facing services only. Jenkins instance is internal only."
+      helperText="Scrubbe uses this to read pipeline results and deployment metadata, never to push changes."
+      defaultBaseUrl={CICD_DEFAULT_BASE_URLS[integrationType]}
+      onSuccess={onSuccess}
+    />
   );
 };
 

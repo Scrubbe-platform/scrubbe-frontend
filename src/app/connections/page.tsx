@@ -1,5 +1,6 @@
 "use client";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AiOutlineCloud, AiOutlineKubernetes } from "react-icons/ai";
 import { BiGitRepoForked, BiGrid, BiLogoMongodb } from "react-icons/bi";
 import { BsDatabase } from "react-icons/bs";
@@ -37,7 +38,7 @@ const integrationModel = [
     Icon: TbBrandBitbucket,
   },
   {
-    name: "azure",
+    name: "azure-devops",
     title: "Azure Devops/ other",
     subtitle: "Projects & repos",
     Icon: VscAzure,
@@ -82,7 +83,7 @@ const deploymentModel = [
     Icon: VscTypeHierarchy,
   },
   {
-    name: "others",
+    name: "cicd-custom",
     title: "Other CI/CD",
     subtitle: "Generic webhooks / API",
     Icon: PiPlugBold,
@@ -108,7 +109,7 @@ const containersModel = [
     Icon: AiOutlineCloud,
   },
   {
-    name: "grc",
+    name: "gcr-artifact",
     title: "GCR / Artifact",
     subtitle: "Google container registry",
     Icon: WiNightCloudy,
@@ -126,7 +127,7 @@ const containersModel = [
     Icon: BiGrid,
   },
   {
-    name: "others",
+    name: "runtime-custom",
     title: "Other  Kubernates",
     subtitle: "Read-only kubeconfig",
     Icon: CgNotes,
@@ -153,7 +154,7 @@ const databaseModel = [
     Icon: BiLogoMongodb,
   },
   {
-    name: "Snowflake",
+    name: "snowflake",
     title: "Snowflake",
     subtitle: "Warehouse metrics",
     Icon: RxStack,
@@ -165,7 +166,7 @@ const databaseModel = [
     Icon: LuPuzzle,
   },
   {
-    name: "others",
+    name: "datastore-custom",
     title: "Other DB / JDBC",
     subtitle: "Custom read -only connector",
     Icon: LuPuzzle,
@@ -193,22 +194,63 @@ const fraudModel = [
     Icon: LuGitPullRequest,
   },
   {
-    name: "scrubbe",
+    name: "scrubbe-fraud-api",
     title: "Scrubbe  Fraud API",
     subtitle: "Native risks & Signals",
     Icon: LuPuzzle,
   },
   {
-    name: "others",
+    name: "fraud-custom",
     title: "Custom Fraud Signals",
     subtitle: "HTTP / stream ingestion",
     Icon: MdOutlineOfflineBolt,
   },
 ];
+
+const CONFIGURATION_SECTIONS = [
+  { modalType: "code_repos", items: integrationModel },
+  { modalType: "cicd", items: deploymentModel },
+  { modalType: "runtime", items: containersModel },
+  { modalType: "datastores", items: databaseModel },
+  { modalType: "fraud_metrics", items: fraudModel },
+] as const;
+
+const findConfigurationPreset = (integrationName: string) => {
+  const normalized = integrationName.trim().toLowerCase();
+
+  for (const section of CONFIGURATION_SECTIONS) {
+    const match = section.items.find((item) => item.name === normalized);
+    if (match) {
+      return {
+        modalType: section.modalType,
+        integration: match.title,
+        integrationType: match.name,
+      };
+    }
+  }
+
+  return null;
+};
+
 const Page = () => {
   const [modalType, setModalType] = useState("none");
   const [isOpen, setIsOpen] = useState(false);
   const [integration, setIntegration] = useState("");
+  const [integrationType, setIntegrationType] = useState("");
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const requestedIntegration = searchParams.get("integration");
+    if (!requestedIntegration) return;
+
+    const preset = findConfigurationPreset(requestedIntegration);
+    if (!preset) return;
+
+    setIsOpen(true);
+    setModalType(preset.modalType);
+    setIntegration(preset.integration);
+    setIntegrationType(preset.integrationType);
+  }, [searchParams]);
   return (
     <div className="bg-[#08132F] min-h-screen text-[#D1D5DB] font-sans p-10">
       {isOpen && (
@@ -217,6 +259,7 @@ const Page = () => {
           setOpen={setIsOpen}
           type={modalType}
           integration={integration}
+          integrationType={integrationType}
         />
       )}
       <div className="max-w-[1400px] mx-auto space-y-6">
@@ -269,6 +312,7 @@ const Page = () => {
                       setIsOpen(true);
                       setModalType("code_repos");
                       setIntegration(rest.title);
+                      setIntegrationType(rest.name);
                     }}
                   >
                     <div className="flex gap-2 items-center">
@@ -305,6 +349,7 @@ const Page = () => {
                       setIsOpen(true);
                       setModalType("cicd");
                       setIntegration(rest.title);
+                      setIntegrationType(rest.name);
                     }}
                     className="border border-white/50 rounded-lg p-2 flex justify-between gap-2"
                   >
@@ -342,6 +387,7 @@ const Page = () => {
                       setIsOpen(true);
                       setModalType("runtime");
                       setIntegration(rest.title);
+                      setIntegrationType(rest.name);
                     }}
                     className="border border-white/50 rounded-lg p-2 flex justify-between gap-2"
                   >
@@ -379,6 +425,7 @@ const Page = () => {
                       setIsOpen(true);
                       setModalType("datastores");
                       setIntegration(rest.title);
+                      setIntegrationType(rest.name);
                     }}
                     className="border border-white/50 rounded-lg p-2 flex justify-between gap-2"
                   >
@@ -416,6 +463,7 @@ const Page = () => {
                       setIsOpen(true);
                       setModalType("fraud_metrics");
                       setIntegration(rest.title);
+                      setIntegrationType(rest.name);
                     }}
                     className="border border-white/50 rounded-lg p-2 flex justify-between gap-2"
                   >

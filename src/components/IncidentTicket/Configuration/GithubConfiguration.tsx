@@ -2,12 +2,15 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import { FiCheckCircle } from "react-icons/fi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
+import useAuthStore from "@/lib/stores/auth.store";
+import { querykeys } from "@/lib/constant";
+import { toast } from "sonner";
 
 type IRepo = {
   id: number;
@@ -18,23 +21,71 @@ type IRepo = {
   defaultBranch?: string;
 };
 
+type IntegrationRecord = {
+  provider: string;
+  config?: {
+    repos?: IRepo[];
+  } | null;
+};
+
 function GithubConfiguration() {
-  const [selectedRepoIds, setSelectedRepoIds] = useState<IRepo[] | undefined>(
-    []
-  );
-  const { get } = useFetch();
+  const [selectedRepoIds, setSelectedRepoIds] = useState<IRepo[] | undefined>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasHydratedSelection, setHasHydratedSelection] = useState(false);
+  const { get, patch } = useFetch();
+  const { user } = useAuthStore();
+  const queryClient = useQueryClient();
 
   const { data: repositories = [] } = useQuery<IRepo[]>({
     queryKey: ["GITHUB_REPO"],
     queryFn: async () => {
       const res = await get(endpoint.incident_ticket.github_repos);
-      console.log({ res });
       if (res.success) {
         return (res.data?.data ?? []) as IRepo[];
       }
       return [] as IRepo[];
     },
   });
+
+  const { data: integrations = [], isLoading: isLoadingIntegrations } =
+    useQuery<IntegrationRecord[]>({
+    queryKey: [querykeys.INTEGRATIONS, user?.id],
+    queryFn: async () => {
+      const res = await get(`${endpoint.incident_ticket.integrations}/${user?.id}`);
+      if (res.success) {
+        return (res.data?.data ?? []) as IntegrationRecord[];
+      }
+      return [];
+    },
+    enabled: !!user?.id,
+  });
+
+  const savedRepoIds = useMemo(() => {
+    const githubIntegration = integrations.find(
+      (integration) => integration.provider.toLowerCase() === "github"
+    );
+
+    return new Set(
+      (githubIntegration?.config?.repos ?? [])
+        .map((repo) => repo.id)
+        .filter((repoId): repoId is number => Number.isFinite(repoId))
+    );
+  }, [integrations]);
+
+  useEffect(() => {
+    if (hasHydratedSelection || repositories.length === 0 || isLoadingIntegrations) {
+      return;
+    }
+
+    const preselectedRepositories = repositories.filter((repo) =>
+      savedRepoIds.has(repo.id)
+    );
+
+    setSelectedRepoIds(
+      preselectedRepositories.length > 0 ? preselectedRepositories : repositories
+    );
+    setHasHydratedSelection(true);
+  }, [hasHydratedSelection, isLoadingIntegrations, repositories, savedRepoIds]);
 
   const handleToggleRepo = (repo: IRepo) => {
     setSelectedRepoIds((prevSelected) => {
@@ -57,6 +108,36 @@ function GithubConfiguration() {
 
   const selectedCount = selectedRepoIds?.length;
   const totalCount = repositories.length;
+
+  const handleSaveSelection = async () => {
+    if (!selectedRepoIds?.length) return;
+
+    setIsSaving(true);
+    try {
+      const res = await patch(endpoint.incident_ticket.github_repos, {
+        repoIds: selectedRepoIds.map((repo) => repo.id),
+      });
+
+      if (!res.success) {
+        toast.error(
+          typeof res.data === "string"
+            ? res.data
+            : "Unable to save monitored GitHub repositories"
+        );
+        return;
+      }
+
+      toast.success("GitHub monitored repositories updated");
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [querykeys.INTEGRATIONS, user?.id],
+        }),
+        queryClient.invalidateQueries({ queryKey: ["GITHUB_REPO"] }),
+      ]);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="w-full mx-auto">
@@ -142,10 +223,11 @@ function GithubConfiguration() {
       {/* Action Button */}
       <div className="mt-6">
         <button
-          disabled={!selectedRepoIds || selectedRepoIds?.length <= 0}
+          disabled={!selectedRepoIds || selectedRepoIds.length <= 0 || isSaving}
+          onClick={handleSaveSelection}
           className="w-full px-4 py-3 disabled:bg-neutral-500 disabled:opacity-60 bg-green text-white rounded-full font-semibold transition-colors duration-200"
         >
-          Monitor Selected Repositories
+          {isSaving ? "Saving..." : "Monitor Selected Repositories"}
         </button>
       </div>
     </div>

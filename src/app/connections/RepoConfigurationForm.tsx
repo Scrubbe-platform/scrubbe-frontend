@@ -1,77 +1,42 @@
-import CButton from "@/components/ui/Cbutton";
-import Input from "@/components/ui/input";
-import TextArea from "@/components/ui/text-area";
 import React from "react";
-import { BiGitRepoForked } from "react-icons/bi";
+import ConnectionConfigurationForm from "./ConnectionConfigurationForm";
 
 type Props = {
   integration: string;
+  integrationType: string;
+  onSuccess?: () => void;
 };
 
-const RepoConfigurationForm = ({ integration }: Props) => {
-  return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <h2 className="text-lg text-white">{integration}</h2>
-      </div>
-      <div className="border border-gray-400 rounded-lg p-4 space-y-2">
-        <div className="flex items-center gap-2 text-white text-base font-bold">
-          <BiGitRepoForked />
-          <p>Code & repos</p>
-        </div>
-        <p className="text-sm text-white">
-          Scrubbe reads repo metadata, commits, branches and deployment status
-          to understand which changes might have broken a service. No code is
-          modified.
-        </p>
-      </div>
+const REPO_DEFAULT_BASE_URLS: Record<string, string> = {
+  github: "https://github.com",
+  gitlab: "https://gitlab.com",
+  bitbucket: "https://bitbucket.org",
+  "azure-devops": "https://dev.azure.com",
+};
 
-      <div>
-        <Input
-          label="Display Name"
-          placeholder="eg GitHub . Core Org"
-          labelClassName="text-white"
-          className="text-white"
-        />
-        <Input
-          label="Base URL / host ( if self - hosted )"
-          placeholder="eg  https://github.com / db. example.com"
-          labelClassName="text-white"
-          className="text-white"
-        />
-        <Input
-          label="App installation / PAT / token"
-          placeholder="Paste a read-only  token or key"
-          labelClassName="text-white"
-          className="text-white"
-        />
-        <p className="text-white text-sm pb-4">
-          Scrubbe uses this to read metadata , pipeline results and metrics -
-          never to push changes{" "}
-        </p>
-        <div className="grid grid-cols-2 gap-5">
-          <Input
-            label="Org/Project/ Workspace"
-            placeholder="eg scrubbe-core , analytics -d"
-            labelClassName="text-white"
-            className="text-white"
-          />
-          <Input
-            label="Environment tags"
-            placeholder="eg prod , staging"
-            labelClassName="text-white"
-            className="text-white"
-          />
-        </div>
-        <TextArea
-          label="Notes  for your team ( optional )"
-          placeholder="Example : Github Org  for customer - facing services only . Jenkins instance is internal only"
-          labelClassName="text-white"
-          className="text-white"
-        />
-        <CButton>Save</CButton>
-      </div>
-    </div>
+const RepoConfigurationForm = ({
+  integration,
+  integrationType,
+  onSuccess,
+}: Props) => {
+  return (
+    <ConnectionConfigurationForm
+      integration={integration}
+      integrationType={integrationType}
+      category="code_repos"
+      sectionTitle="Code & repos"
+      description="Scrubbe reads repo metadata, commits, branches and deployment status to understand which changes might have broken a service. No code is modified."
+      baseUrlLabel="Base URL / host (if self-hosted)"
+      baseUrlPlaceholder="eg https://github.com or https://gitlab.example.com"
+      credentialLabel="App installation / PAT / token"
+      credentialPlaceholder="Paste a read-only token or key"
+      scopeLabel="Org / project / workspace"
+      scopePlaceholder="eg scrubbe-core, analytics-d"
+      notesPlaceholder="Example: GitHub org for customer-facing services only. Jenkins instance is internal only."
+      helperText="Scrubbe uses this to read metadata, pipeline results and metrics, never to push changes."
+      defaultBaseUrl={REPO_DEFAULT_BASE_URLS[integrationType]}
+      onSuccess={onSuccess}
+    />
   );
 };
 
