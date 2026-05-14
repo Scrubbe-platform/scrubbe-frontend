@@ -28,7 +28,64 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 
-// ─── Icons ───────────────────────────────────────────────────────
+type SsoDiscoveryResult = {
+  available?: boolean;
+  enforced?: boolean;
+  provider?: string | null;
+  providerSlug?: "google" | "github" | "gitlab" | "microsoft-entra-id" | null;
+  domain?: string | null;
+  ssoDomain?: string | null;
+  businessId?: string | null;
+  businessName?: string | null;
+  loginUrl?: string | null;
+};
+
+// ── Provider configs ──────────────────────────────────────────────
+
+const SSO_PROVIDERS = [
+  {
+    slug: "google",
+    label: "Continue with Google",
+    sub: "Google Workspace - OAuth 2.0",
+    icon: "google",
+  },
+  {
+    slug: "github",
+    label: "Continue with GitHub",
+    sub: "GitHub org sign-in",
+    icon: "github",
+  },
+  {
+    slug: "gitlab",
+    label: "Continue with GitLab",
+    sub: "GitLab cloud or self-managed",
+    icon: "gitlab",
+  },
+  {
+    slug: "microsoft-entra-id",
+    label: "Continue with Microsoft",
+    sub: "Microsoft 365 - Personal account",
+    icon: "microsoft",
+  },
+] as const;
+
+function ProviderIcon({ type }: { type: string }) {
+  if (type === "google") return <FcGoogle size={22} />;
+  if (type === "github")
+    return <FaGithub size={20} className="text-gray-900" />;
+  if (type === "gitlab")
+    return <FaGitlab size={20} className="text-[#FC6D26]" />;
+  if (type === "microsoft")
+    return (
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+        <rect x="12" y="1" width="9" height="9" fill="#7FBA00" />
+        <rect x="1" y="12" width="9" height="9" fill="#00A4EF" />
+        <rect x="12" y="12" width="9" height="9" fill="#FFB900" />
+      </svg>
+    );
+  return null;
+}
 
 function MsIcon() {
   return (

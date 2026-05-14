@@ -9,6 +9,7 @@ import SlackIntegration from "./Integration/SlackIntegration";
 import GoogleMeetIntegration from "./Integration/GoogleMeetIntegration";
 import GithubIntegration from "./Integration/GithubIntegration";
 import GitlabIntegration from "./Integration/GitlabIntegration";
+import BitbucketIntegration from "./Integration/BitbucketIntegration";
 import { querykeys } from "@/lib/constant";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
@@ -16,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import useAuthStore from "@/lib/stores/auth.store";
 import GitlabConfiguration from "./Configuration/GitlabConfiguration";
 import GithubConfiguration from "./Configuration/GithubConfiguration";
+import BitbucketConfiguration from "./Configuration/BitbucketConfiguration";
 import EmailIntegration from "./Integration/EmailIntegration";
 import CButton from "../ui/Cbutton";
 import { Filter, SearchIcon } from "lucide-react";
@@ -43,7 +45,7 @@ const integrations = [
     icon: "/integration/google_meet.png",
     description: "War rooms, briefings, and post-incident reviews",
     category: "Video Conferencing",
-    development: true,
+    development: false,
   },
   {
     name: "Google Calendar",
@@ -136,6 +138,13 @@ const integrations = [
     development: false,
   },
   {
+    name: "Bitbucket",
+    icon: "/integration/bitbucket.png",
+    description: "Code-related incident tracking and rollbacks",
+    category: "Development Platform",
+    development: false,
+  },
+  {
     name: "Amazon Web Services",
     icon: "/integration/aws.png",
     description: "Infrastructure monitoring and resource management",
@@ -194,6 +203,20 @@ const sortedIntegrations = integrations.sort((a, b) => {
   return 0;
 });
 
+const LEGACY_PROVIDER_KEYS: Record<string, string[]> = {
+  Slack: ["slack"],
+  "Google Meet": ["google_meet", "googlemeet"],
+  SMS: ["sms"],
+  WhatsApp: ["whatsapp"],
+  "Email Services": ["email"],
+  GitHub: ["github"],
+  GitLab: ["gitlab"],
+  Bitbucket: ["bitbucket"],
+};
+
+const normalizeProviderKey = (value: string) =>
+  value.toLowerCase().replace(/\s+/g, "_");
+
 const Integrations: React.FC = () => {
   const [selectedIntegration, setSelectedIntegration] = useState<
     string | undefined
@@ -220,7 +243,7 @@ const Integrations: React.FC = () => {
   const { get } = useFetch();
   const { user } = useAuthStore();
   const { data } = useQuery({
-    queryKey: [querykeys.INTEGRATIONS],
+    queryKey: [querykeys.INTEGRATIONS, user?.id],
     queryFn: async () => {
       const res = await get(
         endpoint.incident_ticket.integrations + "/" + user?.id
@@ -340,6 +363,15 @@ const Integrations: React.FC = () => {
           <GitlabIntegration />
         </Modal>
       );
+    case "Bitbucket":
+      return (
+        <Modal
+          isOpen={selectedIntegration === "Bitbucket"}
+          onClose={() => setSelectedIntegration(undefined)}
+        >
+          <BitbucketIntegration />
+        </Modal>
+      );
     case "Email Services":
       return (
         <Modal
@@ -370,6 +402,15 @@ const Integrations: React.FC = () => {
           onClose={() => setSelectConfiguration(undefined)}
         >
           <GitlabConfiguration />
+        </Modal>
+      );
+    case "Bitbucket":
+      return (
+        <Modal
+          isOpen={selectConfiguration === "Bitbucket"}
+          onClose={() => setSelectConfiguration(undefined)}
+        >
+          <BitbucketConfiguration />
         </Modal>
       );
     default:
@@ -445,7 +486,10 @@ const Integrations: React.FC = () => {
                 userId: string;
               }[]
             )?.find(
-              (value) => value.provider === integration.name.toLowerCase()
+              (value) =>
+                LEGACY_PROVIDER_KEYS[integration.name]?.includes(
+                  normalizeProviderKey(value.provider)
+                )
             );
             return (
               <div
@@ -490,7 +534,8 @@ const Integrations: React.FC = () => {
                       </CButton>
                       {isConnected &&
                         (integration.name === "GitHub" ||
-                          integration.name === "GitLab") && (
+                          integration.name === "GitLab" ||
+                          integration.name === "Bitbucket") && (
                           <button
                             onClick={() =>
                               setSelectConfiguration(integration.name)

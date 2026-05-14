@@ -19,41 +19,68 @@ type Props = {
     | "fraud_metrics"
     | string;
   integration: string;
+  integrationType: string;
 };
-const ConfigureIntegration = ({ open, setOpen, type, integration }: Props) => {
+const ConfigureIntegration = ({
+  open,
+  setOpen,
+  type,
+  integration,
+  integrationType,
+}: Props) => {
   switch (type) {
     case "code_repos":
       return (
         <ConfigureModal open={open} setOpen={setOpen}>
-          <RepoConfigurationForm integration={integration} />
+          <RepoConfigurationForm
+            integration={integration}
+            integrationType={integrationType}
+            onSuccess={() => setOpen(false)}
+          />
         </ConfigureModal>
       );
     case "cicd":
       return (
         <ConfigureModal open={open} setOpen={setOpen}>
-          <CiCdConfigurationForm integration={integration} />
+          <CiCdConfigurationForm
+            integration={integration}
+            integrationType={integrationType}
+            onSuccess={() => setOpen(false)}
+          />
         </ConfigureModal>
       );
     case "runtime":
       return (
         <ConfigureModal open={open} setOpen={setOpen}>
-          <RuntimeConfigurationForm integration={integration} />
+          <RuntimeConfigurationForm
+            integration={integration}
+            integrationType={integrationType}
+            onSuccess={() => setOpen(false)}
+          />
         </ConfigureModal>
       );
     case "datastores":
       return (
         <ConfigureModal open={open} setOpen={setOpen}>
-          <DatastoresConfigurationForm integration={integration} />
+          <DatastoresConfigurationForm
+            integration={integration}
+            integrationType={integrationType}
+            onSuccess={() => setOpen(false)}
+          />
         </ConfigureModal>
       );
     case "fraud_metrics":
       return (
         <ConfigureModal open={open} setOpen={setOpen}>
-          <FraudConfigurationForm integration={integration} />
+          <FraudConfigurationForm
+            integration={integration}
+            integrationType={integrationType}
+            onSuccess={() => setOpen(false)}
+          />
         </ConfigureModal>
       );
     default:
-      break;
+      return null;
   }
 };
 

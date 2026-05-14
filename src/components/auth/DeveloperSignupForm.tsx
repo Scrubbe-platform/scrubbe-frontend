@@ -495,7 +495,9 @@ export default function DeveloperSignupForm() {
 
                         <button
                           type="button"
-                          className="w-full flex items-center justify-center px-3 py-1 border border-gray-300 rounded-md transition-colors"
+                          disabled
+                          title="AWS sign-in is not wired yet"
+                          className="w-full flex items-center justify-center px-3 py-1 border border-gray-300 rounded-md transition-colors opacity-50 cursor-not-allowed"
                         >
                           <Image
                             src="/icon-auth-aws.svg"

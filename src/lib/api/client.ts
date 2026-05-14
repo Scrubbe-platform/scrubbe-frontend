@@ -1,5 +1,5 @@
 import axios, { InternalAxiosRequestConfig, AxiosError } from "axios";
-import { getCookie } from "cookies-next";
+import { getCookie, setCookie, deleteCookie } from "cookies-next";
 import { COOKIE_KEYS } from "../constant";
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -37,10 +37,12 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as
+      | (InternalAxiosRequestConfig & { _retry?: boolean })
+      | undefined;
 
     // Handle 401 errors - Token expired or invalid
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
       
       try {
@@ -52,19 +54,20 @@ apiClient.interceptors.response.use(
             refreshToken,
           });
           
-          const { accessToken, refreshToken: newRefreshToken } = response.data;
+          const { accessToken, refreshToken: newRefreshToken } =
+            response.data?.data ?? {};
           
-          // Update cookies with new tokens
-          // Note: This should be handled by the auth store, but as a fallback:
-          if (typeof window !== "undefined") {
-            // Update the request and retry
+          if (accessToken && newRefreshToken) {
+            setCookie(COOKIE_KEYS.TOKEN, accessToken);
+            setCookie(COOKIE_KEYS.REFRESH_TOKEN, newRefreshToken);
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
             return apiClient(originalRequest);
           }
         }
       } catch (refreshError) {
-        // Refresh failed, let the error propagate
         console.error("Token refresh failed:", refreshError);
+        deleteCookie(COOKIE_KEYS.TOKEN);
+        deleteCookie(COOKIE_KEYS.REFRESH_TOKEN);
       }
     }
 

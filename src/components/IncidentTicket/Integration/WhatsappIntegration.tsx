@@ -13,7 +13,7 @@ import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import CButton from "@/components/ui/Cbutton";
 import { querykeys } from "@/lib/constant";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useAuthStore from "@/lib/stores/auth.store";
 
 // ---
@@ -38,6 +38,7 @@ type FormType = z.infer<typeof formSchema>;
 const WhatsappIntegration: React.FC = () => {
   const [newRecipient, setNewRecipient] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
   const {
     handleSubmit,
     control,
@@ -57,12 +58,11 @@ const WhatsappIntegration: React.FC = () => {
 
   const { user } = useAuthStore();
   const { data } = useQuery({
-    queryKey: [querykeys.INTEGRATIONS],
+    queryKey: [querykeys.INTEGRATIONS, user?.id],
     queryFn: async () => {
       const res = await get(
         endpoint.incident_ticket.integrations + "/" + user?.id
       );
-      console.log(res);
       if (res.success) {
         return res.data.data;
       }
@@ -124,6 +124,9 @@ const WhatsappIntegration: React.FC = () => {
     const res = await post(endpoint.integration.whatsapp, values);
     setIsLoading(false);
     if (res.success) {
+      queryClient.refetchQueries({
+        queryKey: [querykeys.INTEGRATIONS, user?.id],
+      });
       return toast.success("WhatsApp integration successful!");
     }
     return toast.error("Integration failed");

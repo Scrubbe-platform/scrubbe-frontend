@@ -1,16 +1,20 @@
 "use client";
 
-import React, { ReactNode, useEffect } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Book, Check, ChevronRight, Database, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import SettingWrapper from "../_module/setting-wrapper";
 import CButton from "@/components/ui/Cbutton";
+import Modal from "@/components/ui/Modal";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { querykeys } from "@/lib/constant";
 import useAuthStore from "@/lib/stores/auth.store";
+import GithubConfiguration from "@/components/IncidentTicket/Configuration/GithubConfiguration";
+import GitlabConfiguration from "@/components/IncidentTicket/Configuration/GitlabConfiguration";
+import BitbucketConfiguration from "@/components/IncidentTicket/Configuration/BitbucketConfiguration";
 
 type RepoSummary = {
   id: number | string;
@@ -88,6 +92,9 @@ const IngestionPage = () => {
   const { user } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [configurationTarget, setConfigurationTarget] = useState<
+    RepoConnectorView["key"] | null
+  >(null);
 
   useEffect(() => {
     const connected = Array.from(searchParams.entries()).find(
@@ -127,6 +134,15 @@ const IngestionPage = () => {
       }
     }
     toast.error(`Failed to start ${label} connection`);
+  };
+
+  const openRoutingConfiguration = (connector: RepoConnectorView) => {
+    if (!connector.connected) {
+      toast.error(`Connect ${connector.label} before configuring monitored repositories`);
+      return;
+    }
+
+    setConfigurationTarget(connector.key);
   };
 
   const openExternal = (url?: string | null, label = "configuration") => {
@@ -291,6 +307,24 @@ const IngestionPage = () => {
 
   return (
     <div>
+      <Modal
+        isOpen={configurationTarget === "github"}
+        onClose={() => setConfigurationTarget(null)}
+      >
+        <GithubConfiguration />
+      </Modal>
+      <Modal
+        isOpen={configurationTarget === "gitlab"}
+        onClose={() => setConfigurationTarget(null)}
+      >
+        <GitlabConfiguration />
+      </Modal>
+      <Modal
+        isOpen={configurationTarget === "bitbucket"}
+        onClose={() => setConfigurationTarget(null)}
+      >
+        <BitbucketConfiguration />
+      </Modal>
       <SettingWrapper
         title="CI/CD & PR Ingestion"
         description="Where delivery incidents come from"
@@ -426,7 +460,11 @@ const IngestionPage = () => {
               <div className="p-5 border border-neutral-600 rounded-2xl space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-white text-[15px] font-bold">Jenkins</span>
-                  <ActionButton label="Connect" color="cyan" />
+                  <ActionButton
+                    label="Configure"
+                    color="cyan"
+                    onClick={() => router.push("/connections?integration=jenkins")}
+                  />
                 </div>
                 <p className="text-[#64748B] text-xs leading-normal">
                   Build hooks and log ingestion are still pending implementation.
@@ -444,7 +482,12 @@ const IngestionPage = () => {
                       used when a failure auto-raises an incident.
                     </p>
                   </div>
-                  <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
+                  <button
+                    type="button"
+                    onClick={() => openRoutingConfiguration(activeConnector)}
+                    disabled={!activeConnector.connected}
+                    className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     Edit
                   </button>
                 </div>
@@ -469,7 +512,25 @@ const IngestionPage = () => {
         </div>
 
         <div className="pt-6 flex justify-end">
-          <CButton className="w-fit px-4">Save</CButton>
+          <CButton
+            className="w-fit px-4"
+            onClick={() =>
+              activeConnector.connected
+                ? openRoutingConfiguration(activeConnector)
+                : handleConnect(
+                    activeConnector.key === "github"
+                      ? endpoint.integration.github
+                      : activeConnector.key === "gitlab"
+                        ? endpoint.integration.gitlab
+                        : endpoint.integration.bitbucket,
+                    activeConnector.label
+                  )
+            }
+          >
+            {activeConnector.connected
+              ? `Configure ${activeConnector.label}`
+              : `Connect ${activeConnector.label}`}
+          </CButton>
         </div>
       </SettingWrapper>
     </div>

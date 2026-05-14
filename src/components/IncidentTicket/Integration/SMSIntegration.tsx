@@ -57,12 +57,11 @@ const SMSIntegration: React.FC = () => {
   const { post, get } = useFetch();
   const { user } = useAuthStore();
   const { data } = useQuery({
-    queryKey: [querykeys.INTEGRATIONS],
+    queryKey: [querykeys.INTEGRATIONS, user?.id],
     queryFn: async () => {
       const res = await get(
         endpoint.incident_ticket.integrations + "/" + user?.id
       );
-      console.log(res);
       if (res.success) {
         return res.data.data;
       }
@@ -123,7 +122,9 @@ const SMSIntegration: React.FC = () => {
     const res = await post(endpoint.integration.sms, values);
     setIsLoading(false);
     if (res.success) {
-      queryClient.refetchQueries({ queryKey: [querykeys.INTEGRATIONS] });
+      queryClient.refetchQueries({
+        queryKey: [querykeys.INTEGRATIONS, user?.id],
+      });
       return toast.success("SMS integration successful!");
     }
     return toast.error("Integration failed");
