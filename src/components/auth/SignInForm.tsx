@@ -71,8 +71,10 @@ const SSO_PROVIDERS = [
 
 function ProviderIcon({ type }: { type: string }) {
   if (type === "google") return <FcGoogle size={22} />;
-  if (type === "github") return <FaGithub size={20} className="text-gray-900" />;
-  if (type === "gitlab") return <FaGitlab size={20} className="text-[#FC6D26]" />;
+  if (type === "github")
+    return <FaGithub size={20} className="text-gray-900" />;
+  if (type === "gitlab")
+    return <FaGitlab size={20} className="text-[#FC6D26]" />;
   if (type === "microsoft")
     return (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
@@ -83,6 +85,62 @@ function ProviderIcon({ type }: { type: string }) {
       </svg>
     );
   return null;
+}
+
+function MsIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect x="1" y="1" width="8" height="8" fill="#F25022" />
+      <rect x="11" y="1" width="8" height="8" fill="#7FBA00" />
+      <rect x="1" y="11" width="8" height="8" fill="#00A4EF" />
+      <rect x="11" y="11" width="8" height="8" fill="#FFB900" />
+    </svg>
+  );
+}
+
+function OktaIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <circle
+        cx="10"
+        cy="10"
+        r="8.5"
+        stroke="#1d1d1b"
+        strokeWidth="1.5"
+        fill="none"
+      />
+      <circle cx="10" cy="10" r="3.5" fill="#1d1d1b" />
+      <circle cx="10" cy="2" r="1.5" fill="#1d1d1b" />
+      <circle cx="10" cy="18" r="1.5" fill="#1d1d1b" />
+      <circle cx="2" cy="10" r="1.5" fill="#1d1d1b" />
+      <circle cx="18" cy="10" r="1.5" fill="#1d1d1b" />
+    </svg>
+  );
+}
+
+function OneLoginIcon() {
+  return (
+    <div
+      style={{
+        width: 20,
+        height: 20,
+        background: "#f3f4f6",
+        borderRadius: 4,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 6,
+        fontWeight: 900,
+        color: "#374151",
+        lineHeight: 1.1,
+        textAlign: "center",
+      }}
+    >
+      one
+      <br />
+      login
+    </div>
+  );
 }
 
 function EnterpriseSsoIcon() {
@@ -581,15 +639,6 @@ export default function SignInForm() {
           </div>
         </div>
       </div>
-
-      <SsoProviderModal
-        providerSlug={ssoModal}
-        onClose={() => setSsoModal(null)}
-        onContinue={(workspace) => {
-          setSsoModal(null);
-          void handleContinueWithSso({ tenant: workspace });
-        }}
-      />
     </Suspense>
   );
 }
