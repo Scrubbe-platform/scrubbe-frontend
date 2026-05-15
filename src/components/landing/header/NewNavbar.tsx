@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronDown, X, Menu, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 // ─────────────────────────────────────────────────────────────────
 // Shared atoms
@@ -620,33 +621,7 @@ function DropdownContent({ label }: { label: string }) {
     case "SECURITY":
       return <SecurityDropdown />;
     case "PRICING":
-      return (
-        <div className="p-3 space-y-1">
-          {[
-            {
-              title: "Plans",
-              desc: "Compare tiers and features",
-              href: "/pricing",
-            },
-            {
-              title: "Enterprise",
-              desc: "Custom contracts & SLAs",
-              href: "/pricing/enterprise",
-            },
-          ].map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="flex flex-col px-3 py-2.5 rounded-lg hover:bg-gray-50 group transition-colors"
-            >
-              <span className="text-[13.5px] font-semibold text-gray-800 group-hover:text-emerald-600">
-                {l.title}
-              </span>
-              <span className="text-[12px] text-gray-400 mt-0.5">{l.desc}</span>
-            </Link>
-          ))}
-        </div>
-      );
+      return null;
     default:
       return null;
   }
@@ -669,7 +644,7 @@ const NAV_LABELS: DropdownKey[] = [
 function NavItem({ label }: { label: DropdownKey }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
+  const router = useRouter();
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node))
@@ -685,11 +660,13 @@ function NavItem({ label }: { label: DropdownKey }) {
     <div
       ref={ref}
       className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={() => label !== "PRICING" && setOpen(true)}
+      onMouseLeave={() => label !== "PRICING" && setOpen(false)}
     >
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() =>
+          label == "PRICING" ? router.push("/pricing") : setOpen((o) => !o)
+        }
         className="flex items-center gap-1 px-0.5 py-1 text-[11.5px] font-bold tracking-wider text-gray-600 hover:text-gray-900 transition-colors bg-transparent border-none cursor-pointer"
       >
         {label}
@@ -697,7 +674,9 @@ function NavItem({ label }: { label: DropdownKey }) {
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <ChevronDown size={12} className="text-gray-400" />
+          {label !== "PRICING" && (
+            <ChevronDown size={12} className="text-gray-400" />
+          )}
         </motion.div>
       </button>
 
@@ -751,7 +730,7 @@ function ScrubbeLogo() {
 
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-
+  const router = useRouter();
   // Flat link list per label for mobile
   const MOBILE_LINKS: Record<DropdownKey, { title: string; href: string }[]> = {
     PRODUCT: [
@@ -787,10 +766,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
       { title: "Kubernetes", href: "/connectors/kubernetes" },
       { title: "AWS", href: "/connectors/aws" },
     ],
-    PRICING: [
-      { title: "Plans", href: "/pricing" },
-      { title: "Enterprise", href: "/pricing/enterprise" },
-    ],
+    PRICING: [{ title: "Plans", href: "/pricing" }],
     RESOURCES: [
       { title: "Documentation", href: "/docs" },
       { title: "Blog", href: "/blog" },
@@ -837,9 +813,11 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
               {NAV_LABELS.map((label, i) => (
                 <div key={label}>
                   <button
-                    onClick={() =>
-                      setExpandedIndex(expandedIndex === i ? null : i)
-                    }
+                    onClick={() => {
+                      label === "PRICING"
+                        ? router.push("/pricing")
+                        : setExpandedIndex(expandedIndex === i ? null : i);
+                    }}
                     className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-left bg-transparent border-none cursor-pointer hover:bg-gray-50 transition-colors"
                   >
                     <span className="text-[13px] font-bold tracking-wider text-gray-700">

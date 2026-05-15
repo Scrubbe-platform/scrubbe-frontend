@@ -329,19 +329,6 @@ export default function ContactAdminPage() {
         </div>
 
         {/* ── Bottom bar ── */}
-        <div className="px-10 py-4 border-t border-gray-100 flex items-center gap-3">
-          <Building2 size={15} className="text-gray-400 shrink-0" />
-          <p className="text-[13px] text-gray-500">
-            <span className="font-semibold text-gray-700">
-              Looking for your workspace?
-            </span>{" "}
-            If you believe your organization already uses Scrubbe,{" "}
-            <span className="text-blue-500 font-semibold hover:underline">
-              contact your administrator
-            </span>
-            .
-          </p>
-        </div>
       </div>
     </div>
   );
