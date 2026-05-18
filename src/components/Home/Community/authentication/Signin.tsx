@@ -53,7 +53,11 @@ export default function SignIn() {
   };
 
   return (
-    <Modal isOpen={open && modalType === "signin"} onClose={setClose}>
+    <Modal
+      className="!bg-white"
+      isOpen={open && modalType === "signin"}
+      onClose={setClose}
+    >
       <div className="w-full p-6">
         <h1 className=" text-xl md:text-2xl dark:text-white font-semibold mb-6">
           Sign in to Scrubbe
@@ -69,6 +73,8 @@ export default function SignIn() {
                 placeholder="Enter Email"
                 {...field}
                 error={errors.email?.message}
+                className="!text-black"
+                labelClassName="!text-black"
               />
             )}
           />
@@ -83,6 +89,8 @@ export default function SignIn() {
                 {...field}
                 type="password"
                 error={errors.password?.message}
+                className="!text-black"
+                labelClassName="!text-black"
               />
             )}
           />

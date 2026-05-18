@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { BsSlack } from "react-icons/bs";
+import { FaMediumM } from "react-icons/fa";
 
 // ─────────────────────────────────────────────────────────────────
 // Nav columns
@@ -97,6 +98,11 @@ const SOCIALS = [
     label: "Slack",
     href: "https://scrubbecommunity.slack.com/archives/C0B0ZSFG7M0",
     icon: <BsSlack color="#fff" size={18} />,
+  },
+  {
+    label: "Medium",
+    href: " https://scrubbe.medium.com/",
+    icon: <FaMediumM color="#fff" size={18} />,
   },
 ];
 

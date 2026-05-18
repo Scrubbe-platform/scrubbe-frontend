@@ -471,7 +471,7 @@ function ResourcesDropdown() {
     {
       title: "Blog",
       desc: "Notes from engineering and platform design",
-      href: "/blog",
+      href: "https://scrubbe.medium.com/",
     },
     {
       title: "Community",
@@ -769,7 +769,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
     PRICING: [{ title: "Plans", href: "/pricing" }],
     RESOURCES: [
       { title: "Documentation", href: "/docs" },
-      { title: "Blog", href: "/blog" },
+      { title: "Blog", href: "https://scrubbe.medium.com" },
       { title: "Product Demo", href: "/demo" },
       { title: "Reports", href: "/reports" },
     ],
