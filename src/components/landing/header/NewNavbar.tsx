@@ -772,6 +772,10 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
       { title: "Blog", href: "https://scrubbe.medium.com" },
       { title: "Product Demo", href: "/demo" },
       { title: "Reports", href: "/reports" },
+      {
+        title: "Community",
+        href: "/community",
+      },
     ],
     SECURITY: [
       { title: "Security Overview", href: "/security/overview" },

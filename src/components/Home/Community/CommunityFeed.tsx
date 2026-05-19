@@ -10,10 +10,6 @@ import {
   Eye,
   Pin,
   Star,
-  ChevronDown,
-  ChevronUp,
-  Send,
-  X,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────
@@ -248,10 +244,10 @@ function Avatar({
 }) {
   const sz =
     size === "sm"
-      ? "w-8 h-8 text-[11px]"
+      ? "w-7 h-7 sm:w-8 sm:h-8 text-[10px] sm:text-[11px]"
       : size === "lg"
-      ? "w-11 h-11 text-[14px]"
-      : "w-10 h-10 text-[13px]";
+      ? "w-10 h-10 sm:w-11 sm:h-11 text-[13px] sm:text-[14px]"
+      : "w-8 h-8 sm:w-10 sm:h-10 text-[12px] sm:text-[13px]";
   return (
     <div
       className={`${sz} ${color} rounded-full flex items-center justify-center text-white font-bold shrink-0`}
@@ -262,7 +258,7 @@ function Avatar({
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Inline code rendering (backtick → code tag)
+// Inline code rendering
 // ─────────────────────────────────────────────────────────────────
 
 function InlineContent({ text }: { text: string }) {
@@ -273,7 +269,7 @@ function InlineContent({ text }: { text: string }) {
         part.startsWith("`") && part.endsWith("`") ? (
           <code
             key={i}
-            className="px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded text-[13px] font-mono"
+            className="px-1 py-0.5 bg-gray-100 text-gray-700 rounded text-[12px] sm:text-[13px] font-mono break-all"
           >
             {part.slice(1, -1)}
           </code>
@@ -294,7 +290,7 @@ function ReactionPill({ emoji, count }: { emoji: string; count: number }) {
   return (
     <button
       onClick={() => setLiked(!liked)}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold border transition-all cursor-pointer ${
+      className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[12px] sm:text-[13px] font-semibold border transition-all cursor-pointer ${
         liked
           ? "bg-amber-50 border-amber-300 text-amber-700"
           : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
@@ -307,7 +303,7 @@ function ReactionPill({ emoji, count }: { emoji: string; count: number }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Action bar (React, Comments, Read Full, Save, Share)
+// Action bar
 // ─────────────────────────────────────────────────────────────────
 
 function ActionBar({
@@ -320,19 +316,25 @@ function ActionBar({
   showComments: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-4">
-      <div className="flex items-center gap-1 flex-wrap">
-        <ActionBtn icon={<ThumbsUp size={14} />} label="REACT" />
+    <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100 mt-3 sm:mt-4 gap-2">
+      {/* On mobile: show icon-only buttons to save space */}
+      <div className="flex items-center gap-0.5 sm:gap-1 flex-wrap">
+        <ActionBtn icon={<ThumbsUp size={13} />} label="REACT" mobileLabel="" />
         <ActionBtn
-          icon={<MessageCircle size={14} />}
+          icon={<MessageCircle size={13} />}
           label={`${commentCount} COMMENTS`}
+          mobileLabel={`${commentCount}`}
           onClick={onToggleComments}
           active={showComments}
         />
-        <ActionBtn icon={<BookOpen size={14} />} label="READ FULL" />
-        <ActionBtn icon={<Bookmark size={14} />} label="SAVE" />
+        <ActionBtn
+          icon={<BookOpen size={13} />}
+          label="READ FULL"
+          mobileLabel=""
+        />
+        <ActionBtn icon={<Bookmark size={13} />} label="SAVE" mobileLabel="" />
       </div>
-      <ActionBtn icon={<Share2 size={14} />} label="SHARE" />
+      <ActionBtn icon={<Share2 size={13} />} label="SHARE" mobileLabel="" />
     </div>
   );
 }
@@ -340,59 +342,65 @@ function ActionBar({
 function ActionBtn({
   icon,
   label,
+  mobileLabel,
   onClick,
   active,
 }: {
   icon: React.ReactNode;
   label: string;
+  mobileLabel?: string;
   onClick?: () => void;
   active?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold tracking-wide transition-colors cursor-pointer border-0 ${
+      className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-[11px] font-bold tracking-wide transition-colors cursor-pointer border-0 ${
         active
           ? "text-emerald-600 bg-emerald-50"
           : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
       }`}
     >
       {icon}
-      {label}
+      {/* Show full label on sm+, short/icon-only on mobile */}
+      <span className="hidden sm:inline">{label}</span>
+      {mobileLabel !== undefined && (
+        <span className="sm:hidden">{mobileLabel}</span>
+      )}
     </button>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Comment reply
+// Reply card
 // ─────────────────────────────────────────────────────────────────
 
 function ReplyCard({ reply }: { reply: Reply }) {
   return (
-    <div className="ml-12 mt-3">
-      <div className="bg-white border border-gray-200 rounded-xl p-4">
-        <div className="flex items-center gap-2 flex-wrap mb-2">
+    <div className="ml-8 sm:ml-12 mt-3">
+      <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4">
+        <div className="flex items-start sm:items-center gap-2 flex-wrap mb-2">
           <Avatar
             initials={reply.initials}
             color={reply.avatarColor}
             size="sm"
           />
-          <span className="text-[14px] font-semibold text-gray-900">
+          <span className="text-[13px] sm:text-[14px] font-semibold text-gray-900">
             {reply.author}
           </span>
           {reply.badges?.map((b, i) => (
             <span
               key={i}
-              className={`text-[11px] font-bold px-2 py-0.5 rounded ${b.color}`}
+              className={`text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded ${b.color}`}
             >
               {b.label}
             </span>
           ))}
-          <span className="text-[12px] text-gray-400 ml-1">
+          <span className="text-[11px] sm:text-[12px] text-gray-400">
             {reply.timeAgo}
           </span>
         </div>
-        <p className="text-[14px] text-gray-700 leading-relaxed">
+        <p className="text-[13px] sm:text-[14px] text-gray-700 leading-relaxed">
           <InlineContent text={reply.content} />
         </p>
       </div>
@@ -408,38 +416,38 @@ function CommentCard({ comment }: { comment: Comment }) {
   const [liked, setLiked] = useState(false);
   return (
     <div className="mb-4">
-      <div className="flex gap-3">
+      <div className="flex gap-2 sm:gap-3">
         <Avatar
           initials={comment.initials}
           color={comment.avatarColor}
           size="md"
         />
-        <div className="flex-1">
-          <div className="bg-white border border-gray-200 rounded-xl p-4">
-            <div className="flex items-center gap-2 flex-wrap mb-2">
-              <span className="text-[14px] font-semibold text-gray-900">
+        <div className="flex-1 min-w-0">
+          <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-2">
+              <span className="text-[13px] sm:text-[14px] font-semibold text-gray-900">
                 {comment.author}
               </span>
               <span
-                className={`text-[11px] font-bold px-2 py-0.5 rounded ${comment.roleBadgeColor}`}
+                className={`text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded ${comment.roleBadgeColor}`}
               >
                 {comment.role}
               </span>
-              <span className="text-[12px] text-gray-400">
+              <span className="text-[11px] sm:text-[12px] text-gray-400">
                 {comment.timeAgo}
               </span>
             </div>
-            <p className="text-[14px] text-gray-700 leading-relaxed">
+            <p className="text-[13px] sm:text-[14px] text-gray-700 leading-relaxed">
               <InlineContent text={comment.content} />
             </p>
             <div className="flex items-center gap-3 mt-3">
               <button
                 onClick={() => setLiked(!liked)}
-                className="flex items-center gap-1 text-[13px] font-semibold text-amber-500 cursor-pointer border-0 bg-transparent"
+                className="flex items-center gap-1 text-[12px] sm:text-[13px] font-semibold text-amber-500 cursor-pointer border-0 bg-transparent"
               >
                 🔥 {liked ? comment.likes + 1 : comment.likes}
               </button>
-              <button className="text-[13px] font-medium text-gray-400 hover:text-gray-600 border-0 bg-transparent cursor-pointer">
+              <button className="text-[12px] sm:text-[13px] font-medium text-gray-400 hover:text-gray-600 border-0 bg-transparent cursor-pointer">
                 Reply
               </button>
             </div>
@@ -466,32 +474,28 @@ function CommentsSection({
 }) {
   const [newComment, setNewComment] = useState("");
   return (
-    <div className="mt-4 bg-gray-50 border border-gray-200 rounded-2xl p-5">
-      <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-4">
+    <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl p-3 sm:p-5">
+      <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-4">
         {count} COMMENTS
       </p>
-
-      {/* Comment list */}
       {comments.map((c) => (
         <CommentCard key={c.id} comment={c} />
       ))}
-
-      {/* New comment input */}
-      <div className="flex gap-3 mt-2">
+      <div className="flex gap-2 sm:gap-3 mt-2">
         <Avatar initials="S" color="bg-emerald-500" size="md" />
-        <div className="flex-1 border border-gray-200 rounded-xl bg-white overflow-hidden">
+        <div className="flex-1 border border-gray-200 rounded-xl bg-white overflow-hidden min-w-0">
           <textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
             rows={2}
-            className="w-full px-4 pt-3 pb-1 text-[14px] text-gray-700 placeholder-gray-400 resize-none outline-none bg-transparent border-0"
+            className="w-full px-3 sm:px-4 pt-3 pb-1 text-[13px] sm:text-[14px] text-gray-700 placeholder-gray-400 resize-none outline-none bg-transparent border-0"
           />
-          <div className="flex items-center justify-between px-4 pb-3">
-            <span className="text-[11px] text-gray-400 font-mono">
+          <div className="flex items-center justify-between px-3 sm:px-4 pb-3 gap-2">
+            <span className="text-[10px] sm:text-[11px] text-gray-400 font-mono hidden sm:block">
               ⌘+Enter to post
             </span>
-            <button className="flex items-center gap-1.5 px-4 py-2 bg-gray-900 text-white text-[13px] font-bold rounded-lg cursor-pointer border-0 hover:bg-gray-700 transition-colors">
+            <button className="ml-auto flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-900 text-white text-[12px] sm:text-[13px] font-bold rounded-lg cursor-pointer border-0 hover:bg-gray-700 transition-colors">
               POST →
             </button>
           </div>
@@ -509,58 +513,64 @@ function PostCard({ post }: { post: Post }) {
   const [showComments, setShowComments] = useState(post.showComments ?? false);
 
   return (
-    <article className="pb-8 border-b border-gray-200 last:border-0">
+    <article className="pb-6 sm:pb-8 border-b border-gray-200 last:border-0">
       {/* Author row */}
-      <div className="flex items-center gap-2.5 mb-3 flex-wrap">
+      <div className="flex items-start sm:items-center gap-2 sm:gap-2.5 mb-3 flex-wrap">
         <Avatar initials={post.initials} color={post.avatarColor} size="md" />
-        <span className="text-[14px] font-semibold text-gray-900">
-          {post.author}
-        </span>
-
-        {post.badges?.map((b, i) => (
-          <span
-            key={i}
-            className={`text-[11px] font-bold px-2.5 py-0.5 rounded-md ${b.color}`}
-          >
-            {b.label}
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
+          <span className="text-[13px] sm:text-[14px] font-semibold text-gray-900">
+            {post.author}
           </span>
-        ))}
 
-        {!post.badges && (
-          <span
-            className={`text-[11px] font-bold px-2.5 py-0.5 rounded-md ${post.roleBadgeColor}`}
-          >
-            {post.role}
+          {post.badges?.map((b, i) => (
+            <span
+              key={i}
+              className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-md ${b.color}`}
+            >
+              {b.label}
+            </span>
+          ))}
+
+          {!post.badges && (
+            <span
+              className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-md ${post.roleBadgeColor}`}
+            >
+              {post.role}
+            </span>
+          )}
+
+          {post.pinned && (
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-gray-500">
+              <Pin size={10} /> <span className="hidden sm:inline">PINNED</span>
+            </div>
+          )}
+
+          {post.communityFavourite && (
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-red-500">
+              <Star size={10} fill="currentColor" />
+              <span className="hidden sm:inline">COMMUNITY FAVOURITE</span>
+              <span className="sm:hidden">FAV</span>
+            </div>
+          )}
+
+          <span className="text-[11px] sm:text-[12px] text-gray-400">
+            {post.timeAgo}
           </span>
-        )}
 
-        {post.pinned && (
-          <div className="flex items-center gap-1 text-[11px] font-semibold text-gray-500">
-            <Pin size={11} /> PINNED
-          </div>
-        )}
-
-        {post.communityFavourite && (
-          <div className="flex items-center gap-1 text-[11px] font-bold text-red-500">
-            <Star size={11} fill="currentColor" /> COMMUNITY FAVOURITE
-          </div>
-        )}
-
-        <span className="text-[12px] text-gray-400">{post.timeAgo}</span>
-
-        {post.views && (
-          <div className="flex items-center gap-1 text-[12px] text-gray-400">
-            <Eye size={12} /> {post.views}
-          </div>
-        )}
+          {post.views && (
+            <div className="flex items-center gap-1 text-[11px] sm:text-[12px] text-gray-400">
+              <Eye size={11} /> {post.views}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Tags */}
-      <div className="flex flex-wrap gap-2 mb-3">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3">
         {post.tags.map((t, i) => (
           <span
             key={i}
-            className={`text-[11px] font-bold px-2.5 py-1 rounded-md tracking-wide ${t.color}`}
+            className={`text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md tracking-wide ${t.color}`}
           >
             {t.label}
           </span>
@@ -569,7 +579,7 @@ function PostCard({ post }: { post: Post }) {
 
       {/* Title */}
       <h2
-        className={`text-[18px] md:text-[20px] font-bold leading-snug mb-2 ${
+        className={`text-[16px] sm:text-[18px] md:text-[20px] font-bold leading-snug mb-2 ${
           post.titleColor ?? "text-gray-900"
         }`}
       >
@@ -577,13 +587,13 @@ function PostCard({ post }: { post: Post }) {
       </h2>
 
       {/* Body */}
-      <p className="text-[14px] text-gray-600 leading-relaxed mb-4">
+      <p className="text-[13px] sm:text-[14px] text-gray-600 leading-relaxed mb-4">
         {post.body}
       </p>
 
       {/* Trending strip */}
       {post.trending && (
-        <div className="flex flex-wrap items-center gap-2 mb-4 text-[12px]">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4 text-[11px] sm:text-[12px]">
           <span className="text-orange-500 font-bold flex items-center gap-1">
             <span>🔥</span> Trending
           </span>
@@ -596,7 +606,7 @@ function PostCard({ post }: { post: Post }) {
       )}
 
       {/* Reactions */}
-      <div className="flex flex-wrap gap-2 mb-2">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2">
         {post.reactions.map((r, i) => (
           <ReactionPill key={i} emoji={r.emoji} count={r.count} />
         ))}
@@ -611,7 +621,7 @@ function PostCard({ post }: { post: Post }) {
 
       {/* Comments */}
       {showComments && (
-        <div className="mt-4">
+        <div className="mt-3 sm:mt-4">
           <CommentsSection comments={post.comments} count={post.commentCount} />
         </div>
       )}
@@ -625,8 +635,8 @@ function PostCard({ post }: { post: Post }) {
 
 export default function CommunityFeed() {
   return (
-    <div className="w-full max-w-[800px] mx-auto border md:p-10 px-4">
-      <div className="space-y-8">
+    <div className="w-full max-w-[800px] mx-auto border-x border-gray-100 md:p-10 sm:p-6 px-3 py-4">
+      <div className="space-y-6 sm:space-y-8">
         {POSTS.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}

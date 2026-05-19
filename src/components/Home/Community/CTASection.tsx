@@ -5,13 +5,13 @@ import Link from "next/link";
 export default function CTASection() {
   return (
     <section className="bg-[#f5f5f0] w-full px-16 py-16">
-      <div className="mx-auto max-w-7xl flex items-center justify-between gap-16">
+      <div className="mx-auto max-w-7xl flex md:flex-row flex-col items-center justify-between gap-16">
         {/* Left — Headline */}
         <div className="flex-1 min-w-0">
-          <h2 className="text-5xl leading-tight font-serif text-zinc-900">
+          <h2 className="text-3xl md:text-5xl leading-tight font-serif text-zinc-900">
             The fastest way to get help.
           </h2>
-          <h2 className="text-5xl leading-tight font-serif italic text-zinc-400">
+          <h2 className="text-3xl md:text-5xl leading-tight font-serif italic text-zinc-400">
             And to help others.
           </h2>
         </div>
