@@ -91,13 +91,11 @@ function ProductDropdown() {
         <p className="text-[11px] font-bold text-emerald-500 mb-2 tracking-wide uppercase">
           Platform navigation
         </p>
-        <h3 className="text-[20px] font-black text-gray-900 leading-tight mb-2">
-          Move through the product with space for visual navigation.
+        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+          Purpose-built systems for investigating, deciding, and responding to
+          production incidents.{" "}
         </h3>
-        <p className="text-[12px] text-gray-500 leading-relaxed mb-5">
-          Each destination now has a larger target area, supporting imagery,
-          diagrams, or product previews without cramping the menu.
-        </p>
+
         <div className="grid grid-cols-2 gap-2">
           {cards.map((c) => (
             <NavCard key={c.href} {...c} />
@@ -216,13 +214,10 @@ function ChallengesDropdown() {
         <p className="text-[11px] font-bold text-emerald-500 mb-2 tracking-wide uppercase">
           Problem navigation
         </p>
-        <h3 className="text-[20px] font-black text-gray-900 leading-tight mb-2">
-          Browse challenges through clearer, larger destination cards.
+        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+          Solve the operational problems behind production incidents.{" "}
         </h3>
-        <p className="text-[12px] text-gray-500 leading-relaxed mb-5">
-          This gives each problem area enough space for a thumbnail, diagram, or
-          contextual illustration while still acting like a fast nav menu.
-        </p>
+
         <div className="grid grid-cols-2 gap-2">
           {cards.map((c) => (
             <NavCard key={c.href} {...c} />
@@ -486,13 +481,11 @@ function ResourcesDropdown() {
         <p className="text-[11px] font-bold text-emerald-500 mb-2 tracking-wide uppercase">
           Resource navigation
         </p>
-        <h3 className="text-[20px] font-black text-gray-900 leading-tight mb-2">
-          Resources now have room for previews, covers, and thumbnails.
+        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+          Learn how modern engineering teams investigate, remediate, and recover
+          from production incidents..{" "}
         </h3>
-        <p className="text-[12px] text-gray-500 leading-relaxed mb-5">
-          The larger dropdown makes this area feel like a lightweight discovery
-          panel rather than a cramped list of links.
-        </p>
+
         <div className="grid grid-cols-2 gap-2">
           {cards.map((c) => (
             <NavCard key={c.href} {...c} />
@@ -555,13 +548,10 @@ function SecurityDropdown() {
   return (
     <div className="grid grid-cols-2 gap-0 h-full">
       <div className="p-6 border-r border-gray-100">
-        <h3 className="text-[20px] font-black text-gray-900 leading-tight mb-2">
-          Security now has a larger, more structured dropdown for trust content.
+        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+          Built for secure, controlled operation in production environments.{" "}
         </h3>
-        <p className="text-[12px] text-gray-500 leading-relaxed mb-5">
-          This makes room for security diagrams, certification marks, and
-          governance previews while keeping the links easy to scan.
-        </p>
+
         <div className="grid grid-cols-2 gap-2">
           {cards.map((c) => (
             <NavCard key={c.href} {...c} />
