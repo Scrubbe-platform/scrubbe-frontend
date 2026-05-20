@@ -360,6 +360,16 @@ export default function SignInForm() {
     }
   };
 
+  const handleProviderSignIn = useCallback(
+    (provider: "google" | "github" | "gitlab" | "microsoft-entra-id") =>
+      signIn(provider, {
+        callbackUrl: `/auth/signin${
+          path ? `?to=${encodeURIComponent(path)}` : ""
+        }`,
+      }),
+    [path]
+  );
+
   const handleComingSoon = (name: string) => {
     toast.info(name + " sign-in coming soon", {
       description: "This provider will be available shortly.",
@@ -564,12 +574,14 @@ export default function SignInForm() {
                   <ProviderRow
                     icon={<FcGoogle size={20} />}
                     label="Google Workspace"
-                    onClick={() => handleComingSoon("Google Workspace")}
+                    onClick={() => void handleProviderSignIn("google")}
                   />
                   <ProviderRow
                     icon={<MsIcon />}
                     label="Microsoft / Entra ID"
-                    onClick={() => handleComingSoon("Microsoft / Entra ID")}
+                    onClick={() =>
+                      void handleProviderSignIn("microsoft-entra-id")
+                    }
                   />
                   <ProviderRow
                     icon={<OktaIcon />}
@@ -600,12 +612,12 @@ export default function SignInForm() {
                   <ProviderRow
                     icon={<FaGithub size={20} className="text-gray-900" />}
                     label="Github"
-                    onClick={() => handleComingSoon("GitHub")}
+                    onClick={() => void handleProviderSignIn("github")}
                   />
                   <ProviderRow
                     icon={<FaGitlab size={20} className="text-orange-500" />}
                     label="Gitlab"
-                    onClick={() => handleComingSoon("GitLab")}
+                    onClick={() => void handleProviderSignIn("gitlab")}
                   />
                   <ProviderRow
                     icon={<BitbucketIcon />}

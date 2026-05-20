@@ -13,6 +13,12 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
+function getBackendApiBaseUrl() {
+  const configured =
+    process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+  return configured.replace(/\/+$/, "");
+}
+
 export const {
   handlers: { GET, POST },
   auth,
@@ -147,7 +153,13 @@ export const {
       // For OAuth providers, exchange with backend to get real JWT tokens
       if (account.type === "oauth") {
         try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.API_BASE_URL;
+          const apiUrl = getBackendApiBaseUrl();
+          if (!apiUrl) {
+            console.warn(
+              "OAuth backend exchange skipped because API_BASE_URL / NEXT_PUBLIC_API_BASE_URL is not configured."
+            );
+            return true;
+          }
           const res = await fetch(`${apiUrl}/auth/oauth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
