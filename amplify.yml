@@ -3,14 +3,18 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci --legacy-peer-deps
+        - env | grep -E '^(API_BASE_URL|AUTH_|NEXTAUTH_|NEXT_PUBLIC_|FRONTEND_URL|INCIDENT_FRONTEND_URL)=' > .env.production
+        - grep -E '^(API_BASE_URL|AUTH_|NEXTAUTH_|NEXT_PUBLIC_|FRONTEND_URL|INCIDENT_FRONTEND_URL)=' .env.production | sed 's/=.*$/=[set]/'
+        - npm install -g pnpm
+        - pnpm install --no-frozen-lockfile
     build:
       commands:
-        - npm run build
+        - pnpm run build
   artifacts:
     baseDirectory: .next
     files:
       - "**/*"
   cache:
     paths:
+      - .next/cache/**/*
       - node_modules/**/*
