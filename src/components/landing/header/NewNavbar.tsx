@@ -955,7 +955,9 @@ export default function Navbar() {
       </header>
 
       <div className="h-[60px]" />
-      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
+      {mobileOpen && (
+        <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
+      )}
     </>
   );
 }

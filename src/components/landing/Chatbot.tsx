@@ -199,8 +199,9 @@ const Chatbot: React.FC = () => {
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3">
       {/* ── Chat panel ── */}
-      <div
-        className={`flex flex-col w-[340px] sm:w-[380px] rounded-2xl overflow-hidden shadow-2xl border border-zinc-700
+      {isOpen && (
+        <div
+          className={`flex flex-col w-[340px] sm:w-[380px] rounded-2xl overflow-hidden shadow-2xl border border-zinc-700
           transition-all duration-300 origin-bottom-right
           ${
             isOpen
@@ -209,152 +210,153 @@ const Chatbot: React.FC = () => {
           }
           ${isMinimised ? "h-[56px]" : "h-[580px]"}
         `}
-        style={{ background: "#111" }}
-      >
-        {/* ── Header ── */}
-        <div className="flex items-center gap-3 px-4 py-3 bg-zinc-950 border-b border-zinc-800 flex-shrink-0">
-          <div className="w-9 h-9 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
-            <Sparkles size={18} className="text-emerald-400" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[15px] font-bold text-white tracking-wide">
-              EZRA
-            </p>
-            <p className="text-[11px] text-emerald-400 font-mono tracking-widest uppercase">
-              Scrubbe AI · Online
-            </p>
-          </div>
-          <button
-            onClick={() => setIsMinimised(!isMinimised)}
-            className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
-            aria-label="Minimise"
-          >
-            <Minus size={14} />
-          </button>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
-            aria-label="Close"
-          >
-            <X size={14} />
-          </button>
-        </div>
-
-        {!isMinimised && (
-          <>
-            {/* ── Nav tags ── */}
-            <div className="flex flex-wrap gap-1.5 px-4 py-3 bg-white border-b border-zinc-200 flex-shrink-0">
-              {navTags.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => handleQuickAction(tag)}
-                  className="px-2.5 py-1 text-[10px] font-bold tracking-wide border border-zinc-300 rounded text-zinc-700 hover:bg-zinc-100 hover:border-zinc-400 transition-colors"
-                >
-                  {tag}
-                </button>
-              ))}
+          style={{ background: "#111" }}
+        >
+          {/* ── Header ── */}
+          <div className="flex items-center gap-3 px-4 py-3 bg-zinc-950 border-b border-zinc-800 flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
+              <Sparkles size={18} className="text-emerald-400" />
             </div>
-
-            {/* ── Chat body ── */}
-            <div
-              ref={chatBodyRef}
-              className="flex-1 overflow-y-auto px-4 py-4 bg-white flex flex-col gap-3"
+            <div className="flex-1 min-w-0">
+              <p className="text-[15px] font-bold text-white tracking-wide">
+                EZRA
+              </p>
+              <p className="text-[11px] text-emerald-400 font-mono tracking-widest uppercase">
+                Scrubbe AI · Online
+              </p>
+            </div>
+            <button
+              onClick={() => setIsMinimised(!isMinimised)}
+              className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              aria-label="Minimise"
             >
-              {/* Ezra avatar spark */}
-              {messages.length > 0 && (
-                <div className="w-9 h-9 rounded-lg bg-zinc-900 flex items-center justify-center shrink-0 self-start">
-                  <Sparkles size={16} className="text-emerald-400" />
-                </div>
-              )}
+              <Minus size={14} />
+            </button>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              aria-label="Close"
+            >
+              <X size={14} />
+            </button>
+          </div>
 
-              {/* Messages */}
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`max-w-[88%] px-4 py-3 rounded-2xl text-[14px] leading-relaxed
+          {!isMinimised && (
+            <>
+              {/* ── Nav tags ── */}
+              <div className="flex flex-wrap gap-1.5 px-4 py-3 bg-white border-b border-zinc-200 flex-shrink-0">
+                {navTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => handleQuickAction(tag)}
+                    className="px-2.5 py-1 text-[10px] font-bold tracking-wide border border-zinc-300 rounded text-zinc-700 hover:bg-zinc-100 hover:border-zinc-400 transition-colors"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+
+              {/* ── Chat body ── */}
+              <div
+                ref={chatBodyRef}
+                className="flex-1 overflow-y-auto px-4 py-4 bg-white flex flex-col gap-3"
+              >
+                {/* Ezra avatar spark */}
+                {messages.length > 0 && (
+                  <div className="w-9 h-9 rounded-lg bg-zinc-900 flex items-center justify-center shrink-0 self-start">
+                    <Sparkles size={16} className="text-emerald-400" />
+                  </div>
+                )}
+
+                {/* Messages */}
+                {messages.map((msg, i) => (
+                  <div
+                    key={i}
+                    className={`max-w-[88%] px-4 py-3 rounded-2xl text-[14px] leading-relaxed
                     ${
                       msg.isUser
                         ? "bg-zinc-900 text-white self-end rounded-br-sm"
                         : "bg-zinc-100 text-zinc-800 self-start rounded-bl-sm"
                     }`}
-                >
-                  {msg.text.split("\n").map((line, j) => (
-                    <div key={j}>{line}</div>
-                  ))}
-                </div>
-              ))}
+                  >
+                    {msg.text.split("\n").map((line, j) => (
+                      <div key={j}>{line}</div>
+                    ))}
+                  </div>
+                ))}
 
-              {/* Typing indicator */}
-              {isTyping && (
-                <div className="flex gap-1 px-4 py-3 bg-zinc-100 rounded-2xl rounded-bl-sm w-fit self-start">
-                  {[0, 1, 2].map((n) => (
-                    <span
-                      key={n}
-                      className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce"
-                      style={{ animationDelay: `${n * 120}ms` }}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Quick actions — shown only when no conversation yet */}
-              {!hasConversation && (
-                <div className="flex flex-col gap-2 mt-2">
-                  {quickActions.map(({ label, icon: Icon, topic }) => (
-                    <button
-                      key={label}
-                      onClick={() => handleQuickAction(topic)}
-                      className="flex items-center gap-3 px-4 py-3 border border-zinc-200 rounded-xl text-left hover:bg-zinc-50 transition-colors group"
-                    >
-                      <div className="w-8 h-8 rounded-lg border border-zinc-200 flex items-center justify-center shrink-0 text-zinc-500 group-hover:border-zinc-400 transition-colors">
-                        <Icon size={15} />
-                      </div>
-                      <span className="flex-1 text-[11px] font-bold tracking-widest text-zinc-700 uppercase">
-                        {label}
-                      </span>
-                      <ChevronRight
-                        size={14}
-                        className="text-emerald-500 shrink-0"
+                {/* Typing indicator */}
+                {isTyping && (
+                  <div className="flex gap-1 px-4 py-3 bg-zinc-100 rounded-2xl rounded-bl-sm w-fit self-start">
+                    {[0, 1, 2].map((n) => (
+                      <span
+                        key={n}
+                        className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce"
+                        style={{ animationDelay: `${n * 120}ms` }}
                       />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                    ))}
+                  </div>
+                )}
 
-            {/* ── Footer ── */}
-            <div className="px-4 pt-3 pb-2 bg-white border-t border-zinc-100 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Ask Ezra anything about Scrubbe..."
-                  className="flex-1 px-4 py-2.5 text-[13px] border border-zinc-200 rounded-xl focus:outline-none focus:border-emerald-400 placeholder:text-zinc-400 text-zinc-800"
-                />
-                <button
-                  onClick={handleSend}
-                  className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center hover:bg-zinc-700 transition-colors shrink-0"
-                  aria-label="Send"
-                >
-                  <Send size={15} className="text-emerald-400" />
-                </button>
+                {/* Quick actions — shown only when no conversation yet */}
+                {!hasConversation && (
+                  <div className="flex flex-col gap-2 mt-2">
+                    {quickActions.map(({ label, icon: Icon, topic }) => (
+                      <button
+                        key={label}
+                        onClick={() => handleQuickAction(topic)}
+                        className="flex items-center gap-3 px-4 py-3 border border-zinc-200 rounded-xl text-left hover:bg-zinc-50 transition-colors group"
+                      >
+                        <div className="w-8 h-8 rounded-lg border border-zinc-200 flex items-center justify-center shrink-0 text-zinc-500 group-hover:border-zinc-400 transition-colors">
+                          <Icon size={15} />
+                        </div>
+                        <span className="flex-1 text-[11px] font-bold tracking-widest text-zinc-700 uppercase">
+                          {label}
+                        </span>
+                        <ChevronRight
+                          size={14}
+                          className="text-emerald-500 shrink-0"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="flex justify-end mt-2">
-                <button
-                  onClick={handleClearChat}
-                  className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-600 transition-colors font-mono tracking-wide"
-                >
-                  <X size={10} />
-                  CLEAR CHAT
-                </button>
+
+              {/* ── Footer ── */}
+              <div className="px-4 pt-3 pb-2 bg-white border-t border-zinc-100 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                    placeholder="Ask Ezra anything about Scrubbe..."
+                    className="flex-1 px-4 py-2.5 text-[13px] border border-zinc-200 rounded-xl focus:outline-none focus:border-emerald-400 placeholder:text-zinc-400 text-zinc-800"
+                  />
+                  <button
+                    onClick={handleSend}
+                    className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center hover:bg-zinc-700 transition-colors shrink-0"
+                    aria-label="Send"
+                  >
+                    <Send size={15} className="text-emerald-400" />
+                  </button>
+                </div>
+                <div className="flex justify-end mt-2">
+                  <button
+                    onClick={handleClearChat}
+                    className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-600 transition-colors font-mono tracking-wide"
+                  >
+                    <X size={10} />
+                    CLEAR CHAT
+                  </button>
+                </div>
               </div>
-            </div>
-          </>
-        )}
-      </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* ── Toggle button ── */}
       <button

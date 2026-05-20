@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   ThumbsUp,
   MessageCircle,
@@ -230,6 +230,19 @@ const POSTS: Post[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────
+// Emoji picker options
+// ─────────────────────────────────────────────────────────────────
+
+const EMOJI_OPTIONS = [
+  { emoji: "👍", label: "Like" },
+  { emoji: "🔥", label: "Fire" },
+  { emoji: "💜", label: "Love" },
+  { emoji: "🎉", label: "Celebrate" },
+  { emoji: "😮", label: "Wow" },
+  { emoji: "😢", label: "Sad" },
+];
+
+// ─────────────────────────────────────────────────────────────────
 // Avatar
 // ─────────────────────────────────────────────────────────────────
 
@@ -303,6 +316,110 @@ function ReactionPill({ emoji, count }: { emoji: string; count: number }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
+// Emoji Picker Popover
+// ─────────────────────────────────────────────────────────────────
+
+function EmojiPicker({
+  onSelect,
+  onClose,
+}: {
+  onSelect: (emoji: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="absolute bottom-full left-0 mb-2 z-50"
+      onMouseLeave={onClose}
+    >
+      <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-2 py-1.5 shadow-lg">
+        {EMOJI_OPTIONS.map(({ emoji, label }) => (
+          <button
+            key={emoji}
+            title={label}
+            onClick={() => {
+              onSelect(emoji);
+              onClose();
+            }}
+            className="text-xl sm:text-2xl leading-none w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all hover:scale-125 active:scale-110"
+          >
+            {emoji}
+          </button>
+        ))}
+      </div>
+      {/* Little caret */}
+      <div className="w-3 h-3 bg-white border-b border-r border-gray-200 rotate-45 mx-4 -mt-1.5 shadow-sm" />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// React button with hover emoji picker
+// ─────────────────────────────────────────────────────────────────
+
+function ReactButton({
+  postReactions,
+  onAddReaction,
+}: {
+  postReactions: { emoji: string; count: number }[];
+  onAddReaction: (emoji: string) => void;
+}) {
+  const [showPicker, setShowPicker] = useState(false);
+  const [myReaction, setMyReaction] = useState<string | null>(null);
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMouseEnter = () => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    setShowPicker(true);
+  };
+
+  const handleMouseLeave = () => {
+    hoverTimeout.current = setTimeout(() => setShowPicker(false), 150);
+  };
+
+  const handleSelect = (emoji: string) => {
+    if (myReaction === emoji) {
+      setMyReaction(null);
+    } else {
+      if (myReaction) onAddReaction(myReaction); // decrement old
+      setMyReaction(emoji);
+      onAddReaction(emoji);
+    }
+  };
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {showPicker && (
+        <EmojiPicker
+          onSelect={handleSelect}
+          onClose={() => setShowPicker(false)}
+        />
+      )}
+      <button
+        className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-[11px] font-bold tracking-wide transition-colors cursor-pointer border-0 ${
+          myReaction
+            ? "text-amber-600 bg-amber-50"
+            : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+        }`}
+      >
+        {myReaction ? (
+          <span className="text-base leading-none">{myReaction}</span>
+        ) : (
+          <ThumbsUp size={13} />
+        )}
+        <span className="hidden sm:inline">
+          {myReaction ? myReaction : "REACT"}
+        </span>
+        <span className="sm:hidden" />
+      </button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
 // Action bar
 // ─────────────────────────────────────────────────────────────────
 
@@ -310,16 +427,24 @@ function ActionBar({
   commentCount,
   onToggleComments,
   showComments,
+  postReactions,
+  onAddReaction,
 }: {
   commentCount: number;
   onToggleComments: () => void;
   showComments: boolean;
+  postReactions: { emoji: string; count: number }[];
+  onAddReaction: (emoji: string) => void;
 }) {
   return (
     <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100 mt-3 sm:mt-4 gap-2">
-      {/* On mobile: show icon-only buttons to save space */}
       <div className="flex items-center gap-0.5 sm:gap-1 flex-wrap">
-        <ActionBtn icon={<ThumbsUp size={13} />} label="REACT" mobileLabel="" />
+        {/* React button with emoji picker */}
+        <ReactButton
+          postReactions={postReactions}
+          onAddReaction={onAddReaction}
+        />
+
         <ActionBtn
           icon={<MessageCircle size={13} />}
           label={`${commentCount} COMMENTS`}
@@ -362,7 +487,6 @@ function ActionBtn({
       }`}
     >
       {icon}
-      {/* Show full label on sm+, short/icon-only on mobile */}
       <span className="hidden sm:inline">{label}</span>
       {mobileLabel !== undefined && (
         <span className="sm:hidden">{mobileLabel}</span>
@@ -511,6 +635,21 @@ function CommentsSection({
 
 function PostCard({ post }: { post: Post }) {
   const [showComments, setShowComments] = useState(post.showComments ?? false);
+  const [reactions, setReactions] = useState<
+    { emoji: string; count: number }[]
+  >(post.reactions);
+
+  const handleAddReaction = (emoji: string) => {
+    setReactions((prev) => {
+      const exists = prev.find((r) => r.emoji === emoji);
+      if (exists) {
+        return prev.map((r) =>
+          r.emoji === emoji ? { ...r, count: r.count + 1 } : r
+        );
+      }
+      return [...prev, { emoji, count: 1 }];
+    });
+  };
 
   return (
     <article className="pb-6 sm:pb-8 border-b border-gray-200 last:border-0">
@@ -607,7 +746,7 @@ function PostCard({ post }: { post: Post }) {
 
       {/* Reactions */}
       <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2">
-        {post.reactions.map((r, i) => (
+        {reactions.map((r, i) => (
           <ReactionPill key={i} emoji={r.emoji} count={r.count} />
         ))}
       </div>
@@ -617,6 +756,8 @@ function PostCard({ post }: { post: Post }) {
         commentCount={post.commentCount}
         onToggleComments={() => setShowComments(!showComments)}
         showComments={showComments}
+        postReactions={reactions}
+        onAddReaction={handleAddReaction}
       />
 
       {/* Comments */}
