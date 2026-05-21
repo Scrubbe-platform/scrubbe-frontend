@@ -13,42 +13,75 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
-function getServerEnv(key: string) {
-  const value = process.env?.[key];
+function normalizeEnvValue(value: string | undefined) {
   return typeof value === "string" && value.trim().length > 0
     ? value.trim()
     : undefined;
 }
 
-function getBackendApiBaseUrl() {
-  const configured =
-    getServerEnv("API_BASE_URL") ??
-    getServerEnv("NEXT_PUBLIC_API_BASE_URL") ??
-    "";
-  return configured.replace(/\/+$/, "");
-}
+const apiBaseUrl =
+  normalizeEnvValue(process.env.API_BASE_URL) ??
+  normalizeEnvValue(process.env.NEXT_PUBLIC_API_BASE_URL) ??
+  "";
 
 const authSecret =
-  getServerEnv("AUTH_SECRET") ?? getServerEnv("NEXTAUTH_SECRET");
+  normalizeEnvValue(process.env.AUTH_SECRET) ??
+  normalizeEnvValue(process.env.NEXTAUTH_SECRET);
+
+const githubClientId =
+  normalizeEnvValue(process.env.AUTH_GITHUB_ID) ??
+  normalizeEnvValue(process.env.GITHUB_CLIENT_ID);
+
+const githubClientSecret =
+  normalizeEnvValue(process.env.AUTH_GITHUB_SECRET) ??
+  normalizeEnvValue(process.env.GITHUB_CLIENT_SECRET);
+
+const googleClientId =
+  normalizeEnvValue(process.env.AUTH_GOOGLE_ID) ??
+  normalizeEnvValue(process.env.GOOGLE_CLIENT_ID);
+
+const googleClientSecret =
+  normalizeEnvValue(process.env.AUTH_GOOGLE_SECRET) ??
+  normalizeEnvValue(process.env.GOOGLE_CLIENT_SECRET);
+
+const gitlabClientId =
+  normalizeEnvValue(process.env.AUTH_GITLAB_ID) ??
+  normalizeEnvValue(process.env.GITLAB_CLIENT_ID);
+
+const gitlabClientSecret =
+  normalizeEnvValue(process.env.AUTH_GITLAB_SECRET) ??
+  normalizeEnvValue(process.env.GITLAB_CLIENT_SECRET);
+
+const microsoftClientId =
+  normalizeEnvValue(process.env.AUTH_MICROSOFT_ENTRA_ID_ID) ??
+  normalizeEnvValue(process.env.MICROSOFT_ENTRA_ID_ID);
+
+const microsoftClientSecret =
+  normalizeEnvValue(process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET) ??
+  normalizeEnvValue(process.env.MICROSOFT_ENTRA_ID_SECRET);
+
+const microsoftIssuer =
+  normalizeEnvValue(process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER) ??
+  normalizeEnvValue(process.env.MICROSOFT_ENTRA_ID_ISSUER);
+
+const authUrl =
+  normalizeEnvValue(process.env.AUTH_URL) ??
+  normalizeEnvValue(process.env.NEXTAUTH_URL) ??
+  normalizeEnvValue(process.env.FRONTEND_URL) ??
+  (process.env.NODE_ENV === "production" ? "https://www.scrubbe.com" : undefined);
+
+function getBackendApiBaseUrl() {
+  return apiBaseUrl.replace(/\/+$/, "");
+}
 
 if (process.env.NODE_ENV === "production") {
   console.info("[auth] runtime configuration", {
     hasAuthSecret: Boolean(authSecret),
-    hasGithubClientId: Boolean(
-      getServerEnv("AUTH_GITHUB_ID") ?? getServerEnv("GITHUB_CLIENT_ID")
-    ),
-    hasGithubClientSecret: Boolean(
-      getServerEnv("AUTH_GITHUB_SECRET") ??
-        getServerEnv("GITHUB_CLIENT_SECRET")
-    ),
-    hasGitlabClientId: Boolean(
-      getServerEnv("AUTH_GITLAB_ID") ?? getServerEnv("GITLAB_CLIENT_ID")
-    ),
-    hasGitlabClientSecret: Boolean(
-      getServerEnv("AUTH_GITLAB_SECRET") ??
-        getServerEnv("GITLAB_CLIENT_SECRET")
-    ),
-    authUrl: getServerEnv("AUTH_URL") ?? getServerEnv("NEXTAUTH_URL") ?? null,
+    hasGithubClientId: Boolean(githubClientId),
+    hasGithubClientSecret: Boolean(githubClientSecret),
+    hasGitlabClientId: Boolean(gitlabClientId),
+    hasGitlabClientSecret: Boolean(gitlabClientSecret),
+    authUrl: authUrl ?? null,
   });
 }
 
@@ -62,10 +95,8 @@ export const {
   secret: authSecret,
   providers: [
     Github({
-      clientId: getServerEnv("AUTH_GITHUB_ID") ?? getServerEnv("GITHUB_CLIENT_ID"),
-      clientSecret:
-        getServerEnv("AUTH_GITHUB_SECRET") ??
-        getServerEnv("GITHUB_CLIENT_SECRET"),
+      clientId: githubClientId,
+      clientSecret: githubClientSecret,
       authorization: {
         params: {
           scope: "read:user user:email",
@@ -87,10 +118,8 @@ export const {
       },
     }),
     Google({
-      clientId: getServerEnv("AUTH_GOOGLE_ID") ?? getServerEnv("GOOGLE_CLIENT_ID"),
-      clientSecret:
-        getServerEnv("AUTH_GOOGLE_SECRET") ??
-        getServerEnv("GOOGLE_CLIENT_SECRET"),
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
       async profile(profile):Promise<any>  {
         return {
           id: profile.sub,
@@ -106,10 +135,8 @@ export const {
       },
     }),
     Gitlab({
-      clientId: getServerEnv("AUTH_GITLAB_ID") ?? getServerEnv("GITLAB_CLIENT_ID"),
-      clientSecret:
-        getServerEnv("AUTH_GITLAB_SECRET") ??
-        getServerEnv("GITLAB_CLIENT_SECRET"),
+      clientId: gitlabClientId,
+      clientSecret: gitlabClientSecret,
       async profile(profile):Promise<any>  {
         return {
           id: profile.id.toString(),
@@ -125,15 +152,9 @@ export const {
       },
     }),
     MicrosoftEntraID({
-      clientId:
-        getServerEnv("AUTH_MICROSOFT_ENTRA_ID_ID") ??
-        getServerEnv("MICROSOFT_ENTRA_ID_ID"),
-      clientSecret:
-        getServerEnv("AUTH_MICROSOFT_ENTRA_ID_SECRET") ??
-        getServerEnv("MICROSOFT_ENTRA_ID_SECRET"),
-      issuer:
-        getServerEnv("AUTH_MICROSOFT_ENTRA_ID_ISSUER") ??
-        getServerEnv("MICROSOFT_ENTRA_ID_ISSUER"),
+      clientId: microsoftClientId,
+      clientSecret: microsoftClientSecret,
+      issuer: microsoftIssuer,
       async profile(profile):Promise<any>  {
         return {
           id: profile.oid,
@@ -227,11 +248,17 @@ export const {
       return true;
     },
     async redirect({ url, baseUrl }) {
+      const resolvedBaseUrl =
+        authUrl ??
+        (process.env.NODE_ENV === "production" &&
+        /^https?:\/\/localhost(?::\d+)?$/i.test(baseUrl)
+          ? "https://www.scrubbe.com"
+          : baseUrl);
       // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (url.startsWith("/")) return `${resolvedBaseUrl}${url}`;
       // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
+      else if (new URL(url).origin === resolvedBaseUrl) return url;
+      return resolvedBaseUrl;
     },
   },
   pages: {
