@@ -5,11 +5,10 @@ frontend:
       commands:
         - env | grep -E '^(API_BASE_URL|AUTH_|NEXTAUTH_|NEXT_PUBLIC_|FRONTEND_URL|INCIDENT_FRONTEND_URL)=' > .env.production
         - grep -E '^(API_BASE_URL|AUTH_|NEXTAUTH_|NEXT_PUBLIC_|FRONTEND_URL|INCIDENT_FRONTEND_URL)=' .env.production | sed 's/=.*$/=[set]/'
-        - npm install -g pnpm
-        - pnpm install --no-frozen-lockfile
+        - npm install --legacy-peer-deps
     build:
       commands:
-        - pnpm run build
+        - npm run build
   artifacts:
     baseDirectory: .next
     files:
