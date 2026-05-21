@@ -5,6 +5,7 @@ frontend:
       commands:
         - env | grep -E '^(API_BASE_URL|AUTH_|NEXTAUTH_|NEXT_PUBLIC_|FRONTEND_URL|INCIDENT_FRONTEND_URL)=' > .env.production
         - grep -E '^(API_BASE_URL|AUTH_|NEXTAUTH_|NEXT_PUBLIC_|FRONTEND_URL|INCIDENT_FRONTEND_URL)=' .env.production | sed 's/=.*$/=[set]/'
+        - node scripts/write-amplify-server-env.cjs
         - npm install --legacy-peer-deps
     build:
       commands:

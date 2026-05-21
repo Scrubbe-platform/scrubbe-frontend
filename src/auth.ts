@@ -3,6 +3,7 @@ import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Gitlab from "next-auth/providers/gitlab";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
+import { AMPLIFY_SERVER_ENV } from "./generated/amplify-server-env";
 
 // Role definitions matching backend
 export type UserRole = "USER" | "ADMIN" | "SUPER_ADMIN";
@@ -20,51 +21,63 @@ function normalizeEnvValue(value: string | undefined) {
 }
 
 const apiBaseUrl =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.API_BASE_URL) ??
   normalizeEnvValue(process.env.API_BASE_URL) ??
   normalizeEnvValue(process.env.NEXT_PUBLIC_API_BASE_URL) ??
   "";
 
 const authSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_SECRET) ??
   normalizeEnvValue(process.env.AUTH_SECRET) ??
   normalizeEnvValue(process.env.NEXTAUTH_SECRET);
 
 const githubClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GITHUB_ID) ??
   normalizeEnvValue(process.env.AUTH_GITHUB_ID) ??
   normalizeEnvValue(process.env.GITHUB_CLIENT_ID);
 
 const githubClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GITHUB_SECRET) ??
   normalizeEnvValue(process.env.AUTH_GITHUB_SECRET) ??
   normalizeEnvValue(process.env.GITHUB_CLIENT_SECRET);
 
 const googleClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GOOGLE_ID) ??
   normalizeEnvValue(process.env.AUTH_GOOGLE_ID) ??
   normalizeEnvValue(process.env.GOOGLE_CLIENT_ID);
 
 const googleClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GOOGLE_SECRET) ??
   normalizeEnvValue(process.env.AUTH_GOOGLE_SECRET) ??
   normalizeEnvValue(process.env.GOOGLE_CLIENT_SECRET);
 
 const gitlabClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GITLAB_ID) ??
   normalizeEnvValue(process.env.AUTH_GITLAB_ID) ??
   normalizeEnvValue(process.env.GITLAB_CLIENT_ID);
 
 const gitlabClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GITLAB_SECRET) ??
   normalizeEnvValue(process.env.AUTH_GITLAB_SECRET) ??
   normalizeEnvValue(process.env.GITLAB_CLIENT_SECRET);
 
 const microsoftClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_MICROSOFT_ENTRA_ID_ID) ??
   normalizeEnvValue(process.env.AUTH_MICROSOFT_ENTRA_ID_ID) ??
   normalizeEnvValue(process.env.MICROSOFT_ENTRA_ID_ID);
 
 const microsoftClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_MICROSOFT_ENTRA_ID_SECRET) ??
   normalizeEnvValue(process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET) ??
   normalizeEnvValue(process.env.MICROSOFT_ENTRA_ID_SECRET);
 
 const microsoftIssuer =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_MICROSOFT_ENTRA_ID_ISSUER) ??
   normalizeEnvValue(process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER) ??
   normalizeEnvValue(process.env.MICROSOFT_ENTRA_ID_ISSUER);
 
 const authUrl =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_URL) ??
   normalizeEnvValue(process.env.AUTH_URL) ??
   normalizeEnvValue(process.env.NEXTAUTH_URL) ??
   normalizeEnvValue(process.env.FRONTEND_URL) ??
