@@ -83,6 +83,26 @@ const authUrl =
   normalizeEnvValue(process.env.FRONTEND_URL) ??
   (process.env.NODE_ENV === "production" ? "https://www.scrubbe.com" : undefined);
 
+if (!process.env.AUTH_URL && authUrl) {
+  process.env.AUTH_URL = authUrl;
+}
+
+if (!process.env.NEXTAUTH_URL && authUrl) {
+  process.env.NEXTAUTH_URL = authUrl;
+}
+
+if (!process.env.NEXTAUTH_URL_INTERNAL && authUrl) {
+  process.env.NEXTAUTH_URL_INTERNAL = authUrl;
+}
+
+if (!process.env.AUTH_SECRET && authSecret) {
+  process.env.AUTH_SECRET = authSecret;
+}
+
+if (!process.env.NEXTAUTH_SECRET && authSecret) {
+  process.env.NEXTAUTH_SECRET = authSecret;
+}
+
 function getBackendApiBaseUrl() {
   return apiBaseUrl.replace(/\/+$/, "");
 }
