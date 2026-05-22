@@ -100,6 +100,23 @@ const getDefaultRedirect = (payload: JwtPayload | null): string => {
 export default function middleware(req: NextRequest) {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
+  const hostname = req.headers.get("host")?.toLowerCase() ?? "";
+
+  const isStaticAsset = /\.[^/]+$/.test(pathname);
+  const isDocsHost =
+    hostname === "docs.scrubbe.com" || hostname.startsWith("docs.scrubbe.com:");
+
+  if (
+    isDocsHost &&
+    !pathname.startsWith("/docs") &&
+    !pathname.startsWith("/_next") &&
+    !pathname.startsWith("/api") &&
+    !isStaticAsset
+  ) {
+    const docsUrl = nextUrl.clone();
+    docsUrl.pathname = pathname === "/" ? "/docs" : `/docs${pathname}`;
+    return NextResponse.rewrite(docsUrl);
+  }
 
   const token = req.cookies.get(AUTH_COOKIE)?.value;
   const payload = decodeJwtPayload(token);
