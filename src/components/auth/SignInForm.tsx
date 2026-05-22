@@ -325,11 +325,18 @@ export default function SignInForm() {
       if (accountType === "BUSINESS") {
         if (purpose === "IMS") {
           const token = getCookie(COOKIE_KEYS.TOKEN);
+          const refreshToken = getCookie(COOKIE_KEYS.REFRESH_TOKEN);
           const url =
             process.env.NEXT_PUBLIC_INCIDENT_URL ??
             "https://incidents.scrubbe.com";
-          window.location.href =
-            url + "/incident/tickets?token=" + (token ?? "");
+          const redirectUrl = new URL("/incident/tickets", url);
+          if (typeof token === "string" && token.length > 0) {
+            redirectUrl.searchParams.set("token", token);
+          }
+          if (typeof refreshToken === "string" && refreshToken.length > 0) {
+            redirectUrl.searchParams.set("refreshToken", refreshToken);
+          }
+          window.location.href = redirectUrl.toString();
           return;
         }
         router.push("/incident");
