@@ -19,6 +19,8 @@ import { IoCodeSlashSharp } from "react-icons/io5";
 import { AiOutlineLineChart } from "react-icons/ai";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
+import { useIncidentSelection } from "@/hooks/useIncidentSelection";
+import { useIncidentDetail } from "@/hooks/useIncidentWorkspace";
 import { endpoint } from "@/lib/api/endpoint";
 import moment from "moment";
 import Link from "next/link";
@@ -47,8 +49,21 @@ type ChatMessage = {
   timestamp: Date;
 };
 
+const normalizeIncidentId = (value?: string | null) =>
+  (value ?? "").trim().toUpperCase();
+
+const hasMatchingIncidentId = (
+  incidentId: string | null | undefined,
+  candidates: string[]
+) => {
+  const normalizedIncidentId = normalizeIncidentId(incidentId);
+  return Boolean(normalizedIncidentId) && candidates.includes(normalizedIncidentId);
+};
+
 export default function EzraConsole() {
   const { get, post } = useFetch();
+  const { incidentId: routeIncidentId } = useIncidentSelection();
+  const { data: selectedIncident } = useIncidentDetail(routeIncidentId);
   const [selectedAnalysis, setSelectedAnalysis] = useState<Analysis | null>(
     null
   );
@@ -56,6 +71,7 @@ export default function EzraConsole() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const autoAnalysisKeyRef = useRef<string | null>(null);
 
   const {
     data: analysesData,
@@ -73,6 +89,15 @@ export default function EzraConsole() {
   });
 
   const analyses = analysesData ?? [];
+  const preferredIncidentId =
+    selectedIncident?.ticketId ?? selectedIncident?.id ?? routeIncidentId ?? null;
+  const incidentCandidates = [
+    routeIncidentId,
+    selectedIncident?.id,
+    selectedIncident?.ticketId,
+  ]
+    .map((value) => normalizeIncidentId(value))
+    .filter(Boolean);
 
   const { mutateAsync: runAnalyse, isPending: analysing } = useMutation({
     mutationFn: async (incidentId: string) => {
@@ -108,6 +133,66 @@ export default function EzraConsole() {
     setMessages((prev) => [...prev, { role, content, timestamp: new Date() }]);
   };
 
+  const replaceLastEzraMessage = (content: string) => {
+    setMessages((prev) => {
+      if (prev.length === 0) {
+        return [{ role: "ezra", content, timestamp: new Date() }];
+      }
+
+      const updated = [...prev];
+      updated[updated.length - 1] = {
+        role: "ezra",
+        content,
+        timestamp: new Date(),
+      };
+      return updated;
+    });
+  };
+
+  const analyseIncident = async (
+    incidentId: string,
+    options?: { replaceLastMessage?: boolean }
+  ) => {
+    const resolvedIncidentId = incidentId.trim();
+
+    try {
+      const analysis = await runAnalyse(resolvedIncidentId);
+      setSelectedAnalysis(analysis);
+      await refetchAnalyses();
+
+      if (!analysis.id) {
+        return;
+      }
+
+      const report = await generateReport({
+        analysisId: analysis.id,
+        aud: audience,
+      });
+      const narrative =
+        report?.narrative ??
+        report?.content ??
+        JSON.stringify(analysis.situation ?? {}, null, 2);
+
+      if (options?.replaceLastMessage) {
+        replaceLastEzraMessage(narrative);
+        return;
+      }
+
+      addMessage("ezra", narrative);
+    } catch (err: any) {
+      const failureMessage =
+        err?.message ??
+        "Analysis failed. Check the incident ID and try again.";
+
+      if (options?.replaceLastMessage) {
+        replaceLastEzraMessage(failureMessage);
+        return;
+      }
+
+      addMessage("ezra", failureMessage);
+    }
+  };
+
   const handleSend = async () => {
     const query = input.trim();
     if (!query) return;
@@ -118,7 +203,7 @@ export default function EzraConsole() {
     const incidentMatch = query.match(/INC[-–]?[A-Z0-9]+/i);
     const incidentId = incidentMatch
       ? incidentMatch[0].replace(/–/g, "-").toUpperCase()
-      : selectedAnalysis?.incidentId ?? null;
+      : selectedAnalysis?.incidentId ?? preferredIncidentId;
 
     if (!incidentId) {
       addMessage(
@@ -128,45 +213,8 @@ export default function EzraConsole() {
       return;
     }
 
-    try {
-      addMessage("ezra", `Analysing ${incidentId}…`);
-      const analysis = await runAnalyse(incidentId);
-      setSelectedAnalysis(analysis);
-      refetchAnalyses();
-
-      // Generate narrated report for current audience
-      if (analysis.id) {
-        const report = await generateReport({
-          analysisId: analysis.id,
-          aud: audience,
-        });
-        const narrative =
-          report?.narrative ??
-          report?.content ??
-          JSON.stringify(analysis.situation ?? {}, null, 2);
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = {
-            role: "ezra",
-            content: narrative,
-            timestamp: new Date(),
-          };
-          return updated;
-        });
-      }
-    } catch (err: any) {
-      setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1] = {
-          role: "ezra",
-          content:
-            err?.message ??
-            "Analysis failed. Check the incident ID and try again.",
-          timestamp: new Date(),
-        };
-        return updated;
-      });
-    }
+    addMessage("ezra", `Analysing ${incidentId}...`);
+    await analyseIncident(incidentId, { replaceLastMessage: true });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -230,6 +278,60 @@ export default function EzraConsole() {
     setInput(promptText);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (incidentCandidates.length === 0) {
+      autoAnalysisKeyRef.current = null;
+      return;
+    }
+
+    const matchingAnalysis = analyses.find((analysis) =>
+      hasMatchingIncidentId(analysis.incidentId, incidentCandidates)
+    );
+
+    if (matchingAnalysis) {
+      autoAnalysisKeyRef.current = normalizeIncidentId(matchingAnalysis.incidentId);
+
+      if (selectedAnalysis?.id !== matchingAnalysis.id) {
+        void handleSelectAnalysis(matchingAnalysis);
+      }
+      return;
+    }
+
+    const normalizedPreferredIncidentId = normalizeIncidentId(preferredIncidentId);
+    if (!normalizedPreferredIncidentId) {
+      return;
+    }
+
+    if (
+      autoAnalysisKeyRef.current === normalizedPreferredIncidentId ||
+      analysing ||
+      generatingReport
+    ) {
+      return;
+    }
+
+    autoAnalysisKeyRef.current = normalizedPreferredIncidentId;
+    setMessages([
+      {
+        role: "ezra",
+        content: `Analysing ${preferredIncidentId}...`,
+        timestamp: new Date(),
+      },
+    ]);
+    void analyseIncident(preferredIncidentId as string, {
+      replaceLastMessage: true,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    analyses,
+    analysing,
+    generatingReport,
+    incidentCandidates,
+    preferredIncidentId,
+    selectedAnalysis?.id,
+  ]);
+
   return (
     <div className="min-h-screen text-slate-300 p-6 font-sans antialiased">
       {/* Top Header Navigation */}
@@ -244,6 +346,9 @@ export default function EzraConsole() {
           <p className="text-sm max-w-lg">
             Ask Ezra about incidents, MTTR, risk, and fraud impact — it answers
             differently for leadership and for hands-on analysts.
+            {selectedIncident
+              ? ` Focused on ${selectedIncident.ticketId}.`
+              : ""}
           </p>
         </div>
         <div className="flex gap-3">
@@ -364,7 +469,8 @@ export default function EzraConsole() {
               <span className="text-xs">
                 <span className="text-green">ezra</span> @{" "}
                 <span className="text-IMSCyan">scrubbe</span>
-                {selectedAnalysis && ` / ${selectedAnalysis.incidentId}`}
+                {(selectedAnalysis?.incidentId || preferredIncidentId) &&
+                  ` / ${selectedAnalysis?.incidentId ?? preferredIncidentId}`}
               </span>
             </div>
             <div className="flex gap-2">
@@ -473,6 +579,10 @@ export default function EzraConsole() {
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />{" "}
                   synced from Scrubbe
                 </span>
+              ) : selectedIncident ? (
+                <span className="text-sm text-IMSCyan">
+                  selected from workspace
+                </span>
               ) : (
                 <span className="text-sm text-slate-500">
                   No incident selected
@@ -480,31 +590,49 @@ export default function EzraConsole() {
               )}
             </div>
 
-            {selectedAnalysis ? (
+            {selectedAnalysis || selectedIncident ? (
               <div className="space-y-3">
                 <ContextRow
                   label="Incident"
-                  value={selectedAnalysis.incidentId}
+                  value={
+                    selectedAnalysis?.incidentId ??
+                    selectedIncident?.ticketId ??
+                    selectedIncident?.id ??
+                    "—"
+                  }
                 />
                 <ContextRow
                   label="Service"
                   value={
-                    selectedAnalysis.situation?.affectedServices?.[0]?.name ??
+                    selectedAnalysis?.situation?.affectedServices?.[0]?.name ??
+                    selectedIncident?.service ??
                     "—"
                   }
                 />
                 <ContextRow
                   label="Region"
-                  value={selectedAnalysis.situation?.environment ?? "—"}
+                  value={
+                    selectedAnalysis?.situation?.environment ??
+                    selectedIncident?.environment ??
+                    "—"
+                  }
                 />
                 <ContextRow
                   label="Status"
-                  value={selectedAnalysis.situation?.currentState ?? "Analysed"}
+                  value={
+                    selectedAnalysis?.situation?.currentState ??
+                    selectedIncident?.status ??
+                    "Selected"
+                  }
                   valueColor="text-yellow-500"
                 />
                 <ContextRow
                   label="Analysed"
-                  value={moment(selectedAnalysis.createdAt).fromNow()}
+                  value={
+                    selectedAnalysis?.createdAt
+                      ? moment(selectedAnalysis.createdAt).fromNow()
+                      : "Awaiting analysis"
+                  }
                 />
               </div>
             ) : (
