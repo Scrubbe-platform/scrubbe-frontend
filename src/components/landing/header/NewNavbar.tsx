@@ -109,7 +109,7 @@ function ProductDropdown() {
         <div className="flex-1 p-6 flex items-center justify-center">
           <div className="w-full aspect-[4/3] border border-gray-200 rounded-lg bg-gray-50 relative overflow-hidden">
             <Image
-              src="/IMS/images/nav/product-preview.png"
+              src="/IMS/nav3.png"
               alt="Product preview"
               fill
               className="object-cover"
@@ -229,7 +229,7 @@ function ChallengesDropdown() {
         <div className="flex-1 p-6 flex items-center justify-center">
           <div className="w-full aspect-[4/3] border border-gray-200 rounded-lg bg-gray-50 relative overflow-hidden">
             <Image
-              src="/IMS/images/nav/challenges-preview.png"
+              src="/IMS/nav2.png"
               alt="Challenges preview"
               fill
               className="object-cover"
@@ -496,7 +496,7 @@ function ResourcesDropdown() {
       <div className="p-6 flex items-center justify-center">
         <div className="w-full aspect-[4/3] border border-gray-200 rounded-lg bg-gray-50 relative overflow-hidden">
           <Image
-            src="/IMS/images/nav/resources-preview.png"
+            src="/IMS/nav4.png"
             alt="Resources preview"
             fill
             className="object-cover"
@@ -562,7 +562,7 @@ function SecurityDropdown() {
       <div className="p-6 flex items-center justify-center">
         <div className="w-full aspect-[4/3] border border-gray-200 rounded-lg bg-gray-50 relative overflow-hidden">
           <Image
-            src="/IMS/images/nav/security-preview.png"
+            src="/IMS/nav1.png"
             alt="Security preview"
             fill
             className="object-cover"

@@ -1,7 +1,9 @@
 "use client";
 
 import ConnectorsSection from "@/components/IMS/Home/ConnectorSection";
+import CButton from "@/components/ui/Cbutton";
 import { useState } from "react";
+import { FaGitlab } from "react-icons/fa";
 
 // ─── shared primitives ───────────────────────────────────────────
 
@@ -56,28 +58,10 @@ function Hero() {
         {/* Logo row */}
         <div className="flex items-center justify-center gap-4 mb-10 flex-wrap">
           {/* Scrubbe diamond */}
-          <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-            <rect
-              x="14"
-              y="4"
-              width="34"
-              height="34"
-              rx="6"
-              transform="rotate(15 14 4)"
-              fill="white"
-              opacity=".9"
-            />
-            <rect
-              x="8"
-              y="10"
-              width="32"
-              height="32"
-              rx="6"
-              transform="rotate(15 8 10)"
-              fill="white"
-              opacity=".6"
-            />
-          </svg>
+          <img
+            src="/IMS/icons/scrubbe-white-icon.svg"
+            className="h-[50px] md:h-[70px]"
+          />
           <span className="text-white font-serif text-5xl md:text-6xl font-bold">
             Scrubbe
           </span>
@@ -85,16 +69,7 @@ function Hero() {
             +
           </span>
           {/* GitLab fox */}
-          <svg width="52" height="52" viewBox="0 0 380 380" fill="none">
-            <path d="M190 350L285 103H95L190 350Z" fill="#FC6D26" />
-            <path d="M190 350L95 103H18L190 350Z" fill="#E24329" />
-            <path d="M18 103L1 180L190 350L18 103Z" fill="#FC6D26" />
-            <path d="M190 350L285 103H362L190 350Z" fill="#E24329" />
-            <path d="M362 103L379 180L190 350L362 103Z" fill="#FC6D26" />
-            <path d="M95 103L18 103L95 37L95 103Z" fill="#E24329" />
-            <path d="M285 103L362 103L285 37L285 103Z" fill="#E24329" />
-            <path d="M95 103L190 60L285 103H95Z" fill="#FC6D26" />
-          </svg>
+          <FaGitlab className="text-orange-600 size-10 md:size-20" />
           <span className="text-white font-serif text-5xl md:text-6xl font-bold">
             GitLab
           </span>
@@ -105,7 +80,7 @@ function Hero() {
           <em>all connected, all reasoned, all audited.</em>
         </h2>
 
-        <p className="  text-sm sm:text-base leading-relaxed max-w-2xl mx-auto mb-10">
+        <p className=" text-white  text-sm sm:text-base leading-relaxed max-w-2xl mx-auto mb-10">
           Scrubbe connects GitLab repositories, pipelines, deployments,
           observability systems, and production infrastructure into a unified
           operational intelligence and autonomous remediation platform.
@@ -142,47 +117,53 @@ const capabilities = [
     label: "Capability",
     title: "Repository & Service Intelligence",
     body: "Scrubbe continuously analyses GitLab repositories to understand application architecture, service boundaries, infrastructure definitions, deployment configurations, dependency relationships, and operational criticality. It ingests CODEOWNERS data, parses Infrastructure-as-Code, constructs live dependency graphs, and generates full service topology models — giving every investigation an accurate structural foundation before any agent begins reasoning.",
-    open: true,
+    examples: [],
   },
   {
     label: "Capability",
     title: "Merge Request Operational Reviews",
-    body: "Catch resilience and infrastructure risks before merge approval — with operational context that exceeds any static analyser or human reviewer.",
-    open: false,
+    body: "Scrubbe evaluates merge requests for operational risk — not static code quality. The platform identifies scaling vulnerabilities, infrastructure sensitivity, deployment hazards, cascading failure potential, rollback complexity, and resilience regressions before a change reaches production. Every review is backed by production context, not pattern matching alone.",
+    examples: [
+      '"This change introduces elevated retry amplification risk during downstream service degradation."',
+      '"This deployment modifies autoscaling assumptions for payment processing workloads."',
+    ],
   },
   {
     label: "Capability",
     title: "Pipeline & Deployment Intelligence",
-    body: "Evaluates deployment events, artifact versions, rollout timing, feature flag states, and CI/CD execution records across affected services.",
-    open: false,
+    body: "Scrubbe continuously correlates GitLab pipelines, deployments, runtime telemetry, incidents, traces, logs, and infrastructure changes into a unified operational view. The platform automatically identifies suspicious deploys, unstable release patterns, regression indicators, deployment anomalies, and operational drift — without requiring engineers to manually query across disconnected systems.",
+    examples: [],
   },
   {
     label: "Capability",
     title: "Incident-to-Code Correlation",
-    body: "Traces every production incident back to the responsible code change, deployment, or infrastructure drift with evidence-backed correlation.",
-    open: false,
+    body: "When incidents occur, Scrubbe traces failures back to merge requests, commits, deployments, pipeline stages, infrastructure changes, and service dependencies — automatically identifying likely root causes, impacted systems, blast radius, rollback candidates, and mitigation opportunities. Correlation happens in seconds, not across manual investigation hours.",
+    examples: [],
   },
   {
     label: "Capability",
     title: "AI Root Cause Analysis",
-    body: "Produces structured root cause reports with confidence scoring, deployment correlation, blast radius analysis, and rollback recommendations.",
-    open: false,
+    body: "Scrubbe agents investigate incidents across GitLab repositories, CI/CD pipelines, Kubernetes environments, observability systems, and deployment history simultaneously — producing probable root causes with confidence scores, operational timelines, remediation recommendations, rollback guidance, and risk assessments. Every conclusion is evidence-backed.",
+    examples: [
+      '"Elevated API latency likely introduced by deployment from pipeline #842 modifying Redis retry backoff behaviour."',
+    ],
   },
   {
     label: "Capability",
     title: "Autonomous Remediation MRs",
-    body: "Opens governed GitLab merge requests containing proposed remediation, operational reasoning, affected services, and linked evidence.",
-    open: false,
+    body: "Scrubbe generates governed AI remediation merge requests directly inside GitLab — creating rollback MRs, patching configuration errors, disabling problematic feature flags, mitigating retry storms, updating infrastructure policies, and proposing safe production fixes. Every generated MR includes full operational reasoning, linked evidence, policy evaluation, affected systems, verification results, and rollback plans. No unexplained changes. No blind automation.",
+    examples: [],
   },
 ];
 
-function PlatformSection() {
-  const [openIdx, setOpenIdx] = useState(0);
+export function PlatformSection() {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+
   return (
     <section className="px-6 md:px-16 py-24" style={{ background: MINT }}>
       <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-16 items-start">
-        {/* Left */}
-        <div>
+        {/* ── Left ── */}
+        <div className="md:sticky md:top-24">
           <h2 className="font-serif text-[32px] sm:text-[40px] md:text-[44px] leading-tight text-zinc-900 mb-6">
             GitLab is more than
             <br />a CI/CD <em style={{ color: G }}>platform</em>
@@ -211,39 +192,68 @@ function PlatformSection() {
           </p>
         </div>
 
-        {/* Right — accordion */}
-        <div>
-          {capabilities.map((c, i) => (
-            <div key={i} className="border-b border-zinc-200">
-              <button
-                onClick={() => setOpenIdx(i === openIdx ? -1 : i)}
-                className="w-full text-left py-4 flex items-start justify-between gap-4"
+        {/* ── Right — expanded cards ── */}
+        <div className="flex flex-col gap-0">
+          {capabilities.map((c, i) => {
+            const isLast = i === capabilities.length - 1;
+            return (
+              <div
+                key={i}
+                className={`py-6 px-5 rounded-xl mb-3 transition-colors`}
+                style={{
+                  background: "#E8F3EC",
+                  border: "1px solid rgba(26,107,60,0.12)",
+                }}
               >
-                <div>
+                {/* Label */}
+                <div onClick={() => setOpenIdx(i)}>
                   <p
-                    className="text-[10px] font-mono tracking-widest mb-1"
+                    className="text-[10px] font-mono tracking-widest mb-1.5"
                     style={{ color: G }}
                   >
                     {c.label}
                   </p>
-                  <p className="text-[15px] font-semibold text-zinc-900">
+
+                  {/* Title */}
+                  <h3 className="text-[16px] font-bold text-zinc-900">
                     {c.title}
-                  </p>
+                  </h3>
                 </div>
-                <span className="text-zinc-400 mt-1 shrink-0">
-                  {openIdx === i ? "−" : "+"}
-                </span>
-              </button>
-              {openIdx === i && (
-                <div
-                  className="pb-5 text-[13px] text-zinc-600 leading-relaxed pr-6 border-l-2 pl-4 mb-1"
-                  style={{ borderColor: G }}
-                >
-                  {c.body}
-                </div>
-              )}
-            </div>
-          ))}
+
+                {/* Body */}
+                {openIdx === i && (
+                  <div className="mt-3">
+                    <p className="text-[13px] text-zinc-600 leading-relaxed">
+                      {c.body}
+                    </p>
+
+                    {/* Example quotes */}
+                    {c.examples.length > 0 && (
+                      <div className="mt-4 flex flex-col gap-3">
+                        {c.examples.map((ex, j) => (
+                          <div
+                            key={j}
+                            className="px-4 py-3 rounded-lg"
+                            style={{
+                              background: "rgba(26,107,60,0.05)",
+                              border: "1px solid rgba(26,107,60,0.15)",
+                            }}
+                          >
+                            <p className="text-[10px] font-mono tracking-widest mb-1.5 text-zinc-400">
+                              Example &nbsp;·
+                            </p>
+                            <p className="text-[13px] font-serif italic text-zinc-600 leading-relaxed">
+                              {ex}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -477,6 +487,55 @@ const moments = [
     ],
   },
 ];
+
+function PreserveSection() {
+  return (
+    <section className="px-6 md:px-16 py-24 bg-IMSDarkGreen bg-[url('/IMS/preserve.png')] bg-cover">
+      <div className="mx-auto max-w-5xl text-white">
+        <div className="max-w-2xl">
+          <h2 className="font-serif text-[36px] sm:text-[48px] leading-tight mb-10">
+            Preserve institutional operational intelligence{" "}
+          </h2>
+
+          <p>
+            Scrubbe continuously learns from incidents, deployments, rollback
+            events, infrastructure failures, operational regressions,
+            remediation workflows, and historical GitLab activity. Over time,
+            the platform builds an engineering memory graph that enables
+            recurring incident detection, operational pattern recognition,
+            deployment risk forecasting, and organisational memory retention
+            across engineering tenure cycles.
+          </p>
+
+          <p className="mt-4">
+            As teams change and systems evolve, Scrubbe retains the
+            institutional operational knowledge that would otherwise leave with
+            individual engineers — making every future investigation faster and
+            every remediation better informed.
+          </p>
+
+          <div className="flex items-center gap-4 mt-10">
+            <button
+              className="px-7 py-3 font-semibold text-white rounded-lg text-sm transition-all hover:opacity-90 active:scale-95"
+              style={{
+                background:
+                  "linear-gradient(45deg,#082223,#204A46,#1BA55D,#A0DB82,#D9F392,#FDFF9C)",
+              }}
+            >
+              Connect Gitlab
+            </button>
+            <button
+              className="px-7 py-3 font-semibold rounded-lg text-sm border transition-all bg-white active:scale-95"
+              style={{ borderColor: "#082223", color: "#082223" }}
+            >
+              Book Enterprise Demo
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function MomentsSection() {
   return (
@@ -823,6 +882,7 @@ export default function ScrubbePage() {
       <GovernanceSection />
       <GovernanceCards />
       <WorkflowSection />
+      <PreserveSection />
       <MomentsSection />
       <WhyScrubbeSection />
       <ConnectorsSection />
