@@ -1,4 +1,5 @@
 import NextJsTopLoader from "@/lib/NextJsTopLoader";
+import IncidentAuthGuard from "@/components/auth/IncidentAuthGuard";
 // import { RedirectProviderIMS } from "@/provider/RedirectProviderIMS";
 import { redirect } from "next/navigation";
 import React, { ReactNode } from "react";
@@ -14,7 +15,7 @@ const IncidentDashboard = ({ children }: { children: ReactNode }) => {
     // <RedirectProviderIMS>
     <>
       <NextJsTopLoader />
-      {children}
+      <IncidentAuthGuard>{children}</IncidentAuthGuard>
       <Toaster position="top-center" />
     </>
     // </RedirectProviderIMS>

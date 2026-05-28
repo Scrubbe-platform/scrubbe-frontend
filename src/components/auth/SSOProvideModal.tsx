@@ -25,11 +25,29 @@ function MicrosoftIcon() {
   );
 }
 
+function OktaIcon() {
+  return (
+    <span className="text-[11px] font-black uppercase tracking-[0.22em] text-[#111827]">
+      OKTA
+    </span>
+  );
+}
+
+function OneLoginIcon() {
+  return (
+    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#0F172A]">
+      1L
+    </span>
+  );
+}
+
 export type SsoSlug =
   | "google"
   | "github"
   | "gitlab"
-  | "microsoft-entra-id";
+  | "microsoft-entra-id"
+  | "okta"
+  | "onelogin";
 
 type StepDef = { title: string; desc: string };
 type ProviderConfig = {
@@ -91,6 +109,22 @@ export const SSO_PROVIDER_CONFIGS: ProviderConfig[] = [
     urlSuffix: "workspace",
     steps: makeSteps("Microsoft"),
     icon: <MicrosoftIcon />,
+  },
+  {
+    slug: "okta",
+    label: "Continue with Okta",
+    subtitle: "Sign in via your Okta organization",
+    urlSuffix: "workspace",
+    steps: makeSteps("Okta"),
+    icon: <OktaIcon />,
+  },
+  {
+    slug: "onelogin",
+    label: "Continue with OneLogin",
+    subtitle: "Sign in via your OneLogin organization",
+    urlSuffix: "workspace",
+    steps: makeSteps("OneLogin"),
+    icon: <OneLoginIcon />,
   },
 ];
 

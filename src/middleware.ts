@@ -15,6 +15,7 @@ const PUBLIC_ROUTES = [
   "/auth/error",
   "/auth/demo-page",
   "/auth/invite",
+  "/invite",
   "/about",
   "/pricing",
   "/features",
@@ -100,6 +101,53 @@ const getDefaultRedirect = (payload: JwtPayload | null): string => {
 export default function middleware(req: NextRequest) {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
+  const hostname = req.headers.get("host")?.toLowerCase() ?? "";
+  const urlToken = nextUrl.searchParams.get("token");
+  const urlRefreshToken = nextUrl.searchParams.get("refreshToken");
+
+  const isStaticAsset = /\.[^/]+$/.test(pathname);
+  const isDocsHost =
+    hostname === "docs.scrubbe.com" || hostname.startsWith("docs.scrubbe.com:");
+
+  if (
+    isDocsHost &&
+    !pathname.startsWith("/docs") &&
+    !pathname.startsWith("/_next") &&
+    !pathname.startsWith("/api") &&
+    !isStaticAsset
+  ) {
+    const docsUrl = nextUrl.clone();
+    docsUrl.pathname = pathname === "/" ? "/docs" : `/docs${pathname}`;
+    return NextResponse.rewrite(docsUrl);
+  }
+
+  if (urlToken || urlRefreshToken) {
+    const cleanUrl = nextUrl.clone();
+    cleanUrl.searchParams.delete("token");
+    cleanUrl.searchParams.delete("refreshToken");
+
+    const response = NextResponse.redirect(cleanUrl);
+
+    if (urlToken) {
+      response.cookies.set(AUTH_COOKIE, urlToken, {
+        httpOnly: false,
+        secure: nextUrl.protocol === "https:",
+        sameSite: "lax",
+        path: "/",
+      });
+    }
+
+    if (urlRefreshToken) {
+      response.cookies.set(COOKIE_KEYS.REFRESH_TOKEN, urlRefreshToken, {
+        httpOnly: false,
+        secure: nextUrl.protocol === "https:",
+        sameSite: "lax",
+        path: "/",
+      });
+    }
+
+    return response;
+  }
 
   const token = req.cookies.get(AUTH_COOKIE)?.value;
   const payload = decodeJwtPayload(token);

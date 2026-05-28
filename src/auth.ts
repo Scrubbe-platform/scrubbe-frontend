@@ -3,6 +3,9 @@ import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Gitlab from "next-auth/providers/gitlab";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
+import Okta from "next-auth/providers/okta";
+import OneLogin from "next-auth/providers/onelogin";
+import { AMPLIFY_SERVER_ENV } from "./generated/amplify-server-env";
 
 // Role definitions matching backend
 export type UserRole = "USER" | "ADMIN" | "SUPER_ADMIN";
@@ -13,17 +16,156 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
+function normalizeEnvValue(value: string | undefined) {
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : undefined;
+}
+
+const apiBaseUrl =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.API_BASE_URL) ??
+  normalizeEnvValue(process.env.API_BASE_URL) ??
+  normalizeEnvValue(process.env.NEXT_PUBLIC_API_BASE_URL) ??
+  "";
+
+const authSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_SECRET) ??
+  normalizeEnvValue(process.env.AUTH_SECRET) ??
+  normalizeEnvValue(process.env.NEXTAUTH_SECRET);
+
+const githubClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GITHUB_ID) ??
+  normalizeEnvValue(process.env.AUTH_GITHUB_ID) ??
+  normalizeEnvValue(process.env.GITHUB_CLIENT_ID);
+
+const githubClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GITHUB_SECRET) ??
+  normalizeEnvValue(process.env.AUTH_GITHUB_SECRET) ??
+  normalizeEnvValue(process.env.GITHUB_CLIENT_SECRET);
+
+const googleClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GOOGLE_ID) ??
+  normalizeEnvValue(process.env.AUTH_GOOGLE_ID) ??
+  normalizeEnvValue(process.env.GOOGLE_CLIENT_ID);
+
+const googleClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GOOGLE_SECRET) ??
+  normalizeEnvValue(process.env.AUTH_GOOGLE_SECRET) ??
+  normalizeEnvValue(process.env.GOOGLE_CLIENT_SECRET);
+
+const gitlabClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GITLAB_ID) ??
+  normalizeEnvValue(process.env.AUTH_GITLAB_ID) ??
+  normalizeEnvValue(process.env.GITLAB_CLIENT_ID);
+
+const gitlabClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_GITLAB_SECRET) ??
+  normalizeEnvValue(process.env.AUTH_GITLAB_SECRET) ??
+  normalizeEnvValue(process.env.GITLAB_CLIENT_SECRET);
+
+const microsoftClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_MICROSOFT_ENTRA_ID_ID) ??
+  normalizeEnvValue(process.env.AUTH_MICROSOFT_ENTRA_ID_ID) ??
+  normalizeEnvValue(process.env.MICROSOFT_ENTRA_ID_ID);
+
+const microsoftClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_MICROSOFT_ENTRA_ID_SECRET) ??
+  normalizeEnvValue(process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET) ??
+  normalizeEnvValue(process.env.MICROSOFT_ENTRA_ID_SECRET);
+
+const microsoftIssuer =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_MICROSOFT_ENTRA_ID_ISSUER) ??
+  normalizeEnvValue(process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER) ??
+  normalizeEnvValue(process.env.MICROSOFT_ENTRA_ID_ISSUER);
+
+const oktaClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_OKTA_ID) ??
+  normalizeEnvValue(process.env.AUTH_OKTA_ID) ??
+  normalizeEnvValue(process.env.OKTA_CLIENT_ID);
+
+const oktaClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_OKTA_SECRET) ??
+  normalizeEnvValue(process.env.AUTH_OKTA_SECRET) ??
+  normalizeEnvValue(process.env.OKTA_CLIENT_SECRET);
+
+const oktaIssuer =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_OKTA_ISSUER) ??
+  normalizeEnvValue(process.env.AUTH_OKTA_ISSUER) ??
+  normalizeEnvValue(process.env.OKTA_ISSUER);
+
+const oneLoginClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_ONELOGIN_ID) ??
+  normalizeEnvValue(process.env.AUTH_ONELOGIN_ID) ??
+  normalizeEnvValue(process.env.ONELOGIN_CLIENT_ID);
+
+const oneLoginClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_ONELOGIN_SECRET) ??
+  normalizeEnvValue(process.env.AUTH_ONELOGIN_SECRET) ??
+  normalizeEnvValue(process.env.ONELOGIN_CLIENT_SECRET);
+
+const oneLoginIssuer =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_ONELOGIN_ISSUER) ??
+  normalizeEnvValue(process.env.AUTH_ONELOGIN_ISSUER) ??
+  normalizeEnvValue(process.env.ONELOGIN_ISSUER);
+
+const authUrl =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_URL) ??
+  normalizeEnvValue(process.env.AUTH_URL) ??
+  normalizeEnvValue(process.env.NEXTAUTH_URL) ??
+  normalizeEnvValue(process.env.FRONTEND_URL) ??
+  (process.env.NODE_ENV === "production" ? "https://www.scrubbe.com" : undefined);
+
+if (!process.env.AUTH_URL && authUrl) {
+  process.env.AUTH_URL = authUrl;
+}
+
+if (!process.env.NEXTAUTH_URL && authUrl) {
+  process.env.NEXTAUTH_URL = authUrl;
+}
+
+if (!process.env.NEXTAUTH_URL_INTERNAL && authUrl) {
+  process.env.NEXTAUTH_URL_INTERNAL = authUrl;
+}
+
+if (!process.env.AUTH_SECRET && authSecret) {
+  process.env.AUTH_SECRET = authSecret;
+}
+
+if (!process.env.NEXTAUTH_SECRET && authSecret) {
+  process.env.NEXTAUTH_SECRET = authSecret;
+}
+
+function getBackendApiBaseUrl() {
+  return apiBaseUrl.replace(/\/+$/, "");
+}
+
+if (process.env.NODE_ENV === "production") {
+  console.info("[auth] runtime configuration", {
+    hasAuthSecret: Boolean(authSecret),
+    hasGithubClientId: Boolean(githubClientId),
+    hasGithubClientSecret: Boolean(githubClientSecret),
+    hasGitlabClientId: Boolean(gitlabClientId),
+    hasGitlabClientSecret: Boolean(gitlabClientSecret),
+    hasOktaClientId: Boolean(oktaClientId),
+    hasOktaClientSecret: Boolean(oktaClientSecret),
+    hasOneLoginClientId: Boolean(oneLoginClientId),
+    hasOneLoginClientSecret: Boolean(oneLoginClientSecret),
+    authUrl: authUrl ?? null,
+  });
+}
+
 export const {
   handlers: { GET, POST },
   auth,
   signIn,
   signOut,
 } = NextAuth({
+  trustHost: true,
+  secret: authSecret,
   providers: [
     Github({
-      clientId: process.env.AUTH_GITHUB_ID ?? process.env.GITHUB_CLIENT_ID,
-      clientSecret:
-        process.env.AUTH_GITHUB_SECRET ?? process.env.GITHUB_CLIENT_SECRET,
+      clientId: githubClientId,
+      clientSecret: githubClientSecret,
       authorization: {
         params: {
           scope: "read:user user:email",
@@ -45,9 +187,8 @@ export const {
       },
     }),
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID,
-      clientSecret:
-        process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET,
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
       async profile(profile):Promise<any>  {
         return {
           id: profile.sub,
@@ -63,9 +204,8 @@ export const {
       },
     }),
     Gitlab({
-      clientId: process.env.AUTH_GITLAB_ID ?? process.env.GITLAB_CLIENT_ID,
-      clientSecret:
-        process.env.AUTH_GITLAB_SECRET ?? process.env.GITLAB_CLIENT_SECRET,
+      clientId: gitlabClientId,
+      clientSecret: gitlabClientSecret,
       async profile(profile):Promise<any>  {
         return {
           id: profile.id.toString(),
@@ -81,15 +221,9 @@ export const {
       },
     }),
     MicrosoftEntraID({
-      clientId:
-        process.env.AUTH_MICROSOFT_ENTRA_ID_ID ??
-        process.env.MICROSOFT_ENTRA_ID_ID,
-      clientSecret:
-        process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET ??
-        process.env.MICROSOFT_ENTRA_ID_SECRET,
-      issuer:
-        process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER ??
-        process.env.MICROSOFT_ENTRA_ID_ISSUER,
+      clientId: microsoftClientId,
+      clientSecret: microsoftClientSecret,
+      issuer: microsoftIssuer,
       async profile(profile):Promise<any>  {
         return {
           id: profile.oid,
@@ -101,6 +235,44 @@ export const {
           isVerified: true,
           name: profile.name,
           roles: ["USER"], // Default role for OAuth users
+        };
+      },
+    }),
+    Okta({
+      clientId: oktaClientId,
+      clientSecret: oktaClientSecret,
+      issuer: oktaIssuer,
+      async profile(profile): Promise<any> {
+        return {
+          id: profile.sub,
+          oAuthProvider: "OKTA",
+          email: profile.email,
+          image: null,
+          firstName: profile.given_name || profile.name?.split(" ")[0] || "",
+          lastName:
+            profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
+          isVerified: true,
+          name: profile.name || profile.email,
+          roles: ["USER"],
+        };
+      },
+    }),
+    OneLogin({
+      clientId: oneLoginClientId,
+      clientSecret: oneLoginClientSecret,
+      issuer: oneLoginIssuer,
+      async profile(profile): Promise<any> {
+        return {
+          id: profile.sub,
+          oAuthProvider: "ONELOGIN",
+          email: profile.email,
+          image: null,
+          firstName: profile.given_name || profile.name?.split(" ")[0] || "",
+          lastName:
+            profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
+          isVerified: true,
+          name: profile.name || profile.email,
+          roles: ["USER"],
         };
       },
     }),
@@ -147,7 +319,13 @@ export const {
       // For OAuth providers, exchange with backend to get real JWT tokens
       if (account.type === "oauth") {
         try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.API_BASE_URL;
+          const apiUrl = getBackendApiBaseUrl();
+          if (!apiUrl) {
+            console.warn(
+              "OAuth backend exchange skipped because API_BASE_URL / NEXT_PUBLIC_API_BASE_URL is not configured."
+            );
+            return true;
+          }
           const res = await fetch(`${apiUrl}/auth/oauth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -177,11 +355,17 @@ export const {
       return true;
     },
     async redirect({ url, baseUrl }) {
+      const resolvedBaseUrl =
+        authUrl ??
+        (process.env.NODE_ENV === "production" &&
+        /^https?:\/\/localhost(?::\d+)?$/i.test(baseUrl)
+          ? "https://www.scrubbe.com"
+          : baseUrl);
       // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (url.startsWith("/")) return `${resolvedBaseUrl}${url}`;
       // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
+      else if (new URL(url).origin === resolvedBaseUrl) return url;
+      return resolvedBaseUrl;
     },
   },
   pages: {

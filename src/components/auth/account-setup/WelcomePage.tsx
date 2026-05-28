@@ -52,6 +52,7 @@ const ScrubbeOnboarding = () => {
       },
       ssoConfiguration: {
         ssoType: "SAML_2",
+        provider: "OKTA",
         domain: "",
         client_secret: "",
         entity_id: "",
@@ -130,6 +131,8 @@ const ScrubbeOnboarding = () => {
               ssoConfig.protocol === "OIDC" || ssoConfig.protocol === "SAML_2"
                 ? ssoConfig.protocol
                 : currentValues.ssoConfiguration.ssoType,
+            provider:
+              ssoConfig.provider ?? currentValues.ssoConfiguration.provider,
             domain:
               ssoConfig.ssoDomain ??
               imsConfig.primaryDomain ??
@@ -204,6 +207,7 @@ const ScrubbeOnboarding = () => {
         policies: data.policies,
         ssoConfiguration: {
           ...data.ssoConfiguration,
+          provider: data.ssoConfiguration?.provider?.trim() || "",
           domain: data.ssoConfiguration?.domain?.trim() || "",
           group_mapping: parsedGroupMapping,
           scimEnabled: Boolean(data.ssoConfiguration?.autoRoleSync),
@@ -211,6 +215,7 @@ const ScrubbeOnboarding = () => {
         jitEnabled: Boolean(data.ssoConfiguration?.jitEnabled),
         scimEnabled: Boolean(data.ssoConfiguration?.autoRoleSync),
         ssoEnforced: Boolean(data.policies?.enforceSSO),
+        ssoProvider: data.ssoConfiguration?.provider?.trim() || undefined,
       };
 
       await apiClient.post(endpoint.auth.ims_setup, payload);
@@ -521,6 +526,27 @@ const ScrubbeOnboarding = () => {
                               />
                             )}
                           />
+                          <Controller
+                            name="ssoConfiguration.provider"
+                            control={control}
+                            render={({ field }) => (
+                              <Select
+                                label="Identity Provider"
+                                options={[
+                                  { label: "Okta", value: "OKTA" },
+                                  { label: "OneLogin", value: "ONELOGIN" },
+                                  { label: "Microsoft Entra ID", value: "AZURE" },
+                                  { label: "Google Workspace", value: "GOOGLE" },
+                                  { label: "GitHub", value: "GITHUB" },
+                                  { label: "GitLab", value: "GITLAB" },
+                                ]}
+                                labelClassName=""
+                                {...field}
+                              />
+                            )}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 gap-3 mt-3">
                           <Controller
                             name="ssoConfiguration.domain"
                             control={control}

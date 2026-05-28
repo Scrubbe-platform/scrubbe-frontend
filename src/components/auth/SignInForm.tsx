@@ -28,7 +28,14 @@ type SsoDiscoveryResult = {
   available?: boolean;
   enforced?: boolean;
   provider?: string | null;
-  providerSlug?: "google" | "github" | "gitlab" | "microsoft-entra-id" | null;
+  providerSlug?:
+    | "google"
+    | "github"
+    | "gitlab"
+    | "microsoft-entra-id"
+    | "okta"
+    | "onelogin"
+    | null;
   domain?: string | null;
   ssoDomain?: string | null;
   businessId?: string | null;
@@ -63,6 +70,18 @@ const SSO_PROVIDERS = [
     sub: "Microsoft 365 - Personal account",
     icon: "microsoft",
   },
+  {
+    slug: "okta",
+    label: "Continue with Okta",
+    sub: "Okta workforce identity",
+    icon: "okta",
+  },
+  {
+    slug: "onelogin",
+    label: "Continue with OneLogin",
+    sub: "OneLogin workforce identity",
+    icon: "onelogin",
+  },
 ] as const;
 
 function ProviderIcon({ type }: { type: string }) {
@@ -77,6 +96,18 @@ function ProviderIcon({ type }: { type: string }) {
         <rect x="1" y="12" width="9" height="9" fill="#00A4EF" />
         <rect x="12" y="12" width="9" height="9" fill="#FFB900" />
       </svg>
+    );
+  if (type === "okta")
+    return (
+      <span className="text-[8px] font-black uppercase tracking-[0.18em] text-[#111827]">
+        OKTA
+      </span>
+    );
+  if (type === "onelogin")
+    return (
+      <span className="text-[8px] font-black uppercase tracking-[0.16em] text-[#0F172A]">
+        1LOGIN
+      </span>
     );
   return null;
 }
@@ -186,10 +217,18 @@ export default function SignInForm() {
       if (accountType === "BUSINESS") {
         if (purpose === "IMS") {
           const token = getCookie(COOKIE_KEYS.TOKEN);
+          const refreshToken = getCookie(COOKIE_KEYS.REFRESH_TOKEN);
           const url =
             process.env.NEXT_PUBLIC_INCIDENT_URL ??
             "https://incidents.scrubbe.com";
-          window.location.href = `${url}/incident/tickets?token=${token ?? ""}`;
+          const redirectUrl = new URL("/incident/tickets", url);
+          if (typeof token === "string" && token.length > 0) {
+            redirectUrl.searchParams.set("token", token);
+          }
+          if (typeof refreshToken === "string" && refreshToken.length > 0) {
+            redirectUrl.searchParams.set("refreshToken", refreshToken);
+          }
+          window.location.href = redirectUrl.toString();
           return;
         }
         router.push("/incident");

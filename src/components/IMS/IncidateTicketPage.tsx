@@ -18,6 +18,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { formatTime } from "@/lib/utils";
 import { Ticket } from "@/types";
 import Pagination from "../ui/Pagination";
+import useNotificationProvider from "@/hooks/useNotificationProvider";
 
 const columns = [
   {
@@ -135,7 +136,7 @@ const IncidentTicketPage = () => {
   const router = useRouter();
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  // const { notification } = useNotificationProvider();
+  useNotificationProvider();
 
   const statusFilterRef = useRef<HTMLDivElement>(null);
   const { get } = useFetch();
