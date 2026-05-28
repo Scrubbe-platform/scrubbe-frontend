@@ -3,7 +3,7 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Book, Check, ChevronRight, Database, Loader2 } from "lucide-react";
+import { Book, Check, ChevronRight, Copy, Database, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import SettingWrapper from "../_module/setting-wrapper";
 import CButton from "@/components/ui/Cbutton";
@@ -34,6 +34,9 @@ type RepoConnectorConfig = {
   lastIncidentTicketId?: string | null;
   webhookReady?: boolean;
   webhookUrl?: string | null;
+  webhookSecret?: string | null;
+  webhookSecretPreview?: string | null;
+  webhookSecretRotatedAt?: string | null;
   authMode?: string;
   appInstallUrl?: string | null;
   installation?: {
@@ -88,13 +91,14 @@ const toConfig = (value?: RepoConnectorConfig | null): RepoConnectorConfig =>
   value ?? {};
 
 const IngestionPage = () => {
-  const { get } = useFetch();
+  const { get, post } = useFetch();
   const { user } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [configurationTarget, setConfigurationTarget] = useState<
     RepoConnectorView["key"] | null
   >(null);
+  const [rotatingSecretKey, setRotatingSecretKey] = useState<string | null>(null);
 
   useEffect(() => {
     const connected = Array.from(searchParams.entries()).find(
@@ -108,7 +112,7 @@ const IngestionPage = () => {
     router.replace("/incident/settings/ingestion");
   }, [router, searchParams]);
 
-  const { data: integrations = [], isLoading } = useQuery({
+  const { data: integrations = [], isLoading, refetch } = useQuery({
     queryKey: [querykeys.INTEGRATIONS, user?.id],
     queryFn: async () => {
       const res = await get(`${endpoint.incident_ticket.integrations}/${user?.id}`);
@@ -151,6 +155,56 @@ const IngestionPage = () => {
       return;
     }
     window.location.href = url;
+  };
+
+  const copyToClipboard = async (value: string | null | undefined, label: string) => {
+    if (!value) {
+      toast.error(`${label} is not available yet`);
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copied`);
+    } catch {
+      toast.error(`Unable to copy ${label.toLowerCase()}`);
+    }
+  };
+
+  const rotateWebhookSecret = async (connector: RepoConnectorView) => {
+    const rotateEndpoint =
+      connector.key === "github"
+        ? endpoint.integration.github_webhook_secret_rotate
+        : connector.key === "gitlab"
+          ? endpoint.integration.gitlab_webhook_secret_rotate
+          : null;
+
+    if (!rotateEndpoint) {
+      toast.error(`${connector.label} webhook secret rotation is not available yet`);
+      return;
+    }
+
+    setRotatingSecretKey(connector.key);
+    try {
+      const res = await post(rotateEndpoint);
+      if (!res.success) {
+        toast.error(
+          typeof res.data === "string"
+            ? res.data
+            : `Unable to rotate ${connector.label} webhook secret`
+        );
+        return;
+      }
+
+      const secret = res.data?.data?.webhookSecret ?? res.data?.webhookSecret;
+      if (secret) {
+        await copyToClipboard(secret, `${connector.label} webhook secret`);
+      }
+      toast.success(`${connector.label} webhook secret rotated`);
+      await refetch();
+    } finally {
+      setRotatingSecretKey(null);
+    }
   };
 
   const openLastIncident = (config: RepoConnectorConfig) => {
@@ -355,6 +409,18 @@ const IngestionPage = () => {
                     lastIncidentId={connector.config.lastIncidentId}
                     lastIncidentTicketId={connector.config.lastIncidentTicketId}
                     lastIncidentHint={connector.lastIncidentHint}
+                    webhookUrl={connector.config.webhookUrl}
+                    webhookSecret={connector.config.webhookSecret}
+                    webhookSecretPreview={connector.config.webhookSecretPreview}
+                    webhookSecretRotatedAt={connector.config.webhookSecretRotatedAt}
+                    isSecretRotating={rotatingSecretKey === connector.key}
+                    onCopyWebhookUrl={() =>
+                      copyToClipboard(connector.config.webhookUrl, `${connector.label} webhook URL`)
+                    }
+                    onCopyWebhookSecret={() =>
+                      copyToClipboard(connector.config.webhookSecret, `${connector.label} webhook secret`)
+                    }
+                    onRotateWebhookSecret={() => rotateWebhookSecret(connector)}
                     onOpenLastIncident={() => openLastIncident(connector.config)}
                     controls={
                       isLoading ? (
@@ -546,6 +612,14 @@ const RepoConnectorCard = ({
   lastIncidentId,
   lastIncidentTicketId,
   lastIncidentHint,
+  webhookUrl,
+  webhookSecret,
+  webhookSecretPreview,
+  webhookSecretRotatedAt,
+  isSecretRotating,
+  onCopyWebhookUrl,
+  onCopyWebhookSecret,
+  onRotateWebhookSecret,
   onOpenLastIncident,
 }: {
   label: string;
@@ -560,6 +634,14 @@ const RepoConnectorCard = ({
   lastIncidentId?: string | null;
   lastIncidentTicketId?: string | null;
   lastIncidentHint: string;
+  webhookUrl?: string | null;
+  webhookSecret?: string | null;
+  webhookSecretPreview?: string | null;
+  webhookSecretRotatedAt?: string | null;
+  isSecretRotating?: boolean;
+  onCopyWebhookUrl: () => void;
+  onCopyWebhookSecret: () => void;
+  onRotateWebhookSecret: () => void;
   onOpenLastIncident: () => void;
 }) => (
   <div className="p-5 border border-neutral-600 rounded-2xl space-y-4">
@@ -585,23 +667,84 @@ const RepoConnectorCard = ({
     </div>
 
     {isConnected ? (
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-neutral-700 bg-[#0B1224]/40 p-4">
-        <div className="space-y-1">
-          <p className="text-[10px] uppercase tracking-wider text-[#64748B]">
-            Last auto-raised incident
-          </p>
-          <p className="text-sm font-bold text-white">
-            {lastIncidentTicketId ?? "Waiting for a connector event"}
-          </p>
-          <p className="text-[11px] text-[#94A3B8]">{lastIncidentHint}</p>
+      <div className="space-y-3">
+        <div className="rounded-2xl border border-neutral-700 bg-[#0B1224]/40 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-1">
+              <p className="text-[10px] uppercase tracking-wider text-[#64748B]">
+                Last auto-raised incident
+              </p>
+              <p className="text-sm font-bold text-white">
+                {lastIncidentTicketId ?? "Waiting for a connector event"}
+              </p>
+              <p className="text-[11px] text-[#94A3B8]">{lastIncidentHint}</p>
+            </div>
+            <ActionButton
+              label="Open last incident"
+              onClick={onOpenLastIncident}
+              disabled={!lastIncidentId}
+            />
+          </div>
         </div>
-        <ActionButton
-          label="Open last incident"
-          onClick={onOpenLastIncident}
-          disabled={!lastIncidentId}
-        />
+
+        <div className="rounded-2xl border border-[#00CAD8]/20 bg-[#071126] p-4 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-[#64748B]">
+                Provider webhook setup
+              </p>
+              <p className="text-[11px] text-[#94A3B8]">
+                Use this URL and workspace secret in {label} webhook settings.
+              </p>
+            </div>
+            <ActionButton
+              label={isSecretRotating ? "Rotating" : "Rotate secret"}
+              onClick={onRotateWebhookSecret}
+              disabled={isSecretRotating}
+            />
+          </div>
+
+          <SecretRow
+            label="Webhook URL"
+            value={webhookUrl ?? "Webhook URL unavailable"}
+            onCopy={onCopyWebhookUrl}
+          />
+          <SecretRow
+            label="Workspace secret"
+            value={webhookSecret ?? webhookSecretPreview ?? "Secret unavailable"}
+            onCopy={onCopyWebhookSecret}
+          />
+          <p className="text-[10px] text-[#64748B]">
+            Last rotated: {formatTimestamp(webhookSecretRotatedAt)}
+          </p>
+        </div>
       </div>
     ) : null}
+  </div>
+);
+
+const SecretRow = ({
+  label,
+  value,
+  onCopy,
+}: {
+  label: string;
+  value: string;
+  onCopy: () => void;
+}) => (
+  <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+    <div className="min-w-0 flex-1">
+      <p className="text-[10px] uppercase tracking-wider text-[#64748B]">{label}</p>
+      <p className="truncate font-mono text-xs text-[#CBD5E1]">{value}</p>
+    </div>
+    <button
+      type="button"
+      onClick={onCopy}
+      className="rounded-lg border border-[#00CAD8]/40 p-2 text-[#00CAD8] hover:bg-[#00CAD8]/10"
+      aria-label={`Copy ${label}`}
+    >
+      <Copy size={14} />
+    </button>
   </div>
 );
 
