@@ -77,8 +77,8 @@ const Plan = () => {
         planType: plan.type,
         billingCycle: plan.billingCycle,
         quantity: agent > 0 ? agent : 1,
-        successUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billing`,
-        cancelUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billing`,
+        successUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`,
+        cancelUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`,
       };
       setLoading(plan.type);
       const res = await post(endpoint.plans.create_session, data);

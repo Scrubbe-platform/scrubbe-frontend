@@ -168,7 +168,7 @@ const ActiveIncidentTable = ({ activeIncident }: Props) => {
   // };
   const handleRowClick = (ticket: Ticket) => {
     console.log(ticket);
-    router.push(`/incident/${ticket.id}`);
+    router.push(`/incident?id=${ticket.id}&tab=overview`);
   };
 
   return (

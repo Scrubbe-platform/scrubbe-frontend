@@ -202,6 +202,44 @@ export const {
         };
       },
     }),
+    Okta({
+      clientId: oktaClientId,
+      clientSecret: oktaClientSecret,
+      issuer: oktaIssuer,
+      async profile(profile): Promise<any> {
+        return {
+          id: profile.sub,
+          oAuthProvider: "OKTA",
+          email: profile.email,
+          image: null,
+          firstName: profile.given_name || profile.name?.split(" ")[0] || "",
+          lastName:
+            profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
+          isVerified: true,
+          name: profile.name || profile.email,
+          roles: ["USER"],
+        };
+      },
+    }),
+    OneLogin({
+      clientId: oneLoginClientId,
+      clientSecret: oneLoginClientSecret,
+      issuer: oneLoginIssuer,
+      async profile(profile): Promise<any> {
+        return {
+          id: profile.sub,
+          oAuthProvider: "ONELOGIN",
+          email: profile.email,
+          image: null,
+          firstName: profile.given_name || profile.name?.split(" ")[0] || "",
+          lastName:
+            profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
+          isVerified: true,
+          name: profile.name || profile.email,
+          roles: ["USER"],
+        };
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user, account, profile }) {

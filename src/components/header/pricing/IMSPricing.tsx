@@ -224,7 +224,7 @@ const PricingTable = () => {
       Yearly: yearly,
       Monthly: monthly,
     };
-  }, [data, billingCycle]);
+  }, [data]);
 
   const mobilePlan = useMemo(() => {
     const features = [
@@ -269,7 +269,10 @@ const PricingTable = () => {
         billingCycle: plan.billingCycle,
         quantity: agent > 0 ? agent : 1,
         successUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident`,
-        cancelUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/pricing`,
+        cancelUrl:
+          typeof window !== "undefined"
+            ? window.location.href
+            : `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`,
       };
       setLoading(plan.type);
       const res = await post(endpoint.plans.create_session, data);

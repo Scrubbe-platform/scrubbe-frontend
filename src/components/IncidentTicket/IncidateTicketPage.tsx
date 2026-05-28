@@ -24,6 +24,7 @@ import Modal from "../ui/Modal";
 import { usePathname, useRouter } from "next/navigation";
 import { formatTime } from "@/lib/utils";
 import { Ticket } from "@/types";
+import useNotificationProvider from "@/hooks/useNotificationProvider";
 
 const columns = [
   {
@@ -147,7 +148,7 @@ const IncidentTicketPage = () => {
   const [openIntegration, setOpenIntegration] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  // const { notification } = useNotificationProvider();
+  useNotificationProvider();
 
   const statusFilterRef = useRef<HTMLDivElement>(null);
   const { get } = useFetch();

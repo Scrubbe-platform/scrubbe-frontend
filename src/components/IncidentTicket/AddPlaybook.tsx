@@ -1,7 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Modal from "../ui/Modal";
 import Input from "../ui/input";
 import CButton from "../ui/Cbutton";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { querykeys } from "@/lib/constant";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 type AddPlaybookProps = {
   isOpen: boolean;
@@ -17,33 +22,81 @@ type Playbook = {
   steps?: string;
 };
 
+const EMPTY_PLAYBOOK: Playbook = {
+  id: "",
+  name: "",
+  description: "",
+  steps: "",
+};
+
 const AddPlaybook = ({
   isOpen,
   onClose,
   playBook: playBookData,
   isEdit = false,
 }: AddPlaybookProps) => {
-  const [playbook, setPlaybook] = useState<Playbook>(
-    playBookData ?? {
-      id: "",
-      name: "",
-      description: "",
-      steps: "",
-    }
+  const { post, put } = useFetch();
+  const queryClient = useQueryClient();
+  const [playbook, setPlaybook] = useState<Playbook>(playBookData ?? EMPTY_PLAYBOOK);
+
+  const initialPlaybook = useMemo(
+    () => playBookData ?? EMPTY_PLAYBOOK,
+    [playBookData]
   );
 
   useEffect(() => {
     if (playBookData && isEdit) {
       setPlaybook(playBookData);
     } else {
-      setPlaybook({
-        id: "",
-        name: "",
-        description: "",
-        steps: "",
-      });
+      setPlaybook(EMPTY_PLAYBOOK);
     }
   }, [playBookData, isEdit]);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (!playbook.name.trim()) {
+        throw new Error("Playbook name is required");
+      }
+
+      const payload = {
+        name: playbook.name.trim(),
+        description: playbook.description.trim() || undefined,
+        steps: playbook.steps
+          ?.split(/\r?\n/)
+          .map((step) => step.trim())
+          .filter(Boolean),
+      };
+
+      if (isEdit && playbook.id) {
+        const response = await put(
+          `${endpoint.playbooks.update}/${playbook.id}`,
+          payload
+        );
+        if (!response.success) {
+          throw new Error((response.data as string) ?? "Failed to update playbook");
+        }
+        return response.data;
+      }
+
+      const response = await post(endpoint.playbooks.create, payload);
+      if (!response.success) {
+        throw new Error((response.data as string) ?? "Failed to create playbook");
+      }
+      return response.data;
+    },
+    onSuccess: async () => {
+      toast.success(isEdit ? "Playbook updated" : "Playbook created");
+      await queryClient.invalidateQueries({
+        queryKey: [querykeys.PLAYBOOKS],
+      });
+      setPlaybook(initialPlaybook);
+      onClose();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="p-4 space-y-4">
@@ -56,6 +109,7 @@ const AddPlaybook = ({
           placeholder="Pb5"
           value={playbook?.id}
           onChange={(e) => setPlaybook({ ...playbook, id: e.target.value })}
+          disabled={!isEdit}
         />
         <Input
           label="Name"
@@ -86,11 +140,24 @@ const AddPlaybook = ({
           />
         </div>
         <div className="flex justify-end gap-4">
-          <CButton className="w-fit border-colorScBlue border bg-transparent text-colorScBlue">
+          <CButton
+            className="w-fit border-colorScBlue border bg-transparent text-colorScBlue"
+            onClick={onClose}
+          >
             Close
           </CButton>
-          <CButton className="w-fit">
-            {isEdit ? "Edit Playbook" : "Save Playbook"}
+          <CButton
+            className="w-fit"
+            onClick={() => saveMutation.mutate()}
+            disabled={saveMutation.isPending}
+          >
+            {saveMutation.isPending
+              ? isEdit
+                ? "Saving..."
+                : "Creating..."
+              : isEdit
+                ? "Edit Playbook"
+                : "Save Playbook"}
           </CButton>
         </div>
       </div>
