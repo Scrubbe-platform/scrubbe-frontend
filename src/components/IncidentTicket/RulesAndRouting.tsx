@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
+import { ingestionUrlForSource } from "@/lib/api/base-url";
 import {
   AlertTriangle,
   GitBranch,
@@ -279,10 +280,7 @@ export default function RulesAndRouting() {
                 {src}
               </span>
               <span className="text-xs font-mono text-gray-400 flex-1 truncate">
-                {`${
-                  process.env.NEXT_PUBLIC_API_BASE_URL ??
-                  "https://api.scrubbe.com"
-                }/api/v1/ingestion/${src}`}
+                {ingestionUrlForSource(src)}
               </span>
               <span className="text-[10px] text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">
                 POST

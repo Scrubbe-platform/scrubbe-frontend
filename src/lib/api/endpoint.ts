@@ -102,6 +102,17 @@ export const endpoint = {
     health: "/connectors/connections",
     events: "/connectors/connections",
   },
+  ingestion: {
+    github: "/ingestion/github",
+    gitlab: "/ingestion/gitlab",
+    bitbucket: "/ingestion/bitbucket",
+    kubernetes: "/ingestion/kubernetes",
+    kubernetes_manifest: "/ingestion/kubernetes/manifest",
+    pagerduty: "/ingestion/pagerduty",
+    prometheus: "/ingestion/prometheus",
+    datadog: "/ingestion/datadog",
+    webhook: "/ingestion/webhook",
+  },
   plans: {
     get: "/pricing/plans",
     create_subscription: "/pricing/subscriptions",

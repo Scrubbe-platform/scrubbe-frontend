@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import SettingWrapper from "../_module/setting-wrapper";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
+import { ingestionUrlForSource, normalizeApiBase } from "@/lib/api/base-url";
 import { querykeys } from "@/lib/constant";
 import useAuthStore from "@/lib/stores/auth.store";
 
@@ -34,6 +35,7 @@ type ConnectionStatus =
 type ConnectionCategory =
   | "messaging_paging"
   | "observability"
+  | "runtime"
   | "ticketing"
   | "webhooks";
 
@@ -95,7 +97,8 @@ type ConnectorCardDefinition = {
   placeholderCredential?: string;
   placeholderScope?: string;
   requiresCredential?: boolean;
-  webhookSource?: "pagerduty" | "datadog" | "prometheus" | "webhook";
+  webhookSource?: "pagerduty" | "datadog" | "prometheus" | "kubernetes" | "webhook";
+  manifestSource?: "kubernetes";
   statusHint: string;
 };
 
@@ -138,6 +141,22 @@ const CONNECTOR_CARDS: ConnectorCardDefinition[] = [
     placeholderScope: "prod-monitors",
     webhookSource: "datadog",
     statusHint: "Monitor-driven incident ingestion and investigation context.",
+  },
+  {
+    key: "kubernetes-eks",
+    title: "Kubernetes",
+    section: "Observability & alerts",
+    description:
+      "Install the Scrubbe cluster agent to stream warning events, pod crashes, OOM kills, unavailable workloads, and node readiness failures into ingestion.",
+    mode: "manual",
+    category: "runtime",
+    defaultDisplayName: "Kubernetes cluster",
+    placeholderBaseUrl: "https://cluster.example.com",
+    placeholderCredential: "Scrubbe API key or read-only kubeconfig reference",
+    placeholderScope: "production, payments",
+    webhookSource: "kubernetes",
+    manifestSource: "kubernetes",
+    statusHint: "Runtime event ingestion for pod, workload, and node incidents.",
   },
   {
     key: "grafana",
@@ -213,8 +232,6 @@ const CONNECTOR_CARDS: ConnectorCardDefinition[] = [
   },
 ];
 
-const DEFAULT_API_BASE = "https://api.scrubbe.com";
-
 const formatTimestamp = (value?: string | null) => {
   if (!value) return "Not yet";
   const date = new Date(value);
@@ -234,17 +251,16 @@ const toDraft = (
   notes: connection?.notes ?? "",
 });
 
-const normalizeApiBase = () => {
-  const rawBase =
-    process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") ?? DEFAULT_API_BASE;
-  return rawBase.endsWith("/api/v1") ? rawBase : `${rawBase}/api/v1`;
-};
-
 const webhookUrlForSource = (
   source: ConnectorCardDefinition["webhookSource"],
 ) => {
   if (!source) return null;
-  return `${normalizeApiBase()}/ingestion/${source}`;
+  return ingestionUrlForSource(source);
+};
+
+const manifestUrlForSource = (source?: ConnectorCardDefinition["manifestSource"]) => {
+  if (source !== "kubernetes") return null;
+  return `${normalizeApiBase()}${endpoint.ingestion.kubernetes_manifest}`;
 };
 
 const statusTone = (status: ConnectionStatus | "CONNECTED" | "NOT_CONNECTED") => {
@@ -554,6 +570,7 @@ const IntegrationSettingsPage = () => {
                   const isEditorOpen = activeEditor === definition.key;
                   const draft =
                     drafts[definition.key] ?? toDraft(definition, connection);
+                  const manifestUrl = manifestUrlForSource(definition.manifestSource);
 
                   return (
                     <div
@@ -683,6 +700,32 @@ const IntegrationSettingsPage = () => {
                               type="button"
                               className="text-[#00CAD8] hover:text-white transition-colors"
                               onClick={() => copyWebhook(webhookUrl, definition.title)}
+                            >
+                              <Copy size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {manifestUrl ? (
+                        <div className="rounded-2xl border border-white/10 bg-[#071126] px-4 py-4 space-y-3">
+                          <div className="flex items-center gap-2 text-white text-sm font-semibold">
+                            <Webhook size={14} className="text-[#00CAD8]" />
+                            Kubernetes agent manifest
+                          </div>
+                          <p className="text-xs text-[#94A3B8]">
+                            Download the in-cluster agent manifest, replace the
+                            <span className="text-white font-mono"> SCRUBBE_API_KEY </span>
+                            placeholder, then apply it to your cluster.
+                          </p>
+                          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                            <span className="text-xs font-mono text-[#CBD5E1] truncate flex-1">
+                              {manifestUrl}
+                            </span>
+                            <button
+                              type="button"
+                              className="text-[#00CAD8] hover:text-white transition-colors"
+                              onClick={() => copyWebhook(manifestUrl, "Kubernetes manifest")}
                             >
                               <Copy size={14} />
                             </button>
