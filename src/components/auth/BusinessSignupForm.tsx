@@ -530,14 +530,14 @@ export default function BusinessSignupForm() {
             <p className="text-sm text-gray-600 leading-relaxed">
               By creating a workspace, you agree to Scrubbe's{" "}
               <Link
-                href=""
+                href="/terms-service"
                 className="underline text-gray-800 hover:text-emerald-600"
               >
                 Terms of Service
               </Link>{" "}
               and{" "}
               <Link
-                href=""
+                href="/privacy-policy"
                 className="underline text-gray-800 hover:text-emerald-600"
               >
                 Privacy Policy

@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+import { CalendarRange, Clock, ShieldIcon } from "lucide-react";
+import React, { useState } from "react";
 
 const ScrubbeTermsOfService = () => {
   // Data structure for the Table of Contents and main content
@@ -790,122 +792,141 @@ const ScrubbeTermsOfService = () => {
     number: number;
     title: string;
   }) => (
-    <h2
-      id={id}
-      className={`text-2xl font-bold p-4 pl-6 text-white bg-[#1F553E]`}
-    >
+    <h2 id={id} className={`text-2xl p-4 pl-6 bg-[#B5F3D2] font-serif`}>
       {number}. {title}
     </h2>
   );
 
+  const [selectId, setSelectId] = useState(0);
+
   return (
-    <div className="bg-[#00263D] min-h-screen px-4  md:px-8 py-[10rem] font-sans overflow-clip">
-      <style>{`
+    <div>
+      <div className="relative w-full h-[400px]">
+        <img
+          src="/IMS/privacy.png"
+          className=" absolute inset-0 -z-10 w-full h-full object-cover"
+        />
+        <div className="text-center flex flex-col justify-center items-center mb-10  p-6 md:p-10 z-10 h-full w-full">
+          <h1 className="text-3xl md:text-5xl font-serif text-white mb-4">
+            Terms of Service{" "}
+          </h1>
+          <p className="text-white max-w-2xl">
+            These Terms of Service ("Terms") constitute a legally binding
+            agreement between Scrubbe Ltd ("Scrubbe", "we", "us") and the
+            organisation or individual ("Customer", "you") accessing or using
+            the Scrubbe governed multi-agent incident intelligence platform. By
+            accessing any part of the Service, you agree to be bound by these
+            Terms in full.
+          </p>
+          <div className="flex md:flex-row items-center gap-4 pt-6">
+            <p className="text-base text-white flex items-center gap-2">
+              <CalendarRange size={18} />
+              Effective Date : September 26, 2025
+            </p>
+            <p className="text-base text-white flex items-center gap-2">
+              <Clock size={18} /> Last Updated : September 26, 2025
+            </p>
+            <p className="text-base text-white flex items-center gap-2">
+              <ShieldIcon size={18} /> Jurisdiction: England & Wales
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className=" min-h-screen px-4  md:px-8 py-[10rem] font-sans overflow-clip ">
+        <style>{`
         /* Custom colors based on the screenshots */
         .bg-scrubbe-dark { background-color: #2c3e50; }
         .bg-scrubbe-green { background-color: #38761d; }
         .text-scrubbe-green { color: #38761d; }
       `}</style>
-      <div className="max-w-screen-xl mx-auto">
-        <div className="text-center flex flex-col justify-center items-center mb-10 bg-gradient-to-r from-[#5A519F] to-[#8D4C9A] rounded-[30px] p-6 md:p-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Scrubbe IMS Terms of Service
-          </h1>
+        <div className="max-w-screen-xl mx-auto">
+          {/* Main Content Grid */}
+          <div className="w-full min-h-[2000px] mx-auto md:grid grid-cols-12 bg-[#DAFFEB] p-0 rounded-b-lg shadow-xl">
+            {/* Left Column - Table of Contents */}
+            <div className="md:block hidden sticky top-[100px] h-[calc(100vh+300px)] col-span-3 bg-[#DAFFEB] border-r border-gray-200 p-6">
+              <nav className="text-base space-y-1 bg-white p-5 border border-zinc-400">
+                {sections.map((section, index) => (
+                  <a
+                    key={section.id}
+                    href={`#${section.id}`}
+                    onClick={() => setSelectId(index)}
+                    className={` py-1 text-gray-700 hover:text-scrubbe-green transition-colors flex flex-row items-center gap-2 px-2 text-sm ${
+                      index === selectId ? "font-bold bg-[#B4EBC8]" : ""
+                    }`} // Highlight first item like in screenshot
+                  >
+                    <div className="h-7 min-w-7 flex text-sm rounded-full justify-center items-center border border-zinc-300">
+                      {index + 1}
+                    </div>
+                    {section.title}{" "}
+                  </a>
+                ))}
+              </nav>
+            </div>
 
-          <p className="text-lg text-white">
-            Effective Date : September 26, 2025
-          </p>
-          <p className="text-lg text-white">
-            Last Updated : September 26, 2025
-          </p>
-        </div>
-        {/* Header Block */}
-
-        {/* Main Content Grid */}
-        <div className="w-full min-h-[2000px] mx-auto md:grid grid-cols-12 gap-8 bg-white p-0 rounded-b-lg shadow-xl">
-          {/* Left Column - Table of Contents */}
-          <div className="md:block hidden sticky top-[100px] h-screen col-span-3 bg-gray-50 border-r border-gray-200 p-6">
-            <h2 className="text-xl font-bold mb-4 border-b pb-2">
-              Table of contents
-            </h2>
-            <nav className="text-base space-y-1">
+            {/* Right Column - Terms Content */}
+            <div className="col-span-9  md:px-4 text-gray-800">
               {sections.map((section, index) => (
-                <a
-                  key={section.id}
-                  href={`#${section.id}`}
-                  className={`block py-1 text-gray-700 hover:text-scrubbe-green transition-colors ${
-                    index === 0 ? "font-bold text-scrubbe-green" : ""
-                  }`} // Highlight first item like in screenshot
-                >
-                  {index + 1}. {section.title}
-                </a>
-              ))}
-            </nav>
-          </div>
-
-          {/* Right Column - Terms Content */}
-          <div className="col-span-9  md:px-4 text-gray-800">
-            {sections.map((section, index) => (
-              <div key={section.id} className="mb-8">
-                <SectionHeader
-                  id={section.id}
-                  number={index + 1}
-                  title={section.title}
-                />
-                <div className="p-4 bg-white border border-t-0">
-                  {section.content}
+                <div key={section.id} className="mb-8">
+                  <SectionHeader
+                    id={section.id}
+                    number={index + 1}
+                    title={section.title}
+                  />
+                  <div className="p-4 bg-white border border-t-0">
+                    {section.content}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
 
-            {/* Contact Section - Manually styled for the download button */}
-            <SectionHeader id="contact" number={21} title="Contact" />
-            <div className="p-4 bg-white border border-t-0 mb-8 flex flex-col items-center text-center">
-              <p className="mb-1">
-                <strong className="font-semibold">Email:</strong>{" "}
-                <a
-                  href="mailto:contact@scrubbe.com"
-                  className="text-blue-600 hover:underline"
-                >
-                  contact@scrubbe.com
-                </a>{" "}
-                | <strong className="font-semibold">Support:</strong>{" "}
-                <a
-                  href="mailto:support@scrubbe.com"
-                  className="text-blue-600 hover:underline"
-                >
-                  support@scrubbe.com
-                </a>
-              </p>
-              <p className="mb-4">
-                <strong className="font-semibold">Website:</strong>{" "}
-                <a
-                  href="https://incidents.scrubbe.com"
-                  className="text-blue-600 hover:underline"
-                >
-                  incidents.scrubbe.com
-                </a>
-              </p>
-              <button className="flex items-center justify-center bg-scrubbe-green hover:bg-opacity-90 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L10 11.586l1.293-1.293a1 1 0 011.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                  <path
-                    fillRule="evenodd"
-                    d="M10 2a1 1 0 011 1v9a1 1 0 11-2 0V3a1 1 0 011-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Download PDF Version
-              </button>
+              {/* Contact Section - Manually styled for the download button */}
+              <SectionHeader id="contact" number={21} title="Contact" />
+              <div className="p-4 bg-white border border-t-0 mb-8 flex flex-col items-center text-center">
+                <p className="mb-1">
+                  <strong className="font-semibold">Email:</strong>{" "}
+                  <a
+                    href="mailto:contact@scrubbe.com"
+                    className="text-blue-600 hover:underline"
+                  >
+                    contact@scrubbe.com
+                  </a>{" "}
+                  | <strong className="font-semibold">Support:</strong>{" "}
+                  <a
+                    href="mailto:support@scrubbe.com"
+                    className="text-blue-600 hover:underline"
+                  >
+                    support@scrubbe.com
+                  </a>
+                </p>
+                <p className="mb-4">
+                  <strong className="font-semibold">Website:</strong>{" "}
+                  <a
+                    href="https://incidents.scrubbe.com"
+                    className="text-blue-600 hover:underline"
+                  >
+                    incidents.scrubbe.com
+                  </a>
+                </p>
+                <button className="flex items-center justify-center bg-scrubbe-green hover:bg-opacity-90 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L10 11.586l1.293-1.293a1 1 0 011.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a1 1 0 011 1v9a1 1 0 11-2 0V3a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Download PDF Version
+                </button>
+              </div>
             </div>
           </div>
         </div>

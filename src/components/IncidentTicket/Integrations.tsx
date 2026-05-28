@@ -105,7 +105,7 @@ const integrations = [
   },
   {
     name: "PagerDuty",
-    icon: "/integration/page_duty.png", // A placeholder icon
+    icon: "/integration/pagerDuty.png", // A placeholder icon
     description: "Monitoring Tool - Alert correlation and on-call management",
     development: true,
   },
@@ -485,11 +485,10 @@ const Integrations: React.FC = () => {
                 provider: string;
                 userId: string;
               }[]
-            )?.find(
-              (value) =>
-                LEGACY_PROVIDER_KEYS[integration.name]?.includes(
-                  normalizeProviderKey(value.provider)
-                )
+            )?.find((value) =>
+              LEGACY_PROVIDER_KEYS[integration.name]?.includes(
+                normalizeProviderKey(value.provider)
+              )
             );
             return (
               <div
