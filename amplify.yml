@@ -4,6 +4,7 @@ frontend:
     preBuild:
       commands:
         - env | grep -E '^(API_BASE_URL|AUTH_|NEXTAUTH_|NEXT_PUBLIC_|FRONTEND_URL|INCIDENT_FRONTEND_URL)=' > .env.production
+        - if [ -z "$NEXT_PUBLIC_API_BASE_URL" ] && [ -n "$API_BASE_URL" ]; then echo "NEXT_PUBLIC_API_BASE_URL=$API_BASE_URL" >> .env.production; export NEXT_PUBLIC_API_BASE_URL="$API_BASE_URL"; fi
         - grep -E '^(API_BASE_URL|AUTH_|NEXTAUTH_|NEXT_PUBLIC_|FRONTEND_URL|INCIDENT_FRONTEND_URL)=' .env.production | sed 's/=.*$/=[set]/'
         - node scripts/write-amplify-server-env.cjs
         - npm install --legacy-peer-deps

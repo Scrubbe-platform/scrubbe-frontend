@@ -3,6 +3,8 @@ import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Gitlab from "next-auth/providers/gitlab";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
+import Okta from "next-auth/providers/okta";
+import OneLogin from "next-auth/providers/onelogin";
 import { AMPLIFY_SERVER_ENV } from "./generated/amplify-server-env";
 
 // Role definitions matching backend
@@ -76,6 +78,36 @@ const microsoftIssuer =
   normalizeEnvValue(process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER) ??
   normalizeEnvValue(process.env.MICROSOFT_ENTRA_ID_ISSUER);
 
+const oktaClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_OKTA_ID) ??
+  normalizeEnvValue(process.env.AUTH_OKTA_ID) ??
+  normalizeEnvValue(process.env.OKTA_CLIENT_ID);
+
+const oktaClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_OKTA_SECRET) ??
+  normalizeEnvValue(process.env.AUTH_OKTA_SECRET) ??
+  normalizeEnvValue(process.env.OKTA_CLIENT_SECRET);
+
+const oktaIssuer =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_OKTA_ISSUER) ??
+  normalizeEnvValue(process.env.AUTH_OKTA_ISSUER) ??
+  normalizeEnvValue(process.env.OKTA_ISSUER);
+
+const oneLoginClientId =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_ONELOGIN_ID) ??
+  normalizeEnvValue(process.env.AUTH_ONELOGIN_ID) ??
+  normalizeEnvValue(process.env.ONELOGIN_CLIENT_ID);
+
+const oneLoginClientSecret =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_ONELOGIN_SECRET) ??
+  normalizeEnvValue(process.env.AUTH_ONELOGIN_SECRET) ??
+  normalizeEnvValue(process.env.ONELOGIN_CLIENT_SECRET);
+
+const oneLoginIssuer =
+  normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_ONELOGIN_ISSUER) ??
+  normalizeEnvValue(process.env.AUTH_ONELOGIN_ISSUER) ??
+  normalizeEnvValue(process.env.ONELOGIN_ISSUER);
+
 const authUrl =
   normalizeEnvValue(AMPLIFY_SERVER_ENV.AUTH_URL) ??
   normalizeEnvValue(process.env.AUTH_URL) ??
@@ -114,6 +146,12 @@ if (process.env.NODE_ENV === "production") {
     hasGithubClientSecret: Boolean(githubClientSecret),
     hasGitlabClientId: Boolean(gitlabClientId),
     hasGitlabClientSecret: Boolean(gitlabClientSecret),
+    hasOktaClientId: Boolean(oktaClientId),
+    hasOktaClientSecret: Boolean(oktaClientSecret),
+    hasOktaIssuer: Boolean(oktaIssuer),
+    hasOneLoginClientId: Boolean(oneLoginClientId),
+    hasOneLoginClientSecret: Boolean(oneLoginClientSecret),
+    hasOneLoginIssuer: Boolean(oneLoginIssuer),
     authUrl: authUrl ?? null,
   });
 }

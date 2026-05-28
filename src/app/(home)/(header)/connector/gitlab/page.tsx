@@ -156,7 +156,7 @@ const capabilities = [
   },
 ];
 
-export function PlatformSection() {
+function PlatformSection() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   return (
