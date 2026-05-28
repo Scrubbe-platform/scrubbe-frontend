@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronDown, X, Menu, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 // ─────────────────────────────────────────────────────────────────
 // Shared atoms
@@ -90,13 +91,11 @@ function ProductDropdown() {
         <p className="text-[11px] font-bold text-emerald-500 mb-2 tracking-wide uppercase">
           Platform navigation
         </p>
-        <h3 className="text-[20px] font-black text-gray-900 leading-tight mb-2">
-          Move through the product with space for visual navigation.
+        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+          Purpose-built systems for investigating, deciding, and responding to
+          production incidents.{" "}
         </h3>
-        <p className="text-[12px] text-gray-500 leading-relaxed mb-5">
-          Each destination now has a larger target area, supporting imagery,
-          diagrams, or product previews without cramping the menu.
-        </p>
+
         <div className="grid grid-cols-2 gap-2">
           {cards.map((c) => (
             <NavCard key={c.href} {...c} />
@@ -110,7 +109,7 @@ function ProductDropdown() {
         <div className="flex-1 p-6 flex items-center justify-center">
           <div className="w-full aspect-[4/3] border border-gray-200 rounded-lg bg-gray-50 relative overflow-hidden">
             <Image
-              src="/IMS/images/nav/product-preview.png"
+              src="/IMS/nav3.png"
               alt="Product preview"
               fill
               className="object-cover"
@@ -215,13 +214,10 @@ function ChallengesDropdown() {
         <p className="text-[11px] font-bold text-emerald-500 mb-2 tracking-wide uppercase">
           Problem navigation
         </p>
-        <h3 className="text-[20px] font-black text-gray-900 leading-tight mb-2">
-          Browse challenges through clearer, larger destination cards.
+        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+          Solve the operational problems behind production incidents.{" "}
         </h3>
-        <p className="text-[12px] text-gray-500 leading-relaxed mb-5">
-          This gives each problem area enough space for a thumbnail, diagram, or
-          contextual illustration while still acting like a fast nav menu.
-        </p>
+
         <div className="grid grid-cols-2 gap-2">
           {cards.map((c) => (
             <NavCard key={c.href} {...c} />
@@ -233,7 +229,7 @@ function ChallengesDropdown() {
         <div className="flex-1 p-6 flex items-center justify-center">
           <div className="w-full aspect-[4/3] border border-gray-200 rounded-lg bg-gray-50 relative overflow-hidden">
             <Image
-              src="/IMS/images/nav/challenges-preview.png"
+              src="/IMS/nav2.png"
               alt="Challenges preview"
               fill
               className="object-cover"
@@ -470,7 +466,7 @@ function ResourcesDropdown() {
     {
       title: "Blog",
       desc: "Notes from engineering and platform design",
-      href: "/blog",
+      href: "https://scrubbe.medium.com/",
     },
     {
       title: "Community",
@@ -485,13 +481,11 @@ function ResourcesDropdown() {
         <p className="text-[11px] font-bold text-emerald-500 mb-2 tracking-wide uppercase">
           Resource navigation
         </p>
-        <h3 className="text-[20px] font-black text-gray-900 leading-tight mb-2">
-          Resources now have room for previews, covers, and thumbnails.
+        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+          Learn how modern engineering teams investigate, remediate, and recover
+          from production incidents..{" "}
         </h3>
-        <p className="text-[12px] text-gray-500 leading-relaxed mb-5">
-          The larger dropdown makes this area feel like a lightweight discovery
-          panel rather than a cramped list of links.
-        </p>
+
         <div className="grid grid-cols-2 gap-2">
           {cards.map((c) => (
             <NavCard key={c.href} {...c} />
@@ -502,7 +496,7 @@ function ResourcesDropdown() {
       <div className="p-6 flex items-center justify-center">
         <div className="w-full aspect-[4/3] border border-gray-200 rounded-lg bg-gray-50 relative overflow-hidden">
           <Image
-            src="/IMS/images/nav/resources-preview.png"
+            src="/IMS/nav4.png"
             alt="Resources preview"
             fill
             className="object-cover"
@@ -554,13 +548,10 @@ function SecurityDropdown() {
   return (
     <div className="grid grid-cols-2 gap-0 h-full">
       <div className="p-6 border-r border-gray-100">
-        <h3 className="text-[20px] font-black text-gray-900 leading-tight mb-2">
-          Security now has a larger, more structured dropdown for trust content.
+        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+          Built for secure, controlled operation in production environments.{" "}
         </h3>
-        <p className="text-[12px] text-gray-500 leading-relaxed mb-5">
-          This makes room for security diagrams, certification marks, and
-          governance previews while keeping the links easy to scan.
-        </p>
+
         <div className="grid grid-cols-2 gap-2">
           {cards.map((c) => (
             <NavCard key={c.href} {...c} />
@@ -571,7 +562,7 @@ function SecurityDropdown() {
       <div className="p-6 flex items-center justify-center">
         <div className="w-full aspect-[4/3] border border-gray-200 rounded-lg bg-gray-50 relative overflow-hidden">
           <Image
-            src="/IMS/images/nav/security-preview.png"
+            src="/IMS/nav1.png"
             alt="Security preview"
             fill
             className="object-cover"
@@ -620,33 +611,7 @@ function DropdownContent({ label }: { label: string }) {
     case "SECURITY":
       return <SecurityDropdown />;
     case "PRICING":
-      return (
-        <div className="p-3 space-y-1">
-          {[
-            {
-              title: "Plans",
-              desc: "Compare tiers and features",
-              href: "/pricing",
-            },
-            {
-              title: "Enterprise",
-              desc: "Custom contracts & SLAs",
-              href: "/pricing/enterprise",
-            },
-          ].map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="flex flex-col px-3 py-2.5 rounded-lg hover:bg-gray-50 group transition-colors"
-            >
-              <span className="text-[13.5px] font-semibold text-gray-800 group-hover:text-emerald-600">
-                {l.title}
-              </span>
-              <span className="text-[12px] text-gray-400 mt-0.5">{l.desc}</span>
-            </Link>
-          ))}
-        </div>
-      );
+      return null;
     default:
       return null;
   }
@@ -669,7 +634,7 @@ const NAV_LABELS: DropdownKey[] = [
 function NavItem({ label }: { label: DropdownKey }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
+  const router = useRouter();
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node))
@@ -685,11 +650,13 @@ function NavItem({ label }: { label: DropdownKey }) {
     <div
       ref={ref}
       className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={() => label !== "PRICING" && setOpen(true)}
+      onMouseLeave={() => label !== "PRICING" && setOpen(false)}
     >
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() =>
+          label == "PRICING" ? router.push("/pricing") : setOpen((o) => !o)
+        }
         className="flex items-center gap-1 px-0.5 py-1 text-[11.5px] font-bold tracking-wider text-gray-600 hover:text-gray-900 transition-colors bg-transparent border-none cursor-pointer"
       >
         {label}
@@ -697,7 +664,9 @@ function NavItem({ label }: { label: DropdownKey }) {
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <ChevronDown size={12} className="text-gray-400" />
+          {label !== "PRICING" && (
+            <ChevronDown size={12} className="text-gray-400" />
+          )}
         </motion.div>
       </button>
 
@@ -751,7 +720,7 @@ function ScrubbeLogo() {
 
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-
+  const router = useRouter();
   // Flat link list per label for mobile
   const MOBILE_LINKS: Record<DropdownKey, { title: string; href: string }[]> = {
     PRODUCT: [
@@ -787,15 +756,16 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
       { title: "Kubernetes", href: "/connectors/kubernetes" },
       { title: "AWS", href: "/connectors/aws" },
     ],
-    PRICING: [
-      { title: "Plans", href: "/pricing" },
-      { title: "Enterprise", href: "/pricing/enterprise" },
-    ],
+    PRICING: [{ title: "Plans", href: "/pricing" }],
     RESOURCES: [
       { title: "Documentation", href: "/docs" },
-      { title: "Blog", href: "/blog" },
+      { title: "Blog", href: "https://scrubbe.medium.com" },
       { title: "Product Demo", href: "/demo" },
       { title: "Reports", href: "/reports" },
+      {
+        title: "Community",
+        href: "/community",
+      },
     ],
     SECURITY: [
       { title: "Security Overview", href: "/security/overview" },
@@ -837,9 +807,11 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
               {NAV_LABELS.map((label, i) => (
                 <div key={label}>
                   <button
-                    onClick={() =>
-                      setExpandedIndex(expandedIndex === i ? null : i)
-                    }
+                    onClick={() => {
+                      label === "PRICING"
+                        ? router.push("/pricing")
+                        : setExpandedIndex(expandedIndex === i ? null : i);
+                    }}
                     className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-left bg-transparent border-none cursor-pointer hover:bg-gray-50 transition-colors"
                   >
                     <span className="text-[13px] font-bold tracking-wider text-gray-700">
@@ -983,7 +955,9 @@ export default function Navbar() {
       </header>
 
       <div className="h-[60px]" />
-      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
+      {mobileOpen && (
+        <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
+      )}
     </>
   );
 }

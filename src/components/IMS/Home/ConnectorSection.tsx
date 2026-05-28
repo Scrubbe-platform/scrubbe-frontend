@@ -3,116 +3,159 @@
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { id } from "zod/v4/locales";
 
 // ─────────────────────────────────────────────────────────────────
 // Connector data — icons follow /IMS/icons/{name} convention
 // ─────────────────────────────────────────────────────────────────
-
 const CONNECTORS = [
   {
     name: "GitHub",
+    id: "github",
     icon: "/integration/github.png",
     desc: "Push events, PR merges, failed checks, deployment statuses",
+    comingSoon: false,
   },
   {
     name: "Kubernetes",
+    id: "kubernetes",
     icon: "/integration/kubernetes.png",
     desc: "CrashLoopBackOff, pod restarts, OOMKilled, failed deployments",
+    comingSoon: true,
   },
   {
+    id: "datadog",
     name: "Datadog",
     icon: "/integration/datadog.png",
     desc: "Metric alerts, SLO breaches, anomaly detection, monitors",
+    comingSoon: true,
   },
   {
+    id: "pagerduty",
     name: "PagerDuty",
     icon: "/integration/pagerduty.png",
     desc: "Alert triggered, incident acknowledged, resolved events",
+    comingSoon: true,
   },
   {
+    id: "aws",
     name: "AWS",
     icon: "/integration/aws.png",
     desc: "CloudWatch alarms, ECS task failures, Lambda errors",
+    comingSoon: true,
   },
   {
+    id: "prometheus",
     name: "Prometheus",
     icon: "/integration/prometheus.png",
     desc: "Alertmanager webhook receiver, rule evaluation events",
+    comingSoon: true,
   },
   {
+    id: "gitlab",
     name: "Gitlab",
     icon: "/integration/gitlab.png",
     desc: "Pipeline failures, merge requests, job status change",
+    comingSoon: false,
   },
   {
+    id: "grafana",
     name: "Grafana",
     icon: "/integration/grafana.png",
     desc: "Alerting webhooks, dashboard annotations, on-call alerts",
+    comingSoon: true,
   },
   {
+    id: "azure",
     name: "Azure",
     icon: "/integration/azure.png",
     desc: "Azure monitor alerts, AKS events, App Service",
+    comingSoon: true,
   },
   {
+    id: "google-cloud",
     name: "Google Cloud",
     icon: "/integration/google-cloud.png",
     desc: "Cloud Monitoring alerts, GKE events, Cloud Run errors",
+    comingSoon: true,
   },
   {
+    id: "slack",
     name: "Slack",
     icon: "/integration/slack.png",
     desc: "Incident notifications, approval requests, resolution summaries",
+    comingSoon: true,
   },
   {
+    id: "jira",
     name: "Jira",
     icon: "/integration/jira.png",
     desc: "Auto-create tickets on incident raise, sync state transitions",
+    comingSoon: true,
   },
   {
+    id: "github-actions",
     name: "Github Actions",
     icon: "/integration/github-actions.png",
     desc: "Workflow failures, deployment events, environment status",
+    comingSoon: true,
   },
   {
+    id: "new-relic",
     name: "New Relic",
     icon: "/integration/new-relic.png",
     desc: "APM alerts, error rate spikes, Apdex threshold breaches",
+    comingSoon: true,
   },
   {
+    id: "opsgenie",
     name: "OpsGenie",
     icon: "/integration/opsgenie.png",
     desc: "Alert received, escalation triggered, om-call handoff events",
+    comingSoon: true,
   },
   {
+    id: "synk",
     name: "Synk",
     icon: "/integration/snyc.png",
     desc: "Critical CVEs in production dependencies, license violations",
+    comingSoon: true,
   },
   {
+    id: "elastic",
     name: "Elastic",
     icon: "/integration/elastic.png",
     desc: "Log-based alert rules, watcher triggers, security signals",
+    comingSoon: true,
   },
   {
+    id: "splunk",
     name: "Splunk",
     icon: "/integration/splunk.png",
     desc: "Notable events, correlation search results, adaptive responses",
+    comingSoon: true,
   },
   {
+    id: "teams",
     name: "Microsoft Teams",
     icon: "/integration/teams.png",
     desc: "Incident notifications, approval actions, war room channels",
+    comingSoon: true,
   },
   {
+    id: "bit-bucket",
     name: "Bit Bucket",
     icon: "/integration/bitbucket.png",
     desc: "Repository push, pipeline failures, pull request events",
+    comingSoon: true,
   },
   {
+    id: "linear",
     name: "Linear",
     icon: "/integration/linear.png",
-    desc: "Team’s execution workflow, structured follow-up issues for hardening actions and operational improvements",
+    desc: "Team's execution workflow, structured follow-up issues for hardening actions and operational improvements",
+    comingSoon: true,
   },
 ];
 
@@ -124,10 +167,12 @@ function ConnectorCard({
   connector,
   index,
   inView,
+  onClick,
 }: {
   connector: (typeof CONNECTORS)[0];
   index: number;
   inView: boolean;
+  onClick: () => void;
 }) {
   return (
     <motion.div
@@ -138,8 +183,14 @@ function ConnectorCard({
         delay: 0.04 * index,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col items-center text-center hover:border-gray-300 hover:shadow-sm transition-all duration-200 group"
+      className="bg-white border relative border-gray-200 rounded-xl p-5 flex flex-col items-center text-center hover:border-gray-300 hover:shadow-sm transition-all duration-200 group"
+      onClick={onClick}
     >
+      {connector.comingSoon && (
+        <div className="absolute top-2 right-2 border p-0.5 rounded-md text-[8px] text-blue-500 border-blue-500">
+          coming soon
+        </div>
+      )}
       {/* Icon */}
       <div className="relative w-14 h-14 mb-4 flex items-center justify-center">
         <Image
@@ -171,6 +222,7 @@ export default function ConnectorsSection() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [showAll, setShowAll] = useState(false);
+  const router = useRouter();
   return (
     <section
       ref={ref}
@@ -236,6 +288,7 @@ export default function ConnectorsSection() {
                 connector={c}
                 index={i}
                 inView={inView}
+                onClick={() => router.push(`/connector/${c.id}`)}
               />
             )
           )}

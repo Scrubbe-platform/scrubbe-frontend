@@ -10,12 +10,6 @@ export const AMPLIFY_SERVER_ENV = {
   AUTH_MICROSOFT_ENTRA_ID_ID: undefined,
   AUTH_MICROSOFT_ENTRA_ID_ISSUER: undefined,
   AUTH_MICROSOFT_ENTRA_ID_SECRET: undefined,
-  AUTH_OKTA_ID: undefined,
-  AUTH_OKTA_ISSUER: undefined,
-  AUTH_OKTA_SECRET: undefined,
-  AUTH_ONELOGIN_ID: undefined,
-  AUTH_ONELOGIN_ISSUER: undefined,
-  AUTH_ONELOGIN_SECRET: undefined,
   AUTH_SECRET: undefined,
   AUTH_URL: undefined,
 } as const;

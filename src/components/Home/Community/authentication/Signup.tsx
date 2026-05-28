@@ -136,14 +136,18 @@ export default function SignUp() {
   };
 
   return (
-    <Modal isOpen={open && modalType === "signup"} onClose={setClose}>
+    <Modal
+      isOpen={open && modalType === "signup"}
+      onClose={setClose}
+      className="!bg-white"
+    >
       {showSuccess && <SuccessPage fullname={watch("fullName") || ""} />}
       {!showSuccess && (
         <>
           {isOTP ? (
             <VerifyAccount />
           ) : (
-            <div className="w-full">
+            <div className="w-full p-3">
               <h1 className=" text-xl md:text-2xl dark:text-white font-semibold mb-6">
                 Sign up to Scrubbe Community
               </h1>
@@ -158,6 +162,8 @@ export default function SignUp() {
                       placeholder="Enter full name"
                       {...field}
                       error={errors.fullName?.message}
+                      className="!text-black"
+                      labelClassName="!text-black"
                     />
                   )}
                 />
@@ -170,6 +176,8 @@ export default function SignUp() {
                       placeholder="Enter Email"
                       {...field}
                       error={errors.email?.message}
+                      className="!text-black"
+                      labelClassName="!text-black"
                     />
                   )}
                 />
@@ -184,6 +192,8 @@ export default function SignUp() {
                       {...field}
                       type="password"
                       error={errors.password?.message}
+                      className="!text-black"
+                      labelClassName="!text-black"
                     />
                   )}
                 />
@@ -197,6 +207,8 @@ export default function SignUp() {
                       {...field}
                       type="password"
                       error={errors.confirmPassword?.message}
+                      className="!text-black"
+                      labelClassName="!text-black"
                     />
                   )}
                 />

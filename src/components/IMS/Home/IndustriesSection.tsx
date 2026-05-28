@@ -292,6 +292,9 @@ export default function IndustriesSection() {
               Download ebook →
             </button>
             <button
+              data-cal-namespace="hero-demo"
+              data-cal-link="scrubbe/decision-system-demo"
+              data-cal-config='{"layout":"month_view","theme":"light"}'
               className="px-5 py-2.5 rounded-lg text-[13.5px] font-semibold text-white cursor-pointer transition-all hover:border-gray-400"
               style={{ border: "1px solid #374151", background: "transparent" }}
             >

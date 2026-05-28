@@ -598,7 +598,7 @@ export default function EzraConsole() {
                     selectedAnalysis?.incidentId ??
                     selectedIncident?.ticketId ??
                     selectedIncident?.id ??
-                    "â€”"
+                    "—"
                   }
                 />
                 <ContextRow

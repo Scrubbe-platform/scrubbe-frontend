@@ -40,6 +40,7 @@ const WAYS: WayItem[] = [
     icon: <Users size={20} />,
     title: "Join our community",
     desc: "Connect with other engineers, share ideas and get help",
+    href: "/community",
   },
   {
     iconBg: "bg-emerald-50 text-emerald-600",
@@ -322,7 +323,7 @@ export default function ContactPage() {
               data-cal-config='{"layout":"month_view","theme":"light"}'
               className="flex items-center gap-3 p-5 bg-transparent cursor-pointer text-left hover:bg-emerald-50 active:bg-emerald-100 transition-colors border-r-2 border-gray-300 group"
             >
-              <div className="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-200 transition-colors">
+              <div className="w-11 h-11 rounded-xl bg-emerald-100 hidden sm:flex items-center justify-center shrink-0 group-hover:bg-emerald-200 transition-colors">
                 <Calendar size={20} className="text-emerald-600" />
               </div>
               <div>
@@ -336,7 +337,7 @@ export default function ContactPage() {
             </button>
 
             <button className="flex items-center gap-3 p-5 bg-transparent border-none cursor-pointer text-left hover:bg-gray-50 active:bg-gray-100 transition-colors group w-full">
-              <div className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-gray-200 transition-colors">
+              <div className=" w-11 h-11 rounded-xl bg-gray-100 hidden sm:flex items-center justify-center shrink-0 group-hover:bg-gray-200 transition-colors">
                 <MessageSquare size={20} className="text-gray-500" />
               </div>
               <div>

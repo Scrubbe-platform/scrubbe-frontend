@@ -351,7 +351,7 @@ export default function BusinessSignupForm() {
         <div className="text-right mb-6 text-sm text-gray-500">
           Need help?{" "}
           <Link
-            href="/support"
+            href="/contact-us"
             className="text-emerald-600 font-semibold hover:underline"
           >
             contact support
@@ -530,14 +530,14 @@ export default function BusinessSignupForm() {
             <p className="text-sm text-gray-600 leading-relaxed">
               By creating a workspace, you agree to Scrubbe's{" "}
               <Link
-                href="/terms"
+                href=""
                 className="underline text-gray-800 hover:text-emerald-600"
               >
                 Terms of Service
               </Link>{" "}
               and{" "}
               <Link
-                href="/privacy"
+                href=""
                 className="underline text-gray-800 hover:text-emerald-600"
               >
                 Privacy Policy
