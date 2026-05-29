@@ -139,6 +139,10 @@ function getBackendApiBaseUrl() {
   return apiBaseUrl.replace(/\/+$/, "");
 }
 
+function hasProviderCredentials(...values: Array<string | undefined>) {
+  return values.every(Boolean);
+}
+
 if (process.env.NODE_ENV === "production") {
   console.info("[auth] runtime configuration", {
     hasAuthSecret: Boolean(authSecret),
@@ -165,119 +169,157 @@ export const {
   trustHost: true,
   secret: authSecret,
   providers: [
-    Github({
-      clientId: githubClientId,
-      clientSecret: githubClientSecret,
-      authorization: {
-        params: {
-          scope: "read:user user:email",
-        },
-      },
-      async profile(profile):Promise<any> {
-        return {
-          id: profile.id.toString(),
-          oAuthProvider: "GITHUB",
-          githubUsername: profile.login,
-          email: profile.email || `${profile.login}@users.noreply.github.com`,
-          image: profile.avatar_url,
-          firstName: profile.name?.split(" ")[0] || profile.login,
-          lastName: profile.name?.split(" ").slice(1).join(" ") || "",
-          isVerified: true,
-          name: profile.name || profile.login,
-          roles: ["USER"], // Default role for OAuth users
-        };
-      },
-    }),
-    Google({
-      clientId: googleClientId,
-      clientSecret: googleClientSecret,
-      async profile(profile):Promise<any>  {
-        return {
-          id: profile.sub,
-          oAuthProvider: "GOOGLE",
-          email: profile.email,
-          image: profile.picture,
-          firstName: profile.given_name || profile.name?.split(" ")[0] || "",
-          lastName: profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
-          isVerified: profile.email_verified || true,
-          name: profile.name,
-          roles: ["USER"], // Default role for OAuth users
-        };
-      },
-    }),
-    Gitlab({
-      clientId: gitlabClientId,
-      clientSecret: gitlabClientSecret,
-      async profile(profile):Promise<any>  {
-        return {
-          id: profile.id.toString(),
-          oAuthProvider: "GITLAB",
-          email: profile.email,
-          image: profile.avatar_url,
-          firstName: profile.name?.split(" ")[0] || profile.username,
-          lastName: profile.name?.split(" ").slice(1).join(" ") || "",
-          isVerified: true,
-          name: profile.name || profile.username,
-          roles: ["USER"], // Default role for OAuth users
-        };
-      },
-    }),
-    MicrosoftEntraID({
-      clientId: microsoftClientId,
-      clientSecret: microsoftClientSecret,
-      issuer: microsoftIssuer,
-      async profile(profile):Promise<any>  {
-        return {
-          id: profile.oid,
-          oAuthProvider: "AZURE",
-          email: profile.email || profile.preferred_username,
-          image: null,
-          firstName: profile.given_name || profile.name?.split(" ")[0] || "",
-          lastName: profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
-          isVerified: true,
-          name: profile.name,
-          roles: ["USER"], // Default role for OAuth users
-        };
-      },
-    }),
-    Okta({
-      clientId: oktaClientId,
-      clientSecret: oktaClientSecret,
-      issuer: oktaIssuer,
-      async profile(profile): Promise<any> {
-        return {
-          id: profile.sub,
-          oAuthProvider: "OKTA",
-          email: profile.email,
-          image: null,
-          firstName: profile.given_name || profile.name?.split(" ")[0] || "",
-          lastName:
-            profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
-          isVerified: true,
-          name: profile.name || profile.email,
-          roles: ["USER"],
-        };
-      },
-    }),
-    OneLogin({
-      clientId: oneLoginClientId,
-      clientSecret: oneLoginClientSecret,
-      issuer: oneLoginIssuer,
-      async profile(profile): Promise<any> {
-        return {
-          id: profile.sub,
-          oAuthProvider: "ONELOGIN",
-          email: profile.email,
-          image: null,
-          firstName: profile.given_name || profile.name?.split(" ")[0] || "",
-          lastName:
-            profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
-          isVerified: true,
-          name: profile.name || profile.email,
-          roles: ["USER"],
-        };
-      },
-    }),
+    ...(hasProviderCredentials(githubClientId, githubClientSecret)
+      ? [
+          Github({
+            clientId: githubClientId,
+            clientSecret: githubClientSecret,
+            authorization: {
+              params: {
+                scope: "read:user user:email",
+              },
+            },
+            async profile(profile): Promise<any> {
+              return {
+                id: profile.id.toString(),
+                oAuthProvider: "GITHUB",
+                githubUsername: profile.login,
+                email: profile.email || `${profile.login}@users.noreply.github.com`,
+                image: profile.avatar_url,
+                firstName: profile.name?.split(" ")[0] || profile.login,
+                lastName: profile.name?.split(" ").slice(1).join(" ") || "",
+                isVerified: true,
+                name: profile.name || profile.login,
+                roles: ["USER"], // Default role for OAuth users
+              };
+            },
+          }),
+        ]
+      : []),
+    ...(hasProviderCredentials(googleClientId, googleClientSecret)
+      ? [
+          Google({
+            clientId: googleClientId,
+            clientSecret: googleClientSecret,
+            async profile(profile): Promise<any> {
+              return {
+                id: profile.sub,
+                oAuthProvider: "GOOGLE",
+                email: profile.email,
+                image: profile.picture,
+                firstName: profile.given_name || profile.name?.split(" ")[0] || "",
+                lastName:
+                  profile.family_name ||
+                  profile.name?.split(" ").slice(1).join(" ") ||
+                  "",
+                isVerified: profile.email_verified || true,
+                name: profile.name,
+                roles: ["USER"], // Default role for OAuth users
+              };
+            },
+          }),
+        ]
+      : []),
+    ...(hasProviderCredentials(gitlabClientId, gitlabClientSecret)
+      ? [
+          Gitlab({
+            clientId: gitlabClientId,
+            clientSecret: gitlabClientSecret,
+            async profile(profile): Promise<any> {
+              return {
+                id: profile.id.toString(),
+                oAuthProvider: "GITLAB",
+                email: profile.email,
+                image: profile.avatar_url,
+                firstName: profile.name?.split(" ")[0] || profile.username,
+                lastName: profile.name?.split(" ").slice(1).join(" ") || "",
+                isVerified: true,
+                name: profile.name || profile.username,
+                roles: ["USER"], // Default role for OAuth users
+              };
+            },
+          }),
+        ]
+      : []),
+    ...(hasProviderCredentials(
+      microsoftClientId,
+      microsoftClientSecret,
+      microsoftIssuer
+    )
+      ? [
+          MicrosoftEntraID({
+            clientId: microsoftClientId,
+            clientSecret: microsoftClientSecret,
+            issuer: microsoftIssuer,
+            async profile(profile): Promise<any> {
+              return {
+                id: profile.oid,
+                oAuthProvider: "AZURE",
+                email: profile.email || profile.preferred_username,
+                image: null,
+                firstName: profile.given_name || profile.name?.split(" ")[0] || "",
+                lastName:
+                  profile.family_name ||
+                  profile.name?.split(" ").slice(1).join(" ") ||
+                  "",
+                isVerified: true,
+                name: profile.name,
+                roles: ["USER"], // Default role for OAuth users
+              };
+            },
+          }),
+        ]
+      : []),
+    ...(hasProviderCredentials(oktaClientId, oktaClientSecret, oktaIssuer)
+      ? [
+          Okta({
+            clientId: oktaClientId,
+            clientSecret: oktaClientSecret,
+            issuer: oktaIssuer,
+            async profile(profile): Promise<any> {
+              return {
+                id: profile.sub,
+                oAuthProvider: "OKTA",
+                email: profile.email,
+                image: null,
+                firstName: profile.given_name || profile.name?.split(" ")[0] || "",
+                lastName:
+                  profile.family_name ||
+                  profile.name?.split(" ").slice(1).join(" ") ||
+                  "",
+                isVerified: true,
+                name: profile.name || profile.email,
+                roles: ["USER"],
+              };
+            },
+          }),
+        ]
+      : []),
+    ...(hasProviderCredentials(oneLoginClientId, oneLoginClientSecret, oneLoginIssuer)
+      ? [
+          OneLogin({
+            clientId: oneLoginClientId,
+            clientSecret: oneLoginClientSecret,
+            issuer: oneLoginIssuer,
+            async profile(profile): Promise<any> {
+              return {
+                id: profile.sub,
+                oAuthProvider: "ONELOGIN",
+                email: profile.email,
+                image: null,
+                firstName: profile.given_name || profile.name?.split(" ")[0] || "",
+                lastName:
+                  profile.family_name ||
+                  profile.name?.split(" ").slice(1).join(" ") ||
+                  "",
+                isVerified: true,
+                name: profile.name || profile.email,
+                roles: ["USER"],
+              };
+            },
+          }),
+        ]
+      : []),
   ],
   callbacks: {
     async jwt({ token, user, account, profile }) {
