@@ -44,8 +44,9 @@ const NAV_COLUMNS = [
       { label: "About", href: "/#" },
       { label: "Blog", href: "/#" },
       { label: "Careers", href: "/#" },
-      { label: "Privacy", href: "/#" },
-      { label: "Terms", href: "/#" },
+      { label: "Contact us", href: "/contact-us" },
+      { label: "Privacy", href: "/privacy-policy" },
+      { label: "Terms", href: "/terms-service" },
     ],
   },
 ];

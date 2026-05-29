@@ -2,6 +2,7 @@
 
 import ConnectorsSection from "@/components/IMS/Home/ConnectorSection";
 import CButton from "@/components/ui/Cbutton";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaGitlab } from "react-icons/fa";
 
@@ -814,6 +815,7 @@ function WorkflowSection() {
 // ─────────────────────────────────────────────────────────────────
 
 function CTASection() {
+  const router = useRouter();
   return (
     <section
       className="relative px-6 md:px-16 py-20 overflow-hidden"
@@ -846,11 +848,11 @@ function CTASection() {
             GitLab Self-Managed, and multi-group enterprise environments.
           </p>
           <div className="flex flex-wrap gap-4 mb-6">
-            <button className="px-6 py-3 bg-white text-zinc-900 font-semibold text-sm rounded-lg hover:bg-zinc-100 transition-colors active:scale-95">
+            <button
+              onClick={() => router.push("/auth/signin")}
+              className="px-6 py-3 bg-white text-zinc-900 font-semibold text-sm rounded-lg hover:bg-zinc-100 transition-colors active:scale-95"
+            >
               Connect GitLab
-            </button>
-            <button className="px-6 py-3 text-white font-semibold text-sm border-b border-white/60 hover:border-white transition-colors">
-              Request Enterprise Access
             </button>
           </div>
           <div className="flex flex-wrap gap-6">
@@ -888,7 +890,7 @@ export default function ScrubbePage() {
       <PreserveSection />
       <MomentsSection />
       <WhyScrubbeSection />
-      <ConnectorsSection />
+      <ConnectorsSection filter="gitlab" />
       <CTASection />
     </main>
   );

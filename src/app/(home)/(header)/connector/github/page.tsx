@@ -68,12 +68,6 @@ function HeroSection() {
             >
               Connect GitHub
             </button>
-            <button
-              className="px-6 py-3 font-semibold text-sm border-b-2 transition-colors hover:border-white text-white/80"
-              style={{ borderColor: "rgba(255,255,255,.45)" }}
-            >
-              Request Enterprise Access
-            </button>
           </div>
 
           <div className="flex flex-wrap gap-6">
@@ -798,7 +792,7 @@ export default function ScrubbeGitHubPage() {
       <WorkflowSection />
       <MomentsSection />
       <WhyScrubbeSection />
-      <ConnectorsSection />
+      <ConnectorsSection filter="github" />
       <HeroSection />
     </main>
   );

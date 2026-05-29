@@ -187,7 +187,7 @@ function ConnectorCard({
       onClick={onClick}
     >
       {connector.comingSoon && (
-        <div className="absolute top-2 right-2 border p-0.5 rounded-md text-[8px] text-blue-500 border-blue-500">
+        <div className="absolute top-2 right-2 border p-0.5 rounded-md text-[8px] text-zinc-400 border-zinc-400">
           coming soon
         </div>
       )}
@@ -218,7 +218,7 @@ function ConnectorCard({
 // Main Section
 // ─────────────────────────────────────────────────────────────────
 
-export default function ConnectorsSection() {
+export default function ConnectorsSection({ filter }: { filter?: string }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [showAll, setShowAll] = useState(false);
@@ -281,8 +281,9 @@ export default function ConnectorsSection() {
 
         {/* Connector grid — 6 columns on desktop */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-10">
-          {CONNECTORS.slice(0, showAll ? CONNECTORS.length + 1 : 12).map(
-            (c, i) => (
+          {CONNECTORS.filter((item) => item.id !== filter)
+            .slice(0, showAll ? CONNECTORS.length + 1 : 12)
+            .map((c, i) => (
               <ConnectorCard
                 key={c.name}
                 connector={c}
@@ -290,8 +291,7 @@ export default function ConnectorsSection() {
                 inView={inView}
                 onClick={() => router.push(`/connector/${c.id}`)}
               />
-            )
-          )}
+            ))}
         </div>
 
         {/* Show all Connectors button — bottom right */}

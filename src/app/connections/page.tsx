@@ -1,6 +1,6 @@
 "use client";
 import React, { ReactNode, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AiOutlineCloud, AiOutlineKubernetes } from "react-icons/ai";
 import { BiGitRepoForked, BiGrid, BiLogoMongodb } from "react-icons/bi";
 import { BsDatabase } from "react-icons/bs";
@@ -238,6 +238,7 @@ const Page = () => {
   const [integration, setIntegration] = useState("");
   const [integrationType, setIntegrationType] = useState("");
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     const requestedIntegration = searchParams.get("integration");
@@ -252,7 +253,7 @@ const Page = () => {
     setIntegrationType(preset.integrationType);
   }, [searchParams]);
   return (
-    <div className="bg-[#08132F] min-h-screen text-[#D1D5DB] font-sans p-10">
+    <div className="bg-dark min-h-screen text-[#D1D5DB] font-sans p-10">
       {isOpen && (
         <ConfigureIntegration
           open={isOpen}
@@ -278,6 +279,7 @@ const Page = () => {
           <button
             type="button"
             className="px-4 py-1.5 border border-white rounded text-xs font-bold text-white hover:bg-transparent"
+            onClick={() => router.push("/incident")}
           >
             Skip for now
           </button>

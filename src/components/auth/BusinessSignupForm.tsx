@@ -130,7 +130,7 @@ function SuccessPage({
   const name = [firstName, lastName].filter(Boolean).join(" ");
   return (
     <div className="w-full flex flex-col items-center justify-center min-h-96 py-12">
-      <div className="relative flex items-center justify-center mb-10">
+      <div className="relative flex items-center justify-center mb-32">
         <div className="size-[150px] rounded-full bg-emerald-100 absolute animate-ping" />
         <div className="size-[130px] rounded-full bg-emerald-200 absolute" />
         <div className="size-[110px] rounded-full bg-emerald-300 absolute" />

@@ -583,11 +583,13 @@ type DropdownKey =
   | "SOLUTIONS"
   | "CONNECTIONS"
   | "PRICING"
+  | "CONTACT US"
   | "RESOURCES"
   | "SECURITY";
 
 const DROPDOWN_WIDTHS: Record<DropdownKey, number> = {
   PRODUCT: 860,
+  "CONTACT US": 860,
   CHALLENGES: 860,
   SOLUTIONS: 560,
   CONNECTIONS: 700,
@@ -627,6 +629,7 @@ const NAV_LABELS: DropdownKey[] = [
   "SOLUTIONS",
   "CONNECTIONS",
   "PRICING",
+  "CONTACT US",
   "RESOURCES",
   "SECURITY",
 ];
@@ -645,17 +648,21 @@ function NavItem({ label }: { label: DropdownKey }) {
   }, []);
 
   const width = DROPDOWN_WIDTHS[label];
-
+  const singleTab = ["PRICING", "CONTACT US"];
   return (
     <div
       ref={ref}
       className="relative"
-      onMouseEnter={() => label !== "PRICING" && setOpen(true)}
-      onMouseLeave={() => label !== "PRICING" && setOpen(false)}
+      onMouseEnter={() => !singleTab.includes(label) && setOpen(true)}
+      onMouseLeave={() => !singleTab.includes(label) && setOpen(false)}
     >
       <button
         onClick={() =>
-          label == "PRICING" ? router.push("/pricing") : setOpen((o) => !o)
+          label == "PRICING"
+            ? router.push("/pricing")
+            : label == "CONTACT US"
+            ? router.push("/contact-us")
+            : setOpen((o) => !o)
         }
         className="flex items-center gap-1 px-0.5 py-1 text-[11.5px] font-bold tracking-wider text-gray-600 hover:text-gray-900 transition-colors bg-transparent border-none cursor-pointer"
       >
@@ -664,7 +671,7 @@ function NavItem({ label }: { label: DropdownKey }) {
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          {label !== "PRICING" && (
+          {!singleTab.includes(label) && (
             <ChevronDown size={12} className="text-gray-400" />
           )}
         </motion.div>
@@ -757,6 +764,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
       { title: "AWS", href: "/connectors/aws" },
     ],
     PRICING: [{ title: "Plans", href: "/pricing" }],
+    "CONTACT US": [{ title: "Contact us", href: "/contact-us" }],
     RESOURCES: [
       { title: "Documentation", href: "/docs" },
       { title: "Blog", href: "https://scrubbe.medium.com" },
