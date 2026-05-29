@@ -1240,7 +1240,12 @@ function FinalCta() {
           >
             Start free trial
           </button>
-          <button className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl bg-white text-[#0A1F14] font-semibold text-[15px] cursor-pointer border border-[#E5EAE7] hover:border-[#00D26A] transition-colors">
+          <button
+            data-cal-namespace="hero-demo"
+            data-cal-link="scrubbe/decision-system-demo"
+            data-cal-config='{"layout":"month_view","theme":"light"}'
+            className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl bg-white text-[#0A1F14] font-semibold text-[15px] cursor-pointer border border-[#E5EAE7] hover:border-[#00D26A] transition-colors"
+          >
             Book demo
           </button>
         </div>

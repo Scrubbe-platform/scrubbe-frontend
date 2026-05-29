@@ -67,7 +67,12 @@ const Contact = () => {
           >
             Start for Free
           </CButton>
-          <CButton className=" w-full px-5  h-[45px] border bg-transparent hover:bg-transparent border-cyan-500 text-cyan-500 shadow-none text-base">
+          <CButton
+            data-cal-namespace="hero-demo"
+            data-cal-link="scrubbe/decision-system-demo"
+            data-cal-config='{"layout":"month_view","theme":"light"}'
+            className=" w-full px-5  h-[45px] border bg-transparent hover:bg-transparent border-cyan-500 text-cyan-500 shadow-none text-base"
+          >
             Book Demo
           </CButton>
         </motion.div>

@@ -168,8 +168,11 @@ function LogoHeroSection() {
           <button
             className="px-7 py-3 font-semibold rounded-lg text-sm border-2 transition-all hover:bg-zinc-50 active:scale-95 text-zinc-800"
             style={{ borderColor: "#2d9e5f" }}
+            data-cal-namespace="hero-demo"
+            data-cal-link="scrubbe/decision-system-demo"
+            data-cal-config='{"layout":"month_view","theme":"light"}'
           >
-            Book Enterprise Logo
+            Book Enterprise Demo
           </button>
         </div>
       </div>

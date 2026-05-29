@@ -99,6 +99,9 @@ function Hero() {
           <button
             className="px-7 py-3 font-semibold rounded-lg text-sm border transition-all hover:bg-white/10 active:scale-95"
             style={{ borderColor: "#2d9e5f", color: "#5ede9a" }}
+            data-cal-namespace="hero-demo"
+            data-cal-link="scrubbe/decision-system-demo"
+            data-cal-config='{"layout":"month_view","theme":"light"}'
           >
             Book Enterprise Demo
           </button>
