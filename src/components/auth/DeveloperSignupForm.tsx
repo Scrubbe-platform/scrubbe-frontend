@@ -23,6 +23,8 @@ import OtpInput from "../ui/OtpInput";
 import { PasswordInput } from "../ui/password-input";
 import { AxiosError } from "axios";
 import { BiCheck } from "react-icons/bi";
+import { apiClient } from "@/lib/api/client";
+import { endpoint } from "@/lib/api/endpoint";
 
 // Define the form schema using zod
 export const developerSignupSchema = z
@@ -76,6 +78,9 @@ export default function DeveloperSignupForm() {
   const path = searchParams.get("to");
   const inviteEmail = searchParams.get("email");
   const invite = searchParams.get("invite");
+  const inviteToken = searchParams.get("token");
+  const inviteBusinessId = searchParams.get("businessId");
+  const workspace = searchParams.get("workspace");
   const isInvite = Boolean(invite);
 
   const router = useRouter();
@@ -107,6 +112,25 @@ export default function DeveloperSignupForm() {
     try {
       // Log form values
       console.log(data, " developer registration");
+
+      if (isInvite && inviteBusinessId) {
+        await apiClient.post(endpoint.auth.accept_invite, {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          password: data.password,
+          businessId: inviteBusinessId,
+          ...(inviteToken ? { token: inviteToken } : {}),
+        });
+
+        toast.success("Invite accepted", {
+          description: "Sign in to continue to your workspace.",
+        });
+        const params = new URLSearchParams({ email: data.email });
+        if (workspace) params.set("workspace", workspace);
+        router.push(`/auth/signin?${params.toString()}`);
+        return;
+      }
 
       // Simulate a 5-second delay
       await developerSignup(data);

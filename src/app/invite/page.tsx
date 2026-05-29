@@ -25,10 +25,21 @@ const Page = () => {
     onSuccess: (data) => {
       // Logic to handle navigation based on the API response
       const { existingUser, inviteData } = data;
-      const { email } = inviteData;
+      const { email, businessId, subdomain } = inviteData;
 
-      const registrationPath = `/auth/developer-signup?email=${email}&invite=${true}`;
-      const loginPath = `/auth/signin?email=${email}`;
+      const registrationParams = new URLSearchParams({
+        email,
+        invite: "true",
+        token: token ?? "",
+      });
+      if (businessId) registrationParams.set("businessId", businessId);
+      if (subdomain) registrationParams.set("workspace", subdomain);
+
+      const loginParams = new URLSearchParams({ email });
+      if (subdomain) loginParams.set("workspace", subdomain);
+
+      const registrationPath = `/auth/developer-signup?${registrationParams.toString()}`;
+      const loginPath = `/auth/signin?${loginParams.toString()}`;
 
       if (existingUser) {
         router.push(loginPath);

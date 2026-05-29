@@ -60,6 +60,7 @@ export interface BusinessSignupRequest {
   companySize: string;
   purpose?: string;
   businessName?: string;
+  workspaceUrl?: string;
 }
 
 export interface OAuthSignupRequest {
@@ -282,7 +283,8 @@ export const BusinessService = {
 
   // Send Invite
   async sendInvite(data: {
-    email: string;
+    email?: string;
+    inviteEmail?: string;
     role: string;
     accessPermissions?: string[];
     level?: string;
@@ -302,6 +304,7 @@ export const BusinessService = {
     email: string;
     password: string;
     businessId: string;
+    token?: string;
   }): Promise<any> {
     return await apiRequest<any>("post", "/business/accept-invite", data);
   },

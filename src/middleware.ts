@@ -20,6 +20,7 @@ const PUBLIC_ROUTES = [
   "/pricing",
   "/features",
   "/contact",
+  "/workspace",
   "/api/auth",
   "/api-docs",
 ];
@@ -59,6 +60,23 @@ type JwtPayload = {
 };
 
 const AUTH_COOKIE = COOKIE_KEYS.TOKEN;
+const ROOT_DOMAIN = "scrubbe.com";
+const RESERVED_SUBDOMAINS = new Set([
+  "admin",
+  "api",
+  "app",
+  "assets",
+  "auth",
+  "billing",
+  "cdn",
+  "docs",
+  "help",
+  "incidents",
+  "mail",
+  "status",
+  "support",
+  "www",
+]);
 
 const isTokenExpired = (payload: JwtPayload | null): boolean => {
   if (!payload?.exp) return false;
@@ -98,6 +116,18 @@ const getDefaultRedirect = (payload: JwtPayload | null): string => {
   return "/incident";
 };
 
+const getWorkspaceSubdomain = (hostname: string): string | null => {
+  const host = hostname.replace(/:\d+$/, "").toLowerCase();
+  if (!host.endsWith(`.${ROOT_DOMAIN}`)) return null;
+
+  const subdomain = host.slice(0, -`.${ROOT_DOMAIN}`.length);
+  if (!subdomain || subdomain.includes(".") || RESERVED_SUBDOMAINS.has(subdomain)) {
+    return null;
+  }
+
+  return subdomain;
+};
+
 export default function middleware(req: NextRequest) {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
@@ -108,6 +138,7 @@ export default function middleware(req: NextRequest) {
   const isStaticAsset = /\.[^/]+$/.test(pathname);
   const isDocsHost =
     hostname === "docs.scrubbe.com" || hostname.startsWith("docs.scrubbe.com:");
+  const workspaceSubdomain = getWorkspaceSubdomain(hostname);
 
   if (
     isDocsHost &&
@@ -119,6 +150,16 @@ export default function middleware(req: NextRequest) {
     const docsUrl = nextUrl.clone();
     docsUrl.pathname = pathname === "/" ? "/docs" : `/docs${pathname}`;
     return NextResponse.rewrite(docsUrl);
+  }
+
+  if (
+    workspaceSubdomain &&
+    pathname === "/" &&
+    !isStaticAsset
+  ) {
+    const workspaceUrl = nextUrl.clone();
+    workspaceUrl.pathname = `/workspace/${workspaceSubdomain}`;
+    return NextResponse.rewrite(workspaceUrl);
   }
 
   if (urlToken || urlRefreshToken) {
