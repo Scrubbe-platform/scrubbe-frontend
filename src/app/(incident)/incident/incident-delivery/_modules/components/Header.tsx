@@ -48,7 +48,7 @@ const Header = ({ incident }: { incident: IncidentDetailRecord }) => {
 
   return (
     <div>
-      <div className="flex items-start justify-between text-white">
+      <div className="flex items-start justify-between text-gray-900 dark:text-white">
         <div className="space-y-3">
           <p className="text-lg font-semibold">Scrubbe · Analyst Investigation</p>
           <p className="font-semibold">
@@ -115,7 +115,7 @@ const ButtonTags = ({
   return (
     <div
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-400 px-2 py-1 text-sm"
+      className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 dark:border-zinc-400 px-2 py-1 text-sm"
     >
       {Icon}
       {title}

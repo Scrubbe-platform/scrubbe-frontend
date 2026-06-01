@@ -43,12 +43,12 @@ interface Props {
 
 // ── Sub-components ─────────────────────────────────────────────────────────
 function SectionDivider() {
-  return <div className="border-t border-neutral-700/50 my-1" />;
+  return <div className="border-t border-gray-200 dark:border-neutral-700/50 my-1" />;
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-sm font-semibold text-neutral-200 mb-3">{children}</p>
+    <p className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-3">{children}</p>
   );
 }
 
@@ -68,14 +68,14 @@ function CheckRow({
   return (
     <div className="flex items-start justify-between gap-3 mb-2.5">
       <div className="flex items-center gap-2 shrink-0">
-        <Check size={13} className="text-green-400 shrink-0" />
-        <span className="text-xs text-neutral-400">{label}</span>
+        <Check size={13} className="text-green-400 dark:text-emerald-300 shrink-0" />
+        <span className="text-xs text-gray-600 dark:text-neutral-400">{label}</span>
       </div>
       <div className="text-right">
         <span className={`text-xs font-medium ${valueColor}`}>{value}</span>
         {subValue && (
           <p className="text-xs mt-0.5">
-            <span className="text-neutral-300">Auto-merge allowed : </span>
+            <span className="text-gray-600 dark:text-neutral-400">Auto-merge allowed : </span>
             <span className={subValueColor}>{subValue}</span>
           </p>
         )}
@@ -157,7 +157,7 @@ export default function ConfidenceSidebar({
   const confidencePct = Math.round(confidence * 100);
 
   return (
-    <div className="w-full bg-darkEzra text-neutral-300 flex md:flex-col flex-col-reverse overflow-y-auto ">
+    <div className="w-full bg-white dark:bg-grayscrubbe-900 text-gray-900 dark:text-neutral-300 flex md:flex-col flex-col-reverse overflow-y-auto">
       <div>
         {/* ── Confidence Score Section ── */}
         <div className="px-4 pt-4 pb-2">
@@ -179,33 +179,33 @@ export default function ConfidenceSidebar({
           {confidenceOpen && (
             <>
               {/* Score */}
-              <p className="text-4xl font-bold text-green-400 leading-none mb-2">
+              <p className="text-4xl font-bold text-green-400 dark:text-emerald-300 leading-none mb-2">
                 {confidence}
               </p>
 
               {/* Progress bar */}
-              <div className="h-1.5 bg-neutral-700 rounded-full mb-2">
+              <div className="h-1.5 bg-gray-200 dark:bg-neutral-700 rounded-full mb-2">
                 <div
-                  className="h-full bg-green-400 rounded-full transition-all"
+                  className="h-full bg-green-400 dark:bg-emerald-400 rounded-full transition-all"
                   style={{ width: `${confidencePct}%` }}
                 />
               </div>
 
-              <p className="text-xs text-neutral-400 mb-4">{confidenceLabel}</p>
+              <p className="text-xs text-gray-600 dark:text-neutral-400 mb-4">{confidenceLabel}</p>
 
               {/* Inner card */}
-              <div className="bg-[#161e2e] rounded-xl p-4">
+              <div className="bg-white dark:bg-grayscrubbe-800 rounded-xl p-4 border border-gray-100 dark:border-neutral-800">
                 {/* Risk level row */}
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs text-neutral-400">
+                  <span className="text-xs text-gray-600 dark:text-neutral-400">
                     Risk level :{" "}
-                    <span className="text-neutral-200 font-semibold">
+                    <span className="text-gray-900 dark:text-neutral-200 font-semibold">
                       {riskLevel}
                     </span>
                   </span>
-                  <span className="text-xs text-neutral-400">
+                  <span className="text-xs text-gray-600 dark:text-neutral-400">
                     Auto /{" "}
-                    <span className="text-neutral-200 font-semibold">
+                    <span className="text-gray-900 dark:text-neutral-200 font-semibold">
                       {approvalMode}
                     </span>
                   </span>
@@ -233,8 +233,8 @@ export default function ConfidenceSidebar({
                       className="flex items-start justify-between gap-3 mb-2.5"
                     >
                       <div className="flex items-center gap-2 shrink-0">
-                        <Check size={13} className="text-green-400 shrink-0" />
-                        <span className="text-xs text-neutral-400">
+                        <Check size={13} className="text-green-400 dark:text-emerald-300 shrink-0" />
+                        <span className="text-xs text-gray-600 dark:text-neutral-400">
                           {r.label}
                         </span>
                       </div>
@@ -246,14 +246,14 @@ export default function ConfidenceSidebar({
                         >
                           {r.value}
                           {r.label === "Blast Radius" && (
-                            <span className="text-neutral-300 font-normal">
+                            <span className="text-gray-600 dark:text-neutral-300 font-normal">
                               {" "}
                               {r.subValue}
                             </span>
                           )}
                         </p>
                         {r.label === "Policy Status" && r.subValue && (
-                          <p className="text-xs mt-0.5 text-neutral-300">
+                          <p className="text-xs mt-0.5 text-gray-600 dark:text-neutral-300">
                             Auto-merge allowed :{" "}
                             <span className={r.subValueColor ?? "text-red-400"}>
                               {r.subValue}
@@ -321,10 +321,10 @@ export default function ConfidenceSidebar({
                 key={label}
                 className="flex items-start justify-between gap-4"
               >
-                <span className="text-xs text-neutral-500 shrink-0">
+                <span className="text-xs text-gray-500 dark:text-neutral-500 shrink-0">
                   {label}
                 </span>
-                <span className="text-xs text-neutral-300 text-right">
+                <span className="text-xs text-gray-700 dark:text-neutral-300 text-right">
                   {value}
                 </span>
               </div>
@@ -339,7 +339,7 @@ export default function ConfidenceSidebar({
           <SectionTitle>Pull Request</SectionTitle>
 
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-2xl font-bold text-neutral-100">
+            <span className="text-2xl font-bold text-gray-900 dark:text-neutral-100">
               {prNumber}
             </span>
             <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-green-900/40 text-green-400 border border-green-800">
@@ -347,13 +347,13 @@ export default function ConfidenceSidebar({
             </span>
           </div>
 
-          <p className="text-xs text-neutral-300 mb-3 leading-relaxed">
+          <p className="text-xs text-gray-700 dark:text-neutral-300 mb-3 leading-relaxed">
             {prTitle}
           </p>
 
           <div className="space-y-1.5">
             {[prRepo, prBranch, prUrl].map((val) => (
-              <p key={val} className="text-xs text-neutral-500">
+              <p key={val} className="text-xs text-gray-500 dark:text-neutral-500">
                 {val}
               </p>
             ))}
@@ -364,20 +364,20 @@ export default function ConfidenceSidebar({
       </div>
 
       {/* ── Actions ── */}
-      <div className="px-4 py-4 flex flex-col gap-3">
+        <div className="px-4 py-4 flex flex-col gap-3">
         <button
           onClick={onApprove}
-          className="w-full py-3.5 rounded-xl bg-green-400 hover:bg-green-300 text-neutral-900 text-sm font-bold transition-colors"
+          className="w-full py-3.5 rounded-xl bg-green-400 dark:bg-greenscrubbe-500 hover:bg-green-300 dark:hover:bg-greenscrubbe-400 text-neutral-900 dark:text-black text-sm font-bold transition-colors"
         >
           Approve &amp; merge
         </button>
         <button
           onClick={onReject}
-          className="w-full py-3.5 rounded-xl bg-red-500 hover:bg-red-400 text-white text-sm font-bold transition-colors"
+          className="w-full py-3.5 rounded-xl bg-red-500 dark:bg-red-600 hover:bg-red-400 dark:hover:bg-red-500 text-white text-sm font-bold transition-colors"
         >
           Reject
         </button>
-        <p className="text-[11px] text-neutral-600 text-center md:block hidden">
+        <p className="text-[11px] text-gray-500 dark:text-neutral-600 text-center md:block hidden">
           {auditLabel}
         </p>
       </div>

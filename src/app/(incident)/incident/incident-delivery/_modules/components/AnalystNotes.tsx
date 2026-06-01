@@ -24,7 +24,7 @@ const AnalystNotes: React.FC<AnalystNotesProps> = ({
 }) => {
   const [isAnalystNote, setIsAnalystNote] = useState(false);
   return (
-    <div className=" p-5 border border-IMSCyan/40 rounded-xl text-slate-300 bg-gradient-to-b from-[#0074834D] to-[#004B571A] flex items-start justify-center">
+    <div className=" p-5 border border-IMSCyan/40 rounded-xl text-gray-700 dark:text-slate-300 bg-gradient-to-b from-IMSCyan/30 to-IMSCyan/10 dark:from-IMSCyan/20 dark:to-grayscrubbe-800 flex items-start justify-center">
       <div className="w-full">
         {/* Header Section */}
         <div className="flex justify-between items-start mb-3 w-full">
@@ -45,7 +45,7 @@ const AnalystNotes: React.FC<AnalystNotesProps> = ({
           Notes include author + timestamp and become part of the evidence pack.
         </p>
         {/* Notes Container */}
-        <div className="bg-black border border-slate-500 rounded-2xl p-6 mt-4 shadow-inner min-h-[80px] flex items-center">
+        <div className="bg-white dark:bg-grayscrubbe-800 border border-slate-500 rounded-2xl p-6 mt-4 shadow-inner min-h-[80px] flex items-center">
           {notes.length === 0 ? (
             <p className="text-lg text-slate-400 font-medium italic">
               No analyst notes yet.

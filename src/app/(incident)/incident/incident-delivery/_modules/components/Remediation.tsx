@@ -96,7 +96,7 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const recommendedSource = primaryOption?.source ?? "--";
 
   return (
-    <div className=" p-5 border border-IMSCyan/40 rounded-xl text-slate-300 bg-gradient-to-b from-[#0074834D] to-[#004B571A] flex items-start justify-center">
+    <div className=" p-5 border border-IMSCyan/40 rounded-xl text-gray-700 dark:text-slate-300 bg-gradient-to-b from-IMSCyan/30 to-IMSCyan/10 dark:from-IMSCyan/20 dark:to-grayscrubbe-800 flex items-start justify-center">
       <div className="w-full">
         <div className="flex justify-between items-start mb-6">
           <div className="space-y-1">
@@ -308,7 +308,7 @@ const SuggestionBox: React.FC<{
   boldText: string;
   desc: string;
 }> = ({ title, boldText, desc }) => (
-  <div className="bg-black p-4 rounded-xl border border-slate-500 min-h-[140px]">
+  <div className="bg-white dark:bg-grayscrubbe-800 p-4 rounded-xl border border-slate-500 min-h-[140px]">
     <p className="text-sm font-black uppercase text-white mb-2">{title}</p>
     <p className="text-sm font-semibold text-slate-200 leading-tight">
       {boldText}

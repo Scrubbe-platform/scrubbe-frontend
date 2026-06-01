@@ -36,7 +36,7 @@ const PlaybookSection: React.FC<{ incidentId?: string; category?: string }> = ({
   const scope = matched?.config?.scope ?? matched?.scope ?? "pr-only";
 
   return (
-    <div className=" p-5 text-white border border-IMSCyan/40 rounded-xl w-full bg-gradient-to-b from-[#0074834D] to-[#004B571A] flex items-start justify-center">
+    <div className=" p-5 text-gray-900 dark:text-white border border-IMSCyan/40 rounded-xl w-full bg-gradient-to-b from-IMSCyan/30 to-IMSCyan/10 dark:from-IMSCyan/20 dark:to-grayscrubbe-800 flex items-start justify-center">
       <div className="w-full">
         {/* Header Area */}
         <div className="flex justify-between items-start mb-6 ">
@@ -63,7 +63,7 @@ const PlaybookSection: React.FC<{ incidentId?: string; category?: string }> = ({
         </div>
 
         {/* Content Card */}
-        <div className="bg-black border border-slate-800 rounded-2xl p-6 mt-8 shadow-inner">
+        <div className="bg-white dark:bg-grayscrubbe-800 border border-slate-800 rounded-2xl p-6 mt-8 shadow-inner">
           {isLoading ? (
             <p className="text-xs text-slate-500 animate-pulse">Matching playbook…</p>
           ) : (

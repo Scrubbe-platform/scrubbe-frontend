@@ -7,7 +7,7 @@ const LinksThatOpen = ({ incident }: { incident: IncidentDetailRecord }) => {
   const payloadData = buildDeliveryPayload(incident);
 
   return (
-    <div className="flex items-center justify-center rounded-xl border border-IMSCyan/40 bg-gradient-to-b from-[#0074834D] to-[#004B571A] p-5 text-slate-300">
+    <div className="flex items-center justify-center rounded-xl border border-IMSCyan/40 bg-gradient-to-b from-IMSCyan/30 to-IMSCyan/10 dark:from-IMSCyan/20 dark:to-grayscrubbe-800 p-5 text-gray-700 dark:text-slate-300">
       <div className="w-full">
         <div className="mb-10 flex items-start justify-between">
           <div className="space-y-1">
@@ -27,7 +27,7 @@ const LinksThatOpen = ({ incident }: { incident: IncidentDetailRecord }) => {
         </div>
 
         <div className="mb-6 grid gap-6">
-          <div className="flex flex-col gap-6 rounded-2xl border border-slate-800 bg-black p-6">
+          <div className="flex flex-col gap-6 rounded-2xl border border-slate-800 bg-white dark:bg-grayscrubbe-800 p-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-100">
               Artifacts
             </h3>
@@ -38,7 +38,7 @@ const LinksThatOpen = ({ incident }: { incident: IncidentDetailRecord }) => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-black p-6">
+            <div className="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-white dark:bg-grayscrubbe-800 p-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-100">
               Failing Units
             </h3>
@@ -85,7 +85,7 @@ const ArtifactLink = ({ label, href }: { label: string; href: string }) => (
 );
 
 const SignalPill = ({ label }: { label: string }) => (
-  <div className="flex items-center gap-3 rounded-full border border-slate-700 bg-slate-900/50 px-4 py-2 text-xs font-medium text-slate-300">
+  <div className="flex items-center gap-3 rounded-full border border-slate-700 bg-white/5 dark:bg-slate-900/50 px-4 py-2 text-xs font-medium text-gray-700 dark:text-slate-300">
     <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
     {label}
   </div>

@@ -2,7 +2,7 @@ import React from "react";
 
 const Status = () => {
   return (
-    <div className=" bg-[#030D25] p-5 text-slate-300 antialiased  border-green-400/40 rounded-lg text-base ">
+    <div className="bg-slate-950/80 dark:bg-grayscrubbe-950 p-5 text-slate-300 antialiased border-green-400/40 rounded-lg text-base">
       <p>Status</p>
       <p>Quiet inactive</p>
       <p className="text-sm">Next quiet period starts in —</p>

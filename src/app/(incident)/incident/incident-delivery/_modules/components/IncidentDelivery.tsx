@@ -27,7 +27,7 @@ const IncidentDelivery = ({ incident }: { incident: IncidentDetailRecord }) => {
   }
 
   return (
-    <div className="bg-dark min-h-screen p-10 text-gray-200 space-y-3">
+    <div className="bg-white dark:bg-grayscrubbe-900 min-h-screen p-10 text-gray-900 dark:text-gray-200 space-y-3">
         <Header incident={incident}/>
         <DeliverySignal/>
         <div className="flex gap-5 pt-5">

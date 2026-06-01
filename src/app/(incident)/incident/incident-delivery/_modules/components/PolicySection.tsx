@@ -30,7 +30,7 @@ const PolicySection: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   ];
 
   return (
-    <div className="text-white border border-IMSCyan/40 rounded-xl p-5 bg-gradient-to-b from-[#0074834D] to-[#004B571A] flex items-start justify-center">
+    <div className="text-gray-900 dark:text-white border border-IMSCyan/40 rounded-xl p-5 bg-gradient-to-b from-IMSCyan/30 to-IMSCyan/10 dark:from-IMSCyan/20 dark:to-grayscrubbe-800 flex items-start justify-center">
       <div className="w-full">
         {/* Header Area */}
         <div className="flex justify-between items-start mb-10">
@@ -64,7 +64,7 @@ const PolicySection: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
         </div>
 
         {/* Reasons Summary Card */}
-        <div className="bg-black border border-slate-800 rounded-2xl p-6 shadow-inner">
+        <div className="bg-white dark:bg-grayscrubbe-800 border border-slate-800 rounded-2xl p-6 shadow-inner">
           <h3 className="text-base font-black text-white uppercase tracking-widest mb-4">
             Reasons (summary)
           </h3>

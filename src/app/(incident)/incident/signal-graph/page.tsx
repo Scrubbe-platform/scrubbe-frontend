@@ -380,7 +380,7 @@ function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) 
           </div>
         </aside>
 
-        <main className="relative min-h-[680px] bg-[#020408]">
+        <main className="relative min-h-[680px] bg-slate-950 dark:bg-grayscrubbe-950">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -509,7 +509,7 @@ function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) 
         </aside>
       </div>
 
-      <footer className="flex h-8 items-center justify-between border-t border-white/10 bg-[#060b12] px-4 text-[10px] font-mono text-slate-500">
+      <footer className="flex h-8 items-center justify-between border-t border-white/10 bg-slate-950/90 dark:bg-grayscrubbe-950/90 px-4 text-[10px] font-mono text-slate-500">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-1.5">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />

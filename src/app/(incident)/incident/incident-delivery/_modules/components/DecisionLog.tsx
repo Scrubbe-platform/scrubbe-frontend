@@ -41,7 +41,7 @@ const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const entries = data ?? [];
 
   return (
-    <div className=" p-5 border border-IMSCyan/40 rounded-xl text-slate-300 bg-gradient-to-b from-[#0074834D] to-[#004B571A] flex items-start justify-center">
+    <div className=" p-5 border border-IMSCyan/40 rounded-xl text-gray-700 dark:text-slate-300 bg-gradient-to-b from-IMSCyan/30 to-IMSCyan/10 dark:from-IMSCyan/20 dark:to-grayscrubbe-800 flex items-start justify-center">
       <div className="w-full ">
         {/* Header Section */}
         <div className="mb-8">
@@ -57,12 +57,12 @@ const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
         </div>
 
         {/* Entries Container */}
-        <div className="bg-black border border-slate-400 rounded-2xl p-6 space-y-4 shadow-inner">
+        <div className="bg-white dark:bg-grayscrubbe-800 border border-slate-400 rounded-2xl p-6 space-y-4 shadow-inner">
           <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
-            <h3 className="text-sm font-black text-slate-100 uppercase tracking-widest">
+            <h3 className="text-sm font-black text-gray-900 dark:text-slate-100 uppercase tracking-widest">
               Recent entries
             </h3>
-            <span className="px-3 py-1 bg-slate-900 border border-slate-800 rounded-full text-xs font-bold text-slate-400">
+            <span className="px-3 py-1 bg-white/5 dark:bg-slate-900 border border-slate-800 rounded-full text-xs font-bold text-gray-600 dark:text-slate-400">
               {isLoading ? "…" : `${entries.length} events`}
             </span>
           </div>
@@ -114,20 +114,20 @@ const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
 };
 
 const LogEntry: React.FC<LogEntryProps> = ({ icon, title, desc, time, payload }) => (
-  <div className="border border-slate-800 rounded-xl p-4 bg-black hover:border-slate-700 transition-colors group">
+  <div className="border border-slate-800 rounded-xl p-4 bg-white dark:bg-grayscrubbe-800 hover:border-slate-700 transition-colors group">
     <div className="flex justify-between items-start mb-2">
       <div className="flex items-start gap-3">
         <div className="mt-1">{icon}</div>
         <div>
-          <h4 className="text-sm font-black text-slate-100 font-mono tracking-tight">{title}</h4>
-          <p className="text-[13px] text-slate-400 mt-0.5">{desc}</p>
+          <h4 className="text-sm font-black text-gray-900 dark:text-slate-100 font-mono tracking-tight">{title}</h4>
+          <p className="text-[13px] text-gray-600 dark:text-slate-400 mt-0.5">{desc}</p>
         </div>
       </div>
       <span className="text-[11px] font-medium text-slate-600 font-mono">{time}</span>
     </div>
 
     {payload && (
-      <div className="mt-4 bg-black/80 rounded-lg p-4 border border-slate-800 font-mono text-[12px] text-slate-300 leading-relaxed overflow-x-auto shadow-inner">
+      <div className="mt-4 bg-white/80 dark:bg-grayscrubbe-800 rounded-lg p-4 border border-slate-800 font-mono text-[12px] text-gray-700 dark:text-slate-300 leading-relaxed overflow-x-auto shadow-inner">
         <pre>
           <code>{JSON.stringify(payload, null, 2)}</code>
         </pre>

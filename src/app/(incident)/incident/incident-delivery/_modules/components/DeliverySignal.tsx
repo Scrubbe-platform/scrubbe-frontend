@@ -15,7 +15,7 @@ import {
 const DeliverySignal = () => {
   return (
     <div className="pt-5">
-      <div className="w-full mx-auto bg-gradient-to-b text-white from-[#0074834D] to-[#004B571A] border rounded-xl transition-all border-IMSCyan/40 p-6 shadow-2xl">
+      <div className="w-full mx-auto bg-gradient-to-b text-gray-900 dark:text-white from-IMSCyan/30 to-IMSCyan/10 dark:from-IMSCyan/20 dark:to-grayscrubbe-800 border rounded-xl transition-all border-IMSCyan/40 p-6 shadow-2xl">
         {/* Top Header Section */}
         <div className="flex justify-between items-start mb-6">
           <div className="space-y-1">
@@ -30,8 +30,8 @@ const DeliverySignal = () => {
               below drive the UI so devs can understand the analyst workflow.
             </p>
           </div>
-          <div className="flex gap-2">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-900/50 border border-slate-800 rounded-lg text-[11px] font-bold uppercase tracking-wider">
+            <div className="flex gap-2">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-900/5 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg text-[11px] font-bold uppercase tracking-wider">
               Policy mode : Standard
             </div>
             <button className="px-3 py-1.5 bg-transparent border border-IMSCyan text-IMSCyan rounded-lg text-sm font-bold transition-colors">
@@ -47,34 +47,34 @@ const DeliverySignal = () => {
         <div className="flex flex-wrap gap-3 mb-10">
           <SignalButton
             icon={<BeakerIcon size={14} />}
-            color="bg-[#eab308]"
+            color="bg-amber-400"
             label="CI failed (tests)"
             textColor="text-black"
           />
           <SignalButton
             icon={<HammerIcon size={14} />}
-            color="bg-[#eab308]"
+            color="bg-amber-400"
             label="CI failed (build)"
             textColor="text-black"
           />
           <SignalButton
             icon={<GitPullRequestIcon size={14} />}
-            color="bg-[#f43f5e]"
+            color="bg-rose-500"
             label="PR Checks failed"
           />
           <SignalButton
             icon={<GitMergeIcon size={14} />}
-            color="bg-[#f43f5e]"
+            color="bg-rose-500"
             label="Merge Conflicts"
           />
           <SignalButton
             icon={<RocketIcon size={14} />}
-            color="bg-[#06b6d4]"
+            color="bg-cyan-500"
             label="Deployed Failed ( Staging )"
           />
           <SignalButton
             icon={<SearchIcon size={14} />}
-            color="bg-[#d946ef]"
+            color="bg-violet-500"
             label="Flaky tests detected"
           />
         </div>

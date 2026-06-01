@@ -262,7 +262,7 @@ const ScrubbeOnboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#08132F] text-[#D1D5DB] font-sans p-10 selection:bg-IMSCyan selection:text-black">
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-grayscrubbe-900 dark:text-grayscrubbe-300 font-sans p-10 selection:bg-IMSCyan selection:text-black">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="max-w-[1400px] mx-auto"
@@ -270,10 +270,10 @@ const ScrubbeOnboarding = () => {
         {/* HEADER SECTION */}
         <div className="flex justify-between items-start mb-12">
           <div className="max-w-3xl">
-            <h1 className="text-3xl font-bold text-white mb-3">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
               Welcome to your Scrubbe Workspace
             </h1>
-            <p className="text-[#9CA3AF] text-base leading-relaxed">
+            <p className="text-gray-500 dark:text-grayscrubbe-400 text-base leading-relaxed">
               You&apos;re the first administrator here. Take a few minutes to
               invite your team, choose roles and permissions, and set the basic
               guardrails for how incidents, fraud signals, and handovers work in
@@ -283,7 +283,7 @@ const ScrubbeOnboarding = () => {
           <button
             type="button"
             onClick={() => router.push("/incident")}
-            className="px-4 py-1.5 border border-white rounded text-xs font-bold text-white hover:bg-transparent"
+            className="px-4 py-1.5 border border-gray-300 dark:border-white rounded text-xs font-bold text-gray-900 dark:text-white hover:bg-transparent"
           >
             Skip for now
           </button>
@@ -309,7 +309,7 @@ const ScrubbeOnboarding = () => {
                   </label>
                   <textarea
                     {...register("inviteEmails")}
-                    className="w-full bg-[#08132F] border border-zinc-500 rounded-md p-4 h-28 text-sm outline-none focus:border-[#00CAD8]"
+                    className="w-full bg-white dark:bg-grayscrubbe-900 border border-zinc-500 rounded-md p-4 h-28 text-sm outline-none focus:border-IMSCyan"
                     placeholder="jane@acme.com, jude@flutter.com"
                   />
                   <p className="text-sm">
@@ -358,7 +358,7 @@ const ScrubbeOnboarding = () => {
                         label="Send Welcome Note"
                         value={field.value}
                         onChange={field.onChange}
-                        className="!bg-[#08132F]"
+                        className="!bg-white dark:!bg-grayscrubbe-900"
                       />
                     )}
                   />
@@ -375,7 +375,7 @@ const ScrubbeOnboarding = () => {
                     />
                   )}
                 />
-                <div className="flex items-center justify-end pt-4 border-t border-[#1F2937]">
+                <div className="flex items-center justify-end pt-4 border-t border-gray-200 dark:border-grayscrubbe-800">
                   <div className="flex gap-4 items-center">
                     <button
                       type="button"
@@ -561,10 +561,10 @@ const ScrubbeOnboarding = () => {
                         </div>
 
                         {/* 3. SAML/OIDC DYNAMIC DETAILS — Signal Ingestion */}
-                        <div className="bg-panel/40 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-                          <div className="p-4 border-b border-white/5 bg-white/5 flex items-center gap-3">
+                        <div className="bg-white/5 dark:bg-grayscrubbe-800 border border-gray-200/20 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                          <div className="p-4 border-b border-gray-200/20 bg-white/5 dark:bg-grayscrubbe-800/20 flex items-center gap-3">
                             <Database className="size-4 text-accent" />
-                            <h3 className="text-xs font-bold text-white uppercase tracking-widest">
+                            <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest">
                               {formValues.ssoConfiguration.ssoType === "SAML_2"
                                 ? "SAML 2.0 Identity Details"
                                 : "OIDC Client Configuration"}
@@ -583,11 +583,11 @@ const ScrubbeOnboarding = () => {
                                     name="ssoConfiguration.idp_url"
                                     control={control}
                                     render={({ field }) => (
-                                      <Input
-                                        placeholder="https://idp.example.com/app/metadata"
-                                        className="!h-11 !bg-void/50"
-                                        {...field}
-                                      />
+                                          <Input
+                                            placeholder="https://idp.example.com/app/metadata"
+                                            className="!h-11 !bg-white/5 dark:!bg-grayscrubbe-800"
+                                            {...field}
+                                          />
                                     )}
                                   />
                                   <p className="text-[9px] text-gray-500 font-mono italic">
@@ -606,7 +606,7 @@ const ScrubbeOnboarding = () => {
                                       render={({ field }) => (
                                         <Input
                                           placeholder="urn:scrubbe:acme"
-                                          className="!h-11 !bg-void/50"
+                                          className="!h-11 !bg-white/5 dark:!bg-grayscrubbe-800"
                                           {...field}
                                         />
                                       )}
@@ -621,10 +621,10 @@ const ScrubbeOnboarding = () => {
                                       control={control}
                                     render={({ field }) => (
                                       <Input
-                                          value={field.value}
-                                          readOnly
-                                          className="!h-11 !bg-void/20 text-gray-500"
-                                        />
+                                        value={field.value}
+                                        readOnly
+                                        className="!h-11 !bg-white/10 dark:!bg-grayscrubbe-800 text-gray-500 dark:text-zinc-400"
+                                      />
                                       )}
                                     />
                                   </div>
@@ -640,11 +640,11 @@ const ScrubbeOnboarding = () => {
                                     name="ssoConfiguration.issuer_url"
                                     control={control}
                                     render={({ field }) => (
-                                      <Input
-                                        placeholder="https://accounts.google.com"
-                                        className="!h-11 !bg-void/50"
-                                        {...field}
-                                      />
+                                        <Input
+                                          placeholder="https://accounts.google.com"
+                                          className="!h-11 !bg-white/5 dark:!bg-grayscrubbe-800"
+                                          {...field}
+                                        />
                                     )}
                                   />
                                 </div>
@@ -659,7 +659,7 @@ const ScrubbeOnboarding = () => {
                                       render={({ field }) => (
                                         <Input
                                           placeholder="scrubbe-client-id"
-                                          className="!h-11 !bg-void/50"
+                                          className="!h-11 !bg-white/5 dark:!bg-grayscrubbe-800"
                                           {...field}
                                         />
                                       )}
@@ -676,7 +676,7 @@ const ScrubbeOnboarding = () => {
                                         <Input
                                           type="password"
                                           placeholder="••••••••••••"
-                                          className="!h-11 !bg-void/50"
+                                          className="!h-11 !bg-white/5 dark:!bg-grayscrubbe-800"
                                           {...field}
                                         />
                                       )}
@@ -692,13 +692,13 @@ const ScrubbeOnboarding = () => {
                         <div className=" border border-IMSCyan/10 rounded-2xl p-6 space-y-6 mt-4">
                           <div className="flex items-center gap-3 mb-2">
                             <Fingerprint className="size-5 text-IMSCyan" />
-                            <h3 className="text-sm font-bold text-white uppercase tracking-widest">
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest">
                               Provisioning & Role Mapping
                             </h3>
                           </div>
 
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="flex items-center justify-between p-4 bg-void/40 border border-white/5 rounded-xl">
+                            <div className="flex items-center justify-between p-4 bg-white/5 dark:bg-grayscrubbe-800 border border-gray-200/20 dark:border-white/5 rounded-xl">
                               <div className="flex items-center gap-3">
                                 <Info className="size-4 text-gray-500" />
                                 <span className="text-xs font-medium">
@@ -718,7 +718,7 @@ const ScrubbeOnboarding = () => {
                                 )}
                               />
                             </div>
-                            <div className="flex items-center justify-between p-4 bg-void/40 border border-white/5 rounded-xl">
+                            <div className="flex items-center justify-between p-4 bg-white/5 dark:bg-grayscrubbe-800 border border-gray-200/20 dark:border-white/5 rounded-xl">
                               <div className="flex items-center gap-3">
                                 <AlertCircle className="size-4 text-gray-500" />
                                 <span className="text-xs font-medium">
@@ -741,7 +741,7 @@ const ScrubbeOnboarding = () => {
                           </div>
 
                           <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+                            <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">
                               Group → Scrubbe Role Mapping
                             </label>
                             <Controller
@@ -749,7 +749,7 @@ const ScrubbeOnboarding = () => {
                               control={control}
                               render={({ field }) => (
                                 <TextArea
-                                  className="w-full bg-void/50 border border-white/10 rounded-xl p-4 h-32 text-xs font-mono outline-none focus:border-IMSCyan/50 transition-all"
+                                  className="w-full bg-white/5 dark:bg-grayscrubbe-800 border border-gray-200/20 dark:border-white/10 rounded-xl p-4 h-32 text-xs font-mono outline-none focus:border-IMSCyan transition-all"
                                   placeholder='{ "SRE_TEAM": "Commander", "DEVOPS": "Responder" }'
                                   rows={6}
                                   {...field}
@@ -833,12 +833,12 @@ const ScrubbeOnboarding = () => {
             >
               <div className="grid grid-cols-2 gap-6 mb-8">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-white uppercase">
+                  <label className="text-[11px] font-bold text-gray-900 dark:text-white uppercase">
                     Workspace Name
                   </label>
                   <input
                     {...register("workspaceName")}
-                    className="w-full bg-[#08132F] border border-[#4B5563] rounded p-2 text-sm outline-none"
+                    className="w-full bg-white dark:bg-grayscrubbe-900 border border-gray-300 dark:border-grayscrubbe-600 rounded p-2 text-sm outline-none"
                   />
                   <p className="text-sm">
                     Used in emails, alerts and handover documents.
@@ -857,7 +857,7 @@ const ScrubbeOnboarding = () => {
                   )}
                 />
               </div>
-              <p className="text-white text-base pb-3">
+              <p className="text-gray-900 dark:text-white text-base pb-3">
                 Key integrations to connect now
               </p>
               <div className="grid grid-cols-2 gap-4">
@@ -919,24 +919,24 @@ const ScrubbeOnboarding = () => {
 
           {/* RIGHT COLUMN: SIDEBAR (EXACT UI) */}
           <aside className="flex-1 space-y-6 ">
-            <div className="border-zinc-400 border bg-[#08132F] p-6 rounded-lg">
-              <h3 className="text-base font-bold text-white mb-1">
+            <div className="border-zinc-400 border bg-white dark:bg-grayscrubbe-900 p-6 rounded-lg">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">
                 People in this workspace
               </h3>
-              <p className="text-sm text-zinc-200 mb-4 tracking-tighter">
+              <p className="text-sm text-gray-600 dark:text-zinc-200 mb-4 tracking-tighter">
                 A quick snapshot of who’s here and what they can do.{" "}
               </p>
               <div className="mb-4">
-                <div className="flex justify-between items-center text-sm text-white ">
+                <div className="flex justify-between items-center text-sm text-gray-900 dark:text-white ">
                   <span className="font-medium">You (workspace owner)</span>
-                  <span className="text-[10px] font-bold text-[#6B7280] uppercase">
+                  <span className="text-[10px] font-bold text-grayscrubbe-500 dark:text-grayscrubbe-500 uppercase">
                     Admin
                   </span>
                 </div>
                 <p className="text-xs ">Admins, SREs, fraud & business teams</p>
               </div>
               <div>
-                <p className="text-sm text-white font-medium">
+                <p className="text-sm text-gray-900 dark:text-white font-medium">
                   No invited members yet.
                 </p>
                 <p className="text-xs">
@@ -946,25 +946,25 @@ const ScrubbeOnboarding = () => {
               </div>
             </div>
 
-            <div className="border-zinc-400 border bg-[#08132F] p-6 rounded-lg space-y-3">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Info size={14} className="text-[#00CAD8]" /> Need help?
+            <div className="border-zinc-400 border bg-white dark:bg-grayscrubbe-900 p-6 rounded-lg space-y-3">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Info size={14} className="text-IMSCyan" /> Need help?
               </h3>
               <p className="text-sm">
                 A few quick links if you want more detail while you set things
                 up.
               </p>
               <div className="space-y-2 text-sm">
-                <a href="#" className="text-[#00CAD8] block underline">
+                <a href="#" className="text-IMSCyan block underline">
                   Getting Started guide for Admins{" "}
                 </a>
-                <a href="#" className="text-[#00CAD8] block underline">
+                <a href="#" className="text-IMSCyan block underline">
                   Best practices for roles & permissions{" "}
                 </a>
-                <a href="#" className="text-[#00CAD8] block underline">
+                <a href="#" className="text-IMSCyan block underline">
                   How automated handovers work in Scrubbe{" "}
                 </a>
-                <a href="#" className="text-[#00CAD8] block underline">
+                <a href="#" className="text-IMSCyan block underline">
                   Contact Scrubbe Support{" "}
                 </a>
               </div>
@@ -990,14 +990,14 @@ const StepWrapper = ({
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ duration: 0.5, ease: "easeOut" }}
-    className={`bg-gradient-to-b from-[#0074834D] to-[#004B571A] border rounded-xl transition-all border-IMSCyan/40 overflow-clip mb-8`}
+    className={`bg-gradient-to-b from-IMSCyan/10 to-transparent dark:from-IMSCyan/10 dark:to-transparent border rounded-xl transition-all border-IMSCyan/40 overflow-clip mb-8`}
   >
-    <div className="p-4 border-b border-[#1F2937] flex justify-between items-center ">
+    <div className="p-4 border-b border-gray-800 dark:border-grayscrubbe-800 flex justify-between items-center ">
       <div className="flex flex-col gap-1">
-        <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+        <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
           {title}
         </h2>
-        <p className="text-neutral-300 text-sm">{subtitle}</p>
+        <p className="text-neutral-600 dark:text-neutral-300 text-sm">{subtitle}</p>
       </div>
     </div>
     <div className="px-4 py-4">{children}</div>
@@ -1006,8 +1006,8 @@ const StepWrapper = ({
 const ToggleSwitch = ({ label, sub, value, onChange }: any) => (
   <div className="flex items-center justify-between gap-6">
     <div className="flex flex-col">
-      <span className="text-base font-bold text-white">{label}</span>
-      <span className="text-sm text-zinc-300">{sub}</span>
+      <span className="text-base font-bold text-gray-900 dark:text-white">{label}</span>
+      <span className="text-sm text-gray-600 dark:text-zinc-300">{sub}</span>
     </div>
     <Switch value={value} onChange={() => onChange(!value)} color="success" />
   </div>
@@ -1025,17 +1025,17 @@ const RoleCard = ({
   <div
     className={`${
       active ? "opacity-100 scale-105" : "opacity-65 scale-100"
-    } p-4 rounded-lg border cursor-pointer bg-[#111827] border-zinc-300 hover:border-[#4B5563] transition-all duration-250`}
+    } p-4 rounded-lg border cursor-pointer bg-white dark:bg-grayscrubbe-900 border-gray-200 dark:border-zinc-300 hover:border-gray-300 dark:hover:border-grayscrubbe-700 transition-all duration-250`}
   >
-    <h4 className={`text-base font-bold mb-1 text-white`}>{title}</h4>
-    <p className="text-sm text-zinc-300 leading-tight">{desc}</p>
+    <h4 className={`text-base font-bold mb-1 text-gray-900 dark:text-white`}>{title}</h4>
+    <p className="text-sm text-gray-600 dark:text-zinc-300 leading-tight">{desc}</p>
   </div>
 );
 
 const CustomSelect = ({ label, value, options, onChange }: any) => {
   return (
     <div className="space-y-2 relative">
-      <label className="text-[11px] font-bold text-white uppercase">
+      <label className="text-[11px] font-bold text-gray-900 dark:text-white uppercase">
         {label}
       </label>
       <Select
@@ -1046,7 +1046,7 @@ const CustomSelect = ({ label, value, options, onChange }: any) => {
           label: option,
         }))}
         onChange={onChange}
-        className="!bg-[#08132F] !h-10 border-zinc-500"
+        className="!bg-white dark:!bg-grayscrubbe-900 !h-10 border-zinc-500"
       />
     </div>
   );
@@ -1060,7 +1060,7 @@ const PolicyGroup = ({
   children: ReactNode;
 }) => (
   <div className="space-y-3">
-    <h4 className="text-base font-bold text-white  uppercase tracking-widest">
+    <h4 className="text-base font-bold text-gray-900 dark:text-white  uppercase tracking-widest">
       {title}
     </h4>
     <div className="space-y-5">{children}</div>
@@ -1080,10 +1080,10 @@ const PolicyToggle = ({
 }) => (
   <div className="flex justify-between items-start">
     <div className="flex flex-col">
-      <span className="text-sm font-bold text-white tracking-wide">
+      <span className="text-sm font-bold text-gray-900 dark:text-white tracking-wide">
         {label}
       </span>
-      <span className="text-sm text-zinc-200">{sub}</span>
+      <span className="text-sm text-gray-600 dark:text-zinc-200">{sub}</span>
     </div>
 
     <Switch value={value} onChange={() => onChange(!value)} color="success" />
@@ -1104,14 +1104,13 @@ const IntegrationCard = ({
   desc: string;
 }) => (
   <motion.div
-    animate={{ borderColor: active ? "#00CAD8" : "#4B5563" }}
-    className={`p-4 rounded-lg border flex justify-between items-center cursor-pointer bg-[#0A1635] ${
+    className={`p-4 rounded-lg border ${active ? 'border-IMSCyan' : 'border-gray-200 dark:border-zinc-400'} flex justify-between items-center cursor-pointer bg-white dark:bg-grayscrubbe-900 ${
       disable ? "opacity-70" : ""
     }`}
   >
     <div className="pr-4">
-      <p className="text-xs font-bold text-white tracking-widest">{label}</p>
-      <p className="text-[11px] text-zinc-400">{desc}</p>
+      <p className="text-xs font-bold text-gray-900 dark:text-white tracking-widest">{label}</p>
+      <p className="text-[11px] text-gray-600 dark:text-zinc-400">{desc}</p>
     </div>
     <Switch
       isSelected={active}
@@ -1141,12 +1140,12 @@ const SidebarStep = ({ label, subLabel, active }: any) => (
     <div>
       <p
         className={`text-sm font-bold ${
-          active ? "text-white" : "text-[#6B7280]"
+          active ? "text-white" : "text-grayscrubbe-500"
         }`}
       >
         {label}
       </p>
-      <p className="text-[11px] text-[#6B7280]">{subLabel}</p>
+      <p className="text-[11px] text-grayscrubbe-500">{subLabel}</p>
     </div>
   </div>
 );

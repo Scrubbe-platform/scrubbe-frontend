@@ -84,31 +84,31 @@ function IncidentOverview({
   );
 
   return (
-    <div className="min-h-screen p-6 font-sans text-slate-300 selection:bg-green-500/30">
+    <div className="min-h-screen p-6 font-sans text-gray-900 dark:text-slate-300 bg-white dark:bg-grayscrubbe-900 selection:bg-green-500/30">
       <div className="relative mx-auto flex flex-col gap-6 md:flex-row">
         <main className="flex-1 space-y-6">
           <section className="flex flex-col items-start justify-between gap-3 md:flex-row">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-black tracking-tighter text-white">
+                <h1 className="text-2xl font-black tracking-tighter text-gray-900 dark:text-white">
                   {activeIncident.ticketId}
                 </h1>
-                <span className="rounded border border-rose-500/30 bg-rose-500 px-2 py-0.5 text-[10px] uppercase text-black">
+                <span className="rounded border border-rose-500/30 bg-rose-500 dark:bg-rose-600 px-2 py-0.5 text-[10px] uppercase text-black dark:text-white">
                   {priorityLabel(activeIncident.priority)} •{" "}
                   {activeIncident.status || "Open"}
                 </span>
               </div>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-gray-600 dark:text-slate-400">
                 {activeIncident.reason ||
                   activeIncident.summary ||
                   "Select an incident from the sidebar to view details."}
               </p>
             </div>
             <div className="flex gap-2">
-              <button className="flex items-center gap-2 rounded-lg border border-IMSCyan px-4 py-2 text-xs text-IMSCyan transition-all">
+              <button className="flex items-center gap-2 rounded-lg border border-IMSCyan px-4 py-2 text-xs text-IMSCyan transition-all bg-white dark:bg-grayscrubbe-900">
                 <Bell size={14} /> Notify
               </button>
-              <button className="flex items-center gap-2 rounded-lg bg-green-400 px-4 py-2 text-xs text-black transition-all hover:bg-green-300">
+              <button className="flex items-center gap-2 rounded-lg bg-green-400 dark:bg-greenscrubbe-500 px-4 py-2 text-xs text-black dark:text-black transition-all hover:bg-green-300 dark:hover:bg-greenscrubbe-400">
                 <Phone size={14} /> Declare Incident
               </button>
             </div>
@@ -144,7 +144,7 @@ function IncidentOverview({
                 % confidence
               </span>
             </div>
-            <p className="text-sm text-slate-300">{insightText}</p>
+            <p className="text-sm text-gray-700 dark:text-slate-300">{insightText}</p>
           </section>
 
           <section className="grid gap-4 md:grid-cols-3">
@@ -158,7 +158,7 @@ function IncidentOverview({
                     <span className="text-green">{serviceName}</span> in{" "}
                     {activeIncident.environment || "the live environment"}.
                   </p>
-                  <div className="mt-2 flex items-center gap-2 text-white">
+                  <div className="mt-2 flex items-center gap-2 text-gray-700 dark:text-slate-200">
                     <p>Open SLO Context</p>
                     <GiHamburgerMenu className="text-IMSCyan" />
                   </div>
@@ -201,8 +201,8 @@ function IncidentOverview({
             />
           </section>
 
-          <section className="space-y-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-6">
-            <div className="flex items-center gap-2 text-emerald-400">
+          <section className="space-y-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 dark:border-emerald-700/30 dark:bg-emerald-900/5 p-6">
+            <div className="flex items-center gap-2 text-emerald-400 dark:text-emerald-300">
               <Shield size={16} />
               <span className="text-sm font-bold uppercase tracking-widest">
                 Code Intelligence Engine • Live incident context
@@ -220,8 +220,8 @@ function IncidentOverview({
             </div>
           </section>
 
-          <section className="space-y-4 rounded-2xl border border-orange-500/20 bg-orange-500/5 p-6">
-            <div className="flex items-center gap-2 text-orange-400">
+          <section className="space-y-4 rounded-2xl border border-orange-500/20 bg-orange-500/5 dark:border-orange-700/20 dark:bg-orange-900/5 p-6">
+            <div className="flex items-center gap-2 text-orange-400 dark:text-orange-300">
               <Info size={16} />
               <span className="text-xs font-black uppercase tracking-widest">
                 {isDeploymentAware
@@ -229,7 +229,7 @@ function IncidentOverview({
                   : "Code Intelligence is waiting for clearer deploy context"}
               </span>
             </div>
-            <p className="text-sm leading-relaxed text-slate-400">
+            <p className="text-sm leading-relaxed text-gray-600 dark:text-slate-400">
               {isDeploymentAware
                 ? `This incident already carries enough source context (${activeIncident.sourceType || "incident source"}) for Code Intelligence to reason about a safer remediation path for ${serviceName}.`
                 : "This incident is not yet strongly tied to a failed CI/CD deployment, so Scrubbe stays in guidance mode instead of proposing a code diff."}
@@ -242,11 +242,11 @@ function IncidentOverview({
                 `Use ${activeIncident.ticketId} in the shared workspace timeline to confirm blast radius before execution.`,
               ].map((text, index) => (
                 <li
-                  key={index}
-                  className="flex items-center gap-3 text-xs font-medium text-slate-500"
-                >
-                  <div className="h-1 w-1 rounded-full bg-slate-700" /> {text}
-                </li>
+                    key={index}
+                    className="flex items-center gap-3 text-xs font-medium text-gray-600 dark:text-zinc-400"
+                  >
+                    <div className="h-1 w-1 rounded-full bg-slate-700 dark:bg-zinc-600" /> {text}
+                  </li>
               ))}
             </ul>
           </section>
@@ -254,7 +254,7 @@ function IncidentOverview({
           <button
             type="button"
             onClick={() => setOpenPipeline(true)}
-            className="flex items-center gap-2 rounded-xl border border-green-500/30 bg-green-500/5 px-4 py-3 text-xs font-bold text-green-400 transition-all hover:bg-green-500/10"
+            className="flex items-center gap-2 rounded-xl border border-green-500/30 bg-green-500/5 dark:border-greenscrubbe-700/30 dark:bg-greenscrubbe-900/5 px-4 py-3 text-xs font-bold text-green-400 dark:text-greenscrubbe-300 transition-all hover:bg-green-500/10 dark:hover:bg-greenscrubbe-800/10"
           >
             <Layout size={14} /> View Pipeline {activeIncident.ticketId}
           </button>
@@ -295,7 +295,7 @@ const StatBox = ({
   value,
   sub,
   subClass,
-  valueClass = "text-white",
+  valueClass = "text-gray-900 dark:text-white",
   subIcon,
 }: {
   label: string;
@@ -305,14 +305,14 @@ const StatBox = ({
   valueClass?: string;
   subIcon?: ReactNode;
 }) => (
-  <div className="flex flex-col justify-between rounded-xl border border-slate-400 p-5">
-    <span className="text-[9px] font-bold uppercase text-slate-500">{label}</span>
+  <div className="flex flex-col justify-between rounded-xl border border-gray-200 dark:border-zinc-700 p-5 bg-white dark:bg-grayscrubbe-900">
+    <span className="text-[9px] font-bold uppercase text-gray-600 dark:text-zinc-400">{label}</span>
     <div className="space-y-1">
       <div className={`text-lg font-black ${valueClass}`}>{value}</div>
       {sub ? (
         <div
           className={`flex items-center gap-1 text-[10px] font-bold ${
-            subClass || "text-slate-500"
+            subClass || "text-gray-600 dark:text-zinc-400"
           }`}
         >
           {subIcon} {sub}
@@ -331,14 +331,14 @@ const InfoCard = ({
   title: string;
   desc: string | ReactNode;
 }) => (
-  <div className="space-y-3 rounded-2xl border border-white/5 bg-white/[0.02] p-5">
-    <div className="flex items-center gap-2 text-slate-200">
+  <div className="space-y-3 rounded-2xl border border-white/5 bg-white/[0.02] dark:border-zinc-700 dark:bg-grayscrubbe-800/40 p-5">
+    <div className="flex items-center gap-2 text-gray-700 dark:text-slate-200">
       {icon}
       <span className="text-[10px] font-black uppercase tracking-widest">
         {title}
       </span>
     </div>
-    <p className="text-[11px] leading-relaxed text-slate-500">{desc}</p>
+    <p className="text-[11px] leading-relaxed text-gray-600 dark:text-zinc-400">{desc}</p>
   </div>
 );
 
@@ -349,7 +349,7 @@ const FixTag = ({
   label: string;
   icon: ReactNode;
 }) => (
-  <div className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[9px] font-bold text-slate-500 transition-all hover:border-emerald-500/30">
+  <div className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 dark:border-zinc-700 dark:bg-grayscrubbe-800/40 px-3 py-1.5 text-[9px] font-bold text-gray-600 dark:text-zinc-300 transition-all hover:border-emerald-500/30">
     {icon}
     {label}
   </div>

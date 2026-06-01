@@ -35,7 +35,7 @@ const AUTH_ROUTES = [
 // Define protected routes that require authentication
 const PROTECTED_ROUTE_PREFIXES = [
   "/dashboard",
-  // "/incident",
+  "/incident",
   "/ezra/dashboard",
   "/developer",
   "/profile",

@@ -20,7 +20,7 @@ const QuietRules = ({
 }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className=" bg-[#030D25] p-8 text-slate-300 antialiased border border-green-400/40 rounded-lg">
+    <div className="bg-slate-950/80 dark:bg-grayscrubbe-950 p-8 text-slate-300 antialiased border border-green-400/40 rounded-lg">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* HEADER SECTION */}
         <div className="flex justify-between items-start">

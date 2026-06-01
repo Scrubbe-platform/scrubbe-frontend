@@ -109,15 +109,15 @@ const Sidebar = () => {
   };
 
   return (
-    <div className=" min-h-screen dark:bg-[#030D25] dark:text-[#D1D5DB] p-6 flex flex-col font-sans">
+    <div className="min-h-screen bg-white dark:bg-grayscrubbe-950 text-gray-900 dark:text-slate-300 p-6 flex flex-col font-sans">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-1">
-        <h2 className="text-[13px] font-bold uppercase tracking-wider dark:text-white">
+        <h2 className="text-[13px] font-bold uppercase tracking-wider text-slate-900 dark:text-white">
           Navigation
         </h2>
-        <Command size={18} className="text-[#94A3B8]" />
+        <Command size={18} className="text-slate-500 dark:text-slate-400" />
       </div>
-      <p className="text-sm text-[#94A3B8] mb-8">Admin-only configuration</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">Admin-only configuration</p>
 
       {/* NAVIGATION ITEMS */}
       <nav className="flex-1 space-y-1">
@@ -132,12 +132,12 @@ const Sidebar = () => {
               ${item.margin || ""}
               ${
                 active
-                  ? "bg-[#0B1224] border-[1.5px] border-[#00CAD8] text-white bg-gradient-to-t from-[#004B571A] to-[#0074834D]"
-                  : "hover:bg-[#0B1224] text-[#94A3B8] hover:text-white border-[1.5px] border-transparent"
+                  ? "bg-slate-100 dark:bg-grayscrubbe-800 border-[1.5px] border-IMSCyan text-slate-900 dark:text-white"
+                  : "hover:bg-slate-100 dark:hover:bg-grayscrubbe-900 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-[1.5px] border-transparent"
               }
             `}
             >
-              <span className={active ? "text-[#00CAD8]" : "text-[#64748B]"}>
+              <span className={active ? "text-IMSCyan" : "text-slate-500 dark:text-slate-400"}>
                 {item.icon}
               </span>
               <span className="text-sm font-medium">{item.label}</span>
@@ -159,26 +159,26 @@ const Sidebar = () => {
             transition-all duration-200 border-[1.5px] text-sm font-medium w-full text-left
             ${
               theme === value
-                ? "bg-[#0B1224] text-white border-[#1e3a5f]"
-                : "text-[#94A3B8] border-transparent hover:bg-[#0B1224] hover:text-white"
+                ? "bg-slate-100 dark:bg-grayscrubbe-800 dark:text-white border-slate-200 dark:border-slate-700"
+                : "text-slate-500 dark:text-slate-400 border-transparent hover:bg-slate-100 dark:hover:bg-grayscrubbe-900 hover:text-slate-900 dark:hover:text-white"
             }
           `}
             >
-              <span className="text-[#64748B]">{icon}</span>
+              <span className="text-slate-500 dark:text-slate-400">{icon}</span>
               <span>{label}</span>
               {theme === value && (
-                <span className="ml-auto text-[11px] bg-[#1e293b] text-[#94a3b8] px-2 py-0.5 rounded-md">
+                <span className="ml-auto text-[11px] bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md">
                   Active
                 </span>
               )}
             </button>
           ))}
         </div>
-        <button className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl border-[1.5px] border-[#00CAD8] text-[#00CAD8] font-bold text-sm hover:bg-[#00CAD8]/5 transition-colors">
+        <button className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl border-[1.5px] border-IMSCyan text-IMSCyan font-bold text-sm hover:bg-IMSCyan/10 transition-colors">
           <Download size={18} />
           Export Settings (JSON)
         </button>
-        <button className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl border-[1.5px] border-[#00CAD8] text-[#00CAD8] font-bold text-sm hover:bg-[#00CAD8]/5 transition-colors">
+        <button className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl border-[1.5px] border-IMSCyan text-IMSCyan font-bold text-sm hover:bg-IMSCyan/10 transition-colors">
           <Upload size={18} />
           Import Settings
         </button>
