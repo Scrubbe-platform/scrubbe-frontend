@@ -4,6 +4,8 @@ export const endpoint = {
     invite_member: "/business/send-invite",
     decode_invite_token: "/business/decode-invite",
     accept_invite: "/business/accept-invite",
+    workspace_resolve: "/business/workspace",
+    workspace_access_check: "/business/workspace",
     ims_setup: "/ims/setup",
     ims_config: "/ims/config",
     ims_sso: "/ims/sso",

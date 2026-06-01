@@ -23,6 +23,7 @@ export type User = {
   email: string;
   firstName: string;
   id: string;
+  businessId?: string | null;
   isActive: boolean;
   isVerified: boolean;
   lastLogin?: string;
@@ -255,6 +256,8 @@ const useAuthStore = create<AuthState & AuthActions>()(
             lastName: validatedData.lastName,
             email: validatedData.businessEmail,
             password: validatedData.password,
+            businessName: validatedData.businessName,
+            workspaceUrl: validatedData.workspaceUrl,
             // businessAddress: validatedData?.businessAddress,
             // companySize: validatedData.companySize,
             // purpose: validatedData.purpose || undefined,
