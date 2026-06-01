@@ -21,12 +21,12 @@ const IncidentRouteShell = ({
 
   if (!incidentId) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 bg-dark text-slate-200">
-        <div className="max-w-xl rounded-3xl border border-white/10 bg-white/[0.02] p-8 text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+      <div className="min-h-screen flex items-center justify-center p-8 dark:bg-dark dark:text-slate-200">
+        <div className="max-w-xl rounded-3xl border dark:border-white/10 bg-white/[0.02] p-8 text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] dark:text-slate-500">
             {title}
           </p>
-          <h1 className="mt-4 text-3xl font-bold text-white">
+          <h1 className="mt-4 text-3xl font-bold dark:text-white">
             Select an incident first
           </h1>
           <p className="mt-3 text-sm leading-7 text-slate-400">

@@ -24,10 +24,7 @@ export const raiseIncidentSchema = z.object({
   service: z
     .string()
     .min(1, "Please select an affected service")
-    .refine(
-      (value) => value !== "select-service",
-      "Please select a valid service"
-    ),
+    .refine((v) => v !== "select-service", "Please select a valid service"),
   environment: z.string().min(1, "Environment is required"),
   severity: z.enum(["P0", "P1", "P2", "P3", "P4"]),
   description: z.string().min(20, "Please provide a more detailed description"),
@@ -67,28 +64,19 @@ const customerImpactLabels: Record<string, string> = {
   "full-service-outage": "Full service outage",
 };
 
-const ACCEPTED_TYPES = [
-  "image/png",
-  "image/jpeg",
-  "application/pdf",
-  "text/plain",
-  "application/json",
-  "text/yaml",
-  "application/x-yaml",
-];
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
-const buildImpactSummary = (data: RaiseIncidentFormValues) => {
-  const parts = [
+const buildImpactSummary = (data: RaiseIncidentFormValues) =>
+  [
     customerImpactLabels[data.customerImpact] ?? data.customerImpact,
     data.businessImpact ? `Business impact: ${data.businessImpact}` : "",
     data.recentChange ? `Recent change: ${data.recentChange}` : "",
-  ].filter(Boolean);
-  return parts.join(". ");
-};
+  ]
+    .filter(Boolean)
+    .join(". ");
 
 // ─────────────────────────────────────────────────────────────────
-// Sub-components
+// FormSection
 // ─────────────────────────────────────────────────────────────────
 
 const FormSection = ({
@@ -98,13 +86,17 @@ const FormSection = ({
   children: React.ReactNode;
   title: string;
 }) => (
-  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
-    <p className="font-semibold text-lg pb-4">{title}</p>
+  <div className="rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02] p-6">
+    <p className="font-semibold text-lg pb-4 text-zinc-800 dark:text-white">
+      {title}
+    </p>
     {children}
   </div>
 );
 
-// ── War Room toggle ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// WarRoomToggle
+// ─────────────────────────────────────────────────────────────────
 
 function WarRoomToggle({
   value,
@@ -115,40 +107,38 @@ function WarRoomToggle({
 }) {
   return (
     <div>
-      <label className="mb-3 block text-xs font-bold uppercase tracking-widest text-slate-500">
+      <label className="mb-3 block text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-slate-500">
         War room
       </label>
       <div className="grid grid-cols-2 gap-3">
-        {/* Not required */}
         <button
           type="button"
           onClick={() => onChange("not-required")}
           className={`flex flex-col items-start rounded-xl border p-4 text-left transition-all ${
             value === "not-required"
-              ? "border-white/20 bg-white/10 text-white"
-              : "border-white/10 bg-white/[0.02] text-slate-400 hover:border-white/20"
+              ? "border-zinc-400 dark:border-white/20 bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-white"
+              : "border-zinc-200 dark:border-white/10 bg-white dark:bg-white/[0.02] text-zinc-400 dark:text-slate-400 hover:border-zinc-300 dark:hover:border-white/20"
           }`}
         >
           <span className="font-semibold text-sm">Not required</span>
-          <span className="text-xs text-slate-500 mt-0.5">
+          <span className="text-xs text-zinc-400 dark:text-slate-500 mt-0.5">
             Standard incident flow
           </span>
         </button>
 
-        {/* Open War room */}
         <button
           type="button"
           onClick={() => onChange("open-war-room")}
           className={`flex flex-col items-start rounded-xl border p-4 text-left transition-all ${
             value === "open-war-room"
-              ? "border-green-500/50 bg-green-950/30 text-green-400"
-              : "border-white/10 bg-white/[0.02] text-slate-400 hover:border-white/20"
+              ? "border-green-500/50 bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400"
+              : "border-zinc-200 dark:border-white/10 bg-white dark:bg-white/[0.02] text-zinc-400 dark:text-slate-400 hover:border-zinc-300 dark:hover:border-white/20"
           }`}
         >
           <span className="font-semibold text-sm">Open War room</span>
           <span
             className="text-xs mt-0.5"
-            style={{ color: value === "open-war-room" ? "#86efac" : "#64748b" }}
+            style={{ color: value === "open-war-room" ? "#16a34a" : "#94a3b8" }}
           >
             Creates Slack channel + Teams + Zoom meeting
           </span>
@@ -158,7 +148,9 @@ function WarRoomToggle({
   );
 }
 
-// ── Evidence & Attachments ───────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// EvidenceSection
+// ─────────────────────────────────────────────────────────────────
 
 interface AttachedFile {
   id: string;
@@ -197,16 +189,20 @@ function EvidenceSection({
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
-      <p className="font-semibold text-lg pb-1">Evidence and Attachments</p>
-      <p className="text-xs text-slate-500 mb-5">Upload files as evidence</p>
+    <div className="rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02] p-6">
+      <p className="font-semibold text-lg pb-1 text-zinc-800 dark:text-white">
+        Evidence and Attachments
+      </p>
+      <p className="text-xs text-zinc-400 dark:text-slate-500 mb-5">
+        Upload files as evidence
+      </p>
 
       {/* Drop zone */}
       <div
         className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-all cursor-pointer ${
           dragging
-            ? "border-green-500/60 bg-green-950/20"
-            : "border-white/10 hover:border-white/25 hover:bg-white/[0.03]"
+            ? "border-green-500/60 bg-green-50 dark:bg-green-950/20"
+            : "border-zinc-300 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/25 hover:bg-zinc-100 dark:hover:bg-white/[0.03]"
         }`}
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
@@ -228,34 +224,37 @@ function EvidenceSection({
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />
-        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-3">
-          <Upload size={18} className="text-slate-400" />
+        <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center mb-3">
+          <Upload size={18} className="text-zinc-400 dark:text-slate-400" />
         </div>
-        <p className="text-sm font-medium text-slate-300">
+        <p className="text-sm font-medium text-zinc-600 dark:text-slate-300">
           Drop files here or click to browse
         </p>
-        <p className="text-xs text-slate-600 mt-1">
+        <p className="text-xs text-zinc-400 dark:text-slate-600 mt-1">
           PNG, JPG, PDF, Log, .txt, .json, .yaml — max 25MB per file
         </p>
       </div>
 
-      {/* Attached files list */}
+      {/* File list */}
       {files.length > 0 && (
         <div className="mt-4 space-y-2">
           {files.map((af) => (
             <div
               key={af.id}
-              className="flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3"
+              className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 dark:border-white/8 bg-white dark:bg-white/[0.03] px-4 py-3"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
-                  <FileText size={14} className="text-slate-400" />
+                <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-white/5 flex items-center justify-center shrink-0">
+                  <FileText
+                    size={14}
+                    className="text-zinc-400 dark:text-slate-400"
+                  />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-200 truncate">
+                  <p className="text-sm font-medium text-zinc-700 dark:text-slate-200 truncate">
                     {af.file.name}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-zinc-400 dark:text-slate-500">
                     {formatSize(af.file.size)}
                   </p>
                 </div>
@@ -263,7 +262,7 @@ function EvidenceSection({
               <button
                 type="button"
                 onClick={() => onRemove(af.id)}
-                className="shrink-0 p-1.5 rounded-lg hover:bg-white/10 text-slate-500 hover:text-red-400 transition-colors"
+                className="shrink-0 p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/10 text-zinc-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
               >
                 <Trash2 size={14} />
               </button>
@@ -283,8 +282,6 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: members = [] } = useMember();
-
-  // Evidence files state (outside react-hook-form since it's File objects)
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
 
   const handleAddFiles = (incoming: File[]) => {
@@ -293,10 +290,6 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
       file,
     }));
     setAttachedFiles((prev) => [...prev, ...newFiles]);
-  };
-
-  const handleRemoveFile = (id: string) => {
-    setAttachedFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
   const {
@@ -382,34 +375,42 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
   const watchedSeverity = watch("severity");
   const watchedService = watch("service");
 
-  const statusStyles: Record<RaiseIncidentFormValues["severity"], string> = {
-    P0: "border-red-500 text-red-500",
-    P1: "border-red-600 text-red-600",
-    P2: "border-orange-500 text-orange-500",
-    P3: "border-yellow-500 text-yellow-500",
-    P4: "border-blue-500 text-blue-500",
-  };
-
-  const statusLabels: Record<RaiseIncidentFormValues["severity"], string> = {
-    P0: "Full outage",
-    P1: "Critical impact",
-    P2: "Major degradation",
-    P3: "Minor impact",
-    P4: "Informational",
-  };
-
-  const onSubmit = async (data: RaiseIncidentFormValues) => {
-    await createMutation.mutateAsync(data);
+  const severityStyles: Record<
+    RaiseIncidentFormValues["severity"],
+    { active: string; label: string }
+  > = {
+    P0: {
+      active: "border-red-500 text-red-500 bg-red-500/5",
+      label: "Full outage",
+    },
+    P1: {
+      active: "border-red-600 text-red-600 bg-red-600/5",
+      label: "Critical impact",
+    },
+    P2: {
+      active: "border-orange-500 text-orange-500 bg-orange-500/5",
+      label: "Major degradation",
+    },
+    P3: {
+      active: "border-yellow-500 text-yellow-500 bg-yellow-500/5",
+      label: "Minor impact",
+    },
+    P4: {
+      active: "border-blue-500 text-blue-500 bg-blue-500/5",
+      label: "Informational",
+    },
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-y-auto rounded-3xl border border-white/10 bg-dark shadow-2xl">
-        {/* Header */}
-        <div className="sticky top-0 z-20 flex items-start justify-between border-b border-white/5 bg-dark p-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 p-4 backdrop-blur-sm">
+      <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-y-auto rounded-3xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-dark shadow-2xl">
+        {/* ── Header ── */}
+        <div className="sticky top-0 z-20 flex items-start justify-between border-b border-zinc-200 dark:border-white/5 bg-white dark:bg-dark p-8">
           <div>
-            <h2 className="text-2xl font-bold text-white">Raise Incident</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="text-2xl font-bold text-zinc-800 dark:text-white">
+              Raise Incident
+            </h2>
+            <p className="mt-1 text-sm text-zinc-400 dark:text-slate-500">
               Manual raise · enters the same governance pipeline as
               auto-detected incidents
             </p>
@@ -417,13 +418,18 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full bg-white/5 p-2 text-slate-500 transition-colors hover:text-white"
+            className="rounded-full bg-zinc-100 dark:bg-white/5 p-2 text-zinc-400 dark:text-slate-500 transition-colors hover:text-zinc-700 dark:hover:text-white"
           >
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-8">
+        <form
+          onSubmit={handleSubmit(async (data) =>
+            createMutation.mutateAsync(data)
+          )}
+          className="space-y-4 p-8"
+        >
           {/* ── Core Details ── */}
           <FormSection title="Core Details">
             <div className="space-y-6">
@@ -480,29 +486,30 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
                 />
               </div>
 
+              {/* Severity picker */}
               <div>
-                <label className="mb-3 block text-xs font-bold uppercase tracking-widest text-slate-500">
+                <label className="mb-3 block text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-slate-500">
                   Severity *
                 </label>
                 <div className="grid grid-cols-5 gap-2">
-                  {(["P0", "P1", "P2", "P3", "P4"] as const).map((severity) => (
+                  {(["P0", "P1", "P2", "P3", "P4"] as const).map((sev) => (
                     <Controller
-                      key={severity}
+                      key={sev}
                       name="severity"
                       control={control}
                       render={({ field }) => (
                         <button
                           type="button"
-                          onClick={() => field.onChange(severity)}
+                          onClick={() => field.onChange(sev)}
                           className={`flex flex-col items-center rounded-xl border p-3 transition-all ${
-                            field.value === severity
-                              ? statusStyles[severity]
-                              : "border-white/10 bg-white/5 text-slate-400 hover:border-white/30"
+                            field.value === sev
+                              ? severityStyles[sev].active
+                              : "border-zinc-200 dark:border-white/10 bg-white dark:bg-white/5 text-zinc-400 dark:text-slate-400 hover:border-zinc-300 dark:hover:border-white/30"
                           }`}
                         >
-                          <span className="font-bold">{severity}</span>
+                          <span className="font-bold">{sev}</span>
                           <span className="text-[10px] uppercase opacity-60">
-                            {statusLabels[severity]}
+                            {severityStyles[sev].label}
                           </span>
                         </button>
                       )}
@@ -529,7 +536,6 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
                   />
                 )}
               />
-
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Controller
                   name="firstNoticed"
@@ -598,7 +604,7 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
             </div>
           </FormSection>
 
-          {/* ── Assignment & Notifications + War Room ── */}
+          {/* ── Assignment & Notifications ── */}
           <FormSection title="Assignment & Notifications">
             <div className="space-y-6">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -637,8 +643,6 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
                   )}
                 />
               </div>
-
-              {/* War Room toggle */}
               <Controller
                 name="warRoom"
                 control={control}
@@ -652,26 +656,28 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
             </div>
           </FormSection>
 
-          {/* ── Evidence and Attachments ── */}
+          {/* ── Evidence ── */}
           <EvidenceSection
             files={attachedFiles}
             onAdd={handleAddFiles}
-            onRemove={handleRemoveFile}
+            onRemove={(id) =>
+              setAttachedFiles((p) => p.filter((f) => f.id !== id))
+            }
           />
 
           {/* ── Incident Preview ── */}
-          <div className="rounded-3xl border border-green-500/20 bg-green-950/20 p-8">
-            <span className="mb-4 block text-[10px] font-bold uppercase tracking-widest text-green-500">
+          <div className="rounded-3xl border border-green-500/20 bg-green-50 dark:bg-green-950/20 p-8">
+            <span className="mb-4 block text-[10px] font-bold uppercase tracking-widest text-green-600 dark:text-green-500">
               Incident Preview
             </span>
-            <h3 className="mb-2 break-words text-2xl font-bold text-white">
+            <h3 className="mb-2 break-words text-2xl font-bold text-zinc-800 dark:text-white">
               {watchedTitle || "Incident title will appear here..."}
             </h3>
-            <p className="mb-2 text-sm text-slate-400">
+            <p className="mb-2 text-sm text-zinc-500 dark:text-slate-400">
               {watchedService !== "select-service" ? watchedService : "Service"}{" "}
               · {watchedEnv} · {watchedSeverity}
             </p>
-            <div className="flex items-start gap-2 text-xs text-slate-500">
+            <div className="flex items-start gap-2 text-xs text-zinc-400 dark:text-slate-500">
               <Info size={14} className="mt-0.5 shrink-0" />
               <p>
                 Scrubbe will correlate this with active signals and run playbook
@@ -681,31 +687,31 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
           </div>
 
           {createMutation.isError && (
-            <p className="text-sm text-red-400">
+            <p className="text-sm text-red-500">
               Unable to create the incident right now. Please try again.
             </p>
           )}
 
-          {/* ── Footer actions ── */}
-          <div className="sticky bottom-0 z-20 flex justify-end gap-3 border-t border-white/5 bg-dark py-4">
+          {/* ── Footer ── */}
+          <div className="sticky bottom-0 z-20 flex justify-end gap-3 border-t border-zinc-200 dark:border-white/5 bg-white dark:bg-dark py-4">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-white/10 px-6 py-2.5 font-semibold text-white transition-all hover:bg-white/5"
+              className="rounded-xl border border-zinc-200 dark:border-white/10 px-6 py-2.5 font-semibold text-zinc-700 dark:text-white transition-all hover:bg-zinc-50 dark:hover:bg-white/5"
             >
               Cancel
             </button>
             <button
               type="button"
               disabled={createMutation.isPending}
-              className="rounded-xl border border-white/10 px-6 py-2.5 font-semibold text-white transition-all hover:bg-white/5 disabled:opacity-50"
+              className="rounded-xl border border-zinc-200 dark:border-white/10 px-6 py-2.5 font-semibold text-zinc-700 dark:text-white transition-all hover:bg-zinc-50 dark:hover:bg-white/5 disabled:opacity-50"
             >
               Save as draft
             </button>
             <button
               type="submit"
               disabled={createMutation.isPending}
-              className="rounded-xl bg-green-400 px-8 py-2.5 font-bold text-[#050b18] transition-all disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl bg-green-500 dark:bg-green-400 px-8 py-2.5 font-bold text-white dark:text-[#050b18] transition-all disabled:cursor-not-allowed disabled:opacity-50"
             >
               {createMutation.isPending
                 ? "Creating..."

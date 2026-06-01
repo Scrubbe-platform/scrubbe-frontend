@@ -36,7 +36,7 @@ const IncidentOverview: React.FC = () => {
   const showMainPanel = Boolean(incidentId && selectedIncident);
 
   return (
-    <div className="flex h-screen text-slate-300 font-sans overflow-hidden">
+    <div className="flex h-screen dark:text-slate-300 text-slate-600 font-sans overflow-hidden">
       <aside
         className={cn(
           "md:border-r border-white/5 flex flex-col h-full shrink-0",
@@ -72,7 +72,9 @@ const IncidentOverview: React.FC = () => {
 
             {(currentTab === "overview" || !currentTab) && (
               <>
-                <IncidentLifecycle currentStep={selectedIncident.lifecycleStep} />
+                <IncidentLifecycle
+                  currentStep={selectedIncident.lifecycleStep}
+                />
                 <DetectionSignals incident={selectedIncident} />
                 <ScrubbeIntelligence incident={selectedIncident} />
                 <IncidentContextModule
@@ -85,14 +87,8 @@ const IncidentOverview: React.FC = () => {
 
             {currentTab === "context" && (
               <>
-                <ContextList
-                  context={context}
-                  incident={selectedIncident}
-                />
-                <AddContextForm
-                  context={context}
-                  incident={selectedIncident}
-                />
+                <ContextList context={context} incident={selectedIncident} />
+                <AddContextForm context={context} incident={selectedIncident} />
               </>
             )}
           </>
@@ -115,8 +111,8 @@ const IncidentOverview: React.FC = () => {
               Select an incident to open the live workspace
             </h2>
             <p className="mt-3 text-sm leading-7 text-slate-400">
-              The workspace only appears when a real incident is selected. Use the
-              sidebar to browse current incidents or raise a new one.
+              The workspace only appears when a real incident is selected. Use
+              the sidebar to browse current incidents or raise a new one.
             </p>
           </div>
         </main>

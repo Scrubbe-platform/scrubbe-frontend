@@ -8,24 +8,24 @@ import RightContent from "./_module/right-content";
 
 const layout = ({ children }: { children: ReactNode }) => {
   return (
-    <div className="bg-dark min-h-screen p-6">
+    <div className="dark:bg-dark min-h-screen p-6">
       <div className="flex justify-between items-center">
-        <p className="text-xl font-bold text-white">Settings</p>
+        <p className="text-xl font-bold dark:text-white">Settings</p>
 
         <div className="flex items-center gap-3">
           <div className="text-sm flex items-center gap-2 border rounded-lg px-2 py-1">
             <Building className="text-yellow-400 size-4" />
-            <p className="text-white">Company name</p>
+            <p className="dark:text-white">Company name</p>
           </div>
 
           <div className="text-sm flex items-center gap-2 border rounded-lg px-2 py-1">
             <ShieldCheck className="text-emerald-400 size-4" />
-            <p className="text-white">Security: Standard</p>
+            <p className="dark:text-white">Security: Standard</p>
           </div>
 
           <div className="text-sm flex items-center gap-2 border rounded-lg px-2 py-1">
             <FaCodeBranch className="text-orange-400 size-4" />
-            <p className="text-white">Delivery: Connected</p>
+            <p className="dark:text-white">Delivery: Connected</p>
           </div>
 
           <div className="w-fit border bg-transparent border-IMSCyan hover:bg-transparent flex items-center gap-2 text-sm p-2 rounded-lg">
@@ -34,7 +34,7 @@ const layout = ({ children }: { children: ReactNode }) => {
           </div>
         </div>
       </div>
-      <p className="text-sm text-white mt-4">
+      <p className="text-sm dark:text-white mt-4">
         Configure governance, integrations, delivery failure ingestion, Ezra,
         Code Engine, and security controls (including SSO).
       </p>

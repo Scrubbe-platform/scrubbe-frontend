@@ -34,7 +34,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={props.id}
-            className={`flex gap-2 items-center text-white mb-2 text-sm font-medium ${
+            className={`flex gap-2 items-center dark:text-white mb-2 text-sm font-medium ${
               isLoading ? "text-gray-500" : "text-gray-700"
             } ${labelClassName}`}
           >
@@ -51,7 +51,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           </label>
         )}
         <div
-          className={`w-full text-white  h-[42px] bg-transparent text-sm px-3 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full dark:text-white  h-[42px] bg-transparent text-sm px-3 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             isLoading
               ? "border-gray-400 bg-gray-50 opacity-70 cursor-not-allowed"
               : "border-gray-400"
@@ -67,7 +67,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
               <option
                 key={opt.value}
                 value={opt.value}
-                className={`text-white`}
+                className={`dark:text-white`}
               >
                 {opt.label}
               </option>

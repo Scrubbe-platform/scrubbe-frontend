@@ -59,11 +59,14 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
   ];
 
   return (
-    <div className="w-full text-white p-4 md:p-6 flex flex-col gap-6 md:gap-8 border-b border-white/5">
+    <div className="w-full dark:text-white p-4 md:p-6 flex flex-col gap-6 md:gap-8 border-b border-white/5">
       <div className="flex overflow-x-auto no-scrollbar pb-2 md:pb-0 gap-2 items-center justify-between">
         <div className="flex gap-2 shrink-0">
           <StatBadge label={`${stats.active} Active`} color="orange" />
-          <StatBadge label={`${stats.investigating} Investigating`} color="yellow" />
+          <StatBadge
+            label={`${stats.investigating} Investigating`}
+            color="yellow"
+          />
           <StatBadge label={`${stats.resolved} Resolved`} color="green" />
         </div>
       </div>
@@ -126,7 +129,8 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
       <nav className="flex overflow-x-auto no-scrollbar gap-8 md:gap-12 relative border-b border-white/20 -mx-4 px-4 md:mx-0 md:px-0">
         {tabs.map((tab) => {
           const isActive =
-            (tab.id === "overview" && (!currentTab || currentTab === "overview")) ||
+            (tab.id === "overview" &&
+              (!currentTab || currentTab === "overview")) ||
             currentTab === tab.id;
 
           return (
