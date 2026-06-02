@@ -353,17 +353,17 @@ export default function EzraConsole() {
         </div>
         <div className="flex gap-3">
           <NavBadge
-            icon={<GoGitBranch color="#FF8181" size={14} />}
+            icon={<GoGitBranch className="text-rose-300" size={14} />}
             label="Code Engine"
             route="/incident/code-engine"
           />
           <NavBadge
-            icon={<CiClock2 size={14} color="#EABD08" />}
+            icon={<CiClock2 className="text-amber-300" size={14} />}
             label="MTTR & SLOs"
             route=""
           />
           <NavBadge
-            icon={<BsShieldExclamation color="#7599EC" size={14} />}
+            icon={<BsShieldExclamation className="text-sky-300" size={14} />}
             label="Fraud & risk"
             route=""
           />
@@ -372,7 +372,7 @@ export default function EzraConsole() {
 
       <main className="grid grid-cols-12 gap-6 h-[calc(100vh-120px)]">
         {/* Left Column: Sessions */}
-        <aside className="col-span-3 border border-white/10 rounded-2xl bg-[#030a1c] p-5 flex flex-col gap-6">
+        <aside className="col-span-3 border border-white/10 rounded-2xl bg-slate-950/80 dark:bg-grayscrubbe-950 p-5 flex flex-col gap-6">
           <div className="flex justify-between items-center">
             <h2 className="uppercase text-sm text-slate-300">Sessions</h2>
             <button
@@ -463,7 +463,7 @@ export default function EzraConsole() {
         </aside>
 
         {/* Center Column: Chat Interface */}
-        <section className="col-span-5 flex flex-col border border-green-500/20 rounded-2xl bg-[#030a1c] relative overflow-hidden">
+        <section className="col-span-5 flex flex-col border border-green-500/20 rounded-2xl bg-slate-950/80 dark:bg-grayscrubbe-950 relative overflow-hidden">
           <div className="flex justify-between items-center p-4 border-b border-white/5">
             <div className="flex items-center gap-2">
               <span className="text-xs">
@@ -542,7 +542,7 @@ export default function EzraConsole() {
           <div className="p-4 bg-gradient-to-t from-black/40 to-transparent">
             <div className="relative group">
               <input
-                className="w-full bg-[#1e293b]/50 border border-white/10 rounded-xl py-4 px-12 text-sm focus:outline-none focus:border-green-500/50 transition-all"
+                className="w-full bg-slate-900/50 dark:bg-slate-950/50 border border-white/10 rounded-xl py-4 px-12 text-sm focus:outline-none focus:border-green-500/50 transition-all"
                 placeholder="Ask Ezra — e.g. 'Analyse INC-311' or 'What caused the checkout failure?'"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -569,7 +569,7 @@ export default function EzraConsole() {
 
         {/* Right Column: Context & Metrics */}
         <aside className="col-span-4 space-y-3 overflow-y-auto pr-2">
-          <div className="border border-white/10 rounded-2xl bg-[#030a1c] p-5 space-y-6">
+          <div className="border border-white/10 rounded-2xl bg-slate-950/80 dark:bg-grayscrubbe-950 p-5 space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-sm font-bold text-white">
                 Live incident context
@@ -691,7 +691,7 @@ export default function EzraConsole() {
             )}
           </div>
 
-          <div className="border border-white/10 rounded-2xl bg-[#030a1c] p-5">
+          <div className="border border-white/10 rounded-2xl bg-slate-950/80 dark:bg-grayscrubbe-950 p-5">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-white mb-4">
                 Ezra output focus
@@ -741,7 +741,7 @@ export default function EzraConsole() {
             </div>
           </div>
 
-          <div className="border border-white/10 rounded-2xl bg-[#030a1c] p-5">
+          <div className="border border-white/10 rounded-2xl bg-slate-950/80 dark:bg-grayscrubbe-950 p-5">
             <h3 className="text-xs font-bold text-white mb-4">Quick prompts</h3>
             <div className="grid grid-cols-2 gap-2">
               <PromptButton
@@ -788,7 +788,7 @@ export default function EzraConsole() {
             </div>
           </div>
 
-          <div className="border border-white/10 rounded-2xl bg-[#030a1c] p-5">
+          <div className="border border-white/10 rounded-2xl bg-slate-950/80 dark:bg-grayscrubbe-950 p-5">
             <h3 className="text-sm font-bold text-white mb-2">
               Ezra response behaviour
             </h3>

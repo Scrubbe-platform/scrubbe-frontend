@@ -5,7 +5,7 @@ import { IoNotificationsOffOutline } from 'react-icons/io5'
 
 const RelatedSection = () => {
   return (
-    <div className=' bg-[#030D25] p-4 rounded-xl text-white space-y-2 text-base'>
+    <div className='bg-slate-950/80 dark:bg-grayscrubbe-950 p-4 rounded-xl text-white space-y-2 text-base'>
         <p className='opacity-60'>Related Sections</p>
         <div className='flex items-center gap-2 p-2'>
         <FaRegBuilding className='text-amber-400'/> <span>Global Mode</span>

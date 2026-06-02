@@ -38,70 +38,69 @@ const Table = <TData extends object>({
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    state: {
-      sorting,
-    },
+    state: { sorting },
   });
 
   return (
-    <div className="overflow-x-auto dark:bg-background bg-[#0A1635] rounded-lg">
+    <div className="overflow-x-auto rounded-lg bg-white dark:bg-[#0A1635]">
       {data && data.length < 1 ? (
-        <>
-          <EmptyState title="No Items yet"/>
-        </>
+        <EmptyState title="No Items yet" />
       ) : (
         <table
           className={cn("w-full caption-bottom text-sm", className)}
           {...props}
         >
-          <thead className="text-white bg-[#374151]">
+          {/* ── Head ── */}
+          <thead className="bg-zinc-100 dark:bg-[#374151] text-zinc-700 dark:text-white">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
                 key={headerGroup.id}
-                className="dark:border-zinc-600 border-zinc-300 transition-colors  data-[state=selected]:bg-zinc-100  dark:data-[state=selected]:bg-zinc-800"
+                className="border-b border-zinc-200 dark:border-zinc-600 transition-colors data-[state=selected]:bg-zinc-100 dark:data-[state=selected]:bg-zinc-800"
               >
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <th
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      className={cn(
-                        "h-12 px-4 text-left align-middle font-semibold [&:has([role=checkbox])]:pr-0 ",
-                        headerClassName
-                      )}
-                    >
-                      {header.isPlaceholder ? null : (
-                        <div
-                          {...{
-                            className: header.column.getCanSort()
-                              ? "cursor-pointer select-none flex items-center gap-1"
-                              : "",
-                            onClick: header.column.getToggleSortingHandler(),
-                          }}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                          {{ asc: " 🔼", desc: " 🔽" }[
-                            header.column.getIsSorted() as string
-                          ] ?? null}
-                        </div>
-                      )}
-                    </th>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    className={cn(
+                      "h-12 px-4 text-left align-middle font-semibold text-xs uppercase tracking-wider [&:has([role=checkbox])]:pr-0",
+                      headerClassName
+                    )}
+                  >
+                    {header.isPlaceholder ? null : (
+                      <div
+                        className={
+                          header.column.getCanSort()
+                            ? "cursor-pointer select-none flex items-center gap-1"
+                            : ""
+                        }
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {{ asc: " 🔼", desc: " 🔽" }[
+                          header.column.getIsSorted() as string
+                        ] ?? null}
+                      </div>
+                    )}
+                  </th>
+                ))}
               </tr>
             ))}
           </thead>
-          <tbody className="[&_tr:last-child]:border-0 dark:bg-[#1F2937] dark:text-white">
+
+          {/* ── Body ── */}
+          <tbody className="[&_tr:last-child]:border-0 bg-white dark:bg-[#1F2937] text-zinc-700 dark:text-white">
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => onRowClick?.(row.original)}
                 className={cn(
-                  "border-b dark:border-zinc-600 border-zinc-300 transition-colors  data-[state=selected]:bg-zinc-100  dark:data-[state=selected]:bg-zinc-800",
+                  "border-b border-zinc-200 dark:border-zinc-600 transition-colors",
+                  "hover:bg-zinc-50 dark:hover:bg-zinc-700/40",
+                  "data-[state=selected]:bg-zinc-100 dark:data-[state=selected]:bg-zinc-800",
                   typeof rowClassName === "function"
                     ? rowClassName(row.original)
                     : rowClassName,

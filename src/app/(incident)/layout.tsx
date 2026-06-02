@@ -15,7 +15,9 @@ const IncidentDashboard = ({ children }: { children: ReactNode }) => {
     // <RedirectProviderIMS>
     <>
       <NextJsTopLoader />
-      <IncidentAuthGuard>{children}</IncidentAuthGuard>
+      <IncidentAuthGuard>
+      {children}
+      </IncidentAuthGuard>
       <Toaster position="top-center" />
     </>
     // </RedirectProviderIMS>

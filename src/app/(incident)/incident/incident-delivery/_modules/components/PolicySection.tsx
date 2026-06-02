@@ -1,13 +1,13 @@
 "use client";
-import SideModal from "@/components/ui/SideModal";
 import React, { useState } from "react";
-import PolicyDecision from "./Modal/PolicyDecision";
 import { useQuery } from "@tanstack/react-query";
+import SideModal from "@/components/ui/SideModal";
+import PolicyDecision from "./Modal/PolicyDecision";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 
 const PolicySection: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
-  const [isPolicy, setIsPolicy] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const { get } = useFetch();
 
   const { data: guardrail } = useQuery({
@@ -22,79 +22,93 @@ const PolicySection: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
     },
   });
 
-  const autoActivate = guardrail?.config?.autoActivate ?? false;
-  const approvalGate = guardrail?.config?.requireApproval ?? true;
-  const scope = guardrail?.config?.scope ?? "pr-only";
+  const autoActivate  = guardrail?.config?.autoActivate    ?? false;
+  const approvalGate  = guardrail?.config?.requireApproval ?? true;
+  const scope         = guardrail?.config?.scope            ?? "pr-only";
   const reasons: string[] = guardrail?.config?.reasons ?? [
     "Merge conflicts are correctness-sensitive → approval required.",
   ];
 
-  return (
-    <div className="text-white border border-IMSCyan/40 rounded-xl p-5 bg-gradient-to-b from-[#0074834D] to-[#004B571A] flex items-start justify-center">
-      <div className="w-full">
-        {/* Header Area */}
-        <div className="flex justify-between items-start mb-10">
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-white tracking-tight">
-              Policy
-            </h2>
-            <div className="space-y-2">
-              <p className="text-lg text-slate-300 font-medium">
-                When and how execution is allowed
-              </p>
-              <p className="text-base text-slate-400 font-medium">
-                Auto-activation, gates, scope, and reasons.
-              </p>
-            </div>
-          </div>
+  const policyFields = [
+    { title: "Auto-activate", value: autoActivate ? "Yes" : "No"                       },
+    { title: "Approval gate", value: approvalGate ? "Required" : "Not required"        },
+    { title: "Execution scope", value: scope                                            },
+  ];
 
+  return (
+    <>
+      <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
+
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="space-y-0.5">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+              Policy
+            </p>
+            <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">
+              When and how execution is allowed
+            </p>
+            <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+              Auto-activation, gates, scope, and reasons.
+            </p>
+          </div>
           <button
-            onClick={() => setIsPolicy(true)}
-            className="px-6 py-2 border border-green-400 text-green-400 rounded-xl text-lg font-bold hover:bg-green-400/10 transition-all duration-200 shadow-[0_0_15px_rgba(34,211,238,0.1)]"
+            onClick={() => setIsOpen(true)}
+            className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/40 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors shrink-0"
           >
             Details
           </button>
         </div>
 
-        {/* Policy Configuration Grid */}
-        <div className="grid grid-cols-3 gap-6 mb-6">
-          <PolicyCard title="Auto-activate?" value={autoActivate ? "Yes" : "No"} />
-          <PolicyCard title="Approval gate?" value={approvalGate ? "Required" : "Not required"} />
-          <PolicyCard title="Execution scope" value={scope} />
-        </div>
+        {/* Body */}
+        <div className="p-4 space-y-3">
 
-        {/* Reasons Summary Card */}
-        <div className="bg-black border border-slate-800 rounded-2xl p-6 shadow-inner">
-          <h3 className="text-base font-black text-white uppercase tracking-widest mb-4">
-            Reasons (summary)
-          </h3>
-          {reasons.map((r: string, i: number) => (
-            <div key={i} className="flex items-start gap-3">
-              <span className="text-slate-500 mt-1.5 text-xs">•</span>
-              <p className="text-sm text-slate-300 font-medium">{r}</p>
-            </div>
-          ))}
+          {/* Policy fields */}
+          <div className="grid grid-cols-3 gap-2.5">
+            {policyFields.map(({ title, value }) => (
+              <div
+                key={title}
+                className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-3.5 flex flex-col gap-1.5"
+              >
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                  {title}
+                </p>
+                <p className="text-[13px] font-medium text-zinc-700 dark:text-zinc-200">
+                  {value}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Reasons */}
+          <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">
+              Reasons
+            </p>
+            <ul className="space-y-2">
+              {reasons.map((r, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600 mt-1.5 shrink-0" />
+                  <p className="text-[12px] text-zinc-500 dark:text-zinc-400 leading-relaxed">{r}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
-      {isPolicy && (
+
+      {isOpen && (
         <SideModal
-          isOpen={isPolicy}
-          onClose={() => setIsPolicy(false)}
-          title={"Policy decision"}
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          title="Policy decision"
           subTitle="Why actions are allowed or blocked"
         >
           <PolicyDecision />
         </SideModal>
       )}
-    </div>
+    </>
   );
 };
-
-const PolicyCard = ({ title, value }: { title: string; value: string }) => (
-  <div className="bg-black border border-slate-800 rounded-2xl p-6 flex flex-col gap-2 group hover:border-green-500/30 transition-all duration-300">
-    <h3 className="text-base font-black text-slate-100 uppercase tracking-tight">{title}</h3>
-    <p className="text-sm font-medium text-slate-400 group-hover:text-slate-200 transition-colors">{value}</p>
-  </div>
-);
 
 export default PolicySection;

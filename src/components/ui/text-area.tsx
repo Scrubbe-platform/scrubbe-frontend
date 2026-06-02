@@ -32,7 +32,7 @@ const TextArea = ({
       {label && (
         <label
           htmlFor={props.id}
-          className={`flex gap-2 items-center text-white mb-2 text-sm font-medium ${
+          className={`flex gap-2 items-center dark:text-white text-black mb-2 text-sm font-medium ${
             isLoading ? "text-gray-500" : "text-gray-700"
           } ${labelClassName}`}
         >

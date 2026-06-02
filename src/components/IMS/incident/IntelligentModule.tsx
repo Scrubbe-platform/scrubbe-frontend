@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Sparkles } from "lucide-react";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 interface IntelligenceProps {
@@ -17,69 +18,64 @@ const IntelligenceModule: React.FC<IntelligenceProps> = ({
   relatedItems,
 }) => {
   return (
-    <div className="w-full flex flex-col gap-4">
-      <h2 className="text-[11px] md:text-[13px] font-bold text-slate-600 uppercase tracking-[0.15em] mb-1 px-1">
-        Scrubbe Intelligence
-      </h2>
+    <div className="flex flex-col gap-4">
 
-      <div className="bg-[#050b18]/40 border border-green-400/50 rounded-2xl p-4 md:p-6 relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 md:mb-6">
-          <div className="w-fit px-3 py-1 border border-green-400/50 rounded-lg bg-green-400/5 shrink-0">
-            <span className="text-[10px] md:text-xs font-bold text-green-400 uppercase tracking-tight">
+      {/* Main card */}
+      <div className="rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/60 dark:bg-emerald-500/5 p-5">
+
+        {/* Header row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/25 flex items-center justify-center shrink-0">
+              <Sparkles size={13} className="text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
               Scrubbe · Decision Engine
             </span>
           </div>
-          <div className="flex gap-1.5 items-center">
+
+          <div className="flex items-center gap-2 text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
             {typeof confidence === "number" && confidence > 0 ? (
-              <span className="text-xs md:text-sm font-bold text-emerald-500 whitespace-nowrap">
-                {confidence}% confidence
-              </span>
+              <span>{confidence}% confidence</span>
             ) : (
-              <span className="text-xs md:text-sm font-bold text-emerald-500 whitespace-nowrap">
-                Live context
-              </span>
+              <span>Live context</span>
             )}
-            {playbook ? (
+            {playbook && (
               <>
-                <span className="text-slate-500 text-sm">·</span>
-                <span className="text-xs md:text-sm font-bold text-emerald-500 whitespace-nowrap">
-                  {playbook}
-                </span>
+                <span className="text-emerald-300 dark:text-emerald-700">·</span>
+                <span>{playbook}</span>
               </>
-            ) : null}
+            )}
           </div>
         </div>
 
-        <p className="text-slate-200 text-sm md:text-lg font-medium leading-relaxed tracking-tight">
+        {/* Analysis text */}
+        <p className="text-[14px] text-zinc-700 dark:text-zinc-200 leading-relaxed">
           {description}
         </p>
       </div>
 
-      <div className="flex overflow-x-auto no-scrollbar gap-3 mt-1 pb-1">
-        {relatedItems.map((incident) => (
-          <div
-            key={incident.id}
-            className="px-3 py-2 md:px-4 border border-slate-700/50 rounded-xl bg-slate-800/20 text-slate-400 text-[10px] md:text-xs font-medium whitespace-nowrap shrink-0"
-          >
-            {incident.id}
-            {typeof incident.confidence === "number"
-              ? ` · ${incident.confidence}%`
-              : ""}
-          </div>
-        ))}
-      </div>
+      {/* Related signal chips */}
+      {relatedItems.length > 0 && (
+        <div className="flex overflow-x-auto no-scrollbar gap-2 pb-0.5">
+          {relatedItems.map((item) => (
+            <span
+              key={item.id}
+              className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 whitespace-nowrap shrink-0"
+            >
+              {item.id}
+              {typeof item.confidence === "number" ? ` · ${item.confidence}%` : ""}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-const ScrubbeIntelligence = ({
-  incident,
-}: {
-  incident: IncidentDetailRecord;
-}) => {
-  const confidenceValue = Math.round(
-    Math.max(incident.score || 0, incident.riskScore || 0)
-  );
+const ScrubbeIntelligence = ({ incident }: { incident: IncidentDetailRecord }) => {
+  const confidenceValue = Math.round(Math.max(incident.score || 0, incident.riskScore || 0));
+
   const relatedItems =
     incident.correlatedSignalIds.length > 0
       ? incident.correlatedSignalIds.map((id) => ({ id }))
@@ -88,7 +84,11 @@ const ScrubbeIntelligence = ({
           .map((value) => ({ id: value }));
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="px-5 md:px-8 py-6 border-b border-zinc-100 dark:border-white/[0.06]">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">
+        Scrubbe Intelligence
+      </p>
+
       <IntelligenceModule
         confidence={confidenceValue > 0 ? confidenceValue : undefined}
         playbook={incident.category || undefined}

@@ -95,7 +95,7 @@ export default function RootLayout({
           fallback={
             <div className="h-screen bg-white flex justify-center items-center">
               <Image
-                src="/scrubbe-logo-01.png"
+                src="/blacklogo.png"
                 alt="scrubbe-logo-01.png"
                 fill
                 sizes="(min-width: 300px) 100vw"

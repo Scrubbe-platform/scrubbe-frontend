@@ -19,115 +19,104 @@ const IncidentRouteShell = ({
   const detailQuery = useIncidentDetail(incidentId);
   const incident = detailQuery.data ?? null;
 
+  // ── Empty state ──────────────────────────────────────────────
   if (!incidentId) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 bg-dark text-slate-200">
-        <div className="max-w-xl rounded-3xl border border-white/10 bg-white/[0.02] p-8 text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
-            {title}
-          </p>
-          <h1 className="mt-4 text-3xl font-bold text-white">
-            Select an incident first
-          </h1>
-          <p className="mt-3 text-sm leading-7 text-slate-400">
-            This incident page follows the currently selected incident. Open the
-            incident workspace and choose an incident to continue.
-          </p>
-          <Link
-            href="/incident"
-            className="mt-6 inline-flex rounded-lg border border-green-500/40 px-4 py-2 text-sm font-semibold text-green-400"
-          >
-            Go to incident workspace
-          </Link>
-        </div>
-      </div>
+      <EmptyState
+        label={title}
+        heading="Select an incident first"
+        body="This page follows the currently selected incident. Open the incident workspace and choose an incident to continue."
+        href="/incident"
+        linkLabel="Go to incident workspace"
+      />
     );
   }
 
+  // ── Loading state ────────────────────────────────────────────
   if (detailQuery.isLoading) {
     return (
-      <div className="min-h-screen p-8 bg-dark text-slate-200 space-y-4">
-        <div className="h-24 rounded-2xl border border-white/10 bg-white/[0.03]" />
-        <div className="h-64 rounded-2xl border border-white/10 bg-white/[0.03]" />
+      <div className="min-h-screen p-8 bg-white dark:bg-zinc-950 space-y-3">
+        <div className="h-20 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 animate-pulse" />
+        <div className="h-56 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 animate-pulse" />
       </div>
     );
   }
 
+  // ── Not found ────────────────────────────────────────────────
   if (!incident) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 bg-dark text-slate-200">
-        <div className="max-w-xl rounded-3xl border border-white/10 bg-white/[0.02] p-8 text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
-            {title}
-          </p>
-          <h1 className="mt-4 text-3xl font-bold text-white">
-            That incident could not be resolved
-          </h1>
-          <p className="mt-3 text-sm leading-7 text-slate-400">
-            The selected incident id is invalid or no longer available. Choose a
-            different incident from the main workspace.
-          </p>
-          <Link
-            href="/incident"
-            className="mt-6 inline-flex rounded-lg border border-green-500/40 px-4 py-2 text-sm font-semibold text-green-400"
-          >
-            Back to incident workspace
-          </Link>
-        </div>
-      </div>
+      <EmptyState
+        label={title}
+        heading="Incident could not be resolved"
+        body="The selected incident ID is invalid or no longer available. Choose a different incident from the main workspace."
+        href="/incident"
+        linkLabel="Back to incident workspace"
+      />
     );
   }
 
+  // ── Content ──────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-dark text-slate-200">
-      <div className="border-b border-white/10 bg-darkEzra/70 px-6 py-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200">
+
+      {/* Shell header */}
+      <div className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-6 py-5">
+        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+
+          {/* Left — incident info */}
+          <div className="flex flex-col gap-2">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
               {title}
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-black tracking-tight text-white">
+
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-[20px] font-bold tracking-tight text-zinc-900 dark:text-white">
                 {incident.ticketId}
               </h1>
-              <span className="rounded border border-red-500/30 bg-red-500/5 px-2 py-1 text-[10px] font-bold uppercase text-red-400">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold border border-red-200 dark:border-red-500/25 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/8">
                 {incident.severity} · {incident.priority}
               </span>
-              <span className="rounded border border-white/10 px-2 py-1 text-[10px] font-bold uppercase text-slate-400">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/60">
                 {incident.status}
               </span>
             </div>
-            <p className="mt-3 text-sm text-slate-300">{incident.title}</p>
-            <p className="mt-2 text-xs uppercase tracking-[0.16em] text-slate-500">
+
+            <p className="text-[14px] text-zinc-600 dark:text-zinc-300 leading-snug">
+              {incident.title}
+            </p>
+
+            <p className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500">
               {[incident.service, incident.environment, incident.region]
                 .filter(Boolean)
                 .join(" · ")}
             </p>
-            {description ? (
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-400">
+
+            {description && (
+              <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
                 {description}
               </p>
-            ) : null}
+            )}
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          {/* Right — actions */}
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             <Link
               href={`/incident?id=${incident.id}&tab=overview`}
-              className="rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold text-slate-300"
+              className="px-4 py-2 rounded-lg text-[12px] font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               Overview
             </Link>
             <Link
               href={`/incident?id=${incident.id}&tab=context`}
-              className="rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold text-slate-300"
+              className="px-4 py-2 rounded-lg text-[12px] font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               Context
             </Link>
             <Link
               href={`/incident/tickets/${incident.id}`}
-              className="rounded-lg border border-green-500/40 px-4 py-2 text-xs font-semibold text-green-400"
+              className="px-4 py-2 rounded-lg text-[12px] font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors"
             >
-              Open war room
+              War Room
             </Link>
           </div>
         </div>
@@ -137,5 +126,41 @@ const IncidentRouteShell = ({
     </div>
   );
 };
+
+// ── Shared empty / error state ────────────────────────────────────
+
+const EmptyState = ({
+  label,
+  heading,
+  body,
+  href,
+  linkLabel,
+}: {
+  label: string;
+  heading: string;
+  body: string;
+  href: string;
+  linkLabel: string;
+}) => (
+  <div className="min-h-screen flex items-center justify-center p-8 bg-white dark:bg-zinc-950">
+    <div className="max-w-md w-full rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-8 text-center">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">
+        {label}
+      </p>
+      <h1 className="text-[22px] font-bold text-zinc-900 dark:text-white mb-3">
+        {heading}
+      </h1>
+      <p className="text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400 mb-6">
+        {body}
+      </p>
+      <Link
+        href={href}
+        className="inline-flex px-5 py-2.5 rounded-lg text-[13px] font-semibold border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+      >
+        {linkLabel}
+      </Link>
+    </div>
+  </div>
+);
 
 export default IncidentRouteShell;

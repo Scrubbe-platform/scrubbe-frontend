@@ -40,7 +40,7 @@ const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            className={`${className} relative bg-dark rounded-lg p-2 sm:p-2 w-full   sm:max-w-xl mx-2 max-h-[90vh] overflow-y-auto `}
+            className={`${className} relative bg-dark rounded-lg p-2 sm:p-2 w-full   sm:max-w-lg mx-2 max-h-[90vh] overflow-y-auto `}
           >
             <div className=" absolute right-3 top-3">
               <div

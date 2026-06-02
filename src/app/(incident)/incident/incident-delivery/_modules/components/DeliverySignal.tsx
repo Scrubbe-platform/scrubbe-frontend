@@ -1,160 +1,111 @@
+"use client";
 import React from "react";
 import {
-  BeakerIcon,
-  HammerIcon,
-  GitPullRequestIcon,
-  GitMergeIcon,
-  RocketIcon,
-  SearchIcon,
-  CheckCircle2,
-  RefreshCcw,
-  ArrowRight,
-  Check,
-} from "lucide-react"; // Using lucide-react for the icons
+  BeakerIcon, HammerIcon, GitPullRequestIcon, GitMergeIcon,
+  RocketIcon, SearchIcon, RefreshCcw, ArrowRight, Check,
+} from "lucide-react";
 
-const DeliverySignal = () => {
-  return (
-    <div className="pt-5">
-      <div className="w-full mx-auto bg-gradient-to-b text-white from-[#0074834D] to-[#004B571A] border rounded-xl transition-all border-IMSCyan/40 p-6 shadow-2xl">
-        {/* Top Header Section */}
-        <div className="flex justify-between items-start mb-6">
-          <div className="space-y-1">
-            <h1 className="text-xl font-bold text-white tracking-tight">
-              Incoming delivery signals
-            </h1>
-            <p className="text-sm text-white">
-              Ingest latest CI/CD and PR failure signals
-            </p>
-            <p className="text-[13px] text-white max-w-2xl leading-relaxed mt-2">
-              In production, integrations deliver these automatically. Buttons
-              below drive the UI so devs can understand the analyst workflow.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-900/50 border border-slate-800 rounded-lg text-[11px] font-bold uppercase tracking-wider">
-              Policy mode : Standard
-            </div>
-            <button className="px-3 py-1.5 bg-transparent border border-IMSCyan text-IMSCyan rounded-lg text-sm font-bold transition-colors">
-              Toggle Stricter
-            </button>
-            <button className="px-3 py-1.5 border border-IMSCyan rounded-lg hover:bg-slate-800 transition-colors">
-              <RefreshCcw className="w-4 h-4 text-green-400" />
-            </button>
-          </div>
-        </div>
+const signals = [
+  { icon: <BeakerIcon size={13} />,          label: "CI failed (tests)",          variant: "amber"  },
+  { icon: <HammerIcon size={13} />,           label: "CI failed (build)",          variant: "amber"  },
+  { icon: <GitPullRequestIcon size={13} />,   label: "PR checks failed",           variant: "red"    },
+  { icon: <GitMergeIcon size={13} />,         label: "Merge conflicts",            variant: "red"    },
+  { icon: <RocketIcon size={13} />,           label: "Deploy failed (staging)",    variant: "sky"    },
+  { icon: <SearchIcon size={13} />,           label: "Flaky tests detected",       variant: "violet" },
+];
 
-        {/* Signal Simulation Buttons */}
-        <div className="flex flex-wrap gap-3 mb-10">
-          <SignalButton
-            icon={<BeakerIcon size={14} />}
-            color="bg-[#eab308]"
-            label="CI failed (tests)"
-            textColor="text-black"
-          />
-          <SignalButton
-            icon={<HammerIcon size={14} />}
-            color="bg-[#eab308]"
-            label="CI failed (build)"
-            textColor="text-black"
-          />
-          <SignalButton
-            icon={<GitPullRequestIcon size={14} />}
-            color="bg-[#f43f5e]"
-            label="PR Checks failed"
-          />
-          <SignalButton
-            icon={<GitMergeIcon size={14} />}
-            color="bg-[#f43f5e]"
-            label="Merge Conflicts"
-          />
-          <SignalButton
-            icon={<RocketIcon size={14} />}
-            color="bg-[#06b6d4]"
-            label="Deployed Failed ( Staging )"
-          />
-          <SignalButton
-            icon={<SearchIcon size={14} />}
-            color="bg-[#d946ef]"
-            label="Flaky tests detected"
-          />
-        </div>
-
-        {/* Trace Section */}
-        <div className="border border-slate-400 rounded-xl p-3 relative">
-          <div className="flex justify-between items-center mb-6">
-            <div className="">
-              <h2 className="text-2xl font-medium text-white">Trace</h2>
-              <p className="text-sm text-slate-300 font-medium">
-                Stages update from decision log + incident state.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full text-[11px] text-green-400 font-bold">
-              Incident raised <Check className="text-green" size={12} />
-            </div>
-          </div>
-
-          {/* Trace Steps Flow */}
-          <div className="flex flex-wrap gap-3 items-center">
-            <TraceStep
-              title="Event received"
-              sub="Webhook/pipeline signal ingested"
-            />
-            <ArrowRight className="text-white" size={18} />
-
-            <TraceStep
-              title="Incident created/updated"
-              sub="Correlation + dedup applied"
-            />
-            <ArrowRight className="text-white" size={18} />
-
-            <TraceStep
-              title="Signals bound"
-              sub="Logs, jobs, PR, commit, artifacts"
-            />
-            <ArrowRight className="text-white" size={18} />
-
-            <TraceStep
-              title="Playbook selected"
-              sub="Delivery-incident playbook"
-            />
-            <ArrowRight className="text-white" size={18} />
-
-            <TraceStep
-              title="Policy decision"
-              sub="Auto-activate? Gate? Scope"
-            />
-            <ArrowRight className="text-white" size={18} />
-          </div>
-
-          <div className="mt-4">
-            <TraceStep
-              title="Remediation + verification"
-              sub="Suggest â†’ verify â†’ summarize"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+const signalVariant: Record<string, string> = {
+  amber:  "bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/25 text-amber-700 dark:text-amber-400",
+  red:    "bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/25 text-red-600 dark:text-red-400",
+  sky:    "bg-sky-50 dark:bg-sky-500/10 border-sky-200 dark:border-sky-500/25 text-sky-600 dark:text-sky-400",
+  violet: "bg-violet-50 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/25 text-violet-600 dark:text-violet-400",
 };
 
-const SignalButton = ({
-  icon,
-  color,
-  label,
-  textColor = "text-white",
-}: any) => (
-  <button
-    className={`flex items-center gap-2 px-3 py-1.5 ${color} ${textColor} rounded-md text-[11px] font-black uppercase tracking-tight hover:opacity-90 transition-opacity`}
-  >
-    {icon} {label}
-  </button>
+const traceSteps = [
+  { title: "Event received",            sub: "Webhook / pipeline signal ingested"   },
+  { title: "Incident created/updated",  sub: "Correlation + dedup applied"          },
+  { title: "Signals bound",             sub: "Logs, jobs, PR, commit, artifacts"    },
+  { title: "Playbook selected",         sub: "Delivery-incident playbook"           },
+  { title: "Policy decision",           sub: "Auto-activate? Gate? Scope"          },
+  { title: "Remediation + verification",sub: "Suggest → verify → summarize"        },
+];
+
+const DeliverySignal = () => (
+  <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-6 space-y-6">
+
+    {/* ── Header ── */}
+    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+      <div className="space-y-1">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          Delivery Signals
+        </p>
+        <h2 className="text-[16px] font-semibold text-zinc-900 dark:text-white">
+          Incoming delivery signals
+        </h2>
+        <p className="text-[13px] text-zinc-500 dark:text-zinc-400 max-w-lg leading-relaxed">
+          In production, integrations deliver these automatically. Buttons below
+          drive the UI so devs can understand the analyst workflow.
+        </p>
+      </div>
+
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+          Policy: Standard
+        </span>
+        <button className="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-600 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+          Toggle Stricter
+        </button>
+        <button className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+          <RefreshCcw size={14} />
+        </button>
+      </div>
+    </div>
+
+    {/* ── Signal buttons ── */}
+    <div className="flex flex-wrap gap-2">
+      {signals.map(({ icon, label, variant }) => (
+        <button
+          key={label}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors hover:opacity-80 ${signalVariant[variant]}`}
+        >
+          {icon} {label}
+        </button>
+      ))}
+    </div>
+
+    {/* ── Trace ── */}
+    <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-5">
+      <div className="flex items-start justify-between mb-5 gap-3">
+        <div className="space-y-0.5">
+          <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">Trace</p>
+          <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+            Stages update from decision log + incident state.
+          </p>
+        </div>
+        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/8 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 shrink-0">
+          Incident raised <Check size={11} />
+        </span>
+      </div>
+
+      {/* Steps */}
+      <div className="flex flex-wrap items-center gap-2">
+        {traceSteps.map((step, i) => (
+          <React.Fragment key={step.title}>
+            <TraceStep title={step.title} sub={step.sub} />
+            {i < traceSteps.length - 1 && (
+              <ArrowRight size={14} className="text-zinc-300 dark:text-zinc-600 shrink-0" />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  </div>
 );
 
-const TraceStep = ({ title, sub }: any) => (
-  <div className="w-[230px] border border-green rounded-lg p-3 group hover:border-green-500/50 transition-colors">
-    <p className="text-sm font-bold text-white mb-1">{title}</p>
-    <p className="text-xs text-white font-medium">{sub}</p>
+const TraceStep = ({ title, sub }: { title: string; sub: string }) => (
+  <div className="w-[180px] rounded-lg border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-3 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors">
+    <p className="text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 mb-0.5">{title}</p>
+    <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-snug">{sub}</p>
   </div>
 );
 

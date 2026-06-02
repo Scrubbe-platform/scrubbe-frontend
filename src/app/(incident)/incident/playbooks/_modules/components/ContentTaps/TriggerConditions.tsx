@@ -6,162 +6,121 @@ import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 type Operator = "eq" | "gt" | "in";
 
 interface Condition {
-  id: string;
-  field: string;
-  operator: Operator;
-  value: string | number;
-  weight: number;
-  isMatched: boolean;
+  id: string; field: string; operator: Operator;
+  value: string | number; weight: number; isMatched: boolean;
 }
 
-interface TriggerConditionsProps {
-  incident: IncidentDetailRecord;
-}
+// ── Condition row ─────────────────────────────────────────────────
 
-const ConditionRow: React.FC<Condition> = ({
-  field,
-  operator,
-  value,
-  weight,
-  isMatched,
-}) => (
-  <div className="group mb-2 flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] p-4 transition-colors hover:border-white/10">
+const ConditionRow: React.FC<Condition> = ({ field, operator, value, weight, isMatched }) => (
+  <div className="group flex items-center justify-between rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-4 transition-colors hover:border-zinc-200 dark:hover:border-zinc-700">
     <div className="flex flex-1 items-center gap-6">
-      <span className="w-32 text-sm font-medium text-blue-400">{field}</span>
+      {/* Field — keep a subtle accent to distinguish it as a key */}
+      <span className="w-32 text-[13px] font-medium text-sky-600 dark:text-sky-400 font-mono shrink-0">
+        {field}
+      </span>
 
-      <div className="flex flex-1 items-center gap-4">
-        <span className="rounded border border-slate-700 bg-slate-800/50 px-3 py-1 text-[11px] font-mono uppercase text-slate-400">
+      <div className="flex flex-1 items-center gap-3">
+        <span className="rounded border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-2.5 py-1 text-[11px] font-mono uppercase text-zinc-500 dark:text-zinc-400">
           {operator}
         </span>
-        <span className="font-mono text-sm text-amber-500">
-          {typeof value === "string" && !value.startsWith("[")
-            ? `"${value}"`
-            : value}
+        {/* Value — amber kept, it reads as a code literal */}
+        <span className="font-mono text-[13px] text-amber-600 dark:text-amber-400">
+          {typeof value === "string" && !value.startsWith("[") ? `"${value}"` : value}
         </span>
       </div>
     </div>
 
-    <div className="flex items-center gap-6">
-      <div className="flex items-center gap-3">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-amber-500/80">
+    <div className="flex items-center gap-5">
+      <div className="flex items-center gap-2.5">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
           Weight
         </span>
-        <div className="flex h-1.5 w-24 overflow-hidden rounded-full bg-slate-800">
+        <div className="flex h-1 w-20 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
           <div
-            className="h-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
+            className="h-full bg-zinc-400 dark:bg-zinc-500 transition-all"
             style={{ width: `${weight * 100}%` }}
           />
         </div>
-        <span className="w-8 font-mono text-sm text-slate-200">
+        <span className="w-8 font-mono text-[12px] text-zinc-600 dark:text-zinc-300">
           {weight.toFixed(2)}
         </span>
       </div>
       <Check
-        size={16}
-        className={isMatched ? "text-emerald-500" : "text-slate-700"}
+        size={14}
+        className={isMatched ? "text-emerald-500 dark:text-emerald-400" : "text-zinc-200 dark:text-zinc-700"}
       />
     </div>
   </div>
 );
 
+// ── Data ──────────────────────────────────────────────────────────
+
 const isDeploymentAware = (incident: IncidentDetailRecord) =>
   /deploy|pipeline|ci\/cd|rollback|release/i.test(
-    `${incident.sourceType ?? ""} ${incident.detection ?? ""} ${
-      incident.title ?? ""
-    }`
+    `${incident.sourceType ?? ""} ${incident.detection ?? ""} ${incident.title ?? ""}`
   );
 
 const buildConditions = (incident: IncidentDetailRecord): Condition[] => [
-  {
-    id: "1",
-    field: "signal_type",
-    operator: "eq",
-    value: incident.sourceType || incident.source || "manual_raise",
-    weight: 0.5,
-    isMatched: true,
-  },
-  {
-    id: "2",
-    field: "service",
-    operator: "eq",
-    value: incident.service || incident.affectedSystem || "unknown-service",
-    weight: 0.5,
-    isMatched: true,
-  },
-  {
-    id: "3",
-    field: "incident_status",
-    operator: "eq",
-    value: incident.status || "OPEN",
-    weight: 0.5,
-    isMatched: true,
-  },
-  {
-    id: "4",
-    field: "recent_deployment",
-    operator: "eq",
-    value: isDeploymentAware(incident) ? "true" : "unknown",
-    weight: 0.5,
-    isMatched: true,
-  },
-  {
-    id: "5",
-    field: "incident_severity",
-    operator: "in",
-    value: JSON.stringify([incident.severity || incident.priority || "P3"]),
-    weight: 0.5,
-    isMatched: true,
-  },
+  { id: "1", field: "signal_type",       operator: "eq", value: incident.sourceType || incident.source || "manual_raise",                    weight: 0.5, isMatched: true },
+  { id: "2", field: "service",           operator: "eq", value: incident.service || incident.affectedSystem || "unknown-service",             weight: 0.5, isMatched: true },
+  { id: "3", field: "incident_status",   operator: "eq", value: incident.status || "OPEN",                                                   weight: 0.5, isMatched: true },
+  { id: "4", field: "recent_deployment", operator: "eq", value: isDeploymentAware(incident) ? "true" : "unknown",                            weight: 0.5, isMatched: true },
+  { id: "5", field: "incident_severity", operator: "in", value: JSON.stringify([incident.severity || incident.priority || "P3"]),             weight: 0.5, isMatched: true },
 ];
 
-const TriggerConditions: React.FC<TriggerConditionsProps> = ({ incident }) => {
+// ── Component ─────────────────────────────────────────────────────
+
+const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({ incident }) => {
   const conditions = buildConditions(incident);
 
   return (
-    <div className="w-full max-w-5xl rounded-2xl border border-white/5 bg-dark p-3 shadow-2xl">
-      <div className="mb-8 flex items-start justify-between">
-        <div className="flex gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10">
-            <Bolt size={20} className="fill-amber-500 text-amber-500" />
+    <div className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5">
+
+      {/* Header */}
+      <div className="mb-6 flex items-start justify-between">
+        <div className="flex gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
+            <Bolt size={16} className="text-zinc-500 dark:text-zinc-400" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">
               Trigger Conditions
             </h2>
-            <p className="mt-1 text-xs font-medium text-slate-500">
+            <p className="mt-0.5 text-[12px] text-zinc-400 dark:text-zinc-500">
               Pattern match — MatchCondition[] with weighted confidence scoring
             </p>
           </div>
         </div>
 
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 rounded border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold text-emerald-500">
-            <Check size={14} /> Matched
-          </button>
-          <button className="rounded border border-slate-700 p-1.5 text-slate-400 hover:bg-white/5">
-            <TriangleAlert size={16} />
+          <span className="flex items-center gap-1.5 rounded-lg border border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/8 px-3 py-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <Check size={12} /> Matched
+          </span>
+          <button className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-1.5 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            <TriangleAlert size={14} />
           </button>
         </div>
       </div>
 
-      <div className="mb-8 flex gap-4 rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
-        <Info size={20} className="shrink-0 text-blue-400" />
-        <p className="text-sm leading-relaxed text-slate-300">
+      {/* Info banner */}
+      <div className="mb-5 flex gap-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
+        <Info size={16} className="shrink-0 text-zinc-400 dark:text-zinc-500 mt-0.5" />
+        <p className="text-[12px] leading-relaxed text-zinc-500 dark:text-zinc-400">
           All conditions are evaluated against the selected incident context.
           Weighted scores are summed to produce match confidence on the proposal,
           while alternatives stay visible for operator review.
         </p>
       </div>
 
-      <div className="mb-6 space-y-1">
-        {conditions.map((condition) => (
-          <ConditionRow key={condition.id} {...condition} />
-        ))}
+      {/* Rows */}
+      <div className="mb-5 space-y-1.5">
+        {conditions.map((c) => <ConditionRow key={c.id} {...c} />)}
       </div>
 
-      <button className="flex items-center gap-2 rounded-lg border border-green-500/50 px-4 py-2 text-sm font-semibold text-green-400 transition-all hover:bg-green-500/5">
-        <Plus size={18} />
-        Add Condition
+      {/* Add */}
+      <button className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 px-4 py-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+        <Plus size={14} /> Add Condition
       </button>
     </div>
   );

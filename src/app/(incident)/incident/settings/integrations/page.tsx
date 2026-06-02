@@ -268,8 +268,8 @@ const statusTone = (status: ConnectionStatus | "CONNECTED" | "NOT_CONNECTED") =>
     case "HEALTHY":
     case "CONNECTED":
       return {
-        border: "border-[#00CAD8]/50",
-        text: "text-[#00CAD8]",
+        border: "border-cyan-500/50",
+        text: "text-cyan-400",
         label: "Connected",
       };
     case "CONNECTING":
@@ -287,14 +287,14 @@ const statusTone = (status: ConnectionStatus | "CONNECTED" | "NOT_CONNECTED") =>
       };
     case "REVOKED":
       return {
-        border: "border-[#64748B]/40",
-        text: "text-[#64748B]",
+        border: "border-slate-400/40",
+        text: "text-slate-400",
         label: "Revoked",
       };
     default:
       return {
-        border: "border-[#64748B]/40",
-        text: "text-[#64748B]",
+        border: "border-slate-400/40",
+        text: "text-slate-400",
         label: "Not connected",
       };
   }
@@ -542,11 +542,10 @@ const IntegrationSettingsPage = () => {
           {sections.map(([section, definitions]) => (
             <section
               key={section}
-              className="bg-transparent border border-neutral-500 rounded-[24px] p-4 space-y-5"
+              className="bg-transparent border border-slate-500/40 dark:border-slate-700 rounded-[24px] p-4 space-y-5"
             >
               <div className="flex justify-between items-center px-1">
-                <h3 className="text-white font-bold text-lg">{section}</h3>
-                <ArrowRight size={18} className="text-[#64748B]" />
+                <h3 className="dark:text-white font-bold text-lg">{section}</h3>
               </div>
 
               <div className="space-y-4">
@@ -575,12 +574,12 @@ const IntegrationSettingsPage = () => {
                   return (
                     <div
                       key={definition.key}
-                      className="p-5 border border-neutral-500 rounded-2xl space-y-4 group hover:border-[#00CAD8]/30 transition-colors"
+                      className="p-5 border border-slate-500/40 dark:border-slate-700 rounded-2xl space-y-4 group hover:border-cyan-500/30 transition-colors"
                     >
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div className="space-y-2">
                           <div className="flex items-center gap-3 flex-wrap">
-                            <span className="text-white text-[15px] font-bold">
+                            <span className="dark:text-white text-[15px] font-bold">
                               {definition.title}
                             </span>
                             <StatusBadge
@@ -592,10 +591,10 @@ const IntegrationSettingsPage = () => {
                               }
                             />
                           </div>
-                          <p className="text-[#CBD5E1] text-sm max-w-3xl">
+                          <p className="dark:text-slate-300 text-sm max-w-3xl">
                             {definition.description}
                           </p>
-                          <p className="text-[#64748B] text-xs">
+                          <p className="dark:text-zinc-400 text-xs">
                             {definition.statusHint}
                           </p>
                         </div>
@@ -682,23 +681,23 @@ const IntegrationSettingsPage = () => {
                       ) : null}
 
                       {webhookUrl ? (
-                        <div className="rounded-2xl border border-white/10 bg-[#071126] px-4 py-4 space-y-3">
+                        <div className="rounded-2xl border border-slate-400/10 bg-slate-950/80 px-4 py-4 space-y-3">
                           <div className="flex items-center gap-2 text-white text-sm font-semibold">
-                            <Webhook size={14} className="text-[#00CAD8]" />
+                            <Webhook size={14} className="text-cyan-400" />
                             Inbound webhook
                           </div>
-                          <p className="text-xs text-[#94A3B8]">
+                          <p className="text-xs text-slate-400">
                             Point the provider at this endpoint and include your Scrubbe API key in the
                             <span className="text-white font-mono"> X-API-Key </span>
                             header.
                           </p>
-                          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-                            <span className="text-xs font-mono text-[#CBD5E1] truncate flex-1">
+                          <div className="flex items-center gap-2 rounded-xl border border-slate-400/10 bg-slate-950/20 px-3 py-2">
+                            <span className="text-xs font-mono text-slate-300 truncate flex-1">
                               {webhookUrl}
                             </span>
                             <button
                               type="button"
-                              className="text-[#00CAD8] hover:text-white transition-colors"
+                              className="text-cyan-400 hover:text-white transition-colors"
                               onClick={() => copyWebhook(webhookUrl, definition.title)}
                             >
                               <Copy size={14} />
@@ -708,23 +707,23 @@ const IntegrationSettingsPage = () => {
                       ) : null}
 
                       {manifestUrl ? (
-                        <div className="rounded-2xl border border-white/10 bg-[#071126] px-4 py-4 space-y-3">
+                        <div className="rounded-2xl border border-slate-400/10 bg-slate-950/80 px-4 py-4 space-y-3">
                           <div className="flex items-center gap-2 text-white text-sm font-semibold">
-                            <Webhook size={14} className="text-[#00CAD8]" />
+                            <Webhook size={14} className="text-cyan-400" />
                             Kubernetes agent manifest
                           </div>
-                          <p className="text-xs text-[#94A3B8]">
+                          <p className="text-xs text-slate-400">
                             Download the in-cluster agent manifest, replace the
                             <span className="text-white font-mono"> SCRUBBE_API_KEY </span>
                             placeholder, then apply it to your cluster.
                           </p>
-                          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-                            <span className="text-xs font-mono text-[#CBD5E1] truncate flex-1">
+                          <div className="flex items-center gap-2 rounded-xl border border-slate-400/10 bg-slate-950/20 px-3 py-2">
+                            <span className="text-xs font-mono text-slate-300 truncate flex-1">
                               {manifestUrl}
                             </span>
                             <button
                               type="button"
-                              className="text-[#00CAD8] hover:text-white transition-colors"
+                              className="text-cyan-400 hover:text-white transition-colors"
                               onClick={() => copyWebhook(manifestUrl, "Kubernetes manifest")}
                             >
                               <Copy size={14} />
@@ -734,19 +733,19 @@ const IntegrationSettingsPage = () => {
                       ) : null}
 
                       {isEditorOpen && definition.mode === "manual" ? (
-                        <div className="rounded-2xl border border-[#00CAD8]/20 bg-[#071126] px-4 py-4 space-y-4">
+                        <div className="rounded-2xl border border-cyan-500/20 bg-slate-950/80 px-4 py-4 space-y-4">
                           <div className="flex items-center justify-between gap-3">
                             <div>
                               <p className="text-white font-semibold text-sm">
                                 {connection ? "Update connection" : "Configure connection"}
                               </p>
-                              <p className="text-[#94A3B8] text-xs">
+                              <p className="text-slate-400 text-xs">
                                 Save the connector metadata Scrubbe should use for this provider.
                               </p>
                             </div>
                             <button
                               type="button"
-                              className="text-[#64748B] hover:text-white transition-colors"
+                              className="text-slate-400 hover:text-white transition-colors"
                               onClick={() => setActiveEditor(null)}
                             >
                               Close
@@ -832,7 +831,7 @@ const IntegrationSettingsPage = () => {
           ))}
 
           {isLoading ? (
-            <div className="flex items-center gap-2 text-sm text-[#94A3B8]">
+            <div className="flex items-center gap-2 text-sm text-slate-400">
               <Loader2 size={16} className="animate-spin" />
               Loading connector state...
             </div>
@@ -855,7 +854,7 @@ const StatusBadge = ({
   icon: ReactNode;
 }) => (
   <div
-    className={`flex items-center gap-1.5 px-3 py-1 border rounded-full bg-[#0B1224] ${borderClass}`}
+    className={`flex items-center gap-1.5 px-3 py-1 border rounded-full bg-slate-950 ${borderClass}`}
   >
     <span className={textClass}>{icon}</span>
     <span className="text-[10px] font-bold text-white uppercase tracking-wider">
@@ -881,8 +880,8 @@ const ActionButton = ({
     variant === "danger"
       ? "text-rose-200 border-rose-400/30 hover:bg-rose-500/10"
       : variant === "secondary"
-        ? "text-white border-white/15 hover:bg-white/5"
-        : "text-[#00CAD8] border-[#00CAD8] hover:bg-[#00CAD8]/5";
+        ? "text-white border-slate-400/40 hover:bg-white/5"
+        : "text-green border-green-500 hover:bg-green-500/5";
 
   return (
     <button
@@ -898,9 +897,9 @@ const ActionButton = ({
 };
 
 const DetailPill = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-2xl border border-white/10 bg-[#071126] px-4 py-3">
-    <p className="text-[11px] uppercase tracking-[0.2em] text-[#64748B]">{label}</p>
-    <p className="text-sm text-white mt-1 break-words">{value}</p>
+  <div className="rounded-2xl border dark:border-slate-400/10 dark:bg-slate-950/80 px-4 py-3">
+    <p className="text-[11px] uppercase dark:text-slate-400 text-black">{label}</p>
+    <p className="text-sm dark:text-white mt-1 break-words">{value}</p>
   </div>
 );
 
@@ -918,7 +917,7 @@ const InputField = ({
   onChange: (value: string) => void;
 }) => (
   <label className="space-y-2">
-    <span className="text-xs uppercase tracking-[0.18em] text-[#64748B]">
+    <span className="text-xs uppercase tracking-[0.18em] text-slate-400">
       {label}
     </span>
     <input
@@ -926,7 +925,7 @@ const InputField = ({
       value={value}
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value)}
-      className="w-full rounded-xl border border-white/10 bg-[#020817] px-3 py-2 text-sm text-white placeholder:text-[#475569] outline-none focus:border-[#00CAD8]/50"
+      className="w-full rounded-xl border border-slate-500/20 bg-slate-950 px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:border-cyan-500/50"
     />
   </label>
 );
@@ -943,7 +942,7 @@ const TextAreaField = ({
   onChange: (value: string) => void;
 }) => (
   <label className="space-y-2 lg:col-span-2">
-    <span className="text-xs uppercase tracking-[0.18em] text-[#64748B]">
+    <span className="text-xs uppercase tracking-[0.18em] text-slate-400">
       {label}
     </span>
     <textarea
@@ -951,7 +950,7 @@ const TextAreaField = ({
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value)}
       rows={4}
-      className="w-full rounded-xl border border-white/10 bg-[#020817] px-3 py-2 text-sm text-white placeholder:text-[#475569] outline-none focus:border-[#00CAD8]/50 resize-none"
+      className="w-full rounded-xl border border-slate-500/20 bg-slate-950 px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:border-cyan-500/50 resize-none"
     />
   </label>
 );

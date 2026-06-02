@@ -54,7 +54,9 @@ export default function IncidentAuthGuard({
 
     const query = searchParams.toString();
     const callbackUrl = query ? `${pathname}?${query}` : pathname;
-    router.replace(`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+    router.replace(
+      `/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    );
   }, [pathname, router, searchParams]);
 
   if (!isAllowed) {

@@ -19,7 +19,7 @@ const page = () => {
     <IncidentRouteShell title="Playbooks">
       {(incident) => (
         <div>
-          <div className="border-b border-white/10 bg-dark px-6 py-4">
+          <div className="border-b border-white/10 dark:bg-dark px-6 py-4">
             <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-300">
               <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-green-400">
                 {incident.ticketId}
@@ -38,7 +38,7 @@ const page = () => {
             <div className="flex-[.3]">
               <PlaybookSidebar incident={incident} />
             </div>
-            <div className="flex-1 bg-darkEzra p-2 space-y-4">
+            <div className="flex-1 dark:bg-darkEzra p-2 space-y-4">
               <PlaybookStatusCard incident={incident} />
               <TriggerConditions incident={incident} />
               <InvestigationTimeline incident={incident} />

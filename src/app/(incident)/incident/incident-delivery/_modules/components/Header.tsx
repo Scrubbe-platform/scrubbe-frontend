@@ -1,126 +1,95 @@
-import SideModal from "@/components/ui/SideModal";
+"use client";
 import React, { ReactNode, useState } from "react";
 import { AiOutlineBranches } from "react-icons/ai";
 import { GoShieldCheck } from "react-icons/go";
-import {
-  IoBookOutline,
-  IoDocumentOutline,
-  IoDocumentTextOutline,
-} from "react-icons/io5";
+import { IoBookOutline, IoDocumentOutline, IoDocumentTextOutline } from "react-icons/io5";
+import SideModal from "@/components/ui/SideModal";
 import Govern from "./Modal/Govern";
 import Playbook from "./Modal/Playbook";
 import AnalystNote from "./Modal/AnalystNote";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 const Header = ({ incident }: { incident: IncidentDetailRecord }) => {
-  const [isGoverned, setIsGoverned] = useState(false);
+  const [isGoverned,    setIsGoverned]    = useState(false);
   const [isAnalystNote, setIsAnalystNote] = useState(false);
-  const [isPlaybook, setIsPlaybook] = useState(false);
+  const [isPlaybook,    setIsPlaybook]    = useState(false);
+
   const sourceLabel = incident.sourceType || incident.source || "Manual";
 
   const tags = [
-    {
-      title: "Governed",
-      icon: <GoShieldCheck className="size-4 text-emerald-400" />,
-      onClick: () => setIsGoverned(true),
-    },
-    {
-      title: `Source : ${sourceLabel}`,
-      icon: <AiOutlineBranches className="size-4 text-orange-400" />,
-      onClick: () => undefined,
-    },
-    {
-      title: "Playbook Active",
-      icon: <IoBookOutline className="size-4 text-fuchsia-500" />,
-      onClick: () => setIsPlaybook(true),
-    },
-    {
-      title: "Decision Log",
-      icon: <IoDocumentTextOutline className="size-4 text-blue-500" />,
-      onClick: () => undefined,
-    },
-    {
-      title: "Analyst Note",
-      icon: <IoDocumentOutline className="size-4 text-yellow-500" />,
-      onClick: () => setIsAnalystNote(true),
-    },
+    { title: "Governed",                icon: <GoShieldCheck className="size-3.5 text-emerald-500 dark:text-emerald-400" />,           onClick: () => setIsGoverned(true)    },
+    { title: `Source: ${sourceLabel}`,  icon: <AiOutlineBranches className="size-3.5 text-amber-500 dark:text-amber-400" />,           onClick: () => undefined              },
+    { title: "Playbook Active",         icon: <IoBookOutline className="size-3.5 text-violet-500 dark:text-violet-400" />,             onClick: () => setIsPlaybook(true)    },
+    { title: "Decision Log",            icon: <IoDocumentTextOutline className="size-3.5 text-sky-500 dark:text-sky-400" />,           onClick: () => undefined              },
+    { title: "Analyst Note",            icon: <IoDocumentOutline className="size-3.5 text-zinc-400 dark:text-zinc-400" />,             onClick: () => setIsAnalystNote(true) },
   ];
 
   return (
-    <div>
-      <div className="flex items-start justify-between text-white">
-        <div className="space-y-3">
-          <p className="text-lg font-semibold">Scrubbe · Analyst Investigation</p>
-          <p className="font-semibold">
+    <>
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
+
+        {/* Left — title block */}
+        <div className="space-y-1.5 max-w-xl">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+            Scrubbe · Analyst Investigation
+          </p>
+          <p className="text-[16px] font-semibold text-zinc-900 dark:text-white leading-snug">
             {incident.ticketId} · {incident.title || "Delivery incident investigation"}
           </p>
-          <p className="max-w-xl text-base">
+          <p className="text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
             Analyst view for what went wrong across delivery signals, evidence,
             remediation, verification, and the decision log for{" "}
-            {incident.service || "the selected service"}.
+            <span className="text-zinc-700 dark:text-zinc-300 font-medium">
+              {incident.service || "the selected service"}
+            </span>.
           </p>
         </div>
-        <div className="flex max-w-2xl flex-wrap items-center gap-4">
+
+        {/* Right — tags */}
+        <div className="flex flex-wrap items-center gap-2">
           {tags.map(({ icon, title, onClick }) => (
-            <ButtonTags Icon={icon} key={title} title={title} onClick={onClick} />
+            <Tag key={title} icon={icon} title={title} onClick={onClick} />
           ))}
         </div>
       </div>
 
-      {isGoverned ? (
-        <SideModal
-          isOpen={isGoverned}
-          onClose={() => setIsGoverned(false)}
-          title="Governed orchestration"
-          subTitle="What Governed means"
-        >
+      {/* Modals */}
+      {isGoverned && (
+        <SideModal isOpen={isGoverned} onClose={() => setIsGoverned(false)} title="Governed orchestration" subTitle="What Governed means">
           <Govern />
         </SideModal>
-      ) : null}
-
-      {isPlaybook ? (
-        <SideModal
-          isOpen={isPlaybook}
-          onClose={() => setIsPlaybook(false)}
-          title="Playbook"
-          subTitle="Active playbook"
-        >
+      )}
+      {isPlaybook && (
+        <SideModal isOpen={isPlaybook} onClose={() => setIsPlaybook(false)} title="Playbook" subTitle="Active playbook">
           <Playbook />
         </SideModal>
-      ) : null}
-
-      {isAnalystNote ? (
-        <SideModal
-          isOpen={isAnalystNote}
-          onClose={() => setIsAnalystNote(false)}
-          title="Analyst Note"
-          subTitle="Add note (author + timestamp)"
-        >
+      )}
+      {isAnalystNote && (
+        <SideModal isOpen={isAnalystNote} onClose={() => setIsAnalystNote(false)} title="Analyst Note" subTitle="Add note (author + timestamp)">
           <AnalystNote />
         </SideModal>
-      ) : null}
-    </div>
+      )}
+    </>
   );
 };
 
-const ButtonTags = ({
-  Icon,
+const Tag = ({
+  icon,
   title,
   onClick,
 }: {
-  Icon: ReactNode;
+  icon: ReactNode;
   title: string;
   onClick: () => void;
-}) => {
-  return (
-    <div
-      onClick={onClick}
-      className="flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-400 px-2 py-1 text-sm"
-    >
-      {Icon}
-      {title}
-    </div>
-  );
-};
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 px-2.5 py-1.5 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+  >
+    {icon}
+    {title}
+  </button>
+);
 
 export default Header;

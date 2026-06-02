@@ -315,6 +315,7 @@ export default function SignInForm() {
   const errorCode = searchParams.get("error");
   const magicToken = searchParams.get("magic");
   const inviteEmail = searchParams.get("email");
+  const callbackUrl = searchParams.get("callbackUrl") || undefined;
   const isAuthRef = useRef(false);
   const shownErrorRef = useRef<string | null>(null);
 
@@ -346,6 +347,7 @@ export default function SignInForm() {
 
   const redirectAfterLogin = useCallback(
     (accountType?: string | null, purpose?: string | null) => {
+      console.log("Redirecting after login with accountType:", accountType, "purpose:", purpose);
       if (IS_STANDALONE) {
         if (path === "payment") { router.replace("/pricing"); return; }
         if (path === "community") { router.replace("/community"); return; }
@@ -363,13 +365,15 @@ export default function SignInForm() {
           window.location.href = redirectUrl.toString();
           return;
         }
-        router.push("/incident");
+              console.log("Redirecting after login with accountType:", accountType, "purpose:", purpose);
+
+        window.location.href = callbackUrl || "/incident"
         return;
       }
       if (accountType === "DEVELOPER") { router.push("/developer/dashboard"); return; }
-      router.push("/incident");
+        window.location.href = callbackUrl || "/incident"
     },
-    [path, router]
+    [callbackUrl, path, router]
   );
 
   // Step 1: discover SSO for this email domain

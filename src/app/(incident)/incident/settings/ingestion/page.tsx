@@ -385,10 +385,10 @@ const IngestionPage = () => {
         sub="Connect Git providers and CI to auto-raise incidents and generate safe PR-based remediation."
       >
         <div className="grid 2xl:grid-cols-2 gap-8 pt-5 items-start">
-          <section className="bg-transparent border border-neutral-600 rounded-[24px] p-6 space-y-5">
+          <section className="bg-transparent border border-slate-300 dark:border-white/10 rounded-[24px] p-6 space-y-5">
             <div className="flex justify-between items-center mb-2 px-1">
-              <h3 className="text-white font-bold text-lg">Git providers</h3>
-              <ChevronRight size={18} className="text-[#64748B]" />
+              <h3 className="text-slate-900 dark:text-slate-100 font-bold text-lg">Git providers</h3>
+              <ChevronRight size={18} className="text-slate-500 dark:text-slate-400" />
             </div>
 
             <div className="space-y-4">
@@ -424,7 +424,7 @@ const IngestionPage = () => {
                     onOpenLastIncident={() => openLastIncident(connector.config)}
                     controls={
                       isLoading ? (
-                        <Loader2 size={16} className="animate-spin text-[#64748B]" />
+                        <Loader2 size={16} className="animate-spin text-slate-500 dark:text-slate-400" />
                       ) : connector.connected ? (
                         <>
                           <StatusBadge
@@ -489,24 +489,24 @@ const IngestionPage = () => {
             </div>
           </section>
 
-          <section className="bg-transparent border border-neutral-600 rounded-[24px] p-6 space-y-5">
+          <section className="bg-transparent border border-slate-300 dark:border-white/10 rounded-[24px] p-6 space-y-5">
             <div className="flex justify-between items-center mb-2 px-1">
-              <h3 className="text-white font-bold text-lg">CI/CD sources</h3>
-              <ChevronRight size={18} className="text-[#64748B]" />
+              <h3 className="text-slate-900 dark:text-slate-100 font-bold text-lg">CI/CD sources</h3>
+              <ChevronRight size={18} className="text-slate-500 dark:text-slate-400" />
             </div>
 
             <div className="space-y-4">
-              {repoConnectors.map((connector) => (
+                {repoConnectors.map((connector) => (
                 <div
                   key={connector.ciLabel}
-                  className="p-5 border border-neutral-600 rounded-2xl space-y-3"
+                  className="p-5 border border-slate-300 dark:border-white/10 rounded-2xl space-y-3 bg-white dark:bg-slate-950/80"
                 >
                   <div className="flex justify-between items-center gap-3">
                     <div>
-                      <span className="text-white text-[15px] font-bold">
+                      <span className="text-slate-900 dark:text-slate-100 text-[15px] font-bold">
                         {connector.ciLabel}
                       </span>
-                      <p className="text-[#64748B] text-xs leading-normal mt-2">
+                      <p className="text-slate-600 dark:text-slate-400 text-xs leading-normal mt-2">
                         {connector.ciDescription}
                       </p>
                     </div>
@@ -523,27 +523,27 @@ const IngestionPage = () => {
                 </div>
               ))}
 
-              <div className="p-5 border border-neutral-600 rounded-2xl space-y-3">
+              <div className="p-5 border border-slate-300 dark:border-white/10 rounded-2xl space-y-3 bg-white dark:bg-slate-950/80">
                 <div className="flex justify-between items-center">
-                  <span className="text-white text-[15px] font-bold">Jenkins</span>
+                  <span className="text-slate-900 dark:text-slate-100 text-[15px] font-bold">Jenkins</span>
                   <ActionButton
                     label="Configure"
                     color="cyan"
                     onClick={() => router.push("/connections?integration=jenkins")}
                   />
                 </div>
-                <p className="text-[#64748B] text-xs leading-normal">
+                <p className="text-slate-600 dark:text-slate-400 text-xs leading-normal">
                   Build hooks and log ingestion are still pending implementation.
                 </p>
               </div>
 
-              <div className="p-5 border border-neutral-600 rounded-2xl space-y-4">
+              <div className="p-5 border border-slate-300 dark:border-white/10 rounded-2xl space-y-4 bg-white dark:bg-slate-950/80">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <span className="text-white text-[15px] font-bold">
+                    <span className="text-slate-900 dark:text-slate-100 text-[15px] font-bold">
                       Delivery incident routing
                     </span>
-                    <p className="text-[#64748B] text-xs leading-normal">
+                    <p className="text-slate-600 dark:text-slate-400 text-xs leading-normal">
                       Connector metadata seeds which repo and playbook will be
                       used when a failure auto-raises an incident.
                     </p>
@@ -552,22 +552,22 @@ const IngestionPage = () => {
                     type="button"
                     onClick={() => openRoutingConfiguration(activeConnector)}
                     disabled={!activeConnector.connected}
-                    className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-IMSCyan border border-IMSCyan px-3 py-1 rounded-lg text-xs font-bold hover:bg-IMSCyan/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Edit
                   </button>
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center gap-3 p-2.5 border border-neutral-600 rounded-xl bg-[#0B1224]/50">
-                    <Database size={14} className="text-[#FF7ED4]" />
-                    <span className="text-[11px] text-[#D1D5DB]">
+                  <div className="flex items-center gap-3 p-2.5 border border-slate-300 dark:border-white/10 rounded-xl bg-slate-50 dark:bg-slate-900/30">
+                    <Database size={14} className="text-pink-400 dark:text-pink-300" />
+                    <span className="text-[11px] text-slate-600 dark:text-slate-300">
                       {activeConnector.repoLabel}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 p-2.5 border border-neutral-600 rounded-xl bg-[#0B1224]/50">
-                    <Book size={14} className="text-[#FDE047]" />
-                    <span className="text-[11px] text-[#D1D5DB]">
+                  <div className="flex items-center gap-3 p-2.5 border border-slate-300 dark:border-white/10 rounded-xl bg-slate-50 dark:bg-slate-900/30">
+                    <Book size={14} className="text-yellow-400 dark:text-yellow-300" />
+                    <span className="text-[11px] text-slate-600 dark:text-slate-300">
                       {activeConnector.playbookLabel}
                     </span>
                   </div>
@@ -644,11 +644,11 @@ const RepoConnectorCard = ({
   onRotateWebhookSecret: () => void;
   onOpenLastIncident: () => void;
 }) => (
-  <div className="p-5 border border-neutral-600 rounded-2xl space-y-4">
+  <div className="p-5 border border-slate-300 dark:border-white/10 rounded-2xl space-y-4 bg-white dark:bg-slate-950/80">
     <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
       <div className="space-y-2">
-        <span className="text-white text-[15px] font-bold">{label}</span>
-        <p className="text-[#64748B] text-xs leading-normal max-w-[30rem]">
+        <span className="text-slate-900 dark:text-slate-100 text-[15px] font-bold">{label}</span>
+        <p className="text-slate-600 dark:text-slate-400 text-xs leading-normal max-w-[30rem]">
           {description}
         </p>
       </div>
@@ -668,16 +668,16 @@ const RepoConnectorCard = ({
 
     {isConnected ? (
       <div className="space-y-3">
-        <div className="rounded-2xl border border-neutral-700 bg-[#0B1224]/40 p-4">
+        <div className="rounded-2xl border border-slate-300 dark:border-neutral-700 bg-white dark:bg-slate-900/40 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <p className="text-[10px] uppercase tracking-wider text-[#64748B]">
+              <p className="text-[10px] uppercase tracking-wider text-slate-600 dark:text-slate-400">
                 Last auto-raised incident
               </p>
-              <p className="text-sm font-bold text-white">
+              <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {lastIncidentTicketId ?? "Waiting for a connector event"}
               </p>
-              <p className="text-[11px] text-[#94A3B8]">{lastIncidentHint}</p>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400">{lastIncidentHint}</p>
             </div>
             <ActionButton
               label="Open last incident"
@@ -687,13 +687,13 @@ const RepoConnectorCard = ({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#00CAD8]/20 bg-[#071126] p-4 space-y-3">
+        <div className="rounded-2xl border border-IMSCyan/20 bg-white dark:bg-slate-950/80 p-4 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-[#64748B]">
+              <p className="text-[10px] uppercase tracking-wider text-slate-600 dark:text-slate-400">
                 Provider webhook setup
               </p>
-              <p className="text-[11px] text-[#94A3B8]">
+              <p className="text-[11px] text-slate-600 dark:text-slate-400">
                 Use this URL and workspace secret in {label} webhook settings.
               </p>
             </div>
@@ -714,7 +714,7 @@ const RepoConnectorCard = ({
             value={webhookSecret ?? webhookSecretPreview ?? "Secret unavailable"}
             onCopy={onCopyWebhookSecret}
           />
-          <p className="text-[10px] text-[#64748B]">
+          <p className="text-[10px] text-slate-600 dark:text-slate-400">
             Last rotated: {formatTimestamp(webhookSecretRotatedAt)}
           </p>
         </div>
@@ -732,15 +732,15 @@ const SecretRow = ({
   value: string;
   onCopy: () => void;
 }) => (
-  <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+  <div className="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-black/20 px-3 py-2">
     <div className="min-w-0 flex-1">
-      <p className="text-[10px] uppercase tracking-wider text-[#64748B]">{label}</p>
-      <p className="truncate font-mono text-xs text-[#CBD5E1]">{value}</p>
+      <p className="text-[10px] uppercase tracking-wider text-slate-600 dark:text-slate-400">{label}</p>
+      <p className="truncate font-mono text-xs text-slate-700 dark:text-slate-300">{value}</p>
     </div>
     <button
       type="button"
       onClick={onCopy}
-      className="rounded-lg border border-[#00CAD8]/40 p-2 text-[#00CAD8] hover:bg-[#00CAD8]/10"
+      className="rounded-lg border border-IMSCyan/40 p-2 text-IMSCyan hover:bg-IMSCyan/10"
       aria-label={`Copy ${label}`}
     >
       <Copy size={14} />
@@ -755,9 +755,9 @@ const StatusBadge = ({
   label: string;
   icon?: ReactNode;
 }) => (
-  <div className="flex items-center gap-1.5 px-3 py-1 border border-[#00CAD8]/50 rounded-full bg-[#0B1224]">
-    {icon ? <span className="text-[#00CAD8]">{icon}</span> : null}
-    <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+  <div className="flex items-center gap-1.5 px-3 py-1 border border-IMSCyan/50 rounded-full bg-white dark:bg-slate-900/40">
+    {icon ? <span className="text-IMSCyan">{icon}</span> : null}
+    <span className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-wider">
       {label}
     </span>
   </div>
@@ -777,11 +777,9 @@ const ActionButton = ({
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-      color === "cyan"
-        ? "text-[#3EE9FF] border-[#3EE9FF] hover:bg-[#3EE9FF]/5"
-        : "text-[#00CAD8] border-[#00CAD8] hover:bg-[#00CAD8]/5"
-    } ${disabled ? "opacity-50 cursor-not-allowed hover:bg-transparent" : ""}`}
+    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all border text-IMSCyan border-IMSCyan hover:bg-IMSCyan/5 ${
+      disabled ? "opacity-50 cursor-not-allowed hover:bg-transparent" : ""
+    }`}
   >
     {label}
   </button>
@@ -796,10 +794,10 @@ const MetricCard = ({
   value: string;
   caption: string;
 }) => (
-  <div className="rounded-2xl border border-neutral-700 bg-[#0B1224]/50 p-4">
-    <p className="text-[10px] uppercase tracking-wider text-[#64748B]">{label}</p>
-    <p className="mt-2 text-sm font-bold text-white">{value}</p>
-    <p className="mt-2 text-[11px] leading-relaxed text-[#94A3B8]">{caption}</p>
+  <div className="rounded-2xl border border-slate-300 dark:border-neutral-700 bg-white dark:bg-slate-900/40 p-4">
+    <p className="text-[10px] uppercase tracking-wider text-slate-600 dark:text-slate-400">{label}</p>
+    <p className="mt-2 text-sm font-bold text-slate-900 dark:text-slate-100">{value}</p>
+    <p className="mt-2 text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">{caption}</p>
   </div>
 );
 

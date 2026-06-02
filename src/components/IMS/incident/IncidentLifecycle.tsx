@@ -16,87 +16,71 @@ interface IncidentLifecycleProps {
   currentStep: LifecycleStepLabel;
 }
 
-const IncidentLifecycle: React.FC<IncidentLifecycleProps> = ({
-  currentStep,
-}) => {
-  const steps: LifecycleStepLabel[] = [
-    "Detected",
-    "Enriched",
-    "Analysed",
-    "Proposed",
-    "Approved",
-    "Executed",
-    "Resolved",
-  ];
+const steps: LifecycleStepLabel[] = [
+  "Detected", "Enriched", "Analysed", "Proposed", "Approved", "Executed", "Resolved",
+];
 
+const IncidentLifecycle: React.FC<IncidentLifecycleProps> = ({ currentStep }) => {
   const currentStepIndex = steps.indexOf(currentStep);
 
   return (
-    <div className="w-full p-4 md:p-8 rounded-xl">
-      <h2 className="text-white text-base font-semibold mb-8">
+    <div className="w-full px-5 md:px-8 py-6 border-b border-zinc-100 dark:border-white/[0.06]">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-6">
         Incident Lifecycle
-      </h2>
+      </p>
 
-      {/* Horizontal Scroll Container for Mobile:
-         Uses -mx-4 and px-4 to allow the "line" to touch the edges while scrolling
-      */}
-      <div className="overflow-x-auto no-scrollbar -mx-4 px-4">
-        <div className="relative flex items-center justify-between min-w-[700px] md:min-w-full pb-12">
-          {/* Background Connector Line */}
-          <div className="absolute top-5 left-0 w-full h-[1px] bg-slate-800 z-0" />
+      {/* scrollable on mobile */}
+      <div className="overflow-x-auto no-scrollbar">
+        <div className="relative flex items-start justify-between min-w-[600px] md:min-w-full pb-8">
+
+          {/* connector track */}
+          <div className="absolute top-[18px] left-5 right-5 h-px bg-zinc-100 dark:bg-zinc-800 z-0" />
+
+          {/* progress fill */}
+          {currentStepIndex > 0 && (
+            <div
+              className="absolute top-[18px] left-5 h-px bg-emerald-400 dark:bg-emerald-500 z-0 transition-all duration-700"
+              style={{ width: `calc(${(currentStepIndex / (steps.length - 1)) * 100}% - 2.5rem)` }}
+            />
+          )}
 
           {steps.map((label, index) => {
             const isCompleted = index < currentStepIndex;
             const isCurrent = index === currentStepIndex;
+            const isPending = index > currentStepIndex;
 
             return (
-              <div
-                key={`${label}-${index}`}
-                className="relative z-10 flex flex-col items-center"
-              >
-                {/* Circle Icon */}
+              <div key={label} className="relative z-10 flex flex-col items-center gap-3">
+                {/* Step dot */}
                 <div
                   className={cn(
-                    "w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-500 bg-[#03050c]",
-                    isCompleted &&
-                      "border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]",
-                    isCurrent &&
-                      "border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.2)]",
-                    !isCompleted && !isCurrent && "border-slate-700"
+                    "w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300",
+                    isCompleted && "border-emerald-400 dark:border-emerald-500 bg-emerald-400 dark:bg-emerald-500",
+                    isCurrent  && "border-amber-400 dark:border-amber-400 bg-white dark:bg-zinc-900",
+                    isPending  && "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
                   )}
                 >
                   {isCompleted ? (
-                    <Check
-                      size={20}
-                      className="text-emerald-500"
-                      strokeWidth={3}
-                    />
+                    <Check size={14} className="text-white" strokeWidth={3} />
                   ) : (
-                    <span
-                      className={`text-sm font-bold ${
-                        isCurrent ? "text-amber-400" : "text-slate-600"
-                      }`}
-                    >
+                    <span className={cn(
+                      "text-[11px] font-bold",
+                      isCurrent ? "text-amber-500 dark:text-amber-400" : "text-zinc-300 dark:text-zinc-600"
+                    )}>
                       {index + 1}
                     </span>
                   )}
                 </div>
 
-                {/* Label below the circle */}
-                <div className="absolute top-12 whitespace-nowrap">
-                  <span
-                    className={cn(
-                      "text-[11px] md:text-sm font-medium transition-colors duration-500 uppercase tracking-tight md:tracking-normal",
-                      isCompleted
-                        ? "text-emerald-500"
-                        : isCurrent
-                        ? "text-amber-400"
-                        : "text-slate-500"
-                    )}
-                  >
-                    {label}
-                  </span>
-                </div>
+                {/* Label */}
+                <span className={cn(
+                  "text-[11px] font-medium whitespace-nowrap uppercase tracking-wide transition-colors",
+                  isCompleted && "text-emerald-500 dark:text-emerald-400",
+                  isCurrent  && "text-amber-500 dark:text-amber-400",
+                  isPending  && "text-zinc-300 dark:text-zinc-600"
+                )}>
+                  {label}
+                </span>
               </div>
             );
           })}

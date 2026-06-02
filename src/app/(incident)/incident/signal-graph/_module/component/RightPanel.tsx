@@ -48,7 +48,7 @@ export const RightPanel = () => {
           </ul>
         </div>
 
-        <div className="bg-[#0d1520] border border-blue-500/10 rounded-xl p-4">
+        <div className="bg-slate-950/80 dark:bg-grayscrubbe-950 border border-blue-500/10 rounded-xl p-4">
           <div className="flex items-center gap-2 text-amber-500 mb-2">
             <Users size={14} />
             <span className="text-[10px] font-bold uppercase tracking-widest">
@@ -89,7 +89,7 @@ export const RightPanel = () => {
               className={`p-2.5 rounded border text-[11px] transition-colors cursor-pointer ${
                 step.done
                   ? "bg-transparent border-white/5 text-slate-600 line-through"
-                  : "bg-[#0d1520] border-white/5 text-slate-300 hover:border-blue-500/30"
+                  : "bg-slate-950/80 dark:bg-grayscrubbe-950 border-white/5 text-slate-300 hover:border-blue-500/30"
               }`}
             >
               <span className="mr-2 opacity-50">{i + 1}.</span> {step.text}
@@ -137,7 +137,7 @@ export const RightPanel = () => {
           ].map((action, i) => (
             <button
               key={i}
-              className="w-full p-2.5 rounded border border-white/5 bg-[#0d1520] hover:bg-emerald-500/5 hover:border-emerald-500/30 transition-all flex items-center gap-3 text-[11px] font-medium text-slate-300 group"
+              className="w-full p-2.5 rounded border border-white/5 bg-slate-950/80 dark:bg-grayscrubbe-950 hover:bg-emerald-500/5 hover:border-emerald-500/30 transition-all flex items-center gap-3 text-[11px] font-medium text-slate-300 group"
             >
               <div
                 className={`p-1 rounded bg-white/5 group-hover:bg-transparent ${action.color}`}
@@ -189,7 +189,7 @@ export const RightPanel = () => {
           ].map((signal, i) => (
             <div
               key={i}
-              className="p-3 rounded-xl border border-white/5 bg-[#0d1520] hover:bg-white/10 transition-colors cursor-pointer group"
+              className="p-3 rounded-xl border border-white/5 bg-slate-950/80 dark:bg-grayscrubbe-950 hover:bg-white/10 transition-colors cursor-pointer group"
             >
               <div className="text-[9px] font-mono text-slate-500 mb-1">
                 {signal.time}

@@ -90,7 +90,7 @@ const NewTicketDetails = () => {
           </p>
         </div>
 
-        <div className="flex gap-8 border-b border-gray-400 mb-6">
+        <div className="flex gap-8 border-b border-white/10 mb-6">
           {TABS.map((item, index) => (
             <button
               key={item}
@@ -149,7 +149,7 @@ const NewTicketDetails = () => {
 
           <div className="flex justify-end gap-4">
             <CButton
-              className="border-gray-300 border bg-transparent w-fit"
+              className="border-white/10 border bg-transparent text-white w-fit"
               onClick={() => setIsExcuteLockAccount(false)}
             >
               Cancel
@@ -220,7 +220,7 @@ const NewTicketDetails = () => {
 
           <div className="flex justify-end gap-4">
             <CButton
-              className="border-gray-300 border bg-transparent w-fit"
+              className="border-white/10 border bg-transparent text-white w-fit"
               onClick={() => setIsEscalateTicket(false)}
             >
               Cancel

@@ -253,7 +253,7 @@ const Page = () => {
     setIntegrationType(preset.integrationType);
   }, [searchParams]);
   return (
-    <div className="bg-dark min-h-screen text-[#D1D5DB] font-sans p-10">
+    <div className="bg-dark min-h-screen text-slate-300 font-sans p-10">
       {isOpen && (
         <ConfigureIntegration
           open={isOpen}
@@ -266,10 +266,10 @@ const Page = () => {
       <div className="max-w-[1400px] mx-auto space-y-6">
         <div className="flex justify-between items-start mb-12">
           <div className="max-w-3xl">
-            <h1 className="text-3xl font-bold text-white mb-3">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">
               Connect your engineering stack{" "}
             </h1>
-            <p className="text-[#9CA3AF] text-sm leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
               Scrubbe turns failed deployments, fraud spikes and noisy alerts
               into signal-rich incidents with fix-ready code. Wire in your
               repos, pipelines, runtimes, data and fraud signals so Code Engine
@@ -278,7 +278,7 @@ const Page = () => {
           </div>
           <button
             type="button"
-            className="px-4 py-1.5 border border-white rounded text-xs font-bold text-white hover:bg-transparent"
+            className="px-4 py-1.5 border border-slate-300 dark:border-white/20 rounded text-xs font-bold text-slate-900 dark:text-slate-100 hover:bg-transparent"
             onClick={() => router.push("/incident")}
           >
             Skip for now
@@ -286,11 +286,11 @@ const Page = () => {
         </div>
 
         <div className="flex items-center gap-5">
-          <div className="px-4 py-1.5 flex items-center gap-2 border border-gray-400  text-xs font-bold text-white hover:bg-transparent rounded-md">
+          <div className="px-4 py-1.5 flex items-center gap-2 border border-slate-300 dark:border-white/10 text-xs font-bold text-slate-900 dark:text-slate-100 hover:bg-transparent rounded-md">
             <BiGitRepoForked size={14} />
             Step 1 of 3 · Engineering graph{" "}
           </div>
-          <div className="px-4 py-1.5 flex items-center gap-2 border border-gray-400  text-xs font-bold text-white hover:bg-transparent rounded-md">
+          <div className="px-4 py-1.5 flex items-center gap-2 border border-slate-300 dark:border-white/10 text-xs font-bold text-slate-900 dark:text-slate-100 hover:bg-transparent rounded-md">
             <GoShield size={14} />
             Read-only integration model{" "}
           </div>
@@ -309,7 +309,7 @@ const Page = () => {
                 {integrationModel.map(({ Icon, ...rest }) => (
                   <div
                     key={rest.name}
-                    className="border border-white/50 rounded-lg p-2 flex justify-between gap-2"
+                    className="border border-slate-300 dark:border-white/50 rounded-lg p-2 flex justify-between gap-2"
                     onClick={() => {
                       setIsOpen(true);
                       setModalType("code_repos");
@@ -318,14 +318,14 @@ const Page = () => {
                     }}
                   >
                     <div className="flex gap-2 items-center">
-                      <div className=" size-9 rounded-full bg-[#08132F] flex justify-center items-center border border-gray-400">
+                      <div className="size-9 rounded-full bg-slate-200 dark:bg-grayscrubbe-950 flex justify-center items-center border border-slate-300 dark:border-white/10">
                         <Icon className="size-6" />
                       </div>
                       <div>
-                        <p className="text-base text-white font-semibold">
+                        <p className="text-base text-slate-900 dark:text-slate-100 font-semibold">
                           {rest.title}
                         </p>
-                        <p className="text-sm">{rest.subtitle}</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">{rest.subtitle}</p>
                       </div>
                     </div>
 
@@ -353,17 +353,17 @@ const Page = () => {
                       setIntegration(rest.title);
                       setIntegrationType(rest.name);
                     }}
-                    className="border border-white/50 rounded-lg p-2 flex justify-between gap-2"
+                    className="border border-slate-300 dark:border-white/50 rounded-lg p-2 flex justify-between gap-2"
                   >
                     <div className="flex gap-2 items-center">
-                      <div className=" size-9 rounded-full bg-[#08132F] flex justify-center items-center border border-gray-400">
+                      <div className="size-9 rounded-full bg-slate-200 dark:bg-grayscrubbe-950 flex justify-center items-center border border-slate-300 dark:border-white/10">
                         <Icon className="size-6" />
                       </div>
                       <div>
-                        <p className="text-base text-white font-semibold">
+                        <p className="text-base text-slate-900 dark:text-slate-100 font-semibold">
                           {rest.title}
                         </p>
-                        <p className="text-sm">{rest.subtitle}</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">{rest.subtitle}</p>
                       </div>
                     </div>
 
@@ -391,17 +391,17 @@ const Page = () => {
                       setIntegration(rest.title);
                       setIntegrationType(rest.name);
                     }}
-                    className="border border-white/50 rounded-lg p-2 flex justify-between gap-2"
+                    className="border border-slate-300 dark:border-white/50 rounded-lg p-2 flex justify-between gap-2"
                   >
                     <div className="flex gap-2 items-center">
-                      <div className=" size-9 rounded-full bg-[#08132F] flex justify-center items-center border border-gray-400">
+                      <div className="size-9 rounded-full bg-slate-200 dark:bg-grayscrubbe-950 flex justify-center items-center border border-slate-300 dark:border-white/10">
                         <Icon className="size-6" />
                       </div>
                       <div>
-                        <p className="text-base text-white font-semibold">
+                        <p className="text-base text-slate-900 dark:text-slate-100 font-semibold">
                           {rest.title}
                         </p>
-                        <p className="text-sm">{rest.subtitle}</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">{rest.subtitle}</p>
                       </div>
                     </div>
 
@@ -429,17 +429,17 @@ const Page = () => {
                       setIntegration(rest.title);
                       setIntegrationType(rest.name);
                     }}
-                    className="border border-white/50 rounded-lg p-2 flex justify-between gap-2"
+                    className="border border-slate-300 dark:border-white/50 rounded-lg p-2 flex justify-between gap-2"
                   >
                     <div className="flex gap-2 items-center">
-                      <div className=" size-9 rounded-full bg-[#08132F] flex justify-center items-center border border-gray-400">
+                      <div className="size-9 rounded-full bg-slate-200 dark:bg-grayscrubbe-950 flex justify-center items-center border border-slate-300 dark:border-white/10">
                         <Icon className="size-6" />
                       </div>
                       <div>
-                        <p className="text-base text-white font-semibold">
+                        <p className="text-base text-slate-900 dark:text-slate-100 font-semibold">
                           {rest.title}
                         </p>
-                        <p className="text-sm">{rest.subtitle}</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">{rest.subtitle}</p>
                       </div>
                     </div>
 
@@ -467,17 +467,17 @@ const Page = () => {
                       setIntegration(rest.title);
                       setIntegrationType(rest.name);
                     }}
-                    className="border border-white/50 rounded-lg p-2 flex justify-between gap-2"
+                    className="border border-slate-300 dark:border-white/50 rounded-lg p-2 flex justify-between gap-2"
                   >
                     <div className="flex gap-2 items-center">
-                      <div className=" size-9 rounded-full bg-[#08132F] flex justify-center items-center border border-gray-400">
+                      <div className="size-9 rounded-full bg-slate-200 dark:bg-grayscrubbe-950 flex justify-center items-center border border-slate-300 dark:border-white/10">
                         <Icon className="size-6" />
                       </div>
                       <div>
-                        <p className="text-base text-white font-semibold">
+                        <p className="text-base text-slate-900 dark:text-slate-100 font-semibold">
                           {rest.title}
                         </p>
-                        <p className="text-sm">{rest.subtitle}</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">{rest.subtitle}</p>
                       </div>
                     </div>
 
@@ -499,40 +499,40 @@ const Page = () => {
           </div>
 
           <aside className="flex-[.5] space-y-6 ">
-            <div className="border-zinc-400 border bg-[#08132F] p-6 rounded-lg">
-              <h3 className="text-base font-bold text-white mb-1">
+            <div className="border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950/80 p-6 rounded-lg">
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-1">
                 What Scrubbe will do{" "}
               </h3>
 
               <ul className="list-disc pl-3 space-y-2">
-                <li className="text-sm text-white font-medium">
+                <li className="text-sm text-slate-600 dark:text-slate-300 font-medium">
                   Watch for failed deployments, critical fraud spikes and broken
                   flows tied to your services.
                 </li>
-                <li className="text-sm text-white font-medium">
+                <li className="text-sm text-slate-600 dark:text-slate-300 font-medium">
                   Raise signal-rich incidents instead of generic tickets, with
                   code, pipelines, runtimes, data and fraud context linked.
                 </li>
-                <li className="text-sm text-white font-medium">
+                <li className="text-sm text-slate-600 dark:text-slate-300 font-medium">
                   Feed Code Engine and Ezra so they can propose fixes and
                   summarise differently for leaders, SREs and fraud teams.
                 </li>
               </ul>
             </div>
 
-            <div className="border-zinc-400 border bg-[#08132F] p-6 rounded-lg">
-              <h3 className="text-base font-bold text-white mb-1">
+            <div className="border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950/80 p-6 rounded-lg">
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-1">
                 Access & security{" "}
               </h3>
 
               <ul className="list-disc pl-3 space-y-2">
-                <li className="text-sm text-white font-medium">
+                <li className="text-sm text-slate-600 dark:text-slate-300 font-medium">
                   No write access granted to code, clusters or databases.
                 </li>
-                <li className="text-sm text-white font-medium">
+                <li className="text-sm text-slate-600 dark:text-slate-300 font-medium">
                   Secrets and tokens stored encrypted at rest.
                 </li>
-                <li className="text-sm text-white font-medium">
+                <li className="text-sm text-slate-600 dark:text-slate-300 font-medium">
                   You can revoke any integration at any time from Settings {">"}{" "}
                   Integrations.
                 </li>
@@ -563,15 +563,15 @@ const StepWrapper = ({
   tag: string;
 }) => (
   <div
-    className={`bg-gradient-to-b from-[#0074834D] to-[#004B571A] border rounded-xl transition-all border-IMSCyan/40 overflow-clip`}
+    className={`bg-gradient-to-b from-IMSCyan/20 to-slate-950/30 dark:from-IMSCyan/20 dark:to-grayscrubbe-950/60 border rounded-xl transition-all border-IMSCyan/40 overflow-clip`}
   >
-    <div className="p-4 border-b border-[#1F2937] flex justify-between items-start ">
+    <div className="p-4 border-b border-slate-300 dark:border-white/10 flex justify-between items-start ">
       <div className="flex flex-col gap-1">
-        <h2 className="text-base font-bold text-white uppercase tracking-wider">
+        <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
           {title}
         </h2>
-        <p className="text-white text-base font-bold">{subtitle}</p>
-        <p className="text-neutral-300 text-sm max-w-lg">{description}</p>
+        <p className="text-slate-800 dark:text-slate-200 text-base font-bold">{subtitle}</p>
+        <p className="text-slate-600 dark:text-slate-300 text-sm max-w-lg">{description}</p>
       </div>
       <div className="flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors border-green text-green">
         <GoShield size={16} />
@@ -581,7 +581,7 @@ const StepWrapper = ({
     <div className="px-4 py-4">
       {children}
 
-      <p className="text-neutral-300 text-sm pt-6">{footer}</p>
+      <p className="text-slate-600 dark:text-slate-300 text-sm pt-6">{footer}</p>
     </div>
   </div>
 );

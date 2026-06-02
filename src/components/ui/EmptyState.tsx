@@ -23,9 +23,9 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div
-      className={`flex flex-col items-center justify-center p-8 text-center text-gray-500 rounded-lg border border-dashed border-gray-300 bg-dark ${className}`}
+      className={`flex flex-col items-center justify-center p-8 text-center  dark:text-gray-500 rounded-lg border border-dashed border-gray-300 dark:bg-dark ${className}`}
     >
-      {image && <div className="mb-4 text-white">{image}</div>}
+      {image && <div className="mb-4 dark:text-white">{image}</div>}
       <h3 className="text-xl font-semibold">{title}</h3>
       <p className="mt-2 text-sm">{description}</p>
       {action && <div className="mt-6">{action}</div>}
