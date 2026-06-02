@@ -63,27 +63,40 @@ export async function authMiddleware(req: NextRequest) {
   return res
 }`;
 
-export default function CodeEngineRecommendation({
-  original = DEFAULT_ORIGINAL,
-  suggested = DEFAULT_SUGGESTED,
-  filename = "src/middleware/auth.ts",
-  language = "typescript",
-  incidentId = "INC-9204",
-  service = "checkout-api",
-  environment = "production",
-  severity = "P1",
-  confidence = 0.91,
-  prNumber = "#2847",
-  prTitle = "fix(auth): enforce RS256 + issuer validation [INC-9204]",
-  prRepo = "acme-corp/checkout-api",
-  prBranch = "ezra/fix-inc-9204 → main",
-  playbook = "jwt-algo-constraint-v3",
-  patternMatch = "INC-231, INC-187 (×2)",
-  onApprove,
-  onDecline,
-}: Props) {
+
+// 1. Change props to match Next.js PageProps expectation
+interface PageProps {
+  params: Promise<{ [key: string]: any }>;
+  searchParams: Promise<{ [key: string]: any | any[] | undefined }>;
+}
+
+// 2. Change the function signature to use standard Next.js page props
+export default function CodeEngineRecommendation({ params, searchParams }: PageProps) {
+  // If you need data from the URL query strings, you can handle it here, 
+  // otherwise we just fallback to your default hardcoded values:
+  const original = DEFAULT_ORIGINAL;
+  const suggested = DEFAULT_SUGGESTED;
+  const filename = "src/middleware/auth.ts";
+  const language = "typescript";
+  const incidentId = "INC-9204";
+  const service = "checkout-api";
+  const environment = "production";
+  const severity = "P1";
+  const confidence = 0.91;
+  const prNumber = "#2847";
+  const prTitle = "fix(auth): enforce RS256 + issuer validation [INC-9204]";
+  const prRepo = "acme-corp/checkout-api";
+  const prBranch = "ezra/fix-inc-9204 → main";
+  const playbook = "jwt-algo-constraint-v3";
+  const patternMatch = "INC-231, INC-187 (×2)";
+  
+  const onApprove = () => console.log("Approved");
+  const onDecline = () => console.log("Declined");
+
   const [view, setView] = useState<ViewMode>("diff");
   const [sideBySide, setSideBySide] = useState<boolean>(false);
+
+  // ... rest of your component UI code remains exactly the same
 
   const originalContent = view === "suggested" ? suggested : original;
   const modifiedContent = view === "original" ? original : suggested;
