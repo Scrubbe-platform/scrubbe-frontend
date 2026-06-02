@@ -50,18 +50,10 @@ const businessEmailSchema = emailSchema.refine(
   }
 );
 
-// Login schema
+// Login schema — email only for step-1 SSO discovery; password added in step-2 via local state
 export const loginSchema = z.object({
-  email: emailSchema.refine(
-    (email) => {
-      const domain = email.split("@")[1]?.toLowerCase();
-      return !freeEmailDomains.includes(domain);
-    },
-    {
-      message: "Please use a work email address",
-    }
-  ),
-  // password: z.string().min(1, "Password is required"),
+  email: emailSchema,
+  password: z.string().optional(),
 });
 
 // Developer signup schema
