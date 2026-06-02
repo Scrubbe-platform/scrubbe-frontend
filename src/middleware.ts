@@ -152,17 +152,25 @@ export default function middleware(req: NextRequest) {
     return NextResponse.rewrite(docsUrl);
   }
 
-  if (
-    workspaceSubdomain &&
-    pathname === "/" &&
-    !isStaticAsset
-  ) {
-    const workspaceUrl = nextUrl.clone();
-    workspaceUrl.pathname = `/workspace/${workspaceSubdomain}`;
-    return NextResponse.rewrite(workspaceUrl);
+  if (workspaceSubdomain && !isStaticAsset) {
+    // /invite on a workspace subdomain — let it pass through untouched so
+    // the invite page can read ?token= itself (it is an invite token, not JWT)
+    if (pathname.startsWith("/invite")) {
+      return NextResponse.next();
+    }
+
+    // Rewrite any workspace subdomain path to /workspace/[subdomain][path]
+    // so the Next.js app can render the correct page
+    if (pathname === "/" || !pathname.startsWith("/workspace")) {
+      const workspaceUrl = nextUrl.clone();
+      workspaceUrl.pathname =
+        pathname === "/" ? `/workspace/${workspaceSubdomain}` : `/workspace/${workspaceSubdomain}${pathname}`;
+      return NextResponse.rewrite(workspaceUrl);
+    }
   }
 
-  if (urlToken || urlRefreshToken) {
+  // Only treat ?token= as a JWT auth token when NOT on an invite path
+  if ((urlToken || urlRefreshToken) && !pathname.startsWith("/invite")) {
     const cleanUrl = nextUrl.clone();
     cleanUrl.searchParams.delete("token");
     cleanUrl.searchParams.delete("refreshToken");
