@@ -50,7 +50,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
         <div className="h-6">
           {/* light logo */}
           <img
-            src="/IMS/darklogo.png"
+            src="/IMS/blacklogo.png"
             alt="logo"
             className="h-full object-contain block dark:hidden"
           />

@@ -7,17 +7,17 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { toast } from "sonner";
-
+ 
 const page = () => {
   const { get, put } = useFetch();
   const queryClient = useQueryClient();
-
+ 
   const [flags, setFlags] = useState({
     autoMergeGated: true,
     rollbackPlaybooks: true,
     riskFraudLens: true,
   });
-
+ 
   const { data: config } = useQuery({
     queryKey: ["ims-feature-flags"],
     queryFn: async () => {
@@ -27,16 +27,16 @@ const page = () => {
     },
     refetchOnWindowFocus: false,
   });
-
+ 
   useEffect(() => {
     if (config?.featureFlags) {
       setFlags((prev) => ({ ...prev, ...config.featureFlags }));
     }
   }, [config]);
-
+ 
   const toggle = (key: keyof typeof flags) =>
     setFlags((prev) => ({ ...prev, [key]: !prev[key] }));
-
+ 
   const { mutateAsync: save, isPending } = useMutation({
     mutationFn: async () => {
       const res = await put(endpoint.auth.ims_config, { featureFlags: flags });
@@ -49,7 +49,7 @@ const page = () => {
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
+ 
   return (
     <div>
       <SettingWrapper
@@ -72,16 +72,16 @@ const page = () => {
               onToggle={() => toggle("rollbackPlaybooks")}
             />
           </div>
-
+ 
           <FeatureCard
             title="Risk/Fraud lens"
             description="Allow Ezra to produce risk-aware narratives."
             active={flags.riskFraudLens}
             onToggle={() => toggle("riskFraudLens")}
-            fullWidth={true}
+            fullWidth
           />
         </div>
-
+ 
         <div className="pt-6 flex justify-end">
           <CButton className="w-fit px-4" onClick={() => save()} isLoading={isPending} disabled={isPending}>
             Save
@@ -91,27 +91,21 @@ const page = () => {
     </div>
   );
 };
-
+ 
 const FeatureCard = ({
-  title,
-  description,
-  active,
-  onToggle,
-  fullWidth = false,
+  title, description, active, onToggle, fullWidth = false,
 }: {
-  title: string;
-  description: string;
-  active: boolean;
-  onToggle: () => void;
-  fullWidth?: boolean;
+  title: string; description: string; active: boolean;
+  onToggle: () => void; fullWidth?: boolean;
 }) => (
-  <div className={`${fullWidth ? "w-full" : ""} bg-transparent border border-neutral-500 rounded-xl p-4 flex justify-between items-start transition-all hover:border-neutral-500/80`}>
+  <div className={`${fullWidth ? "w-full" : ""} bg-white dark:bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-xl p-4 flex justify-between items-start transition-all hover:border-zinc-300 dark:hover:border-neutral-500/80`}>
     <div className="space-y-2 pr-4">
-      <h3 className="text-white font-bold text-lg">{title}</h3>
-      <p className="text-[#94A3B8] text-sm leading-relaxed max-w-[280px]">{description}</p>
+      <h3 className="text-zinc-800 dark:text-white font-bold text-lg">{title}</h3>
+      <p className="text-zinc-500 dark:text-[#94A3B8] text-sm leading-relaxed max-w-[280px]">{description}</p>
     </div>
     <Switch color="success" size="sm" isSelected={active} onChange={onToggle} />
   </div>
 );
-
+ 
 export default page;
+ 

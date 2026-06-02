@@ -60,7 +60,7 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
 
   return (
     <div className="w-full dark:text-white p-4 md:p-6 flex flex-col gap-6 md:gap-8 border-b border-white/5">
-      <div className="flex overflow-x-auto no-scrollbar pb-2 md:pb-0 gap-2 items-center justify-between">
+      {/* <div className="flex overflow-x-auto no-scrollbar pb-2 md:pb-0 gap-2 items-center justify-between">
         <div className="flex gap-2 shrink-0">
           <StatBadge label={`${stats.active} Active`} color="orange" />
           <StatBadge
@@ -69,7 +69,7 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
           />
           <StatBadge label={`${stats.resolved} Resolved`} color="green" />
         </div>
-      </div>
+      </div> */}
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -114,7 +114,7 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
           </div>
         </div>
 
-        <h2 className="text-lg md:text-2xl font-bold text-slate-100 leading-tight">
+        <h2 className="text-lg md:text-2xl font-bold dark:text-slate-100 leading-tight">
           {incident.title}
         </h2>
 
@@ -126,7 +126,7 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
         </div>
       </div>
 
-      <nav className="flex overflow-x-auto no-scrollbar gap-8 md:gap-12 relative border-b border-white/20 -mx-4 px-4 md:mx-0 md:px-0">
+      <nav className="flex overflow-x-auto no-scrollbar gap-8 md:gap-12 relative border-b border-gray-200 dark:border-white/20 -mx-4 px-4 md:mx-0 md:px-0">
         {tabs.map((tab) => {
           const isActive =
             (tab.id === "overview" &&
@@ -142,15 +142,15 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
               <span
                 className={`text-sm font-medium transition-colors whitespace-nowrap ${
                   isActive
-                    ? "text-green-400"
-                    : "text-slate-500 group-hover:text-slate-200"
+                    ? "dark:text-green-400 text-green-500"
+                    : "dark:text-slate-100 text-black"
                 }`}
               >
                 {tab.label}
               </span>
 
               {isActive && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-green-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-green-400 " />
               )}
             </Link>
           );
@@ -210,14 +210,10 @@ const MetaTag = ({
   children: React.ReactNode;
   variant: "blue" | "orange";
 }) => {
-  const styles = {
-    blue: "border-green-500/30 text-green-400",
-    orange: "border-orange-500/30 text-orange-400",
-  };
-
+  
   return (
     <span
-      className={`px-2.5 py-1 rounded border text-[10px] font-medium bg-white/[0.02] whitespace-nowrap ${styles[variant]}`}
+      className={`px-2.5 py-1 rounded border text-[10px] font-medium bg-white/[0.02] whitespace-nowrap border-gray-300 text-gray-500 dark:text-gray-300`}
     >
       {children}
     </span>

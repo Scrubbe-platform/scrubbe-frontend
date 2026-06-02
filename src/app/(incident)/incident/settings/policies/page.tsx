@@ -9,18 +9,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { toast } from "sonner";
-
+ 
 const PoliciesModule = () => {
   const { get, put } = useFetch();
   const queryClient = useQueryClient();
-
+ 
   const [autoActivate, setAutoActivate] = useState(true);
   const [requireApprovalMerges, setRequireApprovalMerges] = useState(true);
   const [productionApproval, setProductionApproval] = useState(true);
   const [threshold, setThreshold] = useState(100);
   const [maxServices, setMaxServices] = useState("");
   const [maxEnvScope, setMaxEnvScope] = useState("PR-only");
-
+ 
   const { data: config } = useQuery({
     queryKey: ["ims-policies-config"],
     queryFn: async () => {
@@ -30,7 +30,7 @@ const PoliciesModule = () => {
     },
     refetchOnWindowFocus: false,
   });
-
+ 
   useEffect(() => {
     if (config) {
       setAutoActivate(config.autoActivatePlaybooks ?? true);
@@ -41,7 +41,7 @@ const PoliciesModule = () => {
       setMaxEnvScope(config.maxEnvScope ?? "PR-only");
     }
   }, [config]);
-
+ 
   const { mutateAsync: save, isPending } = useMutation({
     mutationFn: async () => {
       const res = await put(endpoint.auth.ims_config, {
@@ -61,7 +61,7 @@ const PoliciesModule = () => {
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
+ 
   return (
     <SettingWrapper
       title="Policies"
@@ -69,30 +69,27 @@ const PoliciesModule = () => {
       sub="These settings are the governor of multi-agent orchestration."
     >
       <div className="grid 2xl:grid-cols-2 gap-8 items-start pt-4">
-        {/* LEFT COLUMN: AUTO-ACTIVATION */}
-        <section className="bg-transparent border border-neutral-500 rounded-[24px] p-4 space-y-6">
-          <h3 className="text-white font-bold text-lg px-1">Auto-activation</h3>
-
+        {/* LEFT — Auto-activation */}
+        <section className="bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-[24px] p-4 space-y-6">
+          <h3 className="text-zinc-800 dark:text-white font-bold text-lg px-1">Auto-activation</h3>
+ 
           <div className="space-y-4">
-            {/* PLAYBOOKS TOGGLE */}
-            <div className="p-5 border border-neutral-500 rounded-2xl space-y-3">
+            {/* Playbooks toggle */}
+            <div className="p-5 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-3 bg-white dark:bg-transparent">
               <div className="flex justify-between items-start">
-                <span className="text-white text-[15px] font-bold leading-tight max-w-[180px]">
+                <span className="text-zinc-800 dark:text-white text-[15px] font-bold leading-tight max-w-[180px]">
                   Auto-activate playbooks for delivery incidents
                 </span>
-                <Toggle
-                  active={autoActivate}
-                  onToggle={() => setAutoActivate((v) => !v)}
-                />
+                <Toggle active={autoActivate} onToggle={() => setAutoActivate((v) => !v)} />
               </div>
-              <p className="text-[#64748B] text-xs leading-normal">
+              <p className="text-zinc-400 dark:text-[#64748B] text-xs leading-normal">
                 Creates a remediation plan immediately after incident creation.
               </p>
             </div>
-
-            {/* CONFIDENCE SLIDER */}
-            <div className="p-5 border border-neutral-500 rounded-2xl space-y-4">
-              <span className="text-white text-[15px] font-bold block">
+ 
+            {/* Confidence slider */}
+            <div className="p-5 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-4 bg-white dark:bg-transparent">
+              <span className="text-zinc-800 dark:text-white text-[15px] font-bold block">
                 Confidence threshold to auto-suggest code
               </span>
               <div className="px-2">
@@ -102,105 +99,80 @@ const PoliciesModule = () => {
                   max="100"
                   value={threshold}
                   onChange={(e) => setThreshold(Number(e.target.value))}
-                  className="w-full h-2 bg-[#0B1224] rounded-lg appearance-none cursor-pointer accent-[#3EE9FF] border border-neutral-500"
+                  className="w-full h-2 bg-zinc-100 dark:bg-[#0B1224] rounded-lg appearance-none cursor-pointer accent-[#3EE9FF] border border-zinc-200 dark:border-neutral-500"
                 />
-                <div className="flex justify-between text-[10px] text-[#64748B] mt-2 font-bold uppercase tracking-wider">
+                <div className="flex justify-between text-[10px] text-zinc-400 dark:text-[#64748B] mt-2 font-bold uppercase tracking-wider">
                   <span>0</span>
-                  <span className="text-[#D1D5DB]">
-                    threshold: {threshold}%
-                  </span>
+                  <span className="text-zinc-700 dark:text-[#D1D5DB]">threshold: {threshold}%</span>
                   <span>100</span>
                 </div>
               </div>
             </div>
-
-            {/* SUPPRESSION RULES */}
-            <div className="p-5 border border-neutral-500 rounded-2xl space-y-4">
+ 
+            {/* Suppression rules */}
+            <div className="p-5 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-4 bg-white dark:bg-transparent">
               <div className="flex justify-between items-center">
-                <span className="text-white text-[15px] font-bold">
-                  Suppression rules
-                </span>
+                <span className="text-zinc-800 dark:text-white text-[15px] font-bold">Suppression rules</span>
                 <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
                   Edit
                 </button>
               </div>
-              <p className="text-[#64748B] text-xs">
+              <p className="text-zinc-400 dark:text-[#64748B] text-xs">
                 Reduce noise when flake storms or repeated failures happen.
               </p>
-              <div className="flex items-center gap-3 p-2.5 border border-neutral-500 rounded-xl bg-[#0B1224]/50">
+              <div className="flex items-center gap-3 p-2.5 border border-zinc-200 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
                 <List size={14} className="text-[#A5B4FC]" />
-                <span className="text-[11px] text-[#D1D5DB]">
-                  suppress after 5 repeats / 10 min
-                </span>
+                <span className="text-[11px] text-zinc-600 dark:text-[#D1D5DB]">suppress after 5 repeats / 10 min</span>
               </div>
             </div>
           </div>
         </section>
-
-        {/* RIGHT COLUMN: HUMAN GATES */}
-        <section className="bg-transparent border border-neutral-500 rounded-[24px] p-6 space-y-6">
+ 
+        {/* RIGHT — Human gates */}
+        <section className="bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-[24px] p-6 space-y-6">
           <div className="space-y-1 px-1">
-            <h3 className="text-white font-bold text-lg">
-              Human gates + blast radius
-            </h3>
-            <p className="text-[#64748B] text-xs">
-              Security defaults applied org-wide.
-            </p>
+            <h3 className="text-zinc-800 dark:text-white font-bold text-lg">Human gates + blast radius</h3>
+            <p className="text-zinc-400 dark:text-[#64748B] text-xs">Security defaults applied org-wide.</p>
           </div>
-
+ 
           <div className="space-y-4">
-            <GateToggle
-              label="Require approval for merges"
-              active={requireApprovalMerges}
-              onToggle={() => setRequireApprovalMerges((v) => !v)}
-            />
-            <GateToggle
-              label="Production actions require approval"
-              active={productionApproval}
-              onToggle={() => setProductionApproval((v) => !v)}
-            />
-
-            {/* BLAST RADIUS LIMITS */}
-            <div className="p-6 border border-neutral-500 rounded-2xl space-y-5">
+            <GateToggle label="Require approval for merges" active={requireApprovalMerges} onToggle={() => setRequireApprovalMerges((v) => !v)} />
+            <GateToggle label="Production actions require approval" active={productionApproval} onToggle={() => setProductionApproval((v) => !v)} />
+ 
+            {/* Blast radius limits */}
+            <div className="p-6 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-5 bg-white dark:bg-transparent">
               <div className="flex justify-between items-center">
-                <span className="text-white text-[15px] font-bold">
-                  Blast radius limits
-                </span>
+                <span className="text-zinc-800 dark:text-white text-[15px] font-bold">Blast radius limits</span>
                 <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
                   Configure
                 </button>
               </div>
-              <p className="text-[#64748B] text-xs">
-                Prevent large-scale changes by default.
-              </p>
-
+              <p className="text-zinc-400 dark:text-[#64748B] text-xs">Prevent large-scale changes by default.</p>
+ 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[11px] text-[#64748B] font-bold uppercase tracking-wider">
+                  <label className="text-[11px] text-zinc-400 dark:text-[#64748B] font-bold uppercase tracking-wider">
                     Max services per execution
                   </label>
                   <Input
-                    className="text-white"
+                    className="text-zinc-700 dark:text-white"
                     value={maxServices}
                     onChange={(e: any) => setMaxServices(e.target.value)}
                     placeholder="e.g. 3"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[11px] text-[#64748B] font-bold uppercase tracking-wider">
+                  <label className="text-[11px] text-zinc-400 dark:text-[#64748B] font-bold uppercase tracking-wider">
                     Max env scope
                   </label>
                   <Select
-                    className="text-white"
+                    className="text-zinc-700 dark:text-white"
                     value={maxEnvScope}
                     onChange={(e: any) => setMaxEnvScope(e.target.value)}
                     options={[
-                      { value: "PR-only", label: "PR-only" },
-                      { value: "Staging only", label: "Staging only" },
-                      {
-                        value: "Production (gated)",
-                        label: "Production (gated)",
-                      },
+                      { value: "PR-only",              label: "PR-only"              },
+                      { value: "Staging only",          label: "Staging only"         },
+                      { value: "Production (gated)",    label: "Production (gated)"   },
                     ]}
                   />
                 </div>
@@ -209,66 +181,40 @@ const PoliciesModule = () => {
           </div>
         </section>
       </div>
-
-      {/* SAVE BUTTON */}
+ 
       <div className="pt-6 flex justify-end">
-        <CButton
-          className="w-fit px-4"
-          onClick={() => save()}
-          isLoading={isPending}
-          disabled={isPending}
-        >
+        <CButton className="w-fit px-4" onClick={() => save()} isLoading={isPending} disabled={isPending}>
           Save
         </CButton>
       </div>
     </SettingWrapper>
   );
 };
-
-const Toggle = ({
-  active,
-  onToggle,
-}: {
-  active: boolean;
-  onToggle: () => void;
-}) => (
+ 
+const Toggle = ({ active, onToggle }: { active: boolean; onToggle: () => void }) => (
   <button
     onClick={onToggle}
-    className={`w-12 h-6 rounded-full relative transition-colors duration-200 ${
-      active ? "bg-[#4ADE80]" : "bg-neutral-500"
-    }`}
+    className={`w-12 h-6 rounded-full relative transition-colors duration-200 ${active ? "bg-[#4ADE80]" : "bg-zinc-200 dark:bg-neutral-500"}`}
   >
-    <div
-      className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 ${
-        active ? "left-7" : "left-1"
-      }`}
-    />
+    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${active ? "left-7" : "left-1"}`} />
   </button>
 );
-
-const GateToggle = ({
-  label,
-  active,
-  onToggle,
-}: {
-  label: string;
-  active: boolean;
-  onToggle: () => void;
-}) => (
-  <div className="p-5 border border-neutral-500 rounded-2xl space-y-3">
+ 
+const GateToggle = ({ label, active, onToggle }: { label: string; active: boolean; onToggle: () => void }) => (
+  <div className="p-5 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-3 bg-white dark:bg-transparent">
     <div className="flex justify-between items-center">
-      <div className="flex items-center gap-2 px-3 py-1.5 border border-neutral-500 rounded-xl bg-[#0B1224]/50">
+      <div className="flex items-center gap-2 px-3 py-1.5 border border-zinc-200 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
         <CheckCircle2 size={16} className="text-red-500" />
-        <span className="text-xs font-bold text-white">{label}</span>
+        <span className="text-xs font-bold text-zinc-700 dark:text-white">{label}</span>
       </div>
       <Toggle active={active} onToggle={onToggle} />
     </div>
-    <p className="text-[#64748B] text-xs leading-normal">
+    <p className="text-zinc-400 dark:text-[#64748B] text-xs leading-normal">
       {label === "Require approval for merges"
         ? "Even if a patch is safe, humans should approve merging to main."
         : "Block execute in production unless approver signs off."}
     </p>
   </div>
 );
-
+ 
 export default PoliciesModule;

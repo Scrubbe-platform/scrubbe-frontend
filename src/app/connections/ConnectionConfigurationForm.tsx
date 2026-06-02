@@ -148,56 +148,56 @@ export default function ConnectionConfigurationForm({
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
       <div>
-        <h2 className="text-lg text-white">{integration}</h2>
+        <h2 className="text-lg text-slate-900 dark:text-slate-100">{integration}</h2>
       </div>
-      <div className="border border-gray-400 rounded-lg p-4 space-y-2">
-        <div className="flex items-center gap-2 text-white text-base font-bold">
+      <div className="border border-slate-300 dark:border-white/10 rounded-lg p-4 space-y-2 bg-white dark:bg-slate-950/80">
+        <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100 text-base font-bold">
           <BiGitRepoForked />
           <p>{sectionTitle}</p>
         </div>
-        <p className="text-sm text-white">{description}</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">{description}</p>
       </div>
 
       <div>
         <Input
           label="Display Name"
           placeholder={`eg ${integration} - Core Org`}
-          labelClassName="text-white"
-          className="text-white"
+          labelClassName="text-slate-900 dark:text-slate-100"
+          className="text-slate-900 dark:text-slate-300"
           value={form.displayName}
           onChange={(event) => updateField("displayName", event.target.value)}
         />
         <Input
           label={baseUrlLabel}
           placeholder={baseUrlPlaceholder}
-          labelClassName="text-white"
-          className="text-white"
+          labelClassName="text-slate-900 dark:text-slate-100"
+          className="text-slate-900 dark:text-slate-300"
           value={form.baseUrl}
           onChange={(event) => updateField("baseUrl", event.target.value)}
         />
         <Input
           label={credentialLabel}
           placeholder={credentialPlaceholder}
-          labelClassName="text-white"
-          className="text-white"
+          labelClassName="text-slate-900 dark:text-slate-100"
+          className="text-slate-900 dark:text-slate-300"
           value={form.credential}
           onChange={(event) => updateField("credential", event.target.value)}
         />
-        <p className="text-white text-sm pb-4">{helperText}</p>
+        <p className="text-slate-600 dark:text-slate-300 text-sm pb-4">{helperText}</p>
         <div className="grid grid-cols-2 gap-5">
           <Input
             label={scopeLabel}
             placeholder={scopePlaceholder}
-            labelClassName="text-white"
-            className="text-white"
+            labelClassName="text-slate-900 dark:text-slate-100"
+            className="text-slate-900 dark:text-slate-300"
             value={form.scope}
             onChange={(event) => updateField("scope", event.target.value)}
           />
           <Input
             label="Environment tags"
             placeholder="eg prod, staging"
-            labelClassName="text-white"
-            className="text-white"
+            labelClassName="text-slate-900 dark:text-slate-100"
+            className="text-slate-900 dark:text-slate-300"
             value={form.environmentTags}
             onChange={(event) =>
               updateField("environmentTags", event.target.value)
@@ -207,8 +207,8 @@ export default function ConnectionConfigurationForm({
         <TextArea
           label="Notes for your team (optional)"
           placeholder={notesPlaceholder}
-          labelClassName="text-white"
-          className="text-white"
+          labelClassName="text-slate-900 dark:text-slate-100"
+          className="text-slate-900 dark:text-slate-300"
           value={form.notes}
           onChange={(event) => updateField("notes", event.target.value)}
         />

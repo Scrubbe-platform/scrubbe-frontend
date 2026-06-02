@@ -67,8 +67,8 @@ const Page = () => {
           <div className="border border-[#1F2937] rounded-2xl p-4 space-y-6">
             <div className="flex justify-between items-center">
               <div className="space-y-1">
-                <h3 className="text-white font-bold text-lg">Role templates</h3>
-                <p className="text-[#64748B] text-sm">You can customize these later.</p>
+                <h3 className="dark:text-white font-bold text-lg">Role templates</h3>
+                <p className="dark:text-[#64748B] text-sm">You can customize these later.</p>
               </div>
               <Settings2 size={20} className="text-[#64748B]" />
             </div>
@@ -98,7 +98,7 @@ const Page = () => {
           {/* RIGHT COLUMN: SESSION CONTROLS */}
           <div className="border border-[#1F2937] rounded-2xl p-4 space-y-6">
             <div className="space-y-1">
-              <h3 className="text-white font-bold text-lg">Session controls</h3>
+              <h3 className="dark:text-white text-black font-bold text-lg">Session controls</h3>
               <p className="text-[#64748B] text-sm">Security defaults applied org-wide.</p>
             </div>
 
@@ -106,7 +106,7 @@ const Page = () => {
               {/* MFA TOGGLE */}
               <div className="p-5 border border-[#1F2937] rounded-xl space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-white text-sm font-medium pr-4 leading-tight">
+                  <span className="dark:text-white text-sm font-medium pr-4 leading-tight">
                     Require MFA for non-SSO users
                   </span>
                   <button
@@ -130,7 +130,7 @@ const Page = () => {
               {/* SESSION DURATION */}
               <div className="p-5 border border-[#1F2937] rounded-xl space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-white text-sm font-medium">Session duration</span>
+                  <span className="dark:text-white text-sm font-medium">Session duration</span>
                   <div className="flex gap-2">
                     {durations.map((d) => (
                       <button
@@ -154,7 +154,7 @@ const Page = () => {
               <div className="p-5 border border-[#1F2937] rounded-xl space-y-3">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <span className="text-white text-sm font-medium">Analyst</span>
+                    <span className="dark:text-white  text-sm font-medium">Analyst</span>
                     <p className="text-[#64748B] text-xs leading-normal">
                       Investigate delivery incidents, request approvals, generate summaries.
                     </p>
@@ -182,10 +182,10 @@ const Page = () => {
 const RoleCard = ({ title, badge, icon, desc }: any) => (
   <div className="p-4 border border-[#1F2937] rounded-xl space-y-3 hover:border-[#00CAD8]/40 transition-colors group">
     <div className="flex justify-between items-center">
-      <span className="text-white text-sm font-bold group-hover:text-[#00CAD8] transition-colors">{title}</span>
-      <div className="flex items-center gap-2 px-3 py-1 border border-[#00CAD8]/50 rounded-full bg-[#0B1224]">
+      <span className="dark:text-white text-sm font-bold group-hover:text-[#00CAD8] transition-colors">{title}</span>
+      <div className="flex items-center gap-2 px-3 py-1 border border-zinc-300 dark:border-[#00CAD8]/50 rounded-full dark:bg-[#0B1224]">
         <span className="text-lime-400">{icon}</span>
-        <span className="text-[10px] font-medium text-white uppercase tracking-wider">{badge}</span>
+        <span className="text-[10px] font-medium dark:text-white uppercase tracking-wider">{badge}</span>
       </div>
     </div>
     <p className="text-[#64748B] text-xs leading-normal">{desc}</p>

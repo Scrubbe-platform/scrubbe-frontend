@@ -385,7 +385,7 @@ const ScrubbeOnboarding = () => {
                     </button>
                     <button
                       type="button"
-                      className="bg-IMSCyan text-black px-6 py-2 rounded-md font-bold text-sm"
+                      className="bg-IMSCyan dark:text-black text-white px-6 py-2 rounded-md font-bold text-sm"
                     >
                       Send Invites
                     </button>
@@ -561,8 +561,8 @@ const ScrubbeOnboarding = () => {
                         </div>
 
                         {/* 3. SAML/OIDC DYNAMIC DETAILS — Signal Ingestion */}
-                        <div className="bg-white/5 dark:bg-grayscrubbe-800 border border-gray-200/20 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-                          <div className="p-4 border-b border-gray-200/20 bg-white/5 dark:bg-grayscrubbe-800/20 flex items-center gap-3">
+                        <div className="bg-panel/40 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                          <div className="p-4 border-b border-white/5 bg-white/5 flex items-center gap-3">
                             <Database className="size-4 text-accent" />
                             <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest">
                               {formValues.ssoConfiguration.ssoType === "SAML_2"
@@ -583,11 +583,11 @@ const ScrubbeOnboarding = () => {
                                     name="ssoConfiguration.idp_url"
                                     control={control}
                                     render={({ field }) => (
-                                          <Input
-                                            placeholder="https://idp.example.com/app/metadata"
-                                            className="!h-11 !bg-white/5 dark:!bg-grayscrubbe-800"
-                                            {...field}
-                                          />
+                                      <Input
+                                        placeholder="https://idp.example.com/app/metadata"
+                                        className="!h-11 !bg-void/50"
+                                        {...field}
+                                      />
                                     )}
                                   />
                                   <p className="text-[9px] text-gray-500 font-mono italic">
@@ -606,7 +606,7 @@ const ScrubbeOnboarding = () => {
                                       render={({ field }) => (
                                         <Input
                                           placeholder="urn:scrubbe:acme"
-                                          className="!h-11 !bg-white/5 dark:!bg-grayscrubbe-800"
+                                          className="!h-11 !bg-void/50"
                                           {...field}
                                         />
                                       )}
@@ -621,10 +621,10 @@ const ScrubbeOnboarding = () => {
                                       control={control}
                                     render={({ field }) => (
                                       <Input
-                                        value={field.value}
-                                        readOnly
-                                        className="!h-11 !bg-white/10 dark:!bg-grayscrubbe-800 text-gray-500 dark:text-zinc-400"
-                                      />
+                                          value={field.value}
+                                          readOnly
+                                          className="!h-11 !bg-void/20 text-gray-500"
+                                        />
                                       )}
                                     />
                                   </div>
@@ -640,11 +640,11 @@ const ScrubbeOnboarding = () => {
                                     name="ssoConfiguration.issuer_url"
                                     control={control}
                                     render={({ field }) => (
-                                        <Input
-                                          placeholder="https://accounts.google.com"
-                                          className="!h-11 !bg-white/5 dark:!bg-grayscrubbe-800"
-                                          {...field}
-                                        />
+                                      <Input
+                                        placeholder="https://accounts.google.com"
+                                        className="!h-11 !bg-void/50"
+                                        {...field}
+                                      />
                                     )}
                                   />
                                 </div>
@@ -659,7 +659,7 @@ const ScrubbeOnboarding = () => {
                                       render={({ field }) => (
                                         <Input
                                           placeholder="scrubbe-client-id"
-                                          className="!h-11 !bg-white/5 dark:!bg-grayscrubbe-800"
+                                          className="!h-11 !bg-void/50"
                                           {...field}
                                         />
                                       )}
@@ -676,7 +676,7 @@ const ScrubbeOnboarding = () => {
                                         <Input
                                           type="password"
                                           placeholder="••••••••••••"
-                                          className="!h-11 !bg-white/5 dark:!bg-grayscrubbe-800"
+                                          className="!h-11 !bg-void/50"
                                           {...field}
                                         />
                                       )}
@@ -698,7 +698,7 @@ const ScrubbeOnboarding = () => {
                           </div>
 
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="flex items-center justify-between p-4 bg-white/5 dark:bg-grayscrubbe-800 border border-gray-200/20 dark:border-white/5 rounded-xl">
+                            <div className="flex items-center justify-between p-4 bg-void/40 border border-white/5 rounded-xl">
                               <div className="flex items-center gap-3">
                                 <Info className="size-4 text-gray-500" />
                                 <span className="text-xs font-medium">
@@ -718,7 +718,7 @@ const ScrubbeOnboarding = () => {
                                 )}
                               />
                             </div>
-                            <div className="flex items-center justify-between p-4 bg-white/5 dark:bg-grayscrubbe-800 border border-gray-200/20 dark:border-white/5 rounded-xl">
+                            <div className="flex items-center justify-between p-4 bg-void/40 border border-white/5 rounded-xl">
                               <div className="flex items-center gap-3">
                                 <AlertCircle className="size-4 text-gray-500" />
                                 <span className="text-xs font-medium">
@@ -741,7 +741,7 @@ const ScrubbeOnboarding = () => {
                           </div>
 
                           <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
                               Group → Scrubbe Role Mapping
                             </label>
                             <Controller
@@ -749,7 +749,7 @@ const ScrubbeOnboarding = () => {
                               control={control}
                               render={({ field }) => (
                                 <TextArea
-                                  className="w-full bg-white/5 dark:bg-grayscrubbe-800 border border-gray-200/20 dark:border-white/10 rounded-xl p-4 h-32 text-xs font-mono outline-none focus:border-IMSCyan transition-all"
+                                  className="w-full bg-void/50 border border-white/10 rounded-xl p-4 h-32 text-xs font-mono outline-none focus:border-IMSCyan/50 transition-all"
                                   placeholder='{ "SRE_TEAM": "Commander", "DEVOPS": "Responder" }'
                                   rows={6}
                                   {...field}
@@ -936,7 +936,7 @@ const ScrubbeOnboarding = () => {
                 <p className="text-xs ">Admins, SREs, fraud & business teams</p>
               </div>
               <div>
-                <p className="text-sm text-gray-900 dark:text-white font-medium">
+                <p className="text-sm text-white font-medium">
                   No invited members yet.
                 </p>
                 <p className="text-xs">
@@ -990,14 +990,14 @@ const StepWrapper = ({
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ duration: 0.5, ease: "easeOut" }}
-    className={`bg-gradient-to-b from-IMSCyan/10 to-transparent dark:from-IMSCyan/10 dark:to-transparent border rounded-xl transition-all border-IMSCyan/40 overflow-clip mb-8`}
+    className={`dark:bg-gradient-to-b from-[#0074834D] to-[#004B571A] border rounded-xl transition-all dark:border-IMSCyan/40 overflow-clip mb-8`}
   >
     <div className="p-4 border-b border-gray-800 dark:border-grayscrubbe-800 flex justify-between items-center ">
       <div className="flex flex-col gap-1">
-        <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+        <h2 className="text-sm font-bold dark:text-white uppercase tracking-wider">
           {title}
         </h2>
-        <p className="text-neutral-600 dark:text-neutral-300 text-sm">{subtitle}</p>
+        <p className="dark:text-neutral-300 text-neutral-600 text-sm">{subtitle}</p>
       </div>
     </div>
     <div className="px-4 py-4">{children}</div>
@@ -1104,13 +1104,14 @@ const IntegrationCard = ({
   desc: string;
 }) => (
   <motion.div
-    className={`p-4 rounded-lg border ${active ? 'border-IMSCyan' : 'border-gray-200 dark:border-zinc-400'} flex justify-between items-center cursor-pointer bg-white dark:bg-grayscrubbe-900 ${
+    animate={{ borderColor: active ? "#00CAD8" : "#4B5563" }}
+    className={`p-4 rounded-lg border flex justify-between items-center cursor-pointer bg-white dark:bg-grayscrubbe-900 ${
       disable ? "opacity-70" : ""
     }`}
   >
     <div className="pr-4">
       <p className="text-xs font-bold text-gray-900 dark:text-white tracking-widest">{label}</p>
-      <p className="text-[11px] text-gray-600 dark:text-zinc-400">{desc}</p>
+      <p className="text-[11px] text-zinc-400">{desc}</p>
     </div>
     <Switch
       isSelected={active}

@@ -78,7 +78,7 @@ const IncidentCard = ({
     onClick={onClick}
     className={`border rounded-xl p-4 mb-3 transition-all cursor-pointer group ${
       isActive
-        ? "border-green-500/60 dark:border-green-400/60 bg-green-50 dark:bg-green-400/5 ring-1 ring-green-500/20 dark:ring-green-400/20"
+        ? "border-black dark:border-green-400/60 dark:bg-green-400/5 ring-1 ring-green-500/20 dark:ring-green-400/20"
         : "border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/20"
     }`}
   >
@@ -93,7 +93,7 @@ const IncidentCard = ({
       <span className="text-[10px] font-mono text-zinc-400 dark:text-slate-600 block mb-1 uppercase tracking-widest">
         {incident.ticketId}
       </span>
-      <h3 className="text-[13px] font-semibold text-green-600 dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300 leading-snug line-clamp-2">
+      <h3 className="text-[13px] font-semibold  dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300 leading-snug line-clamp-2">
         {incident.title}
       </h3>
     </div>
@@ -170,7 +170,7 @@ export const ExactIncidentSidebar: React.FC = () => {
           onClick={() => setOpen((prev) => !prev)}
           className="px-5 py-2 border border-IMSCyan text-IMSCyan rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-green-400/5 transition-all"
         >
-          Raise an Incident
+          Raise Incident
         </button>
       </div>
 

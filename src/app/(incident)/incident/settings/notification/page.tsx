@@ -79,22 +79,22 @@ const page = () => {
         <form onSubmit={handleSubmit((data) => saveConfig(data))}>
           <div className="grid 2xl:grid-cols-2 gap-8 items-start pt-5">
             {/* ROUTING RULES */}
-            <section className="bg-transparent border border-neutral-500 rounded-lg p-4 space-y-4">
-              <h3 className="text-white font-bold text-lg px-1">
+            <section className="bg-transparent border border-slate-500/40 dark:border-slate-700 rounded-lg p-4 space-y-4">
+              <h3 className="dark:text-white font-bold text-lg px-1">
                 Routing rules
               </h3>
 
               <div className="space-y-4">
-                <div className="p-4 border border-neutral-500 rounded-2xl space-y-3 group hover:border-[#00CAD8]/30 transition-colors">
+                <div className="p-4 border border-slate-500/40 dark:border-slate-700 rounded-2xl space-y-3 group hover:border-cyan-500/30 transition-colors">
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2 px-3 py-1.5 border border-neutral-500 rounded-xl bg-[#0B1224]/50">
-                      <GitBranch size={16} className="text-[#F472B6]" />
-                      <span className="text-xs font-bold text-white">
+                    <div className="flex items-center gap-2 px-3 py-1.5 border border-slate-500/40 dark:border-slate-700 rounded-xl dark:bg-slate-950/50">
+                      <GitBranch size={16} className="text-fuchsia-400" />
+                      <span className="text-xs font-bold dark:text-white">
                         Delivery incidents
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-gray-400">
+                      <span className="text-[10px] text-slate-400">
                         On create
                       </span>
                       <Controller
@@ -118,22 +118,22 @@ const page = () => {
                       />
                     </div>
                   </div>
-                  <p className="text-[#64748B] text-xs leading-normal">
+                  <p className="text-slate-400 text-xs leading-normal">
                     Send to Slack channel + create approval thread when
                     required.
                   </p>
                 </div>
 
-                <div className="p-4 border border-neutral-500 rounded-2xl space-y-3 group hover:border-[#00CAD8]/30 transition-colors">
+                <div className="p-4 border border-slate-500/40 dark:border-slate-700 rounded-2xl space-y-3 group hover:border-cyan-500/30 transition-colors">
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2 px-3 py-1.5 border border-neutral-500 rounded-xl bg-[#0B1224]/50">
-                      <CheckCircle size={16} className="text-[#4ADE80]" />
-                      <span className="text-xs font-bold text-white">
+                    <div className="flex items-center gap-2 px-3 py-1.5 border border-slate-500/40 dark:border-slate-700 rounded-xl dark:bg-slate-950/50">
+                      <CheckCircle size={16} className="text-emerald-400" />
+                      <span className="text-xs font-bold dark:text-white">
                         Approvals
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-gray-400">
+                      <span className="text-[10px] text-slate-400">
                         On resolve
                       </span>
                       <Controller
@@ -157,7 +157,7 @@ const page = () => {
                       />
                     </div>
                   </div>
-                  <p className="text-[#64748B] text-xs leading-normal">
+                  <p className="text-slate-400 text-xs leading-normal">
                     Notify approvers and log decisions to the timeline.
                   </p>
                 </div>
@@ -165,14 +165,14 @@ const page = () => {
             </section>
 
             {/* EMAIL FALLBACK */}
-            <section className="bg-transparent border border-neutral-500 rounded-lg p-4 space-y-4">
-              <h3 className="text-white font-bold text-lg px-1">
+            <section className="bg-transparent border border-slate-500/40 dark:border-slate-700 rounded-lg p-4 space-y-4">
+              <h3 className="dark:text-white font-bold text-lg px-1">
                 Email fallback
               </h3>
 
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <label className="text-white text-sm font-medium ml-1">
+                  <label className="dark:text-white text-sm font-medium ml-1">
                     Notification email
                   </label>
                   <Controller
@@ -180,19 +180,18 @@ const page = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
-                        className="text-white"
                         placeholder="alerts@yourorg.com"
                         {...field}
                       />
                     )}
                   />
-                  <p className="text-[#64748B] text-xs leading-normal px-1">
+                  <p className="text-slate-400 text-xs leading-normal px-1">
                     Used when chat/paging integrations are unavailable.
                   </p>
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-white text-sm font-medium ml-1">
+                  <label className="dark:text-white text-sm font-medium ml-1">
                     Slack channel
                   </label>
                   <Controller
@@ -200,7 +199,6 @@ const page = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
-                        className="text-white"
                         placeholder="#incidents"
                         {...field}
                       />
@@ -208,9 +206,9 @@ const page = () => {
                   />
                 </div>
 
-                <div className="p-4 border border-neutral-500 rounded-2xl space-y-4">
+                <div className="p-4 border border-slate-500/40 dark:border-slate-700 rounded-2xl space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-white text-sm font-medium">
+                    <span className="dark:text-white text-sm font-medium">
                       Rate limit notifications
                     </span>
                     <Controller
@@ -218,7 +216,6 @@ const page = () => {
                       control={control}
                       render={({ field }) => (
                         <Select
-                          className="text-white"
                           options={[
                             { value: "off", label: "Off" },
                             { value: "10/minute", label: "10/minute" },
@@ -230,7 +227,7 @@ const page = () => {
                       )}
                     />
                   </div>
-                  <p className="text-[#64748B] text-xs leading-normal">
+                  <p className="text-slate-400 text-xs leading-normal">
                     Prevent spam during flake storms.
                   </p>
                 </div>
