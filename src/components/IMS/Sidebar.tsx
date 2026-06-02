@@ -8,11 +8,13 @@ import { BsArrowBarLeft } from "react-icons/bs";
 import { useSidebar } from "@/lib/stores/useSidebar";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import useAuthStore from "@/lib/stores/auth.store";
+import useGetConfig from "@/hooks/useConfig";
 
 const Sidebar = () => {
   const pathname = usePathname();
   const { collapse, toggle } = useSidebar();
-
+  const { imsConfig , isLoading } = useGetConfig();
   return (
     <motion.div
       initial={false}
@@ -25,7 +27,7 @@ const Sidebar = () => {
             : 0,
       }}
       className={cn(
-        "flex flex-col justify-between py-5 overflow-x-hidden whitespace-nowrap z-[60] px-3",
+        "flex flex-col justify-between py-5 overflow-x-hidden whitespace-nowrap z-40 px-3",
         // theme-aware background + border
         "bg-white dark:bg-dark",
         "fixed inset-y-0 left-0 md:relative md:inset-auto md:flex",
@@ -53,7 +55,7 @@ const Sidebar = () => {
                     className="object-contain h-full hidden dark:block"
                   />
                   <img
-                    src="/IMS/darklogo.png"
+                    src="/IMS/blacklogo.png"
                     alt="scrubbe"
                     className="object-contain h-full block dark:hidden"
                   />
@@ -70,7 +72,7 @@ const Sidebar = () => {
               <div className="border border-zinc-200 dark:border-white/20 p-1 px-2 rounded-lg flex items-center gap-2 mt-3 w-fit">
                 <div className="size-2 rounded-full bg-emerald-400" />
                 <span className="text-sm text-zinc-700 dark:text-white">
-                  Acme Payments PROD
+                  {isLoading ? "Loading config..." : imsConfig?.orgName || "Unknown status"}
                 </span>
               </div>
 

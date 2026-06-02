@@ -1,70 +1,74 @@
+"use client";
 import React from "react";
-import { Link2, XCircle, Minus } from "lucide-react";
+import { Link2, XCircle } from "lucide-react";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 import { buildDeliveryPayload } from "./incidentDelivery.data";
 
 const LinksThatOpen = ({ incident }: { incident: IncidentDetailRecord }) => {
-  const payloadData = buildDeliveryPayload(incident);
+  const payload = buildDeliveryPayload(incident);
+
+  const signals = [
+    { label: "repo",  value: payload.repo              },
+    { label: "pr",    value: `#${payload.pr.number}`   },
+    { label: "sha",   value: payload.commit.sha        },
+  ];
 
   return (
-    <div className="flex items-center justify-center rounded-xl border border-IMSCyan/40 bg-gradient-to-b from-IMSCyan/30 to-IMSCyan/10 dark:from-IMSCyan/20 dark:to-grayscrubbe-800 p-5 text-gray-700 dark:text-slate-300">
-      <div className="w-full">
-        <div className="mb-10 flex items-start justify-between">
-          <div className="space-y-1">
-            <h2 className="text-xl font-bold tracking-tight text-white">
-              5) Links that open
-            </h2>
-            <p className="mt-4 font-medium text-slate-300">
-              Signals & artifacts (clickable)
-            </p>
-            <p className="text-base text-slate-500">
-              URLs are clickable for faster investigation
-            </p>
-          </div>
-          <button className="rounded-full border border-slate-800 bg-slate-900/80 p-2 transition-colors hover:bg-slate-800">
-            <Minus size={20} className="text-slate-400" />
-          </button>
-        </div>
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
 
-        <div className="mb-6 grid gap-6">
-          <div className="flex flex-col gap-6 rounded-2xl border border-slate-800 bg-white dark:bg-grayscrubbe-800 p-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-100">
-              Artifacts
-            </h3>
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-0.5">
+          Signals & Artifacts
+        </p>
+        <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">
+          Links that open
+        </p>
+        <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+          URLs are clickable for faster investigation.
+        </p>
+      </div>
 
-            <div className="space-y-4">
-              <ArtifactLink label="runUrl" href={payloadData.artifacts.runUrl} />
-              <ArtifactLink label="diffUrl" href={payloadData.artifacts.diffUrl} />
-            </div>
-          </div>
+      <div className="p-4 space-y-3">
 
-            <div className="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-white dark:bg-grayscrubbe-800 p-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-100">
-              Failing Units
-            </h3>
-
-            <div className="space-y-3">
-              {payloadData.failing.map((unit) => (
-                <div
-                  key={unit}
-                  className="group flex cursor-pointer items-center gap-3 rounded-full border border-yellow-500/30 bg-yellow-500/5 px-4 py-2 text-xs font-mono text-slate-300 transition-colors hover:border-yellow-500/50"
-                >
-                  <XCircle size={14} className="text-yellow-500" />
-                  {unit}
-                </div>
-              ))}
-            </div>
+        {/* Artifacts */}
+        <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">
+            Artifacts
+          </p>
+          <div className="space-y-3">
+            <ArtifactLink label="runUrl"  href={payload.artifacts.runUrl}  />
+            <ArtifactLink label="diffUrl" href={payload.artifacts.diffUrl} />
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-black p-6">
-          <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-slate-100">
+        {/* Failing units */}
+        <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">
+            Failing Units
+          </p>
+          <div className="flex flex-col gap-2">
+            {payload.failing.map((unit) => (
+              <div
+                key={unit}
+                className="flex items-center gap-2.5 rounded-lg border border-amber-100 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/5 px-3 py-2 text-[11px] font-mono text-amber-700 dark:text-amber-400 cursor-default"
+              >
+                <XCircle size={12} className="shrink-0 text-amber-500 dark:text-amber-400" />
+                {unit}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Signal list */}
+        <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">
             Signal list
-          </h3>
-          <div className="flex flex-wrap gap-4">
-            <SignalPill label={`repo : ${payloadData.repo}`} />
-            <SignalPill label={`Pr: #${payloadData.pr.number}`} />
-            <SignalPill label={`sha: ${payloadData.commit.sha}`} />
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {signals.map(({ label, value }) => (
+              <SignalPill key={label} label={label} value={value} />
+            ))}
           </div>
         </div>
       </div>
@@ -72,22 +76,27 @@ const LinksThatOpen = ({ incident }: { incident: IncidentDetailRecord }) => {
   );
 };
 
+// ── Sub-components ────────────────────────────────────────────────
+
 const ArtifactLink = ({ label, href }: { label: string; href: string }) => (
-  <div className="space-y-2">
+  <div className="space-y-1">
     <a
       href={href}
-      className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/5 px-3 py-1.5 text-xs font-bold text-green-400 transition-colors hover:bg-green-500/10"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1.5 text-[12px] font-medium text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
     >
-      <Link2 size={14} /> {label}
+      <Link2 size={12} />
+      {label}
     </a>
-    <p className="pl-1 font-mono text-xs text-slate-500">{href}</p>
+    <p className="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 truncate">{href}</p>
   </div>
 );
 
-const SignalPill = ({ label }: { label: string }) => (
-  <div className="flex items-center gap-3 rounded-full border border-slate-700 bg-white/5 dark:bg-slate-900/50 px-4 py-2 text-xs font-medium text-gray-700 dark:text-slate-300">
-    <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
-    {label}
+const SignalPill = ({ label, value }: { label: string; value: string }) => (
+  <div className="flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2.5 py-1.5 text-[11px] font-mono">
+    <span className="text-zinc-400 dark:text-zinc-500">{label}:</span>
+    <span className="text-zinc-700 dark:text-zinc-300">{value}</span>
   </div>
 );
 

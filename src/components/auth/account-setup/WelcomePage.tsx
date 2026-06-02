@@ -24,18 +24,25 @@ import { AxiosError } from "axios";
 
 function normalizeInviteRole(value: string) {
   const normalized = value.trim().toLowerCase();
+  if (normalized.includes("owner")) return "WORKSPACE_OWNER";
   if (normalized.includes("admin")) return "ADMIN";
-  if (normalized.includes("commander")) return "MANAGER";
+  if (normalized.includes("commander")) return "INCIDENT_COMMANDER";
+  if (normalized.includes("operations") || normalized.includes("ops manager")) return "OPERATIONS_MANAGER";
   if (normalized.includes("responder")) return "RESPONDER";
+  if (normalized.includes("analyst")) return "ANALYST";
+  if (normalized.includes("observer")) return "OBSERVER";
+  if (normalized.includes("guest")) return "GUEST";
   if (normalized.includes("viewer")) return "VIEWER";
-  return "ENGINEER";
+  return "RESPONDER";
 }
 
 const ScrubbeOnboarding = () => {
+  const [isSendingInvites, setIsSendingInvites] = useState(false);
+
   const { register, handleSubmit, control, watch, setValue, reset, getValues } = useForm({
     defaultValues: {
       inviteEmails: "",
-      inviteRole: "Admin-Full Control",
+      inviteRole: "Admin",
       welcomeNote: "Standard Welcome",
       customWelcomeNote: "",
       selfSignUp: true,
@@ -175,6 +182,48 @@ const ScrubbeOnboarding = () => {
       isMounted = false;
     };
   }, [getValues, reset]);
+
+  const handleSendInvites = async () => {
+    const data = getValues();
+    const emails = data.inviteEmails
+      .split(/[\n,]+/)
+      .map((v: string) => v.trim())
+      .filter(Boolean);
+
+    if (emails.length === 0) {
+      toast.error("Please enter at least one email address");
+      return;
+    }
+
+    setIsSendingInvites(true);
+    let sent = 0;
+    let failed = 0;
+
+    for (const inviteEmail of emails) {
+      try {
+        await apiClient.post(endpoint.auth.invite_member, {
+          inviteEmail,
+          role: normalizeInviteRole(data.inviteRole),
+        });
+        sent++;
+      } catch (err) {
+        failed++;
+        console.error(`Failed to invite ${inviteEmail}:`, err);
+      }
+    }
+
+    setIsSendingInvites(false);
+
+    if (sent > 0 && failed === 0) {
+      toast.success(`${sent} invite${sent > 1 ? "s" : ""} sent successfully`);
+      setValue("inviteEmails", "");
+      setValue("manualDone.s1", true);
+    } else if (sent > 0) {
+      toast.info(`${sent} sent, ${failed} failed`);
+    } else {
+      toast.error("Failed to send invites. Make sure your workspace is set up.");
+    }
+  };
 
   const onSubmit = async (data: any) => {
     try {
@@ -327,10 +376,13 @@ const ScrubbeOnboarding = () => {
                         value={field.value}
                         onChange={field.onChange}
                         options={[
-                          "Admin-Full Control",
-                          "Commander",
+                          "Admin",
+                          "Incident Commander",
+                          "Operations Manager",
                           "Responder",
-                          "Viewer",
+                          "Analyst",
+                          "Observer",
+                          "Guest",
                         ]}
                       />
                     )}
@@ -379,15 +431,18 @@ const ScrubbeOnboarding = () => {
                   <div className="flex gap-4 items-center">
                     <button
                       type="button"
+                      onClick={() => { setValue("inviteEmails", ""); setValue("manualDone.s1", true); }}
                       className="text-IMSCyan px-6 py-2 rounded-md text-sm font-bold border border-IMSCyan"
                     >
                       Skip for Now
                     </button>
                     <button
                       type="button"
-                      className="bg-IMSCyan dark:text-black text-white px-6 py-2 rounded-md font-bold text-sm"
+                      onClick={handleSendInvites}
+                      disabled={isSendingInvites}
+                      className="bg-IMSCyan text-black px-6 py-2 rounded-md font-bold text-sm disabled:opacity-60"
                     >
-                      Send Invites
+                      {isSendingInvites ? "Sending..." : "Send Invites"}
                     </button>
                   </div>
                 </div>
@@ -413,7 +468,7 @@ const ScrubbeOnboarding = () => {
                       label="Default role for new members"
                       value={field.value}
                       onChange={field.onChange}
-                      options={["Admin", "Commander", "Responder", "Viewer"]}
+                      options={["Admin", "Incident Commander", "Operations Manager", "Responder", "Analyst", "Observer", "Guest"]}
                     />
                   )}
                 />
@@ -431,24 +486,15 @@ const ScrubbeOnboarding = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 {[
-                  {
-                    name: "Admin",
-                    desc: "Full settings, billing, API keys, environment and policy changes.",
-                  },
-                  {
-                    name: "Commander",
-                    desc: "Leads incidents, assigns owners, approves production changes.",
-                  },
-                  {
-                    name: "Responder",
-                    desc: "Updates incidents, adds notes, runs playbooks.",
-                  },
-                  {
-                    name: "Viewer",
-                    desc: "Read-only access to incidents and handovers.",
-                  },
+                  { name: "Admin", desc: "Full settings, billing, integrations, policies, and user management." },
+                  { name: "Incident Commander", desc: "Leads incidents, assigns owners, approves rollbacks and production changes." },
+                  { name: "Responder", desc: "Joins incidents, updates status, runs playbooks, adds evidence." },
+                  { name: "Analyst", desc: "Read access to incidents, timelines, RCA, and intelligence insights." },
+                  { name: "Operations Manager", desc: "Manages on-call, creates playbooks, assigns responders." },
+                  { name: "Observer", desc: "View-only access to incidents, status, and executive dashboard." },
+                  { name: "Guest", desc: "External access to specific incidents or shared postmortems only." },
                 ].map((r) => (
                   <RoleCard
                     key={r.name}

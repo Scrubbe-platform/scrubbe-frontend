@@ -1,198 +1,110 @@
+"use client";
 import React from "react";
 import {
-  AlertTriangle,
-  RefreshCw,
-  Database,
-  Plus,
-  Activity,
-  Shield,
-  CheckCircle2,
-  Circle,
+  AlertTriangle, RefreshCw, Database, Plus,
+  Activity, Shield, CheckCircle2, Circle,
 } from "lucide-react";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
-type PlaybookStatus = "warning" | "info" | "success" | "danger" | "default";
-
 interface PlaybookItem {
-  id: string;
-  title: string;
-  stage: number;
-  service: string;
-  icon: React.ReactNode;
-  status: PlaybookStatus;
+  id: string; title: string; stage: number;
+  service: string; icon: React.ReactNode;
 }
 
-interface LegendItem {
-  id: number;
-  label: string;
-  status: "completed" | "active" | "pending";
-}
+// ── Status card ───────────────────────────────────────────────────
 
-const StatusCard: React.FC<PlaybookItem> = ({
-  title,
-  stage,
-  service,
-  icon,
-  status,
-}) => {
-  const statusStyles: Record<PlaybookStatus, string> = {
-    warning: "border-amber-500/50 bg-amber-500/5",
-    danger: "border-purple-500/30 bg-purple-500/5",
-    success: "border-emerald-500/50 bg-emerald-500/5",
-    info: "border-blue-500/30 bg-blue-500/5",
-    default: "border-slate-700/50 bg-slate-800/20",
-  };
-
-  const badgeStyles: Record<PlaybookStatus, string> = {
-    warning: "border-amber-500/40 text-amber-500",
-    danger: "border-purple-500/40 text-purple-400",
-    success: "border-emerald-500/40 text-emerald-500",
-    info: "border-blue-500/40 text-blue-400",
-    default: "border-slate-600 text-slate-400",
-  };
-
-  return (
-    <div
-      className={`cursor-pointer rounded-xl border p-4 transition-all hover:brightness-110 ${statusStyles[status]}`}
-    >
-      <div className="flex items-center gap-4">
-        <div
-          className={`flex items-center justify-center rounded-lg border p-2 ${badgeStyles[status]}`}
-        >
-          {icon}
-        </div>
-        <div className="flex flex-col gap-1">
-          <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
-          <div className="flex items-center gap-3">
-            <span
-              className={`rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${badgeStyles[status]}`}
-            >
-              Stage {stage}
-            </span>
-            <span className="text-xs font-medium text-slate-400">{service}</span>
-          </div>
+const StatusCard: React.FC<PlaybookItem> = ({ title, stage, service, icon }) => (
+  <div className="cursor-pointer rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 p-3.5 transition-colors hover:border-zinc-200 dark:hover:border-zinc-700">
+    <div className="flex items-center gap-3">
+      <div className="flex items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-2 shrink-0 text-zinc-500 dark:text-zinc-400">
+        {React.cloneElement(icon as React.ReactElement, { size: 14 })}
+      </div>
+      <div className="flex flex-col gap-1 min-w-0">
+        <p className="text-[12px] font-semibold text-zinc-800 dark:text-zinc-100 leading-tight truncate">
+          {title}
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="rounded border border-zinc-200 dark:border-zinc-700 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            Stage {stage}
+          </span>
+          <span className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">{service}</span>
         </div>
       </div>
     </div>
-  );
-};
+  </div>
+);
+
+// ── Data builder ──────────────────────────────────────────────────
 
 const buildPlaybooks = (incident: IncidentDetailRecord): PlaybookItem[] => {
-  const serviceName =
-    incident.service || incident.affectedSystem || "unknown-service";
-  const title =
-    incident.title || incident.reason || incident.summary || incident.ticketId;
+  const svc   = incident.service || incident.affectedSystem || "unknown-service";
+  const title = incident.title || incident.reason || incident.summary || incident.ticketId;
 
   return [
-    {
-      id: "1",
-      title,
-      stage: 3,
-      service: serviceName,
-      icon: <AlertTriangle size={18} />,
-      status: "warning",
-    },
-    {
-      id: "2",
-      title: "Deployment Rollback",
-      stage: 3,
-      service: incident.environment || "all-services",
-      icon: <RefreshCw size={18} />,
-      status: "info",
-    },
-    {
-      id: "3",
-      title: "Dependency Health Check",
-      stage: 3,
-      service: incident.region || "shared-infra",
-      icon: <Database size={18} />,
-      status: "success",
-    },
-    {
-      id: "4",
-      title: "Pod Recovery",
-      stage: 3,
-      service: serviceName,
-      icon: <Plus size={18} />,
-      status: "warning",
-    },
-    {
-      id: "5",
-      title: "Traffic Stabilization",
-      stage: 3,
-      service: incident.blastRadius || "impacted services",
-      icon: <Activity size={18} />,
-      status: "success",
-    },
-    {
-      id: "6",
-      title: "Auth / Access Check",
-      stage: 2,
-      service:
-        incident.assignedToName ||
-        incident.assignedToEmail ||
-        incident.incidentCommander ||
-        "response-owner",
-      icon: <Shield size={18} />,
-      status: "danger",
-    },
+    { id: "1", title,                        stage: 3, service: svc,                                                                                           icon: <AlertTriangle /> },
+    { id: "2", title: "Deployment Rollback",  stage: 3, service: incident.environment || "all-services",                                                        icon: <RefreshCw />     },
+    { id: "3", title: "Dependency Health",    stage: 3, service: incident.region || "shared-infra",                                                             icon: <Database />      },
+    { id: "4", title: "Pod Recovery",         stage: 3, service: svc,                                                                                           icon: <Plus />          },
+    { id: "5", title: "Traffic Stability",    stage: 3, service: incident.blastRadius || "impacted services",                                                   icon: <Activity />      },
+    { id: "6", title: "Auth / Access Check",  stage: 2, service: incident.assignedToName || incident.assignedToEmail || incident.incidentCommander || "owner",  icon: <Shield />        },
   ];
 };
 
-const PlaybookSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({
-  incident,
-}) => {
+// ── Legend ────────────────────────────────────────────────────────
+
+const legends = [
+  { id: 1, label: "Lifecycle Stages",    status: "completed" as const },
+  { id: 2, label: "Investigation Steps", status: "active"    as const },
+  { id: 3, label: "Remediation Options", status: "pending"   as const },
+  { id: 4, label: "Blast Radius Eval",   status: "pending"   as const },
+  { id: 5, label: "Guardrail Check",     status: "pending"   as const },
+  { id: 6, label: "Execution Gate",      status: "pending"   as const },
+  { id: 7, label: "Audit Trail",         status: "pending"   as const },
+];
+
+// ── Sidebar ───────────────────────────────────────────────────────
+
+const PlaybookSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({ incident }) => {
   const playbooks = buildPlaybooks(incident);
 
-  const legends: LegendItem[] = [
-    { id: 1, label: "Lifecycle Stages", status: "completed" },
-    { id: 2, label: "Investigation Steps", status: "active" },
-    { id: 3, label: "Remediation Options", status: "pending" },
-    { id: 4, label: "Blast Radius Eval", status: "pending" },
-    { id: 5, label: "Guardrail Check", status: "pending" },
-    { id: 6, label: "Execution Gate", status: "pending" },
-    { id: 7, label: "Audit Trail", status: "pending" },
-  ];
-
   return (
-    <div className="flex h-full w-80 flex-col gap-6 overflow-y-auto border-r border-white/5 p-6">
+    <div className="flex h-full w-72 flex-col gap-5 overflow-y-auto border-r border-zinc-100 dark:border-zinc-800 bg-white dark:bg-transparent p-5">
+
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold tracking-tight text-white">
-          Playbooks
-        </h2>
-        <div className="flex h-8 w-8 items-center justify-center rounded border border-white/20 text-xs font-bold text-white">
-          3
-        </div>
+        <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">Playbooks</p>
+        <span className="flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-700 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+          {playbooks.length}
+        </span>
       </div>
 
+      {/* Cards */}
+      <div className="flex flex-col gap-2">
+        {playbooks.map((p) => <StatusCard key={p.id} {...p} />)}
+      </div>
+
+      <div className="h-px bg-zinc-100 dark:bg-zinc-800" />
+
+      {/* Legend */}
       <div className="flex flex-col gap-3">
-        {playbooks.map((playbook) => (
-          <StatusCard key={playbook.id} {...playbook} />
-        ))}
-      </div>
-
-      <hr className="my-2 border-white/5" />
-
-      <div className="flex flex-col gap-4">
-        <h3 className="text-sm font-semibold text-slate-200">Legend</h3>
-        <div className="flex flex-col gap-3">
-          {legends.map((item) => (
-            <div
-              key={item.id}
-              className="group flex cursor-default items-center justify-between"
-            >
-              <span className="text-xs text-slate-400 transition-colors group-hover:text-slate-200">
-                {item.id}. {item.label}
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          Legend
+        </p>
+        <div className="flex flex-col gap-2.5">
+          {legends.map(({ id, label, status }) => (
+            <div key={id} className="flex items-center justify-between group cursor-default">
+              <span className="text-[12px] text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200 transition-colors">
+                {id}. {label}
               </span>
-              {item.status === "completed" ? (
-                <CheckCircle2 size={16} className="text-emerald-500" />
-              ) : item.status === "active" ? (
-                <div className="relative flex items-center justify-center">
-                  <Circle size={16} className="text-green-400" />
-                  <div className="absolute h-1.5 w-1.5 rounded-full bg-green-400" />
+              {status === "completed" ? (
+                <CheckCircle2 size={14} className="text-zinc-400 dark:text-zinc-500 shrink-0" />
+              ) : status === "active" ? (
+                <div className="relative flex items-center justify-center shrink-0">
+                  <Circle size={14} className="text-zinc-600 dark:text-zinc-400" />
+                  <div className="absolute h-1.5 w-1.5 rounded-full bg-zinc-600 dark:bg-zinc-400" />
                 </div>
               ) : (
-                <Circle size={16} className="text-slate-700" />
+                <Circle size={14} className="text-zinc-200 dark:text-zinc-700 shrink-0" />
               )}
             </div>
           ))}

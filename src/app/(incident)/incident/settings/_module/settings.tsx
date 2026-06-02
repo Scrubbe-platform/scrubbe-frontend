@@ -14,6 +14,7 @@ import { endpoint } from "@/lib/api/endpoint";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import useAuthStore from "@/lib/stores/auth.store";
+import useGetConfig from "@/hooks/useConfig";
 
 type OrgFormValues = {
   orgName: string;
@@ -30,8 +31,7 @@ type OrgFormValues = {
 function Settings() {
   const { get, put } = useFetch();
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
-
+  const { imsConfig, isLoading } = useGetConfig();
   const { control, handleSubmit, reset, watch, setValue } =
     useForm<OrgFormValues>({
       defaultValues: {
@@ -47,15 +47,7 @@ function Settings() {
       },
     });
 
-  const { data: imsConfig, isLoading } = useQuery({
-    queryKey: ["ims-config"],
-    queryFn: async () => {
-      const res = await get(endpoint.auth.ims_config);
-      if (res.success) return res.data?.data ?? res.data ?? {};
-      return {};
-    },
-    refetchOnWindowFocus: false,
-  });
+    
 
   useEffect(() => {
     if (imsConfig) {

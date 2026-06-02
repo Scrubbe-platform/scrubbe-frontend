@@ -5,23 +5,48 @@ import { useQuery } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 
-interface LogPayload {
-  [key: string]: any;
-}
-
 interface LogEntryProps {
   icon: React.ReactNode;
   title: string;
   desc: string;
   time: string;
-  payload?: LogPayload;
+  payload?: Record<string, any>;
 }
 
+// ── Icon resolver ─────────────────────────────────────────────────
+
 const iconForType = (type: string) => {
-  if (type?.includes("policy")) return <ShieldCheck className="text-green" size={16} />;
-  if (type?.includes("insight") || type?.includes("hypothesis")) return <Lightbulb className="text-yellow-400" size={16} />;
-  return <Activity className="text-blue-400" size={16} />;
+  if (type?.includes("policy"))                        return <ShieldCheck size={14} className="text-emerald-500 dark:text-emerald-400" />;
+  if (type?.includes("insight") || type?.includes("hypothesis")) return <Lightbulb size={14} className="text-amber-500 dark:text-amber-400"  />;
+  return <Activity size={14} className="text-sky-500 dark:text-sky-400" />;
 };
+
+// ── Fallback entries shown when API returns nothing ───────────────
+
+const FALLBACK: LogEntryProps[] = [
+  {
+    icon: <ShieldCheck size={14} className="text-emerald-500 dark:text-emerald-400" />,
+    title: "policy.evaluated",
+    desc: "Policy evaluated for incident.",
+    time: "—",
+    payload: { autoActivate: false, humanGate: true, scope: "pr-only" },
+  },
+  {
+    icon: <ShieldCheck size={14} className="text-emerald-500 dark:text-emerald-400" />,
+    title: "policy.mode",
+    desc: "Policy mode set to standard.",
+    time: "—",
+  },
+  {
+    icon: <Lightbulb size={14} className="text-amber-500 dark:text-amber-400" />,
+    title: "hypotheses.generated",
+    desc: "Generated top 3 likely causes (not final RCA).",
+    time: "—",
+    payload: { top: [{ title: "Competing refactors touching same module", conf: 0.72 }] },
+  },
+];
+
+// ── Component ─────────────────────────────────────────────────────
 
 const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const { get } = useFetch();
@@ -40,95 +65,75 @@ const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
 
   const entries = data ?? [];
 
+  const displayEntries: LogEntryProps[] =
+    isLoading || entries.length === 0
+      ? FALLBACK
+      : entries.map((e: any) => ({
+          icon: iconForType(e.type ?? e.action ?? ""),
+          title: e.type ?? e.action ?? "event",
+          desc: e.summary ?? e.reason ?? e.description ?? "Decision recorded.",
+          time: e.createdAt ? new Date(e.createdAt).toLocaleTimeString() : "—",
+          payload: e.context ?? e.metadata ?? undefined,
+        }));
+
   return (
-    <div className=" p-5 border border-IMSCyan/40 rounded-xl text-gray-700 dark:text-slate-300 bg-gradient-to-b from-IMSCyan/30 to-IMSCyan/10 dark:from-IMSCyan/20 dark:to-grayscrubbe-800 flex items-start justify-center">
-      <div className="w-full ">
-        {/* Header Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-white tracking-tight mb-2">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
+
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
+        <div className="space-y-0.5">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
             Decision Log
-          </h2>
-          <p className=" text-slate-300 font-medium">
-            What happened and why (including human notes)
           </p>
-          <p className="text-base text-slate-300">
-            Timeline is derived from this log.
+          <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">
+            What happened and why
+          </p>
+          <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+            Timeline is derived from this log, including human notes.
           </p>
         </div>
+        <span className="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-mono text-zinc-400 dark:text-zinc-500 shrink-0">
+          {isLoading ? "…" : `${entries.length} events`}
+        </span>
+      </div>
 
-        {/* Entries Container */}
-        <div className="bg-white dark:bg-grayscrubbe-800 border border-slate-400 rounded-2xl p-6 space-y-4 shadow-inner">
-          <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
-            <h3 className="text-sm font-black text-gray-900 dark:text-slate-100 uppercase tracking-widest">
-              Recent entries
-            </h3>
-            <span className="px-3 py-1 bg-white/5 dark:bg-slate-900 border border-slate-800 rounded-full text-xs font-bold text-gray-600 dark:text-slate-400">
-              {isLoading ? "…" : `${entries.length} events`}
-            </span>
-          </div>
-
-          {isLoading && (
-            <p className="text-xs text-slate-500 animate-pulse">Loading decisions…</p>
-          )}
-
-          {!isLoading && entries.length === 0 && (
-            <>
-              <LogEntry
-                icon={<ShieldCheck className="text-green" size={16} />}
-                title="policy.evaluated"
-                desc="Policy evaluated for incident."
-                time="—"
-                payload={{ autoActivate: false, humanGate: true, scope: "pr-only" }}
-              />
-              <LogEntry
-                icon={<ShieldCheck className="text-green" size={16} />}
-                title="policy.mode"
-                desc="Policy mode set to standard."
-                time="—"
-              />
-              <LogEntry
-                icon={<ShieldCheck className="text-green" size={16} />}
-                title="hypotheses.generated"
-                desc="Generated top 3 likely causes (not final RCA)."
-                time="—"
-                payload={{ top: [{ title: "Competing refactors touching same module", conf: 0.72 }] }}
-              />
-            </>
-          )}
-
-          {!isLoading &&
-            entries.map((entry: any, i: number) => (
-              <LogEntry
-                key={entry.id ?? i}
-                icon={iconForType(entry.type ?? entry.action ?? "")}
-                title={entry.type ?? entry.action ?? "event"}
-                desc={entry.summary ?? entry.reason ?? entry.description ?? "Decision recorded."}
-                time={entry.createdAt ? new Date(entry.createdAt).toLocaleTimeString() : "—"}
-                payload={entry.context ?? entry.metadata ?? undefined}
-              />
-            ))}
-        </div>
+      {/* Entries */}
+      <div className="p-4 space-y-2">
+        {isLoading && (
+          <p className="text-[12px] text-zinc-400 animate-pulse px-1">Loading decisions…</p>
+        )}
+        {displayEntries.map((entry, i) => (
+          <LogEntry key={i} {...entry} />
+        ))}
       </div>
     </div>
   );
 };
 
+// ── Log entry ─────────────────────────────────────────────────────
+
 const LogEntry: React.FC<LogEntryProps> = ({ icon, title, desc, time, payload }) => (
-  <div className="border border-slate-800 rounded-xl p-4 bg-white dark:bg-grayscrubbe-800 hover:border-slate-700 transition-colors group">
-    <div className="flex justify-between items-start mb-2">
-      <div className="flex items-start gap-3">
-        <div className="mt-1">{icon}</div>
-        <div>
-          <h4 className="text-sm font-black text-gray-900 dark:text-slate-100 font-mono tracking-tight">{title}</h4>
-          <p className="text-[13px] text-gray-600 dark:text-slate-400 mt-0.5">{desc}</p>
+  <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-2.5">
+        <div className="mt-0.5 shrink-0">{icon}</div>
+        <div className="min-w-0">
+          <p className="text-[12px] font-semibold font-mono text-zinc-700 dark:text-zinc-200 leading-tight">
+            {title}
+          </p>
+          <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-0.5 leading-snug">
+            {desc}
+          </p>
         </div>
       </div>
-      <span className="text-[11px] font-medium text-slate-600 font-mono">{time}</span>
+      <span className="text-[11px] font-mono text-zinc-300 dark:text-zinc-600 shrink-0 tabular-nums">
+        {time}
+      </span>
     </div>
 
     {payload && (
-      <div className="mt-4 bg-white/80 dark:bg-grayscrubbe-800 rounded-lg p-4 border border-slate-800 font-mono text-[12px] text-gray-700 dark:text-slate-300 leading-relaxed overflow-x-auto shadow-inner">
-        <pre>
+      <div className="mt-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950/60 p-3 overflow-x-auto">
+        <pre className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 leading-relaxed">
           <code>{JSON.stringify(payload, null, 2)}</code>
         </pre>
       </div>

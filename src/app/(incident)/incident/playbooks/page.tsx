@@ -38,7 +38,7 @@ const page = () => {
             <div className="flex-[.3]">
               <PlaybookSidebar incident={incident} />
             </div>
-            <div className="flex-1 bg-darkEzra p-2 space-y-4">
+            <div className="flex-1 dark:bg-darkEzra p-2 space-y-4">
               <PlaybookStatusCard incident={incident} />
               <TriggerConditions incident={incident} />
               <InvestigationTimeline incident={incident} />

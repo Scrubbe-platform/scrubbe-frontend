@@ -27,14 +27,14 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const isMobile = width < 768;
 
   // Apply theme class to <html> whenever theme changes
-  useEffect(() => {
-    const root = document.documentElement;
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    const isDark = theme === "dark" || prefersDark;
-    root.classList.toggle("dark", isDark);
-  }, [theme]);
+  // useEffect(() => {
+  //   const root = document.documentElement;
+  //   const prefersDark = window.matchMedia(
+  //     "(prefers-color-scheme: dark)"
+  //   ).matches;
+  //   const isDark = theme === "dark" || prefersDark;
+  //   root.classList.toggle("dark", isDark);
+  // }, [theme]);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {

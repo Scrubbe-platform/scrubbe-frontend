@@ -11,40 +11,53 @@ interface DetectionSignal {
   content: string;
   timestamp: string;
   icon: React.ReactNode;
-  iconColor: string;
+  accent: string; // single tailwind color key e.g. "emerald" | "amber" | "red" | "blue"
 }
 
-const SignalCard = ({ signal }: { signal: DetectionSignal }) => (
-  <div className="bg-darkEzra border border-white/5 rounded-xl p-3 md:p-4 flex gap-3 md:gap-4 items-start hover:border-white/10 transition-all group">
-    <div
-      className={`
-      w-10 h-10 md:w-12 md:h-12 rounded-lg border flex items-center justify-center shrink-0
-      bg-opacity-10 transition-transform group-hover:scale-105
-      ${signal.iconColor.replace("text", "border")}/30
-      ${signal.iconColor.replace("text", "bg")}/10
-    `}
-    >
-      <div className={`${signal.iconColor} scale-90 md:scale-100`}>
-        {React.cloneElement(signal.icon as React.ReactElement, { size: 18 })}
-      </div>
-    </div>
+// ── Map accent name → tailwind classes ───────────────────────────
 
-    <div className="flex-1 min-w-0">
-      <div className="flex justify-between items-center mb-1">
-        <p className="text-[10px] md:text-[11px] font-medium text-slate-500 truncate pr-2">
-          {signal.source} <span className="mx-1 opacity-50">·</span>{" "}
-          {signal.subSource}
-        </p>
-        <span className="text-[10px] md:text-[11px] font-mono text-slate-600 tabular-nums shrink-0">
-          {signal.timestamp}
+const accentClasses: Record<string, { icon: string; border: string; bg: string }> = {
+  emerald: { icon: "text-emerald-500",                         border: "border-emerald-500/20 dark:border-emerald-500/20", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
+  amber:   { icon: "text-amber-500",                           border: "border-amber-500/20 dark:border-amber-500/20",     bg: "bg-amber-50 dark:bg-amber-500/10"     },
+  red:     { icon: "text-red-500",                             border: "border-red-500/20 dark:border-red-500/20",         bg: "bg-red-50 dark:bg-red-500/10"         },
+  blue:    { icon: "text-blue-500 dark:text-blue-400",         border: "border-blue-500/20 dark:border-blue-400/20",       bg: "bg-blue-50 dark:bg-blue-500/10"       },
+};
+
+// ── Signal card ──────────────────────────────────────────────────
+
+const SignalCard = ({ signal }: { signal: DetectionSignal }) => {
+  const a = accentClasses[signal.accent] ?? accentClasses.emerald;
+
+  return (
+    <div className="flex gap-3 md:gap-4 items-start p-3.5 rounded-xl border border-zinc-100 dark:border-white/[0.06] bg-white dark:bg-zinc-900/40 hover:border-zinc-200 dark:hover:border-white/10 transition-colors">
+      {/* Icon */}
+      <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${a.border} ${a.bg}`}>
+        <span className={a.icon}>
+          {React.cloneElement(signal.icon as React.ReactElement, { size: 16 })}
         </span>
       </div>
-      <h4 className="text-[13px] md:text-[15px] font-semibold text-slate-100 leading-snug tracking-tight">
-        {signal.content}
-      </h4>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1 gap-2">
+          <p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
+            {signal.source}
+            <span className="mx-1.5 opacity-40">·</span>
+            {signal.subSource}
+          </p>
+          <span className="text-[11px] font-mono text-zinc-300 dark:text-zinc-600 shrink-0 tabular-nums">
+            {signal.timestamp}
+          </span>
+        </div>
+        <p className="text-[13px] font-medium text-zinc-800 dark:text-zinc-100 leading-snug">
+          {signal.content}
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
+
+// ── Build signals from incident ──────────────────────────────────
 
 const buildDetectionSignals = (incident: IncidentDetailRecord): DetectionSignal[] => {
   const signals: DetectionSignal[] = [];
@@ -54,12 +67,10 @@ const buildDetectionSignals = (incident: IncidentDetailRecord): DetectionSignal[
       id: "source",
       source: incident.sourceType || "Incident Source",
       subSource: incident.source || "Detection",
-      content:
-        incident.detection ||
-        `${incident.title} triggered from ${incident.sourceType || "manual input"}.`,
+      content: incident.detection || `${incident.title} triggered from ${incident.sourceType || "manual input"}.`,
       timestamp: incident.elapsedLabel,
       icon: <GitBranch />,
-      iconColor: "text-emerald-500",
+      accent: "emerald",
     });
   }
 
@@ -68,12 +79,10 @@ const buildDetectionSignals = (incident: IncidentDetailRecord): DetectionSignal[
       id: "impact",
       source: "Impact",
       subSource: incident.environment || "Runtime",
-      content:
-        incident.impactSummary ||
-        `${incident.service} is affected in ${incident.region}.`,
+      content: incident.impactSummary || `${incident.service} is affected in ${incident.region}.`,
       timestamp: incident.elapsedLabel,
       icon: <BarChart3 />,
-      iconColor: "text-amber-500",
+      accent: "amber",
     });
   }
 
@@ -85,7 +94,7 @@ const buildDetectionSignals = (incident: IncidentDetailRecord): DetectionSignal[
       content: incident.techDescription || incident.description,
       timestamp: incident.elapsedLabel,
       icon: <Zap />,
-      iconColor: "text-red-500",
+      accent: "red",
     });
   }
 
@@ -97,35 +106,35 @@ const buildDetectionSignals = (incident: IncidentDetailRecord): DetectionSignal[
       content: incident.recommendedActions[0],
       timestamp: incident.elapsedLabel,
       icon: <Workflow />,
-      iconColor: "text-blue-500",
+      accent: "blue",
     });
   }
 
   return signals;
 };
 
-const DetectionSignals: React.FC<{ incident: IncidentDetailRecord }> = ({
-  incident,
-}) => {
+// ── Section ──────────────────────────────────────────────────────
+
+const DetectionSignals: React.FC<{ incident: IncidentDetailRecord }> = ({ incident }) => {
   const signals = buildDetectionSignals(incident);
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="w-full bg-transparent flex flex-col gap-3 p-3 md:p-4 rounded-xl border border-white/20">
-        <h2 className="text-[11px] md:text-[13px] font-bold text-slate-600 uppercase tracking-[0.15em] mb-1 md:mb-2 px-1">
-          Detection Signals
-        </h2>
+    <div className="px-5 md:px-8 py-6 border-b border-zinc-100 dark:border-white/[0.06]">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">
+        Detection Signals
+      </p>
 
-        <div className="flex flex-col gap-3">
-          {signals.length > 0 ? (
-            signals.map((signal) => <SignalCard key={signal.id} signal={signal} />)
-          ) : (
-            <div className="rounded-xl border border-dashed border-white/10 px-4 py-5 text-sm text-slate-400">
-              No live detection signals are available for this incident yet.
-            </div>
-          )}
+      {signals.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          {signals.map((signal) => (
+            <SignalCard key={signal.id} signal={signal} />
+          ))}
         </div>
-      </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700 px-5 py-6 text-[13px] text-zinc-400 dark:text-zinc-500">
+          No live detection signals available for this incident yet.
+        </div>
+      )}
     </div>
   );
 };

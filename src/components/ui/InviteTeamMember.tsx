@@ -126,10 +126,14 @@ const InviteTeamMember = () => {
               labelClassName="dark:!text-black"
               options={[
                 { value: "", label: "Select role" },
-                { value: "ADMIN", label: "Admin" },
-                { value: "MANAGER", label: "Manager" },
+                { value: "WORKSPACE_OWNER", label: "Workspace Owner" },
+                { value: "ADMIN", label: "Administrator" },
+                { value: "INCIDENT_COMMANDER", label: "Incident Commander" },
+                { value: "OPERATIONS_MANAGER", label: "Operations Manager" },
+                { value: "RESPONDER", label: "Responder" },
                 { value: "ANALYST", label: "Analyst" },
-                { value: "VIEWER", label: "Viewer" },
+                { value: "OBSERVER", label: "Observer" },
+                { value: "GUEST", label: "Guest" },
               ]}
               error={errors.role?.message}
             />

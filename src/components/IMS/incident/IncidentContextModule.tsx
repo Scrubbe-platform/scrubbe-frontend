@@ -7,33 +7,40 @@ import {
   IncidentDetailRecord,
 } from "@/lib/incident/incident.types";
 
+// ── Field box ────────────────────────────────────────────────────
+
 interface ContextField {
   label: string;
   value: string;
-  valueColor?: string;
-  isDescription?: boolean;
+  accent?: "default" | "blue" | "amber" | "red" | "muted";
+  span?: "full" | "half";
+  description?: boolean;
 }
 
-const ContextBox = ({
-  label,
-  value,
-  valueColor = "text-white",
-  isDescription = false,
-}: ContextField) => (
+const accentValue: Record<string, string> = {
+  default: "text-zinc-800 dark:text-zinc-100",
+  blue:    "text-sky-600 dark:text-sky-400",
+  amber:   "text-amber-600 dark:text-amber-400",
+  red:     "text-red-600 dark:text-red-400",
+  muted:   "text-zinc-400 dark:text-zinc-500",
+};
+
+const ContextBox = ({ label, value, accent = "default", span = "half", description = false }: ContextField) => (
   <div
     className={cn(
-      "p-4 md:p-5 bg-darkEzra border border-white/5 rounded-2xl transition-colors hover:border-white/10",
-      isDescription ? "col-span-full" : "col-span-1"
+      "flex flex-col gap-1.5 p-4 rounded-xl border bg-white dark:bg-zinc-900/40 transition-colors",
+      "border-zinc-100 dark:border-zinc-800/60",
+      span === "full" && "sm:col-span-2"
     )}
   >
-    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+    <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
       {label}
     </p>
     <p
       className={cn(
-        "text-[12px] md:text-[13px] font-semibold leading-relaxed break-words",
-        valueColor,
-        isDescription && "text-slate-300 font-medium"
+        "text-[13px] leading-relaxed break-words",
+        description ? "font-normal text-zinc-500 dark:text-zinc-400" : "font-semibold",
+        accentValue[accent]
       )}
     >
       {value}
@@ -41,15 +48,18 @@ const ContextBox = ({
   </div>
 );
 
+// ── Module ───────────────────────────────────────────────────────
+
 const IncidentContextModule: React.FC<{
   incident: IncidentDetailRecord;
   context: IncidentContextRecord | null;
 }> = ({ incident, context }) => {
+
   const fields: ContextField[] = [
     {
       label: "Affected Service",
       value: incident.service,
-      valueColor: "text-blue-400",
+      accent: "blue",
     },
     {
       label: "Environment",
@@ -58,71 +68,55 @@ const IncidentContextModule: React.FC<{
     {
       label: "Source",
       value: incident.sourceType || incident.source,
-      valueColor: "text-blue-400",
+      accent: "blue",
     },
     {
       label: "Business Impact",
-      value:
-        context?.businessImpact ||
-        incident.financialExposure ||
-        "Not captured yet",
+      value: context?.businessImpact || incident.financialExposure || "Not captured yet",
+      accent: context?.businessImpact || incident.financialExposure ? "default" : "muted",
     },
     {
       label: "Blast Radius",
       value: incident.blastRadius || "Not captured yet",
-      valueColor: incident.blastRadius ? "text-amber-400" : "text-slate-400",
+      accent: incident.blastRadius ? "amber" : "muted",
     },
     {
       label: "Incident Commander",
+      value: context?.incidentCommander || incident.incidentCommander || "Not assigned",
+      accent: context?.incidentCommander || incident.incidentCommander ? "amber" : "muted",
+    },
+    {
+      label: "Assigned to",
+      value: incident.assignedToName || incident.assignedToEmail || "Unassigned",
+      accent: incident.assignedToName || incident.assignedToEmail ? "default" : "muted",
+    },
+    {
+      label: "Priority",
+      value: `${incident.severity} · ${incident.priority}`,
+      accent: "red",
+    },
+    {
+      label: "Description",
       value:
-        context?.incidentCommander ||
-        incident.incidentCommander ||
-        "No incident commander assigned",
-      valueColor: "text-amber-400",
+        context?.additionalContext ||
+        incident.techDescription ||
+        incident.description ||
+        "No additional context captured yet.",
+      span: "full",
+      description: true,
     },
   ];
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="w-full flex flex-col gap-4 p-3 md:p-4 rounded-xl border border-white/20 bg-transparent">
-        <h2 className="text-[11px] md:text-[13px] font-bold text-white uppercase tracking-[0.15em] mb-1 px-1">
-          Incident Context
-        </h2>
+    <div className="px-5 md:px-8 py-6 border-b border-zinc-100 dark:border-white/[0.06]">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">
+        Incident Context
+      </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-          {fields.map((field, idx) => (
-            <ContextBox key={idx} {...field} />
-          ))}
-
-          <ContextBox
-            label="Description"
-            isDescription
-            value={
-              context?.additionalContext ||
-              incident.techDescription ||
-              incident.description ||
-              "No additional incident context has been captured yet."
-            }
-          />
-
-          <div className="col-span-1 p-4 md:p-5 bg-darkEzra border border-white/5 rounded-2xl">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
-              Assigned to
-            </p>
-            <p className="text-[12px] md:text-[13px] font-semibold text-white">
-              {incident.assignedToName || incident.assignedToEmail || "Unassigned"}
-            </p>
-          </div>
-
-          <div className="col-span-1 p-4 md:p-5 bg-darkEzra border border-white/5 rounded-2xl">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
-              Priority
-            </p>
-            <p className="text-[12px] md:text-[13px] font-bold text-red-500">
-              {incident.severity} · {incident.priority}
-            </p>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        {fields.map((field) => (
+          <ContextBox key={field.label} {...field} />
+        ))}
       </div>
     </div>
   );

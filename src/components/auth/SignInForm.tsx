@@ -308,18 +308,26 @@ function Divider({ label, icon }: { label?: string; icon?: ReactNode }) {
 // ─── Main ────────────────────────────────────────────────────────
 
 export default function SignInForm() {
-  const { oauthLogin, requestMagicLink, consumeMagicLink } = useAuthStore();
+  const { login, oauthLogin, requestMagicLink, consumeMagicLink } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const path = searchParams.get("to");
   const errorCode = searchParams.get("error");
   const magicToken = searchParams.get("magic");
   const inviteEmail = searchParams.get("email");
+  const callbackUrl = searchParams.get("callbackUrl") || undefined;
   const isAuthRef = useRef(false);
   const shownErrorRef = useRef<string | null>(null);
 
+  // Step 1 = email entry, Step 2 = password entry (after SSO discovery finds no enforced SSO)
+  const [step, setStep] = useState<"email" | "password">("email");
+  const [ssoResult, setSsoResult] = useState<SsoDiscoveryResult | null>(null);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isDiscoveryLoading, setIsDiscoveryLoading] = useState(false);
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
   const [isMagicLinkLoading, setIsMagicLinkLoading] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [altExpanded, setAltExpanded] = useState(false);
 
   const {
@@ -335,83 +343,122 @@ export default function SignInForm() {
   });
 
   const session = useSession();
+  const emailValue = watch("email");
 
   const redirectAfterLogin = useCallback(
     (accountType?: string | null, purpose?: string | null) => {
+      console.log("Redirecting after login with accountType:", accountType, "purpose:", purpose);
       if (IS_STANDALONE) {
-        if (path === "payment") {
-          router.replace("/pricing");
-          return;
-        }
-        if (path === "community") {
-          router.replace("/community");
-          return;
-        }
+        if (path === "payment") { router.replace("/pricing"); return; }
+        if (path === "community") { router.replace("/community"); return; }
         return;
       }
-      if (path === "ezra") {
-        router.push("/ezra/dashboard");
-        return;
-      }
+      if (path === "ezra") { router.push("/ezra/dashboard"); return; }
       if (accountType === "BUSINESS") {
         if (purpose === "IMS") {
           const token = getCookie(COOKIE_KEYS.TOKEN);
           const refreshToken = getCookie(COOKIE_KEYS.REFRESH_TOKEN);
-          const url =
-            process.env.NEXT_PUBLIC_INCIDENT_URL ??
-            "https://incidents.scrubbe.com";
+          const url = process.env.NEXT_PUBLIC_INCIDENT_URL ?? "https://incidents.scrubbe.com";
           const redirectUrl = new URL("/incident/tickets", url);
-          if (typeof token === "string" && token.length > 0) {
-            redirectUrl.searchParams.set("token", token);
-          }
-          if (typeof refreshToken === "string" && refreshToken.length > 0) {
-            redirectUrl.searchParams.set("refreshToken", refreshToken);
-          }
+          if (typeof token === "string" && token.length > 0) redirectUrl.searchParams.set("token", token);
+          if (typeof refreshToken === "string" && refreshToken.length > 0) redirectUrl.searchParams.set("refreshToken", refreshToken);
           window.location.href = redirectUrl.toString();
           return;
         }
-        router.push("/incident");
+        router.push(callbackUrl || "/incident");
         return;
       }
-      if (accountType === "DEVELOPER") {
-        router.push("/developer/dashboard");
-        return;
-      }
-      router.push("/incident");
+      if (accountType === "DEVELOPER") { router.push("/developer/dashboard"); return; }
+        router.push(callbackUrl || "/incident");
     },
     [path, router]
   );
 
+  // Step 1: discover SSO for this email domain
   const handleContinue = async () => {
-    const email = watch("email").trim();
-    if (!email) {
-      toast.error("Please enter your work email first");
-      return;
-    }
+    const email = emailValue.trim();
+    if (!email) { toast.error("Please enter your email first"); return; }
     try {
       setIsDiscoveryLoading(true);
-      await apiClient.get(endpoint.auth.sso_discover, { params: { email } });
+      const res = await apiClient.get(endpoint.auth.sso_discover, { params: { email } });
+      const result: SsoDiscoveryResult = res.data?.data ?? res.data ?? {};
+      setSsoResult(result);
+
+      if (result.enforced) {
+        // SSO is enforced — redirect to the identity provider
+        if (result.loginUrl) {
+          window.location.href = result.loginUrl;
+          return;
+        }
+        if (result.providerSlug && ["google", "github", "gitlab", "microsoft-entra-id"].includes(result.providerSlug)) {
+          void signIn(result.providerSlug as "google" | "github" | "gitlab" | "microsoft-entra-id", {
+            callbackUrl: `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}`,
+          });
+          return;
+        }
+      }
+      // No enforced SSO — show password field
+      setStep("password");
     } catch {
-      /* no-op */
+      // SSO discovery failed — fall through to password login
+      setSsoResult(null);
+      setStep("password");
     } finally {
       setIsDiscoveryLoading(false);
+    }
+  };
+
+  // Step 2: sign in with email + password
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = emailValue.trim();
+    if (!password.trim()) { toast.error("Please enter your password"); return; }
+    try {
+      setIsLoginLoading(true);
+      const user = await login(email, password);
+      toast.success("Signed in successfully", { id: "login-success" });
+      redirectAfterLogin(user?.accountType, (user as any)?.purpose ?? null);
+    } catch (err) {
+      toast.error(
+        err instanceof AxiosError
+          ? err.response?.data?.message ?? "Invalid email or password"
+          : "Sign in failed"
+      );
+    } finally {
+      setIsLoginLoading(false);
+    }
+  };
+
+  // Magic link request
+  const handleMagicLink = async () => {
+    const email = emailValue.trim();
+    if (!email) { toast.error("Please enter your email first"); return; }
+    try {
+      setIsMagicLinkLoading(true);
+      await requestMagicLink(email, path);
+      setMagicLinkSent(true);
+      toast.success("Magic link sent — check your inbox");
+    } catch (err) {
+      toast.error(
+        err instanceof AxiosError
+          ? err.response?.data?.message ?? "Failed to send magic link"
+          : "Failed to send magic link"
+      );
+    } finally {
+      setIsMagicLinkLoading(false);
     }
   };
 
   const handleProviderSignIn = useCallback(
     (provider: "google" | "github" | "gitlab" | "microsoft-entra-id") =>
       signIn(provider, {
-        callbackUrl: `/auth/signin${
-          path ? `?to=${encodeURIComponent(path)}` : ""
-        }`,
+        callbackUrl: `/auth/signin${path ? `?to=${encodeURIComponent(path)}` : ""}`,
       }),
     [path]
   );
 
   const handleComingSoon = (name: string) => {
-    toast.info(name + " sign-in coming soon", {
-      description: "This provider will be available shortly.",
-    });
+    toast.info(name + " sign-in coming soon", { description: "This provider will be available shortly." });
   };
 
   const onSubmitOAuth = useCallback(async () => {
@@ -422,12 +469,9 @@ export default function SignInForm() {
         session.data.user.id ?? "",
         session.data.user.oAuthProvider ?? ""
       );
-      toast.success("Successfully signed in!", {
-        duration: 10000,
-        id: "redirect",
-      });
+      toast.success("Successfully signed in!", { duration: 10000, id: "redirect" });
       await signOut({ redirect: false });
-      redirectAfterLogin(d?.accountType, d?.purpose ?? null);
+      redirectAfterLogin(d?.accountType, (d as any)?.purpose ?? null);
     } catch (err) {
       if (err instanceof AxiosError && err.response?.status === 404) {
         const p = new URLSearchParams();
@@ -441,21 +485,14 @@ export default function SignInForm() {
   }, [oauthLogin, path, redirectAfterLogin, router, session.data]);
 
   useEffect(() => {
-    if (
-      session.status === "authenticated" &&
-      session.data?.user &&
-      !isAuthRef.current &&
-      !magicToken
-    ) {
+    if (session.status === "authenticated" && session.data?.user && !isAuthRef.current && !magicToken) {
       isAuthRef.current = true;
       void onSubmitOAuth();
     }
   }, [magicToken, onSubmitOAuth, session.data?.user, session.status]);
 
   useEffect(() => {
-    if (inviteEmail) {
-      setValue("email", inviteEmail);
-    }
+    if (inviteEmail) setValue("email", inviteEmail);
   }, [inviteEmail, setValue]);
 
   useEffect(() => {
@@ -474,11 +511,8 @@ export default function SignInForm() {
         const d = await consumeMagicLink(magicToken);
         if (!mounted) return;
         await signOut({ redirect: false });
-        toast.success("Successfully signed in!", {
-          duration: 10000,
-          id: "magic-link-redirect",
-        });
-        redirectAfterLogin(d?.accountType, d?.purpose ?? null);
+        toast.success("Successfully signed in!", { duration: 10000, id: "magic-link-redirect" });
+        redirectAfterLogin(d?.accountType, (d as any)?.purpose ?? null);
       } catch {
         if (!mounted) return;
         toast.error("Magic link failed");
@@ -488,16 +522,14 @@ export default function SignInForm() {
       }
     };
     void run();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [consumeMagicLink, magicToken, path, redirectAfterLogin, router]);
 
   const isSpinning = session.status === "loading" || isMagicLinkLoading;
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div className="w-full relative ">
+      <div className="w-full relative">
         {isSpinning && (
           <div className="absolute inset-0 bg-white/70 z-50 flex items-center justify-center rounded-2xl">
             <Loader2 className="animate-spin text-emerald-500" size={28} />
@@ -507,183 +539,221 @@ export default function SignInForm() {
         {/* Help */}
         <div className="text-right mb-6 text-sm text-gray-500">
           Need help?{" "}
-          <Link
-            href="/contact-us"
-            className="text-emerald-600 font-semibold hover:underline"
-          >
+          <Link href="/contact-us" className="text-emerald-600 font-semibold hover:underline">
             contact support
           </Link>
         </div>
 
         {/* Heading */}
         <div className="text-center mb-8">
-          <h1 className="text-[28px] font-black text-gray-900 tracking-tight mb-1">
-            Welcome to Scrubbe
-          </h1>
-          <p className="text-sm text-gray-400 mb-5">
-            Secure access for engineering workspace
-          </p>
-          <p className="text-[17px] font-bold text-gray-900">
-            Sign in to your workspace
-          </p>
+          <h1 className="text-[28px] font-black text-gray-900 tracking-tight mb-1">Welcome to Scrubbe</h1>
+          <p className="text-sm text-gray-400 mb-5">Secure access for engineering workspace</p>
+          <p className="text-[17px] font-bold text-gray-900">Sign in to your workspace</p>
           <p className="text-sm text-gray-400 mt-1">
-            Enter your work email to continue
+            {step === "email" ? "Enter your email to continue" : "Enter your password to sign in"}
           </p>
         </div>
 
-        {/* Email + Continue */}
-        <form
-          onSubmit={handleSubmit(handleContinue)}
-          className="space-y-3 mb-2"
-        >
-          <div className="flex items-center gap-2.5 border border-gray-200 rounded-xl px-3.5 py-3.5 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all bg-white">
-            <Mail size={15} className="text-gray-400 shrink-0" />
-            <Controller
-              name="email"
-              control={control}
-              render={({ field }) => (
-                <input
-                  {...field}
-                  type="email"
-                  className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
-                  placeholder="name@company.com"
-                />
-              )}
-            />
-          </div>
-          {errors.email && (
-            <p className="text-xs text-red-500">{errors.email.message}</p>
-          )}
-          <button
-            type="submit"
-            disabled={!isValid || isDiscoveryLoading}
-            className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
-            style={{
-              background:
-                "linear-gradient(90deg,#1a2a1a 0%,#14532d 55%,#22c55e 100%)",
-            }}
-          >
-            {isDiscoveryLoading ? (
-              <Loader2 size={16} className="animate-spin mx-auto" />
-            ) : (
-              "Continue"
-            )}
-          </button>
-        </form>
-
-        <Divider label="OR" />
-
-        {/* Collapsible alternative sign-in */}
-        <button
-          type="button"
-          onClick={() => setAltExpanded((v) => !v)}
-          className="w-full flex items-center gap-3 px-4 py-3.5 border border-gray-200 rounded-xl text-left hover:bg-gray-50 transition-colors bg-white cursor-pointer mb-4"
-        >
-          <Shield size={17} className="text-gray-500 shrink-0" />
-          <span className="flex-1 text-[14px] font-medium text-gray-700">
-            Sign in via different way
-          </span>
-          <motion.div
-            animate={{ rotate: altExpanded ? 180 : 0 }}
-            transition={{ duration: 0.22 }}
-          >
-            <ChevronDown size={16} className="text-gray-400" />
-          </motion.div>
-        </button>
-
-        <AnimatePresence initial={false}>
-          {altExpanded && (
+        <AnimatePresence mode="wait">
+          {/* ── STEP 1: EMAIL ───────────────────────────────────────────── */}
+          {step === "email" && (
             <motion.div
-              key="alt"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-              style={{ overflow: "hidden" }}
+              key="email-step"
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 16 }}
+              transition={{ duration: 0.2 }}
             >
-              <div className="space-y-4 pb-2">
-                {/* Enterprise SSO group */}
-                <ProviderGroup
-                  title="Enterprise SSO"
-                  badge="For organizations"
-                  badgeColor="green"
-                  subtitle="Use your organization's identity provider"
+              <form onSubmit={handleSubmit(handleContinue)} className="space-y-3 mb-2">
+                <div className="flex items-center gap-2.5 border border-gray-200 rounded-xl px-3.5 py-3.5 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all bg-white">
+                  <Mail size={15} className="text-gray-400 shrink-0" />
+                  <Controller
+                    name="email"
+                    control={control}
+                    render={({ field }) => (
+                      <input
+                        {...field}
+                        type="email"
+                        autoFocus
+                        className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
+                        placeholder="name@company.com"
+                      />
+                    )}
+                  />
+                </div>
+                {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                <button
+                  type="submit"
+                  disabled={!isValid || isDiscoveryLoading}
+                  className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
+                  style={{ background: "linear-gradient(90deg,#1a2a1a 0%,#14532d 55%,#22c55e 100%)" }}
                 >
-                  <ProviderRow
-                    icon={<FcGoogle size={20} />}
-                    label="Google Workspace"
-                    onClick={() => void handleProviderSignIn("google")}
-                  />
-                  <ProviderRow
-                    icon={<MsIcon />}
-                    label="Microsoft / Entra ID"
-                    onClick={() =>
-                      void handleProviderSignIn("microsoft-entra-id")
-                    }
-                  />
-                  <ProviderRow
-                    icon={<OktaIcon />}
-                    label="Okta"
-                    onClick={() => handleComingSoon("Okta")}
-                  />
-                  <ProviderRow
-                    icon={<OneLoginIcon />}
-                    label="Onelogin"
-                    onClick={() => handleComingSoon("OneLogin")}
-                  />
-                  <ProviderRow
-                    icon={<EnterpriseSsoIcon />}
-                    label="Enterprise SSO (OIDC/SAML)"
-                    onClick={() =>
-                      handleComingSoon("Enterprise SSO (OIDC/SAML)")
-                    }
-                  />
-                </ProviderGroup>
+                  {isDiscoveryLoading ? <Loader2 size={16} className="animate-spin mx-auto" /> : "Continue"}
+                </button>
+              </form>
 
-                {/* Engineering sign-in group */}
-                <ProviderGroup
-                  title="Engineering sign-in"
-                  badge="For developers"
-                  badgeColor="blue"
-                  subtitle="Use your developer account"
+              <Divider label="OR" />
+
+              {/* Collapsible alternative sign-in */}
+              <button
+                type="button"
+                onClick={() => setAltExpanded((v) => !v)}
+                className="w-full flex items-center gap-3 px-4 py-3.5 border border-gray-200 rounded-xl text-left hover:bg-gray-50 transition-colors bg-white cursor-pointer mb-4"
+              >
+                <Shield size={17} className="text-gray-500 shrink-0" />
+                <span className="flex-1 text-[14px] font-medium text-gray-700">Sign in via different way</span>
+                <motion.div animate={{ rotate: altExpanded ? 180 : 0 }} transition={{ duration: 0.22 }}>
+                  <ChevronDown size={16} className="text-gray-400" />
+                </motion.div>
+              </button>
+
+              <AnimatePresence initial={false}>
+                {altExpanded && (
+                  <motion.div
+                    key="alt"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <div className="space-y-4 pb-2">
+                      <ProviderGroup title="Enterprise SSO" badge="For organizations" badgeColor="green" subtitle="Use your organization's identity provider">
+                        <ProviderRow icon={<FcGoogle size={20} />} label="Google Workspace" onClick={() => void handleProviderSignIn("google")} />
+                        <ProviderRow icon={<MsIcon />} label="Microsoft / Entra ID" onClick={() => void handleProviderSignIn("microsoft-entra-id")} />
+                        <ProviderRow icon={<OktaIcon />} label="Okta" onClick={() => handleComingSoon("Okta")} />
+                        <ProviderRow icon={<OneLoginIcon />} label="Onelogin" onClick={() => handleComingSoon("OneLogin")} />
+                        <ProviderRow icon={<EnterpriseSsoIcon />} label="Enterprise SSO (OIDC/SAML)" onClick={() => handleComingSoon("Enterprise SSO (OIDC/SAML)")} />
+                      </ProviderGroup>
+                      <ProviderGroup title="Engineering sign-in" badge="For developers" badgeColor="blue" subtitle="Use your developer account">
+                        <ProviderRow icon={<FaGithub size={20} className="text-gray-900" />} label="Github" onClick={() => void handleProviderSignIn("github")} />
+                        <ProviderRow icon={<FaGitlab size={20} className="text-orange-500" />} label="Gitlab" onClick={() => void handleProviderSignIn("gitlab")} />
+                        <ProviderRow icon={<BitbucketIcon />} label="Bitbucket" onClick={() => handleComingSoon("Bitbucket")} />
+                      </ProviderGroup>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+
+          {/* ── STEP 2: PASSWORD ─────────────────────────────────────────── */}
+          {step === "password" && (
+            <motion.div
+              key="password-step"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* SSO suggestion banner (if SSO available but not enforced) */}
+              {ssoResult?.available && !ssoResult.enforced && ssoResult.providerSlug && (
+                <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+                  <p className="text-xs text-emerald-700 font-medium">
+                    Your org uses {ssoResult.provider ?? "SSO"} — sign in faster with it
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (ssoResult.loginUrl) { window.location.href = ssoResult.loginUrl!; return; }
+                      if (ssoResult.providerSlug && ["google","github","gitlab","microsoft-entra-id"].includes(ssoResult.providerSlug)) {
+                        void handleProviderSignIn(ssoResult.providerSlug as "google" | "github" | "gitlab" | "microsoft-entra-id");
+                      }
+                    }}
+                    className="text-xs font-bold text-emerald-600 hover:underline whitespace-nowrap ml-3"
+                  >
+                    Use SSO
+                  </button>
+                </div>
+              )}
+
+              {/* Email display (read-only) */}
+              <div className="flex items-center gap-2.5 border border-gray-100 rounded-xl px-3.5 py-3 mb-3 bg-gray-50">
+                <Mail size={14} className="text-gray-400 shrink-0" />
+                <span className="flex-1 text-sm text-gray-700 truncate">{emailValue}</span>
+                <button
+                  type="button"
+                  onClick={() => { setStep("email"); setPassword(""); setSsoResult(null); setMagicLinkSent(false); }}
+                  className="text-xs text-emerald-600 font-semibold hover:underline shrink-0"
                 >
-                  <ProviderRow
-                    icon={<FaGithub size={20} className="text-gray-900" />}
-                    label="Github"
-                    onClick={() => void handleProviderSignIn("github")}
-                  />
-                  <ProviderRow
-                    icon={<FaGitlab size={20} className="text-orange-500" />}
-                    label="Gitlab"
-                    onClick={() => void handleProviderSignIn("gitlab")}
-                  />
-                  <ProviderRow
-                    icon={<BitbucketIcon />}
-                    label="Bitbucket"
-                    onClick={() => handleComingSoon("Bitbucket")}
-                  />
-                </ProviderGroup>
+                  Change
+                </button>
               </div>
+
+              {magicLinkSent ? (
+                <div className="text-center py-6 space-y-2">
+                  <p className="text-emerald-600 font-bold text-base">Magic link sent!</p>
+                  <p className="text-sm text-gray-500">Check your inbox at <strong>{emailValue}</strong> and click the link to sign in.</p>
+                  <button type="button" onClick={() => setMagicLinkSent(false)} className="text-xs text-gray-400 hover:underline mt-2">
+                    Try password instead
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSignIn} className="space-y-3">
+                  {/* Password field */}
+                  <div className="flex items-center gap-2.5 border border-gray-200 rounded-xl px-3.5 py-3.5 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all bg-white">
+                    <Lock size={14} className="text-gray-400 shrink-0" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      autoFocus
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
+                      placeholder="Enter your password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="text-gray-400 hover:text-gray-600 text-xs shrink-0"
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Link href="/auth/forgot-password" className="text-xs text-emerald-600 font-semibold hover:underline">
+                      Forgot password?
+                    </Link>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!password.trim() || isLoginLoading}
+                    className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
+                    style={{ background: "linear-gradient(90deg,#1a2a1a 0%,#14532d 55%,#22c55e 100%)" }}
+                  >
+                    {isLoginLoading ? <Loader2 size={16} className="animate-spin mx-auto" /> : "Sign In"}
+                  </button>
+
+                  <Divider label="OR" />
+
+                  <button
+                    type="button"
+                    onClick={handleMagicLink}
+                    disabled={isMagicLinkLoading}
+                    className="w-full py-3 rounded-xl text-sm font-semibold text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isMagicLinkLoading
+                      ? <Loader2 size={14} className="animate-spin" />
+                      : <Mail size={14} className="text-gray-500" />}
+                    Send me a magic link instead
+                  </button>
+                </form>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Bottom */}
-        <div className="text-center">
+        <div className="text-center mt-6">
           <Divider icon={<Lock size={16} className="text-gray-300 w-10" />} />
-          <p className="text-sm text-gray-400 mb-3">Don't have access yet?</p>
+          <p className="text-sm text-gray-400 mb-3">Don&apos;t have access yet?</p>
           <div className="flex items-center justify-center gap-4">
-            <Link
-              href="/contact-admin"
-              className="text-sm font-semibold text-emerald-600 hover:underline"
-            >
+            <Link href="/contact-admin" className="text-sm font-semibold text-emerald-600 hover:underline">
               Contact your administrator
             </Link>
             <div className="w-px h-4 bg-gray-200" />
-            <Link
-              href="/auth/business-signup"
-              className="text-sm font-semibold text-emerald-600 hover:underline"
-            >
+            <Link href="/auth/business-signup" className="text-sm font-semibold text-emerald-600 hover:underline">
               Create a workspace
             </Link>
           </div>

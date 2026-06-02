@@ -1,12 +1,9 @@
-import SideModal from "@/components/ui/SideModal";
+"use client";
 import React, { useState } from "react";
+import SideModal from "@/components/ui/SideModal";
 import AnalystNote from "./Modal/AnalystNote";
 
-/**
- * Interface for Analyst Note data structure
- * to ensure strict type safety across the evidence pack.
- */
-interface AnalystNote {
+interface AnalystNoteItem {
   id: string;
   author: string;
   timestamp: string;
@@ -14,54 +11,61 @@ interface AnalystNote {
 }
 
 interface AnalystNotesProps {
-  notes?: AnalystNote[];
-  onAddNote?: () => void;
+  notes?: AnalystNoteItem[];
 }
 
-const AnalystNotes: React.FC<AnalystNotesProps> = ({
-  notes = [],
-  onAddNote,
-}) => {
-  const [isAnalystNote, setIsAnalystNote] = useState(false);
-  return (
-    <div className=" p-5 border border-IMSCyan/40 rounded-xl text-gray-700 dark:text-slate-300 bg-gradient-to-b from-IMSCyan/30 to-IMSCyan/10 dark:from-IMSCyan/20 dark:to-grayscrubbe-800 flex items-start justify-center">
-      <div className="w-full">
-        {/* Header Section */}
-        <div className="flex justify-between items-start mb-3 w-full">
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-white tracking-tight">
-              Analyst notes
-            </h2>
-          </div>
+const AnalystNotes: React.FC<AnalystNotesProps> = ({ notes = [] }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
+  return (
+    <>
+      <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
+
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="space-y-0.5">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+              Analyst Notes
+            </p>
+            <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">
+              Notes & observations
+            </p>
+            <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+              Notes include author + timestamp and become part of the evidence pack.
+            </p>
+          </div>
           <button
-            onClick={() => setIsAnalystNote(true)}
-            className="px-4 py-1.5 border border-green-500 text-green-500 rounded-lg text-sm font-bold w-fit"
+            onClick={() => setIsOpen(true)}
+            className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/40 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors shrink-0"
           >
-            Add analyst note
+            Add note
           </button>
         </div>
-        <p className="text-base text-slate-300 font-medium">
-          Notes include author + timestamp and become part of the evidence pack.
-        </p>
-        {/* Notes Container */}
-        <div className="bg-white dark:bg-grayscrubbe-800 border border-slate-500 rounded-2xl p-6 mt-4 shadow-inner min-h-[80px] flex items-center">
+
+        {/* Notes list */}
+        <div className="p-4">
           {notes.length === 0 ? (
-            <p className="text-lg text-slate-400 font-medium italic">
-              No analyst notes yet.
-            </p>
+            <div className="rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700 px-5 py-6 text-center">
+              <p className="text-[13px] text-zinc-400 dark:text-zinc-500">
+                No analyst notes yet.
+              </p>
+            </div>
           ) : (
-            <div className="w-full space-y-4">
+            <div className="space-y-2">
               {notes.map((note) => (
                 <div
                   key={note.id}
-                  className="border-b border-slate-800 pb-4 last:border-0 last:pb-0"
+                  className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4"
                 >
-                  <div className="flex justify-between text-xs font-black text-slate-500 uppercase tracking-widest mb-2">
-                    <span>{note.author}</span>
-                    <span>{note.timestamp}</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                      {note.author}
+                    </span>
+                    <span className="text-[11px] font-mono text-zinc-300 dark:text-zinc-600 tabular-nums">
+                      {note.timestamp}
+                    </span>
                   </div>
-                  <p className="text-slate-200 leading-relaxed">
+                  <p className="text-[13px] text-zinc-600 dark:text-zinc-300 leading-relaxed">
                     {note.content}
                   </p>
                 </div>
@@ -70,17 +74,18 @@ const AnalystNotes: React.FC<AnalystNotesProps> = ({
           )}
         </div>
       </div>
-      {isAnalystNote && (
+
+      {isOpen && (
         <SideModal
-          isOpen={isAnalystNote}
-          onClose={() => setIsAnalystNote(false)}
-          title={"Analyst Note"}
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          title="Analyst Note"
           subTitle="Add note (author + timestamp)"
         >
           <AnalystNote />
         </SideModal>
       )}
-    </div>
+    </>
   );
 };
 
