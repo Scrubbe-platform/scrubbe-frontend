@@ -365,13 +365,15 @@ export default function SignInForm() {
           window.location.href = redirectUrl.toString();
           return;
         }
-        router.push(callbackUrl || "/incident");
+              console.log("Redirecting after login with accountType:", accountType, "purpose:", purpose);
+
+        window.location.href = callbackUrl || "/incident"
         return;
       }
       if (accountType === "DEVELOPER") { router.push("/developer/dashboard"); return; }
-        router.push(callbackUrl || "/incident");
+        window.location.href = callbackUrl || "/incident"
     },
-    [path, router]
+    [callbackUrl, path, router]
   );
 
   // Step 1: discover SSO for this email domain
