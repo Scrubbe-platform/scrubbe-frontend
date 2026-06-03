@@ -1,39 +1,46 @@
-import CButton from '@/components/ui/Cbutton';
-import React, { ReactNode } from 'react'
+"use client";
+import CButton from "@/components/ui/Cbutton";
+import React, { ReactNode } from "react";
 
 const FormWrapper = ({
-    subtitle,
-    title,
-    label,
-    children,
-    actionText,
-    action
-  }: {
-    subtitle: string;
-    label: string;
-    children: ReactNode;
-    title: string;
-    actionText?: ReactNode;
-    action?:() => void
-  }) => (
-    <div
-      className={`bg-gradient-to-b from-[#0074834D] to-[#004B571A] border rounded-xl transition-all border-IMSCyan/40 overflow-clip`}
-    >
-      <div className="p-4 border-b border-[#1F2937] flex justify-between ">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-            {title}
-          </h2>
-          <p className="text-white font-medium text-sm max-w-lg">{subtitle}</p>
-          <p className="text-neutral-300 text-sm max-w-lg">{label}</p>
-          
-        </div>
-        {actionText && <CButton onClick={action} className='border border-IMSCyan bg-transparent hover:bg-transparent text-IMSCyan w-fit h-8'>{actionText}</CButton>}
+  title,
+  subtitle,
+  label,
+  children,
+  actionText,
+  action,
+}: {
+  title: string;
+  subtitle: string;
+  label: string;
+  children: ReactNode;
+  actionText?: ReactNode;
+  action?: () => void;
+}) => (
+  <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
+    <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="space-y-1">
+        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          {title}
+        </h2>
+        <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">
+          {subtitle}
+        </p>
+        <p className="text-[12px] text-zinc-500 dark:text-zinc-400 max-w-lg leading-relaxed">
+          {label}
+        </p>
       </div>
-      <div className="px-4 py-4">{children}</div>
+      {actionText && (
+        <CButton
+          onClick={action}
+          className="border border-zinc-200 dark:border-zinc-700 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 w-fit h-8 shrink-0"
+        >
+          {actionText}
+        </CButton>
+      )}
     </div>
-  );
+    <div className="px-5 py-4">{children}</div>
+  </div>
+);
 
-export default FormWrapper
-
-  
+export default FormWrapper;
