@@ -6,115 +6,100 @@ import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 
 type GuardrailStatus = "APPROVAL REQUIRED" | "AUTO-EXECUTE" | "BLOCK AUTO" | "PASS";
+interface PolicyRow { id: string; title: string; description: string; status: GuardrailStatus; icon: React.ReactNode }
 
-interface PolicyRow {
-  id: string;
-  title: string;
-  description: string;
-  status: GuardrailStatus;
-  icon: React.ReactNode;
-}
-
+// Status badge — keep minimal signal: blocked is red, pass is green, rest zinc
 const StatusBadge = ({ status }: { status: GuardrailStatus }) => {
   const styles: Record<GuardrailStatus, string> = {
-    "APPROVAL REQUIRED": "border-amber-500/40 text-amber-500 bg-amber-500/5",
-    "AUTO-EXECUTE": "border-rose-900/50 text-rose-500 bg-red-500/5",
-    "BLOCK AUTO": "border-rose-900/50 text-rose-500 bg-red-600/5",
-    PASS: "border-orange-900/30 text-orange-800 bg-red-900/5",
+    "APPROVAL REQUIRED": "border-amber-200 dark:border-amber-500/25 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/8",
+    "AUTO-EXECUTE":      "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800",
+    "BLOCK AUTO":        "border-red-200 dark:border-red-500/25 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/8",
+    PASS:                "border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800",
   };
   return (
-    <span className={`text-[10px] font-bold px-3 py-1.5 rounded border uppercase tracking-wider ${styles[status]}`}>
+    <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg border uppercase tracking-wider ${styles[status]}`}>
       {status}
     </span>
   );
 };
 
-const iconForType = (type: string) => {
-  if (type?.includes("APPROVAL")) return <ShieldCheck size={18} className="text-amber-500" />;
-  if (type?.includes("ROLLBACK") || type?.includes("RESTART")) return <RotateCcw size={18} className="text-amber-500" />;
-  if (type?.includes("BLAST") || type?.includes("RADIUS")) return <Maximize size={18} className="text-amber-500" />;
-  if (type?.includes("HOURS") || type?.includes("ESCALATION")) return <Bolt size={18} className="text-amber-500" />;
-  return <CheckCircle2 size={18} className="text-amber-500" />;
+const iconForType = (type: string): React.ReactNode => {
+  if (type?.includes("APPROVAL"))                            return <ShieldCheck size={15} className="text-zinc-400 dark:text-zinc-500" />;
+  if (type?.includes("ROLLBACK") || type?.includes("RESTART")) return <RotateCcw size={15} className="text-zinc-400 dark:text-zinc-500" />;
+  if (type?.includes("BLAST") || type?.includes("RADIUS"))  return <Maximize size={15} className="text-zinc-400 dark:text-zinc-500" />;
+  if (type?.includes("HOURS") || type?.includes("ESCALATION")) return <Bolt size={15} className="text-zinc-400 dark:text-zinc-500" />;
+  return <CheckCircle2 size={15} className="text-zinc-400 dark:text-zinc-500" />;
 };
 
 const statusFromGuardrail = (g: any): GuardrailStatus => {
   if (!g.isActive) return "BLOCK AUTO";
-  const cfg = g.config ?? {};
-  if (cfg.requireApproval) return "APPROVAL REQUIRED";
+  if (g.config?.requireApproval) return "APPROVAL REQUIRED";
   if (g.type === "BLAST_RADIUS_LIMIT") return "BLOCK AUTO";
-  if (cfg.autoExecute) return "AUTO-EXECUTE";
+  if (g.config?.autoExecute) return "AUTO-EXECUTE";
   return "PASS";
 };
 
 const FALLBACK_POLICIES: PolicyRow[] = [
-  { id: "1", title: "Production Rollback Approval", description: "policy: prod.rollback.requires_approval = true · Applies to all P1/P2 incidents", status: "APPROVAL REQUIRED", icon: <ShieldCheck size={18} className="text-amber-500" /> },
-  { id: "2", title: "Pod Restart Auto-Allowed", description: "policy: pod.restart.auto = true · reversible = true · blast_radius ≤ 1 service", status: "AUTO-EXECUTE", icon: <RotateCcw size={18} className="text-amber-500" /> },
-  { id: "3", title: "Blast Radius Automation Limit", description: "policy: no automation if blast_radius > 3 services · Current: 3 — threshold met", status: "BLOCK AUTO", icon: <Maximize size={18} className="text-amber-500" /> },
-  { id: "4", title: "Reversibility Check", description: "policy: prefer reversible actions · Rollback: reversible ✓ · rollbackPlaybookId linked", status: "PASS", icon: <CheckCircle2 size={18} className="text-amber-500" /> },
-  { id: "5", title: "Business Hours Escalation", description: "policy: P1 outside 09:00–18:00 UTC requires on-call approval · Current: 00:15 UTC", status: "APPROVAL REQUIRED", icon: <Bolt size={18} className="text-amber-500" /> },
+  { id: "1", title: "Production Rollback Approval",  description: "policy: prod.rollback.requires_approval = true · Applies to all P1/P2 incidents",    status: "APPROVAL REQUIRED", icon: iconForType("APPROVAL")  },
+  { id: "2", title: "Pod Restart Auto-Allowed",       description: "policy: pod.restart.auto = true · reversible = true · blast_radius ≤ 1 service",     status: "AUTO-EXECUTE",      icon: iconForType("ROLLBACK")  },
+  { id: "3", title: "Blast Radius Automation Limit", description: "policy: no automation if blast_radius > 3 services · Current: 3 — threshold met",     status: "BLOCK AUTO",        icon: iconForType("BLAST")     },
+  { id: "4", title: "Reversibility Check",           description: "policy: prefer reversible actions · Rollback: reversible ✓ · rollbackPlaybookId linked", status: "PASS",            icon: iconForType("")          },
+  { id: "5", title: "Business Hours Escalation",     description: "policy: P1 outside 09:00–18:00 UTC requires on-call approval · Current: 00:15 UTC",    status: "APPROVAL REQUIRED", icon: iconForType("ESCALATION") },
 ];
 
 const GuardrailModule: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const { get } = useFetch();
-
   const { data: guardrails } = useQuery({
     queryKey: ["guardrails-playbook", incidentId],
     queryFn: async () => {
       const res = await get(endpoint.guardrails.list + "?activeOnly=true");
-      if (res.success) return (res.data?.data?.guardrails ?? res.data?.data ?? []) as any[];
-      return [] as any[];
+      return res.success ? (res.data?.data?.guardrails ?? res.data?.data ?? []) as any[] : [] as any[];
     },
   });
 
   const policies: PolicyRow[] = guardrails?.length
-    ? guardrails.map((g: any) => ({
-        id: g.id,
-        title: g.name,
-        description: g.description ?? `policy: ${g.type ?? "CUSTOM"} · ${g.config ? JSON.stringify(g.config).slice(0, 80) : ""}`,
-        status: statusFromGuardrail(g),
-        icon: iconForType(g.type ?? g.name ?? ""),
-      }))
+    ? guardrails.map((g: any) => ({ id: g.id, title: g.name, description: g.description ?? `policy: ${g.type ?? "CUSTOM"}`, status: statusFromGuardrail(g), icon: iconForType(g.type ?? g.name ?? "") }))
     : FALLBACK_POLICIES;
 
   const approvalCount = policies.filter((p) => p.status === "APPROVAL REQUIRED").length;
 
   return (
-    <div className="w-full max-w-6xl bg-dark border border-white/5 rounded-3xl p-3 flex flex-col gap-6">
+    <div className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-5">
       <div className="flex justify-between items-start">
-        <div className="flex gap-4">
-          <div className="w-10 h-10 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center">
-            <Lock size={20} className="text-amber-500" />
+        <div className="flex gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
+            <Lock size={15} className="text-zinc-500 dark:text-zinc-400" />
           </div>
           <div>
-            <h2 className="text-white font-semibold text-lg leading-tight">Guardrail Check</h2>
-            <p className="text-slate-500 text-xs mt-1 font-medium">Policy engine — PolicyRef[] · determines whether automation is permitted · CP enforced</p>
+            <h2 className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">Guardrail Check</h2>
+            <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-0.5">Policy engine — determines whether automation is permitted · CP enforced</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <div className="px-4 py-1.5 border border-amber-500/40 bg-amber-500/5 rounded text-amber-500 text-xs font-bold uppercase tracking-widest">
-            {approvalCount} APPROVAL{approvalCount !== 1 ? "S" : ""} REQUIRED
-          </div>
-          <button className="p-1.5 border border-slate-700 rounded text-slate-400 hover:bg-white/5">
-            <TriangleAlert size={16} />
+          <span className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-semibold text-zinc-600 dark:text-zinc-300">
+            {approvalCount} approval{approvalCount !== 1 ? "s" : ""} required
+          </span>
+          <button className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            <TriangleAlert size={14} />
           </button>
         </div>
       </div>
 
-      <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl flex gap-4">
-        <Info size={20} className="text-amber-500 shrink-0 mt-0.5" />
-        <p className="text-sm text-amber-200/70 leading-relaxed">
-          <span className="font-bold text-amber-500">CP Zone</span> — policies are strongly consistent. On partition or uncertainty, execution is blocked. Policies never conflict.
+      <div className="flex gap-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
+        <Info size={15} className="text-zinc-400 dark:text-zinc-500 shrink-0 mt-0.5" />
+        <p className="text-[12px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+          <span className="font-semibold text-zinc-700 dark:text-zinc-300">CP Zone</span> — policies are strongly consistent. On partition or uncertainty, execution is blocked.
         </p>
       </div>
 
       <div className="flex flex-col gap-2">
         {policies.map((policy) => (
-          <div key={policy.id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl group hover:border-white/10 transition-all">
-            <div className="flex items-center gap-5">
-              <div className="p-2 border border-amber-500/20 rounded-lg bg-amber-500/5">{policy.icon}</div>
-              <div className="flex flex-col gap-1">
-                <span className="text-sm font-semibold text-slate-200">{policy.title}</span>
-                <span className="text-xs text-slate-500 font-mono">{policy.description}</span>
+          <div key={policy.id} className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-100 dark:border-zinc-800 rounded-xl hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-1.5 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 shrink-0">{policy.icon}</div>
+              <div className="min-w-0">
+                <p className="text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 truncate">{policy.title}</p>
+                <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-mono mt-0.5 truncate">{policy.description}</p>
               </div>
             </div>
             <StatusBadge status={policy.status} />

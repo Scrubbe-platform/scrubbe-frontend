@@ -73,7 +73,7 @@ const CookieConsentModal: React.FC = () => {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={handleAcceptAll}
-            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg transition hover:bg-blue-700"
+            className="px-4 py-2 bg-IMSLightGreen text-white font-medium rounded-lg transition hover:bg-blue-700"
           >
             Accept All
           </button>
