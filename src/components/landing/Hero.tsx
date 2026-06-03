@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import WorldMap from "@/components/ui/world-map";
+import Image from "next/image";
 
 const scrubbeData = [
   {
@@ -274,37 +274,18 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* World map – replaces hero image */}
-          <div className="mt-auto w-full max-w-[95%] sm:max-w-[90%] md:max-w-5xl mx-auto">
-            <WorldMap
-              lineColor="#00CAD8"
-              dots={[
-                {
-                  start: { lat: 64.2008, lng: -149.4937 },
-                  end: { lat: 34.0522, lng: -118.2437 },
-                },
-                {
-                  start: { lat: 64.2008, lng: -149.4937 },
-                  end: { lat: -15.7975, lng: -47.8919 },
-                },
-                {
-                  start: { lat: -15.7975, lng: -47.8919 },
-                  end: { lat: 38.7223, lng: -9.1393 },
-                },
-                {
-                  start: { lat: 51.5074, lng: -0.1278 },
-                  end: { lat: 28.6139, lng: 77.209 },
-                },
-                {
-                  start: { lat: 28.6139, lng: 77.209 },
-                  end: { lat: 43.1332, lng: 131.9113 },
-                },
-                {
-                  start: { lat: 28.6139, lng: 77.209 },
-                  end: { lat: -1.2921, lng: 36.8219 },
-                },
-              ]}
-            />
+          {/* Image container that sticks to bottom */}
+          <div className="mt-auto w-full max-w-[95%] sm:max-w-[90%] md:max-w-4xl mx-auto">
+            <div className="shadow-2xl rounded-xl overflow-hidden">
+              <Image
+                src="/hero-image.png"
+                alt="Scrubbe Dashboard Preview"
+                width={507}
+                height={342}
+                quality={90}
+                className="w-full h-auto object-contain"
+              />
+            </div>
           </div>
         </article>
       </section>

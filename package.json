@@ -31,7 +31,6 @@
     "cookies-next": "^4.3.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.18",
-    "dotted-map": "^3.1.0",
     "framer-motion": "^12.6.3",
     "highlight.js": "^11.11.1",
     "lucide": "^0.487.0",
