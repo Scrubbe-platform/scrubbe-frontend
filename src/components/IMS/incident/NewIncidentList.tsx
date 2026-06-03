@@ -47,6 +47,8 @@ const IncidentOverview: React.FC = () => {
         <ExactIncidentSidebar />
       </aside>
 
+        {
+          showMainPanel && (
       <main
         className={cn(
           "flex-1 flex flex-col overflow-y-auto h-full",
@@ -100,14 +102,16 @@ const IncidentOverview: React.FC = () => {
           </div>
         ) : null}
       </main>
+          )
+        }
 
       {!showMainPanel && (
-        <main className="hidden md:flex flex-1 items-center justify-center p-10">
+        <main className="hidden md:flex flex-1 items-center justify-center p-10 mx-auto">
           <div className="max-w-lg rounded-3xl border border-white/10 bg-white/[0.02] p-8 text-center">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
               Incident Workspace
             </p>
-            <h2 className="mt-4 text-2xl font-bold text-white">
+            <h2 className="mt-4 text-2xl font-bold text-black dark:text-white">
               Select an incident to open the live workspace
             </h2>
             <p className="mt-3 text-sm leading-7 text-slate-400">

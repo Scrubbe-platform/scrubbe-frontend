@@ -1,6 +1,8 @@
+"use client";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 type ModalProps = {
   isOpen: boolean;
@@ -11,20 +13,10 @@ type ModalProps = {
 
 const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    // Attach the listener
+    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handleKeyDown);
-
-    // Clean up the listener on unmount
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
 
   return (
     <AnimatePresence>
@@ -33,23 +25,31 @@ const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 -top-10 bg-black bg-opacity-60 flex items-center justify-center z-50"
+          onClick={onClose}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
         >
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            className={`${className} relative bg-dark rounded-lg p-2 sm:p-2 w-full   sm:max-w-lg mx-2 max-h-[90vh] overflow-y-auto `}
+            initial={{ scale: 0.96, opacity: 0 }}
+            animate={{ scale: 1,    opacity: 1 }}
+            exit={{   scale: 0.96, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 280, damping: 22 }}
+            onClick={(e) => e.stopPropagation()}
+            className={cn(
+              "relative w-full mx-4 sm:max-w-lg max-h-[90vh] overflow-y-auto",
+              "rounded-xl border border-zinc-200 dark:border-zinc-700/60",
+              "bg-white dark:bg-zinc-900 shadow-xl",
+              "p-2",
+              className
+            )}
           >
-            <div className=" absolute right-3 top-3">
-              <div
-                onClick={onClose}
-                className="bg-dark text-white rounded-sm p-1 w-fit cursor-pointer"
-              >
-                <X />
-              </div>
-            </div>
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="absolute right-3 top-3 p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            >
+              <X size={15} />
+            </button>
+
             {children}
           </motion.div>
         </motion.div>

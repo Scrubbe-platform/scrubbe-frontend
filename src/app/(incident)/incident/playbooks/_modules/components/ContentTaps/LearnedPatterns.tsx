@@ -5,27 +5,23 @@ import { useQuery } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 
-interface PatternRow {
-  id: string;
-  title: string;
-  description: string;
-  confidence: number;
-  tags: string[];
-}
+interface PatternRow { id: string; title: string; description: string; confidence: number; tags: string[] }
 
 const PatternCard = ({ title, description, confidence, tags }: PatternRow) => (
-  <div className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl group hover:border-white/10 transition-all">
-    <div className="flex justify-between items-start mb-3">
-      <h3 className="text-base font-semibold text-white tracking-tight group-hover:text-emerald-400 transition-colors">
+  <div className="p-4 border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 rounded-xl hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
+    <div className="flex justify-between items-start gap-3 mb-2">
+      <h3 className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 leading-snug">
         {title}
       </h3>
-      <span className="text-xl font-black text-emerald-500">{confidence}%</span>
+      <span className="text-[13px] font-semibold text-zinc-500 dark:text-zinc-400 shrink-0 tabular-nums">
+        {confidence}%
+      </span>
     </div>
-    <p className="text-sm text-slate-400 leading-relaxed mb-5 max-w-4xl">{description}</p>
+    <p className="text-[12px] text-zinc-500 dark:text-zinc-400 leading-relaxed mb-3">{description}</p>
     {tags.length > 0 && (
-      <div className="flex flex-wrap gap-2">
-        {tags.map((tag, idx) => (
-          <span key={idx} className="px-3 py-1.5 bg-slate-800/40 border border-slate-700/50 rounded-lg text-[11px] font-mono text-slate-400">
+      <div className="flex flex-wrap gap-1.5">
+        {tags.map((tag, i) => (
+          <span key={i} className="px-2.5 py-1 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg text-[10px] font-mono text-zinc-500 dark:text-zinc-400">
             {tag}
           </span>
         ))}
@@ -35,27 +31,9 @@ const PatternCard = ({ title, description, confidence, tags }: PatternRow) => (
 );
 
 const FALLBACK_PATTERNS: PatternRow[] = [
-  {
-    id: "1",
-    title: "Error spike + recent deployment → rollback resolves",
-    confidence: 92,
-    description: "Based on 34 incidents. When error_rate_high follows a deployment within 60 minutes, rollback resulted in outcome: resolved in 82% of cases.",
-    tags: ["error-rate high", "recent_deployment: true", "Window : 60m", "Resolution : rollback"],
-  },
-  {
-    id: "2",
-    title: "DB connection exhaustion → scale replicas ineffective",
-    confidence: 92,
-    description: 'Scaling replicas worsened DB connection exhaustion in 71% of cases. Pattern suppresses "Scale Up" confidence when DB connection > 85%.',
-    tags: ["db_connections_high", "scale_action", "outcome: worsened"],
-  },
-  {
-    id: "3",
-    title: "Pod restart clears memory leak on first restart",
-    confidence: 92,
-    description: "Pod restart with OOMKilled cause resolves in 93% of cases on first attempt. If restarts > 3, issue is persistent — escalate to rollback.",
-    tags: [],
-  },
+  { id: "1", title: "Error spike + recent deployment → rollback resolves",  confidence: 92, description: "Based on 34 incidents. When error_rate_high follows a deployment within 60 minutes, rollback resulted in outcome: resolved in 82% of cases.", tags: ["error-rate high", "recent_deployment: true", "Window : 60m", "Resolution : rollback"] },
+  { id: "2", title: "DB connection exhaustion → scale replicas ineffective", confidence: 92, description: 'Scaling replicas worsened DB connection exhaustion in 71% of cases. Pattern suppresses "Scale Up" confidence when DB connection > 85%.',            tags: ["db_connections_high", "scale_action", "outcome: worsened"]                          },
+  { id: "3", title: "Pod restart clears memory leak on first restart",       confidence: 92, description: "Pod restart with OOMKilled cause resolves in 93% of cases on first attempt. If restarts > 3, issue is persistent — escalate to rollback.",       tags: []                                                                                      },
 ];
 
 const LearnedPatterns: React.FC = () => {
@@ -84,33 +62,31 @@ const LearnedPatterns: React.FC = () => {
   const displayPatterns = patterns ?? FALLBACK_PATTERNS;
 
   return (
-    <div className="w-full max-w-6xl bg-dark border border-white/5 rounded-3xl p-3 flex flex-col gap-8">
+    <div className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-5">
       <div className="flex justify-between items-start">
-        <div className="flex gap-4">
-          <div className="w-10 h-10 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-center justify-center">
-            <BarChart3 size={20} className="text-emerald-500" />
+        <div className="flex gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
+            <BarChart3 size={15} className="text-zinc-500 dark:text-zinc-400" />
           </div>
           <div>
-            <h2 className="text-white font-semibold text-lg leading-tight">Learned Patterns</h2>
-            <p className="text-slate-500 text-xs mt-1 font-medium">
-              learnedPatterns[] — historical resolution data · built from Execution.outcome over time
+            <h2 className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">Learned Patterns</h2>
+            <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+              Historical resolution data · built from Execution.outcome over time
             </p>
           </div>
         </div>
         <div className="flex gap-2">
-          <div className="px-4 py-2 border border-emerald-500/40 bg-emerald-500/5 rounded text-emerald-500 text-xs font-bold uppercase tracking-widest">
-            {displayPatterns.length} Pattern{displayPatterns.length !== 1 ? "s" : ""}
-          </div>
-          <button className="p-2 border border-slate-700 rounded text-slate-400 hover:bg-white/5">
-            <TriangleAlert size={18} />
+          <span className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+            {displayPatterns.length} pattern{displayPatterns.length !== 1 ? "s" : ""}
+          </span>
+          <button className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            <TriangleAlert size={14} />
           </button>
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
-        {displayPatterns.map((pattern) => (
-          <PatternCard key={pattern.id} {...pattern} />
-        ))}
+      <div className="flex flex-col gap-2.5">
+        {displayPatterns.map((p) => <PatternCard key={p.id} {...p} />)}
       </div>
     </div>
   );

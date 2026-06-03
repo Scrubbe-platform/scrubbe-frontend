@@ -1,197 +1,101 @@
 "use client";
 import React from "react";
-import { FileText, Info, Bolt, Check, TriangleAlert } from "lucide-react";
+import { FileText, Check, TriangleAlert, Info, Bolt } from "lucide-react";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 interface RemediationData {
-  title: string;
-  isRecommended?: boolean;
-  confidence: number;
-  risk: "Low" | "MED" | "High";
-  blast: string;
-  tags: string[];
-  progress: number;
+  title: string; isRecommended?: boolean; confidence: number;
+  risk: "Low" | "MED" | "High"; blast: string; tags: string[]; progress: number;
 }
 
-const MetricBox = ({
-  label,
-  value,
-  colorClass,
-}: {
-  label: string;
-  value: string | number;
-  colorClass: string;
-}) => (
-  <div className="flex-1 rounded-lg border border-white/5 bg-white/[0.02] p-3">
-    <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-      {label}
-    </p>
-    <p className={`text-lg font-bold ${colorClass}`}>{value}</p>
+const MetricBox = ({ label, value }: { label: string; value: string | number }) => (
+  <div className="flex-1 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-800/40 p-3">
+    <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">{label}</p>
+    <p className="text-[15px] font-semibold text-zinc-700 dark:text-zinc-200">{value}</p>
   </div>
 );
 
-const OptionCard: React.FC<RemediationData> = ({
-  title,
-  isRecommended,
-  confidence,
-  risk,
-  blast,
-  tags,
-  progress,
-}) => {
-  const riskColor =
-    risk === "Low"
-      ? "text-lime-400"
-      : risk === "High"
-      ? "text-red-400"
-      : "text-amber-400";
-
-  return (
-    <div className="group flex flex-col gap-4 rounded-2xl border border-white/5 p-5 transition-colors hover:border-white/10">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="rounded-md border border-amber-500/20 bg-amber-500/10 p-1.5">
-            <Bolt size={16} className="fill-amber-500 text-amber-500" />
-          </div>
-          <h4 className="text-sm font-semibold text-slate-200">{title}</h4>
+const OptionCard: React.FC<RemediationData> = ({ title, isRecommended, confidence, risk, blast, tags, progress }) => (
+  <div className="flex flex-col gap-3.5 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2.5">
+        <div className="rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-1.5">
+          <Bolt size={14} className="text-zinc-400 dark:text-zinc-500" />
         </div>
-        {isRecommended ? (
-          <span className="rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-500">
-            Recommended
-          </span>
-        ) : null}
+        <h4 className="text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 leading-snug">{title}</h4>
       </div>
-
-      <div className="flex gap-2">
-        <MetricBox
-          label="Confidence"
-          value={`${confidence}%`}
-          colorClass="text-emerald-500"
-        />
-        <MetricBox label="Risk" value={risk} colorClass={riskColor} />
-        <MetricBox label="Blast" value={blast} colorClass="text-lime-400" />
-      </div>
-
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800/50">
-        <div
-          className="h-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      <div className="mt-1 flex flex-wrap gap-2">
-        {tags.map((tag, index) => (
-          <span
-            key={`${tag}-${index}`}
-            className={`rounded-md border px-3 py-1 text-[10px] font-medium ${
-              tag.includes("rollback")
-                ? "border-purple-400/20 bg-purple-400/5 text-purple-400"
-                : tag.includes("auto")
-                ? "border-blue-400/20 bg-blue-400/5 text-blue-400"
-                : tag.includes("impact")
-                ? "border-red-400/20 bg-red-400/5 text-red-400"
-                : "border-slate-700/50 bg-slate-800/20 text-slate-400"
-            }`}
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
+      {isRecommended && (
+        <span className="rounded border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 py-0.5 text-[10px] font-semibold text-zinc-600 dark:text-zinc-300 shrink-0">
+          Recommended
+        </span>
+      )}
     </div>
-  );
-};
+
+    <div className="flex gap-2">
+      <MetricBox label="Confidence" value={`${confidence}%`} />
+      <MetricBox label="Risk"       value={risk}              />
+      <MetricBox label="Blast"      value={blast}             />
+    </div>
+
+    <div className="h-1 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+      <div className="h-full bg-zinc-400 dark:bg-zinc-500 transition-all" style={{ width: `${progress}%` }} />
+    </div>
+
+    <div className="flex flex-wrap gap-1.5">
+      {tags.map((tag, i) => (
+        <span key={`${tag}-${i}`} className="rounded border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2.5 py-1 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
+          {tag}
+        </span>
+      ))}
+    </div>
+  </div>
+);
 
 const buildOptions = (incident: IncidentDetailRecord): RemediationData[] => {
-  const serviceName =
-    incident.service || incident.affectedSystem || "selected-service";
-  const blastLabel = incident.blastRadius || incident.region || "1 svc";
-  const primaryAction =
-    incident.recommendedActions[0] ||
-    incident.aiAnalysis?.suggestion ||
-    "Review telemetry and confirm rollback safety";
-
+  const svc     = incident.service || incident.affectedSystem || "selected-service";
+  const blast   = incident.blastRadius || incident.region || "1 svc";
+  const primary = incident.recommendedActions[0] || incident.aiAnalysis?.suggestion || "Review telemetry and confirm rollback safety";
   return [
-    {
-      title: primaryAction,
-      isRecommended: true,
-      confidence: Math.max(incident.score || 0, incident.riskScore || 0, 72),
-      risk: incident.severity === "P0" || incident.severity === "P1" ? "MED" : "Low",
-      blast: blastLabel,
-      progress: 100,
-      tags: ["playbook: 3", "rollback: self", `${serviceName} + impact context`],
-    },
-    {
-      title: "Rollback Deployment",
-      confidence: 64,
-      risk: "Low",
-      blast: blastLabel,
-      progress: 100,
-      tags: ["Reversible", "auto-eligible"],
-    },
-    {
-      title: "Scale Up Capacity",
-      confidence: 58,
-      risk: "Low",
-      blast: blastLabel,
-      progress: 75,
-      tags: ["Reversible", "auto-eligible"],
-    },
-    {
-      title: "Disable Feature Flag",
-      confidence: 42,
-      risk: "MED",
-      blast: blastLabel,
-      progress: 100,
-      tags: ["State impact", incident.environment || "runtime impact"],
-    },
+    { title: primary,                confidence: Math.max(incident.score || 0, incident.riskScore || 0, 72), isRecommended: true, risk: incident.severity === "P0" || incident.severity === "P1" ? "MED" : "Low", blast, progress: 100, tags: ["playbook: 3", "rollback: self", `${svc} + impact context`] },
+    { title: "Rollback Deployment",  confidence: 64, risk: "Low", blast, progress: 100, tags: ["Reversible", "auto-eligible"] },
+    { title: "Scale Up Capacity",    confidence: 58, risk: "Low", blast, progress: 75,  tags: ["Reversible", "auto-eligible"] },
+    { title: "Disable Feature Flag", confidence: 42, risk: "MED", blast, progress: 100, tags: ["State impact", incident.environment || "runtime impact"] },
   ];
 };
 
-const RemediationModule: React.FC<{ incident: IncidentDetailRecord }> = ({
-  incident,
-}) => {
+const RemediationModule: React.FC<{ incident: IncidentDetailRecord }> = ({ incident }) => {
   const options = buildOptions(incident);
-
   return (
-    <div className="w-full max-w-6xl rounded-3xl border border-white/5 bg-dark p-3">
-      <div className="mb-8 flex items-start justify-between">
-        <div className="flex gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10">
-            <FileText size={20} className="text-amber-500" />
+    <div className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5">
+      <div className="mb-5 flex items-start justify-between">
+        <div className="flex gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
+            <FileText size={15} className="text-zinc-500 dark:text-zinc-400" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-white">
-              Remediation Option
-            </h2>
-            <p className="mt-1 text-xs text-slate-500">
-              RemediationOption[] — confidence · blast radius · risk level · reversibility
-            </p>
+            <h2 className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">Remediation Options</h2>
+            <p className="mt-0.5 text-[12px] text-zinc-400 dark:text-zinc-500">confidence · blast radius · risk level · reversibility</p>
           </div>
         </div>
-
         <div className="flex gap-2">
-          <div className="flex items-center gap-2 rounded border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-500">
-            <Check size={14} /> Awaiting Investigation
-          </div>
-          <button className="rounded border border-slate-700 p-1.5 text-slate-400">
-            <TriangleAlert size={16} />
+          <span className="flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-1.5 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+            <Check size={12} /> Awaiting Investigation
+          </span>
+          <button className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-1.5 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            <TriangleAlert size={14} />
           </button>
         </div>
       </div>
 
-      <div className="mb-8 flex gap-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
-        <Info size={20} className="mt-0.5 shrink-0 text-amber-500" />
-        <p className="text-sm leading-relaxed text-amber-200/70">
-          Agent findings from investigation steps will dynamically update
-          confidence scores and may add or remove options before this stage
-          activates. Blast radius must be evaluated before guardrail check.
+      <div className="mb-5 flex gap-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
+        <Info size={15} className="mt-0.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
+        <p className="text-[12px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+          Agent findings from investigation steps will dynamically update confidence scores and may add or remove options before this stage activates. Blast radius must be evaluated before guardrail check.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {options.map((option, index) => (
-          <OptionCard key={`${option.title}-${index}`} {...option} />
-        ))}
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {options.map((o, i) => <OptionCard key={`${o.title}-${i}`} {...o} />)}
       </div>
     </div>
   );

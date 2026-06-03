@@ -85,6 +85,8 @@ export default function CodeEngineRecommendation() {
   const [view, setView] = useState<ViewMode>("diff");
   const [sideBySide, setSideBySide] = useState<boolean>(false);
 
+  // ... rest of your component UI code remains exactly the same
+
   const originalContent = view === "suggested" ? suggested : original;
   const modifiedContent = view === "original" ? original : suggested;
 
