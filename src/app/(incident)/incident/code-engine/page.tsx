@@ -63,17 +63,7 @@ export async function authMiddleware(req: NextRequest) {
   return res
 }`;
 
-
-// 1. Change props to match Next.js PageProps expectation
-interface PageProps {
-  params: Promise<{ [key: string]: any }>;
-  searchParams: Promise<{ [key: string]: any | any[] | undefined }>;
-}
-
-// 2. Change the function signature to use standard Next.js page props
-export default function CodeEngineRecommendation({ params, searchParams }: PageProps) {
-  // If you need data from the URL query strings, you can handle it here, 
-  // otherwise we just fallback to your default hardcoded values:
+export default function CodeEngineRecommendation() {
   const original = DEFAULT_ORIGINAL;
   const suggested = DEFAULT_SUGGESTED;
   const filename = "src/middleware/auth.ts";
@@ -89,9 +79,8 @@ export default function CodeEngineRecommendation({ params, searchParams }: PageP
   const prBranch = "ezra/fix-inc-9204 → main";
   const playbook = "jwt-algo-constraint-v3";
   const patternMatch = "INC-231, INC-187 (×2)";
-  
-  const onApprove = () => console.log("Approved");
-  const onDecline = () => console.log("Declined");
+  const onApprove = undefined;
+  const onDecline = undefined;
 
   const [view, setView] = useState<ViewMode>("diff");
   const [sideBySide, setSideBySide] = useState<boolean>(false);
