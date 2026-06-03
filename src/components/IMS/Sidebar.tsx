@@ -113,15 +113,7 @@ const AdminSidebarItem = ({ item, pathname }: { item: any; pathname: string }) =
             )}>
               {item.name}
             </p>
-            {item.pillText && (
-              <span className={cn(
-                "border rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase shrink-0",
-                item.pillBorderColor || "border-zinc-200 dark:border-zinc-700",
-                item.pillTextColor   || "text-zinc-400 dark:text-zinc-500"
-              )}>
-                {item.pillText}
-              </span>
-            )}
+            
           </div>
           <p className="text-[11px] text-zinc-400 dark:text-zinc-600 leading-tight line-clamp-1">
             {item.description}
