@@ -33,8 +33,8 @@ const IncidentPolicy = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-9 space-y-4">
+      <div className="grid gap-6 w-full">
+        <div className="space-y-4">
           <SeverityRules />
           <RoutingNotification />
           <AutoCreateIncident />
