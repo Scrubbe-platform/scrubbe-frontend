@@ -77,22 +77,22 @@ const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
         }));
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
+    <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
 
       {/* Header */}
       <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
         <div className="space-y-0.5">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
             Decision Log
           </p>
-          <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">
+          <p className="text-[14px] font-semibold text-black dark:text-zinc-100">
             What happened and why
           </p>
-          <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+          <p className="text-[12px] text-black dark:text-zinc-500">
             Timeline is derived from this log, including human notes.
           </p>
         </div>
-        <span className="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-mono text-zinc-400 dark:text-zinc-500 shrink-0">
+        <span className="px-2.5 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-mono text-black dark:text-zinc-500 shrink-0">
           {isLoading ? "…" : `${entries.length} events`}
         </span>
       </div>
@@ -100,7 +100,7 @@ const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
       {/* Entries */}
       <div className="p-4 space-y-2">
         {isLoading && (
-          <p className="text-[12px] text-zinc-400 animate-pulse px-1">Loading decisions…</p>
+          <p className="text-[12px] text-black animate-pulse px-1">Loading decisions…</p>
         )}
         {displayEntries.map((entry, i) => (
           <LogEntry key={i} {...entry} />
@@ -118,22 +118,22 @@ const LogEntry: React.FC<LogEntryProps> = ({ icon, title, desc, time, payload })
       <div className="flex items-start gap-2.5">
         <div className="mt-0.5 shrink-0">{icon}</div>
         <div className="min-w-0">
-          <p className="text-[12px] font-semibold font-mono text-zinc-700 dark:text-zinc-200 leading-tight">
+          <p className="text-[12px] font-semibold font-mono text-black dark:text-zinc-200 leading-tight">
             {title}
           </p>
-          <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-0.5 leading-snug">
+          <p className="text-[12px] text-black dark:text-zinc-500 mt-0.5 leading-snug">
             {desc}
           </p>
         </div>
       </div>
-      <span className="text-[11px] font-mono text-zinc-300 dark:text-zinc-600 shrink-0 tabular-nums">
+      <span className="text-[11px] font-mono text-black dark:text-zinc-600 shrink-0 tabular-nums">
         {time}
       </span>
     </div>
 
     {payload && (
       <div className="mt-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950/60 p-3 overflow-x-auto">
-        <pre className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 leading-relaxed">
+        <pre className="text-[11px] font-mono text-black dark:text-zinc-400 leading-relaxed">
           <code>{JSON.stringify(payload, null, 2)}</code>
         </pre>
       </div>

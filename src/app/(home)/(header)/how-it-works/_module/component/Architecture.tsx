@@ -12,7 +12,7 @@ const ArchitectureCTA = () => {
             <span className="block font-serif italic text-slate-800">
               See the
             </span>
-            <span className="block font-serif italic text-zinc-400 -mt-2 md:-mt-4">
+            <span className="block font-serif italic text-black -mt-2 md:-mt-4">
               architecture.
             </span>
           </h2>

@@ -577,7 +577,7 @@ export default function APISection() {
 
       {/* ── WHY TEAMS USE SCRUBBE API ── */}
       <section className="max-w-[960px] mx-auto px-6 pb-16">
-        <h3 className="text-[22px] font-black text-gray-900 tracking-tight mb-8">
+        <h3 className="text-[22px] font-black text-black tracking-tight mb-8">
           Why teams use Scrubbe API
         </h3>
 
@@ -597,7 +597,7 @@ export default function APISection() {
               <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center mb-4">
                 {card.icon}
               </div>
-              <h4 className="text-[14px] font-black text-gray-900 mb-3 leading-snug">
+              <h4 className="text-[14px] font-black text-black mb-3 leading-snug">
                 {card.title}
               </h4>
               <p className="text-[12.5px] text-gray-500 leading-relaxed whitespace-pre-line">
@@ -610,7 +610,7 @@ export default function APISection() {
 
       {/* ── API CAPABILITIES ── */}
       <section className="max-w-[960px] mx-auto px-6 pb-20">
-        <h3 className="text-[22px] font-black text-gray-900 tracking-tight mb-8">
+        <h3 className="text-[22px] font-black text-black tracking-tight mb-8">
           API Capabilities
         </h3>
 
@@ -624,7 +624,7 @@ export default function APISection() {
               className="border border-gray-200 rounded-xl p-5"
             >
               {/* <div className="text-2xl mb-3">{cap.icon}</div> */}
-              <h4 className="text-[14px] font-bold text-gray-900 mb-4">
+              <h4 className="text-[14px] font-bold text-black mb-4">
                 {cap.title}
               </h4>
               <div className="space-y-2.5">

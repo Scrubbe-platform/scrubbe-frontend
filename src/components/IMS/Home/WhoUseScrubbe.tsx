@@ -319,7 +319,7 @@ function DetailPanel({ user }: { user: (typeof ALL_USERS)[0] }) {
         />
 
         <h3
-          className="font-black text-gray-900 leading-[1.1] tracking-tight mb-4"
+          className="font-black text-black leading-[1.1] tracking-tight mb-4"
           style={{ fontSize: "clamp(22px, 2.4vw, 34px)" }}
         >
           {user.title}
@@ -346,7 +346,7 @@ function DetailPanel({ user }: { user: (typeof ALL_USERS)[0] }) {
               <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">
                 {item.label}
               </p>
-              <p className="text-[13px] font-bold text-gray-800 leading-snug">
+              <p className="text-[13px] font-bold text-black leading-snug">
                 {item.value}
               </p>
             </div>
@@ -358,14 +358,14 @@ function DetailPanel({ user }: { user: (typeof ALL_USERS)[0] }) {
         <div className="mt-5">
           {user.ctaStyle === "link" ? (
             <Link href={"/auth/signin"}>
-              <div className="text-[13px] text-center font-semibold text-gray-700 underline underline-offset-4 bg-transparent border-none cursor-pointer hover:text-emerald-600 transition-colors">
+              <div className="text-[13px] text-center font-semibold text-black underline underline-offset-4 bg-transparent border-none cursor-pointer hover:text-emerald-600 transition-colors">
                 {user.cta}
               </div>
             </Link>
           ) : user.ctaStyle === "outline-green" ? (
             <Link href={"/auth/signin"}>
               <div className="w-full p-0.5 cursor-pointer bg-gradient-to-r from-zinc-700 to-teal-500 border-none">
-                <div className="py-3 bg-white text-[14px] text-gray-800 font-semibold text-center">
+                <div className="py-3 bg-white text-[14px] text-black font-semibold text-center">
                   {user.cta}
                 </div>
               </div>
@@ -373,7 +373,7 @@ function DetailPanel({ user }: { user: (typeof ALL_USERS)[0] }) {
           ) : (
             <Link href={"/auth/signin"}>
               <div className="w-full p-0.5 cursor-pointer bg-gradient-to-r from-zinc-700 to-teal-500 border-none">
-                <div className="py-3 bg-white text-[14px] text-gray-800 font-semibold text-center">
+                <div className="py-3 bg-white text-[14px] text-black font-semibold text-center">
                   {user.cta}
                 </div>
               </div>

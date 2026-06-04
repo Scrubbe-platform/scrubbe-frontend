@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full h-screen overflow-hidden">
+    <div className="w-full h-screen overflow-hidden bg-white">
       <Suspense fallback={<div>Loading...</div>}>
         <div className="grid md:grid-cols-2 h-full">
           {/* Left — fills full height, image contained inside */}

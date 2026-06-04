@@ -28,7 +28,7 @@ const FilterPill = ({
     ${
       active
         ? "border-green-500 text-green-600 dark:text-green-400 bg-green-500/5"
-        : "border-zinc-200 dark:border-white/10 text-zinc-400 dark:text-slate-500 hover:text-zinc-600 dark:hover:text-slate-300 hover:border-zinc-300 dark:hover:border-white/20"
+        : "border-zinc-200 dark:border-white/10 text-black dark:text-slate-500 hover:text-zinc-600 dark:hover:text-slate-300 hover:border-zinc-300 dark:hover:border-white/20"
     }`}
   >
     {label}
@@ -90,7 +90,7 @@ const IncidentCard = ({
     </div>
 
     <div className="mb-2">
-      <span className="text-[10px] font-mono text-zinc-400 dark:text-slate-600 block mb-1 uppercase tracking-widest">
+      <span className="text-[10px] font-mono text-black dark:text-slate-600 block mb-1 uppercase tracking-widest">
         {incident.ticketId}
       </span>
       <h3 className="text-[13px] font-semibold  dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300 leading-snug line-clamp-2">
@@ -98,7 +98,7 @@ const IncidentCard = ({
       </h3>
     </div>
 
-    <div className="text-[10px] text-zinc-400 dark:text-slate-500 mb-4 font-medium">
+    <div className="text-[10px] text-black dark:text-slate-500 mb-4 font-medium">
       {incident.service} · {incident.region} · {incident.elapsedLabel}
     </div>
 
@@ -123,7 +123,7 @@ export const ExactIncidentSidebar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<
-    "all" | "p1" | "p23" | "resolved" | "auto" | "manual"
+    "all" | "p0" | "p1" | "p2" | "p3" | "resolved" | "auto" | "manual"
   >("all");
 
   const incidents = data?.incidents ?? [];
@@ -146,10 +146,14 @@ export const ExactIncidentSidebar: React.FC = () => {
     const matchesFilter =
       filter === "all"
         ? true
+        : filter === "p0"
+        ? incident.severity === "P0"
         : filter === "p1"
         ? incident.severity === "P1"
-        : filter === "p23"
-        ? incident.severity === "P2" || incident.severity === "P3"
+        : filter === "p2"
+        ? incident.severity === "P2"
+        : filter === "p3"
+        ? incident.severity === "P3"
         : filter === "resolved"
         ? incident.sidebarStatus === "Resolved" ||
           incident.status === "RESOLVED"
@@ -161,9 +165,9 @@ export const ExactIncidentSidebar: React.FC = () => {
   });
 
   return (
-    <div className="w-full h-screen md:border-r border-zinc-200 dark:border-white/5 flex flex-col p-3 md:p-6 overflow-hidden bg-white dark:bg-transparent">
+    <div className="w-full h-screen md:border-r border-zinc-500 dark:border-white/5 flex flex-col p-3 md:p-6 overflow-hidden bg-white dark:bg-transparent">
       <div className="flex justify-between items-center mb-8">
-        <p className="font-semibold text-zinc-800 dark:text-white">
+        <p className="font-semibold text-black dark:text-white">
           Incidents {incidents.length > 0 ? `(${incidents.length})` : ""}
         </p>
         <button
@@ -175,11 +179,11 @@ export const ExactIncidentSidebar: React.FC = () => {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">
-        {(["all", "p1", "p23", "resolved", "auto", "manual"] as const).map(
+        {(["all", "p0", "p1", "p2", "p3", "resolved", "auto", "manual"] as const).map(
           (f) => (
             <FilterPill
               key={f}
-              label={f === "p23" ? "P2-P3" : f}
+              label={f}
               active={filter === f}
               onClick={() => setFilter(f)}
             />
@@ -189,7 +193,7 @@ export const ExactIncidentSidebar: React.FC = () => {
 
       <div className="relative mb-8">
         <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-slate-600"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-black dark:text-slate-600"
           size={14}
         />
         <input
@@ -197,7 +201,7 @@ export const ExactIncidentSidebar: React.FC = () => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search incidents, services, ID"
-          className="w-full bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs text-zinc-700 dark:text-slate-300 focus:outline-none focus:border-green-500/40 dark:focus:border-green-400/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-slate-600 font-medium"
+          className="w-full bg-zinc-50 dark:bg-white/[0.02] border border-zinc-500 dark:border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs text-black dark:text-slate-300 focus:outline-none focus:border-green-500/40 dark:focus:border-green-400/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-slate-600 font-medium"
         />
       </div>
 
@@ -221,7 +225,7 @@ export const ExactIncidentSidebar: React.FC = () => {
             />
           ))
         ) : (
-          <div className="rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02] p-5 text-sm text-zinc-400 dark:text-slate-400">
+          <div className="rounded-2xl border border-zinc-500 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02] p-5 text-sm text-black dark:text-slate-400">
             No incidents matched this filter.
           </div>
         )}

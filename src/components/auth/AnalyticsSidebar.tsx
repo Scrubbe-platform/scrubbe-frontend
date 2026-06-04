@@ -178,7 +178,7 @@ export default function AnalyticsSidebar() {
       <div className="flex flex-col gap-4 items-center">
         {/* User Signup Activity Card */}
         <div className="bg-white rounded-lg shadow p-4 w-full max-w-[510px]">
-          <h2 className="text-gray-800 text-base font-medium mb-4">
+          <h2 className="text-black text-base font-medium mb-4">
             User Sign up Activity
           </h2>
           <div className="h-[400px] relative">
@@ -198,7 +198,7 @@ export default function AnalyticsSidebar() {
 
         {/* Authentication Methods Card */}
         <div className="bg-white rounded-lg shadow p-4 w-full max-w-[510px] ">
-          <h2 className="text-gray-800 text-base font-medium mb-4">
+          <h2 className="text-black text-base font-medium mb-4">
             Authentication Methods
           </h2>
           <div className="h-[400px] relative">

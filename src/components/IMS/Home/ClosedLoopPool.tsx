@@ -95,7 +95,7 @@ export default function ClosedLoopProof() {
               </p>
 
               {/* Title */}
-              <h3 className="text-[17px] font-black text-gray-900 tracking-tight mb-3">
+              <h3 className="text-[17px] font-black text-black tracking-tight mb-3">
                 {step.title}
               </h3>
 

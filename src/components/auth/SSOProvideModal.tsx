@@ -138,7 +138,7 @@ function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
         <span className="text-[13px] font-bold text-emerald-600">{n}</span>
       </div>
       <div>
-        <p className="text-[14px] font-bold text-gray-900 mb-0.5">{title}</p>
+        <p className="text-[14px] font-bold text-black mb-0.5">{title}</p>
         <p className="text-[13px] text-gray-500 leading-relaxed">{desc}</p>
       </div>
     </div>
@@ -209,7 +209,7 @@ export function SsoProviderModal({
                     {config.icon}
                   </div>
                   <div>
-                    <h2 className="text-[17px] font-black text-gray-900 leading-snug">
+                    <h2 className="text-[17px] font-black text-black leading-snug">
                       {config.label}
                     </h2>
                     <p className="text-[12.5px] text-gray-500 mt-0.5">
@@ -247,7 +247,7 @@ export function SsoProviderModal({
                       onChange={(e) => setWorkspace(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleContinue()}
                       placeholder="your-company"
-                      className="flex-1 px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none bg-transparent"
+                      className="flex-1 px-4 py-3 text-sm text-black placeholder-gray-400 outline-none bg-transparent"
                     />
                     <div
                       className="px-4 py-3 text-sm font-medium text-gray-400 shrink-0"
@@ -290,7 +290,7 @@ export function SsoProviderModal({
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="px-6 py-2.5 rounded-xl text-[14px] font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors bg-white cursor-pointer"
+                    className="px-6 py-2.5 rounded-xl text-[14px] font-semibold text-black border border-gray-300 hover:bg-gray-50 transition-colors bg-white cursor-pointer"
                   >
                     Cancel
                   </button>

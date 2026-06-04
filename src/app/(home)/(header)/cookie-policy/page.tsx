@@ -34,13 +34,13 @@ const ScrubbeCookiePolicy = () => {
           <table className="min-w-full divide-y divide-gray-200 border mb-8">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase tracking-wider">
                   Examples
                 </th>
               </tr>
@@ -116,16 +116,16 @@ const ScrubbeCookiePolicy = () => {
           <table className="min-w-full divide-y divide-gray-200 border mb-8">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase tracking-wider">
                   Cookie Name
                 </th>
-                <th className="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase tracking-wider">
                   Provider
                 </th>
-                <th className="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase tracking-wider">
                   Purpose
                 </th>
-                <th className="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase tracking-wider">
                   Examples
                 </th>
               </tr>
@@ -617,7 +617,7 @@ const ScrubbeCookiePolicy = () => {
                 <a
                   key={section.id}
                   href={`#${section.id}`}
-                  className={`block py-1 text-gray-700 hover:text-scrubbe-green transition-colors ${
+                  className={`block py-1 text-black hover:text-scrubbe-green transition-colors ${
                     index === 0 ? "font-bold text-scrubbe-green" : ""
                   }`} // Highlight first item like in screenshot
                 >
@@ -628,7 +628,7 @@ const ScrubbeCookiePolicy = () => {
           </div>
 
           {/* Right Column - Terms Content */}
-          <div className="col-span-9 md:px-4 text-gray-800 bg-white w-full overflow-auto">
+          <div className="col-span-9 md:px-4 text-black bg-white w-full overflow-auto">
             {sections.map((section, index) => (
               <div key={section.id} className="mb-8">
                 <SectionHeader

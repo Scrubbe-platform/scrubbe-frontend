@@ -58,7 +58,7 @@ function InfoItem({
         {icon}
       </div>
       <div>
-        <p className="text-[14px] font-bold text-gray-900 mb-0.5">{title}</p>
+        <p className="text-[14px] font-bold text-black mb-0.5">{title}</p>
         <p className="text-[13px] text-gray-500 leading-relaxed">{desc}</p>
       </div>
     </div>
@@ -71,7 +71,7 @@ function InfoItem({
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <label className="block text-[14px] font-semibold text-gray-800 mb-2">
+    <label className="block text-[14px] font-semibold text-black mb-2">
       {children}
     </label>
   );
@@ -194,7 +194,7 @@ export default function ContactAdminPage() {
           {/* Back to sign in */}
           <Link
             href="/auth/signin"
-            className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors"
+            className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-black transition-colors"
           >
             <ArrowLeft size={15} />
             Back to sign in
@@ -206,7 +206,7 @@ export default function ContactAdminPage() {
           {/* LEFT */}
           <div className="px-10 py-12 lg:border-r border-gray-100">
             <h1
-              className="font-black text-gray-900 leading-[1.1] tracking-tight mb-4"
+              className="font-black text-black leading-[1.1] tracking-tight mb-4"
               style={{ fontSize: "clamp(22px, 2.5vw, 32px)" }}
             >
               Request access to your
@@ -259,7 +259,7 @@ export default function ContactAdminPage() {
                 <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-5">
                   <Shield size={28} className="text-emerald-600" />
                 </div>
-                <h2 className="text-[20px] font-black text-gray-900 mb-2">
+                <h2 className="text-[20px] font-black text-black mb-2">
                   Request sent!
                 </h2>
                 <p className="text-[14px] text-gray-500 leading-relaxed max-w-xs">
@@ -275,7 +275,7 @@ export default function ContactAdminPage() {
               </div>
             ) : (
               <>
-                <h2 className="text-[22px] font-black text-gray-900 mb-1">
+                <h2 className="text-[22px] font-black text-black mb-1">
                   Tell us who you are
                 </h2>
                 <p className="text-[13.5px] text-gray-500 mb-8">
@@ -295,7 +295,7 @@ export default function ContactAdminPage() {
                           <input
                             {...field}
                             type="email"
-                            className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
+                            className="flex-1 bg-transparent outline-none text-sm text-black placeholder-gray-400"
                             placeholder="name@company.com"
                           />
                         </div>
@@ -322,7 +322,7 @@ export default function ContactAdminPage() {
                           <input
                             {...field}
                             type="text"
-                            className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
+                            className="flex-1 bg-transparent outline-none text-sm text-black placeholder-gray-400"
                             placeholder="e.g Alex Johnson"
                           />
                         </div>
@@ -343,7 +343,7 @@ export default function ContactAdminPage() {
                         <textarea
                           {...field}
                           rows={4}
-                          className="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 transition-all bg-white resize-none"
+                          className="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm text-black placeholder-gray-400 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 transition-all bg-white resize-none"
                           placeholder="Let your administrator know why you need access to scrubbe"
                         />
                       )}

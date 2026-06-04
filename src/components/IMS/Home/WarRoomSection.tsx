@@ -185,7 +185,7 @@ export default function WarRoomSection() {
                     transition: "opacity 0.5s ease",
                   }}
                 >
-                  <h4 className="text-[15px] font-bold text-gray-800 mb-2">
+                  <h4 className="text-[15px] font-bold text-black mb-2">
                     {room.subtitle}
                   </h4>
                   <p className="text-[14px] text-gray-500 leading-relaxed max-w-xl">

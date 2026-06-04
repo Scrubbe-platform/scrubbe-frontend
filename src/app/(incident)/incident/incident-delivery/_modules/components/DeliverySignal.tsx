@@ -31,31 +31,31 @@ const traceSteps = [
 ];
 
 const DeliverySignal = () => (
-  <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-6 space-y-6">
+  <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-6 space-y-6">
 
     {/* ── Header ── */}
     <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
       <div className="space-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
           Delivery Signals
         </p>
-        <h2 className="text-[16px] font-semibold text-zinc-900 dark:text-white">
+        <h2 className="text-[16px] font-semibold text-black dark:text-white">
           Incoming delivery signals
         </h2>
-        <p className="text-[13px] text-zinc-500 dark:text-zinc-400 max-w-lg leading-relaxed">
+        <p className="text-[13px] text-black dark:text-zinc-400 max-w-lg leading-relaxed">
           In production, integrations deliver these automatically. Buttons below
           drive the UI so devs can understand the analyst workflow.
         </p>
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
-        <span className="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+        <span className="px-2.5 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-medium text-black dark:text-zinc-400">
           Policy: Standard
         </span>
         <button className="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-600 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
           Toggle Stricter
         </button>
-        <button className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+        <button className="p-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 text-black hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
           <RefreshCcw size={14} />
         </button>
       </div>
@@ -77,8 +77,8 @@ const DeliverySignal = () => (
     <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-5">
       <div className="flex items-start justify-between mb-5 gap-3">
         <div className="space-y-0.5">
-          <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">Trace</p>
-          <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+          <p className="text-[14px] font-semibold text-black dark:text-zinc-100">Trace</p>
+          <p className="text-[12px] text-black dark:text-zinc-500">
             Stages update from decision log + incident state.
           </p>
         </div>
@@ -103,9 +103,9 @@ const DeliverySignal = () => (
 );
 
 const TraceStep = ({ title, sub }: { title: string; sub: string }) => (
-  <div className="w-[180px] rounded-lg border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-3 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors">
-    <p className="text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 mb-0.5">{title}</p>
-    <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-snug">{sub}</p>
+  <div className="w-[180px] rounded-lg border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-3 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors">
+    <p className="text-[12px] font-semibold text-black dark:text-zinc-200 mb-0.5">{title}</p>
+    <p className="text-[11px] text-black dark:text-zinc-500 leading-snug">{sub}</p>
   </div>
 );
 

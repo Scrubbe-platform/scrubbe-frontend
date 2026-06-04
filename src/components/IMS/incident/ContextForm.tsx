@@ -29,7 +29,7 @@ export const incidentContextSchema = z.object({
 export type IncidentContextFormValues = z.infer<typeof incidentContextSchema>;
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <label className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2 block">
+  <label className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-2 block">
     {children}
   </label>
 );
@@ -114,11 +114,11 @@ const AddContextForm = ({
     <div className="p-6">
       <form
         onSubmit={handleSubmit(async (data) => { setSaveNotice(""); await saveMutation.mutateAsync(data); })}
-        className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-6"
+        className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-6"
       >
         {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-6 pb-5 border-b border-zinc-100 dark:border-zinc-800">
-          <h2 className="text-[15px] font-semibold text-zinc-800 dark:text-zinc-100">
+          <h2 className="text-[15px] font-semibold text-black dark:text-zinc-100">
             Add Context · Enrich signals
           </h2>
           {saveNotice && (
@@ -164,15 +164,15 @@ const AddContextForm = ({
           {/* Tags */}
           <div className="col-span-2">
             <SectionLabel>Labels / Tags</SectionLabel>
-            <div className="flex flex-wrap items-center gap-2 p-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-700 rounded-lg focus-within:border-zinc-400 dark:focus-within:border-zinc-500 transition-colors">
+            <div className="flex flex-wrap items-center gap-2 p-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-500 dark:border-zinc-700 rounded-lg focus-within:border-zinc-400 dark:focus-within:border-zinc-500 transition-colors">
               {currentTags.map((tag) => (
-                <span key={tag} className="flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded text-[12px] text-zinc-600 dark:text-zinc-300">
+                <span key={tag} className="flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-zinc-800 border border-zinc-500 dark:border-zinc-700 rounded text-[12px] text-zinc-600 dark:text-zinc-300">
                   {tag}
-                  <X size={12} className="cursor-pointer text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors" onClick={() => setValue("labels", currentTags.filter((t) => t !== tag))} />
+                  <X size={12} className="cursor-pointer text-black hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors" onClick={() => setValue("labels", currentTags.filter((t) => t !== tag))} />
                 </span>
               ))}
               <input
-                className="bg-transparent border-none outline-none text-[12px] text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 p-1 flex-1 min-w-[140px]"
+                className="bg-transparent border-none outline-none text-[12px] text-black dark:text-zinc-300 placeholder:text-zinc-400 p-1 flex-1 min-w-[140px]"
                 placeholder="Add tag + enter"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
@@ -205,9 +205,9 @@ const AddContextForm = ({
                   type="file"
                   multiple
                   onChange={(e) => field.onChange(Array.from(e.target.files ?? []))}
-                  className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-transparent px-3 py-2 text-[12px] text-zinc-600 dark:text-zinc-300"
+                  className="w-full rounded-lg border border-zinc-500 dark:border-zinc-700 bg-transparent px-3 py-2 text-[12px] text-zinc-600 dark:text-zinc-300"
                 />
-                <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
+                <p className="text-[11px] text-black dark:text-zinc-500">
                   Attachment metadata is saved in this incident slice.
                 </p>
               </div>
@@ -223,7 +223,7 @@ const AddContextForm = ({
           <button
             type="submit"
             disabled={isSubmitting || saveMutation.isPending}
-            className="px-5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-[12px] font-semibold hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors disabled:opacity-50"
+            className="px-5 py-2 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-900 dark:bg-white text-white dark:text-black text-[12px] font-semibold hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors disabled:opacity-50"
           >
             {saveMutation.isPending ? "Saving…" : "Save Context"}
           </button>

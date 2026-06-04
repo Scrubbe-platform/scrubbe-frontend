@@ -240,7 +240,7 @@ export default function Hero() {
         <article className="flex flex-col w-full max-w-full px-2 sm:px-4 pt-12 relative z-10 overflow-hidden">
           {/* Text content */}
           <div className="flex flex-col items-center justify-center text-center">
-            <h1 className="text-[30px] sm:text-[37.5px] md:text-[45px] lg:text-[60px] font-bold text-gray-800 mb-4">
+            <h1 className="text-[30px] sm:text-[37.5px] md:text-[45px] lg:text-[60px] font-bold text-black mb-4">
               <div className="h-[135px] lg:h-[180px] relative">
                 <div
                   className={`transition-opacity duration-500 ${

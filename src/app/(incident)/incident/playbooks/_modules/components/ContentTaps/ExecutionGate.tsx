@@ -25,9 +25,9 @@ const ModeCard = ({ title, description, stage, status }: ExecutionModeCard) => (
     )}>
       <Users size={20} className="text-zinc-500 dark:text-zinc-400" />
     </div>
-    <h4 className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 mb-1.5">{title}</h4>
-    <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed mb-3 max-w-[180px]">{description}</p>
-    <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{stage}</span>
+    <h4 className="text-[13px] font-semibold text-black dark:text-zinc-100 mb-1.5">{title}</h4>
+    <p className="text-[11px] text-black dark:text-zinc-500 leading-relaxed mb-3 max-w-[180px]">{description}</p>
+    <span className="text-[10px] font-semibold uppercase tracking-wider text-black dark:text-zinc-400">{stage}</span>
   </div>
 );
 
@@ -70,24 +70,24 @@ const ExecutionGate: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const ealLevel = pendingDecision?.ealScore ?? 2;
 
   return (
-    <div className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-6">
+    <div className="w-full rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-6">
       <div className="flex justify-between items-start">
         <div className="flex gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
             <Lock size={15} className="text-zinc-500 dark:text-zinc-400" />
           </div>
           <div>
-            <h2 className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">Execution Gate</h2>
-            <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-0.5 font-mono">
+            <h2 className="text-[14px] font-semibold text-black dark:text-zinc-100">Execution Gate</h2>
+            <p className="text-[12px] text-black dark:text-zinc-500 mt-0.5 font-mono">
               CP enforced · effectiveAutomationLevel = min(playbook, policy, risk)
             </p>
           </div>
         </div>
         <div className="flex gap-2">
-          <span className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 truncate max-w-[220px]">
+          <span className="px-3 py-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-medium text-black dark:text-zinc-400 truncate max-w-[220px]">
             {statusLabel}
           </span>
-          <button className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+          <button className="p-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 text-black hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
             <TriangleAlert size={14} />
           </button>
         </div>
@@ -96,15 +96,15 @@ const ExecutionGate: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
       {/* EAL row */}
       <div className="flex items-center justify-between px-4 py-3 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-100 dark:border-zinc-800 rounded-xl">
         <div className="flex items-center gap-3">
-          <div className="p-1.5 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800">
+          <div className="p-1.5 border border-zinc-500 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800">
             <Lock size={14} className="text-zinc-500 dark:text-zinc-400" />
           </div>
-          <span className="text-[12px] font-semibold text-zinc-700 dark:text-zinc-200">Execution Mode</span>
-          <span className="px-2 py-0.5 border border-zinc-200 dark:border-zinc-700 rounded text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          <span className="text-[12px] font-semibold text-black dark:text-zinc-200">Execution Mode</span>
+          <span className="px-2 py-0.5 border border-zinc-500 dark:border-zinc-700 rounded text-[10px] font-semibold text-black dark:text-zinc-400 uppercase tracking-wider">
             CP Zone
           </span>
         </div>
-        <p className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500">
+        <p className="text-[11px] font-mono text-black dark:text-zinc-500">
           effectiveAutomationLevel <span className="font-semibold text-zinc-600 dark:text-zinc-300 ml-1">{ealLevel} · PROPOSE</span>
         </p>
       </div>
@@ -118,7 +118,7 @@ const ExecutionGate: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
       <button
         onClick={() => proposeRollback()}
         disabled={proposing}
-        className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 text-[13px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 text-[13px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <CheckCircle2 size={16} className="text-zinc-400 dark:text-zinc-500" />
         {proposing ? "Proposing…" : "Prepare Rollback for engineer approval"}

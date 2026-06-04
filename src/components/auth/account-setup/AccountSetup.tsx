@@ -17,6 +17,7 @@ import { PenLine } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import useAuthStore from "@/lib/stores/auth.store";
+import useGetConfig from "@/hooks/useConfig";
 
 // Zod schema for form validation
 const companyInfoSchema = z.object({
@@ -236,6 +237,8 @@ const AccountSetup = () => {
     }
   };
 
+  
+
   return (
     <section className="w-full h-auto bg-[#F9FAFB]">
       {/* Skip Button */}
@@ -272,7 +275,7 @@ const AccountSetup = () => {
 
         <article className="w-full mx-auto">
           <div className="bg-white p-6">
-            <h2 className="text-[24px] font-semibold text-gray-900 mb-8">
+            <h2 className="text-[24px] font-semibold text-black mb-8">
               Enterprise Setup
             </h2>
 
@@ -378,7 +381,7 @@ const AccountSetup = () => {
 
               {/* Company Logo Upload */}
               <div className="space-y-4">
-                <label className="block text-sm font-medium text-gray-700 ">
+                <label className="block text-sm font-medium text-black ">
                   Upload company Logo
                 </label>
                 {/* Upload Area */}
@@ -422,7 +425,7 @@ const AccountSetup = () => {
                           </svg>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-black">
                             {uploadedLogo?.name ||
                               enterpriseSetup.companyLogo?.file?.name ||
                               "Company Logo"}
@@ -438,7 +441,7 @@ const AccountSetup = () => {
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="px-3 py-1 text-xs bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700"
+                          className="px-3 py-1 text-xs bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-black"
                         >
                           Change
                         </button>
@@ -472,7 +475,7 @@ const AccountSetup = () => {
                 {/* Uploaded Logo Preview */}
                 {(uploadedLogo || enterpriseSetup.companyLogo) && (
                   <div className="mt-4">
-                    <p className="text-sm font-medium text-gray-700 mb-2">
+                    <p className="text-sm font-medium text-black mb-2">
                       Preview:
                     </p>
                     <div className="w-32 h-20 relative border rounded-lg overflow-hidden bg-gray-50">
@@ -501,7 +504,7 @@ const AccountSetup = () => {
         {/* Admin Contact Section */}
         <article className="w-full  mx-auto mt-12">
           <div className="bg-white p-6">
-            <h2 className="text-[24px] font-semibold text-gray-900 mb-8">
+            <h2 className="text-[24px] font-semibold text-black mb-8">
               Admin Contact
             </h2>
 
@@ -581,7 +584,7 @@ const AccountSetup = () => {
         {/* Team Members Section */}
         <article className="w-full mx-auto mt-12">
           <div className="bg-white p-6">
-            <h2 className="text-[24px] font-semibold text-gray-900 mb-8">
+            <h2 className="text-[24px] font-semibold text-black mb-8">
               Invite Team Members
             </h2>
 
@@ -595,7 +598,7 @@ const AccountSetup = () => {
                       className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg gap-3"
                     >
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 truncate capitalize">
+                        <h3 className="font-semibold text-black truncate capitalize">
                           {member.name}
                         </h3>
                         <p className="text-gray-600 text-sm sm:text-base truncate">
@@ -648,7 +651,7 @@ const AccountSetup = () => {
                 <button
                   type="button"
                   onClick={handleAddMember}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors text-sm font-medium border border-gray-300"
+                  className="px-4 py-2 bg-gray-100 text-black rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors text-sm font-medium border border-gray-300"
                 >
                   + Add Another Team Member
                 </button>
@@ -662,7 +665,7 @@ const AccountSetup = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-black">
                   {editingMember ? "Edit Team Member" : "Add Team Member"}
                 </h3>
                 <button
@@ -732,7 +735,7 @@ const AccountSetup = () => {
 
                 {/* Access Permissions */}
                 <div className="space-y-4">
-                  <h4 className="text-sm font-medium text-gray-700">
+                  <h4 className="text-sm font-medium text-black">
                     Access Permissions
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -778,7 +781,7 @@ const AccountSetup = () => {
                         />
                         <label
                           htmlFor={permission.value}
-                          className="text-sm text-gray-700"
+                          className="text-sm text-black"
                         >
                           {permission.label}
                         </label>
@@ -796,7 +799,7 @@ const AccountSetup = () => {
                       resetMemberForm();
                       setEditingMember(null);
                     }}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    className="px-4 py-2 text-black border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
@@ -815,7 +818,7 @@ const AccountSetup = () => {
         {/* Dashboard Preferences Section */}
         <article className="w-full mx-auto mt-12 mb-8">
           <div className="bg-white p-6">
-            <h2 className="text-[24px] font-semibold text-gray-900 mb-2">
+            <h2 className="text-[24px] font-semibold text-black mb-2">
               Dashboard Preferences
             </h2>
             <p className="text-gray-600 mb-8">
@@ -825,13 +828,13 @@ const AccountSetup = () => {
             <div className="space-y-8">
               {/* Color Scheme */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-black">
                   Colour Scheme
                 </h3>
                 <div className="flex gap-6">
                   {/* Primary Color */}
                   <div className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-black">
                       Primary Colour
                     </label>
                     <div className="flex items-center space-x-3">
@@ -881,7 +884,7 @@ const AccountSetup = () => {
 
                   {/* Secondary Color */}
                   <div className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-black">
                       Secondary Colour
                     </label>
                     <div className="flex items-center space-x-3">
@@ -932,7 +935,7 @@ const AccountSetup = () => {
 
               {/* Default Dashboard */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-black">
                   Default Dashboard
                 </h3>
                 <p className="text-sm text-gray-600">You can only select one</p>
@@ -956,7 +959,7 @@ const AccountSetup = () => {
                     />
                     <label
                       htmlFor="siemDashboard"
-                      className="text-sm text-gray-700"
+                      className="text-sm text-black"
                     >
                       Scrubbe Dashboard SIEM
                     </label>
@@ -980,7 +983,7 @@ const AccountSetup = () => {
                     />
                     <label
                       htmlFor="soarDashboard"
-                      className="text-sm text-gray-700"
+                      className="text-sm text-black"
                     >
                       Scrubbe Dashboard SOAR
                     </label>
@@ -1004,7 +1007,7 @@ const AccountSetup = () => {
                     />
                     <label
                       htmlFor="customDashboard"
-                      className="text-sm text-gray-700"
+                      className="text-sm text-black"
                     >
                       Custom
                     </label>
@@ -1019,7 +1022,7 @@ const AccountSetup = () => {
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:gap-8">
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900">
+                      <h3 className="text-lg font-medium text-black">
                         Notification Channels
                       </h3>
                       <p className="text-sm text-gray-600">
@@ -1046,7 +1049,7 @@ const AccountSetup = () => {
                         />
                         <label
                           htmlFor={channel.toLowerCase().replace(" ", "")}
-                          className="text-sm text-gray-700"
+                          className="text-sm text-black"
                         >
                           {channel}
                         </label>
@@ -1058,7 +1061,7 @@ const AccountSetup = () => {
 
               {/* Default Incident Priority */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-black">
                   Default Incident Priority
                 </h3>
 
@@ -1076,7 +1079,7 @@ const AccountSetup = () => {
                       />
                       <label
                         htmlFor={priority.toLowerCase()}
-                        className="text-sm text-gray-700"
+                        className="text-sm text-black"
                       >
                         {priority}
                       </label>

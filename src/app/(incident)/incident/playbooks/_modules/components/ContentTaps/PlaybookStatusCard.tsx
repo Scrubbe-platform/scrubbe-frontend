@@ -27,18 +27,18 @@ export default function PlaybookStatusCard({ incident }: { incident: IncidentDet
 
         {/* Left — icon + title + tags */}
         <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
-            <TriangleAlert className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
+            <TriangleAlert className="h-3.5 w-3.5 text-black dark:text-zinc-400" />
           </div>
           <div className="space-y-2.5">
-            <h2 className="text-[15px] font-semibold text-zinc-800 dark:text-zinc-100 leading-snug">
+            <h2 className="text-[15px] font-semibold text-black dark:text-zinc-100 leading-snug">
               {playbookTitle}
             </h2>
             <div className="flex flex-wrap items-center gap-1.5">
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 px-2.5 py-1 text-[11px] font-medium text-zinc-600 dark:text-zinc-300"
+                  className="rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 px-2.5 py-1 text-[11px] font-medium text-zinc-600 dark:text-zinc-300"
                 >
                   {tag}
                 </span>
@@ -55,7 +55,7 @@ export default function PlaybookStatusCard({ incident }: { incident: IncidentDet
           ].map(({ icon, label }) => (
             <button
               key={label}
-              className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              className="flex items-center gap-2 rounded-lg border border-zinc-500 dark:border-zinc-700 px-3 py-1.5 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
             >
               <span className="text-zinc-400 dark:text-zinc-500">{icon}</span>
               {label}
@@ -67,11 +67,11 @@ export default function PlaybookStatusCard({ incident }: { incident: IncidentDet
       {/* Automation level panel */}
       <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-5">
         <div className="flex items-center justify-between mb-5">
-          <p className="text-[13px] font-medium text-zinc-700 dark:text-zinc-200">
+          <p className="text-[13px] font-medium text-black dark:text-zinc-200">
             Effective Automation Level · CP Enforced
           </p>
           <div className="space-y-1.5 text-right">
-            <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Automation Stages</p>
+            <p className="text-[11px] font-medium text-black dark:text-zinc-400">Automation Stages</p>
             <div className="flex gap-1">
               <div className="h-1 w-10 rounded-full bg-zinc-400 dark:bg-zinc-500" />
               <div className="h-1 w-10 rounded-full bg-zinc-400 dark:bg-zinc-500" />
@@ -81,18 +81,18 @@ export default function PlaybookStatusCard({ incident }: { incident: IncidentDet
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 font-mono text-[12px] text-zinc-400 dark:text-zinc-500">
+        <div className="flex flex-wrap items-center gap-2 font-mono text-[12px] text-black dark:text-zinc-500">
           <span>min(</span>
           {automationLevels.map(({ label, value }, i) => (
             <React.Fragment key={label}>
-              <span className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 font-medium text-zinc-600 dark:text-zinc-300">
+              <span className="rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 font-medium text-zinc-600 dark:text-zinc-300">
                 {label}: {value}
               </span>
               {i < automationLevels.length - 1 && <span>,</span>}
             </React.Fragment>
           ))}
           <span>) =</span>
-          <span className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 font-medium text-zinc-700 dark:text-zinc-200">
+          <span className="rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 font-medium text-black dark:text-zinc-200">
             2 · PROPOSE
           </span>
         </div>

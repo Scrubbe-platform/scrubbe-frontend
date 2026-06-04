@@ -91,7 +91,7 @@ const SSO_PROVIDERS = [
 function ProviderIcon({ type }: { type: string }) {
   if (type === "google") return <FcGoogle size={22} />;
   if (type === "github")
-    return <FaGithub size={20} className="text-gray-900" />;
+    return <FaGithub size={20} className="text-black" />;
   if (type === "gitlab")
     return <FaGitlab size={20} className="text-[#FC6D26]" />;
   if (type === "microsoft")
@@ -228,7 +228,7 @@ function ProviderRow({
       <div className="w-8 h-8 rounded-lg border border-gray-100 bg-white flex items-center justify-center shrink-0 shadow-sm">
         {icon}
       </div>
-      <span className="flex-1 text-[14px] font-medium text-gray-800 group-hover:text-gray-900">
+      <span className="flex-1 text-[14px] font-medium text-black group-hover:text-black">
         {label}
       </span>
       <svg
@@ -269,7 +269,7 @@ function ProviderGroup({
     <div className="border border-gray-200 rounded-2xl overflow-hidden">
       <div className="px-4 py-3.5 bg-white">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-[15px] font-black text-gray-900">{title}</span>
+          <span className="text-[15px] font-black text-black">{title}</span>
           <span
             className="text-[11px] font-bold px-2 py-0.5 rounded-full"
             style={{
@@ -553,9 +553,9 @@ export default function SignInForm() {
 
         {/* Heading */}
         <div className="text-center mb-8">
-          <h1 className="text-[28px] font-black text-gray-900 tracking-tight mb-1">Welcome to Scrubbe</h1>
+          <h1 className="text-[28px] font-black text-black tracking-tight mb-1">Welcome to Scrubbe</h1>
           <p className="text-sm text-gray-400 mb-5">Secure access for engineering workspace</p>
-          <p className="text-[17px] font-bold text-gray-900">Sign in to your workspace</p>
+          <p className="text-[17px] font-bold text-black">Sign in to your workspace</p>
           <p className="text-sm text-gray-400 mt-1">
             {step === "email" ? "Enter your email to continue" : "Enter your password to sign in"}
           </p>
@@ -582,7 +582,7 @@ export default function SignInForm() {
                         {...field}
                         type="email"
                         autoFocus
-                        className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
+                        className="flex-1 bg-transparent outline-none text-sm text-black placeholder-gray-400"
                         placeholder="name@company.com"
                       />
                     )}
@@ -608,7 +608,7 @@ export default function SignInForm() {
                 className="w-full flex items-center gap-3 px-4 py-3.5 border border-gray-200 rounded-xl text-left hover:bg-gray-50 transition-colors bg-white cursor-pointer mb-4"
               >
                 <Shield size={17} className="text-gray-500 shrink-0" />
-                <span className="flex-1 text-[14px] font-medium text-gray-700">Sign in via different way</span>
+                <span className="flex-1 text-[14px] font-medium text-black">Sign in via different way</span>
                 <motion.div animate={{ rotate: altExpanded ? 180 : 0 }} transition={{ duration: 0.22 }}>
                   <ChevronDown size={16} className="text-gray-400" />
                 </motion.div>
@@ -633,7 +633,7 @@ export default function SignInForm() {
                         <ProviderRow icon={<EnterpriseSsoIcon />} label="Enterprise SSO (OIDC/SAML)" onClick={() => handleComingSoon("Enterprise SSO (OIDC/SAML)")} />
                       </ProviderGroup>
                       <ProviderGroup title="Engineering sign-in" badge="For developers" badgeColor="blue" subtitle="Use your developer account">
-                        <ProviderRow icon={<FaGithub size={20} className="text-gray-900" />} label="Github" onClick={() => void handleProviderSignIn("github")} />
+                        <ProviderRow icon={<FaGithub size={20} className="text-black" />} label="Github" onClick={() => void handleProviderSignIn("github")} />
                         <ProviderRow icon={<FaGitlab size={20} className="text-orange-500" />} label="Gitlab" onClick={() => void handleProviderSignIn("gitlab")} />
                         <ProviderRow icon={<BitbucketIcon />} label="Bitbucket" onClick={() => handleComingSoon("Bitbucket")} />
                       </ProviderGroup>
@@ -677,7 +677,7 @@ export default function SignInForm() {
               {/* Email display (read-only) */}
               <div className="flex items-center gap-2.5 border border-gray-100 rounded-xl px-3.5 py-3 mb-3 bg-gray-50">
                 <Mail size={14} className="text-gray-400 shrink-0" />
-                <span className="flex-1 text-sm text-gray-700 truncate">{emailValue}</span>
+                <span className="flex-1 text-sm text-black truncate">{emailValue}</span>
                 <button
                   type="button"
                   onClick={() => { setStep("email"); setPassword(""); setSsoResult(null); setMagicLinkSent(false); }}
@@ -705,7 +705,7 @@ export default function SignInForm() {
                       autoFocus
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
+                      className="flex-1 bg-transparent outline-none text-sm text-black placeholder-gray-400"
                       placeholder="Enter your password"
                     />
                     <button
@@ -738,7 +738,7 @@ export default function SignInForm() {
                     type="button"
                     onClick={handleMagicLink}
                     disabled={isMagicLinkLoading}
-                    className="w-full py-3 rounded-xl text-sm font-semibold text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full py-3 rounded-xl text-sm font-semibold text-black border border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {isMagicLinkLoading
                       ? <Loader2 size={14} className="animate-spin" />

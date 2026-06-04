@@ -106,14 +106,14 @@ export default function CodeEngineRecommendation() {
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-grayscrubbe-900 text-gray-900 dark:text-slate-200 font-sans text-sm">
+    <div className="flex flex-col h-screen bg-white dark:bg-grayscrubbe-900 text-black dark:text-slate-200 font-sans text-sm">
       {/* ── TOP NAV ── */}
       <header className="flex items-center justify-between px-4 h-10 bg-white dark:bg-grayscrubbe-900 border-b border-gray-200 dark:border-neutral-800 shrink-0">
         <div className="flex items-center gap-2.5">
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-red-700 text-red-600 bg-red-50 dark:bg-red-950/40 text-[11px] font-bold tracking-wider">
             INCIDENT
           </span>
-          <span className="text-gray-700 dark:text-neutral-200 font-semibold">{incidentId}</span>
+          <span className="text-black dark:text-neutral-200 font-semibold">{incidentId}</span>
           <span className="text-blue-600 dark:text-blue-300 text-xs md:block hidden">
             {service}
           </span>
@@ -146,7 +146,7 @@ export default function CodeEngineRecommendation() {
                 border-b-2 transition-colors cursor-pointer bg-transparent border-x-0 border-t-0
                 ${
                   active
-                    ? "border-green-500 text-neutral-900 dark:text-neutral-200 bg-white dark:bg-grayscrubbe-800"
+                    ? "border-green-500 text-black dark:text-neutral-200 bg-white dark:bg-grayscrubbe-800"
                     : "border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
                 }
               `}
@@ -266,13 +266,13 @@ export default function CodeEngineRecommendation() {
           <div className="flex items-center gap-2 px-5 py-3 shrink-0">
             <button
               onClick={onApprove}
-              className="px-4 py-2 rounded-md bg-green-500 dark:bg-greenscrubbe-500 hover:bg-green-400 dark:hover:bg-greenscrubbe-400 text-neutral-900 dark:text-black text-xs font-bold transition-colors"
+              className="px-4 py-2 rounded-md bg-green-500 dark:bg-greenscrubbe-500 hover:bg-green-400 dark:hover:bg-greenscrubbe-400 text-black dark:text-black text-xs font-bold transition-colors"
             >
               ✓ Approve &amp; merge
             </button>
             <button
               onClick={onDecline}
-              className="px-4 py-2 rounded-md border border-gray-300 dark:border-neutral-700 hover:border-gray-400 dark:hover:border-neutral-500 text-gray-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 text-xs font-semibold transition-colors bg-transparent"
+              className="px-4 py-2 rounded-md border border-gray-300 dark:border-neutral-700 hover:border-gray-400 dark:hover:border-neutral-500 text-gray-600 dark:text-neutral-400 hover:text-black dark:hover:text-neutral-200 text-xs font-semibold transition-colors bg-transparent"
             >
               ✕ Decline
             </button>

@@ -17,7 +17,7 @@ const AtRiskIncidents: React.FC<Props> = ({ incidents }) => {
   return (
     <div className="bg-white p-6 rounded-lg">
       {/* Header */}
-      <h2 className="text-xl font-semibold text-gray-800 mb-6">
+      <h2 className="text-xl font-semibold text-black mb-6">
         At Risk Incidents
       </h2>
 
@@ -30,7 +30,7 @@ const AtRiskIncidents: React.FC<Props> = ({ incidents }) => {
                 key={index}
                 className="flex items-center justify-between border-b border-gray-200 pb-4 last:border-b-0 last:pb-0"
               >
-                <div className="text-gray-700 text-sm">
+                <div className="text-black text-sm">
                   <span className="font-bold">{incident.id}:</span>{" "}
                   {incident.name}
                 </div>

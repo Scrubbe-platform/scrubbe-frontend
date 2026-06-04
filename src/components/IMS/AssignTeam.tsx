@@ -103,7 +103,7 @@ const AssignAnalyst = ({ onClose, date, previousMember }: Props) => {
     <div className="bg-white dark:bg-gray-900 p-6 rounded-lg w-full">
       {/* Header */}
       <div className="flex justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <h2 className="text-xl font-semibold text-black dark:text-white">
           Assign Analyst
         </h2>
       </div>
@@ -132,7 +132,7 @@ const AssignAnalyst = ({ onClose, date, previousMember }: Props) => {
               className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4"
             >
               <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-black dark:text-gray-300">
                   Select Team member
                 </label>
                 {fields.length > 1 && (

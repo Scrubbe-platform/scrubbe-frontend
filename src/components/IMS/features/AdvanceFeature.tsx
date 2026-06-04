@@ -293,7 +293,7 @@ const AdvanceFeature = () => {
       </p>
       <div className="flex flex-col mt-4 max-w-6xl mx-auto overflow-clip">
         <div className="overflow-x-auto pb-4">
-          <div className="flex flex-row gap-3 mx-auto  justify-between w-full border-b border-zinc-200 ">
+          <div className="flex flex-row gap-3 mx-auto  justify-between w-full border-b border-zinc-500 ">
             {featureTabs.map((tab) => (
               <div
                 className={`${

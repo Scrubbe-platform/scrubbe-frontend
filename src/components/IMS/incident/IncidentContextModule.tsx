@@ -18,7 +18,7 @@ interface ContextField {
 }
 
 const accentValue: Record<string, string> = {
-  default: "text-zinc-800 dark:text-zinc-100",
+  default: "text-black dark:text-zinc-100",
   blue:    "text-sky-600 dark:text-sky-400",
   amber:   "text-amber-600 dark:text-amber-400",
   red:     "text-red-600 dark:text-red-400",
@@ -29,17 +29,17 @@ const ContextBox = ({ label, value, accent = "default", span = "half", descripti
   <div
     className={cn(
       "flex flex-col gap-1.5 p-4 rounded-xl border bg-white dark:bg-zinc-900/40 transition-colors",
-      "border-zinc-100 dark:border-zinc-800/60",
+      "border-zinc-500 dark:border-zinc-800/60",
       span === "full" && "sm:col-span-2"
     )}
   >
-    <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+    <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
       {label}
     </p>
     <p
       className={cn(
         "text-[13px] leading-relaxed break-words",
-        description ? "font-normal text-zinc-500 dark:text-zinc-400" : "font-semibold",
+        description ? "font-normal text-black dark:text-zinc-400" : "font-semibold",
         accentValue[accent]
       )}
     >
@@ -109,7 +109,7 @@ const IncidentContextModule: React.FC<{
 
   return (
     <div className="px-5 md:px-8 py-6 border-b border-zinc-100 dark:border-white/[0.06]">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-4">
         Incident Context
       </p>
 

@@ -23,7 +23,7 @@ function SectionLayout({
           <p className="text-[11px] tracking-widest text-zinc-500 font-mono mb-3">
             {label}
           </p>
-          <h2 className="font-serif text-[26px] sm:text-[30px] md:text-[34px] leading-tight text-zinc-900 mb-6">
+          <h2 className="font-serif text-[26px] sm:text-[30px] md:text-[34px] leading-tight text-black mb-6">
             {title}
           </h2>
           <div className="w-7 h-[2px] bg-emerald-500 mb-3" />
@@ -81,7 +81,7 @@ function FoundationSection() {
       title="A governed orchestration layer for production systems"
       sublabel="Orchestration"
     >
-      <div className="space-y-5 text-[14px] sm:text-[15px] text-zinc-700 leading-relaxed mb-8">
+      <div className="space-y-5 text-[14px] sm:text-[15px] text-black leading-relaxed mb-8">
         <p>
           During an incident, Scrubbe continuously ingests changes across code,
           CI/CD pipelines, infrastructure, observability systems, service
@@ -113,7 +113,7 @@ function FoundationSection() {
             key={i}
             className="grid grid-cols-1 sm:grid-cols-[1fr_2fr] border-b border-[#cdd9cd] last:border-0"
           >
-            <div className="px-4 sm:px-5 pt-4 pb-1 sm:py-4 text-[13px] font-mono font-semibold text-zinc-800 sm:border-r border-[#cdd9cd]">
+            <div className="px-4 sm:px-5 pt-4 pb-1 sm:py-4 text-[13px] font-mono font-semibold text-black sm:border-r border-[#cdd9cd]">
               {a.name}
             </div>
             <div className="px-4 sm:px-5 pt-1 sm:pt-4 pb-4 text-[13px] sm:text-[14px] text-zinc-600 leading-relaxed">
@@ -124,7 +124,7 @@ function FoundationSection() {
       </div>
 
       <div className="mt-6 border-l-4 border-emerald-500 bg-[#eaf0ea] rounded-r-md px-5 py-4">
-        <p className="text-[13px] sm:text-[14px] text-zinc-700 leading-relaxed">
+        <p className="text-[13px] sm:text-[14px] text-black leading-relaxed">
           The platform does not treat agent output as final truth. It
           continuously reconciles agent findings against live production
           evidence, historical context, service topology, policy constraints,
@@ -162,7 +162,7 @@ function UnifiedContextSection() {
       title="Unified operational context"
       sublabel="Signal Normalization"
     >
-      <div className="space-y-5 text-[14px] sm:text-[15px] text-zinc-700 leading-relaxed mb-8">
+      <div className="space-y-5 text-[14px] sm:text-[15px] text-black leading-relaxed mb-8">
         <p>
           Production incidents rarely fail inside one isolated system. Root
           causes usually span multiple layers of the stack — a deployment in one
@@ -200,7 +200,7 @@ function UnifiedContextSection() {
           {signals.map((s, i) => (
             <div key={i} className="flex items-start gap-3 px-5 py-4">
               <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-              <span className="text-[13px] text-zinc-700">{s}</span>
+              <span className="text-[13px] text-black">{s}</span>
             </div>
           ))}
         </div>
@@ -213,7 +213,7 @@ function UnifiedContextSection() {
                 className="flex items-start gap-3 px-5 py-4 border-b border-[#cdd9cd] last:border-b-0"
               >
                 <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                <span className="text-[14px] text-zinc-700">{s}</span>
+                <span className="text-[14px] text-black">{s}</span>
               </div>
             ))}
           </div>
@@ -224,7 +224,7 @@ function UnifiedContextSection() {
                 className="flex items-start gap-3 px-5 py-4 border-b border-[#cdd9cd] last:border-b-0"
               >
                 <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                <span className="text-[14px] text-zinc-700">{s}</span>
+                <span className="text-[14px] text-black">{s}</span>
               </div>
             ))}
           </div>
@@ -273,7 +273,7 @@ function ParallelInvestigationSection() {
       title="Parallel investigation, single decision path"
       sublabel="Orchestration Model"
     >
-      <div className="space-y-5 text-[14px] sm:text-[15px] text-zinc-700 leading-relaxed mb-8">
+      <div className="space-y-5 text-[14px] sm:text-[15px] text-black leading-relaxed mb-8">
         <p>
           Speed matters during incidents, but parallelism without coordination
           creates noise. When multiple agents investigate independently and
@@ -303,10 +303,10 @@ function ParallelInvestigationSection() {
         {orchestrationSteps.map((s) => (
           <div key={s.n} className="grid grid-cols-1 sm:grid-cols-[64px_1fr]">
             <div className="px-4 sm:px-0 sm:flex sm:items-start sm:justify-center pt-4 sm:pt-5 pb-0 sm:pb-5">
-              <span className="text-[12px] font-mono text-zinc-400">{s.n}</span>
+              <span className="text-[12px] font-mono text-black">{s.n}</span>
             </div>
             <div className="px-4 sm:px-6 pt-2 sm:pt-5 pb-5 sm:border-l border-[#cdd9cd]">
-              <p className="text-[13px] sm:text-[14px] font-mono font-semibold text-zinc-800 mb-2">
+              <p className="text-[13px] sm:text-[14px] font-mono font-semibold text-black mb-2">
                 {s.title}
               </p>
               <p className="text-[13px] sm:text-[14px] text-zinc-600 leading-relaxed">
@@ -366,7 +366,7 @@ function PolicySection() {
       title="Policy-governed execution"
       sublabel="Execution Policy"
     >
-      <div className="space-y-5 text-[14px] sm:text-[15px] text-zinc-700 leading-relaxed mb-8">
+      <div className="space-y-5 text-[14px] sm:text-[15px] text-black leading-relaxed mb-8">
         <p>
           The platform does not execute actions simply because a likely fix
           exists. A high-confidence hypothesis and a well-evidenced remediation
@@ -403,7 +403,7 @@ function PolicySection() {
         <div className="sm:hidden divide-y divide-[#cdd9cd]">
           {policies.map((p, i) => (
             <div key={i} className="px-5 py-5">
-              <p className="text-[13px] font-mono font-semibold text-zinc-800 mb-2">
+              <p className="text-[13px] font-mono font-semibold text-black mb-2">
                 {p.title}
               </p>
               <p className="text-[13px] text-zinc-600 leading-relaxed">
@@ -424,7 +424,7 @@ function PolicySection() {
                       col === 0 ? "border-r border-[#cdd9cd]" : ""
                     }`}
                   >
-                    <p className="text-[13px] font-mono font-semibold text-zinc-800 mb-2">
+                    <p className="text-[13px] font-mono font-semibold text-black mb-2">
                       {p.title}
                     </p>
                     <p className="text-[14px] text-zinc-600 leading-relaxed">
@@ -480,7 +480,7 @@ function ExecutionSection() {
       title="Controlled execution and verification"
       sublabel="Execution Layer"
     >
-      <div className="space-y-5 text-[14px] sm:text-[15px] text-zinc-700 leading-relaxed mb-8">
+      <div className="space-y-5 text-[14px] sm:text-[15px] text-black leading-relaxed mb-8">
         <p>
           When remediation is approved, the platform executes through controlled
           adapters connected to production systems. Execution is not a
@@ -507,10 +507,10 @@ function ExecutionSection() {
         {executionSteps.map((s) => (
           <div key={s.n} className="grid grid-cols-1 sm:grid-cols-[64px_1fr]">
             <div className="px-4 sm:px-0 sm:flex sm:items-start sm:justify-center pt-4 sm:pt-5 pb-0 sm:pb-5">
-              <span className="text-[12px] font-mono text-zinc-400">{s.n}</span>
+              <span className="text-[12px] font-mono text-black">{s.n}</span>
             </div>
             <div className="px-4 sm:px-6 pt-2 sm:pt-5 pb-5 sm:border-l border-[#cdd9cd]">
-              <p className="text-[13px] sm:text-[14px] font-mono font-semibold text-zinc-800 mb-2">
+              <p className="text-[13px] sm:text-[14px] font-mono font-semibold text-black mb-2">
                 {s.title}
               </p>
               <p className="text-[13px] sm:text-[14px] text-zinc-600 leading-relaxed">

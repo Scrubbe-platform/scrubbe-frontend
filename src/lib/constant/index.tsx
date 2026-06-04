@@ -1126,7 +1126,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Connections",
       Icon: HiOutlineLink,
       description: "GitHub/GitLab, Datadog, Grafana, Slack, risk systems",
-      link: "/incident/connections",
+      link: "/connections",
       isActive: false,
       isMenu: false,
       pillText: "hook",

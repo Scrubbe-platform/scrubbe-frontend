@@ -16,7 +16,7 @@ const RecentPostmortems: React.FC<Props> = ({ postmortems }) => {
   return (
     <div className="bg-white p-6 rounded-lg">
       {/* Header */}
-      <h2 className="text-xl font-semibold text-gray-800 mb-6">
+      <h2 className="text-xl font-semibold text-black mb-6">
         Recent Postmortems (Last 5)
       </h2>
 

@@ -256,7 +256,7 @@ const SecurityFeatures: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 overflow-x-hidden">
           {/* Header */}
           <div className="text-center mb-12">
-            <h2 className="text-[20px] sm:text-[24px] md:text-[30px] lg:text-[36px] font-bold text-gray-800 mb-4">
+            <h2 className="text-[20px] sm:text-[24px] md:text-[30px] lg:text-[36px] font-bold text-black mb-4">
               Powerful Security Features
             </h2>
             <div className="w-28 h-1 bg-emerald-400 mx-auto"></div>

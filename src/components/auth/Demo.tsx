@@ -33,7 +33,7 @@ export default function Demo() {
   return (
     <div className="w-full min-w-[320px] max-w-[730px] mx-auto p-6">
       <div className="w-full min-w-[320px] max-w-[730px] mx-auto">
-        <h1 className="text-2xl font-semibold mb-2 text-gray-800">
+        <h1 className="text-2xl font-semibold mb-2 text-black">
           Sign in to view our demo page
         </h1>
         <p className="text-gray-600 mb-6">

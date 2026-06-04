@@ -14,7 +14,7 @@ const StatusBadge = ({ status }: { status: GuardrailStatus }) => {
     "APPROVAL REQUIRED": "border-amber-200 dark:border-amber-500/25 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/8",
     "AUTO-EXECUTE":      "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800",
     "BLOCK AUTO":        "border-red-200 dark:border-red-500/25 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/8",
-    PASS:                "border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800",
+    PASS:                "border-zinc-200 dark:border-zinc-700 text-black dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800",
   };
   return (
     <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg border uppercase tracking-wider ${styles[status]}`}>
@@ -64,22 +64,22 @@ const GuardrailModule: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const approvalCount = policies.filter((p) => p.status === "APPROVAL REQUIRED").length;
 
   return (
-    <div className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-5">
+    <div className="w-full rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-5">
       <div className="flex justify-between items-start">
         <div className="flex gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
             <Lock size={15} className="text-zinc-500 dark:text-zinc-400" />
           </div>
           <div>
-            <h2 className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">Guardrail Check</h2>
-            <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-0.5">Policy engine — determines whether automation is permitted · CP enforced</p>
+            <h2 className="text-[14px] font-semibold text-black dark:text-zinc-100">Guardrail Check</h2>
+            <p className="text-[12px] text-black dark:text-zinc-500 mt-0.5">Policy engine — determines whether automation is permitted · CP enforced</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <span className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-semibold text-zinc-600 dark:text-zinc-300">
+          <span className="px-3 py-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-semibold text-zinc-600 dark:text-zinc-300">
             {approvalCount} approval{approvalCount !== 1 ? "s" : ""} required
           </span>
-          <button className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+          <button className="p-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 text-black hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
             <TriangleAlert size={14} />
           </button>
         </div>
@@ -87,8 +87,8 @@ const GuardrailModule: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
 
       <div className="flex gap-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
         <Info size={15} className="text-zinc-400 dark:text-zinc-500 shrink-0 mt-0.5" />
-        <p className="text-[12px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
-          <span className="font-semibold text-zinc-700 dark:text-zinc-300">CP Zone</span> — policies are strongly consistent. On partition or uncertainty, execution is blocked.
+        <p className="text-[12px] text-black dark:text-zinc-400 leading-relaxed">
+          <span className="font-semibold text-black dark:text-zinc-300">CP Zone</span> — policies are strongly consistent. On partition or uncertainty, execution is blocked.
         </p>
       </div>
 
@@ -96,10 +96,10 @@ const GuardrailModule: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
         {policies.map((policy) => (
           <div key={policy.id} className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-100 dark:border-zinc-800 rounded-xl hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="p-1.5 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 shrink-0">{policy.icon}</div>
+              <div className="p-1.5 border border-zinc-500 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 shrink-0">{policy.icon}</div>
               <div className="min-w-0">
-                <p className="text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 truncate">{policy.title}</p>
-                <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-mono mt-0.5 truncate">{policy.description}</p>
+                <p className="text-[12px] font-semibold text-black dark:text-zinc-200 truncate">{policy.title}</p>
+                <p className="text-[11px] text-black dark:text-zinc-500 font-mono mt-0.5 truncate">{policy.description}</p>
               </div>
             </div>
             <StatusBadge status={policy.status} />

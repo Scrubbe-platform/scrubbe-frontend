@@ -400,8 +400,8 @@ function FeatureCardFinal({
           text-[16px] font-black tracking-tight mb-3
           ${
             isDark
-              ? "text-gray-50 group-hover:text-gray-900"
-              : "text-gray-900 group-hover:text-gray-50"
+              ? "text-gray-50 group-hover:text-black"
+              : "text-black group-hover:text-gray-50"
           }
         `}
         style={{ transition: "color 0.3s ease" }}

@@ -29,7 +29,7 @@ const SignalCard = ({ signal }: { signal: DetectionSignal }) => {
   const a = accentClasses[signal.accent] ?? accentClasses.emerald;
 
   return (
-    <div className="flex gap-3 md:gap-4 items-start p-3.5 rounded-xl border border-zinc-100 dark:border-white/[0.06] bg-white dark:bg-zinc-900/40 hover:border-zinc-200 dark:hover:border-white/10 transition-colors">
+    <div className="flex gap-3 md:gap-4 items-start p-3.5 rounded-xl border border-zinc-500 dark:border-white/[0.06] bg-white dark:bg-zinc-900/40 hover:border-zinc-500 dark:hover:border-white/10 transition-colors">
       {/* Icon */}
       <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${a.border} ${a.bg}`}>
         <span className={a.icon}>
@@ -40,16 +40,16 @@ const SignalCard = ({ signal }: { signal: DetectionSignal }) => {
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1 gap-2">
-          <p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
+          <p className="text-[11px] font-medium text-black dark:text-zinc-500 truncate">
             {signal.source}
             <span className="mx-1.5 opacity-40">·</span>
             {signal.subSource}
           </p>
-          <span className="text-[11px] font-mono text-zinc-300 dark:text-zinc-600 shrink-0 tabular-nums">
+          <span className="text-[11px] font-mono text-black dark:text-zinc-600 shrink-0 tabular-nums">
             {signal.timestamp}
           </span>
         </div>
-        <p className="text-[13px] font-medium text-zinc-800 dark:text-zinc-100 leading-snug">
+        <p className="text-[13px] font-medium text-black dark:text-zinc-100 leading-snug">
           {signal.content}
         </p>
       </div>
@@ -120,7 +120,7 @@ const DetectionSignals: React.FC<{ incident: IncidentDetailRecord }> = ({ incide
 
   return (
     <div className="px-5 md:px-8 py-6 border-b border-zinc-100 dark:border-white/[0.06]">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-4">
         Detection Signals
       </p>
 
@@ -131,7 +131,7 @@ const DetectionSignals: React.FC<{ incident: IncidentDetailRecord }> = ({ incide
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700 px-5 py-6 text-[13px] text-zinc-400 dark:text-zinc-500">
+        <div className="rounded-xl border border-dashed border-zinc-500 dark:border-zinc-700 px-5 py-6 text-[13px] text-black dark:text-zinc-500">
           No live detection signals available for this incident yet.
         </div>
       )}

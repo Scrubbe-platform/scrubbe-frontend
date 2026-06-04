@@ -121,7 +121,7 @@ const Collaboration = ({ ticket }: Props) => {
                         {senderName}
                       </div>
                     ) : null}
-                    <div className="text-gray-800 text-sm mb-2">
+                    <div className="text-black text-sm mb-2">
                       {message.content}
                     </div>
                     <div className="text-gray-400 text-xs text-right">
@@ -148,7 +148,7 @@ const Collaboration = ({ ticket }: Props) => {
           <FiPlus size={22} />
         </button>
         <input
-          className="flex-1 border-none outline-none bg-transparent px-3 py-2 dark:text-white text-gray-700 placeholder-gray-400"
+          className="flex-1 border-none outline-none bg-transparent px-3 py-2 dark:text-white text-black placeholder-gray-400"
           placeholder="Send message"
           value={input}
           onChange={(event) => setInput(event.target.value)}

@@ -52,7 +52,7 @@ const Pagination: React.FC<PaginationProps> = ({
             className={`w-8 h-8 flex items-center justify-center rounded-full ${
               p === page
                 ? "bg-blue-100 text-blue-700"
-                : "hover:bg-zinc-100 text-zinc-700"
+                : "hover:bg-zinc-100 text-black"
             } font-medium`}
             onClick={() => onPageChange(p)}
             aria-current={p === page ? "page" : undefined}
@@ -62,7 +62,7 @@ const Pagination: React.FC<PaginationProps> = ({
         ) : (
           <span
             key={i}
-            className="w-8 h-8 flex items-center justify-center text-zinc-400"
+            className="w-8 h-8 flex items-center justify-center text-black"
           >
             {p}
           </span>

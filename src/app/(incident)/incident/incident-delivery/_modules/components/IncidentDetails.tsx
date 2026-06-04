@@ -26,22 +26,22 @@ const IncidentDetails = ({ incident }: { incident: IncidentDetailRecord }) => {
   ];
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
+    <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
 
       {/* Header */}
       <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
         <div className="space-y-0.5">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
             Incident
           </p>
-          <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">
+          <p className="text-[14px] font-semibold text-black dark:text-zinc-100">
             Raised from live incident context
           </p>
-          <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+          <p className="text-[12px] text-black dark:text-zinc-500">
             Dedup keeps one incident per correlated failure pattern.
           </p>
         </div>
-        <span className="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-mono text-zinc-500 dark:text-zinc-400 shrink-0">
+        <span className="px-2.5 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-mono text-black dark:text-zinc-400 shrink-0">
           {incident.ticketId}
         </span>
       </div>
@@ -57,7 +57,7 @@ const IncidentDetails = ({ incident }: { incident: IncidentDetailRecord }) => {
 
           {/* Type / subtype */}
           <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-3">
               Type / subtype
             </p>
             <div className="flex flex-wrap gap-2">
@@ -69,10 +69,10 @@ const IncidentDetails = ({ incident }: { incident: IncidentDetailRecord }) => {
 
         {/* Incident title */}
         <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-2">
             Incident title
           </p>
-          <p className="text-[13px] font-medium text-zinc-700 dark:text-zinc-200 leading-snug">
+          <p className="text-[13px] font-medium text-black dark:text-zinc-200 leading-snug">
             {incident.title || payload.pr.title}
           </p>
         </div>
@@ -89,23 +89,23 @@ const InfoCard = ({
   title: string; value: string; sub?: string; list?: string[];
 }) => (
   <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
-    <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">
+    <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-2">
       {title}
     </p>
-    <p className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200 break-all leading-relaxed">
+    <p className="text-[12px] font-medium text-black dark:text-zinc-200 break-all leading-relaxed">
       {value}
     </p>
     {sub && (
-      <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1">{sub}</p>
+      <p className="text-[11px] text-black dark:text-zinc-500 mt-1">{sub}</p>
     )}
     {list?.map((item, i) => (
-      <p key={i} className="text-[12px] text-zinc-500 dark:text-zinc-400 mt-1">{item}</p>
+      <p key={i} className="text-[12px] text-black dark:text-zinc-400 mt-1">{item}</p>
     ))}
   </div>
 );
 
 const Badge = ({ icon, label }: { icon: React.ReactNode; label: string }) => (
-  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[11px] font-medium text-zinc-600 dark:text-zinc-300">
+  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[11px] font-medium text-zinc-600 dark:text-zinc-300">
     <span className="text-zinc-400 dark:text-zinc-500">{icon}</span>
     {label}
   </span>

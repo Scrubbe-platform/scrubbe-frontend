@@ -68,8 +68,8 @@ const EzraPage = () => {
       >
         <div className="grid 2xl:grid-cols-2 gap-8 items-start pt-4">
           {/* LEFT — Audience outputs */}
-          <section className="bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-[24px] p-4 space-y-4">
-            <h3 className="text-zinc-800 dark:text-white font-bold text-lg px-1">Audience outputs</h3>
+          <section className="bg-transparent border border-zinc-500 dark:border-neutral-500 rounded-[24px] p-4 space-y-4">
+            <h3 className="text-black dark:text-white font-bold text-lg px-1">Audience outputs</h3>
  
             <div className="space-y-4">
               <ToggleRow icon={<Dna size={16} className="text-[#F472B6]" />}          label="Analyst summary enabled"   active={analystEnabled}   onToggle={() => setAnalystEnabled((v) => !v)}   />
@@ -79,8 +79,8 @@ const EzraPage = () => {
  
             <div className="space-y-3 pt-2">
               <Select
-                className="text-zinc-700 dark:text-white"
-                labelClassName="text-zinc-700 dark:text-white"
+                className="text-black dark:text-white"
+                labelClassName="text-black dark:text-white"
                 label="Executive format"
                 value={execFormat}
                 onChange={(e: any) => setExecFormat(e.target.value)}
@@ -92,15 +92,15 @@ const EzraPage = () => {
               />
             </div>
  
-            <div className="p-5 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-4 bg-white dark:bg-transparent">
+            <div className="p-5 border border-zinc-500 dark:border-neutral-500 rounded-2xl space-y-4 bg-white dark:bg-transparent">
               <div className="flex justify-between items-center">
-                <span className="text-zinc-800 dark:text-white text-[15px] font-bold">Delivery summary channel</span>
+                <span className="text-black dark:text-white text-[15px] font-bold">Delivery summary channel</span>
                 <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
                   Change
                 </button>
               </div>
               <p className="text-zinc-400 dark:text-[#64748B] text-xs leading-normal">Where executive updates go.</p>
-              <div className="flex items-center gap-3 p-2.5 border border-zinc-200 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
+              <div className="flex items-center gap-3 p-2.5 border border-zinc-500 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
                 <Hash size={14} className="text-[#FDE047]" />
                 <span className="text-[11px] text-zinc-600 dark:text-[#D1D5DB] font-mono">{deliveryChannel}</span>
               </div>
@@ -109,12 +109,12 @@ const EzraPage = () => {
  
           {/* RIGHT — Data exposure */}
           <section className="space-y-6">
-            <div className="bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-[24px] p-4 space-y-6">
+            <div className="bg-transparent border border-zinc-500 dark:border-neutral-500 rounded-[24px] p-4 space-y-6">
               <div className="space-y-1 px-1">
-                <h3 className="text-zinc-800 dark:text-white font-bold text-lg">Data exposure controls</h3>
+                <h3 className="text-black dark:text-white font-bold text-lg">Data exposure controls</h3>
                 <p className="text-zinc-400 dark:text-[#64748B] text-xs font-medium">Security defaults applied org-wide.</p>
               </div>
-              <div className="p-4 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-5">
+              <div className="p-4 border border-zinc-500 dark:border-neutral-500 rounded-2xl space-y-5">
                 <p className="text-zinc-600 dark:text-[#D1D5DB] text-sm leading-relaxed">
                   Prevent sensitive content from appearing in executive summaries.
                 </p>
@@ -129,9 +129,9 @@ const EzraPage = () => {
               </div>
             </div>
  
-            <div className="bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-[24px] p-4 space-y-4">
+            <div className="bg-transparent border border-zinc-500 dark:border-neutral-500 rounded-[24px] p-4 space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-zinc-800 dark:text-white font-bold text-lg">Open Ezra full view</h3>
+                <h3 className="text-black dark:text-white font-bold text-lg">Open Ezra full view</h3>
                 <Link href="/incident/ezra" className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
                   Open Ezra
                 </Link>
@@ -158,17 +158,17 @@ const EzraPage = () => {
 };
  
 const ToggleRow = ({ icon, label, active, onToggle }: { icon: ReactNode; label: string; active: boolean; onToggle: () => void }) => (
-  <div className="flex justify-between items-center p-3.5 border border-zinc-200 dark:border-neutral-500 rounded-2xl group hover:border-[#00CAD8]/30 transition-all bg-white dark:bg-transparent">
+  <div className="flex justify-between items-center p-3.5 border border-zinc-500 dark:border-neutral-500 rounded-2xl group hover:border-[#00CAD8]/30 transition-all bg-white dark:bg-transparent">
     <div className="flex items-center gap-3">
-      <div className="p-2 border border-zinc-200 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">{icon}</div>
-      <span className="text-zinc-700 dark:text-white text-xs font-bold">{label}</span>
+      <div className="p-2 border border-zinc-500 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">{icon}</div>
+      <span className="text-black dark:text-white text-xs font-bold">{label}</span>
     </div>
     <Switch color="success" isSelected={active} onChange={onToggle} size="sm" />
   </div>
 );
  
 const MaskTag = ({ label }: { label: string }) => (
-  <span className="px-3 py-1.5 bg-zinc-100 dark:bg-[#0B1224] border border-zinc-200 dark:border-neutral-500 rounded-lg text-[10px] font-bold text-zinc-600 dark:text-[#D1D5DB] font-mono tracking-tight">
+  <span className="px-3 py-1.5 bg-zinc-100 dark:bg-[#0B1224] border border-zinc-500 dark:border-neutral-500 rounded-lg text-[10px] font-bold text-zinc-600 dark:text-[#D1D5DB] font-mono tracking-tight">
     {label}
   </span>
 );

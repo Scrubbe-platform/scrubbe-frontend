@@ -48,7 +48,7 @@ function SectionDivider() {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-sm font-semibold text-gray-700 dark:text-neutral-200 mb-3">{children}</p>
+    <p className="text-sm font-semibold text-black dark:text-neutral-200 mb-3">{children}</p>
   );
 }
 
@@ -157,7 +157,7 @@ export default function ConfidenceSidebar({
   const confidencePct = Math.round(confidence * 100);
 
   return (
-    <div className="w-full bg-white dark:bg-grayscrubbe-900 text-gray-900 dark:text-neutral-300 flex md:flex-col flex-col-reverse overflow-y-auto">
+    <div className="w-full bg-white dark:bg-grayscrubbe-900 text-black dark:text-neutral-300 flex md:flex-col flex-col-reverse overflow-y-auto">
       <div>
         {/* ── Confidence Score Section ── */}
         <div className="px-4 pt-4 pb-2">
@@ -199,13 +199,13 @@ export default function ConfidenceSidebar({
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xs text-gray-600 dark:text-neutral-400">
                     Risk level :{" "}
-                    <span className="text-gray-900 dark:text-neutral-200 font-semibold">
+                    <span className="text-black dark:text-neutral-200 font-semibold">
                       {riskLevel}
                     </span>
                   </span>
                   <span className="text-xs text-gray-600 dark:text-neutral-400">
                     Auto /{" "}
-                    <span className="text-gray-900 dark:text-neutral-200 font-semibold">
+                    <span className="text-black dark:text-neutral-200 font-semibold">
                       {approvalMode}
                     </span>
                   </span>
@@ -324,7 +324,7 @@ export default function ConfidenceSidebar({
                 <span className="text-xs text-gray-500 dark:text-neutral-500 shrink-0">
                   {label}
                 </span>
-                <span className="text-xs text-gray-700 dark:text-neutral-300 text-right">
+                <span className="text-xs text-black dark:text-neutral-300 text-right">
                   {value}
                 </span>
               </div>
@@ -339,7 +339,7 @@ export default function ConfidenceSidebar({
           <SectionTitle>Pull Request</SectionTitle>
 
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-2xl font-bold text-gray-900 dark:text-neutral-100">
+            <span className="text-2xl font-bold text-black dark:text-neutral-100">
               {prNumber}
             </span>
             <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-green-900/40 text-green-400 border border-green-800">
@@ -347,7 +347,7 @@ export default function ConfidenceSidebar({
             </span>
           </div>
 
-          <p className="text-xs text-gray-700 dark:text-neutral-300 mb-3 leading-relaxed">
+          <p className="text-xs text-black dark:text-neutral-300 mb-3 leading-relaxed">
             {prTitle}
           </p>
 
@@ -367,7 +367,7 @@ export default function ConfidenceSidebar({
         <div className="px-4 py-4 flex flex-col gap-3">
         <button
           onClick={onApprove}
-          className="w-full py-3.5 rounded-xl bg-green-400 dark:bg-greenscrubbe-500 hover:bg-green-300 dark:hover:bg-greenscrubbe-400 text-neutral-900 dark:text-black text-sm font-bold transition-colors"
+          className="w-full py-3.5 rounded-xl bg-green-400 dark:bg-greenscrubbe-500 hover:bg-green-300 dark:hover:bg-greenscrubbe-400 text-black dark:text-black text-sm font-bold transition-colors"
         >
           Approve &amp; merge
         </button>

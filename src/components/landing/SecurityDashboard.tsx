@@ -52,17 +52,17 @@ const SecurityDashboard = () => {
           {/* Fake Account Creation Panel */}
           <div className="bg-blue-100 rounded-lg p-2 md:p-3 flex flex-col">
             <div className="flex items-center mb-1">
-              <User className="h-3 w-3 md:h-4 md:w-4 mr-1 text-gray-700" />
-              <span className="text-gray-700 text-xs font-medium">
+              <User className="h-3 w-3 md:h-4 md:w-4 mr-1 text-black" />
+              <span className="text-black text-xs font-medium">
                 Fake Account Creation
               </span>
             </div>
-            <p className="text-gray-700 text-[8px] md:text-xs leading-tight">
+            <p className="text-black text-[8px] md:text-xs leading-tight">
               Scrubbe monitors every payment attempt in real time, detecting
               patterns like multiple failures, suspicious velocity, and
               blacklisted cards or BINs.
             </p>
-            <p className="text-gray-700 text-[8px] md:text-xs leading-tight mt-1">
+            <p className="text-black text-[8px] md:text-xs leading-tight mt-1">
               It flags high-risk behaviors before funds move, protecting you
               from chargebacks, abuse, and payment scams.
             </p>

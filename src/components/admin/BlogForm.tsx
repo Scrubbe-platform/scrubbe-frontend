@@ -191,7 +191,7 @@ const BlogForm = () => {
       />
 
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-neutral-900 dark:text-white">
+        <h3 className="text-lg font-medium text-black dark:text-white">
           Tags
         </h3>
 
@@ -231,7 +231,7 @@ const BlogForm = () => {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-neutral-900 dark:text-white">
+        <h3 className="text-lg font-medium text-black dark:text-white">
           Featured Image
         </h3>
 
@@ -240,7 +240,7 @@ const BlogForm = () => {
             <LuUpload className="mx-auto h-12 w-12 text-neutral-400" />
             <div className="mt-4">
               <label htmlFor="featured-image" className="cursor-pointer">
-                <span className="mt-2 block text-sm font-medium text-neutral-900 dark:text-white">
+                <span className="mt-2 block text-sm font-medium text-black dark:text-white">
                   Upload featured image
                 </span>
                 <span className="mt-1 block text-xs text-neutral-500">

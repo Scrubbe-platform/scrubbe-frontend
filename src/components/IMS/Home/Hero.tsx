@@ -150,7 +150,7 @@ function FloatingCard({ text }: { text: string }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="text-[14.5px] text-gray-700 leading-[1.8] font-normal"
+          className="text-[14.5px] text-black leading-[1.8] font-normal"
         >
           {text}
         </motion.p>

@@ -166,7 +166,7 @@ const Page = () => {
               <DetailSection label="Root cause" value={postMortem.rootCause} />
 
               <div>
-                <h2 className="text-lg font-bold text-gray-900 mb-4">5 Whys</h2>
+                <h2 className="text-lg font-bold text-black mb-4">5 Whys</h2>
                 <div className="space-y-4">
                   <DetailSection label="Why 1" value={postMortem.why1} />
                   <DetailSection label="Why 2" value={postMortem.why2} />
@@ -221,7 +221,7 @@ const Page = () => {
                     postMortem.knowledgeTagsInternal.map((tag) => (
                       <span
                         key={tag}
-                        className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm"
+                        className="bg-gray-200 text-black px-3 py-1 rounded-full text-sm"
                       >
                         {tag}
                       </span>
@@ -261,7 +261,7 @@ const Page = () => {
                     {postMortem.followUpTicketingSystems.map((system) => (
                       <span
                         key={system}
-                        className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm"
+                        className="bg-gray-200 text-black px-3 py-1 rounded-full text-sm"
                       >
                         {system}
                       </span>

@@ -91,7 +91,7 @@ const SlaBreachesChart = () => {
   return (
     <div className="bg-white p-6 rounded-lg ">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">
+        <h2 className="text-xl font-semibold text-black">
           SLA Breaches ( last 30 days)
         </h2>
         <a

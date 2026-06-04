@@ -187,7 +187,7 @@ function ConnectorCard({
       onClick={onClick}
     >
       {connector.comingSoon && (
-        <div className="absolute top-2 right-2 border p-0.5 rounded-md text-[8px] text-zinc-400 border-zinc-400">
+        <div className="absolute top-2 right-2 border p-0.5 rounded-md text-[8px] text-black border-zinc-400">
           coming soon
         </div>
       )}
@@ -202,7 +202,7 @@ function ConnectorCard({
       </div>
 
       {/* Name */}
-      <h3 className="text-[14px] font-bold text-gray-900 mb-2 tracking-tight">
+      <h3 className="text-[14px] font-bold text-black mb-2 tracking-tight">
         {connector.name}
       </h3>
 
@@ -303,7 +303,7 @@ export default function ConnectorsSection({ filter }: { filter?: string }) {
         >
           <button
             onClick={() => setShowAll((prev) => !prev)}
-            className="px-6 py-3 text-[14px] font-semibold text-gray-800 border border-gray-300 rounded-lg bg-white hover:border-emerald-500 hover:text-emerald-600 transition-all duration-200 cursor-pointer"
+            className="px-6 py-3 text-[14px] font-semibold text-black border border-gray-300 rounded-lg bg-white hover:border-emerald-500 hover:text-emerald-600 transition-all duration-200 cursor-pointer"
           >
             Show {showAll ? "less" : "all"} Connectors
           </button>

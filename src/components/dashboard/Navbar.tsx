@@ -55,7 +55,7 @@ const Navbar = () => {
   return (
     <div>
       <div className="h-[70px] w-full border-b border-neutral-200 dark:border-blue-400/50  flex justify-between items-center px-[3%]">
-        {/* <div className=" w-[50%] dark:bg-zinc-800 bg-zinc-100 flex gap-3 items-center border border-zinc-200 dark:border-zinc-600 rounded-lg h-[38px] px-2">
+        {/* <div className=" w-[50%] dark:bg-zinc-800 bg-zinc-100 flex gap-3 items-center border border-zinc-500 dark:border-zinc-600 rounded-lg h-[38px] px-2">
           <input
             type="text"
             placeholder="Search..."
@@ -73,7 +73,7 @@ const Navbar = () => {
             <div className=" cursor-pointer uppercase size-7 rounded-full bg-zinc-700 flex justify-center items-center text-sm text-white">
               {user?.firstName?.[0]}.{user?.lastName?.[0]}
             </div>
-            <ChevronDown className=" text-zinc-400" size={16} />
+            <ChevronDown className=" text-black" size={16} />
 
             {menu && (
               <div

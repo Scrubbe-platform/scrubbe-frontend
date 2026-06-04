@@ -70,7 +70,7 @@ const AuditLogs = () => {
           <h1 className="text-2xl font-bold mb-6">Audit Logs</h1>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-2">
-              <button className="flex items-center gap-2 border border-zinc-200 rounded-lg px-4 py-2 text-zinc-600 bg-white text-base font-medium shadow-sm">
+              <button className="flex items-center gap-2 border border-zinc-500 rounded-lg px-4 py-2 text-zinc-600 bg-white text-base font-medium shadow-sm">
                 <Filter size={18} />
                 Filter by date
                 <ChevronDown size={18} />
@@ -90,7 +90,7 @@ const AuditLogs = () => {
           {/* Pagination */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-6 gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-zinc-500">Rows per page</span>
+              <span className="text-sm text-black">Rows per page</span>
               <select className="border border-zinc-300 rounded px-2 py-1 text-sm">
                 <option value={12}>12</option>
                 <option value={24}>24</option>

@@ -51,11 +51,11 @@ const Table = <TData extends object>({
           {...props}
         >
           {/* ── Head ── */}
-          <thead className="bg-zinc-100 dark:bg-[#374151] text-zinc-700 dark:text-white">
+          <thead className="bg-zinc-100 dark:bg-[#374151] text-black dark:text-white">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
                 key={headerGroup.id}
-                className="border-b border-zinc-200 dark:border-zinc-600 transition-colors data-[state=selected]:bg-zinc-100 dark:data-[state=selected]:bg-zinc-800"
+                className="border-b border-zinc-500 dark:border-zinc-600 transition-colors data-[state=selected]:bg-zinc-100 dark:data-[state=selected]:bg-zinc-800"
               >
                 {headerGroup.headers.map((header) => (
                   <th
@@ -91,14 +91,14 @@ const Table = <TData extends object>({
           </thead>
 
           {/* ── Body ── */}
-          <tbody className="[&_tr:last-child]:border-0 bg-white dark:bg-[#1F2937] text-zinc-700 dark:text-white">
+          <tbody className="[&_tr:last-child]:border-0 bg-white dark:bg-[#1F2937] text-black dark:text-white">
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => onRowClick?.(row.original)}
                 className={cn(
-                  "border-b border-zinc-200 dark:border-zinc-600 transition-colors",
+                  "border-b border-zinc-500 dark:border-zinc-600 transition-colors",
                   "hover:bg-zinc-50 dark:hover:bg-zinc-700/40",
                   "data-[state=selected]:bg-zinc-100 dark:data-[state=selected]:bg-zinc-800",
                   typeof rowClassName === "function"

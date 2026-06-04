@@ -219,7 +219,7 @@ export default function DeveloperSignupForm() {
             </div>
           </div>
 
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-2xl font-semibold text-black dark:text-white mb-2">
             Successful
           </h1>
 
@@ -475,7 +475,7 @@ export default function DeveloperSignupForm() {
                           <div>
                             <FcGoogle size={33} />
                           </div>
-                          <span className="text-sm font-medium text-gray-700 dark:text-white">
+                          <span className="text-sm font-medium text-black dark:text-white">
                             Google
                           </span>
                         </button>
@@ -491,7 +491,7 @@ export default function DeveloperSignupForm() {
                           <div>
                             <FaGithub size={33} className=" dark:text-white" />
                           </div>
-                          <span className="text-sm font-medium text-gray-700 dark:text-white">
+                          <span className="text-sm font-medium text-black dark:text-white">
                             GitHub
                           </span>
                         </button>
@@ -512,7 +512,7 @@ export default function DeveloperSignupForm() {
                             height={38}
                             className="mr-2"
                           />
-                          <span className="text-sm font-medium text-gray-700 dark:text-white">
+                          <span className="text-sm font-medium text-black dark:text-white">
                             GitLab
                           </span>
                         </button>
@@ -530,7 +530,7 @@ export default function DeveloperSignupForm() {
                             height={38}
                             className="mr-2"
                           />
-                          <span className="text-sm font-medium text-gray-700 dark:text-white">
+                          <span className="text-sm font-medium text-black dark:text-white">
                             AWS
                           </span>
                         </button>
@@ -551,7 +551,7 @@ export default function DeveloperSignupForm() {
                             height={38}
                             className="mr-2"
                           />
-                          <span className="text-sm font-medium text-gray-700 dark:text-white">
+                          <span className="text-sm font-medium text-black dark:text-white">
                             Azure
                           </span>
                         </button>

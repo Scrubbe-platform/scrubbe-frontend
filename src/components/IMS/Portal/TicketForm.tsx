@@ -69,7 +69,7 @@ const TicketForm: React.FC = () => {
       </div>
 
       {/* Header */}
-      <h2 className="text-xl font-semibold text-gray-800 mb-6">
+      <h2 className="text-xl font-semibold text-black mb-6">
         Raise New Ticket
       </h2>
 

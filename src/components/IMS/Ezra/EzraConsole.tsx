@@ -152,16 +152,16 @@ export default function EzraConsole() {
   }, [analyses, analysing, generatingReport, incidentCandidates, preferredIncidentId, selectedAnalysis?.id]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 p-6 font-sans antialiased">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-black dark:text-zinc-200 p-6 font-sans antialiased">
 
       {/* Header */}
       <header className="flex justify-between items-center mb-6">
         <div className="space-y-1">
-          <h1 className="text-[16px] font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+          <h1 className="text-[16px] font-bold text-black dark:text-zinc-100 flex items-center gap-2">
             Ezra
             <span className="text-zinc-400 dark:text-zinc-500 font-normal text-[14px]">· Incident Counsel</span>
           </h1>
-          <p className="text-[12px] text-zinc-500 dark:text-zinc-400 max-w-lg leading-relaxed">
+          <p className="text-[12px] text-black dark:text-zinc-400 max-w-lg leading-relaxed">
             Ask Ezra about incidents, MTTR, risk, and fraud impact — it answers differently for leadership and for hands-on analysts.
             {selectedIncident ? ` Focused on ${selectedIncident.ticketId}.` : ""}
           </p>
@@ -176,12 +176,12 @@ export default function EzraConsole() {
       <main className="grid grid-cols-12 gap-5 h-[calc(100vh-120px)]">
 
         {/* Left — Sessions */}
-        <aside className="col-span-3 border border-zinc-200 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 p-4 flex flex-col gap-5 overflow-hidden">
+        <aside className="col-span-3 border border-zinc-500 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 p-4 flex flex-col gap-5 overflow-hidden">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Sessions</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">Sessions</p>
             <button
               onClick={() => { setSelectedAnalysis(null); setMessages([]); }}
-              className="flex items-center gap-1 px-2.5 py-1 border border-zinc-200 dark:border-zinc-700 rounded-lg text-[11px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 border border-zinc-500 dark:border-zinc-700 rounded-lg text-[11px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
             >
               <Plus size={12} /> New
             </button>
@@ -192,7 +192,7 @@ export default function EzraConsole() {
               <div key={i} className="h-14 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 animate-pulse" />
             ))}
             {!loadingAnalyses && analyses.length === 0 && (
-              <p className="text-[11px] text-zinc-400 dark:text-zinc-500 text-center pt-4">
+              <p className="text-[11px] text-black dark:text-zinc-500 text-center pt-4">
                 No sessions yet. Ask Ezra about an incident to start.
               </p>
             )}
@@ -208,7 +208,7 @@ export default function EzraConsole() {
           </div>
 
           <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4 space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Quick prompts</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">Quick prompts</p>
             {[
               { icon: <FiMessageSquare size={12} />, label: "Leadership view",    prompt: "Summarise the leadership impact of this incident"  },
               { icon: <IoCodeSlashSharp size={12} />, label: "Analyst breakdown", prompt: "Give me an analyst breakdown of this incident"      },
@@ -217,7 +217,7 @@ export default function EzraConsole() {
               <button
                 key={label}
                 onClick={() => setInput(prompt)}
-                className="w-full flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+                className="w-full flex items-center gap-2 text-[11px] text-black dark:text-zinc-400 hover:text-black dark:hover:text-zinc-200 transition-colors"
               >
                 {icon} {label}
               </button>
@@ -225,16 +225,16 @@ export default function EzraConsole() {
           </div>
 
           <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-1.5">Input behaviour</p>
-            <p className="text-[11px] text-zinc-400 dark:text-zinc-500">Enter = send · Shift+Enter = new line</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-1.5">Input behaviour</p>
+            <p className="text-[11px] text-black dark:text-zinc-500">Enter = send · Shift+Enter = new line</p>
           </div>
         </aside>
 
         {/* Center — Chat */}
-        <section className="col-span-5 flex flex-col border border-zinc-200 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 overflow-hidden">
+        <section className="col-span-5 flex flex-col border border-zinc-500 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 overflow-hidden">
           {/* Chat header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-            <span className="text-[12px] font-mono text-zinc-500 dark:text-zinc-400">
+            <span className="text-[12px] font-mono text-black dark:text-zinc-400">
               <span className="text-emerald-600 dark:text-emerald-400">ezra</span>
               {" / "}
               <span className="text-sky-600 dark:text-sky-400">scrubbe</span>
@@ -247,7 +247,7 @@ export default function EzraConsole() {
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors ${
                   audience === "LEADERSHIP"
                     ? "border-emerald-300 dark:border-emerald-500/40 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/8"
-                    : "border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-600"
+                    : "border-zinc-200 dark:border-zinc-700 text-black hover:border-zinc-300 dark:hover:border-zinc-600"
                 }`}
               >
                 <CiGift size={14} /> Leadership
@@ -258,7 +258,7 @@ export default function EzraConsole() {
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors ${
                   audience === "ENGINEER"
                     ? "border-sky-300 dark:border-sky-500/40 text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/8"
-                    : "border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-600"
+                    : "border-zinc-200 dark:border-zinc-700 text-black hover:border-zinc-300 dark:hover:border-zinc-600"
                 }`}
               >
                 <AiOutlineLineChart size={14} /> Analyst
@@ -271,7 +271,7 @@ export default function EzraConsole() {
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full text-center gap-3">
                 <img src="/IMS/icons/star.svg" alt="" className="size-12 opacity-40" />
-                <p className="max-w-xs text-[12px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
+                <p className="max-w-xs text-[12px] text-black dark:text-zinc-500 leading-relaxed">
                   Ezra is wired into incident metrics, logs, and fraud telemetry. Ask a question to start signal provenance.
                 </p>
               </div>
@@ -281,10 +281,10 @@ export default function EzraConsole() {
                 <div className={`max-w-[80%] rounded-xl px-4 py-3 text-[13px] leading-relaxed ${
                   msg.role === "user"
                     ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-100 border border-emerald-100 dark:border-emerald-500/20"
-                    : "bg-zinc-50 dark:bg-zinc-800/60 text-zinc-700 dark:text-zinc-200 border border-zinc-100 dark:border-zinc-800"
+                    : "bg-zinc-50 dark:bg-zinc-800/60 text-black dark:text-zinc-200 border border-zinc-100 dark:border-zinc-800"
                 }`}>
                   {msg.content}
-                  <p className="text-[9px] text-zinc-400 dark:text-zinc-500 mt-1">{moment(msg.timestamp).fromNow()}</p>
+                  <p className="text-[9px] text-black dark:text-zinc-500 mt-1">{moment(msg.timestamp).fromNow()}</p>
                 </div>
               </div>
             ))}
@@ -296,7 +296,7 @@ export default function EzraConsole() {
             <div className="relative">
               <img src="/IMS/icons/star.svg" alt="" className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 opacity-50" />
               <input
-                className="w-full bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 pl-10 pr-12 text-[13px] text-zinc-700 dark:text-zinc-200 placeholder:text-zinc-400 focus:outline-none focus:border-emerald-400 dark:focus:border-emerald-500/50 transition-colors"
+                className="w-full bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-500 dark:border-zinc-700 rounded-xl py-3 pl-10 pr-12 text-[13px] text-black dark:text-zinc-200 placeholder:text-zinc-400 focus:outline-none focus:border-emerald-400 dark:focus:border-emerald-500/50 transition-colors"
                 placeholder="Ask Ezra — e.g. 'Analyse INC-311' or 'What caused the checkout failure?'"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -318,9 +318,9 @@ export default function EzraConsole() {
         <aside className="col-span-4 space-y-3 overflow-y-auto pr-1">
 
           {/* Live context */}
-          <div className="border border-zinc-200 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 p-4 space-y-4">
+          <div className="border border-zinc-500 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 p-4 space-y-4">
             <div className="flex items-center justify-between">
-              <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">Live incident context</p>
+              <p className="text-[13px] font-semibold text-black dark:text-zinc-100">Live incident context</p>
               {selectedAnalysis ? (
                 <span className="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> synced
@@ -328,7 +328,7 @@ export default function EzraConsole() {
               ) : selectedIncident ? (
                 <span className="text-[11px] text-sky-500">selected</span>
               ) : (
-                <span className="text-[11px] text-zinc-400 dark:text-zinc-500">none</span>
+                <span className="text-[11px] text-black dark:text-zinc-500">none</span>
               )}
             </div>
 
@@ -342,13 +342,13 @@ export default function EzraConsole() {
                   { label: "Analysed", value: selectedAnalysis?.createdAt ? moment(selectedAnalysis.createdAt).fromNow() : "Awaiting" },
                 ].map(({ label, value, valueClass }) => (
                   <div key={label} className="flex justify-between items-center">
-                    <span className="text-[11px] text-zinc-400 dark:text-zinc-500">{label}</span>
-                    <span className={`text-[11px] font-semibold ${valueClass ?? "text-zinc-700 dark:text-zinc-200"}`}>{value}</span>
+                    <span className="text-[11px] text-black dark:text-zinc-500">{label}</span>
+                    <span className={`text-[11px] font-semibold ${valueClass ?? "text-black dark:text-zinc-200"}`}>{value}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-[11px] text-zinc-400 dark:text-zinc-500">Select a session or analyse an incident to see context here.</p>
+              <p className="text-[11px] text-black dark:text-zinc-500">Select a session or analyse an incident to see context here.</p>
             )}
 
             {selectedAnalysis && (
@@ -362,9 +362,9 @@ export default function EzraConsole() {
           </div>
 
           {/* Output focus */}
-          <div className="border border-zinc-200 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 p-4">
+          <div className="border border-zinc-500 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 p-4">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">Ezra output focus</p>
+              <p className="text-[13px] font-semibold text-black dark:text-zinc-100">Ezra output focus</p>
               <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[10px] font-semibold ${
                 audience === "LEADERSHIP"
                   ? "border-emerald-200 dark:border-emerald-500/25 text-emerald-600 dark:text-emerald-400"
@@ -377,7 +377,7 @@ export default function EzraConsole() {
               {audience === "LEADERSHIP" ? (
                 <>
                   <p>Leadership framing: revenue, customer trust and time-to-stable are prioritised.</p>
-                  <ul className="pl-3 list-disc space-y-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+                  <ul className="pl-3 list-disc space-y-1 text-[11px] text-black dark:text-zinc-500">
                     <li>Clear view of impact, blast radius and exposure.</li>
                     <li>Simple narrative: what happened, are we in control, when are we stable.</li>
                     <li>Explicit next steps and owner for follow-up work.</li>
@@ -386,7 +386,7 @@ export default function EzraConsole() {
               ) : (
                 <>
                   <p>Analyst framing: root cause, signals, and actionable remediation steps.</p>
-                  <ul className="pl-3 list-disc space-y-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+                  <ul className="pl-3 list-disc space-y-1 text-[11px] text-black dark:text-zinc-500">
                     <li>Detailed root cause hypothesis and confidence.</li>
                     <li>Signal trace: what changed, when, and in which service.</li>
                     <li>Ranked remediation options with risk assessment.</li>
@@ -397,8 +397,8 @@ export default function EzraConsole() {
           </div>
 
           {/* Quick prompts */}
-          <div className="border border-zinc-200 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">Quick prompts</p>
+          <div className="border border-zinc-500 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-3">Quick prompts</p>
             <div className="grid grid-cols-2 gap-2">
               {[
                 { icon: <ListTree size={13} />,   label: "CI/CD",           prompt: "Analyse the CI/CD pipeline signals for this incident"  },
@@ -410,7 +410,7 @@ export default function EzraConsole() {
                 <button
                   key={label}
                   onClick={() => setInput(prompt)}
-                  className="flex items-center gap-2 px-3 py-2 border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 rounded-lg text-[11px] font-medium text-zinc-500 dark:text-zinc-400 hover:border-zinc-200 dark:hover:border-zinc-700 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 rounded-lg text-[11px] font-medium text-black dark:text-zinc-400 hover:border-zinc-200 dark:hover:border-zinc-700 hover:text-black dark:hover:text-zinc-200 transition-colors"
                 >
                   {icon} {label}
                 </button>
@@ -419,9 +419,9 @@ export default function EzraConsole() {
           </div>
 
           {/* Response behaviour */}
-          <div className="border border-zinc-200 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 p-4">
-            <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 mb-1.5">Ezra response behaviour</p>
-            <p className="text-[12px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
+          <div className="border border-zinc-500 dark:border-zinc-700/60 rounded-xl bg-white dark:bg-zinc-900/40 p-4">
+            <p className="text-[13px] font-semibold text-black dark:text-zinc-100 mb-1.5">Ezra response behaviour</p>
+            <p className="text-[12px] text-black dark:text-zinc-500 leading-relaxed">
               Typical response 2–6s (includes Code Engine + telemetry fetch). Guardrails always apply before any fix.
             </p>
           </div>
@@ -436,7 +436,7 @@ export default function EzraConsole() {
 const NavBadge = ({ icon, label, route }: { icon: React.ReactNode; label: string; route: string }) => (
   <Link
     href={route || ""}
-    className="flex items-center gap-1.5 px-3 py-1.5 border border-zinc-200 dark:border-zinc-700 rounded-full bg-white dark:bg-zinc-900/40 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+    className="flex items-center gap-1.5 px-3 py-1.5 border border-zinc-500 dark:border-zinc-700 rounded-full bg-white dark:bg-zinc-900/40 text-[11px] font-medium text-black dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
   >
     <span className="text-zinc-400 dark:text-zinc-500">{icon}</span>
     {label}
@@ -452,15 +452,15 @@ const SessionCard = ({ title, subtitle, active = false, onClick }: { title: stri
         : "border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
     }`}
   >
-    <p className="text-[12px] font-semibold text-zinc-800 dark:text-zinc-100 mb-0.5">{title}</p>
-    <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{subtitle}</p>
+    <p className="text-[12px] font-semibold text-black dark:text-zinc-100 mb-0.5">{title}</p>
+    <p className="text-[11px] text-black dark:text-zinc-500">{subtitle}</p>
   </div>
 );
 
 const MetricBox = ({ label, value, sub, subClass = "text-zinc-400 dark:text-zinc-500" }: { label: string; value: string; sub?: string; subClass?: string }) => (
   <div className="p-3 border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 rounded-xl space-y-1">
-    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">{label}</p>
-    <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">{value}</p>
+    <p className="text-[10px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">{label}</p>
+    <p className="text-[13px] font-semibold text-black dark:text-zinc-100">{value}</p>
     {sub && <p className={`text-[9px] leading-tight ${subClass}`}>{sub}</p>}
   </div>
 );

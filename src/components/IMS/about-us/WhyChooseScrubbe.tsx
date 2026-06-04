@@ -36,7 +36,7 @@ const WhyChooseScrubbe = () => {
         <h1 className="md:text-5xl text-4xl font-bigshotOne font-bold text-scrubbe-dark mb-4 leading-tight">
           Why Choose Scrubbe
         </h1>
-        <p className="text-xl text-gray-700 font-medium">
+        <p className="text-xl text-black font-medium">
           Because reliability isn&apos;t a feature, it&apos;s your business
           foundation.
         </p>
@@ -53,7 +53,7 @@ const WhyChooseScrubbe = () => {
         {comparisonData.map((item, index) => (
           <div
             key={index}
-            className={`grid grid-cols-3 text-gray-800 ${
+            className={`grid grid-cols-3 text-black ${
               index % 2 === 0 ? "bg-white" : "bg-gray-50"
             } border-t border-gray-200`}
           >

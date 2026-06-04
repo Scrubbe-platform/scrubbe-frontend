@@ -182,7 +182,7 @@ function FAQRow({ item }: { item: FAQItem }) {
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-start justify-between gap-4 py-5 text-left bg-transparent border-none cursor-pointer group"
       >
-        <span className="text-lg font-semibold text-gray-800 leading-snug group-hover:text-emerald-600 transition-colors flex-1">
+        <span className="text-lg font-semibold text-black leading-snug group-hover:text-emerald-600 transition-colors flex-1">
           {item.q}
         </span>
         {open ? (
@@ -214,7 +214,7 @@ function WayRow({ w }: { w: WayItem }) {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-lg font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors">
+          <span className="text-lg font-semibold text-black group-hover:text-emerald-600 transition-colors">
             {w.title}
           </span>
           {w.badge && (
@@ -277,7 +277,7 @@ export default function ContactPage() {
       setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const inputCls =
-    "w-full border-2 border-gray-200 rounded-lg px-4 py-3.5 text-base text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all bg-white";
+    "w-full border-2 border-gray-200 rounded-lg px-4 py-3.5 text-base text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all bg-white";
 
   const labelCls = "text-base text-gray-500 font-medium block mb-2";
 
@@ -291,7 +291,7 @@ export default function ContactPage() {
       <section className="max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-10 lg:gap-14 items-start">
         {/* LEFT */}
         <div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight mb-2">
+          <h1 className="text-4xl sm:text-5xl font-bold text-black tracking-tight mb-2">
             Contact us
           </h1>
           <p className="text-xl sm:text-2xl font-semibold text-emerald-500 mb-3">
@@ -327,7 +327,7 @@ export default function ContactPage() {
                 <Calendar size={20} className="text-emerald-600" />
               </div>
               <div>
-                <p className="text-base font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">
+                <p className="text-base font-bold text-black group-hover:text-emerald-600 transition-colors">
                   Book a Demo
                 </p>
                 <p className="text-sm text-gray-400 leading-snug mt-0.5">
@@ -341,7 +341,7 @@ export default function ContactPage() {
                 <MessageSquare size={20} className="text-gray-500" />
               </div>
               <div>
-                <p className="text-base font-bold text-gray-800 group-hover:text-gray-600 transition-colors">
+                <p className="text-base font-bold text-black group-hover:text-gray-600 transition-colors">
                   Send us a message
                 </p>
                 <p className="text-sm text-gray-400 leading-snug mt-0.5">
@@ -393,7 +393,7 @@ export default function ContactPage() {
                 <label className={labelCls}>What best describes you</label>
                 <select
                   className={`${inputCls} ${
-                    !form.role ? "text-gray-400" : "text-gray-700"
+                    !form.role ? "text-gray-400" : "text-black"
                   }`}
                   value={form.role}
                   onChange={set("role")}
@@ -437,12 +437,12 @@ export default function ContactPage() {
       {/* ── FAQ SECTION ── */}
       <section className="max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
         <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-black tracking-tight mb-4">
             Frequently Asked Questions
           </h2>
           <p className="text-lg text-gray-500">
             Got questions? We've got answers.{" "}
-            <span className="font-medium text-gray-700">
+            <span className="font-medium text-black">
               Browse our frequently asked questions
             </span>{" "}
             to find what you're looking for.

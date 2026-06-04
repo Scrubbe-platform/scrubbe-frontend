@@ -22,7 +22,7 @@ const MetricCard: React.FC<Props> = ({
       <div className="flex-grow">
         <p className="text-gray-500 text-sm font-medium">{title}</p>
         <div className="flex items-center space-x-2 mt-1">
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-2xl font-bold text-black">{value}</p>
           {trend && (
             <div
               className={`text-sm ${

@@ -525,7 +525,7 @@ const EditIncidentTicket = () => {
           />
 
           <div className="space-y-4">
-            <label className="flex gap-2 items-center text-sm font-medium text-gray-700 dark:text-white ">
+            <label className="flex gap-2 items-center text-sm font-medium text-black dark:text-white ">
               <HiOutlinePaperClip /> Attachment
               <div className="group relative">
                 <RiInformationLine className=" text-IMSLightGreen cursor-pointer" />
@@ -537,7 +537,7 @@ const EditIncidentTicket = () => {
             {/* Upload Area */}
             {!uploadedLogo ? (
               <div
-                className="flex text-sm border-zinc-200 border rounded-md h-[42px] overflow-clip"
+                className="flex text-sm border-zinc-500 border rounded-md h-[42px] overflow-clip"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <span className=" flex items-center justify-center h-full bg-emerald-100 text-emerald-600 px-2">
@@ -565,7 +565,7 @@ const EditIncidentTicket = () => {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-black">
                         {uploadedLogo?.name}
                       </p>
                       <p className="text-xs text-gray-500">
@@ -579,7 +579,7 @@ const EditIncidentTicket = () => {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-3 py-1 text-xs bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700"
+                      className="px-3 py-1 text-xs bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-black"
                     >
                       Change
                     </button>

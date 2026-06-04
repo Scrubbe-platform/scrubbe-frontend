@@ -64,8 +64,8 @@ const severityConfig: Record<RaiseIncidentFormValues["severity"], { label: strin
 // ── FormSection ───────────────────────────────────────────────────
 
 const FormSection = ({ children, title }: { children: React.ReactNode; title: string }) => (
-  <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5">
-    <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100 mb-4">{title}</p>
+  <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5">
+    <p className="text-[14px] font-semibold text-black dark:text-zinc-100 mb-4">{title}</p>
     {children}
   </div>
 );
@@ -75,7 +75,7 @@ const FormSection = ({ children, title }: { children: React.ReactNode; title: st
 function WarRoomToggle({ value, onChange }: { value: "not-required" | "open-war-room"; onChange: (v: "not-required" | "open-war-room") => void }) {
   return (
     <div>
-      <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+      <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
         War room
       </label>
       <div className="grid grid-cols-2 gap-2.5">
@@ -84,12 +84,12 @@ function WarRoomToggle({ value, onChange }: { value: "not-required" | "open-war-
           onClick={() => onChange("not-required")}
           className={`flex flex-col items-start rounded-xl border p-4 text-left transition-colors ${
             value === "not-required"
-              ? "border-zinc-300 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100"
-              : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/40 text-zinc-400 dark:text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-600"
+              ? "border-zinc-300 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 text-black dark:text-zinc-100"
+              : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/40 text-black dark:text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-600"
           }`}
         >
           <span className="text-[13px] font-semibold">Not required</span>
-          <span className="text-[11px] mt-0.5 text-zinc-400 dark:text-zinc-500">Standard incident flow</span>
+          <span className="text-[11px] mt-0.5 text-black dark:text-zinc-500">Standard incident flow</span>
         </button>
 
         <button
@@ -98,11 +98,11 @@ function WarRoomToggle({ value, onChange }: { value: "not-required" | "open-war-
           className={`flex flex-col items-start rounded-xl border p-4 text-left transition-colors ${
             value === "open-war-room"
               ? "border-emerald-400 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-400"
-              : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/40 text-zinc-400 dark:text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-600"
+              : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/40 text-black dark:text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-600"
           }`}
         >
           <span className="text-[13px] font-semibold">Open War room</span>
-          <span className="text-[11px] mt-0.5 text-zinc-400 dark:text-zinc-500">Creates Slack channel + Teams + Zoom meeting</span>
+          <span className="text-[11px] mt-0.5 text-black dark:text-zinc-500">Creates Slack channel + Teams + Zoom meeting</span>
         </button>
       </div>
     </div>
@@ -126,9 +126,9 @@ function EvidenceSection({ files, onAdd, onRemove }: { files: AttachedFile[]; on
   const formatSize = (b: number) => b < 1024 ? `${b}B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(1)}KB` : `${(b / (1024 * 1024)).toFixed(1)}MB`;
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5">
-      <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100 mb-0.5">Evidence and Attachments</p>
-      <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mb-4">Upload files as evidence</p>
+    <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5">
+      <p className="text-[14px] font-semibold text-black dark:text-zinc-100 mb-0.5">Evidence and Attachments</p>
+      <p className="text-[12px] text-black dark:text-zinc-500 mb-4">Upload files as evidence</p>
 
       <div
         className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-colors ${
@@ -142,11 +142,11 @@ function EvidenceSection({ files, onAdd, onRemove }: { files: AttachedFile[]; on
         onDrop={(e) => { e.preventDefault(); setDragging(false); handleFiles(e.dataTransfer.files); }}
       >
         <input ref={inputRef} type="file" multiple accept=".png,.jpg,.jpeg,.pdf,.log,.txt,.json,.yaml,.yml" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
-        <div className="w-9 h-9 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center mb-3">
+        <div className="w-9 h-9 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center mb-3">
           <Upload size={16} className="text-zinc-400 dark:text-zinc-500" />
         </div>
         <p className="text-[13px] font-medium text-zinc-600 dark:text-zinc-300">Drop files here or click to browse</p>
-        <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1">PNG, JPG, PDF, .txt, .json, .yaml — max 25MB</p>
+        <p className="text-[11px] text-black dark:text-zinc-500 mt-1">PNG, JPG, PDF, .txt, .json, .yaml — max 25MB</p>
       </div>
 
       {files.length > 0 && (
@@ -154,15 +154,15 @@ function EvidenceSection({ files, onAdd, onRemove }: { files: AttachedFile[]; on
           {files.map((af) => (
             <div key={af.id} className="flex items-center justify-between gap-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-4 py-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-7 h-7 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0">
                   <FileText size={13} className="text-zinc-400 dark:text-zinc-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200 truncate">{af.file.name}</p>
-                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{formatSize(af.file.size)}</p>
+                  <p className="text-[12px] font-medium text-black dark:text-zinc-200 truncate">{af.file.name}</p>
+                  <p className="text-[11px] text-black dark:text-zinc-500">{formatSize(af.file.size)}</p>
                 </div>
               </div>
-              <button type="button" onClick={() => onRemove(af.id)} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+              <button type="button" onClick={() => onRemove(af.id)} className="p-1.5 rounded-lg text-black hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
                 <Trash2 size={13} />
               </button>
             </div>
@@ -218,17 +218,17 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-y-auto rounded-2xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-950 shadow-xl">
+      <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-y-auto rounded-2xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-950 shadow-xl">
 
         {/* Header */}
         <div className="sticky top-0 z-20 flex items-start justify-between border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 py-5">
           <div>
-            <h2 className="text-[18px] font-bold text-zinc-800 dark:text-zinc-100">Raise Incident</h2>
-            <p className="mt-0.5 text-[12px] text-zinc-400 dark:text-zinc-500">
+            <h2 className="text-[18px] font-bold text-black dark:text-zinc-100">Raise Incident</h2>
+            <p className="mt-0.5 text-[12px] text-black dark:text-zinc-500">
               Manual raise · enters the same governance pipeline as auto-detected incidents
             </p>
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg bg-zinc-100 dark:bg-zinc-800 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+          <button type="button" onClick={onClose} className="rounded-lg bg-zinc-100 dark:bg-zinc-800 p-1.5 text-black hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -262,7 +262,7 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
 
               {/* Severity picker */}
               <div>
-                <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
                   Severity *
                 </label>
                 <div className="grid grid-cols-5 gap-2">
@@ -274,7 +274,7 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
                         className={`flex flex-col items-center rounded-xl border p-3 transition-colors ${
                           field.value === sev
                             ? severityConfig[sev].active
-                            : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/40 text-zinc-400 dark:text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-600"
+                            : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/40 text-black dark:text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-600"
                         }`}
                       >
                         <span className="text-[13px] font-bold">{sev}</span>
@@ -350,13 +350,13 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
             <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-500 mb-3">
               Incident Preview
             </p>
-            <p className="text-[18px] font-bold text-zinc-800 dark:text-zinc-100 mb-1 break-words">
+            <p className="text-[18px] font-bold text-black dark:text-zinc-100 mb-1 break-words">
               {watchedTitle || "Incident title will appear here…"}
             </p>
-            <p className="text-[12px] text-zinc-500 dark:text-zinc-400 mb-3">
+            <p className="text-[12px] text-black dark:text-zinc-400 mb-3">
               {watchedService !== "select-service" ? watchedService : "Service"} · {watchedEnv} · {watchedSeverity}
             </p>
-            <div className="flex items-start gap-2 text-[11px] text-zinc-400 dark:text-zinc-500">
+            <div className="flex items-start gap-2 text-[11px] text-black dark:text-zinc-500">
               <Info size={13} className="mt-0.5 shrink-0" />
               <p>Scrubbe will correlate this with active signals and run playbook matching automatically once raised.</p>
             </div>
@@ -368,10 +368,10 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
 
           {/* Footer */}
           <div className="sticky bottom-0 z-20 flex justify-end gap-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 py-4">
-            <button type="button" onClick={onClose} className="rounded-lg border border-zinc-200 dark:border-zinc-700 px-5 py-2 text-[12px] font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            <button type="button" onClick={onClose} className="rounded-lg border border-zinc-500 dark:border-zinc-700 px-5 py-2 text-[12px] font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
               Cancel
             </button>
-            <button type="button" disabled={createMutation.isPending} className="rounded-lg border border-zinc-200 dark:border-zinc-700 px-5 py-2 text-[12px] font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50">
+            <button type="button" disabled={createMutation.isPending} className="rounded-lg border border-zinc-500 dark:border-zinc-700 px-5 py-2 text-[12px] font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50">
               Save as draft
             </button>
             <button type="submit" disabled={createMutation.isPending} className="rounded-lg bg-emerald-500 hover:bg-emerald-600 px-6 py-2 text-[12px] font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50">

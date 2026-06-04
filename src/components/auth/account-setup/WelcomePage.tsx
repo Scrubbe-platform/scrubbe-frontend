@@ -21,6 +21,7 @@ import { apiClient } from "@/lib/api/client";
 import { endpoint } from "@/lib/api/endpoint";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import useGetConfig from "@/hooks/useConfig";
 
 function normalizeInviteRole(value: string) {
   const normalized = value.trim().toLowerCase();
@@ -309,6 +310,7 @@ const ScrubbeOnboarding = () => {
       setIsSubmitting(false);
     }
   };
+    const { imsConfig, isLoading } = useGetConfig();
 
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-grayscrubbe-900 dark:text-grayscrubbe-300 font-sans p-10 selection:bg-IMSCyan selection:text-black">
@@ -319,20 +321,20 @@ const ScrubbeOnboarding = () => {
         {/* HEADER SECTION */}
         <div className="flex justify-between items-start mb-12">
           <div className="max-w-3xl">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+            <h1 className="text-3xl font-bold text-black dark:text-white mb-3">
               Welcome to your Scrubbe Workspace
             </h1>
             <p className="text-gray-500 dark:text-grayscrubbe-400 text-base leading-relaxed">
               You&apos;re the first administrator here. Take a few minutes to
               invite your team, choose roles and permissions, and set the basic
               guardrails for how incidents, fraud signals, and handovers work in
-              acme-payments.
+              {imsConfig?.orgName || "your organization"}-payments.
             </p>
           </div>
           <button
             type="button"
             onClick={() => router.push("/incident")}
-            className="px-4 py-1.5 border border-gray-300 dark:border-white rounded text-xs font-bold text-gray-900 dark:text-white hover:bg-transparent"
+            className="px-4 py-1.5 border border-gray-300 dark:border-white rounded text-xs font-bold text-black dark:text-white hover:bg-transparent"
           >
             Skip for now
           </button>
@@ -421,7 +423,7 @@ const ScrubbeOnboarding = () => {
                   render={({ field }) => (
                     <ToggleSwitch
                       label="Self Sign-Up"
-                      sub="Allow anyone with @acme.com to join"
+                      sub={"Allow anyone with @" + (imsConfig?.orgName || "your organization") + ".com to join"}
                       value={field.value}
                       onChange={field.onChange}
                     />
@@ -599,7 +601,7 @@ const ScrubbeOnboarding = () => {
                             render={({ field }) => (
                               <Input
                                 label="Discovery Domain"
-                                placeholder="acme.com"
+                                placeholder={"e.g. acme.com (for auto-discovery of IdP settings)"}
                                 {...field}
                               />
                             )}
@@ -610,7 +612,7 @@ const ScrubbeOnboarding = () => {
                         <div className="bg-panel/40 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
                           <div className="p-4 border-b border-white/5 bg-white/5 flex items-center gap-3">
                             <Database className="size-4 text-accent" />
-                            <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest">
+                            <h3 className="text-xs font-bold text-black dark:text-white uppercase tracking-widest">
                               {formValues.ssoConfiguration.ssoType === "SAML_2"
                                 ? "SAML 2.0 Identity Details"
                                 : "OIDC Client Configuration"}
@@ -651,7 +653,7 @@ const ScrubbeOnboarding = () => {
                                       control={control}
                                       render={({ field }) => (
                                         <Input
-                                          placeholder="urn:scrubbe:acme"
+                                          placeholder="urn:example:app"
                                           className="!h-11 !bg-void/50"
                                           {...field}
                                         />
@@ -738,7 +740,7 @@ const ScrubbeOnboarding = () => {
                         <div className=" border border-IMSCyan/10 rounded-2xl p-6 space-y-6 mt-4">
                           <div className="flex items-center gap-3 mb-2">
                             <Fingerprint className="size-5 text-IMSCyan" />
-                            <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest">
+                            <h3 className="text-sm font-bold text-black dark:text-white uppercase tracking-widest">
                               Provisioning & Role Mapping
                             </h3>
                           </div>
@@ -879,7 +881,7 @@ const ScrubbeOnboarding = () => {
             >
               <div className="grid grid-cols-2 gap-6 mb-8">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-gray-900 dark:text-white uppercase">
+                  <label className="text-[11px] font-bold text-black dark:text-white uppercase">
                     Workspace Name
                   </label>
                   <input
@@ -903,7 +905,7 @@ const ScrubbeOnboarding = () => {
                   )}
                 />
               </div>
-              <p className="text-gray-900 dark:text-white text-base pb-3">
+              <p className="text-black dark:text-white text-base pb-3">
                 Key integrations to connect now
               </p>
               <div className="grid grid-cols-2 gap-4">
@@ -966,14 +968,14 @@ const ScrubbeOnboarding = () => {
           {/* RIGHT COLUMN: SIDEBAR (EXACT UI) */}
           <aside className="flex-1 space-y-6 ">
             <div className="border-zinc-400 border bg-white dark:bg-grayscrubbe-900 p-6 rounded-lg">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">
+              <h3 className="text-base font-bold text-black dark:text-white mb-1">
                 People in this workspace
               </h3>
               <p className="text-sm text-gray-600 dark:text-zinc-200 mb-4 tracking-tighter">
                 A quick snapshot of who’s here and what they can do.{" "}
               </p>
               <div className="mb-4">
-                <div className="flex justify-between items-center text-sm text-gray-900 dark:text-white ">
+                <div className="flex justify-between items-center text-sm text-black dark:text-white ">
                   <span className="font-medium">You (workspace owner)</span>
                   <span className="text-[10px] font-bold text-grayscrubbe-500 dark:text-grayscrubbe-500 uppercase">
                     Admin
@@ -993,7 +995,7 @@ const ScrubbeOnboarding = () => {
             </div>
 
             <div className="border-zinc-400 border bg-white dark:bg-grayscrubbe-900 p-6 rounded-lg space-y-3">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <h3 className="text-base font-bold text-black dark:text-white flex items-center gap-2">
                 <Info size={14} className="text-IMSCyan" /> Need help?
               </h3>
               <p className="text-sm">
@@ -1052,7 +1054,7 @@ const StepWrapper = ({
 const ToggleSwitch = ({ label, sub, value, onChange }: any) => (
   <div className="flex items-center justify-between gap-6">
     <div className="flex flex-col">
-      <span className="text-base font-bold text-gray-900 dark:text-white">{label}</span>
+      <span className="text-base font-bold text-black dark:text-white">{label}</span>
       <span className="text-sm text-gray-600 dark:text-zinc-300">{sub}</span>
     </div>
     <Switch value={value} onChange={() => onChange(!value)} color="success" />
@@ -1073,7 +1075,7 @@ const RoleCard = ({
       active ? "opacity-100 scale-105" : "opacity-65 scale-100"
     } p-4 rounded-lg border cursor-pointer bg-white dark:bg-grayscrubbe-900 border-gray-200 dark:border-zinc-300 hover:border-gray-300 dark:hover:border-grayscrubbe-700 transition-all duration-250`}
   >
-    <h4 className={`text-base font-bold mb-1 text-gray-900 dark:text-white`}>{title}</h4>
+    <h4 className={`text-base font-bold mb-1 text-black dark:text-white`}>{title}</h4>
     <p className="text-sm text-gray-600 dark:text-zinc-300 leading-tight">{desc}</p>
   </div>
 );
@@ -1081,7 +1083,7 @@ const RoleCard = ({
 const CustomSelect = ({ label, value, options, onChange }: any) => {
   return (
     <div className="space-y-2 relative">
-      <label className="text-[11px] font-bold text-gray-900 dark:text-white uppercase">
+      <label className="text-[11px] font-bold text-black dark:text-white uppercase">
         {label}
       </label>
       <Select
@@ -1106,7 +1108,7 @@ const PolicyGroup = ({
   children: ReactNode;
 }) => (
   <div className="space-y-3">
-    <h4 className="text-base font-bold text-gray-900 dark:text-white  uppercase tracking-widest">
+    <h4 className="text-base font-bold text-black dark:text-white  uppercase tracking-widest">
       {title}
     </h4>
     <div className="space-y-5">{children}</div>
@@ -1126,7 +1128,7 @@ const PolicyToggle = ({
 }) => (
   <div className="flex justify-between items-start">
     <div className="flex flex-col">
-      <span className="text-sm font-bold text-gray-900 dark:text-white tracking-wide">
+      <span className="text-sm font-bold text-black dark:text-white tracking-wide">
         {label}
       </span>
       <span className="text-sm text-gray-600 dark:text-zinc-200">{sub}</span>
@@ -1156,8 +1158,8 @@ const IntegrationCard = ({
     }`}
   >
     <div className="pr-4">
-      <p className="text-xs font-bold text-gray-900 dark:text-white tracking-widest">{label}</p>
-      <p className="text-[11px] text-zinc-400">{desc}</p>
+      <p className="text-xs font-bold text-black dark:text-white tracking-widest">{label}</p>
+      <p className="text-[11px] text-black">{desc}</p>
     </div>
     <Switch
       isSelected={active}

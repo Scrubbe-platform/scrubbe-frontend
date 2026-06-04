@@ -62,7 +62,7 @@ const KPICard = ({ title, value, change, icon: Icon, color }: any) => (
 // Incident Risk Card Component
 const IncidentRiskCard = ({ id, status, sla, tenant }: any) => (
   <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-4">
-    <h4 className="text-lg font-semibold text-gray-800 mb-2">Incident #{id}</h4>
+    <h4 className="text-lg font-semibold text-black mb-2">Incident #{id}</h4>
     <div className="space-y-1 text-sm text-gray-600">
       <p>
         <span className="font-medium">Status:</span>{" "}
@@ -166,7 +166,7 @@ const SLADashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
           {/* Overall Compliance (Gauge/Donut) */}
           <div className="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            <h3 className="text-lg font-semibold text-black mb-4">
               Overall Compliance
             </h3>
             <OverallComplianceChart compliance={analytics?.overallCompliance} />
@@ -185,7 +185,7 @@ const SLADashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Performance Trend (Line Chart) */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            <h3 className="text-lg font-semibold text-black mb-4">
               Performance Trend
             </h3>
             <PerformanceTrendChart
@@ -196,7 +196,7 @@ const SLADashboard = () => {
 
           {/* Breaches by Priority (Pie Chart) */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            <h3 className="text-lg font-semibold text-black mb-4">
               Breaches by Priority
             </h3>
             <BreachesByPriorityChart
@@ -208,7 +208,7 @@ const SLADashboard = () => {
 
         {/* 4. Incidents at Risk Section */}
         <div>
-          <h3 className="text-xl font-bold text-gray-800 mb-4">
+          <h3 className="text-xl font-bold text-black mb-4">
             Incidents at Risk of Breach
           </h3>
           {incidentsAtRisk.length > 0 ? (

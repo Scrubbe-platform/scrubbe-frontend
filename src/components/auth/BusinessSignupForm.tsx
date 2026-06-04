@@ -90,7 +90,7 @@ type BusinessSignupFormData = z.infer<typeof businessSignupSchema>;
 function FieldLabel({ label, info }: { label: string; info?: string }) {
   return (
     <div className="flex items-center justify-between mb-1.5">
-      <label className="text-sm font-semibold text-gray-900">{label}</label>
+      <label className="text-sm font-semibold text-black">{label}</label>
       {info && (
         <button
           type="button"
@@ -114,7 +114,7 @@ function FieldError({ message }: { message?: string }) {
 }
 
 const inputCls =
-  "w-full flex items-center gap-2.5 border border-gray-200 rounded-lg px-3.5 py-3 text-sm text-gray-800 placeholder-gray-400 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all bg-white";
+  "w-full flex items-center gap-2.5 border border-gray-200 rounded-lg px-3.5 py-3 text-sm text-black placeholder-gray-400 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all bg-white";
 
 // ─────────────────────────────────────────────────────────────────
 // Success page
@@ -137,7 +137,7 @@ function SuccessPage({
         <div className="size-[90px] rounded-full bg-emerald-500 absolute" />
         <BiCheck className="absolute text-white" size={40} />
       </div>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+      <h1 className="text-2xl font-semibold text-black mb-2">
         Workspace created!
       </h1>
       <p className="text-gray-500 text-center text-sm">
@@ -310,7 +310,7 @@ export default function BusinessSignupForm() {
   if (profileComplete) {
     return (
       <div className="w-full">
-        <h1 className="text-xl font-semibold text-gray-900 mb-1">
+        <h1 className="text-xl font-semibold text-black mb-1">
           Complete your profile
         </h1>
         <p className="text-sm text-gray-500 mb-6">
@@ -360,7 +360,7 @@ export default function BusinessSignupForm() {
 
         {/* Page heading */}
         <div className="text-center mb-8">
-          <h1 className="text-[28px] font-black text-gray-900 tracking-tight mb-1">
+          <h1 className="text-[28px] font-black text-black tracking-tight mb-1">
             Create your workspace
           </h1>
           <p className="text-sm text-gray-500">
@@ -485,7 +485,7 @@ export default function BusinessSignupForm() {
                     <Globe size={15} className="text-gray-400 shrink-0" />
                     <input
                       {...field}
-                      className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400 min-w-0"
+                      className="flex-1 bg-transparent outline-none text-sm text-black placeholder-gray-400 min-w-0"
                       placeholder="acme"
                     />
                   </div>
@@ -501,7 +501,7 @@ export default function BusinessSignupForm() {
             <FieldError message={errors.workspaceUrl?.message} />
             <FieldHint>
               Example:{" "}
-              <span className="text-gray-700">
+              <span className="text-black">
                 {watch("workspaceUrl") || "acme"}.scrubbe.com
               </span>
               .
@@ -531,14 +531,14 @@ export default function BusinessSignupForm() {
               By creating a workspace, you agree to Scrubbe's{" "}
               <Link
                 href="/terms-service"
-                className="underline text-gray-800 hover:text-emerald-600"
+                className="underline text-black hover:text-emerald-600"
               >
                 Terms of Service
               </Link>{" "}
               and{" "}
               <Link
                 href="/privacy-policy"
-                className="underline text-gray-800 hover:text-emerald-600"
+                className="underline text-black hover:text-emerald-600"
               >
                 Privacy Policy
               </Link>

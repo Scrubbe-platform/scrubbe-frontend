@@ -36,7 +36,7 @@ const IncidentOverview: React.FC = () => {
   const showMainPanel = Boolean(incidentId && selectedIncident);
 
   return (
-    <div className="flex h-screen dark:text-slate-300 text-slate-600 font-sans overflow-hidden">
+    <div className="flex h-screen dark:text-slate-300 text-black font-sans overflow-hidden">
       <aside
         className={cn(
           "md:border-r border-white/5 flex flex-col h-full shrink-0",

@@ -50,7 +50,7 @@ const IntelligenceModule: React.FC<IntelligenceProps> = ({
         </div>
 
         {/* Analysis text */}
-        <p className="text-[14px] text-zinc-700 dark:text-zinc-200 leading-relaxed">
+        <p className="text-[14px] text-black dark:text-zinc-200 leading-relaxed">
           {description}
         </p>
       </div>
@@ -61,7 +61,7 @@ const IntelligenceModule: React.FC<IntelligenceProps> = ({
           {relatedItems.map((item) => (
             <span
               key={item.id}
-              className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 whitespace-nowrap shrink-0"
+              className="px-3 py-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 text-[11px] font-medium text-black dark:text-zinc-400 whitespace-nowrap shrink-0"
             >
               {item.id}
               {typeof item.confidence === "number" ? ` · ${item.confidence}%` : ""}
@@ -85,7 +85,7 @@ const ScrubbeIntelligence = ({ incident }: { incident: IncidentDetailRecord }) =
 
   return (
     <div className="px-5 md:px-8 py-6 border-b border-zinc-100 dark:border-white/[0.06]">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-4">
         Scrubbe Intelligence
       </p>
 

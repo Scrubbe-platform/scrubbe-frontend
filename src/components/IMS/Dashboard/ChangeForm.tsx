@@ -318,7 +318,7 @@ const ChangeForm = ({ onClose }: { onClose: () => void }) => {
                             />
                             <label
                               htmlFor={incident?.id}
-                              className="text-gray-700 select-none cursor-pointer text-base"
+                              className="text-black select-none cursor-pointer text-base"
                             >
                               {incident?.ticketId} {incident?.reason}
                             </label>

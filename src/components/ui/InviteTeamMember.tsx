@@ -142,7 +142,7 @@ const InviteTeamMember = () => {
 
         {/* Access Permissions */}
         <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-700">Permissions</h4>
+          <h4 className="text-sm font-medium text-black">Permissions</h4>
           <div className="flex flex-wrap items-center gap-4">
             <Controller
               name="permissions"
@@ -170,7 +170,7 @@ const InviteTeamMember = () => {
                       />
                       <label
                         htmlFor={permission.value}
-                        className="text-sm text-gray-700"
+                        className="text-sm text-black"
                       >
                         {permission.label}
                       </label>

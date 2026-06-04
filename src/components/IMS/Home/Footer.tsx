@@ -191,7 +191,7 @@ export default function Footer() {
 
           {/* ── RIGHT: Systems Operational pill ── */}
           <div className="flex items-start justify-end">
-            <div
+            <Link href="/system-status"
               className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-semibold whitespace-nowrap"
               style={{
                 border: "1px solid #22c55e",
@@ -204,7 +204,7 @@ export default function Footer() {
                 style={{ background: "#22c55e" }}
               />
               Systems Operational
-            </div>
+            </Link>
           </div>
         </div>
       </div>

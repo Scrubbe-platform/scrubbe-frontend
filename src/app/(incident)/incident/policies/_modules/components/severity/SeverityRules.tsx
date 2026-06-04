@@ -204,7 +204,7 @@ const SeverityRules = () => {
                             </div>
                         </div>
 
-                        <TextArea placeholder='Optional : house styles , terms to avoid , how to talk about customers , etc' className='!bg-dark' />
+                        <TextArea placeholder='Optional : house styles , terms to avoid , how to talk about customers , etc' />
                     </div>
                 </div>
             </FormWrapper>

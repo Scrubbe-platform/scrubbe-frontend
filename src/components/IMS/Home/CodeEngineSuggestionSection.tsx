@@ -442,7 +442,7 @@ export default function EzraCodeEngineSection() {
                     </div>
                     <button
                       onClick={() => setActiveTab("suggestion")}
-                      className="w-full mt-4 py-2.5 rounded text-[12px] font-bold text-gray-900 border-none cursor-pointer hover:brightness-110"
+                      className="w-full mt-4 py-2.5 rounded text-[12px] font-bold text-black border-none cursor-pointer hover:brightness-110"
                       style={{ background: "#f59e0b" }}
                     >
                       ⚡ View Ezra's fix →
@@ -502,7 +502,7 @@ export default function EzraCodeEngineSection() {
                       github.com/acme/checkout-api/pull/2847
                     </p>
                     <button
-                      className="w-full py-2.5 rounded text-[12px] font-bold text-gray-900 border-none cursor-pointer mb-2 hover:brightness-110"
+                      className="w-full py-2.5 rounded text-[12px] font-bold text-black border-none cursor-pointer mb-2 hover:brightness-110"
                       style={{ background: "#22c55e" }}
                     >
                       Approve and Merge
@@ -535,7 +535,7 @@ export default function EzraCodeEngineSection() {
                   {f.icon}
                 </div>
                 <div>
-                  <p className="text-[13.5px] font-bold text-gray-900 mb-1.5">
+                  <p className="text-[13.5px] font-bold text-black mb-1.5">
                     {f.title}
                   </p>
                   <p className="text-[12.5px] text-gray-500 leading-relaxed">
