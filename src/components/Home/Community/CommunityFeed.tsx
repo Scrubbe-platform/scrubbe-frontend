@@ -162,7 +162,7 @@ const POSTS: Post[] = [
         initials: "TK",
         avatarColor: "bg-purple-400",
         role: "PLATFORM ENG",
-        roleBadgeColor: "bg-gray-100 text-gray-700 border border-gray-200",
+        roleBadgeColor: "bg-gray-100 text-black border border-gray-200",
         timeAgo: "1 day ago",
         content:
           "We do exactly this. Prod at EAL 2, staging at EAL 3. One gotcha: make sure env labels in your ScrubbEvent schema match the policy entity keys exactly — case sensitive.",
@@ -177,7 +177,7 @@ const POSTS: Post[] = [
     initials: "JW",
     avatarColor: "bg-blue-500",
     role: "DEVOPS ENGINEER",
-    roleBadgeColor: "bg-gray-100 text-gray-700 border border-gray-200",
+    roleBadgeColor: "bg-gray-100 text-black border border-gray-200",
     communityFavourite: true,
     timeAgo: "Yesterday",
     views: "2.1k",
@@ -219,7 +219,7 @@ const POSTS: Post[] = [
     initials: "AM",
     avatarColor: "bg-green-500",
     role: "SRE LEAD · FINTECH",
-    roleBadgeColor: "bg-gray-100 text-gray-700 border border-gray-200",
+    roleBadgeColor: "bg-gray-100 text-black border border-gray-200",
     timeAgo: "Yesterday",
     views: "2.1k",
     tags: [
@@ -323,7 +323,7 @@ function SharePopover({
           </span>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-700 transition-colors"
+            className="text-gray-400 hover:text-black transition-colors"
           >
             <X size={13} />
           </button>
@@ -341,7 +341,7 @@ function SharePopover({
               className={`text-[11px] font-bold transition-colors shrink-0 ${
                 copied
                   ? "text-emerald-600"
-                  : "text-gray-700 hover:text-emerald-600"
+                  : "text-black hover:text-emerald-600"
               }`}
             >
               {copied ? "Copied!" : "Copy"}
@@ -399,7 +399,7 @@ function ReadFullModal({ post, onClose }: { post: Post; onClose: () => void }) {
           </div>
           <button
             onClick={onClose}
-            className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-black hover:bg-gray-100 transition-colors"
           >
             <X size={15} />
           </button>
@@ -408,7 +408,7 @@ function ReadFullModal({ post, onClose }: { post: Post; onClose: () => void }) {
         <div className="overflow-y-auto p-6 flex-1">
           <h2
             className={`text-[20px] sm:text-[22px] font-bold leading-snug mb-3 ${
-              post.titleColor ?? "text-gray-900"
+              post.titleColor ?? "text-black"
             }`}
           >
             {post.title}
@@ -419,7 +419,7 @@ function ReadFullModal({ post, onClose }: { post: Post; onClose: () => void }) {
               color={post.avatarColor}
               size="sm"
             />
-            <span className="text-[13px] font-semibold text-gray-800">
+            <span className="text-[13px] font-semibold text-black">
               {post.author}
             </span>
             <span className="text-[12px] text-gray-400">{post.timeAgo}</span>
@@ -429,7 +429,7 @@ function ReadFullModal({ post, onClose }: { post: Post; onClose: () => void }) {
               </span>
             )}
           </div>
-          <p className="text-[14px] sm:text-[15px] text-gray-700 leading-relaxed whitespace-pre-line">
+          <p className="text-[14px] sm:text-[15px] text-black leading-relaxed whitespace-pre-line">
             {post.body}
           </p>
           {post.trending && (
@@ -495,7 +495,7 @@ function InlineContent({ text }: { text: string }) {
         part.startsWith("`") && part.endsWith("`") ? (
           <code
             key={i}
-            className="px-1 py-0.5 bg-gray-100 text-gray-700 rounded text-[12px] sm:text-[13px] font-mono break-all"
+            className="px-1 py-0.5 bg-gray-100 text-black rounded text-[12px] sm:text-[13px] font-mono break-all"
           >
             {part.slice(1, -1)}
           </code>
@@ -528,7 +528,7 @@ function ReactionPill({
       className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[12px] sm:text-[13px] font-semibold border transition-all cursor-pointer ${
         active
           ? "bg-amber-50 border-amber-300 text-amber-700 scale-105"
-          : "bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:scale-105"
+          : "bg-white border-gray-200 text-black hover:border-gray-300 hover:scale-105"
       }`}
     >
       <span>{emoji}</span>
@@ -615,7 +615,7 @@ function ReactButton({
         className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-[11px] font-bold tracking-wide transition-colors cursor-pointer border-0 ${
           myReaction
             ? "text-amber-600 bg-amber-50"
-            : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+            : "text-gray-500 hover:text-black hover:bg-gray-50"
         }`}
       >
         {myReaction ? (
@@ -739,7 +739,7 @@ function ActionBtn({
       className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-[11px] font-bold tracking-wide transition-colors cursor-pointer border-0 ${
         active
           ? "text-emerald-600 bg-emerald-50"
-          : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+          : "text-gray-500 hover:text-black hover:bg-gray-50"
       }`}
     >
       {icon}
@@ -766,7 +766,7 @@ function ReplyCard({ reply }: { reply: Reply }) {
             color={reply.avatarColor}
             size="sm"
           />
-          <span className="text-[13px] sm:text-[14px] font-semibold text-gray-900">
+          <span className="text-[13px] sm:text-[14px] font-semibold text-black">
             {reply.author}
           </span>
           {reply.badges?.map((b, i) => (
@@ -781,7 +781,7 @@ function ReplyCard({ reply }: { reply: Reply }) {
             {reply.timeAgo}
           </span>
         </div>
-        <p className="text-[13px] sm:text-[14px] text-gray-700 leading-relaxed">
+        <p className="text-[13px] sm:text-[14px] text-black leading-relaxed">
           <InlineContent text={reply.content} />
         </p>
         <button
@@ -823,7 +823,7 @@ function CommentCard({
         <div className="flex-1 min-w-0">
           <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4">
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-2">
-              <span className="text-[13px] sm:text-[14px] font-semibold text-gray-900">
+              <span className="text-[13px] sm:text-[14px] font-semibold text-black">
                 {comment.author}
               </span>
               <span
@@ -835,7 +835,7 @@ function CommentCard({
                 {comment.timeAgo}
               </span>
             </div>
-            <p className="text-[13px] sm:text-[14px] text-gray-700 leading-relaxed">
+            <p className="text-[13px] sm:text-[14px] text-black leading-relaxed">
               <InlineContent text={comment.content} />
             </p>
             <div className="flex items-center gap-3 mt-3">
@@ -908,7 +908,7 @@ function CommentsSection({
       initials: "Y",
       avatarColor: "bg-emerald-500",
       role: "MEMBER",
-      roleBadgeColor: "bg-gray-100 text-gray-700 border border-gray-200",
+      roleBadgeColor: "bg-gray-100 text-black border border-gray-200",
       timeAgo: "just now",
       content: newComment.trim(),
       likes: 0,
@@ -956,7 +956,7 @@ function CommentsSection({
             }}
             placeholder="Add a comment..."
             rows={2}
-            className="w-full px-3 sm:px-4 pt-3 pb-1 text-[13px] sm:text-[14px] text-gray-700 placeholder-gray-400 resize-none outline-none bg-transparent border-0"
+            className="w-full px-3 sm:px-4 pt-3 pb-1 text-[13px] sm:text-[14px] text-black placeholder-gray-400 resize-none outline-none bg-transparent border-0"
           />
           <div className="flex items-center justify-between px-3 sm:px-4 pb-3 gap-2">
             <span className="text-[10px] sm:text-[11px] text-gray-400 font-mono hidden sm:block">
@@ -1044,7 +1044,7 @@ function PostCard({ post }: { post: Post }) {
         <div className="flex items-start sm:items-center gap-2 sm:gap-2.5 mb-3 flex-wrap">
           <Avatar initials={post.initials} color={post.avatarColor} size="md" />
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
-            <span className="text-[13px] sm:text-[14px] font-semibold text-gray-900">
+            <span className="text-[13px] sm:text-[14px] font-semibold text-black">
               {post.author}
             </span>
 
@@ -1102,7 +1102,7 @@ function PostCard({ post }: { post: Post }) {
         {/* Title */}
         <h2
           className={`text-[16px] sm:text-[18px] md:text-[20px] font-bold leading-snug mb-2 cursor-pointer hover:underline underline-offset-2 ${
-            post.titleColor ?? "text-gray-900"
+            post.titleColor ?? "text-black"
           }`}
           onClick={() => setShowReadFull(true)}
         >

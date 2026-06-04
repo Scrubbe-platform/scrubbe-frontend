@@ -7,7 +7,7 @@ import CButton from "@/components/ui/Cbutton";
 
 const IncidentPolicy = () => {
   return (
-    <div className=" bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 min-h-screen p-10 space-y-3">
+    <div className=" bg-white dark:bg-zinc-950 text-black dark:text-zinc-200 min-h-screen p-10 space-y-3">
       <div className="flex items-center gap-3">
         <p className="text-lg dark:text-white font-medium">Incident policies</p>
         <div className="border border-white rounded-md px-2 py-1 text-xs">

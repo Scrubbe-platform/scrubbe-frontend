@@ -98,9 +98,9 @@ const FeatureCard = ({
   title: string; description: string; active: boolean;
   onToggle: () => void; fullWidth?: boolean;
 }) => (
-  <div className={`${fullWidth ? "w-full" : ""} bg-white dark:bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-xl p-4 flex justify-between items-start transition-all hover:border-zinc-300 dark:hover:border-neutral-500/80`}>
+  <div className={`${fullWidth ? "w-full" : ""} bg-white dark:bg-transparent border border-zinc-500 dark:border-neutral-500 rounded-xl p-4 flex justify-between items-start transition-all hover:border-zinc-300 dark:hover:border-neutral-500/80`}>
     <div className="space-y-2 pr-4">
-      <h3 className="text-zinc-800 dark:text-white font-bold text-lg">{title}</h3>
+      <h3 className="text-black dark:text-white font-bold text-lg">{title}</h3>
       <p className="text-zinc-500 dark:text-[#94A3B8] text-sm leading-relaxed max-w-[280px]">{description}</p>
     </div>
     <Switch color="success" size="sm" isSelected={active} onChange={onToggle} />

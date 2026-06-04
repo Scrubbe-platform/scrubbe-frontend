@@ -86,12 +86,12 @@ const page = () => {
           <div className="space-y-6 pt-5">
 
             {/* ── SEVERITY MAPPING ── */}
-            <section className="bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-[24px] p-4 space-y-4">
-              <h3 className="text-zinc-800 dark:text-white font-bold text-lg">
+            <section className="bg-transparent border border-zinc-500 dark:border-neutral-500 rounded-[24px] p-4 space-y-4">
+              <h3 className="text-black dark:text-white font-bold text-lg">
                 Severity mapping
               </h3>
               <div className="space-y-3">
-                <label className="text-zinc-700 dark:text-white text-sm font-medium ml-1">
+                <label className="text-black dark:text-white text-sm font-medium ml-1">
                   Delivery incidents default severity
                 </label>
                 <Controller
@@ -99,7 +99,7 @@ const page = () => {
                   control={control}
                   render={({ field }) => (
                     <Select
-                      className="bg-white dark:bg-[#0B1224] text-zinc-700 dark:text-white"
+                      className="bg-white dark:bg-[#0B1224] text-black dark:text-white"
                       options={[
                         { value: "P4", label: "P4 - Low"      },
                         { value: "P3", label: "P3 - Medium"   },
@@ -134,13 +134,13 @@ const page = () => {
             </section>
 
             {/* ── DEDUPLICATION ── */}
-            <section className="bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-[24px] p-4 space-y-6">
-              <h3 className="text-zinc-800 dark:text-white font-bold text-lg">
+            <section className="bg-transparent border border-zinc-500 dark:border-neutral-500 rounded-[24px] p-4 space-y-6">
+              <h3 className="text-black dark:text-white font-bold text-lg">
                 Deduplication
               </h3>
 
               <div className="space-y-3">
-                <label className="text-zinc-700 dark:text-white text-sm font-medium ml-1">
+                <label className="text-black dark:text-white text-sm font-medium ml-1">
                   Correlation key
                 </label>
                 <Controller
@@ -148,7 +148,7 @@ const page = () => {
                   control={control}
                   render={({ field }) => (
                     <Input
-                      className="bg-white dark:bg-[#0B1224] text-zinc-700 dark:text-white"
+                      className="bg-white dark:bg-[#0B1224] text-black dark:text-white"
                       placeholder="repo + pr + runId + sha"
                       {...field}
                     />
@@ -161,7 +161,7 @@ const page = () => {
               </div>
 
               <div className="space-y-3 pt-2">
-                <label className="text-zinc-700 dark:text-white text-sm font-medium ml-1">
+                <label className="text-black dark:text-white text-sm font-medium ml-1">
                   Auto-close delivery incidents after
                 </label>
                 <Controller
@@ -169,7 +169,7 @@ const page = () => {
                   control={control}
                   render={({ field }) => (
                     <Select
-                      className="bg-white dark:bg-[#0B1224] text-zinc-700 dark:text-white"
+                      className="bg-white dark:bg-[#0B1224] text-black dark:text-white"
                       options={[
                         { value: "never",           label: "Never"            },
                         { value: "24 hours stable", label: "24 hours stable"  },
@@ -184,8 +184,8 @@ const page = () => {
             </section>
 
             {/* ── EVIDENCE CAPTURE ── */}
-            <section className="bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-[24px] p-4 space-y-6">
-              <h3 className="text-zinc-800 dark:text-white font-bold text-lg">
+            <section className="bg-transparent border border-zinc-500 dark:border-neutral-500 rounded-[24px] p-4 space-y-6">
+              <h3 className="text-black dark:text-white font-bold text-lg">
                 Evidence capture
               </h3>
               <div className="space-y-4">
@@ -236,9 +236,9 @@ const ToggleField = ({
   checked: boolean;
   onChange: (v: boolean) => void;
 }) => (
-  <div className="flex justify-between items-center p-5 border border-zinc-200 dark:border-neutral-500 rounded-2xl bg-white dark:bg-transparent">
+  <div className="flex justify-between items-center p-5 border border-zinc-500 dark:border-neutral-500 rounded-2xl bg-white dark:bg-transparent">
     <div className="space-y-1">
-      <span className="text-zinc-800 dark:text-white text-[15px] font-bold">
+      <span className="text-black dark:text-white text-[15px] font-bold">
         {label}
       </span>
       <p className="text-zinc-400 dark:text-[#64748B] text-xs">{desc}</p>

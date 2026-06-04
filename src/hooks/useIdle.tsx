@@ -12,30 +12,34 @@ const events = [
 
 const useIdle = (idleTime = 900000, onIdle: () => void, onReset?: () => void) => {
   const [isIdle, setIsIdle] = useState(false);
-  const timeoutRef = useRef<any | null>(null);
-  const onIdleRef = useRef(onIdle);
-  const onResetRef = useRef(onReset);
+  const timeoutRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onIdleRef   = useRef(onIdle);
+  const onResetRef  = useRef(onReset);
+  const hasInteractedRef = useRef(false); // ← track if user ever interacted
 
-  useEffect(() => { onIdleRef.current = onIdle; }, [onIdle]);
+  useEffect(() => { onIdleRef.current  = onIdle;  }, [onIdle]);
   useEffect(() => { onResetRef.current = onReset; }, [onReset]);
 
   useEffect(() => {
     const resetTimer = () => {
-      clearTimeout(timeoutRef.current);
+      hasInteractedRef.current = true; // mark that real interaction happened
+      clearTimeout(timeoutRef.current!);
       setIsIdle(false);
       onResetRef.current?.();
       timeoutRef.current = setTimeout(() => {
-        setIsIdle(true);
-        onIdleRef.current?.();
+        // only go idle if the user actually interacted at some point
+        if (hasInteractedRef.current) {
+          setIsIdle(true);
+          onIdleRef.current?.();
+        }
       }, idleTime);
     };
 
-    resetTimer();
-    events.forEach((event) => window.addEventListener(event, resetTimer, { passive: true }));
+    events.forEach((e) => window.addEventListener(e, resetTimer, { passive: true }));
 
     return () => {
-      clearTimeout(timeoutRef.current);
-      events.forEach((event) => window.removeEventListener(event, resetTimer));
+      clearTimeout(timeoutRef.current!);
+      events.forEach((e) => window.removeEventListener(e, resetTimer));
     };
   }, [idleTime]);
 

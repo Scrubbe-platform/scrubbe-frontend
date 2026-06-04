@@ -21,7 +21,7 @@ const Header = ({ incident }: { incident: IncidentDetailRecord }) => {
     { title: `Source: ${sourceLabel}`,  icon: <AiOutlineBranches className="size-3.5 text-amber-500 dark:text-amber-400" />,           onClick: () => undefined              },
     { title: "Playbook Active",         icon: <IoBookOutline className="size-3.5 text-violet-500 dark:text-violet-400" />,             onClick: () => setIsPlaybook(true)    },
     { title: "Decision Log",            icon: <IoDocumentTextOutline className="size-3.5 text-sky-500 dark:text-sky-400" />,           onClick: () => undefined              },
-    { title: "Analyst Note",            icon: <IoDocumentOutline className="size-3.5 text-zinc-400 dark:text-zinc-400" />,             onClick: () => setIsAnalystNote(true) },
+    { title: "Analyst Note",            icon: <IoDocumentOutline className="size-3.5 text-black dark:text-zinc-400" />,             onClick: () => setIsAnalystNote(true) },
   ];
 
   return (
@@ -30,16 +30,16 @@ const Header = ({ incident }: { incident: IncidentDetailRecord }) => {
 
         {/* Left — title block */}
         <div className="space-y-1.5 max-w-xl">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
             Scrubbe · Analyst Investigation
           </p>
-          <p className="text-[16px] font-semibold text-zinc-900 dark:text-white leading-snug">
+          <p className="text-[16px] font-semibold text-black dark:text-white leading-snug">
             {incident.ticketId} · {incident.title || "Delivery incident investigation"}
           </p>
-          <p className="text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+          <p className="text-[13px] leading-relaxed text-black dark:text-zinc-400">
             Analyst view for what went wrong across delivery signals, evidence,
             remediation, verification, and the decision log for{" "}
-            <span className="text-zinc-700 dark:text-zinc-300 font-medium">
+            <span className="text-black dark:text-zinc-300 font-medium">
               {incident.service || "the selected service"}
             </span>.
           </p>
@@ -85,7 +85,7 @@ const Tag = ({
   <button
     type="button"
     onClick={onClick}
-    className="flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 px-2.5 py-1.5 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+    className="flex items-center gap-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 px-2.5 py-1.5 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
   >
     {icon}
     {title}

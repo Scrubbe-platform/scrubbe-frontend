@@ -62,14 +62,14 @@ const SignalEnrichment = () => {
         subtitle="Make incidents signal-rich and fraud-aware by default."
         label="These are defaults. Users still configure integrations on the next step."
       >
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 space-y-4">
-          <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">
+        <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 space-y-4">
+          <p className="text-[13px] font-semibold text-black dark:text-zinc-100">
             Default enrichment sources
           </p>
           <div className="space-y-3">
             {SOURCE_LABELS.map(({ key, label }) => (
               <div key={key} className="flex items-center justify-between">
-                <p className="text-[13px] text-zinc-700 dark:text-zinc-300">{label}</p>
+                <p className="text-[13px] text-black dark:text-zinc-300">{label}</p>
                 <Switch size="sm" color="success" isSelected={sources[key]} onChange={() => toggle(key)} />
               </div>
             ))}

@@ -20,7 +20,7 @@ const ContextAware = () => {
 
           {/* Text content for mobile - sized for different breakpoints */}
           <div className="w-full max-w-[340px] md:max-w-[600px]">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 leading-tight mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-black leading-tight mb-4">
               Context-aware AI that thinks before it acts
             </h2>
             <p className="text-sm md:text-base text-gray-600 mb-3">
@@ -60,7 +60,7 @@ const ContextAware = () => {
           </article>
           <article className="w-[445px] xl:w-[560px] h-[445px] xl:h-[560px] p-6">
             <div className="w-full h-full flex flex-col justify-center space-y-4">
-              <h2 className="text-3xl xl:text-4xl font-bold text-gray-800 leading-tight">
+              <h2 className="text-3xl xl:text-4xl font-bold text-black leading-tight">
                 Context-aware AI that thinks before it acts
               </h2>
               <p className="text-base text-gray-600">

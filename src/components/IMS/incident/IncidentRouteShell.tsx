@@ -57,7 +57,7 @@ const IncidentRouteShell = ({
 
   // ── Content ──────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-black dark:text-zinc-200">
 
       {/* Shell header */}
       <div className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-6 py-5">
@@ -65,18 +65,18 @@ const IncidentRouteShell = ({
 
           {/* Left — incident info */}
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
               {title}
             </p>
 
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-[20px] font-bold tracking-tight text-zinc-900 dark:text-white">
+              <h1 className="text-[20px] font-bold tracking-tight text-black dark:text-white">
                 {incident.ticketId}
               </h1>
               <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold border border-red-200 dark:border-red-500/25 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/8">
                 {incident.severity} · {incident.priority}
               </span>
-              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/60">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold border border-zinc-500 dark:border-zinc-700 text-black dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/60">
                 {incident.status}
               </span>
             </div>
@@ -85,14 +85,14 @@ const IncidentRouteShell = ({
               {incident.title}
             </p>
 
-            <p className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500">
+            <p className="text-[11px] font-mono text-black dark:text-zinc-500">
               {[incident.service, incident.environment, incident.region]
                 .filter(Boolean)
                 .join(" · ")}
             </p>
 
             {description && (
-              <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+              <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-black dark:text-zinc-400">
                 {description}
               </p>
             )}
@@ -102,19 +102,19 @@ const IncidentRouteShell = ({
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <Link
               href={`/incident?id=${incident.id}&tab=overview`}
-              className="px-4 py-2 rounded-lg text-[12px] font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="px-4 py-2 rounded-lg text-[12px] font-semibold border border-zinc-500 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               Overview
             </Link>
             <Link
               href={`/incident?id=${incident.id}&tab=context`}
-              className="px-4 py-2 rounded-lg text-[12px] font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="px-4 py-2 rounded-lg text-[12px] font-semibold border border-zinc-500 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               Context
             </Link>
             <Link
               href={`/incident/tickets/${incident.id}`}
-              className="px-4 py-2 rounded-lg text-[12px] font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors"
+              className="px-4 py-2 rounded-lg text-[12px] font-semibold bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors"
             >
               War Room
             </Link>
@@ -143,19 +143,19 @@ const EmptyState = ({
   linkLabel: string;
 }) => (
   <div className="min-h-screen flex items-center justify-center p-8 bg-white dark:bg-zinc-950">
-    <div className="max-w-md w-full rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-8 text-center">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">
+    <div className="max-w-md w-full rounded-2xl border border-zinc-500 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-8 text-center">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-4">
         {label}
       </p>
-      <h1 className="text-[22px] font-bold text-zinc-900 dark:text-white mb-3">
+      <h1 className="text-[22px] font-bold text-black dark:text-white mb-3">
         {heading}
       </h1>
-      <p className="text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400 mb-6">
+      <p className="text-[13px] leading-relaxed text-black dark:text-zinc-400 mb-6">
         {body}
       </p>
       <Link
         href={href}
-        className="inline-flex px-5 py-2.5 rounded-lg text-[13px] font-semibold border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+        className="inline-flex px-5 py-2.5 rounded-lg text-[13px] font-semibold border border-zinc-300 dark:border-zinc-700 text-black dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
       >
         {linkLabel}
       </Link>

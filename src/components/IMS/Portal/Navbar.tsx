@@ -63,7 +63,7 @@ const Navbar = () => {
             <div className=" cursor-pointer size-7 rounded-full bg-zinc-700 flex justify-center items-center text-sm text-white">
               {user?.firstName?.[0]}.{user?.lastName?.[0]}
             </div>
-            <ChevronDown className=" text-zinc-400" size={16} />
+            <ChevronDown className=" text-black" size={16} />
 
             {menu && (
               <div

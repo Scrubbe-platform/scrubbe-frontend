@@ -9,7 +9,7 @@ const RunDetailPanel = ({ data, onClose }: { data: ActivityItem, onClose: () => 
     const { details, metadata, evidence, trigger, run, repoPath, service } = data;
     const [openRequestApproval, setOpenRequestApproval] = useState(false)
     return (
-        <div className="w-full h-screen bg-white dark:bg-grayscrubbe-900 text-gray-900 dark:text-white flex flex-col overflow-y-auto custom-scrollbar">
+        <div className="w-full h-screen bg-white dark:bg-grayscrubbe-900 text-black dark:text-white flex flex-col overflow-y-auto custom-scrollbar">
             {/* HEADER */}
             <div className="p-6 sticky top-0 z-10">
                 <div className="flex justify-between items-center mb-2">
@@ -18,7 +18,7 @@ const RunDetailPanel = ({ data, onClose }: { data: ActivityItem, onClose: () => 
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" size={14} />
                             <input
                                 placeholder="Investigate"
-                                className="bg-white dark:bg-grayscrubbe-800 border border-gray-200 dark:border-slate-800 rounded-md py-1.5 pl-9 pr-3 text-xs w-32 focus:outline-none text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
+                                className="bg-white dark:bg-grayscrubbe-800 border border-gray-200 dark:border-slate-800 rounded-md py-1.5 pl-9 pr-3 text-xs w-32 focus:outline-none text-black dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
                             />
                         </div>
                 </div>
@@ -29,7 +29,7 @@ const RunDetailPanel = ({ data, onClose }: { data: ActivityItem, onClose: () => 
 
             <div className="p-4 space-y-4">
                 {/* METADATA SECTION */}
-                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-5 space-y-3">
+                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-500 dark:border-zinc-700 rounded-2xl p-5 space-y-3">
                     <MetaRow label="RUN" value={run} />
                     <MetaRow label="REPO" value={repoPath} />
                     <MetaRow label="SERVICE" value={service} />
@@ -38,8 +38,8 @@ const RunDetailPanel = ({ data, onClose }: { data: ActivityItem, onClose: () => 
                 </section>
 
                 {/* STAGES SECTION */}
-                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-5">
-                    <h4 className="font-bold text-sm mb-2 text-gray-900 dark:text-white">Stages</h4>
+                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-500 dark:border-zinc-700 rounded-2xl p-5">
+                    <h4 className="font-bold text-sm mb-2 text-black dark:text-white">Stages</h4>
                     <p className="text-gray-600 dark:text-slate-400 text-xs mb-4 leading-relaxed">
                         Click a stage to open logs. Failed stages indicate primary evidence.
                     </p>
@@ -51,7 +51,7 @@ const RunDetailPanel = ({ data, onClose }: { data: ActivityItem, onClose: () => 
                 </section>
 
                 {/* CODE ENGINE INFO */}
-                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-5 space-y-3">
+                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-500 dark:border-zinc-700 rounded-2xl p-5 space-y-3">
                     <div className="flex flex-wrap gap-2">
                         <Tag text={`Code Engine : ${details.codeEngine.id}`} />
                         <Tag text={`Confidence: ${details.codeEngine.confidence}`} />
@@ -61,16 +61,16 @@ const RunDetailPanel = ({ data, onClose }: { data: ActivityItem, onClose: () => 
                 </section>
 
                 {/* AFFECTED FILES */}
-                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-5">
-                    <h4 className="font-bold text-sm mb-4 text-gray-900 dark:text-white">Affected Files</h4>
+                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-500 dark:border-zinc-700 rounded-2xl p-5">
+                    <h4 className="font-bold text-sm mb-4 text-black dark:text-white">Affected Files</h4>
                     <div className="bg-white dark:bg-grayscrubbe-800 border border-slate-800 rounded-full px-4 py-1.5 w-max">
                         <span className="text-xs text-gray-600 dark:text-slate-400 font-mono">{details.affectedFiles[0]}</span>
                     </div>
                 </section>
 
                 {/* APPROVAL GATE */}
-                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-5 space-y-4">
-                    <h4 className="font-bold text-sm text-gray-900 dark:text-white">Approval gate</h4>
+                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-500 dark:border-zinc-700 rounded-2xl p-5 space-y-4">
+                    <h4 className="font-bold text-sm text-black dark:text-white">Approval gate</h4>
                     <p className="text-gray-600 dark:text-slate-400 text-xs leading-relaxed">{details.gateReason}</p>
                     <div className="flex gap-3">
                         <button onClick={() => setOpenRequestApproval(true)} className="flex-1 border border-IMSCyan text-IMSCyan font-bold py-2.5 rounded-xl text-sm hover:bg-IMSCyan/5">
@@ -83,8 +83,8 @@ const RunDetailPanel = ({ data, onClose }: { data: ActivityItem, onClose: () => 
                 </section>
 
                 {/* ANALYST ACTIONS */}
-                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-5 flex flex-col gap-3">
-                    <h4 className="font-bold text-sm mb-4 text-gray-900 dark:text-white">Analyst actions</h4>
+                <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-500 dark:border-zinc-700 rounded-2xl p-5 flex flex-col gap-3">
+                    <h4 className="font-bold text-sm mb-4 text-black dark:text-white">Analyst actions</h4>
                     <ActionButton text="Open Investigation" />
                     <ActionButton text="Review in code engine" />
                     <ActionButton text="Open run url" />
@@ -106,8 +106,8 @@ const RunDetailPanel = ({ data, onClose }: { data: ActivityItem, onClose: () => 
 
 const MetaRow = ({ label, value }: { label: string, value: string }) => (
     <div className="flex justify-between items-center text-[11px]">
-        <span className="text-gray-900 dark:text-white font-bold uppercase tracking-wider">{label}</span>
-        <span className="text-gray-700 dark:text-slate-200 font-mono">{value}</span>
+        <span className="text-black dark:text-white font-bold uppercase tracking-wider">{label}</span>
+        <span className="text-black dark:text-slate-200 font-mono">{value}</span>
     </div>
 );
 

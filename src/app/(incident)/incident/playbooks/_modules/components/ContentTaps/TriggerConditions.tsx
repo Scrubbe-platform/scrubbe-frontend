@@ -21,7 +21,7 @@ const ConditionRow: React.FC<Condition> = ({ field, operator, value, weight, isM
       </span>
 
       <div className="flex flex-1 items-center gap-3">
-        <span className="rounded border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-2.5 py-1 text-[11px] font-mono uppercase text-zinc-500 dark:text-zinc-400">
+        <span className="rounded border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-2.5 py-1 text-[11px] font-mono uppercase text-black dark:text-zinc-400">
           {operator}
         </span>
         {/* Value — amber kept, it reads as a code literal */}
@@ -33,7 +33,7 @@ const ConditionRow: React.FC<Condition> = ({ field, operator, value, weight, isM
 
     <div className="flex items-center gap-5">
       <div className="flex items-center gap-2.5">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
           Weight
         </span>
         <div className="flex h-1 w-20 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
@@ -48,7 +48,7 @@ const ConditionRow: React.FC<Condition> = ({ field, operator, value, weight, isM
       </div>
       <Check
         size={14}
-        className={isMatched ? "text-emerald-500 dark:text-emerald-400" : "text-zinc-200 dark:text-zinc-700"}
+        className={isMatched ? "text-emerald-500 dark:text-emerald-400" : "text-zinc-200 dark:text-black"}
       />
     </div>
   </div>
@@ -75,19 +75,19 @@ const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({ incid
   const conditions = buildConditions(incident);
 
   return (
-    <div className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5">
+    <div className="w-full rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5">
 
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div className="flex gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
             <Bolt size={16} className="text-zinc-500 dark:text-zinc-400" />
           </div>
           <div>
-            <h2 className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">
+            <h2 className="text-[14px] font-semibold text-black dark:text-zinc-100">
               Trigger Conditions
             </h2>
-            <p className="mt-0.5 text-[12px] text-zinc-400 dark:text-zinc-500">
+            <p className="mt-0.5 text-[12px] text-black dark:text-zinc-500">
               Pattern match — MatchCondition[] with weighted confidence scoring
             </p>
           </div>
@@ -97,7 +97,7 @@ const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({ incid
           <span className="flex items-center gap-1.5 rounded-lg border border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/8 px-3 py-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
             <Check size={12} /> Matched
           </span>
-          <button className="rounded-lg border border-zinc-200 dark:border-zinc-700 p-1.5 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+          <button className="rounded-lg border border-zinc-500 dark:border-zinc-700 p-1.5 text-black hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
             <TriangleAlert size={14} />
           </button>
         </div>
@@ -105,8 +105,8 @@ const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({ incid
 
       {/* Info banner */}
       <div className="mb-5 flex gap-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
-        <Info size={16} className="shrink-0 text-zinc-400 dark:text-zinc-500 mt-0.5" />
-        <p className="text-[12px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+        <Info size={16} className="shrink-0 text-black dark:text-zinc-500 mt-0.5" />
+        <p className="text-[12px] leading-relaxed text-black dark:text-zinc-400">
           All conditions are evaluated against the selected incident context.
           Weighted scores are summed to produce match confidence on the proposal,
           while alternatives stay visible for operator review.
@@ -119,7 +119,7 @@ const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({ incid
       </div>
 
       {/* Add */}
-      <button className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 px-4 py-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+      <button className="flex items-center gap-2 rounded-lg border border-zinc-500 dark:border-zinc-700 px-4 py-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
         <Plus size={14} /> Add Condition
       </button>
     </div>

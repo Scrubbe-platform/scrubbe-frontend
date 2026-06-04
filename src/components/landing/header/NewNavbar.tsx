@@ -31,7 +31,7 @@ function NavCard({
       className="flex flex-col p-3 border border-gray-200 rounded-lg hover:border-emerald-400 hover:bg-emerald-50/40 transition-all group"
     >
       <div className="flex items-start justify-between gap-2">
-        <span className="text-[13px] font-bold text-gray-900 group-hover:text-emerald-700 leading-snug">
+        <span className="text-[13px] font-bold text-black group-hover:text-emerald-700 leading-snug">
           {title}
         </span>
         <Arrow />
@@ -91,7 +91,7 @@ function ProductDropdown() {
         <p className="text-[11px] font-bold text-emerald-500 mb-2 tracking-wide uppercase">
           Platform navigation
         </p>
-        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+        <h3 className="text-[20px] font-bold text-black leading-tight mb-2">
           Purpose-built systems for investigating, deciding, and responding to
           production incidents.{" "}
         </h3>
@@ -124,7 +124,7 @@ function ProductDropdown() {
               href={b.href}
               className="p-4 hover:bg-gray-50 transition-colors group border-r border-gray-100 last:border-0"
             >
-              <p className="text-[13px] font-bold text-gray-900 group-hover:text-emerald-600 mb-1">
+              <p className="text-[13px] font-bold text-black group-hover:text-emerald-600 mb-1">
                 {b.title}
               </p>
               <p className="text-[11.5px] text-gray-500 leading-snug">
@@ -214,7 +214,7 @@ function ChallengesDropdown() {
         <p className="text-[11px] font-bold text-emerald-500 mb-2 tracking-wide uppercase">
           Problem navigation
         </p>
-        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+        <h3 className="text-[20px] font-bold text-black leading-tight mb-2">
           Solve the operational problems behind production incidents.{" "}
         </h3>
 
@@ -243,7 +243,7 @@ function ChallengesDropdown() {
               href={b.href}
               className="p-4 hover:bg-gray-50 transition-colors group border-r border-gray-100 last:border-0"
             >
-              <p className="text-[13px] font-bold text-gray-900 group-hover:text-emerald-600 mb-1">
+              <p className="text-[13px] font-bold text-black group-hover:text-emerald-600 mb-1">
                 {b.title}
               </p>
               <p className="text-[11.5px] text-gray-500 leading-snug">
@@ -324,7 +324,7 @@ function SolutionsDropdown() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="flex items-center justify-between py-1.5 text-[14px] text-gray-700 hover:text-emerald-600 transition-colors group"
+                className="flex items-center justify-between py-1.5 text-[14px] text-black hover:text-emerald-600 transition-colors group"
               >
                 {link.title}
                 <ArrowRight
@@ -416,7 +416,7 @@ function ConnectionsDropdown() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="flex items-center justify-between py-1 text-[15px] text-gray-800 hover:text-emerald-600 transition-colors group"
+                className="flex items-center justify-between py-1 text-[15px] text-black hover:text-emerald-600 transition-colors group"
               >
                 {link.title}
                 <ArrowRight
@@ -481,7 +481,7 @@ function ResourcesDropdown() {
         <p className="text-[11px] font-bold text-emerald-500 mb-2 tracking-wide uppercase">
           Resource navigation
         </p>
-        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+        <h3 className="text-[20px] font-bold text-black leading-tight mb-2">
           Learn how modern engineering teams investigate, remediate, and recover
           from production incidents..{" "}
         </h3>
@@ -548,7 +548,7 @@ function SecurityDropdown() {
   return (
     <div className="grid grid-cols-2 gap-0 h-full">
       <div className="p-6 border-r border-gray-100">
-        <h3 className="text-[20px] font-bold text-gray-900 leading-tight mb-2">
+        <h3 className="text-[20px] font-bold text-black leading-tight mb-2">
           Built for secure, controlled operation in production environments.{" "}
         </h3>
 
@@ -664,7 +664,7 @@ function NavItem({ label }: { label: DropdownKey }) {
             ? router.push("/contact-us")
             : setOpen((o) => !o)
         }
-        className="flex items-center gap-1 px-0.5 py-1 text-[11.5px] font-bold tracking-wider text-gray-600 hover:text-gray-900 transition-colors bg-transparent border-none cursor-pointer"
+        className="flex items-center gap-1 px-0.5 py-1 text-[11.5px] font-bold tracking-wider text-gray-600 hover:text-black transition-colors bg-transparent border-none cursor-pointer"
       >
         {label}
         <motion.div
@@ -822,7 +822,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                     }}
                     className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-left bg-transparent border-none cursor-pointer hover:bg-gray-50 transition-colors"
                   >
-                    <span className="text-[13px] font-bold tracking-wider text-gray-700">
+                    <span className="text-[13px] font-bold tracking-wider text-black">
                       {label}
                     </span>
                     <motion.div
@@ -852,7 +852,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                               onClick={onClose}
                               className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-emerald-50 group transition-colors"
                             >
-                              <span className="text-[13px] font-semibold text-gray-800 group-hover:text-emerald-600">
+                              <span className="text-[13px] font-semibold text-black group-hover:text-emerald-600">
                                 {link.title}
                               </span>
                               <ArrowRight
@@ -956,7 +956,7 @@ export default function Navbar() {
               onClick={() => setMobileOpen(true)}
               className="w-9 h-9 rounded-lg flex items-center justify-center bg-gray-100 border-none cursor-pointer hover:bg-gray-200 transition-colors"
             >
-              <Menu size={18} className="text-gray-700" />
+              <Menu size={18} className="text-black" />
             </button>
           </div>
         </div>

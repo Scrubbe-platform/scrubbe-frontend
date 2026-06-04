@@ -27,7 +27,7 @@ const Navbar = () => {
   );
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
-  const textColor = "text-gray-800";
+  const textColor = "text-black";
 
   // Toggle dropdown visibility in mobile menu
   const toggleMobileDropdown = (label: string) => {

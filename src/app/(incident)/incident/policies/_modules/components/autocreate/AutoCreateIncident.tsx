@@ -135,10 +135,10 @@ const AutoCreateIncident = () => {
           <Table columns={columns} data={rules} />
 
           {/* Deduplication */}
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 space-y-3">
+          <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 space-y-3">
             <div>
-              <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 mb-0.5">Deduplication</p>
-              <p className="text-[12px] text-zinc-400 dark:text-zinc-500">Avoid duplicate incidents for the same service & deploy.</p>
+              <p className="text-[13px] font-semibold text-black dark:text-zinc-100 mb-0.5">Deduplication</p>
+              <p className="text-[12px] text-black dark:text-zinc-500">Avoid duplicate incidents for the same service & deploy.</p>
             </div>
             <Select options={[
               { value: "Service + env ( default )",    label: "Service + env (default)"      },
@@ -149,10 +149,10 @@ const AutoCreateIncident = () => {
           </div>
 
           {/* SLA defaults */}
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 space-y-3">
+          <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 space-y-3">
             <div>
-              <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 mb-0.5">Incident SLA defaults</p>
-              <p className="text-[12px] text-zinc-400 dark:text-zinc-500">Sets the resolution countdown per severity.</p>
+              <p className="text-[13px] font-semibold text-black dark:text-zinc-100 mb-0.5">Incident SLA defaults</p>
+              <p className="text-[12px] text-black dark:text-zinc-500">Sets the resolution countdown per severity.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <Input label="P1" defaultValue="60m" />
@@ -163,15 +163,15 @@ const AutoCreateIncident = () => {
           </div>
 
           {/* Code Engine actions */}
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 space-y-3">
+          <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 space-y-3">
             <div>
-              <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 mb-0.5">Code Engine actions</p>
-              <p className="text-[12px] text-zinc-400 dark:text-zinc-500">Policy for what remediation paths are allowed by default.</p>
+              <p className="text-[13px] font-semibold text-black dark:text-zinc-100 mb-0.5">Code Engine actions</p>
+              <p className="text-[12px] text-black dark:text-zinc-500">Policy for what remediation paths are allowed by default.</p>
             </div>
             <div className="space-y-3">
               {codeEngineActions.map((action) => (
                 <div key={action.label} className="flex items-center justify-between">
-                  <p className="text-[13px] text-zinc-700 dark:text-zinc-300">{action.label}</p>
+                  <p className="text-[13px] text-black dark:text-zinc-300">{action.label}</p>
                   <Switch size="sm" color="success" isSelected={action.value} onChange={() => toggleCodeEngineAction(action.label)} />
                 </div>
               ))}
@@ -191,10 +191,10 @@ const AutoCreateIncident = () => {
 
             {/* Info banner */}
             <div className="flex gap-2 items-start rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-3">
-              <BiInfoCircle className="size-4 text-zinc-400 dark:text-zinc-500 shrink-0 mt-0.5" />
+              <BiInfoCircle className="size-4 text-black dark:text-zinc-500 shrink-0 mt-0.5" />
               <div>
-                <p className="text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 mb-0.5">Rule type</p>
-                <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
+                <p className="text-[12px] font-semibold text-black dark:text-zinc-200 mb-0.5">Rule type</p>
+                <p className="text-[12px] text-black dark:text-zinc-400">
                   Evaluates triggers (pipelines / alerts / risk) to auto-create incidents.
                 </p>
               </div>
@@ -253,7 +253,7 @@ const AutoCreateIncident = () => {
               <TextArea {...field} placeholder="Explain intent so future readers don't guess" label="Note (optional)" />
             )} />
 
-            <div className="flex items-center gap-2 text-[12px] text-zinc-400 dark:text-zinc-500">
+            <div className="flex items-center gap-2 text-[12px] text-black dark:text-zinc-500">
               <BiInfoCircle className="size-4 shrink-0" />
               <p>Rules are evaluated in order. Put stricter rules above looser ones.</p>
             </div>
@@ -261,7 +261,7 @@ const AutoCreateIncident = () => {
             <div className="flex justify-end gap-2.5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <CButton
                 onClick={() => setOpenModal(false)}
-                className="border border-zinc-200 dark:border-zinc-700 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 w-fit"
+                className="border border-zinc-500 dark:border-zinc-700 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 w-fit"
               >
                 Cancel
               </CButton>

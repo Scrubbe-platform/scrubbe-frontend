@@ -8,10 +8,10 @@ export default function CTASection() {
       <div className="mx-auto max-w-7xl flex md:flex-row flex-col items-center justify-between gap-16">
         {/* Left — Headline */}
         <div className="flex-1 min-w-0">
-          <h2 className="text-3xl md:text-5xl leading-tight font-serif text-zinc-900">
+          <h2 className="text-3xl md:text-5xl leading-tight font-serif text-black">
             The fastest way to get help.
           </h2>
-          <h2 className="text-3xl md:text-5xl leading-tight font-serif italic text-zinc-400">
+          <h2 className="text-3xl md:text-5xl leading-tight font-serif italic text-black">
             And to help others.
           </h2>
         </div>
@@ -28,16 +28,16 @@ export default function CTASection() {
           {/* Stats */}
           <div className="flex items-stretch divide-x divide-zinc-300">
             <div className="pr-8 flex flex-col gap-0.5">
-              <span className="text-xl font-bold text-zinc-900">1240</span>
-              <span className="text-xs text-zinc-500">Members in Slack</span>
+              <span className="text-xl font-bold text-black">1240</span>
+              <span className="text-xs text-black">Members in Slack</span>
             </div>
             <div className="px-8 flex flex-col gap-0.5">
-              <span className="text-xl font-bold text-zinc-900">12</span>
-              <span className="text-xs text-zinc-500">Active Channels</span>
+              <span className="text-xl font-bold text-black">12</span>
+              <span className="text-xs text-black">Active Channels</span>
             </div>
             <div className="pl-8 flex flex-col gap-0.5">
-              <span className="text-xl font-bold text-zinc-900">&lt;4h</span>
-              <span className="text-xs text-zinc-500">Team response time</span>
+              <span className="text-xl font-bold text-black">&lt;4h</span>
+              <span className="text-xs text-black">Team response time</span>
             </div>
           </div>
 

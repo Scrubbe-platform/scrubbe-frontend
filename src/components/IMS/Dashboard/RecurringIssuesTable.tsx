@@ -16,7 +16,7 @@ const RecurringIssuesTable: React.FC<Props> = ({ issues }) => {
   return (
     <div className="bg-white p-6 rounded-lg w-full">
       {/* Header */}
-      <h2 className="text-xl font-semibold text-gray-800 mb-6">
+      <h2 className="text-xl font-semibold text-black mb-6">
         Recurring Issues Table (Top 5)
       </h2>
 
@@ -29,7 +29,7 @@ const RecurringIssuesTable: React.FC<Props> = ({ issues }) => {
                 key={index}
                 className="flex items-center justify-between border-b border-gray-200 pb-4 last:border-b-0 last:pb-0"
               >
-                <span className="text-gray-700 text-base">{issue?.issue}</span>
+                <span className="text-black text-base">{issue?.issue}</span>
                 <span className="bg-red-100 text-red-700 font-medium px-3 py-1 rounded-md text-sm">
                   {issue?.count} Incidents
                 </span>

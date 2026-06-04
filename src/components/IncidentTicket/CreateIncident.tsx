@@ -591,7 +591,7 @@ const CreateIncident = ({ isOpen, onClose, isModal }: CreateIncidentProps) => {
           />
 
           <div className="space-y-4">
-            <label className="flex gap-2 items-center text-sm font-medium text-gray-700 ">
+            <label className="flex gap-2 items-center text-sm font-medium text-black ">
               <HiOutlinePaperClip /> Attachment
               <div className="group relative">
                 <RiInformationLine className=" text-IMSLightGreen cursor-pointer" />
@@ -603,7 +603,7 @@ const CreateIncident = ({ isOpen, onClose, isModal }: CreateIncidentProps) => {
             {/* Upload Area */}
             {!uploadedLogo ? (
               <div
-                className="flex text-sm border-zinc-200 border rounded-md h-[42px] overflow-clip"
+                className="flex text-sm border-zinc-500 border rounded-md h-[42px] overflow-clip"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <span className=" flex items-center justify-center h-full bg-emerald-100 text-emerald-600 px-2">
@@ -631,7 +631,7 @@ const CreateIncident = ({ isOpen, onClose, isModal }: CreateIncidentProps) => {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-black">
                         {uploadedLogo?.name}
                       </p>
                       <p className="text-xs text-gray-500">
@@ -645,7 +645,7 @@ const CreateIncident = ({ isOpen, onClose, isModal }: CreateIncidentProps) => {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-3 py-1 text-xs bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700"
+                      className="px-3 py-1 text-xs bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-black"
                     >
                       Change
                     </button>

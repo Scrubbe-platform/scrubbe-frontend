@@ -237,7 +237,7 @@ const MainPricing = () => {
             className={`${
               duration === "monthly"
                 ? "text-IMSCyan font-semibold"
-                : "text-gray-700"
+                : "text-black"
             }`}
           >
             Monthly

@@ -9,7 +9,7 @@ const VerifyIdentities = () => {
         <div className="lg:hidden flex flex-col items-center">
           {/* Text content for mobile - sized for different breakpoints */}
           <div className="w-full max-w-[340px] md:max-w-[600px] mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 leading-tight mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-black leading-tight mb-4">
               Verify identities. Profile devices. Expose intent before it
               becomes fraud
             </h2>
@@ -50,7 +50,7 @@ const VerifyIdentities = () => {
         <div className="hidden lg:grid lg:grid-cols-2 justify-items-center gap-4">
           <article className="w-[445px] xl:w-[560px] h-[445px] xl:h-[560px] p-6">
             <div className="w-full h-full flex flex-col justify-center space-y-4">
-              <h2 className="text-3xl xl:text-4xl font-bold text-gray-800 leading-tight">
+              <h2 className="text-3xl xl:text-4xl font-bold text-black leading-tight">
                 Verify identities. Profile devices. Expose intent before it
                 becomes fraud
               </h2>

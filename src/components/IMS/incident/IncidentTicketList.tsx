@@ -66,7 +66,7 @@ const FilterButton = ({
     className={`rounded-lg border px-3 py-2 text-xs font-semibold transition-all ${
       active
         ? "border-green-500/40 bg-green-500/10 text-green-600 dark:text-green-400"
-        : "border-zinc-200 dark:border-white/10 text-zinc-400 dark:text-slate-400 hover:border-zinc-300 dark:hover:border-white/20 hover:text-zinc-700 dark:hover:text-slate-200"
+        : "border-zinc-200 dark:border-white/10 text-black dark:text-slate-400 hover:border-zinc-300 dark:hover:border-white/20 hover:text-black dark:hover:text-slate-200"
     }`}
   >
     {label}
@@ -137,10 +137,10 @@ const IncidentTicketList = () => {
         header: "Incident ID",
         cell: ({ row }) => (
           <div>
-            <p className="font-semibold text-zinc-800 dark:text-white">
+            <p className="font-semibold text-black dark:text-white">
               {row.original.ticketId}
             </p>
-            <p className="text-xs text-zinc-400 dark:text-slate-400">
+            <p className="text-xs text-black dark:text-slate-400">
               {row.original.elapsedLabel}
             </p>
           </div>
@@ -151,10 +151,10 @@ const IncidentTicketList = () => {
         header: "Summary",
         cell: ({ row }) => (
           <div className="max-w-md">
-            <p className="font-semibold text-zinc-800 dark:text-white line-clamp-2">
+            <p className="font-semibold text-black dark:text-white line-clamp-2">
               {row.original.title}
             </p>
-            <p className="mt-1 text-xs text-zinc-400 dark:text-slate-400 line-clamp-1">
+            <p className="mt-1 text-xs text-black dark:text-slate-400 line-clamp-1">
               {row.original.service} / {row.original.environment} /{" "}
               {row.original.region}
             </p>
@@ -186,7 +186,7 @@ const IncidentTicketList = () => {
             >
               {row.original.severity} / {row.original.priority}
             </span>
-            <span className="text-xs text-zinc-400 dark:text-slate-400">
+            <span className="text-xs text-black dark:text-slate-400">
               {row.original.assignedToName ||
                 row.original.assignedToEmail ||
                 "Unassigned"}
@@ -199,10 +199,10 @@ const IncidentTicketList = () => {
         header: "Source",
         cell: ({ row }) => (
           <div className="text-sm">
-            <p className="text-zinc-700 dark:text-slate-300">
+            <p className="text-black dark:text-slate-300">
               {row.original.sourceType || "Manual"}
             </p>
-            <p className="text-xs text-zinc-400 dark:text-slate-500">
+            <p className="text-xs text-black dark:text-slate-500">
               {row.original.status}
             </p>
           </div>
@@ -226,7 +226,7 @@ const IncidentTicketList = () => {
             <Link
               href={`/incident?id=${row.original.id}&tab=overview`}
               onClick={(e) => e.stopPropagation()}
-              className="rounded-lg border border-zinc-200 dark:border-white/10 px-3 py-1.5 text-xs font-semibold text-zinc-500 dark:text-slate-300 hover:border-zinc-300 dark:hover:border-white/20 transition-colors"
+              className="rounded-lg border border-zinc-500 dark:border-white/10 px-3 py-1.5 text-xs font-semibold text-black dark:text-slate-300 hover:border-zinc-300 dark:hover:border-white/20 transition-colors"
             >
               Workspace
             </Link>
@@ -238,17 +238,17 @@ const IncidentTicketList = () => {
   );
 
   return (
-    <div className="p-4 md:p-6 text-zinc-800 dark:text-white">
+    <div className="p-4 md:p-6 text-black dark:text-white">
       {/* ── Page header ── */}
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-slate-500">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-black dark:text-slate-500">
             Incident Command
           </p>
-          <h1 className="mt-2 text-2xl font-bold text-zinc-800 dark:text-white">
+          <h1 className="mt-2 text-2xl font-bold text-black dark:text-white">
             Incident Tickets
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-zinc-500 dark:text-slate-400">
+          <p className="mt-2 max-w-2xl text-sm text-black dark:text-slate-400">
             This route uses the shared incident contract, so ticket list rows,
             workspace selection, and direct ticket navigation all resolve the
             same live incident records.
@@ -266,12 +266,12 @@ const IncidentTicketList = () => {
       </div>
 
       {/* ── Filter + table card ── */}
-      <div className="mt-6 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02] p-4 md:p-5">
+      <div className="mt-6 rounded-2xl border border-zinc-500 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02] p-4 md:p-5">
         {/* Search + filters row */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative w-full lg:max-w-md">
             <Search
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-slate-500"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-black dark:text-slate-500"
               size={16}
             />
             <input
@@ -279,7 +279,7 @@ const IncidentTicketList = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by incident, service, owner, or region"
-              className="w-full rounded-lg border border-zinc-200 dark:border-white/10 bg-white dark:bg-darkEzra px-10 py-2.5 text-sm text-zinc-700 dark:text-white outline-none transition-all placeholder:text-zinc-400 dark:placeholder:text-slate-500 focus:border-green-500/40"
+              className="w-full rounded-lg border border-zinc-500 dark:border-white/10 bg-white dark:bg-darkEzra px-10 py-2.5 text-sm text-black dark:text-white outline-none transition-all placeholder:text-zinc-400 dark:placeholder:text-slate-500 focus:border-green-500/40"
             />
           </div>
 

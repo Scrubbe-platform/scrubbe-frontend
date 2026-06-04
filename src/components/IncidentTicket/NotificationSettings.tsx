@@ -114,7 +114,7 @@ const NotificationSettings = ({
                     className="w-fit min-w-[180px] px-4 py-2 text-left dark:bg-transparent bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex items-center justify-between !text-sm !h-10"
                     type="button"
                   >
-                    <span className={"text-gray-900 dark:text-white"}>
+                    <span className={"text-black dark:text-white"}>
                       {actionSelected[item.id] || "Select Action"}
                     </span>
                     <svg
@@ -154,7 +154,7 @@ const NotificationSettings = ({
                               [item.id]: option.label,
                             }));
                           }}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50 text-gray-900 first:rounded-t-md last:rounded-b-md"
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50 text-black first:rounded-t-md last:rounded-b-md"
                           type="button"
                         >
                           {option.label}

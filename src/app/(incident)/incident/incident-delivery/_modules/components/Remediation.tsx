@@ -78,13 +78,13 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const outlineButtons = ["Auto-suggest fix", "Create PR", "Run CI/CD", "Merge (requires approval)"];
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
+    <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
 
       {/* ── Header ── */}
       <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-0.5">Remediation</p>
-        <p className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">Suggest, verify, summarize</p>
-        <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-0.5">Default is PR-safe. Verification is shown after execution.</p>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-0.5">Remediation</p>
+        <p className="text-[14px] font-semibold text-black dark:text-zinc-100">Suggest, verify, summarize</p>
+        <p className="text-[12px] text-black dark:text-zinc-500 mt-0.5">Default is PR-safe. Verification is shown after execution.</p>
       </div>
 
       <div className="p-4 space-y-4">
@@ -101,8 +101,8 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
         {/* ── Automated remediation ── */}
         <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4 space-y-4">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-0.5">Automated remediation</p>
-            <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-0.5">Automated remediation</p>
+            <p className="text-[12px] text-black dark:text-zinc-500">
               Based on the failure type, Scrubbe proposes the next best actions (code patch, PR, CI rerun) and tracks outcomes.
             </p>
           </div>
@@ -110,9 +110,9 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
           {/* Status chips */}
           <div className="flex flex-wrap gap-1.5">
             {statusChips.map(({ label, value }) => (
-              <span key={label} className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[11px] font-mono">
+              <span key={label} className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[11px] font-mono">
                 <span className="text-zinc-400 dark:text-zinc-500">{label}:</span>
-                <span className="text-zinc-700 dark:text-zinc-300">{value}</span>
+                <span className="text-black dark:text-zinc-300">{value}</span>
               </span>
             ))}
           </div>
@@ -125,9 +125,9 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
               { title: "Suggested CI action", main: ciSuggestion,  note: "Verification results update automatically when actions run."                                                    },
             ].map(({ title, main, note }) => (
               <div key={title} className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-800/40 p-3.5 space-y-2">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">{title}</p>
-                <p className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200 leading-snug">{main}</p>
-                <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed">{note}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">{title}</p>
+                <p className="text-[12px] font-medium text-black dark:text-zinc-200 leading-snug">{main}</p>
+                <p className="text-[11px] text-black dark:text-zinc-500 leading-relaxed">{note}</p>
               </div>
             ))}
           </div>
@@ -135,7 +135,7 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
           {/* Outline actions */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {outlineButtons.map((label) => (
-              <button key={label} className="py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors">
+              <button key={label} className="py-2 rounded-lg border border-zinc-500 dark:border-zinc-700 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors">
                 {label}
               </button>
             ))}
@@ -148,20 +148,20 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
           {/* Suggestion preview */}
           <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Suggestion preview</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">Suggestion preview</p>
               <div className="flex gap-1.5">
                 <Chip label="id" value={primaryOption?.id ?? "--"} />
                 <Chip label="conf" value={formatConfidence(confidence)} />
               </div>
             </div>
             <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950/60 p-3 h-32 overflow-auto">
-              <pre className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 leading-relaxed whitespace-pre-wrap">{suggestion}</pre>
+              <pre className="text-[11px] font-mono text-black dark:text-zinc-400 leading-relaxed whitespace-pre-wrap">{suggestion}</pre>
             </div>
           </div>
 
           {/* Verification results */}
           <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4 space-y-3">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Verification results</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">Verification results</p>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { label: "CI rerun",      value: ciSuggestion ? "Ready" : "--"             },
@@ -169,21 +169,21 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
                 { label: "Affected jobs", value: hypotheses.length ? String(hypotheses.length) : "--" },
               ].map(({ label, value }) => (
                 <div key={label} className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-800/40 p-2.5">
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">{label}</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500 mb-1">{label}</p>
                   <p className="text-[12px] font-mono text-zinc-600 dark:text-zinc-300">{value}</p>
                 </div>
               ))}
             </div>
-            <p className="text-[11px] text-zinc-400 dark:text-zinc-500">Execute a safe action to generate verification results.</p>
+            <p className="text-[11px] text-black dark:text-zinc-500">Execute a safe action to generate verification results.</p>
             <div className="space-y-2.5">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Ezra summaries</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">Ezra summaries</p>
               {[
                 { label: "Executive", audience: "LEADERSHIP" },
                 { label: "Analyst",   audience: "ENGINEER"   },
               ].map(({ label, audience }) => (
                 <div key={label}>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-0.5">{label}</p>
-                  <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500 mb-0.5">{label}</p>
+                  <p className="text-[12px] text-black dark:text-zinc-400">
                     {analysis?.reports?.find((r: any) => r.audience === audience)?.narrative ?? "--"}
                   </p>
                 </div>
@@ -195,8 +195,8 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
         {/* ── Hypothesis panel ── */}
         <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Root-cause hypothesis panel</p>
-            <button className="px-3 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">Root-cause hypothesis panel</p>
+            <button className="px-3 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 text-[11px] font-medium text-black dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
               Expand
             </button>
           </div>
@@ -205,8 +205,8 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
             {hypotheses.map((hyp) => (
               <div key={hyp.id} className="flex items-start justify-between gap-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-800/40 p-3.5 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
                 <div className="min-w-0">
-                  <p className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200 leading-snug">{hyp.title}</p>
-                  <p className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 mt-1">Confidence: {formatConfidence(hyp.confidence)}</p>
+                  <p className="text-[12px] font-medium text-black dark:text-zinc-200 leading-snug">{hyp.title}</p>
+                  <p className="text-[11px] font-mono text-black dark:text-zinc-500 mt-1">Confidence: {formatConfidence(hyp.confidence)}</p>
                   <div className="flex gap-2 mt-2.5">
                     {["runUrl", "diffUrl"].map((key) => (
                       <a
@@ -214,14 +214,14 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
                         href={key === "runUrl" ? hyp.runUrl : hyp.diffUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 text-[10px] font-mono text-sky-600 dark:text-sky-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 text-[10px] font-mono text-sky-600 dark:text-sky-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                       >
                         <Link size={9} /> {key}
                       </a>
                     ))}
                   </div>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 shrink-0">
+                <span className="text-[10px] font-mono px-2 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-zinc-400 shrink-0">
                   {hyp.id}
                 </span>
               </div>
@@ -236,7 +236,7 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
 // ── Chip ──────────────────────────────────────────────────────────
 
 const Chip = ({ label, value }: { label: string; value: string }) => (
-  <span className="flex items-center gap-1 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[10px] font-mono">
+  <span className="flex items-center gap-1 px-2 py-0.5 rounded border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[10px] font-mono">
     <span className="text-zinc-400 dark:text-zinc-500">{label}:</span>
     <span className="text-zinc-600 dark:text-zinc-300">{value}</span>
   </span>

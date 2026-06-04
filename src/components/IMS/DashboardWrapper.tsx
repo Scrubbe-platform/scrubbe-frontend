@@ -46,7 +46,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="w-full bg-white dark:bg-dark h-screen overflow-hidden flex flex-col md:flex-row relative">
       {/* ── 1. Mobile navbar ── */}
-      <div className="md:hidden w-full h-16 flex items-center px-5 gap-4 border-b border-zinc-200 dark:border-white/10 bg-white dark:bg-dark z-[55]">
+      <div className="md:hidden w-full h-16 flex items-center px-5 gap-4 border-b border-zinc-500 dark:border-white/10 bg-white dark:bg-dark z-[55]">
         <div className="h-6">
           {/* light logo */}
           <img
@@ -105,7 +105,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
                 className={clsx(
                   "flex items-center gap-2 px-4 py-2.5 rounded-full md:rounded-lg text-xs font-medium shadow-2xl transition-all",
                   // light
-                  "bg-white border border-zinc-200 text-zinc-500 hover:border-zinc-400",
+                  "bg-white border border-zinc-500 text-zinc-500 hover:border-zinc-400",
                   // dark
                   "dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-500"
                 )}
@@ -115,7 +115,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
                 <kbd
                   className={clsx(
                     "hidden md:block ml-1 px-1.5 py-0.5 rounded font-mono text-[10px]",
-                    "bg-zinc-100 text-zinc-400 border border-zinc-200",
+                    "bg-zinc-100 text-black border border-zinc-500",
                     "dark:bg-neutral-800 dark:text-neutral-500 dark:border-neutral-700"
                   )}
                 >

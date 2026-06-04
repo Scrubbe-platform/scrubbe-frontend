@@ -155,13 +155,13 @@ const Page = () => {
         sub="Eight roles covering every engineering organisation. Clear separation between governance, incident authority, operational execution, investigation, and observation."
       >
         {/* PERMISSION MATRIX LEGEND */}
-        <div className="mb-6 p-4 bg-[#0B1224] border border-[#1F2937] rounded-xl">
-          <h3 className="text-white font-bold text-sm mb-3 uppercase tracking-widest">Merge & Rollback Approval Matrix</h3>
+        <div className="mb-6 p-4 dark:bg-[#0B1224] border border-[#1F2937] rounded-xl">
+          <h3 className="dark:text-white font-bold text-sm mb-3 uppercase tracking-widest">Merge & Rollback Approval Matrix</h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-[#94A3B8]">
+            <table className="w-full text-xs dark:text-[#94A3B8]">
               <thead>
                 <tr className="border-b border-[#1F2937]">
-                  <th className="text-left py-2 pr-4 text-white font-bold">Action</th>
+                  <th className="text-left py-2 pr-4 dark:text-white font-bold">Action</th>
                   {["Owner", "Admin", "IC", "Ops Mgr", "Responder"].map((r) => (
                     <th key={r} className="text-center py-2 px-2 font-semibold">{r}</th>
                   ))}
@@ -177,7 +177,7 @@ const Page = () => {
                   { action: "Close Incident", perms: [true, true, true, true, false] },
                 ].map(({ action, perms }) => (
                   <tr key={action} className="border-b border-[#1F2937]/50">
-                    <td className="py-2 pr-4 text-[#D1D5DB]">{action}</td>
+                    <td className="py-2 pr-4 dark:text-[#D1D5DB]">{action}</td>
                     {perms.map((allowed, i) => (
                       <td key={i} className="text-center py-2 px-2">
                         {allowed
@@ -207,14 +207,14 @@ const Page = () => {
         {/* SESSION CONTROLS */}
         <div className="border border-[#1F2937] rounded-2xl p-4 space-y-6 mb-6">
           <div className="space-y-1">
-            <h3 className="text-white font-bold text-lg">Session controls</h3>
+            <h3 className="dark:text-white text-black font-bold text-lg">Session controls</h3>
             <p className="text-[#64748B] text-sm">Security defaults applied org-wide.</p>
           </div>
 
           <div className="space-y-4">
             <div className="p-5 border border-[#1F2937] rounded-xl space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-white text-sm font-medium pr-4 leading-tight">
+                <span className="text-black dark:text-white text-sm font-medium pr-4 leading-tight">
                   Require MFA for non-SSO users
                 </span>
                 <button
@@ -229,7 +229,7 @@ const Page = () => {
 
             <div className="p-5 border border-[#1F2937] rounded-xl space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-white text-sm font-medium">Session duration</span>
+                <span className="text-black dark:text-white text-sm font-medium">Session duration</span>
                 <div className="flex gap-2">
                   {durations.map((d) => (
                     <button
@@ -238,7 +238,7 @@ const Page = () => {
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
                         sessionDuration === d.label
                           ? "border-[#00CAD8] text-[#00CAD8] bg-[#00CAD8]/10"
-                          : "border-[#94A3B8]/40 text-[#D1D5DB] hover:border-[#00CAD8]"
+                          : "border-zinc-500 dark:border-[#94A3B8]/40 text-black dark:text-[#D1D5DB] hover:border-[#00CAD8]"
                       }`}
                     >
                       {d.label}
@@ -276,16 +276,16 @@ const RoleCard = ({
   >
     <div className="flex justify-between items-start">
       <div className="flex items-center gap-2">
-        <span className="text-white text-sm font-bold">{role.label}</span>
+        <span className="text-black dark:text-white text-sm font-bold">{role.label}</span>
         {role.value === "BREAK_GLASS_ADMIN" && (
-          <span className="text-[9px] font-bold px-1.5 py-0.5 bg-red-900/40 text-red-400 border border-red-800 rounded uppercase tracking-wider">
+          <span className="text-[9px] font-bold px-1.5 py-0.5 bg-red-900/40 text-white dark:text-red-400 border border-red-800 rounded uppercase tracking-wider">
             Emergency
           </span>
         )}
       </div>
-      <div className="flex items-center gap-2 px-2.5 py-1 border border-[#00CAD8]/30 rounded-full bg-[#0B1224] shrink-0">
+      <div className="flex items-center gap-2 px-2.5 py-1 border border-[#00CAD8]/30 rounded-full dark:bg-[#0B1224] shrink-0">
         <span style={{ color: role.color }}>{role.icon}</span>
-        <span className="text-[9px] font-medium text-white uppercase tracking-wider">{role.badge}</span>
+        <span className="text-[9px] font-medium text-black dark:text-white uppercase tracking-wider">{role.badge}</span>
       </div>
     </div>
     <p className="text-[#64748B] text-xs leading-normal">{role.desc}</p>
@@ -299,7 +299,7 @@ const RoleCard = ({
               {role.canDo.map((item) => (
                 <div key={item} className="flex items-center gap-2">
                   <CheckCircle size={10} className="text-emerald-400 shrink-0" />
-                  <span className="text-[11px] text-[#D1D5DB]">{item}</span>
+                  <span className="text-[11px] text-black dark:text-[#D1D5DB]">{item}</span>
                 </div>
               ))}
             </div>
@@ -312,7 +312,7 @@ const RoleCard = ({
               {role.cannotDo.map((item) => (
                 <div key={item} className="flex items-center gap-2">
                   <span className="text-red-400 text-[10px] shrink-0">✗</span>
-                  <span className="text-[11px] text-[#94A3B8]">{item}</span>
+                  <span className="text-[11px] text-black dark:text-[#94A3B8]">{item}</span>
                 </div>
               ))}
             </div>

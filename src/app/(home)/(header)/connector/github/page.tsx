@@ -64,7 +64,7 @@ function HeroSection() {
           <div className="flex flex-wrap gap-4 mb-6">
             <button
               onClick={() => router.push("/auth/signin")}
-              className="px-6 py-3 bg-white text-zinc-900 font-semibold text-sm rounded-lg hover:bg-zinc-100 transition-colors active:scale-95"
+              className="px-6 py-3 bg-white text-black font-semibold text-sm rounded-lg hover:bg-zinc-100 transition-colors active:scale-95"
             >
               Connect GitHub
             </button>
@@ -118,10 +118,10 @@ function LogoHeroSection() {
             src="/IMS/icons/scrubbe-icon.svg"
             className="h-[50px] md:h-[70px]"
           />
-          <span className="font-serif text-5xl md:text-6xl font-bold text-zinc-900">
+          <span className="font-serif text-5xl md:text-6xl font-bold text-black">
             Scrubbe
           </span>
-          <span className="text-5xl md:text-6xl text-zinc-400 font-light">
+          <span className="text-5xl md:text-6xl text-black font-light">
             +
           </span>
           {/* GitHub mark */}
@@ -133,12 +133,12 @@ function LogoHeroSection() {
               fill="#24292f"
             />
           </svg>
-          <span className="font-serif text-5xl md:text-6xl font-bold text-zinc-900">
+          <span className="font-serif text-5xl md:text-6xl font-bold text-black">
             GitHub
           </span>
         </div>
 
-        <h2 className="font-serif text-zinc-900 text-2xl sm:text-3xl md:text-[38px] leading-snug mb-6 max-w-3xl mx-auto">
+        <h2 className="font-serif text-black text-2xl sm:text-3xl md:text-[38px] leading-snug mb-6 max-w-3xl mx-auto">
           From suspicious commits to AI-generated hotfix PRs — Scrubbe reasons
           continuously across your repositories, infrastructure, deployments,
           and incidents in real time.
@@ -160,7 +160,7 @@ function LogoHeroSection() {
             Connect Github
           </button>
           <button
-            className="px-7 py-3 font-semibold rounded-lg text-sm border-2 transition-all hover:bg-zinc-50 active:scale-95 text-zinc-800"
+            className="px-7 py-3 font-semibold rounded-lg text-sm border-2 transition-all hover:bg-zinc-50 active:scale-95 text-black"
             style={{ borderColor: "#2d9e5f" }}
             data-cal-namespace="hero-demo"
             data-cal-link="scrubbe/decision-system-demo"
@@ -217,10 +217,10 @@ function PlatformSection() {
       <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-16 items-start">
         {/* Left */}
         <div className="md:sticky md:top-24">
-          <h2 className="font-serif text-[34px] sm:text-[42px] md:text-[48px] leading-tight text-zinc-900 mb-8">
+          <h2 className="font-serif text-[34px] sm:text-[42px] md:text-[48px] leading-tight text-black mb-8">
             GitHub is more than <em style={{ color: G }}>source control</em>
           </h2>
-          <p className="font-serif italic text-zinc-700 text-[15px] leading-relaxed mb-6">
+          <p className="font-serif italic text-black text-[15px] leading-relaxed mb-6">
             Scrubbe transforms GitHub into a live operational reasoning layer
             for your engineering organisation — continuously mapping
             repositories, services, deployments, ownership, dependencies, and
@@ -259,7 +259,7 @@ function PlatformSection() {
                   </p>
                   <p
                     className={`text-[15px] font-bold transition-colors ${
-                      openIdx === i ? "text-zinc-900" : "text-zinc-700"
+                      openIdx === i ? "text-black" : "text-black"
                     }`}
                   >
                     {c.title}
@@ -406,7 +406,7 @@ function GovernanceCards() {
             >
               {c.layer}
             </p>
-            <h3 className="font-serif text-[22px] font-bold text-zinc-900">
+            <h3 className="font-serif text-[22px] font-bold text-black">
               {c.title}
             </h3>
             <p className="text-[13px] text-zinc-600 leading-relaxed">
@@ -416,7 +416,7 @@ function GovernanceCards() {
               {c.items.map((item) => (
                 <li
                   key={item}
-                  className="flex items-start gap-2.5 text-[13px] text-zinc-700"
+                  className="flex items-start gap-2.5 text-[13px] text-black"
                 >
                   <span className="text-zinc-400 shrink-0 mt-0.5">→</span>
                   {item}
@@ -716,7 +716,7 @@ function WorkflowSection() {
   return (
     <section className="px-6 md:px-16 py-24" style={{ background: MINT }}>
       <div className="mx-auto max-w-4xl">
-        <h2 className="font-serif font-bold text-zinc-900 text-[32px] sm:text-[42px] leading-tight mb-4">
+        <h2 className="font-serif font-bold text-black text-[32px] sm:text-[42px] leading-tight mb-4">
           From <em style={{ color: G }}>incident</em> to
           <br />
           governed remediation
@@ -750,7 +750,7 @@ function WorkflowSection() {
                 </span>
               </div>
               <div>
-                <h3 className="font-serif text-[18px] font-bold text-zinc-900 mb-2">
+                <h3 className="font-serif text-[18px] font-bold text-black mb-2">
                   {s.title}
                 </h3>
                 <p className="text-[13px] text-zinc-600 leading-relaxed mb-4">

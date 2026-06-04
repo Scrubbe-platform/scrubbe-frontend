@@ -70,14 +70,14 @@ const PoliciesModule = () => {
     >
       <div className="grid 2xl:grid-cols-2 gap-8 items-start pt-4">
         {/* LEFT — Auto-activation */}
-        <section className="bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-[24px] p-4 space-y-6">
-          <h3 className="text-zinc-800 dark:text-white font-bold text-lg px-1">Auto-activation</h3>
+        <section className="bg-transparent border border-zinc-500 dark:border-neutral-500 rounded-[24px] p-4 space-y-6">
+          <h3 className="text-black dark:text-white font-bold text-lg px-1">Auto-activation</h3>
  
           <div className="space-y-4">
             {/* Playbooks toggle */}
-            <div className="p-5 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-3 bg-white dark:bg-transparent">
+            <div className="p-5 border border-zinc-500 dark:border-neutral-500 rounded-2xl space-y-3 bg-white dark:bg-transparent">
               <div className="flex justify-between items-start">
-                <span className="text-zinc-800 dark:text-white text-[15px] font-bold leading-tight max-w-[180px]">
+                <span className="text-black dark:text-white text-[15px] font-bold leading-tight max-w-[180px]">
                   Auto-activate playbooks for delivery incidents
                 </span>
                 <Toggle active={autoActivate} onToggle={() => setAutoActivate((v) => !v)} />
@@ -88,8 +88,8 @@ const PoliciesModule = () => {
             </div>
  
             {/* Confidence slider */}
-            <div className="p-5 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-4 bg-white dark:bg-transparent">
-              <span className="text-zinc-800 dark:text-white text-[15px] font-bold block">
+            <div className="p-5 border border-zinc-500 dark:border-neutral-500 rounded-2xl space-y-4 bg-white dark:bg-transparent">
+              <span className="text-black dark:text-white text-[15px] font-bold block">
                 Confidence threshold to auto-suggest code
               </span>
               <div className="px-2">
@@ -99,20 +99,20 @@ const PoliciesModule = () => {
                   max="100"
                   value={threshold}
                   onChange={(e) => setThreshold(Number(e.target.value))}
-                  className="w-full h-2 bg-zinc-100 dark:bg-[#0B1224] rounded-lg appearance-none cursor-pointer accent-[#3EE9FF] border border-zinc-200 dark:border-neutral-500"
+                  className="w-full h-2 bg-zinc-100 dark:bg-[#0B1224] rounded-lg appearance-none cursor-pointer accent-[#3EE9FF] border border-zinc-500 dark:border-neutral-500"
                 />
-                <div className="flex justify-between text-[10px] text-zinc-400 dark:text-[#64748B] mt-2 font-bold uppercase tracking-wider">
+                <div className="flex justify-between text-[10px] text-black dark:text-[#64748B] mt-2 font-bold uppercase tracking-wider">
                   <span>0</span>
-                  <span className="text-zinc-700 dark:text-[#D1D5DB]">threshold: {threshold}%</span>
+                  <span className="text-black dark:text-[#D1D5DB]">threshold: {threshold}%</span>
                   <span>100</span>
                 </div>
               </div>
             </div>
  
             {/* Suppression rules */}
-            <div className="p-5 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-4 bg-white dark:bg-transparent">
+            <div className="p-5 border border-zinc-500 dark:border-neutral-500 rounded-2xl space-y-4 bg-white dark:bg-transparent">
               <div className="flex justify-between items-center">
-                <span className="text-zinc-800 dark:text-white text-[15px] font-bold">Suppression rules</span>
+                <span className="text-black dark:text-white text-[15px] font-bold">Suppression rules</span>
                 <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
                   Edit
                 </button>
@@ -120,7 +120,7 @@ const PoliciesModule = () => {
               <p className="text-zinc-400 dark:text-[#64748B] text-xs">
                 Reduce noise when flake storms or repeated failures happen.
               </p>
-              <div className="flex items-center gap-3 p-2.5 border border-zinc-200 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
+              <div className="flex items-center gap-3 p-2.5 border border-zinc-500 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
                 <List size={14} className="text-[#A5B4FC]" />
                 <span className="text-[11px] text-zinc-600 dark:text-[#D1D5DB]">suppress after 5 repeats / 10 min</span>
               </div>
@@ -129,9 +129,9 @@ const PoliciesModule = () => {
         </section>
  
         {/* RIGHT — Human gates */}
-        <section className="bg-transparent border border-zinc-200 dark:border-neutral-500 rounded-[24px] p-6 space-y-6">
+        <section className="bg-transparent border border-zinc-500 dark:border-neutral-500 rounded-[24px] p-6 space-y-6">
           <div className="space-y-1 px-1">
-            <h3 className="text-zinc-800 dark:text-white font-bold text-lg">Human gates + blast radius</h3>
+            <h3 className="text-black dark:text-white font-bold text-lg">Human gates + blast radius</h3>
             <p className="text-zinc-400 dark:text-[#64748B] text-xs">Security defaults applied org-wide.</p>
           </div>
  
@@ -140,9 +140,9 @@ const PoliciesModule = () => {
             <GateToggle label="Production actions require approval" active={productionApproval} onToggle={() => setProductionApproval((v) => !v)} />
  
             {/* Blast radius limits */}
-            <div className="p-6 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-5 bg-white dark:bg-transparent">
+            <div className="p-6 border border-zinc-500 dark:border-neutral-500 rounded-2xl space-y-5 bg-white dark:bg-transparent">
               <div className="flex justify-between items-center">
-                <span className="text-zinc-800 dark:text-white text-[15px] font-bold">Blast radius limits</span>
+                <span className="text-black dark:text-white text-[15px] font-bold">Blast radius limits</span>
                 <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
                   Configure
                 </button>
@@ -151,22 +151,22 @@ const PoliciesModule = () => {
  
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[11px] text-zinc-400 dark:text-[#64748B] font-bold uppercase tracking-wider">
+                  <label className="text-[11px] text-black dark:text-[#64748B] font-bold uppercase tracking-wider">
                     Max services per execution
                   </label>
                   <Input
-                    className="text-zinc-700 dark:text-white"
+                    className="text-black dark:text-white"
                     value={maxServices}
                     onChange={(e: any) => setMaxServices(e.target.value)}
                     placeholder="e.g. 3"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[11px] text-zinc-400 dark:text-[#64748B] font-bold uppercase tracking-wider">
+                  <label className="text-[11px] text-black dark:text-[#64748B] font-bold uppercase tracking-wider">
                     Max env scope
                   </label>
                   <Select
-                    className="text-zinc-700 dark:text-white"
+                    className="text-black dark:text-white"
                     value={maxEnvScope}
                     onChange={(e: any) => setMaxEnvScope(e.target.value)}
                     options={[
@@ -201,11 +201,11 @@ const Toggle = ({ active, onToggle }: { active: boolean; onToggle: () => void })
 );
  
 const GateToggle = ({ label, active, onToggle }: { label: string; active: boolean; onToggle: () => void }) => (
-  <div className="p-5 border border-zinc-200 dark:border-neutral-500 rounded-2xl space-y-3 bg-white dark:bg-transparent">
+  <div className="p-5 border border-zinc-500 dark:border-neutral-500 rounded-2xl space-y-3 bg-white dark:bg-transparent">
     <div className="flex justify-between items-center">
-      <div className="flex items-center gap-2 px-3 py-1.5 border border-zinc-200 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
+      <div className="flex items-center gap-2 px-3 py-1.5 border border-zinc-500 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
         <CheckCircle2 size={16} className="text-red-500" />
-        <span className="text-xs font-bold text-zinc-700 dark:text-white">{label}</span>
+        <span className="text-xs font-bold text-black dark:text-white">{label}</span>
       </div>
       <Toggle active={active} onToggle={onToggle} />
     </div>

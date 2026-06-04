@@ -58,7 +58,7 @@ const SliderThreshold = ({
       <div className="relative">
         {/* Value Display */}
         <div
-          className="absolute -top-8 text-lg font-semibold text-gray-800 dark:text-gray-200 transition-all duration-150"
+          className="absolute -top-8 text-lg font-semibold text-black dark:text-gray-200 transition-all duration-150"
           style={{
             // Position the value text right above the slider thumb
             left: `calc(${trackProgress}% - ${(trackProgress / 100) * 20}px + ${

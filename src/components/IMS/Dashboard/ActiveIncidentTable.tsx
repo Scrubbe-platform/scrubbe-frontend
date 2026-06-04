@@ -174,7 +174,7 @@ const ActiveIncidentTable = ({ activeIncident }: Props) => {
   return (
     <div className=" bg-white p-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        <h2 className="text-xl font-semibold text-black mb-4">
           Active Incidents Feed
         </h2>
         <p

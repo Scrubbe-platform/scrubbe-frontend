@@ -1193,7 +1193,7 @@ const Stakeholder = ({ ticket, setSteps }: Props) => {
         {/* Communication Preview */}
         <div className="mb-6 p-4 bg-gray-50 rounded-md border border-gray-200">
           <h2 className="text-sm font-semibold mb-2">Communication Preview</h2>
-          <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono">
+          <pre className="whitespace-pre-wrap text-sm text-black font-mono">
             {`Slack Message:\n${messageContent}`}
           </pre>
         </div>
@@ -1215,7 +1215,7 @@ const Stakeholder = ({ ticket, setSteps }: Props) => {
             onClick={downloadRCA}
             isLoading={isLoading}
             disabled={isLoading}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-800 font-medium rounded-md hover:bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-black font-medium rounded-md hover:bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
           >
             <span>Send RCA to Stakeholders</span>
           </CButton>

@@ -124,7 +124,7 @@ const TeamWorkloadChart = ({ workLoad }: Props) => {
   };
   return (
     <div className="bg-white p-6 rounded-lg ">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+      <h2 className="text-xl font-semibold text-black mb-4">
         Team workload chart
       </h2>
       {data && data.length > 0 ? (

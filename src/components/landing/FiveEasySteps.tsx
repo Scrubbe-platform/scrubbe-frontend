@@ -56,7 +56,7 @@ const FiveEasySteps: React.FC = () => {
     <div className="w-full bg-white overflow-hidden">
       <section className="w-full max-w-[1440px] mx-auto px-4 py-10 md:py-16">
         <div className="text-center mb-8 md:mb-10">
-          <h2 className="text-[20px] sm:text-[24px] md:text-[30px] lg:text-[36px] font-bold text-gray-800 mb-3">
+          <h2 className="text-[20px] sm:text-[24px] md:text-[30px] lg:text-[36px] font-bold text-black mb-3">
             Secure your business in five easy steps
           </h2>
           <div className="w-28 h-1 bg-emerald-400 mx-auto"></div>
@@ -104,8 +104,8 @@ const FiveEasySteps: React.FC = () => {
                     <h3
                       className={`text-[20px] sm:text-[22px] lg:text-[24px] font-bold leading-tight mb-1 sm:mb-2 ${
                         activeStep === step.number
-                          ? "text-gray-800 animate-[pulse_2s_ease-in-out_infinite]"
-                          : "text-gray-800"
+                          ? "text-black animate-[pulse_2s_ease-in-out_infinite]"
+                          : "text-black"
                       }`}
                     >
                       {step.title}

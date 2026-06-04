@@ -143,7 +143,7 @@ function GithubConfiguration() {
     <div className="w-full mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-800">
+        <h2 className="text-xl font-bold text-black">
           Monitor Repositories
         </h2>
         <p className="text-gray-500 text-sm mt-1">
@@ -154,7 +154,7 @@ function GithubConfiguration() {
 
       {/* Select All */}
       <div className="flex items-center justify-between mb-4">
-        <span className="text-sm text-gray-700 font-medium">
+        <span className="text-sm text-black font-medium">
           {selectedCount} selected{" "}
           <span className="text-green cursor-pointer" onClick={handleToggleAll}>
             (Select All ({totalCount}))
@@ -183,7 +183,7 @@ function GithubConfiguration() {
                 />
                 <div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-gray-800 font-semibold">
+                    <span className="text-black font-semibold">
                       {repo.name}
                     </span>
                     <span

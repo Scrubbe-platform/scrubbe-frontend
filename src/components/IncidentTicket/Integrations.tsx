@@ -426,7 +426,7 @@ const Integrations: React.FC = () => {
 
   return (
     <div className="min-h-screen !min-w-[600px]">
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-white ">
+      <h1 className="text-2xl font-semibold text-black dark:text-white ">
         Integrations
       </h1>
       <p className="mb-6 dark:text-white">
@@ -462,7 +462,7 @@ const Integrations: React.FC = () => {
                         handleCategoryIntegration(option.value as string);
                         setOpenStatusFilter(false);
                       }}
-                      className="w-full text-sm text-nowrap px-4 py-2 text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50 text-gray-900 first:rounded-t-md last:rounded-b-md"
+                      className="w-full text-sm text-nowrap px-4 py-2 text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50 text-black first:rounded-t-md last:rounded-b-md"
                       type="button"
                     >
                       {option.label}
@@ -511,7 +511,7 @@ const Integrations: React.FC = () => {
 
                   {/* Integration Details */}
                   <div className="flex-1">
-                    <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+                    <h2 className="text-base font-semibold text-black dark:text-white">
                       {integration.name} -{" "}
                       <span className=" font-thin">{integration.category}</span>
                     </h2>

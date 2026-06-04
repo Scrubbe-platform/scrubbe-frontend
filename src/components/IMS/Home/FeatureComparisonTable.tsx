@@ -128,24 +128,24 @@ export function FeatureComparisonTable() {
                   className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                   variants={rowVariants as any}
                 >
-                  <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">
+                  <td className="px-4 py-3 whitespace-nowrap font-medium text-black">
                     {row.feature}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-gray-700 text-center">
+                  <td className="px-4 py-3 whitespace-nowrap text-black text-center">
                     {row.scrubbeIms ? (
                       <FaCheck className="text-green-500 mx-auto" />
                     ) : (
                       <FaTimes className="text-red-500 mx-auto" />
                     )}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-gray-700 text-center">
+                  <td className="px-4 py-3 whitespace-nowrap text-black text-center">
                     {row.serviceNow ? (
                       <FaCheck className="text-green-500 mx-auto" />
                     ) : (
                       <FaTimes className="text-red-500 mx-auto" />
                     )}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-gray-700 text-center">
+                  <td className="px-4 py-3 whitespace-nowrap text-black text-center">
                     {row.pagerDuty ? (
                       <FaCheck className="text-green-500 mx-auto" />
                     ) : (

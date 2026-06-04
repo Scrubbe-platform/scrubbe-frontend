@@ -52,7 +52,7 @@ const TicketComments = ({ ticket }: Props) => {
             key={c.id}
             className={`dark:bg-gray-800 bg-white border-l-4 border-green-400 rounded-xl px-6 py-4 shadow-sm`}
           >
-            <div className="font-semibold text-base dark:text-white text-gray-800 mb-1">
+            <div className="font-semibold text-base dark:text-white text-black mb-1">
               {c.content}
             </div>
             <div className="text-gray-500 text-sm justify-between flex ">
@@ -73,11 +73,11 @@ const TicketComments = ({ ticket }: Props) => {
     <div className="dark:bg-gray-900 bg-gray-50 rounded-2xl p-6">
       {content}
       <div className="my-4">
-        <div className="font-semibold text-base dark:text-white text-gray-800 mb-2">
+        <div className="font-semibold text-base dark:text-white text-black mb-2">
           Add comment
         </div>
         <textarea
-          className="w-full min-h-[80px] bg-transparent border dark:text-white border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none text-gray-800"
+          className="w-full min-h-[80px] bg-transparent border dark:text-white border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none text-black"
           placeholder="Enter your comment"
           value={comment}
           onChange={(e) => setComment(e.target.value)}

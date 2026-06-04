@@ -48,7 +48,7 @@ function ErrorContent() {
         </div>
       </div>
 
-      <h1 className="text-2xl font-semibold text-gray-900 mb-4">
+      <h1 className="text-2xl font-semibold text-black mb-4">
         Authentication Error
       </h1>
 
@@ -74,7 +74,7 @@ function ErrorContent() {
 
         <Link
           href="/"
-          className="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-md hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-center"
+          className="w-full bg-gray-200 text-black py-3 px-4 rounded-md hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-center"
         >
           Go Home
         </Link>

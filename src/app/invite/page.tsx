@@ -227,7 +227,7 @@ function InvitePageInner() {
                 <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
                   <Lock size={26} className="text-red-500" />
                 </div>
-                <h1 className="text-[20px] font-black text-gray-900 mb-2">Invalid Invitation</h1>
+                <h1 className="text-[20px] font-black text-black mb-2">Invalid Invitation</h1>
                 <p className="text-sm text-gray-500 max-w-xs">{errorMsg}</p>
               </div>
             )}
@@ -238,7 +238,7 @@ function InvitePageInner() {
                 <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4">
                   <CheckCircle2 size={26} className="text-emerald-600" />
                 </div>
-                <h1 className="text-[20px] font-black text-gray-900 mb-2">You're in!</h1>
+                <h1 className="text-[20px] font-black text-black mb-2">You're in!</h1>
                 <p className="text-sm text-gray-500">Redirecting to your workspace...</p>
               </div>
             )}
@@ -253,7 +253,7 @@ function InvitePageInner() {
                     <p className="text-[13px] font-semibold text-emerald-600 mb-1">
                       Step 1 of 2
                     </p>
-                    <h1 className="text-[28px] font-black text-gray-900 leading-tight mb-1.5">
+                    <h1 className="text-[28px] font-black text-black leading-tight mb-1.5">
                       {phase === "login" ? "Sign in to workspace" : "Complete your account"}
                     </h1>
                     <p className="text-[14px] text-gray-500 max-w-sm leading-relaxed">
@@ -272,7 +272,7 @@ function InvitePageInner() {
 
                 {/* Email (read-only) */}
                 <div className="mb-5">
-                  <label className="block text-[13px] font-semibold text-gray-800 mb-2">Work email</label>
+                  <label className="block text-[13px] font-semibold text-black mb-2">Work email</label>
                   <div className={inputCls} style={{ background: "#f9fafb" }}>
                     <Mail size={15} className="text-gray-400 shrink-0" />
                     <span className="flex-1 text-[14px] text-gray-500">{invite.email}</span>
@@ -283,12 +283,12 @@ function InvitePageInner() {
                 {phase === "login" && (
                   <form onSubmit={handleLogin} className="space-y-5 flex-1 flex flex-col">
                     <div>
-                      <label className="block text-[13px] font-semibold text-gray-800 mb-2">Password</label>
+                      <label className="block text-[13px] font-semibold text-black mb-2">Password</label>
                       <div className={inputCls}>
                         <Lock size={15} className="text-gray-400 shrink-0" />
                         <input
                           type={showPw ? "text" : "password"}
-                          className="flex-1 bg-transparent outline-none text-[14px] text-gray-800 placeholder-gray-400"
+                          className="flex-1 bg-transparent outline-none text-[14px] text-black placeholder-gray-400"
                           placeholder="Your password"
                           autoFocus
                           {...loginForm.register("password")}
@@ -311,20 +311,20 @@ function InvitePageInner() {
                   <form onSubmit={handleSignup} className="space-y-5 flex-1 flex flex-col">
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[13px] font-semibold text-gray-800 mb-2">First name</label>
+                        <label className="block text-[13px] font-semibold text-black mb-2">First name</label>
                         <div className={inputCls}>
                           <User size={15} className="text-gray-400 shrink-0" />
-                          <input type="text" className="flex-1 bg-transparent outline-none text-[14px] text-gray-800 placeholder-gray-400" placeholder="Alex" autoFocus {...signupForm.register("firstName")} />
+                          <input type="text" className="flex-1 bg-transparent outline-none text-[14px] text-black placeholder-gray-400" placeholder="Alex" autoFocus {...signupForm.register("firstName")} />
                         </div>
                         {signupForm.formState.errors.firstName && (
                           <p className="mt-1 text-[12px] text-red-500">{signupForm.formState.errors.firstName.message}</p>
                         )}
                       </div>
                       <div>
-                        <label className="block text-[13px] font-semibold text-gray-800 mb-2">Last name</label>
+                        <label className="block text-[13px] font-semibold text-black mb-2">Last name</label>
                         <div className={inputCls}>
                           <User size={15} className="text-gray-400 shrink-0" />
-                          <input type="text" className="flex-1 bg-transparent outline-none text-[14px] text-gray-800 placeholder-gray-400" placeholder="Johnson" {...signupForm.register("lastName")} />
+                          <input type="text" className="flex-1 bg-transparent outline-none text-[14px] text-black placeholder-gray-400" placeholder="Johnson" {...signupForm.register("lastName")} />
                         </div>
                         {signupForm.formState.errors.lastName && (
                           <p className="mt-1 text-[12px] text-red-500">{signupForm.formState.errors.lastName.message}</p>
@@ -333,12 +333,12 @@ function InvitePageInner() {
                     </div>
 
                     <div>
-                      <label className="block text-[13px] font-semibold text-gray-800 mb-2">Create password</label>
+                      <label className="block text-[13px] font-semibold text-black mb-2">Create password</label>
                       <div className={inputCls}>
                         <Lock size={15} className="text-gray-400 shrink-0" />
                         <input
                           type={showPw ? "text" : "password"}
-                          className="flex-1 bg-transparent outline-none text-[14px] text-gray-800 placeholder-gray-400"
+                          className="flex-1 bg-transparent outline-none text-[14px] text-black placeholder-gray-400"
                           placeholder="Min. 8 characters"
                           {...signupForm.register("password")}
                         />
@@ -356,7 +356,7 @@ function InvitePageInner() {
                     <div className="flex items-start gap-3 px-4 py-4 rounded-xl border border-gray-100 bg-gray-50">
                       <Shield size={16} className="text-emerald-600 shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-[13px] font-semibold text-gray-800 mb-0.5">Enterprise security by default</p>
+                        <p className="text-[13px] font-semibold text-black mb-0.5">Enterprise security by default</p>
                         <p className="text-[12px] text-gray-500 leading-relaxed">
                           Your account is protected with industry-standard security and compliance controls.
                         </p>

@@ -50,7 +50,7 @@ const SlackIntegration: React.FC = () => {
         </div>
 
         {/* Loading Text */}
-        <p className="text-lg font-medium text-gray-700 dark:text-white">
+        <p className="text-lg font-medium text-black dark:text-white">
           Integrating with Slack...
         </p>
 

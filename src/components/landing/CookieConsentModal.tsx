@@ -61,10 +61,10 @@ const CookieConsentModal: React.FC = () => {
       {/* Simple Banner */}
       <div className="flex flex-col md:flex-row items-center justify-between p-6 bg-white bg-opacity-95 border-t shadow-lg">
         <div className="flex-1 mb-4 md:mb-0 md:mr-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-black mb-2">
             Cookie & Privacy Settings
           </h2>
-          <p className="text-gray-700">
+          <p className="text-black">
             Scrubbe uses cookies and similar technologies to enhance your
             experience, analyze traffic, and enable personalized content. Choose
             your preferences below.
@@ -125,7 +125,7 @@ const CookieConsentModal: React.FC = () => {
                 {/* Essential Cookies */}
                 <div className="mb-5 pb-5 border-b border-gray-200">
                   <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-black">
                       Essential Cookies
                     </h3>
                     <div className="relative w-12 h-6">
@@ -159,7 +159,7 @@ const CookieConsentModal: React.FC = () => {
                 {/* Analytics Cookies */}
                 <div className="mb-5 pb-5 border-b border-gray-200">
                   <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-black">
                       Analytics Cookies
                     </h3>
                     <div className="relative w-12 h-6">
@@ -194,7 +194,7 @@ const CookieConsentModal: React.FC = () => {
                 {/* Functional Cookies */}
                 <div className="mb-5 pb-5 border-b border-gray-200">
                   <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-black">
                       Functional Cookies
                     </h3>
                     <div className="relative w-12 h-6">
@@ -229,7 +229,7 @@ const CookieConsentModal: React.FC = () => {
                 {/* Marketing Cookies */}
                 <div className="mb-5">
                   <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-black">
                       Marketing Cookies
                     </h3>
                     <div className="relative w-12 h-6">
@@ -282,12 +282,12 @@ const CookieConsentModal: React.FC = () => {
             {/* Privacy Policy Tab - Content remains the same */}
             {activeTab === "privacy-policy" && (
               <div className="text-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                <h3 className="text-lg font-semibold text-black mb-1">
                   Privacy Policy for Scrubbe
                 </h3>
                 <p className="mb-4">Effective Date: March 31, 2025</p>
 
-                <h3 className="text-base font-semibold text-gray-900 mt-4 mb-2">
+                <h3 className="text-base font-semibold text-black mt-4 mb-2">
                   1. Introduction
                 </h3>
                 <p className="mb-4">
@@ -297,7 +297,7 @@ const CookieConsentModal: React.FC = () => {
                   when you use our SIEM and SOAR platform.
                 </p>
 
-                <h3 className="text-base font-semibold text-gray-900 mt-4 mb-2">
+                <h3 className="text-base font-semibold text-black mt-4 mb-2">
                   2. Data We Collect
                 </h3>
                 <p className="mb-2">
@@ -349,12 +349,12 @@ const CookieConsentModal: React.FC = () => {
             {/* Cookie Policy Tab - Content remains the same */}
             {activeTab === "cookie-policy" && (
               <div className="text-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                <h3 className="text-lg font-semibold text-black mb-1">
                   Cookie Policy for Scrubbe
                 </h3>
                 <p className="mb-4">Effective Date: March 31, 2025</p>
 
-                <h3 className="text-base font-semibold text-gray-900 mt-4 mb-2">
+                <h3 className="text-base font-semibold text-black mt-4 mb-2">
                   1. What Are Cookies
                 </h3>
                 <p className="mb-4">
@@ -364,11 +364,11 @@ const CookieConsentModal: React.FC = () => {
                   website owners.
                 </p>
 
-                <h3 className="text-base font-semibold text-gray-900 mt-4 mb-2">
+                <h3 className="text-base font-semibold text-black mt-4 mb-2">
                   2. Types of Cookies We Use
                 </h3>
 
-                <h3 className="text-base font-semibold text-gray-900 mt-3 mb-2">
+                <h3 className="text-base font-semibold text-black mt-3 mb-2">
                   Essential Cookies
                 </h3>
                 <p className="mb-2">

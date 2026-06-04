@@ -159,7 +159,7 @@ const Problems = () => {
                       // setStatusFilter(option.value);
                       setOpenFilter(undefined);
                     }}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50 text-gray-900 first:rounded-t-md last:rounded-b-md"
+                    className="w-full px-4 py-2 text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50 text-black first:rounded-t-md last:rounded-b-md"
                     type="button"
                   >
                     {option.label}

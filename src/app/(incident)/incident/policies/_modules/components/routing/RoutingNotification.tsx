@@ -109,10 +109,10 @@ const RoutingNotification = () => {
         actionText="Configure Routing"
         action={() => setOpenModal(true)}
       >
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 space-y-4">
+        <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 space-y-4">
 
           {/* On-call routing */}
-          <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">
+          <p className="text-[13px] font-semibold text-black dark:text-zinc-100">
             On-call routing (global default)
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -121,20 +121,20 @@ const RoutingNotification = () => {
             <Select options={ESCALATE_AFTER_OPTIONS} label="Escalate if not acknowledged" />
             <Select options={ESCALATE_TARGET_OPTIONS}label="Escalate target"              />
           </div>
-          <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+          <p className="text-[12px] text-black dark:text-zinc-500">
             Routing is policy-only here. Actual on-call rotations can be synced after integrations.
           </p>
 
           {/* Notification channels */}
           <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">
+              <p className="text-[13px] font-semibold text-black dark:text-zinc-100">
                 Notification channels
               </p>
               <CButton
                 onClick={() => testNotification()}
                 disabled={testing}
-                className="border border-zinc-200 dark:border-zinc-700 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 w-fit h-8 text-[12px]"
+                className="border border-zinc-500 dark:border-zinc-700 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 w-fit h-8 text-[12px]"
               >
                 {testing ? "Sending…" : "Test Notification"}
               </CButton>
@@ -142,7 +142,7 @@ const RoutingNotification = () => {
             <div className="space-y-3">
               {NOTIFICATION_CHANNELS.map(({ title, value }) => (
                 <div key={value} className="flex items-center justify-between">
-                  <p className="text-[13px] text-zinc-700 dark:text-zinc-300">{title}</p>
+                  <p className="text-[13px] text-black dark:text-zinc-300">{title}</p>
                   <Switch
                     color="success"
                     size="sm"
@@ -168,10 +168,10 @@ const RoutingNotification = () => {
 
             {/* Info banner */}
             <div className="flex gap-2 items-start rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-3">
-              <BiInfoCircle className="size-4 text-zinc-400 dark:text-zinc-500 shrink-0 mt-0.5" />
+              <BiInfoCircle className="size-4 text-black dark:text-zinc-500 shrink-0 mt-0.5" />
               <div>
-                <p className="text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 mb-0.5">Rule type</p>
-                <p className="text-[12px] text-zinc-500 dark:text-zinc-400">Service-scoped overrides come later.</p>
+                <p className="text-[12px] font-semibold text-black dark:text-zinc-200 mb-0.5">Rule type</p>
+                <p className="text-[12px] text-black dark:text-zinc-400">Service-scoped overrides come later.</p>
               </div>
             </div>
 
@@ -187,11 +187,11 @@ const RoutingNotification = () => {
               )} />
             </div>
 
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4">
-              <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 mb-0.5">
+            <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4">
+              <p className="text-[13px] font-semibold text-black dark:text-zinc-100 mb-0.5">
                 Routing is configured on the main page.
               </p>
-              <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+              <p className="text-[12px] text-black dark:text-zinc-500">
                 Use this drawer for future: service-scoped overrides.
               </p>
             </div>
@@ -200,7 +200,7 @@ const RoutingNotification = () => {
               <TextArea {...field} placeholder="Explain intent so future readers don't guess" label="Note (optional)" />
             )} />
 
-            <div className="flex items-center gap-2 text-[12px] text-zinc-400 dark:text-zinc-500">
+            <div className="flex items-center gap-2 text-[12px] text-black dark:text-zinc-500">
               <BiInfoCircle className="size-4 shrink-0" />
               <p>Rules are evaluated in order. Put stricter rules above looser ones.</p>
             </div>
@@ -208,7 +208,7 @@ const RoutingNotification = () => {
             <div className="flex justify-end gap-2.5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <CButton
                 onClick={() => setOpenModal(false)}
-                className="border border-zinc-200 dark:border-zinc-700 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 w-fit"
+                className="border border-zinc-500 dark:border-zinc-700 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 w-fit"
               >
                 Cancel
               </CButton>

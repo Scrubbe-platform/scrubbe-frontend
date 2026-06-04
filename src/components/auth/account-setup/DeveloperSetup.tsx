@@ -81,7 +81,7 @@ const DeveloperSetup = () => {
 
         <article className="w-full mx-auto">
           <div className="bg-white p-6">
-            <h2 className="text-[24px] font-semibold text-gray-900 ">
+            <h2 className="text-[24px] font-semibold text-black ">
               Developer Profile
             </h2>
 

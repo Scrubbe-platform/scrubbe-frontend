@@ -109,7 +109,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="min-h-[80vh] bg-white dark:bg-zinc-900 text-gray-900 dark:text-slate-300 p-6 flex flex-col font-sans">
+    <div className="min-h-[80vh] bg-white dark:bg-zinc-900 text-black dark:text-slate-300 p-6 flex flex-col font-sans rounded-lg border dark:border-[#1F2937] border-zinc-500">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-1">
         <h2 className="text-[13px] font-bold uppercase tracking-wider text-slate-900 dark:text-white">

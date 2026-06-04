@@ -56,7 +56,7 @@ const EventRow = ({ event, isLast }: { event: AuditEvent; isLast: boolean }) => 
 
       {/* Card */}
       <div className="flex-1 min-w-0 pb-5">
-        <div className="rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/40 px-4 py-3 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
+        <div className="rounded-xl border border-zinc-500 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/40 px-4 py-3 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
           <div className="flex items-center justify-between gap-2 mb-2">
             {/* Type badge */}
             <span className={cn(
@@ -67,7 +67,7 @@ const EventRow = ({ event, isLast }: { event: AuditEvent; isLast: boolean }) => 
             </span>
 
             {/* Timestamp */}
-            <span className="text-[11px] font-mono text-zinc-300 dark:text-zinc-600 tabular-nums shrink-0">
+            <span className="text-[11px] font-mono text-black dark:text-zinc-600 tabular-nums shrink-0">
               {event.timestamp}
             </span>
           </div>
@@ -116,7 +116,7 @@ const ActivityAuditTrail: React.FC<{ history: IncidentHistoryRecord[] }> = ({ hi
 
   return (
     <div className="px-5 md:px-8 py-6">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-5">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-5">
         Activity & Audit Trail
       </p>
 
@@ -127,7 +127,7 @@ const ActivityAuditTrail: React.FC<{ history: IncidentHistoryRecord[] }> = ({ hi
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700 px-5 py-6 text-[13px] text-zinc-400 dark:text-zinc-500">
+        <div className="rounded-xl border border-dashed border-zinc-500 dark:border-zinc-700 px-5 py-6 text-[13px] text-black dark:text-zinc-500">
           No audit events have been recorded for this incident yet.
         </div>
       )}

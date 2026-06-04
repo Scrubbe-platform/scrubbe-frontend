@@ -11,7 +11,7 @@ interface ServiceImpact { name: string; subtext: string; type: ImpactType }
 const typeStyle: Record<ImpactType, string> = {
   Direct:   "border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800",
   Cascade:  "border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800",
-  InDirect: "border-zinc-200 dark:border-zinc-700 text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/60",
+  InDirect: "border-zinc-200 dark:border-zinc-700 text-black dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/60",
 };
 
 // Dot color preserved — Direct/Cascade are red for real danger signal
@@ -26,8 +26,8 @@ const ImpactCard = ({ name, subtext, type }: ServiceImpact) => (
     <div className="flex items-center gap-3">
       <div className={`w-2 h-2 rounded-full shrink-0 ${dotColor[type]}`} />
       <div>
-        <p className="text-[12px] font-semibold text-zinc-700 dark:text-zinc-200">{name}</p>
-        <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{subtext}</p>
+        <p className="text-[12px] font-semibold text-black dark:text-zinc-200">{name}</p>
+        <p className="text-[11px] text-black dark:text-zinc-500">{subtext}</p>
       </div>
     </div>
     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border uppercase tracking-wider ${typeStyle[type]}`}>
@@ -38,8 +38,8 @@ const ImpactCard = ({ name, subtext, type }: ServiceImpact) => (
 
 const DataRow = ({ label, value }: { label: string; value: string | number }) => (
   <div className="flex justify-between items-center py-2.5 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
-    <span className="text-[12px] text-zinc-400 dark:text-zinc-500">{label}</span>
-    <span className="text-[12px] font-semibold text-zinc-700 dark:text-zinc-200">{value}</span>
+    <span className="text-[12px] text-black dark:text-zinc-500">{label}</span>
+    <span className="text-[12px] font-semibold text-black dark:text-zinc-200">{value}</span>
   </div>
 );
 
@@ -71,22 +71,22 @@ const BlastRadiusModule: React.FC<{ incidentId?: string }> = ({ incidentId }) =>
   const userImpactPct = parseInt(String(userImpact)) || 30;
 
   return (
-    <div className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-5">
+    <div className="w-full rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-5">
       <div className="flex justify-between items-start">
         <div className="flex gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">
             <Target size={15} className="text-zinc-500 dark:text-zinc-400" />
           </div>
           <div>
-            <h2 className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100">Blast Radius Evaluation</h2>
-            <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-0.5">Impact analysis — always runs before guardrail check · CP enforced</p>
+            <h2 className="text-[14px] font-semibold text-black dark:text-zinc-100">Blast Radius Evaluation</h2>
+            <p className="text-[12px] text-black dark:text-zinc-500 mt-0.5">Impact analysis — always runs before guardrail check · CP enforced</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <span className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-semibold text-zinc-600 dark:text-zinc-300">
+          <span className="px-3 py-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-semibold text-zinc-600 dark:text-zinc-300">
             {riskLevel.charAt(0) + riskLevel.slice(1).toLowerCase()} Risk
           </span>
-          <button className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+          <button className="p-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 text-black hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
             <TriangleAlert size={14} />
           </button>
         </div>
@@ -94,8 +94,8 @@ const BlastRadiusModule: React.FC<{ incidentId?: string }> = ({ incidentId }) =>
 
       <div className="flex gap-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
         <Info size={15} className="text-zinc-400 dark:text-zinc-500 shrink-0 mt-0.5" />
-        <p className="text-[12px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
-          <span className="font-semibold text-zinc-700 dark:text-zinc-300">CP Zone</span> — blast radius must be calculated and consistent before any guardrail or execution decision. Uncertainty blocks execution.
+        <p className="text-[12px] text-black dark:text-zinc-400 leading-relaxed">
+          <span className="font-semibold text-black dark:text-zinc-300">CP Zone</span> — blast radius must be calculated and consistent before any guardrail or execution decision. Uncertainty blocks execution.
         </p>
       </div>
 
@@ -112,7 +112,7 @@ const BlastRadiusModule: React.FC<{ incidentId?: string }> = ({ incidentId }) =>
       </div>
 
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">User Impact Meter</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">User Impact Meter</p>
         <div className="w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
           <div className="h-full bg-zinc-400 dark:bg-zinc-500 transition-all duration-700" style={{ width: `${userImpactPct}%` }} />
         </div>

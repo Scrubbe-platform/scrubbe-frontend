@@ -20,8 +20,7 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
     { id: "code-engine",  label: "Code Engine",        link: `/incident/code-engine?id=${activeId}`       },
     { id: "delivery",     label: "Incident Delivery",  link: `/incident/incident-delivery?id=${activeId}` },
     { id: "playbook",     label: "Playbook. RBK.17",   link: `/incident/playbooks?id=${activeId}`         },
-    { id: "context",      label: "Context",            link: `/incident?id=${activeId}&tab=context`       },
-  ];
+   ];
 
   return (
     <div className="w-full px-5 md:px-8 pt-6 pb-0 flex flex-col gap-5 border-b border-zinc-100 dark:border-white/[0.06] bg-white dark:bg-transparent">
@@ -32,7 +31,7 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
 
           {/* Ticket ID + badges */}
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="text-[13px] font-mono font-semibold text-zinc-400 dark:text-zinc-500 tracking-wider">
+            <span className="text-[13px] font-mono font-semibold text-black dark:text-zinc-500 tracking-wider">
               {incident.ticketId}
             </span>
             <span className="w-px h-3.5 bg-zinc-200 dark:bg-zinc-700" />
@@ -45,7 +44,7 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
           </div>
 
           {/* Title */}
-          <h1 className="text-[18px] md:text-[22px] font-bold text-zinc-900 dark:text-white leading-snug max-w-2xl">
+          <h1 className="text-[18px] md:text-[22px] font-bold text-black dark:text-white leading-snug max-w-2xl">
             {incident.title}
           </h1>
 
@@ -56,7 +55,7 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
               .map((val) => (
                 <span
                   key={val}
-                  className="px-2.5 py-1 rounded-md text-[11px] font-medium border border-zinc-200 dark:border-zinc-700/60 text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/40"
+                  className="px-2.5 py-1 rounded-md text-[11px] font-medium border border-zinc-500 dark:border-zinc-700/60 text-black dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/40"
                 >
                   {val}
                 </span>
@@ -68,7 +67,7 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => router.replace(`/incident?id=${incident.id}&tab=context`)}
-            className="px-4 py-2 text-[12px] font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            className="px-4 py-2 text-[12px] font-semibold rounded-lg border border-zinc-500 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
           >
             Add Context
           </button>
@@ -97,7 +96,7 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
               <span className={`text-[13px] font-medium whitespace-nowrap transition-colors ${
                 isActive
                   ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300"
+                  : "text-dark dark:text-zinc-500 group-hover:text-black dark:group-hover:text-zinc-300"
               }`}>
                 {tab.label}
               </span>

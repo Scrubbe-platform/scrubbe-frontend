@@ -13,7 +13,7 @@ const SystemHealthCard: React.FC<Props> = ({ statuses }) => {
   const statusItems = statuses?.map(({ status, component }) => (
     <div
       key={component}
-      className="flex items-center justify-between text-gray-900 dark:text-gray-100 flex-1 flex-grow"
+      className="flex items-center justify-between text-black dark:text-gray-100 flex-1 flex-grow"
     >
       <span className="text-sm">{component} :</span>
       <StatusPill status={status as any} />

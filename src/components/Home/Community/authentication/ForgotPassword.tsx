@@ -256,7 +256,7 @@ export default function ForgotPassword() {
               </div>
             </div>
 
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-xl font-semibold text-black dark:text-white mb-2">
               Successful
             </h1>
 

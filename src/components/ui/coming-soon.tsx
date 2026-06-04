@@ -4,7 +4,7 @@ import { BsLinkedin, BsTwitterX } from "react-icons/bs";
 
 const ComingSoonPage: React.FC = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 text-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 text-black">
       <div className="mx-4 max-w-xl px-4 py-16 text-center sm:px-6 lg:px-8">
         {/* You can add a logo or brand name here */}
         {/* <img src="/logo.svg" alt="Logo" className="mx-auto h-12 w-auto" /> */}
@@ -21,7 +21,7 @@ const ComingSoonPage: React.FC = () => {
         <div className="mt-8 flex justify-center space-x-4">
           <a
             href="https://x.com/_Scrubbe"
-            className="text-gray-500 hover:text-gray-900 transition-colors duration-200"
+            className="text-gray-500 hover:text-black transition-colors duration-200"
             aria-label="Twitter"
             target="_blank"
           >
@@ -29,7 +29,7 @@ const ComingSoonPage: React.FC = () => {
           </a>
           <a
             href="https://www.linkedin.com/company/scrubbe/"
-            className="text-gray-500 hover:text-gray-900 transition-colors duration-200"
+            className="text-gray-500 hover:text-black transition-colors duration-200"
             aria-label="LinkedIn"
             target="_blank"
           >

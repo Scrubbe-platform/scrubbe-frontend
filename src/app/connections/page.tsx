@@ -104,7 +104,7 @@ const Page = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-950 min-h-screen text-zinc-800 dark:text-zinc-200 font-sans p-10">
+    <div className="bg-white dark:bg-zinc-950 min-h-screen text-black dark:text-zinc-200 font-sans p-10">
       {isOpen && (
         <ConfigureIntegration
           open={isOpen}
@@ -120,7 +120,7 @@ const Page = () => {
         {/* Header */}
         <div className="flex justify-between items-start mb-12">
           <div className="max-w-3xl">
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-3">
+            <h1 className="text-3xl font-bold text-black dark:text-zinc-100 mb-3">
               Connect your engineering stack
             </h1>
             <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">
@@ -131,7 +131,7 @@ const Page = () => {
           </div>
           <button
             type="button"
-            className="px-4 py-1.5 border border-zinc-200 dark:border-zinc-700 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            className="px-4 py-1.5 border border-zinc-500 dark:border-zinc-700 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
             onClick={() => router.push("/incident")}
           >
              Back
@@ -144,7 +144,7 @@ const Page = () => {
             { icon: <BiGitRepoForked size={13} />, label: "Step 1 of 3 · Engineering graph" },
             { icon: <GoShield size={13} />,        label: "Read-only integration model"     },
           ].map(({ icon, label }) => (
-            <div key={label} className="px-3 py-1.5 flex items-center gap-2 border border-zinc-200 dark:border-zinc-700 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 rounded-md">
+            <div key={label} className="px-3 py-1.5 flex items-center gap-2 border border-zinc-500 dark:border-zinc-700 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 rounded-md">
               {icon} {label}
             </div>
           ))}
@@ -200,7 +200,7 @@ const Page = () => {
 
             <div className="flex items-center gap-3">
               <div className="size-2 rounded-full bg-emerald-400 shrink-0" />
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="text-sm text-black dark:text-zinc-400">
                 Once connected, Scrubbe will start listening for failed deployments, anomalies and fraud patterns and map them into incidents.
               </p>
             </div>
@@ -226,11 +226,11 @@ const Page = () => {
                 ],
               },
             ].map(({ title, items }) => (
-              <div key={title} className="border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-6 rounded-xl">
-                <h3 className="text-[14px] font-semibold text-zinc-800 dark:text-zinc-100 mb-3">{title}</h3>
+              <div key={title} className="border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-6 rounded-xl">
+                <h3 className="text-[14px] font-semibold text-black dark:text-zinc-100 mb-3">{title}</h3>
                 <ul className="list-disc pl-4 space-y-2">
                   {items.map((item) => (
-                    <li key={item} className="text-[13px] text-zinc-500 dark:text-zinc-400 leading-relaxed">{item}</li>
+                    <li key={item} className="text-[13px] text-black dark:text-zinc-400 leading-relaxed">{item}</li>
                   ))}
                 </ul>
               </div>
@@ -252,16 +252,16 @@ const StepWrapper = ({
   title: string; description: string; subtitle: string;
   children: ReactNode; footer: string; tag: string;
 }) => (
-  <div className="border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 rounded-xl transition-all overflow-clip">
+  <div className="border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 rounded-xl transition-all overflow-clip">
     <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-start">
       <div className="flex flex-col gap-1">
-        <h2 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 uppercase tracking-wider">
+        <h2 className="text-sm font-bold text-black dark:text-zinc-100 uppercase tracking-wider">
           {title}
         </h2>
-        <p className="text-zinc-700 dark:text-zinc-200 text-sm font-semibold">{subtitle}</p>
+        <p className="text-black dark:text-zinc-200 text-sm font-semibold">{subtitle}</p>
         <p className="text-zinc-500 dark:text-zinc-400 text-sm max-w-lg">{description}</p>
       </div>
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 shrink-0 ml-4">
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 text-black dark:text-zinc-400 shrink-0 ml-4">
         <GoShield size={14} />
         <span className="text-[10px] font-semibold uppercase tracking-wide">{tag}</span>
       </div>
@@ -282,15 +282,15 @@ const IntegrationCard = ({
 }) => (
   <div
     onClick={onClick}
-    className="border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 rounded-lg p-2 flex justify-between gap-2 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
+    className="border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 rounded-lg p-2 flex justify-between gap-2 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
   >
     <div className="flex gap-2 items-center">
-      <div className="size-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex justify-center items-center border border-zinc-200 dark:border-zinc-700 shrink-0">
-        <Icon className="size-5 text-zinc-500 dark:text-zinc-400" />
+      <div className="size-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex justify-center items-center border border-zinc-500 dark:border-zinc-700 shrink-0">
+        <Icon className="size-5 text-black dark:text-zinc-400" />
       </div>
       <div>
-        <p className="text-[13px] text-zinc-800 dark:text-zinc-100 font-semibold leading-tight">{title}</p>
-        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{subtitle}</p>
+        <p className="text-[13px] text-black dark:text-zinc-100 font-semibold leading-tight">{title}</p>
+        <p className="text-[11px] text-black dark:text-zinc-400">{subtitle}</p>
       </div>
     </div>
     <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 underline underline-offset-2 shrink-0 self-center">

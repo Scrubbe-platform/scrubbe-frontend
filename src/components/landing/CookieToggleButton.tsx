@@ -133,7 +133,7 @@ const CookieToggleButton: React.FC = () => {
         {/* ── Header ── */}
         <div className="flex items-start justify-between px-5 pt-5 pb-4 border-b border-zinc-100 flex-shrink-0">
           <div className="pr-4">
-            <h2 className="text-[17px] font-semibold text-zinc-900 mb-1">
+            <h2 className="text-[17px] font-semibold text-black mb-1">
               Cookie preferences
             </h2>
             <p className="text-[13px] text-zinc-500 leading-relaxed">
@@ -162,14 +162,14 @@ const CookieToggleButton: React.FC = () => {
                 key={cat.key}
                 className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-4"
               >
-                <p className="text-[14px] font-semibold text-zinc-900 mb-1">
+                <p className="text-[14px] font-semibold text-black mb-1">
                   {cat.title}
                 </p>
                 <p className="text-[13px] text-zinc-500 leading-relaxed mb-3">
                   {cat.description}
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] font-medium text-zinc-700">
+                  <span className="text-[13px] font-medium text-black">
                     {cat.label}
                   </span>
                   <Toggle
@@ -192,20 +192,20 @@ const CookieToggleButton: React.FC = () => {
 
         {/* ── Footer ── */}
         <div className="border-t border-zinc-100 px-4 pt-3 pb-5 flex-shrink-0">
-          <p className="text-[12px] text-zinc-400 leading-relaxed mb-4">
+          <p className="text-[12px] text-black leading-relaxed mb-4">
             Your choices are stored locally in this browser and can be updated
             at any time from the cookie settings button.
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={handleEssentialOnly}
-              className="flex-1 px-3 py-2.5 text-[13px] font-semibold text-zinc-800 border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
+              className="flex-1 px-3 py-2.5 text-[13px] font-semibold text-black border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
             >
               Necessary only
             </button>
             <button
               onClick={handleAcceptAll}
-              className="flex-1 px-3 py-2.5 text-[13px] font-semibold text-zinc-800 border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
+              className="flex-1 px-3 py-2.5 text-[13px] font-semibold text-black border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
             >
               Accept all
             </button>

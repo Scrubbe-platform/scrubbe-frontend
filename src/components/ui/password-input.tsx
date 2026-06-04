@@ -104,7 +104,7 @@ export const PasswordInput = React.forwardRef<
           <button
             type="button"
             onClick={togglePasswordVisibility}
-            className="absolute right-3 top-[70%] -translate-y-1/2 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+            className="absolute right-3 top-[70%] -translate-y-1/2 text-black hover:text-black dark:text-zinc-400 dark:hover:text-zinc-200"
           >
             {showPassword ? (
               <BsEyeSlash className="h-5 w-5" />

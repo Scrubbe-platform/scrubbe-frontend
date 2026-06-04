@@ -65,7 +65,7 @@ const SupportedBy = () => {
         {/* Light blue content section */}
         <article className="w-full bg-[#EFF6FF] py-6 md:py-12 lg:py-16">
           <div className="max-w-4xl mx-auto px-4">
-            <p className="text-center text-gray-800 text-lg md:text-xl leading-relaxed">
+            <p className="text-center text-black text-lg md:text-xl leading-relaxed">
               Scrubbe empowers modern teams to stop fraud, verify trust, and
               automate response with clarity and speed. Whether you&#39;re
               launching your first security layer or scaling to millions,

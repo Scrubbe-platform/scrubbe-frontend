@@ -81,12 +81,12 @@ const SignalNode = ({ data }: { data: ServiceNodeData }) => {
 
       {/* Header */}
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-zinc-100 dark:border-white/5">
-        <div className="w-7 h-7 rounded-lg bg-zinc-50 dark:bg-white/5 flex items-center justify-center shrink-0 text-zinc-500 dark:text-zinc-400">
+        <div className="w-7 h-7 rounded-lg bg-zinc-50 dark:bg-white/5 flex items-center justify-center shrink-0 text-black dark:text-zinc-400">
           {data.icon}
         </div>
         <div className="min-w-0">
-          <p className="text-[12px] font-semibold text-zinc-800 dark:text-zinc-100 leading-tight truncate">{data.label}</p>
-          <p className="text-[9px] font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500">{data.kind}</p>
+          <p className="text-[12px] font-semibold text-black dark:text-zinc-100 leading-tight truncate">{data.label}</p>
+          <p className="text-[9px] font-mono uppercase tracking-wider text-black dark:text-zinc-500">{data.kind}</p>
         </div>
       </div>
 
@@ -97,7 +97,7 @@ const SignalNode = ({ data }: { data: ServiceNodeData }) => {
           <span className={cn("text-[10px] font-semibold tracking-wide", s.label)}>{data.status}</span>
         </div>
         {data.incidentId && (
-          <span className="text-[9px] font-mono text-zinc-400 dark:text-zinc-500">{data.incidentId}</span>
+          <span className="text-[9px] font-mono text-black dark:text-zinc-500">{data.incidentId}</span>
         )}
       </div>
 
@@ -105,7 +105,7 @@ const SignalNode = ({ data }: { data: ServiceNodeData }) => {
       <div className="grid grid-cols-2 divide-x divide-zinc-100 dark:divide-white/5 border-t border-zinc-100 dark:border-white/5">
         {data.metrics.map((m) => (
           <div key={m.label} className="flex flex-col items-center py-2 px-1">
-            <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-0.5">{m.label}</span>
+            <span className="text-[8px] font-mono uppercase tracking-widest text-black dark:text-zinc-500 mb-0.5">{m.label}</span>
             <span className={cn("text-[11px] font-bold", m.color)}>{m.value}</span>
           </div>
         ))}
@@ -223,7 +223,7 @@ const buildAlertFeed = (incident: IncidentDetailRecord) => [
 // ── Sidebar section label ────────────────────────────────────────
 
 const SideLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">{children}</p>
+  <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-3">{children}</p>
 );
 
 // ── Main workspace ───────────────────────────────────────────────
@@ -245,22 +245,22 @@ function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) 
   const selectedNodeData = (nodes.find((n) => n.id === selectedNodeId)?.data ?? null) as ServiceNodeData | null;
 
   return (
-    <div className="flex min-h-[760px] flex-col bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200">
+    <div className="flex min-h-[760px] flex-col bg-white dark:bg-zinc-950 text-black dark:text-zinc-200">
       <div className="grid flex-1 grid-cols-1 md:grid-cols-[260px_minmax(0,1fr)_300px]">
 
         {/* ── Left sidebar ── */}
         <aside className="border-r border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-5 overflow-y-auto">
 
           {/* Incident card */}
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-4 mb-6">
+          <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-4 mb-6">
             <SideLabel>Active Incident</SideLabel>
-            <p className="text-[16px] font-bold text-zinc-900 dark:text-white mb-1">{incident.ticketId}</p>
-            <p className="text-[13px] text-zinc-500 dark:text-zinc-400 leading-snug mb-4">{incident.title}</p>
+            <p className="text-[16px] font-bold text-black dark:text-white mb-1">{incident.ticketId}</p>
+            <p className="text-[13px] text-black dark:text-zinc-400 leading-snug mb-4">{incident.title}</p>
             <div className="flex flex-wrap gap-1.5">
               <span className="px-2.5 py-1 rounded-md text-[10px] font-semibold border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/5">
                 {incident.severity} / {incident.priority}
               </span>
-              <span className="px-2.5 py-1 rounded-md text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800">
+              <span className="px-2.5 py-1 rounded-md text-[10px] font-semibold border border-zinc-500 dark:border-zinc-700 text-black dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800">
                 {incident.status}
               </span>
             </div>
@@ -272,8 +272,8 @@ function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) 
               { label: "Signals",  value: Math.max(alertFeed.length, incident.correlatedSignalIds.length || 0), color: "text-purple-600 dark:text-purple-400" },
               { label: "Comments", value: incident.commentsCount, color: "text-emerald-600 dark:text-emerald-400" },
             ].map((s) => (
-              <div key={s.label} className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-3.5">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-1">{s.label}</p>
+              <div key={s.label} className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-3.5">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-1">{s.label}</p>
                 <p className={cn("text-2xl font-bold", s.color)}>{s.value}</p>
               </div>
             ))}
@@ -286,9 +286,9 @@ function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) 
               <div key={alert.id} className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-3">
                 <div className="flex items-start justify-between gap-2 mb-1.5">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-rose-500 dark:text-rose-400">{alert.level}</span>
-                  <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 shrink-0">{alert.timestamp}</span>
+                  <span className="text-[10px] font-mono text-black dark:text-zinc-500 shrink-0">{alert.timestamp}</span>
                 </div>
-                <p className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200 leading-snug">{shortText(alert.title, 88)}</p>
+                <p className="text-[12px] font-medium text-black dark:text-zinc-200 leading-snug">{shortText(alert.title, 88)}</p>
               </div>
             ))}
           </div>
@@ -314,7 +314,7 @@ function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) 
             <span className="rounded-full border border-rose-200 dark:border-rose-500/30 bg-white/90 dark:bg-rose-500/10 backdrop-blur-sm px-3 py-1 text-[10px] font-semibold text-rose-600 dark:text-rose-400">
               {incident.ticketId} / {incident.service || "Incident"}
             </span>
-            <span className="rounded-full border border-zinc-200 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/80 backdrop-blur-sm px-3 py-1 text-[10px] font-semibold text-zinc-500 dark:text-zinc-300">
+            <span className="rounded-full border border-zinc-500 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/80 backdrop-blur-sm px-3 py-1 text-[10px] font-semibold text-black dark:text-zinc-300">
               {incident.environment || "runtime"} / {incident.region || "global"}
             </span>
           </div>
@@ -324,7 +324,7 @@ function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) 
         <aside className="border-l border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-5 overflow-y-auto">
 
           {/* Node detail */}
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-4 mb-5">
+          <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-4 mb-5">
             <div className="flex items-center gap-2 mb-4">
               <Activity size={14} className="text-sky-500" />
               <SideLabel>Node Detail</SideLabel>
@@ -332,26 +332,26 @@ function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) 
 
             {selectedNodeData ? (
               <>
-                <p className="text-[16px] font-bold text-zinc-900 dark:text-white mb-0.5">{selectedNodeData.label}</p>
-                <p className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-4">
+                <p className="text-[16px] font-bold text-black dark:text-white mb-0.5">{selectedNodeData.label}</p>
+                <p className="text-[10px] font-mono uppercase tracking-wider text-black dark:text-zinc-500 mb-4">
                   {selectedNodeData.kind} / {selectedNodeData.status}
                 </p>
                 <div className="flex flex-col gap-2">
                   {selectedNodeData.metrics.map((m) => (
                     <div key={m.label} className="flex items-center justify-between rounded-lg border border-zinc-100 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/40 px-3 py-2">
-                      <span className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500">{m.label}</span>
+                      <span className="text-[11px] font-mono text-black dark:text-zinc-500">{m.label}</span>
                       <span className={cn("text-[12px] font-semibold", m.color)}>{m.value}</span>
                     </div>
                   ))}
                 </div>
               </>
             ) : (
-              <p className="text-[13px] text-zinc-400 dark:text-zinc-500">Click a node to inspect it.</p>
+              <p className="text-[13px] text-black dark:text-zinc-500">Click a node to inspect it.</p>
             )}
           </div>
 
           {/* Response guidance */}
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-4 mb-5">
+          <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-4 mb-5">
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle size={14} className="text-amber-500" />
               <SideLabel>Response Guidance</SideLabel>
@@ -368,14 +368,14 @@ function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) 
                 <RefreshCcw size={13} />
                 Review {incident.service || "service"} telemetry and recent change path
               </button>
-              <div className="rounded-lg border border-zinc-100 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/40 p-3 text-[12px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              <div className="rounded-lg border border-zinc-100 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/40 p-3 text-[12px] text-black dark:text-zinc-400 leading-relaxed">
                 {shortText(incident.techDescription || incident.description || "Technical context has not been captured yet.", 180)}
               </div>
             </div>
           </div>
 
           {/* Shared context */}
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-4">
+          <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 p-4">
             <div className="flex items-center gap-2 mb-4">
               <Database size={14} className="text-purple-500" />
               <SideLabel>Shared Context</SideLabel>
@@ -387,8 +387,8 @@ function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) 
                 { label: "Source",  value: incident.sourceType || incident.source || "Manual"                                                                  },
               ].map((row) => (
                 <div key={row.label} className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-zinc-400 dark:text-zinc-500">{row.label}</span>
-                  <span className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200 truncate max-w-[140px] text-right">{row.value}</span>
+                  <span className="text-[11px] text-black dark:text-zinc-500">{row.label}</span>
+                  <span className="text-[12px] font-medium text-black dark:text-zinc-200 truncate max-w-[140px] text-right">{row.value}</span>
                 </div>
               ))}
             </div>
@@ -397,7 +397,7 @@ function SignalGraphWorkspace({ incident }: { incident: IncidentDetailRecord }) 
       </div>
 
       {/* ── Footer ── */}
-      <footer className="flex items-center justify-between h-8 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-5 text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
+      <footer className="flex items-center justify-between h-8 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-5 text-[10px] font-mono text-black dark:text-zinc-500">
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />

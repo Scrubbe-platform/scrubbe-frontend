@@ -30,9 +30,9 @@ const GlobalSearch = () => {
       {/* Search input */}
       <div className="px-4 pt-4 pb-3">
         <div className="relative">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-black dark:text-zinc-500" />
           <input
-            className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg py-2 pl-9 pr-4 text-[12px] text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-300 dark:focus:border-zinc-700 transition-colors"
+            className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-500 dark:border-zinc-800 rounded-lg py-2 pl-9 pr-4 text-[12px] text-black dark:text-zinc-300 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-300 dark:focus:border-zinc-700 transition-colors"
             placeholder="Search incidents, policies, agents…"
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -47,7 +47,7 @@ const GlobalSearch = () => {
             onClick={() => setActiveTab(tab)}
             className={`px-5 py-2.5 text-[12px] font-semibold transition-colors relative ${
               activeTab === tab
-                ? "text-zinc-800 dark:text-zinc-100"
+                ? "text-black dark:text-zinc-100"
                 : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
             }`}
           >
@@ -75,8 +75,8 @@ const GlobalSearch = () => {
           <Shortcut keys={["ESC"]}     label="close"   />
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[10px] text-zinc-400 dark:text-zinc-500">13 results</span>
-          <button className="px-2.5 py-1 border border-zinc-200 dark:border-zinc-700 rounded text-[10px] font-medium text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+          <span className="text-[10px] text-black dark:text-zinc-500">13 results</span>
+          <button className="px-2.5 py-1 border border-zinc-500 dark:border-zinc-700 rounded text-[10px] font-medium text-black dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
             Audit Logs
           </button>
         </div>
@@ -168,7 +168,7 @@ const Policy = () => {
 
 const Section = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="space-y-1">
-    <h3 className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 px-2 mb-2">
+    <h3 className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 px-2 mb-2">
       {label}
     </h3>
     <div className="space-y-0.5">{children}</div>
@@ -184,14 +184,14 @@ const CommandItem = ({
     onClick={() => onClick ? onClick() : toast.info("Coming Soon")}
     className="group flex items-center gap-3 p-3 rounded-xl border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/60 bg-white dark:bg-transparent transition-colors cursor-pointer"
   >
-    <div className="w-8 h-8 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-zinc-400 dark:text-zinc-500 shrink-0 group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-colors">
+    <div className="w-8 h-8 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-black dark:text-zinc-500 shrink-0 group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-colors">
       {icon}
     </div>
     <div className="flex-1 min-w-0">
-      <p className="text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 leading-tight">{title}</p>
-      <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-tight mt-0.5">{desc}</p>
+      <p className="text-[12px] font-semibold text-black dark:text-zinc-200 leading-tight">{title}</p>
+      <p className="text-[11px] text-black dark:text-zinc-500 leading-tight mt-0.5">{desc}</p>
     </div>
-    <ChevronRight size={13} className="text-zinc-300 dark:text-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+    <ChevronRight size={13} className="text-zinc-300 dark:text-black opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
   </div>
 );
 
@@ -199,12 +199,12 @@ const Shortcut = ({ keys, label }: { keys: string[]; label: string }) => (
   <div className="flex items-center gap-1.5">
     <div className="flex gap-0.5">
       {keys.map((k) => (
-        <kbd key={k} className="min-w-[18px] h-5 flex items-center justify-center px-1 rounded border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[10px] font-mono text-zinc-500 dark:text-zinc-400">
+        <kbd key={k} className="min-w-[18px] h-5 flex items-center justify-center px-1 rounded border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[10px] font-mono text-black dark:text-zinc-400">
           {k}
         </kbd>
       ))}
     </div>
-    <span className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wide">{label}</span>
+    <span className="text-[10px] text-black dark:text-zinc-500 uppercase tracking-wide">{label}</span>
   </div>
 );
 

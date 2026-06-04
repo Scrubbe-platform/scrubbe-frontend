@@ -26,7 +26,7 @@ const Sidebar = () => {
         "flex flex-col justify-between py-5 overflow-x-hidden whitespace-nowrap z-40 px-3",
         "bg-white dark:bg-dark",
         "fixed inset-y-0 left-0 md:relative md:inset-auto md:flex",
-        "border-r border-zinc-200 dark:border-white/[0.08]",
+        "border-r border-zinc-500 dark:border-white/[0.08]",
         collapse ? "pointer-events-none border-none" : "pointer-events-auto"
       )}
     >
@@ -66,7 +66,7 @@ const Sidebar = () => {
               <div className="overflow-y-auto custom-scrollbar pr-1 mt-4">
                 {Object.entries(NewMenu).map(([key, items]) => (
                   <div key={key} className="flex flex-col gap-0.5 mt-5 w-full border-b border-zinc-100 dark:border-white/[0.06] pb-4">
-                    <p className="text-[10px] text-zinc-400 dark:text-zinc-500 pl-3 pb-2 uppercase font-semibold tracking-widest">
+                    <p className="text-[10px] text-black dark:text-zinc-500 pl-3 pb-2 uppercase font-semibold tracking-widest">
                       {key.replace("_", " ")}
                     </p>
                     {(items as any[]).map((item: any, index: number) => (
@@ -109,13 +109,13 @@ const AdminSidebarItem = ({ item, pathname }: { item: any; pathname: string }) =
           <div className="flex items-center justify-between">
             <p className={cn(
               "text-[13px] font-medium leading-tight",
-              active ? "text-zinc-800 dark:text-zinc-100" : "text-zinc-600 dark:text-zinc-400"
+              active ? "text-black dark:text-zinc-100" : "text-zinc-600 dark:text-zinc-400"
             )}>
               {item.name}
             </p>
             
           </div>
-          <p className="text-[11px] text-zinc-400 dark:text-zinc-600 leading-tight line-clamp-1">
+          <p className="text-[11px] text-black dark:text-zinc-600 leading-tight line-clamp-1">
             {item.description}
           </p>
         </div>

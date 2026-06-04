@@ -33,7 +33,7 @@ const TextArea = ({
         <label
           htmlFor={props.id}
           className={`flex gap-2 items-center dark:text-white text-black mb-2 text-sm font-medium ${
-            isLoading ? "text-gray-500" : "text-gray-700"
+            isLoading ? "text-gray-500" : "text-black"
           } ${labelClassName}`}
         >
           {icon && <div className="">{icon}</div>}

@@ -43,7 +43,7 @@ const OverallComplianceChart = ({
     <div className="relative h-48 w-full flex items-center justify-center">
       <Doughnut data={data} options={options} />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-2 text-center">
-        <span className="text-4xl font-bold text-gray-800">
+        <span className="text-4xl font-bold text-black">
           {safeCompliance}%
         </span>
       </div>

@@ -127,7 +127,7 @@ function VerifyEmailContent() {
           </div>
         </div>
 
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+        <h1 className="text-2xl font-semibold text-black mb-2">
           Email Verified!
         </h1>
 

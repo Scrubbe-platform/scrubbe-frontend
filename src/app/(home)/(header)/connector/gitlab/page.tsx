@@ -168,11 +168,11 @@ function PlatformSection() {
       <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-16 items-start">
         {/* ── Left ── */}
         <div className="md:sticky md:top-24">
-          <h2 className="font-serif text-[32px] sm:text-[40px] md:text-[44px] leading-tight text-zinc-900 mb-6">
+          <h2 className="font-serif text-[32px] sm:text-[40px] md:text-[44px] leading-tight text-black mb-6">
             GitLab is more than
             <br />a CI/CD <em style={{ color: G }}>platform</em>
           </h2>
-          <p className="text-zinc-700 text-[15px] italic leading-relaxed mb-6 font-serif">
+          <p className="text-black text-[15px] italic leading-relaxed mb-6 font-serif">
             Scrubbe transforms GitLab into a live operational intelligence
             system — continuously building a semantic graph across repositories,
             services, pipelines, deployments, environments, infrastructure,
@@ -181,7 +181,7 @@ function PlatformSection() {
           <p className="text-zinc-600 text-[14px] leading-relaxed mb-4">
             This is not a code assistant layered on top of your repositories. It
             is an{" "}
-            <strong className="text-zinc-900">
+            <strong className="text-black">
               operational reasoning platform
             </strong>{" "}
             that understands your entire software delivery lifecycle — and
@@ -219,7 +219,7 @@ function PlatformSection() {
                   </p>
 
                   {/* Title */}
-                  <h3 className="text-[16px] font-bold text-zinc-900">
+                  <h3 className="text-[16px] font-bold text-black">
                     {c.title}
                   </h3>
                 </div>
@@ -243,7 +243,7 @@ function PlatformSection() {
                               border: "1px solid rgba(26,107,60,0.15)",
                             }}
                           >
-                            <p className="text-[10px] font-mono tracking-widest mb-1.5 text-zinc-400">
+                            <p className="text-[10px] font-mono tracking-widest mb-1.5 text-black">
                               Example &nbsp;·
                             </p>
                             <p className="text-[13px] font-serif italic text-zinc-600 leading-relaxed">
@@ -395,7 +395,7 @@ function GovernanceCards() {
             >
               {c.layer}
             </p>
-            <h3 className="font-serif text-[22px] font-bold text-zinc-900">
+            <h3 className="font-serif text-[22px] font-bold text-black">
               {c.title}
             </h3>
             <p className="text-[13px] text-zinc-600 leading-relaxed">
@@ -405,9 +405,9 @@ function GovernanceCards() {
               {c.items.map((item) => (
                 <li
                   key={item}
-                  className="flex items-start gap-2.5 text-[13px] text-zinc-700"
+                  className="flex items-start gap-2.5 text-[13px] text-black"
                 >
-                  <span className="mt-0.5 text-zinc-400 shrink-0">→</span>
+                  <span className="mt-0.5 text-black shrink-0">→</span>
                   {item}
                 </li>
               ))}
@@ -745,7 +745,7 @@ function WorkflowSection() {
   return (
     <section className="px-6 md:px-16 py-24" style={{ background: MINT }}>
       <div className="mx-auto max-w-4xl">
-        <h2 className="font-serif text-[32px] sm:text-[40px] font-bold text-zinc-900 leading-tight mb-4">
+        <h2 className="font-serif text-[32px] sm:text-[40px] font-bold text-black leading-tight mb-4">
           From production failure
           <br />
           to <em style={{ color: G }}>governed remediation</em>
@@ -781,7 +781,7 @@ function WorkflowSection() {
               </div>
               {/* content */}
               <div>
-                <h3 className="font-serif text-[18px] font-bold text-zinc-900 mb-2">
+                <h3 className="font-serif text-[18px] font-bold text-black mb-2">
                   {s.title}
                 </h3>
                 <p className="text-[13px] text-zinc-600 leading-relaxed mb-4">
@@ -850,7 +850,7 @@ function CTASection() {
           <div className="flex flex-wrap gap-4 mb-6">
             <button
               onClick={() => router.push("/auth/signin")}
-              className="px-6 py-3 bg-white text-zinc-900 font-semibold text-sm rounded-lg hover:bg-zinc-100 transition-colors active:scale-95"
+              className="px-6 py-3 bg-white text-black font-semibold text-sm rounded-lg hover:bg-zinc-100 transition-colors active:scale-95"
             >
               Connect GitLab
             </button>

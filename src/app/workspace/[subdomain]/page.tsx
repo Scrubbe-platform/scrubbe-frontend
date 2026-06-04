@@ -46,7 +46,7 @@ const inputCls =
 // ── Sub-components ────────────────────────────────────────────────
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
-  <label className="block text-[13px] font-semibold text-gray-800 mb-2">{children}</label>
+  <label className="block text-[13px] font-semibold text-black mb-2">{children}</label>
 );
 
 const FieldHint = ({ children }: { children: React.ReactNode }) => (
@@ -79,7 +79,7 @@ const TrustBadge = ({
   <div className="flex items-start gap-3">
     <div className="text-emerald-600 shrink-0 mt-0.5">{icon}</div>
     <div>
-      <p className="text-[13px] font-semibold text-gray-800">{title}</p>
+      <p className="text-[13px] font-semibold text-black">{title}</p>
       <p className="text-[12px] text-gray-500 leading-relaxed">{desc}</p>
     </div>
   </div>
@@ -150,7 +150,7 @@ export default function WorkspaceAccessPage() {
           <div className="relative w-32 h-8">
             <Image src="/IMS/blacklogo.png" alt="Scrubbe" fill sizes="128px" className="object-contain" />
           </div>
-          <Link href="/auth/signin" className="text-[13px] font-semibold text-gray-500 hover:text-gray-900 transition-colors">
+          <Link href="/auth/signin" className="text-[13px] font-semibold text-gray-500 hover:text-black transition-colors">
             Sign in
           </Link>
         </div>
@@ -230,7 +230,7 @@ export default function WorkspaceAccessPage() {
                 <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-5">
                   <Lock size={26} className="text-red-500" />
                 </div>
-                <h2 className="text-[20px] font-black text-gray-900 mb-2">Workspace unavailable</h2>
+                <h2 className="text-[20px] font-black text-black mb-2">Workspace unavailable</h2>
                 <p className="text-[14px] text-gray-500 leading-relaxed max-w-xs">{error}</p>
               </div>
             ) : sent ? (
@@ -238,14 +238,14 @@ export default function WorkspaceAccessPage() {
                 <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-5">
                   <Shield size={26} className="text-emerald-600" />
                 </div>
-                <h2 className="text-[20px] font-black text-gray-900 mb-2">Request sent</h2>
+                <h2 className="text-[20px] font-black text-black mb-2">Request sent</h2>
                 <p className="text-[14px] text-gray-500 leading-relaxed max-w-xs">
                   Your administrator has been notified and will respond by email with next steps.
                 </p>
               </div>
             ) : (
               <div className="flex flex-col h-full">
-                <h2 className="text-[26px] font-black text-gray-900 mb-1">Tell us who you are</h2>
+                <h2 className="text-[26px] font-black text-black mb-1">Tell us who you are</h2>
                 <p className="text-[13.5px] text-gray-500 mb-8">
                   We'll verify your invitation for {businessName}.
                 </p>
@@ -257,7 +257,7 @@ export default function WorkspaceAccessPage() {
                     <Controller name="email" control={control} render={({ field }) => (
                       <div className={inputCls}>
                         <Mail size={15} className="text-gray-400 shrink-0" />
-                        <input {...field} type="email" className="flex-1 bg-transparent outline-none text-[14px] text-gray-800 placeholder-gray-400" placeholder="name@company.com" />
+                        <input {...field} type="email" className="flex-1 bg-transparent outline-none text-[14px] text-black placeholder-gray-400" placeholder="name@company.com" />
                       </div>
                     )} />
                     {errors.email

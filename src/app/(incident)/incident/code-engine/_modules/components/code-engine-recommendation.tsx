@@ -85,7 +85,7 @@ export default function CodeEngineRecommendation({
   ];
 
   return (
-    <div className="flex flex-col h-[600px] rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900 overflow-hidden text-[13px]">
+    <div className="flex flex-col h-[600px] rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900 overflow-hidden text-[13px]">
 
       {/* ── Top bar ── */}
       <header className="flex items-center justify-between px-4 h-10 border-b border-zinc-100 dark:border-zinc-800 shrink-0 bg-zinc-50 dark:bg-zinc-900">
@@ -94,7 +94,7 @@ export default function CodeEngineRecommendation({
             {incidentId}
           </span>
           <span className="text-zinc-500 dark:text-zinc-400 hidden md:block">{service}</span>
-          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hidden md:block">{environment}</span>
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-black dark:text-zinc-400 hidden md:block">{environment}</span>
           <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold border border-red-200 dark:border-red-500/25 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/8">{severity}</span>
         </div>
         <div className="items-center gap-3 hidden md:flex">
@@ -102,7 +102,7 @@ export default function CodeEngineRecommendation({
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Action proposed
           </span>
-          <span className="text-[11px] text-zinc-400 dark:text-zinc-500">14:22:07 UTC</span>
+          <span className="text-[11px] text-black dark:text-zinc-500">14:22:07 UTC</span>
         </div>
       </header>
 
@@ -116,8 +116,8 @@ export default function CodeEngineRecommendation({
               onClick={() => setView(t.id)}
               className={`flex items-center gap-2 px-4 h-9 text-[12px] font-medium border-b-2 transition-colors ${
                 active
-                  ? "border-zinc-800 dark:border-zinc-200 text-zinc-800 dark:text-zinc-100"
-                  : "border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                  ? "border-zinc-800 dark:border-zinc-200 text-black dark:text-zinc-100"
+                  : "border-transparent text-black hover:text-zinc-600 dark:hover:text-zinc-300"
               }`}
             >
               {t.id === "original" && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
@@ -126,13 +126,13 @@ export default function CodeEngineRecommendation({
               <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium hidden md:block ${
                 active && t.id === "original" ? "bg-red-50 dark:bg-red-500/10 text-red-500"
                 : active && t.id === "diff"   ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+                : "bg-zinc-100 dark:bg-zinc-800 text-black"
               }`}>{t.badge}</span>
             </button>
           );
         })}
 
-        <div className="ml-auto flex items-center gap-1.5 pr-4 text-[11px] text-zinc-400 dark:text-zinc-500 hidden md:flex">
+        <div className="ml-auto flex items-center gap-1.5 pr-4 text-[11px] text-black dark:text-zinc-500 hidden md:flex">
           <span>{filename}</span>
           <span>·</span>
           <span>conf: {confidence}</span>
@@ -142,13 +142,13 @@ export default function CodeEngineRecommendation({
       {/* ── Subbar ── */}
       {view === "diff" && (
         <div className="hidden md:flex items-center justify-between px-4 py-1.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 shrink-0">
-          <div className="flex items-center gap-2 text-[11px] text-zinc-400 dark:text-zinc-500">
+          <div className="flex items-center gap-2 text-[11px] text-black dark:text-zinc-500">
             <span className="text-amber-500">⚡</span>
             <span>{filename} → Ezra fix (PR {prNumber})</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400">+14 −7</span>
-            <label className="flex items-center gap-1.5 text-[11px] text-zinc-400 cursor-pointer">
+            <label className="flex items-center gap-1.5 text-[11px] text-black cursor-pointer">
               <input type="checkbox" checked={sideBySide} onChange={(e) => setSideBySide(e.target.checked)} className="accent-zinc-600" />
               Side by side
             </label>
@@ -180,33 +180,33 @@ export default function CodeEngineRecommendation({
         <div className="flex items-stretch divide-x divide-zinc-100 dark:divide-zinc-800">
           {/* Confidence */}
           <div className="flex items-center gap-3 px-5 py-3">
-            <span className="text-[18px] font-semibold text-zinc-800 dark:text-zinc-100">{confidence}</span>
+            <span className="text-[18px] font-semibold text-black dark:text-zinc-100">{confidence}</span>
             <div>
               <div className="w-20 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full mb-1.5">
                 <div className="h-full bg-zinc-700 dark:bg-zinc-300 rounded-full transition-all" style={{ width: `${Math.round(confidence * 100)}%` }} />
               </div>
-              <p className="text-[10px] text-zinc-400 dark:text-zinc-500">High · auto-PR eligible</p>
+              <p className="text-[10px] text-black dark:text-zinc-500">High · auto-PR eligible</p>
             </div>
           </div>
 
           {/* PR title */}
           <div className="flex items-center px-5 py-3 flex-1 min-w-0">
-            <p className="text-[12px] text-zinc-400 dark:text-zinc-500 truncate">{prTitle}</p>
+            <p className="text-[12px] text-black dark:text-zinc-500 truncate">{prTitle}</p>
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2 px-5 py-3 shrink-0">
-            <button onClick={onApprove} className="px-4 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-[12px] font-semibold hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors">
+            <button onClick={onApprove} className="px-4 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-black text-[12px] font-semibold hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors">
               ✓ Approve & merge
             </button>
-            <button onClick={onDecline} className="px-4 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 text-[12px] font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            <button onClick={onDecline} className="px-4 py-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 text-black dark:text-zinc-400 text-[12px] font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
               ✕ Decline
             </button>
           </div>
         </div>
 
         {/* Status bar */}
-        <div className="flex items-center justify-between px-5 py-1.5 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-zinc-400 dark:text-zinc-500">
+        <div className="flex items-center justify-between px-5 py-1.5 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-black dark:text-zinc-500">
           <div className="flex items-center gap-4">
             <span>⚡ Ezra Code Engine</span>
             <span className="flex items-center gap-1.5">

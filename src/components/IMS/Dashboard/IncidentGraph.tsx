@@ -95,7 +95,7 @@ const IncidentGraph = ({ incidentTrends }: Props) => {
   };
   return (
     <div className="bg-white p-6 rounded-lg w-full">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+      <h2 className="text-xl font-semibold text-black mb-4">
         Incident Trend Graph ( Last 30 days)
       </h2>
       <div style={{ height: "300px" }}>

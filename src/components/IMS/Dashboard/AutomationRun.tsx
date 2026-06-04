@@ -23,7 +23,7 @@ const AutomationRuns = ({ runs }: Props) => {
   return (
     <div className="bg-white p-6 rounded-lg ">
       {/* Header */}
-      <h2 className="text-xl font-semibold text-gray-800 mb-6">
+      <h2 className="text-xl font-semibold text-black mb-6">
         Automation Runs
       </h2>
 
@@ -34,7 +34,7 @@ const AutomationRuns = ({ runs }: Props) => {
             key={index}
             className="flex items-center justify-between border-b border-gray-200 pb-4 last:border-b-0 last:pb-0"
           >
-            <div className="flex items-center space-x-2 text-gray-700 text-base">
+            <div className="flex items-center space-x-2 text-black text-base">
               <span>{run.workflowId}:</span>
             </div>
 

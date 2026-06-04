@@ -205,7 +205,7 @@ export default function HowItWorks() {
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   className="bg-gray-50 p-8 w-full h-full"
                 >
-                  <h3 className="text-[22px] font-black text-gray-900 tracking-tight mb-4">
+                  <h3 className="text-[22px] font-black text-black tracking-tight mb-4">
                     {tab.title}
                   </h3>
                   <p className="text-[14.5px] text-gray-500 leading-relaxed max-w-sm">

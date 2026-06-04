@@ -286,7 +286,7 @@ export default function IndustriesSection() {
 
           <div className="flex items-center gap-3 shrink-0">
             <button
-              className="px-5 py-2.5 rounded-lg text-[13.5px] font-bold text-gray-900 cursor-pointer border-none transition-all hover:brightness-110"
+              className="px-5 py-2.5 rounded-lg text-[13.5px] font-bold text-black cursor-pointer border-none transition-all hover:brightness-110"
               style={{ background: "#22c55e" }}
             >
               Download ebook →

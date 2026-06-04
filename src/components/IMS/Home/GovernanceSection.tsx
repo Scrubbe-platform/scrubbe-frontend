@@ -151,7 +151,7 @@ export default function GovernanceSection() {
             }}
           >
             <h3
-              className="font-black text-gray-900 tracking-tight mb-5"
+              className="font-black text-black tracking-tight mb-5"
               style={{ fontSize: "clamp(18px, 2vw, 26px)" }}
             >
               The core promise
@@ -165,7 +165,7 @@ export default function GovernanceSection() {
               trust.
             </p>
 
-            <p className="text-[14px] font-semibold text-gray-700 italic">
+            <p className="text-[14px] font-semibold text-black italic">
               - Scrubbe Founders
             </p>
           </div>

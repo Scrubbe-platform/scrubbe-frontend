@@ -850,7 +850,7 @@ const ScrubbeTermsOfService = () => {
                     key={section.id}
                     href={`#${section.id}`}
                     onClick={() => setSelectId(index)}
-                    className={` py-1 text-gray-700 hover:text-scrubbe-green transition-colors flex flex-row items-center gap-2 px-2 text-sm ${
+                    className={` py-1 text-black hover:text-scrubbe-green transition-colors flex flex-row items-center gap-2 px-2 text-sm ${
                       index === selectId ? "font-bold bg-[#B4EBC8]" : ""
                     }`} // Highlight first item like in screenshot
                   >
@@ -864,7 +864,7 @@ const ScrubbeTermsOfService = () => {
             </div>
 
             {/* Right Column - Terms Content */}
-            <div className="col-span-9  md:px-4 text-gray-800">
+            <div className="col-span-9  md:px-4 text-black">
               {sections.map((section, index) => (
                 <div key={section.id} className="mb-8">
                   <SectionHeader

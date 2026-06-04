@@ -31,8 +31,8 @@ const FilterButton = ({
     onClick={onClick}
     className={`rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition-colors ${
       active
-        ? "border-zinc-300 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100"
-        : "border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-200"
+        ? "border-zinc-300 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 text-black dark:text-zinc-100"
+        : "border-zinc-200 dark:border-zinc-700 text-black dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-600 hover:text-black dark:hover:text-zinc-200"
     }`}
   >
     {label}
@@ -71,10 +71,10 @@ const Postmortems = () => {
       header: "Incident ID",
       cell: ({ row }) => (
         <div>
-          <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">
+          <p className="text-[13px] font-semibold text-black dark:text-zinc-100">
             {row.original.ticketId}
           </p>
-          <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+          <p className="text-[11px] text-black dark:text-zinc-500 mt-0.5">
             {row.original.ResolveIncident?.causeCategory || "Postmortem"}
           </p>
         </div>
@@ -85,10 +85,10 @@ const Postmortems = () => {
       header: "Incident",
       cell: ({ row }) => (
         <div className="max-w-md">
-          <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 line-clamp-2">
+          <p className="text-[13px] font-semibold text-black dark:text-zinc-100 line-clamp-2">
             {row.original.title}
           </p>
-          <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 line-clamp-1">
+          <p className="text-[11px] text-black dark:text-zinc-500 mt-0.5 line-clamp-1">
             {[row.original.service, row.original.environment, row.original.region].filter(Boolean).join(" / ")}
           </p>
         </div>
@@ -112,7 +112,7 @@ const Postmortems = () => {
           row.original.ResolveIncident?.createdAt ||
           row.original.updatedAt;
         return (
-          <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
+          <p className="text-[12px] text-black dark:text-zinc-400">
             {resolvedAt ? new Date(resolvedAt).toLocaleString() : "Unknown"}
           </p>
         );
@@ -133,7 +133,7 @@ const Postmortems = () => {
           <Link
             href={`/incident?id=${row.original.id}&tab=overview`}
             onClick={(e) => e.stopPropagation()}
-            className="rounded-lg border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 text-[11px] font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            className="rounded-lg border border-zinc-500 dark:border-zinc-700 px-3 py-1.5 text-[11px] font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
           >
             Workspace
           </Link>
@@ -143,35 +143,35 @@ const Postmortems = () => {
   ], [router]);
 
   return (
-    <div className="p-4 md:p-6 bg-white dark:bg-zinc-950 min-h-screen text-zinc-800 dark:text-zinc-200">
+    <div className="p-4 md:p-6 bg-white dark:bg-zinc-950 min-h-screen text-black dark:text-zinc-200">
 
       {/* Header */}
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
           Incident Learning
         </p>
-        <h1 className="mt-1.5 text-[22px] font-bold text-zinc-900 dark:text-zinc-100">
+        <h1 className="mt-1.5 text-[22px] font-bold text-black dark:text-zinc-100">
           Postmortems
         </h1>
-        <p className="mt-1.5 max-w-2xl text-[13px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+        <p className="mt-1.5 max-w-2xl text-[13px] text-black dark:text-zinc-400 leading-relaxed">
           Direct navigation now resolves postmortems from live incident data, and this list stays
           aligned with the same normalized incident contract used by the workspace and ticket detail routes.
         </p>
       </div>
 
       {/* Table card */}
-      <div className="mt-6 rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 md:p-5">
+      <div className="mt-6 rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-4 md:p-5">
 
         {/* Toolbar */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative w-full lg:max-w-md">
-            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-black" size={14} />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by incident, service, or cause category"
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/60 px-9 py-2.5 text-[13px] text-zinc-700 dark:text-zinc-200 placeholder:text-zinc-400 outline-none focus:border-zinc-400 dark:focus:border-zinc-500 transition-colors"
+              className="w-full rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800/60 px-9 py-2.5 text-[13px] text-black dark:text-zinc-200 placeholder:text-zinc-400 outline-none focus:border-zinc-400 dark:focus:border-zinc-500 transition-colors"
             />
           </div>
 
