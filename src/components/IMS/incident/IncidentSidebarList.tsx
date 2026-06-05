@@ -103,11 +103,11 @@ const IncidentCard = ({
     </div>
 
     <div className="flex gap-1">
-      {Array.from({ length: 9 }).map((_, i) => (
+      {Array.from({ length: 8 }).map((_, i) => (
         <div
           key={i}
           className={`h-1 flex-1 rounded-sm transition-all duration-700 ${
-            i + 1 <= incident.stageProgress
+            i + 1 <= Math.round((incident.progressPercentage / 100) * 8)
               ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
               : "bg-zinc-100 dark:bg-white/5"
           }`}
