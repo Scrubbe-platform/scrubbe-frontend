@@ -70,7 +70,7 @@ const IncidentOverview: React.FC = () => {
 
         {selectedIncident ? (
           <>
-            <IncidentHeader incident={selectedIncident} stats={stats} />
+            <IncidentHeader incident={selectedIncident} stats={stats} context={context} />
 
             {(currentTab === "overview" || !currentTab) && (
               <>

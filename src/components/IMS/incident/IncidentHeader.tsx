@@ -2,17 +2,22 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { IncidentDetailRecord, IncidentStats } from "@/lib/incident/incident.types";
+import Modal from "@/components/ui/Modal";
+import WarRoom from "./WarRoom";
+import AddContextForm from "./ContextForm";
 
 interface TabItem { id: string; label: string; link: string }
-interface IncidentHeaderProps { incident: IncidentDetailRecord; stats: IncidentStats }
+interface IncidentHeaderProps { incident: IncidentDetailRecord; stats: IncidentStats, context: any }
 
-const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
+const IncidentHeader = ({ incident, stats, context }: IncidentHeaderProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeId = searchParams.get("id") ?? incident.id;
   const currentTab = searchParams.get("tab");
+  const [openWarRoom, setOpenWarRoom] = useState(false)
+  const [openContext, setOpenContext] = useState(false)
 
   const tabs: TabItem[] = [
     { id: "overview",     label: "Overview",          link: `/incident?id=${activeId}&tab=overview`      },
@@ -66,13 +71,13 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
         {/* Actions */}
         <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={() => router.replace(`/incident?id=${incident.id}&tab=context`)}
+            onClick={() => setOpenContext(true)}
             className="px-4 py-2 text-[12px] font-semibold rounded-lg border border-zinc-500 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
           >
             Add Context
           </button>
           <button
-            onClick={() => router.push(`/incident/tickets/${incident.id}`)}
+            onClick={() => setOpenWarRoom(true)}
             className="px-4 py-2 text-[12px] font-semibold rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white transition-colors"
           >
             War Room
@@ -107,7 +112,16 @@ const IncidentHeader = ({ incident, stats }: IncidentHeaderProps) => {
           );
         })}
       </nav>
+      <Modal onClose={() => setOpenContext(false)} isOpen={openContext} >
+        <AddContextForm incident={incident} onCancel={() => setOpenContext(false)} context={context} />
+      </Modal>
+    <Modal onClose={() => setOpenWarRoom(false)} isOpen={openWarRoom} >
+      <WarRoom incident={incident}
+       onDeclare={(data) => console.log(data)}
+       onClose={() => setOpenWarRoom(false)} />
+    </Modal>
     </div>
+
   );
 };
 

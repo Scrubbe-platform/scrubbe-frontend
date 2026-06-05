@@ -345,8 +345,7 @@ export default function SignInForm() {
   const session = useSession();
   const emailValue = watch("email");
 
- const redirectAfterLogin = useCallback(
-  (accountType?: string | null, purpose?: string | null) => {
+ const redirectAfterLogin = (accountType?: string | null, purpose?: string | null) => {
     if (IS_STANDALONE) {
       if (path === "payment")    { window.location.replace("/pricing");   return; }
       if (path === "community")  { window.location.replace("/community"); return; }
@@ -356,30 +355,23 @@ export default function SignInForm() {
     if (path === "ezra") { window.location.replace("/ezra/dashboard"); return; }
 
     if (accountType === "BUSINESS") {
-      if (purpose === "IMS") {
         const token        = getCookie(COOKIE_KEYS.TOKEN);
         const refreshToken = getCookie(COOKIE_KEYS.REFRESH_TOKEN);
         const url          = process.env.NEXT_PUBLIC_INCIDENT_URL ?? "https://incidents.scrubbe.com";
         const redirectUrl  = new URL("/incident/tickets", url);
         if (typeof token === "string"        && token.length > 0)        redirectUrl.searchParams.set("token", token);
         if (typeof refreshToken === "string" && refreshToken.length > 0) redirectUrl.searchParams.set("refreshToken", refreshToken);
-        window.location.replace(redirectUrl.toString());
+        window.location.href = callbackUrl || "/incident";
         return;
-      }
-      console.log("Redirecting business user to:", callbackUrl || "/incident");
-      window.location.replace(callbackUrl || "/incident");
-      return;
-    }
+        }
 
     if (accountType === "DEVELOPER") {
-      window.location.replace("/developer/dashboard");
+      window.location.href = "/developer/dashboard";
       return;
     }
 
-    window.location.replace(callbackUrl || "/incident");
-  },
-  [callbackUrl, path]
-);
+    window.location.href = callbackUrl || "/incident";
+  }
 
   // Step 1: discover SSO for this email domain
   const handleContinue = async () => {
@@ -424,6 +416,7 @@ export default function SignInForm() {
       setIsLoginLoading(true);
       const user = await login(email, password);
       toast.success("Signed in successfully", { id: "login-success" });
+      await new Promise(resolve => setTimeout(resolve, 80));
       redirectAfterLogin(user?.accountType, (user as any)?.purpose ?? null);
     } catch (err) {
       toast.error(
