@@ -396,6 +396,7 @@ export const mapIncidentListItem = (entry: unknown): IncidentListItem => {
     sidebarStatus: toSidebarStatus(lifecycleStep, record.status, hasPostMortem),
     lifecycleStep,
     stageProgress: hasPostMortem ? 9 : lifecycleToProgress(lifecycleStep),
+    progressPercentage: asNumber(record.progressPercentage, hasPostMortem ? 100 : lifecycleToProgress(lifecycleStep) * 14),
     commentsCount: asNumber(record.commentsCount),
     recommendedActions: asStringArray(record.recommendedActions),
     raw: record,

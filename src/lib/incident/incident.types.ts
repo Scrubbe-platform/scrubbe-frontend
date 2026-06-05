@@ -140,6 +140,7 @@ export interface IncidentListItem {
   sidebarStatus: IncidentSidebarStatus;
   lifecycleStep: IncidentLifecycleStep;
   stageProgress: number;
+  progressPercentage: number;
   commentsCount: number;
   recommendedActions: string[];
   raw: Record<string, unknown>;
