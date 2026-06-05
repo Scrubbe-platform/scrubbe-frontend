@@ -34,7 +34,7 @@ const CONNECTORS = [
   {
     id: "pagerduty",
     name: "PagerDuty",
-    icon: "/integration/pagerduty.png",
+    icon: "/integration/pagerDuty.png",
     desc: "Alert triggered, incident acknowledged, resolved events",
     comingSoon: true,
   },
@@ -94,11 +94,38 @@ const CONNECTORS = [
     desc: "Auto-create tickets on incident raise, sync state transitions",
     comingSoon: true,
   },
-  {
-    id: "github-actions",
-    name: "Github Actions",
-    icon: "/integration/github-actions.png",
-    desc: "Workflow failures, deployment events, environment status",
+ {
+    id: "circleci",
+    name: "Circle CI",
+    icon: "/integration/circle.png",
+    desc: "Monitors CI/CD workflows and job execution. Captures pipeline failures and deployment events.",
+    comingSoon: true,
+  },
+ {
+    id: "argocd",
+    name: "Argo CD",
+    icon: "/integration/argo.png",
+    desc: "Tracks Git-to-cluster deployments and synchronization events.",
+    comingSoon: true,
+  },{
+    id: "octopus",
+    name: "Octopus Deploy",
+    icon: "/integration/octopus.png",
+    desc: "Tracks release promotions across environments. Captures deployment approvals and execution history.",
+    comingSoon: true,
+  },
+   {
+    id: "mongodb",
+    name: "MongoDB",
+    icon: "/integration/mongo.png",
+    desc: "Correlates database degradation with application failures.",
+    comingSoon: true,
+  },
+    {
+    id: "teamcity",
+    name: "Team City",
+    icon: "/integration/teamcity.png",
+    desc: "Monitors build executions and failures.Provides build artifacts and pipeline execution evidence.",
     comingSoon: true,
   },
   {
@@ -183,7 +210,7 @@ function ConnectorCard({
         delay: 0.04 * index,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="bg-white border relative border-gray-200 rounded-xl p-5 flex flex-col items-center text-center hover:border-gray-300 hover:shadow-sm transition-all duration-200 group"
+      className="bg-white border relative cursor-pointer border-gray-200 rounded-xl p-5 flex flex-col items-center text-center hover:border-gray-300 hover:shadow-sm transition-all duration-200 group"
       onClick={onClick}
     >
       {connector.comingSoon && (
@@ -207,7 +234,7 @@ function ConnectorCard({
       </h3>
 
       {/* Description */}
-      <p className="text-[12px] text-gray-500 leading-relaxed">
+      <p className="text-[12px] text-gray-600 leading-relaxed">
         {connector.desc}
       </p>
     </motion.div>

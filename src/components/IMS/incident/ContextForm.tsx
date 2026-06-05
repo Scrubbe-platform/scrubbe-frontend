@@ -1,9 +1,9 @@
 "use client";
 import { z } from "zod";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X } from "lucide-react";
+import { X, Upload } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Select from "@/components/ui/select";
 import Input from "@/components/ui/input";
@@ -13,13 +13,20 @@ import { saveIncidentContext } from "@/lib/incident/incident.api";
 import { IncidentContextRecord, IncidentDetailRecord } from "@/lib/incident/incident.types";
 import { querykeys } from "@/lib/constant";
 
+// ── Schema ────────────────────────────────────────────────────────
+
 export const incidentContextSchema = z.object({
+  affectedService:       z.string(),
+  environment:           z.string(),
+  assignedTo:            z.string(),
+  priority:              z.string(),
+  description:           z.string(),
   customerImpact:        z.string(),
   externalCommunication: z.string(),
   incidentCommander:     z.string(),
   businessImpact:        z.string(),
   additionalContext:     z.string(),
-  labels:                z.array(z.string()),
+  labels:                z.array(z.string()), 
   relatedIncidents:      z.string(),
   runbookOverrideUrl:    z.string().url("Must be a valid URL").optional().or(z.literal("")),
   escalateTo:            z.string(),
@@ -28,51 +35,70 @@ export const incidentContextSchema = z.object({
 
 export type IncidentContextFormValues = z.infer<typeof incidentContextSchema>;
 
+// ── Shared tokens ─────────────────────────────────────────────────
+
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <label className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-2 block">
+  <label className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500 mb-1.5 block">
     {children}
   </label>
 );
 
+// ── Component ─────────────────────────────────────────────────────
+
 const AddContextForm = ({
   context,
   incident,
+  onCancel,
 }: {
   context: IncidentContextRecord | null;
   incident: IncidentDetailRecord;
+  onCancel?: () => void;
 }) => {
-  const [tagInput, setTagInput] = useState("");
-  const [saveNotice, setSaveNotice] = useState("");
+  const [tagInput,    setTagInput]    = useState("");
+  const [saveNotice,  setSaveNotice]  = useState("");
+  const [dragOver,    setDragOver]    = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { data: members = [] } = useMember();
 
   const memberOptions = useMemo(() => [
     { value: "", label: "Select team member" },
-    ...members.map((member) => {
-      const fullName = `${member.firstname ?? ""} ${member.lastname ?? ""}`.trim() || member.email;
-      return { value: fullName, label: `${fullName} (${member.email})` };
+    ...members.map((m) => {
+      const fullName = `${m.firstname ?? ""} ${m.lastname ?? ""}`.trim() || m.email;
+      return { value: fullName, label: `${fullName} (${m.email})` };
     }),
   ], [members]);
 
   const defaultValues = useMemo<IncidentContextFormValues>(() => ({
+    affectedService:       incident.service        ?? incident.affectedSystem ?? "",
+    environment:           incident.environment    ?? "",
+    assignedTo:            incident.assignedToName ?? incident.assignedToEmail ?? "",
+    priority:              incident.severity       ?? incident.priority ?? "P1",
+    description:           incident.description    ?? incident.summary ?? "",
     labels:                context?.labels                ?? [],
     businessImpact:        context?.businessImpact        ?? incident.financialExposure ?? "",
     customerImpact:        context?.customerImpact        ?? "",
     externalCommunication: context?.externalCommunication ?? "",
-    incidentCommander:     context?.incidentCommander     ?? incident.incidentCommander  ?? "",
+    incidentCommander:     context?.incidentCommander     ?? incident.incidentCommander ?? "",
     additionalContext:     context?.additionalContext      ?? "",
     relatedIncidents:      (context?.relatedIncidents     ?? []).join(", "),
     runbookOverrideUrl:    context?.runbookOverrideUrl    ?? "",
     escalateTo:            context?.escalateTo            ?? "",
     attachments:           [],
-  }), [context, incident.financialExposure, incident.incidentCommander]);
+  }), [context, incident]);
 
-  const { control, handleSubmit, setValue, reset, watch, formState: { errors, isSubmitting } } =
-    useForm<IncidentContextFormValues>({ resolver: zodResolver(incidentContextSchema), defaultValues });
+  const {
+    control, handleSubmit, setValue, reset, watch,
+    formState: { errors, isSubmitting },
+  } = useForm<IncidentContextFormValues>({
+    resolver: zodResolver(incidentContextSchema),
+    defaultValues,
+  });
 
   useEffect(() => { reset(defaultValues); }, [defaultValues, reset]);
 
-  const currentTags = watch("labels");
+  const currentTags   = watch("labels");
+  const attachments   = watch("attachments") ?? [];
 
   const saveMutation = useMutation({
     mutationFn: async (data: IncidentContextFormValues) => {
@@ -105,74 +131,158 @@ const AddContextForm = ({
   const handleAddTag = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault();
-      if (!currentTags.includes(tagInput.trim())) setValue("labels", [...currentTags, tagInput.trim()]);
+      if (!currentTags.includes(tagInput.trim()))
+        setValue("labels", [...currentTags, tagInput.trim()]);
       setTagInput("");
     }
   };
 
+  const handleFiles = (files: FileList | null) => {
+    if (!files) return;
+    setValue("attachments", [...(attachments as File[]), ...Array.from(files)]);
+  };
+
   return (
-    <div className="p-6">
+    <div className="">
       <form
-        onSubmit={handleSubmit(async (data) => { setSaveNotice(""); await saveMutation.mutateAsync(data); })}
-        className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-6"
+        onSubmit={handleSubmit(async (data) => {
+          setSaveNotice("");
+          await saveMutation.mutateAsync(data);
+        })}
+        className=" bg-white dark:bg-zinc-900/40 w-full max-w-[600px]"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4 mb-6 pb-5 border-b border-zinc-100 dark:border-zinc-800">
-          <h2 className="text-[15px] font-semibold text-black dark:text-zinc-100">
-            Add Context · Enrich signals
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-zinc-100 dark:border-zinc-800">
+          <h2 className="text-[16px] font-bold text-zinc-900 dark:text-zinc-100">
+            Add Context
           </h2>
           {saveNotice && (
             <p className="text-[12px] font-medium text-emerald-600 dark:text-emerald-400">{saveNotice}</p>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-          <Controller name="customerImpact" control={control} render={({ field }) => (
-            <Select {...field} label="Customer Impact" error={errors.customerImpact?.message} options={[
-              { value: "", label: "Select impact" },
-              { value: "No customer impact", label: "No customer impact" },
-              { value: "Partial degradation - checkout affected", label: "Partial degradation - checkout affected" },
-              { value: "Full service outage", label: "Full service outage" },
-              { value: "Data integrity risk", label: "Data integrity risk" },
-            ]} />
+        <div className="px-6 py-6 grid grid-cols-2 gap-x-5 gap-y-5">
+
+          {/* Affected Service + Environment */}
+          <Controller name="affectedService" control={control} render={({ field }) => (
+            <div>
+              <SectionLabel>Affected Service</SectionLabel>
+              <Input {...field} placeholder="Partial degradation - Checkout affected" error={errors.affectedService?.message} />
+            </div>
           )} />
 
-          <Controller name="externalCommunication" control={control} render={({ field }) => (
-            <Select {...field} label="External Communication" error={errors.externalCommunication?.message} options={[
-              { value: "", label: "Select communication status" },
-              { value: "Not required", label: "Not required" },
-              { value: "Status page update pending", label: "Status page update pending" },
-              { value: "Status page updated", label: "Status page updated" },
-              { value: "Customer email sent", label: "Customer email sent" },
-            ]} />
+          <Controller name="environment" control={control} render={({ field }) => (
+            <div>
+              <SectionLabel>Environment</SectionLabel>
+              <Input {...field} placeholder="Not required" error={errors.environment?.message} />
+            </div>
           )} />
 
-          <Controller name="incidentCommander" control={control} render={({ field }) => (
-            <Select {...field} label="Incident Commander" error={errors.incidentCommander?.message} options={memberOptions} />
+          {/* Assigned to + Priority */}
+          <Controller name="assignedTo" control={control} render={({ field }) => (
+            <div>
+              <SectionLabel>Assigned to</SectionLabel>
+              <Select {...field} options={memberOptions} error={errors.assignedTo?.message} />
+            </div>
           )} />
 
-          <Controller name="businessImpact" control={control} render={({ field }) => (
-            <Input {...field} label="Business impact" placeholder="$ / min" error={errors.businessImpact?.message} />
+          <Controller name="priority" control={control} render={({ field }) => (
+            <div>
+              <SectionLabel>Priority</SectionLabel>
+              <Select {...field} error={errors.priority?.message} options={[
+                { value: "P1", label: "P1" },
+                { value: "P2", label: "P2" },
+                { value: "P3", label: "P3" },
+                { value: "P4", label: "P4" },
+              ]} />
+            </div>
           )} />
 
+          {/* Description — full width */}
           <div className="col-span-2">
-            <Controller name="additionalContext" control={control} render={({ field }) => (
-              <TextArea {...field} label="Additional Context" rows={3} error={errors.additionalContext?.message} />
+            <Controller name="description" control={control} render={({ field }) => (
+              <div>
+                <SectionLabel>Description</SectionLabel>
+                <TextArea
+                  {...field}
+                  rows={4}
+                  placeholder="Deploy #311 coincided with a marketing campaign launch…"
+                  error={errors.description?.message}
+                />
+              </div>
             )} />
           </div>
 
-          {/* Tags */}
+          {/* Customer Impact + External Communication */}
+          <Controller name="customerImpact" control={control} render={({ field }) => (
+            <div>
+              <SectionLabel>Customer Impact</SectionLabel>
+              <Select {...field} error={errors.customerImpact?.message} options={[
+                { value: "",                                                  label: "Select impact"                              },
+                { value: "No customer impact",                                label: "No customer impact"                         },
+                { value: "Partial degradation - Checkout affected",           label: "Partial degradation - Checkout affected"    },
+                { value: "Full service outage",                               label: "Full service outage"                        },
+                { value: "Data integrity risk",                               label: "Data integrity risk"                        },
+              ]} />
+            </div>
+          )} />
+
+          <Controller name="externalCommunication" control={control} render={({ field }) => (
+            <div>
+              <SectionLabel>External Communication</SectionLabel>
+              <Select {...field} error={errors.externalCommunication?.message} options={[
+                { value: "",                            label: "Not required"                  },
+                { value: "Status page update pending",  label: "Status page update pending"   },
+                { value: "Status page updated",         label: "Status page updated"           },
+                { value: "Customer email sent",         label: "Customer email sent"           },
+              ]} />
+            </div>
+          )} />
+
+          {/* Incident Commander + Business Impact */}
+          <Controller name="incidentCommander" control={control} render={({ field }) => (
+            <div>
+              <SectionLabel>Incident Commander</SectionLabel>
+              <Select {...field} options={memberOptions} error={errors.incidentCommander?.message} />
+            </div>
+          )} />
+
+          <Controller name="businessImpact" control={control} render={({ field }) => (
+            <div>
+              <SectionLabel>Business impact ( £/min )</SectionLabel>
+              <Input {...field} placeholder="1800" error={errors.businessImpact?.message} />
+            </div>
+          )} />
+
+          {/* Additional Context — full width */}
+          <div className="col-span-2">
+            <Controller name="additionalContext" control={control} render={({ field }) => (
+              <div>
+                <SectionLabel>Additional Context</SectionLabel>
+                <TextArea {...field} rows={4} error={errors.additionalContext?.message} />
+              </div>
+            )} />
+          </div>
+
+          {/* Labels / Tags — full width */}
           <div className="col-span-2">
             <SectionLabel>Labels / Tags</SectionLabel>
-            <div className="flex flex-wrap items-center gap-2 p-2 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-500 dark:border-zinc-700 rounded-lg focus-within:border-zinc-400 dark:focus-within:border-zinc-500 transition-colors">
+            <div className="flex flex-wrap items-center gap-2 p-2.5 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-700 rounded-xl focus-within:border-zinc-400 dark:focus-within:border-zinc-500 transition-colors min-h-[46px]">
               {currentTags.map((tag) => (
-                <span key={tag} className="flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-zinc-800 border border-zinc-500 dark:border-zinc-700 rounded text-[12px] text-zinc-600 dark:text-zinc-300">
+                <span
+                  key={tag}
+                  className="flex items-center gap-1.5 px-2.5 py-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-[12px] font-medium text-zinc-700 dark:text-zinc-300"
+                >
                   {tag}
-                  <X size={12} className="cursor-pointer text-black hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors" onClick={() => setValue("labels", currentTags.filter((t) => t !== tag))} />
+                  <X
+                    size={11}
+                    className="cursor-pointer text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-100 transition-colors"
+                    onClick={() => setValue("labels", currentTags.filter((t) => t !== tag))}
+                  />
                 </span>
               ))}
               <input
-                className="bg-transparent border-none outline-none text-[12px] text-black dark:text-zinc-300 placeholder:text-zinc-400 p-1 flex-1 min-w-[140px]"
+                className="bg-transparent outline-none text-[13px] text-zinc-800 dark:text-zinc-300 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 p-1 flex-1 min-w-[140px]"
                 placeholder="Add tag + enter"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
@@ -182,50 +292,127 @@ const AddContextForm = ({
             {errors.labels && <p className="text-red-500 text-[11px] mt-1">{errors.labels.message}</p>}
           </div>
 
+          {/* Related Incidents — full width */}
           <div className="col-span-2">
             <Controller name="relatedIncidents" control={control} render={({ field }) => (
-              <Input {...field} label="Related Incidents" placeholder="SI-0002310, SI-0001870" />
+              <div>
+                <SectionLabel>Related Incidents</SectionLabel>
+                <Input {...field} placeholder="SI-0002310, SI-0001870" />
+              </div>
             )} />
           </div>
 
+          {/* Runbook Override URL + Escalate to */}
           <Controller name="runbookOverrideUrl" control={control} render={({ field }) => (
-            <Input {...field} label="Runbook Override URL" error={errors.runbookOverrideUrl?.message} />
+            <div>
+              <SectionLabel>Runbook Override URL</SectionLabel>
+              <Input {...field} placeholder="" error={errors.runbookOverrideUrl?.message} />
+            </div>
           )} />
 
           <Controller name="escalateTo" control={control} render={({ field }) => (
-            <Select {...field} label="Escalate to" error={errors.escalateTo?.message} options={memberOptions} />
+            <div>
+              <SectionLabel>Escalate to</SectionLabel>
+              <Select {...field} error={errors.escalateTo?.message} options={[
+                { value: "",                                  label: "Select"                               },
+                { value: "Service Owner + Change Manager",    label: "Service Owner + Change Manager"       },
+                { value: "Engineering Manager",               label: "Engineering Manager"                  },
+                { value: "CTO",                               label: "CTO"                                  },
+                { value: "On-call Lead",                      label: "On-call Lead"                         },
+              ]} />
+            </div>
           )} />
 
-          {/* Attachments */}
+          {/* Evidence & Attachments — full width drag-drop */}
           <div className="col-span-2">
             <SectionLabel>Evidence & Attachments</SectionLabel>
-            <Controller name="attachments" control={control} render={({ field }) => (
-              <div className="space-y-1.5">
-                <input
-                  type="file"
-                  multiple
-                  onChange={(e) => field.onChange(Array.from(e.target.files ?? []))}
-                  className="w-full rounded-lg border border-zinc-500 dark:border-zinc-700 bg-transparent px-3 py-2 text-[12px] text-zinc-600 dark:text-zinc-300"
-                />
-                <p className="text-[11px] text-black dark:text-zinc-500">
-                  Attachment metadata is saved in this incident slice.
-                </p>
-              </div>
-            )} />
+            <Controller
+              name="attachments"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <div
+                    onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={e => {
+                      e.preventDefault();
+                      setDragOver(false);
+                      const files = Array.from(e.dataTransfer.files);
+                      field.onChange([...(field.value ?? []), ...files]);
+                    }}
+                    onClick={() => fileRef.current?.click()}
+                    className={`rounded-xl border-2 border-dashed px-6 py-8 flex flex-col items-center justify-center cursor-pointer transition-colors ${
+                      dragOver
+                        ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-500/5"
+                        : "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/30 hover:border-zinc-300 dark:hover:border-zinc-600"
+                    }`}
+                  >
+                    <Upload size={22} className="text-zinc-400 dark:text-zinc-500 mb-3" />
+                    <p className="text-[13px] font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                      Attach Screenshots , Logs , Dashboards
+                    </p>
+                    <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
+                      PNG , JPG , PDF , .Log , .txt , .json , .yami · max 25MB per file
+                    </p>
+                    {(field.value ?? []).length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2 justify-center">
+                        {(field.value as File[]).map((f, i) => (
+                          <span key={i} className="text-[11px] bg-zinc-100 dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 rounded-lg px-2 py-1">
+                            {f.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    multiple
+                    accept=".png,.jpg,.jpeg,.pdf,.log,.txt,.json,.yaml,.yml"
+                    className="hidden"
+                    onChange={e => {
+                      const files = Array.from(e.target.files ?? []);
+                      field.onChange([...(field.value ?? []), ...files]);
+                    }}
+                  />
+                </div>
+              )}
+            />
           </div>
         </div>
 
         {saveMutation.isError && (
-          <p className="mt-4 text-[12px] text-red-500">Unable to save incident context right now.</p>
+          <p className="px-6 pb-2 text-[12px] text-red-500">Unable to save incident context right now.</p>
         )}
 
-        <div className="mt-6 flex justify-end">
+        {/* ── Footer ── */}
+        <div className="flex items-center justify-center gap-3 px-6 py-5 border-t border-zinc-100 dark:border-zinc-800">
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-7 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-[13px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            >
+              Cancel
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => handleSubmit(async (data) => {
+              setSaveNotice("");
+              await saveMutation.mutateAsync(data);
+            })()}
+            disabled={isSubmitting || saveMutation.isPending}
+            className="px-7 py-2.5 rounded-xl border border-emerald-500 dark:border-emerald-600 text-[13px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors disabled:opacity-50"
+          >
+            Save as draft
+          </button>
           <button
             type="submit"
             disabled={isSubmitting || saveMutation.isPending}
-            className="px-5 py-2 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-900 dark:bg-white text-white dark:text-black text-[12px] font-semibold hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors disabled:opacity-50"
+            className="px-7 py-2.5 rounded-xl text-[13px] font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors disabled:opacity-50"
           >
-            {saveMutation.isPending ? "Saving…" : "Save Context"}
+            {saveMutation.isPending ? "Saving…" : "Save and update incident"}
           </button>
         </div>
       </form>
