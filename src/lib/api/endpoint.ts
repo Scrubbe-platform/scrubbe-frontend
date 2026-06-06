@@ -209,6 +209,11 @@ export const endpoint = {
     learn: "/ezra/learn",
     patterns: "/ezra/patterns",
   },
+  code_engine: {
+    analysis: "/code-engine/analysis",         // GET /code-engine/analysis/:id
+    generate_fix: "/code-engine/generate-fix", // POST /code-engine/generate-fix/:id
+    create_pr: "/code-engine/create-pr",       // POST /code-engine/create-pr/:id
+  },
   signals: {
     list: "/signals",
     stats: "/signals/stats",

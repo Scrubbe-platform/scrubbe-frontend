@@ -416,7 +416,6 @@ export default function SignInForm() {
       setIsLoginLoading(true);
       const user = await login(email, password);
       toast.success("Signed in successfully", { id: "login-success" });
-      await new Promise(resolve => setTimeout(resolve, 80));
       redirectAfterLogin(user?.accountType, (user as any)?.purpose ?? null);
     } catch (err) {
       toast.error(

@@ -231,8 +231,7 @@ export default function BusinessSignupForm() {
 
   useEffect(() => {
     if (showSuccess) {
-      const t = setTimeout(() => router.replace("/auth/account-setup"), 3000);
-      return () => clearTimeout(t);
+      router.replace("/auth/account-setup");
     }
   }, [showSuccess, router]);
 
