@@ -8,6 +8,7 @@ import {
   Check,
   Copy,
   ExternalLink,
+  GitBranch,
   Loader2,
   Minus,
   Pencil,
@@ -50,7 +51,14 @@ type LegacyIntegration = {
   id: string;
   provider: string;
   isActive: boolean;
-  config?: SlackConfig | null;
+  config?: SlackConfig | Record<string, unknown> | null;
+};
+
+type ProviderIntegrationDef = {
+  key: string;
+  label: string;
+  description: string;
+  oauthEndpointKey: "github" | "gitlab" | "bitbucket";
 };
 
 type ConnectionRecord = {
@@ -343,6 +351,50 @@ const IntegrationSettingsPage = () => {
     [integrations],
   );
 
+  const findProviderIntegration = (name: string) =>
+    integrations.find((i) => i.provider.toLowerCase() === name.toLowerCase());
+
+  const PROVIDER_INTEGRATIONS: ProviderIntegrationDef[] = [
+    {
+      key: "github",
+      label: "GitHub",
+      description: "OAuth account link. Enables webhook-triggered auto-incidents from failed Actions workflows, deploys, and checks.",
+      oauthEndpointKey: "github",
+    },
+    {
+      key: "gitlab",
+      label: "GitLab",
+      description: "OAuth project sync. Pipelines, jobs, and deployment failures auto-raise incidents with merge-request remediation.",
+      oauthEndpointKey: "gitlab",
+    },
+    {
+      key: "bitbucket",
+      label: "Bitbucket",
+      description: "OAuth workspace link. Pipeline and commit-status failures auto-raise incidents with PR-based remediation.",
+      oauthEndpointKey: "bitbucket",
+    },
+  ];
+
+  const handleProviderConnect = async (key: "github" | "gitlab" | "bitbucket") => {
+    const endpointMap = {
+      github: endpoint.integration.github,
+      gitlab: endpoint.integration.gitlab,
+      bitbucket: endpoint.integration.bitbucket,
+    };
+    setBusyKey(`${key}-connect`);
+    try {
+      const res = await get(endpointMap[key]);
+      const url = res.data?.data?.url ?? res.data?.url;
+      if (!res.success || typeof url !== "string") {
+        toast.error(`Unable to start ${key} connection`);
+        return;
+      }
+      window.location.href = url;
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
   const connectionMap = useMemo(
     () =>
       connections.reduce<Record<string, ConnectionRecord>>((acc, connection) => {
@@ -539,6 +591,97 @@ const IntegrationSettingsPage = () => {
         sub="Live connectors now cover chat, alerting, ticketing, dashboards, and custom webhooks."
       >
         <div className="space-y-8 pt-5">
+
+          {/* Source code & CI/CD providers (OAuth-based) */}
+          <section className="bg-transparent border border-slate-500/40 dark:border-slate-700 rounded-[24px] p-4 space-y-5">
+            <div className="flex justify-between items-center px-1">
+              <h3 className="dark:text-white font-bold text-lg">Source code &amp; CI/CD</h3>
+              <button
+                type="button"
+                className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                onClick={() => router.push("/incident/settings/ingestion")}
+              >
+                <GitBranch size={13} />
+                Manage repos &amp; webhooks
+                <ArrowRight size={13} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {PROVIDER_INTEGRATIONS.map((def) => {
+                const integration = findProviderIntegration(def.key);
+                const connected = Boolean(integration?.isActive);
+                const config = (integration?.config ?? {}) as Record<string, unknown>;
+                const tone = statusTone(connected ? "CONNECTED" : "NOT_CONNECTED");
+                const lastEvent = config.lastEventType as string | undefined;
+                const lastEventAt = config.lastEventAt as string | undefined;
+                const repoCount = config.repoCount as number | undefined;
+                const webhookReady = Boolean(config.webhookReady);
+
+                return (
+                  <div
+                    key={def.key}
+                    className="p-5 border border-slate-500/40 dark:border-slate-700 rounded-2xl space-y-4 group hover:border-cyan-500/30 transition-colors"
+                  >
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="dark:text-white text-[15px] font-bold">{def.label}</span>
+                          <StatusBadge
+                            borderClass={tone.border}
+                            textClass={tone.text}
+                            label={tone.label}
+                            icon={connected ? <Check size={14} /> : <Minus size={14} />}
+                          />
+                          {connected && webhookReady && (
+                            <StatusBadge
+                              borderClass="border-emerald-500/40"
+                              textClass="text-emerald-400"
+                              label="Webhook ready"
+                              icon={<Webhook size={13} />}
+                            />
+                          )}
+                        </div>
+                        <p className="dark:text-slate-300 text-sm max-w-3xl">{def.description}</p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <ActionButton
+                          label={connected ? "Reconnect" : "Connect"}
+                          icon={<PlugZap size={14} />}
+                          loading={busyKey === `${def.key}-connect`}
+                          onClick={() => handleProviderConnect(def.oauthEndpointKey)}
+                        />
+                        <ActionButton
+                          label="Configure"
+                          icon={<Pencil size={14} />}
+                          variant="secondary"
+                          onClick={() => router.push("/incident/settings/ingestion")}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 xl:grid-cols-4 gap-3">
+                      <DetailPill label="Status" value={connected ? "Connected" : "Not connected"} />
+                      <DetailPill
+                        label="Repos synced"
+                        value={connected ? String(repoCount ?? 0) : "--"}
+                      />
+                      <DetailPill
+                        label="Last event"
+                        value={lastEvent ?? (connected ? "Waiting" : "Not connected")}
+                      />
+                      <DetailPill
+                        label="Last event at"
+                        value={formatTimestamp(lastEventAt)}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
           {sections.map(([section, definitions]) => (
             <section
               key={section}

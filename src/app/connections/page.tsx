@@ -1,6 +1,7 @@
 "use client";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { AiOutlineCloud, AiOutlineKubernetes } from "react-icons/ai";
 import { BiGitRepoForked, BiGrid, BiLogoMongodb } from "react-icons/bi";
 import { BsDatabase } from "react-icons/bs";
@@ -16,6 +17,10 @@ import { RxStack } from "react-icons/rx";
 import { TbBrandBitbucket } from "react-icons/tb";
 import { VscAzure, VscTypeHierarchy } from "react-icons/vsc";
 import { WiNightCloudy } from "react-icons/wi";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { querykeys } from "@/lib/constant";
+import useAuthStore from "@/lib/stores/auth.store";
 import ConfigureIntegration from "./ConfigureIntegration";
 
 const integrationModel = [
@@ -84,6 +89,37 @@ const Page = () => {
   const [integrationType, setIntegrationType] = useState("");
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user } = useAuthStore();
+  const { get } = useFetch();
+
+  const { data: integrations = [] } = useQuery({
+    queryKey: [querykeys.INTEGRATIONS, user?.id],
+    queryFn: async () => {
+      const res = await get(`${endpoint.incident_ticket.integrations}/${user?.id}`);
+      if (!res.success) return [];
+      return (res.data?.data ?? res.data?.integrations ?? res.data ?? []) as Array<{ provider: string; isActive: boolean }>;
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: connections = [] } = useQuery({
+    queryKey: [querykeys.CONNECTOR_CONNECTIONS],
+    queryFn: async () => {
+      const res = await get(endpoint.connectors.connections);
+      if (!res.success) return [];
+      return (res.data?.connections ?? res.data?.data?.connections ?? []) as Array<{ type: string; status: string }>;
+    },
+    enabled: !!user,
+  });
+
+  const connectedProviders = useMemo(() => {
+    const set = new Set<string>();
+    integrations.forEach((i) => { if (i.isActive) set.add(i.provider.toLowerCase()); });
+    connections.forEach((c) => { if (c.status === "HEALTHY" || c.status === "CONNECTING") set.add(c.type.toLowerCase()); });
+    return set;
+  }, [integrations, connections]);
+
+  const isConnected = (name: string) => connectedProviders.has(name.toLowerCase());
 
   useEffect(() => {
     const requested = searchParams.get("integration");
@@ -157,7 +193,7 @@ const Page = () => {
             <StepWrapper title="1. CODE & REPOS  ( REQUIRED )" subtitle="Where your services and deployments live." description="Scrubbe watches commits and deployment statuses here so it can raise incidents when something breaks and suggest fixes with Code Engine." tag="Read-only integration model" footer="At least one repo provider must be connected before you continue. You can fine-tune which repos and services Scrubbe watches later.">
               <div className="grid grid-cols-3 gap-4">
                 {integrationModel.map(({ Icon, ...rest }) => (
-                  <IntegrationCard key={rest.name} Icon={Icon} title={rest.title} subtitle={rest.subtitle} onClick={() => openModal("code_repos", rest.title, rest.name)} />
+                  <IntegrationCard key={rest.name} Icon={Icon} title={rest.title} subtitle={rest.subtitle} connected={isConnected(rest.name)} onClick={() => openModal("code_repos", rest.title, rest.name)} />
                 ))}
               </div>
             </StepWrapper>
@@ -166,7 +202,7 @@ const Page = () => {
             <StepWrapper title="2. CI/CD PIPELINES ( RECOMMENDED )" subtitle="See failed deployments the moment they happen." description='Scrubbe correlates pipeline runs with incidents so you can see "this deploy broke that service" and let Code Engine propose the safest fix path.' tag="MTTR & deployment analytics" footer='CI/CD integrations help Scrubbe compute deployment velocity, MTTR and "blast radius" for incidents.'>
               <div className="grid grid-cols-3 gap-4">
                 {deploymentModel.map(({ Icon, ...rest }) => (
-                  <IntegrationCard key={rest.name} Icon={Icon} title={rest.title} subtitle={rest.subtitle} onClick={() => openModal("cicd", rest.title, rest.name)} />
+                  <IntegrationCard key={rest.name} Icon={Icon} title={rest.title} subtitle={rest.subtitle} connected={isConnected(rest.name)} onClick={() => openModal("cicd", rest.title, rest.name)} />
                 ))}
               </div>
             </StepWrapper>
@@ -175,7 +211,7 @@ const Page = () => {
             <StepWrapper title="3. RUNTIME & CLUSTERS" subtitle="Map incidents to real containers and pods." description='Connect Docker registries and Kubernetes clusters so Scrubbe can see which images and pods are behind a failing deploy and surface that context in incidents.' tag="Optional but powerful" footer='These connections let Scrubbe answer "which image / pod is behind this incident?" without leaving the UI.'>
               <div className="grid grid-cols-3 gap-4">
                 {containersModel.map(({ Icon, ...rest }) => (
-                  <IntegrationCard key={rest.name} Icon={Icon} title={rest.title} subtitle={rest.subtitle} onClick={() => openModal("runtime", rest.title, rest.name)} />
+                  <IntegrationCard key={rest.name} Icon={Icon} title={rest.title} subtitle={rest.subtitle} connected={isConnected(rest.name)} onClick={() => openModal("runtime", rest.title, rest.name)} />
                 ))}
               </div>
             </StepWrapper>
@@ -184,7 +220,7 @@ const Page = () => {
             <StepWrapper title="4. DATASTORES & WAREHOUSES" subtitle="Know the real impact: rows, records and money." description="Connect read replicas or analytics warehouses so Scrubbe and Ezra can quantify impact, potential loss and affected customers without touching production write paths." tag="Impact & loss analysis" footer="Use replicas or warehouses, not primary write nodes. Scrubbe needs enough data to understand impact, not to run your production workloads.">
               <div className="grid grid-cols-3 gap-4">
                 {databaseModel.map(({ Icon, ...rest }) => (
-                  <IntegrationCard key={rest.name} Icon={Icon} title={rest.title} subtitle={rest.subtitle} onClick={() => openModal("datastores", rest.title, rest.name)} />
+                  <IntegrationCard key={rest.name} Icon={Icon} title={rest.title} subtitle={rest.subtitle} connected={isConnected(rest.name)} onClick={() => openModal("datastores", rest.title, rest.name)} />
                 ))}
               </div>
             </StepWrapper>
@@ -193,7 +229,7 @@ const Page = () => {
             <StepWrapper title="5. FRAUD METRICS & SIGNALS" subtitle='Teach incidents what "bad money" looks like.' description="Connect your fraud and risk signals so Scrubbe can tell the difference between a noisy technical incident and a real fraud or abuse event that needs leadership attention." tag="Money & abuse awareness" footer='Fraud integrations are optional, but if you are a payments or fintech business this is where Scrubbe becomes "fraud-aware", not just "infra-aware".'>
               <div className="grid grid-cols-3 gap-4">
                 {fraudModel.map(({ Icon, ...rest }) => (
-                  <IntegrationCard key={rest.name} Icon={Icon} title={rest.title} subtitle={rest.subtitle} onClick={() => openModal("fraud_metrics", rest.title, rest.name)} />
+                  <IntegrationCard key={rest.name} Icon={Icon} title={rest.title} subtitle={rest.subtitle} connected={isConnected(rest.name)} onClick={() => openModal("fraud_metrics", rest.title, rest.name)} />
                 ))}
               </div>
             </StepWrapper>
@@ -276,25 +312,42 @@ const StepWrapper = ({
 // ── Integration card ──────────────────────────────────────────────
 
 const IntegrationCard = ({
-  Icon, title, subtitle, onClick,
+  Icon, title, subtitle, onClick, connected = false,
 }: {
-  Icon: React.ElementType; title: string; subtitle: string; onClick: () => void;
+  Icon: React.ElementType; title: string; subtitle: string; onClick: () => void; connected?: boolean;
 }) => (
   <div
     onClick={onClick}
-    className="border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 rounded-lg p-2 flex justify-between gap-2 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
+    className={`border rounded-lg p-2 flex justify-between gap-2 cursor-pointer transition-colors ${
+      connected
+        ? "border-emerald-500/50 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/20 hover:border-emerald-400 dark:hover:border-emerald-400/60"
+        : "border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-800/40 hover:border-zinc-300 dark:hover:border-zinc-600"
+    }`}
   >
     <div className="flex gap-2 items-center">
-      <div className="size-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex justify-center items-center border border-zinc-500 dark:border-zinc-700 shrink-0">
-        <Icon className="size-5 text-black dark:text-zinc-400" />
+      <div className={`size-9 rounded-full flex justify-center items-center border shrink-0 ${
+        connected
+          ? "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-500/40"
+          : "bg-zinc-100 dark:bg-zinc-800 border-zinc-500 dark:border-zinc-700"
+      }`}>
+        <Icon className={`size-5 ${connected ? "text-emerald-600 dark:text-emerald-400" : "text-black dark:text-zinc-400"}`} />
       </div>
       <div>
-        <p className="text-[13px] text-black dark:text-zinc-100 font-semibold leading-tight">{title}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-[13px] text-black dark:text-zinc-100 font-semibold leading-tight">{title}</p>
+          {connected && (
+            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+              Active
+            </span>
+          )}
+        </div>
         <p className="text-[11px] text-black dark:text-zinc-400">{subtitle}</p>
       </div>
     </div>
-    <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 underline underline-offset-2 shrink-0 self-center">
-      Configure
+    <span className={`text-[11px] font-medium underline underline-offset-2 shrink-0 self-center ${
+      connected ? "text-emerald-600 dark:text-emerald-400" : "text-emerald-600 dark:text-emerald-400"
+    }`}>
+      {connected ? "Manage" : "Configure"}
     </span>
   </div>
 );
