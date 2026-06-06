@@ -3,7 +3,11 @@ import React from "react";
 import {
   AlertTriangle, RefreshCw, Database, Plus,
   Activity, Shield, CheckCircle2, Circle,
+  BookOpen, Zap, Settings, RotateCcw, Search,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 interface PlaybookItem {
@@ -34,7 +38,17 @@ const StatusCard: React.FC<PlaybookItem> = ({ title, stage, service, icon }) => 
   </div>
 );
 
-// ── Data builder ──────────────────────────────────────────────────
+// ── Icon helpers ──────────────────────────────────────────────────
+
+const PLAYBOOK_ICONS = [
+  <AlertTriangle key="0" />, <RefreshCw key="1" />, <Database key="2" />,
+  <Activity key="3" />, <Shield key="4" />, <BookOpen key="5" />,
+  <Zap key="6" />, <Settings key="7" />, <RotateCcw key="8" />, <Search key="9" />,
+];
+
+const iconAt = (i: number) => PLAYBOOK_ICONS[i % PLAYBOOK_ICONS.length];
+
+// ── Fallback builder (used when API returns empty) ─────────────────
 
 const buildPlaybooks = (incident: IncidentDetailRecord): PlaybookItem[] => {
   const svc   = incident.service || incident.affectedSystem || "unknown-service";
@@ -65,7 +79,35 @@ const legends = [
 // ── Sidebar ───────────────────────────────────────────────────────
 
 const PlaybookSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({ incident }) => {
-  const playbooks = buildPlaybooks(incident);
+  const { get } = useFetch();
+
+  const { data: serverPlaybooks } = useQuery({
+    queryKey: ["playbooks-sidebar", incident.id],
+    queryFn: async () => {
+      // Try matched playbooks first, fall back to full list
+      const matchRes = await get(`${endpoint.playbooks.match}?incidentId=${incident.id}`);
+      if (matchRes.success) {
+        const items: any[] = matchRes.data?.data?.playbooks ?? matchRes.data?.data ?? [];
+        if (items.length > 0) return items;
+      }
+      const listRes = await get(endpoint.playbooks.list);
+      return listRes.success
+        ? (listRes.data?.data?.playbooks ?? listRes.data?.data ?? []) as any[]
+        : [] as any[];
+    },
+    enabled: !!incident.id,
+    refetchOnWindowFocus: false,
+  });
+
+  const playbooks: PlaybookItem[] = serverPlaybooks?.length
+    ? serverPlaybooks.map((p: any, i: number) => ({
+        id: p.id ?? String(i),
+        title: p.name ?? p.title ?? "Playbook",
+        stage: p.currentStage ?? p.stage ?? p.automationLevel ?? 3,
+        service: p.service ?? p.triggerConditions?.service ?? incident.service ?? incident.affectedSystem ?? "all-services",
+        icon: iconAt(i),
+      }))
+    : buildPlaybooks(incident);
 
   return (
     <div className="flex h-full w-72 flex-col gap-5 overflow-y-auto border-r border-zinc-100 dark:border-zinc-800 bg-white dark:bg-transparent p-5">

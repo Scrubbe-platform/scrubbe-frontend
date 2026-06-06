@@ -13,19 +13,25 @@ const AuditBadge = ({ type }: { type: AuditType }) => (
   </span>
 );
 
+const fmtTime = (base: Date, offsetMinutes: number): string => {
+  const d = new Date(base.getTime() + offsetMinutes * 60_000);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+};
+
 const buildAuditEvents = (incident: IncidentDetailRecord): AuditEvent[] => {
   const playbookLabel = incident.title || incident.reason || incident.summary || "Selected incident";
   const serviceName   = incident.service || incident.affectedSystem || "unknown-service";
   const recommended   = incident.recommendedActions[0] || incident.aiAnalysis?.suggestion || "Validate the current remediation path";
+  const base          = incident.createdAt ? new Date(incident.createdAt) : new Date();
 
   return [
-    { timestamp: "00:00", type: "Playbook",  description: `Playbook "${playbookLabel}" matched to ${incident.ticketId} · matchConfidence: 0.91 · service: ${serviceName}`, actor: "system/matcher"           },
-    { timestamp: "00:00", type: "Step",      description: 'Step 1 "Review Recent Incident Signals" started · agent/deploy-scanner-01 assigned · status: in_progress',       actor: "agent/orchestrator"        },
-    { timestamp: "00:00", type: "Step",      description: `Step 1 completed · outcome: context collected · recommendation: ${recommended}`,                                  actor: "agent/deploy-scanner-01"   },
-    { timestamp: "00:00", type: "Step",      description: 'Step 2 "Inspect Service Logs" started · branch conditions registered for remediation review',                     actor: "agent/orchestrator"        },
-    { timestamp: "00:00", type: "Decision",  description: `effectiveAutomationLevel computed: min(playbook:3, policy:3, risk:2) = 2 · execution mode locked to ASSISTED · incident status: ${incident.status}`, actor: "system/execution-gate" },
-    { timestamp: "00:00", type: "Guardrail", description: "GuardrailCheck: rollback approval and blast-radius review remain enforced before execution",                      actor: "system/policy-engine"      },
-    { timestamp: "00:00", type: "Execution", description: `Execution prepared for ${incident.ticketId} · awaiting approval · owner: ${incident.assignedToName || incident.assignedToEmail || incident.incidentCommander || "unassigned"}`, actor: "system/execution-gate" },
+    { timestamp: fmtTime(base, 0),  type: "Playbook",  description: `Playbook "${playbookLabel}" matched to ${incident.ticketId} · matchConfidence: 0.91 · service: ${serviceName}`, actor: "system/matcher"           },
+    { timestamp: fmtTime(base, 1),  type: "Step",      description: 'Step 1 "Review Recent Incident Signals" started · agent/deploy-scanner-01 assigned · status: in_progress',       actor: "agent/orchestrator"        },
+    { timestamp: fmtTime(base, 3),  type: "Step",      description: `Step 1 completed · outcome: context collected · recommendation: ${recommended}`,                                  actor: "agent/deploy-scanner-01"   },
+    { timestamp: fmtTime(base, 5),  type: "Step",      description: 'Step 2 "Inspect Service Logs" started · branch conditions registered for remediation review',                     actor: "agent/orchestrator"        },
+    { timestamp: fmtTime(base, 6),  type: "Decision",  description: `effectiveAutomationLevel computed: min(playbook:3, policy:3, risk:2) = 2 · execution mode locked to ASSISTED · incident status: ${incident.status}`, actor: "system/execution-gate" },
+    { timestamp: fmtTime(base, 7),  type: "Guardrail", description: "GuardrailCheck: rollback approval and blast-radius review remain enforced before execution",                      actor: "system/policy-engine"      },
+    { timestamp: fmtTime(base, 8),  type: "Execution", description: `Execution prepared for ${incident.ticketId} · awaiting approval · owner: ${incident.assignedToName || incident.assignedToEmail || incident.incidentCommander || "unassigned"}`, actor: "system/execution-gate" },
   ];
 };
 

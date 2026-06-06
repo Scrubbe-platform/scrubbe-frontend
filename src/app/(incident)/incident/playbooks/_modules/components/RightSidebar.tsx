@@ -1,6 +1,9 @@
 "use client";
 import React from "react";
 import { Check, CheckCircle2, Circle, TrendingUp } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -53,10 +56,30 @@ const MatchRow = ({ label, weight, met }: MatchCriteria) => (
 // ── Main component ────────────────────────────────────────────────
 
 const PlaybookRightSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({ incident }) => {
+  const { get } = useFetch();
   const incidentContext = deriveIncidentContext(incident);
   const isDeployAware = /deploy|pipeline|ci\/cd|rollback|release/i.test(
     `${incident.sourceType ?? ""} ${incident.detection ?? ""} ${incident.title ?? ""}`
   );
+
+  const { data: matchData } = useQuery({
+    queryKey: ["playbook-match-confidence", incident.id],
+    queryFn: async () => {
+      const res = await get(`${endpoint.playbooks.match}?incidentId=${incident.id}`);
+      if (res.success) {
+        const items: any[] = res.data?.data?.playbooks ?? res.data?.data ?? [];
+        const top = items[0];
+        return top
+          ? { confidence: Math.round((top.matchConfidence ?? top.confidence ?? 0.91) * 100) }
+          : null;
+      }
+      return null;
+    },
+    enabled: !!incident.id,
+    refetchOnWindowFocus: false,
+  });
+
+  const matchConfidence = matchData?.confidence ?? 91;
 
   return (
     <div className="w-[340px] h-full flex flex-col p-5 gap-7 overflow-y-auto border-l border-zinc-200 dark:border-white/5 bg-white dark:bg-transparent">
@@ -65,7 +88,7 @@ const PlaybookRightSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({ in
       <section>
         <SectionHeader>Match Confidence</SectionHeader>
         <div className="flex flex-col items-center mb-5">
-          <span className="text-[40px] font-black text-emerald-500 leading-none tracking-tight">91%</span>
+          <span className="text-[40px] font-black text-emerald-500 leading-none tracking-tight">{matchConfidence}%</span>
           <span className="text-[10px] font-mono text-zinc-400 mt-1 uppercase tracking-widest">
             Proposal.matchConfidence
           </span>

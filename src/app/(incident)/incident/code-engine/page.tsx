@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { DiffEditor } from "@monaco-editor/react";
 import { apiClient } from "@/lib/api/apiClient";
 import { endpoint } from "@/lib/api/endpoint";
@@ -59,6 +59,7 @@ function severityBadgeStyle(s: string): string {
 
 function CodeEngineContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const incidentParam = searchParams.get("id");
 
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
@@ -75,8 +76,30 @@ function CodeEngineContent() {
 
   useEffect(() => {
     if (!incidentParam) {
-      setFetchError("No incident ID provided. Navigate here from an incident (e.g. ?id=INC-1234).");
-      setLoading(false);
+      // Auto-select the first incident when navigated here without ?id=
+      const fetchFirst = async () => {
+        try {
+          const res = await apiClient.get<{ data: Array<{ id: string }> | { data?: Array<{ id: string }> } }>(
+            endpoint.incident_ticket.get,
+          );
+          const raw = res.data?.data;
+          const list: Array<{ id: string }> = Array.isArray(raw)
+            ? raw
+            : Array.isArray((raw as { data?: Array<{ id: string }> })?.data)
+            ? (raw as { data: Array<{ id: string }> }).data
+            : [];
+          if (list.length > 0) {
+            router.replace(`/incident/code-engine?id=${list[0].id}`);
+          } else {
+            setFetchError("No incidents found. Create an incident first to use Code Engine.");
+            setLoading(false);
+          }
+        } catch {
+          setFetchError("No incident ID provided. Navigate here from an incident (e.g. ?id=INC-1234).");
+          setLoading(false);
+        }
+      };
+      void fetchFirst();
       return;
     }
 
@@ -97,7 +120,7 @@ function CodeEngineContent() {
     };
 
     void fetchAnalysis();
-  }, [incidentParam]);
+  }, [incidentParam, router]);
 
   const handleGenerateFix = async () => {
     if (!analysis) return;

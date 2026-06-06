@@ -6,6 +6,14 @@ import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 const getPlaybookTitle = (incident: IncidentDetailRecord) =>
   incident.title || incident.reason || incident.summary || `${incident.service || "Service"} Incident`;
 
+const severityToRiskLevel = (incident: IncidentDetailRecord): number => {
+  const sev = (incident.severity || incident.priority || "").toUpperCase();
+  if (sev === "P0" || sev === "CRITICAL") return 1;
+  if (sev === "P1" || sev === "HIGH")     return 2;
+  if (sev === "P2" || sev === "MEDIUM")   return 3;
+  return Math.min(4, Math.max(1, incident.riskScore ?? 3));
+};
+
 export default function PlaybookStatusCard({ incident }: { incident: IncidentDetailRecord }) {
   const playbookTitle = getPlaybookTitle(incident);
   const serviceName   = incident.service || incident.affectedSystem || "unknown-service";
@@ -15,10 +23,11 @@ export default function PlaybookStatusCard({ incident }: { incident: IncidentDet
 
   const tags = [stageLabel, versionLabel, serviceName, severityLabel];
 
+  const riskLevel = severityToRiskLevel(incident);
   const automationLevels = [
-    { label: "playbook", value: "3", active: true  },
-    { label: "policy",   value: "3", active: true  },
-    { label: "risk",     value: "2", active: false },
+    { label: "playbook", value: "3",              active: true  },
+    { label: "policy",   value: "3",              active: true  },
+    { label: "risk",     value: String(riskLevel), active: false },
   ];
 
   return (

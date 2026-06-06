@@ -349,7 +349,7 @@ export default function SignInForm() {
     if (IS_STANDALONE) {
       if (path === "payment")    { window.location.replace("/pricing");   return; }
       if (path === "community")  { window.location.replace("/community"); return; }
-      return;
+      // Don't early-return here — BUSINESS/DEVELOPER users still need to be redirected
     }
 
     if (path === "ezra") { window.location.replace("/ezra/dashboard"); return; }
@@ -357,13 +357,15 @@ export default function SignInForm() {
     if (accountType === "BUSINESS") {
         const token        = getCookie(COOKIE_KEYS.TOKEN);
         const refreshToken = getCookie(COOKIE_KEYS.REFRESH_TOKEN);
-        const url          = process.env.NEXT_PUBLIC_INCIDENT_URL ?? "https://incidents.scrubbe.com";
-        const redirectUrl  = new URL("/incident/tickets", url);
-        if (typeof token === "string"        && token.length > 0)        redirectUrl.searchParams.set("token", token);
-        if (typeof refreshToken === "string" && refreshToken.length > 0) redirectUrl.searchParams.set("refreshToken", refreshToken);
-        window.location.href = callbackUrl || "/incident";
-        return;
+        const incidentBase = process.env.NEXT_PUBLIC_INCIDENT_URL ?? "";
+        const redirectUrl  = incidentBase ? new URL("/incident/tickets", incidentBase) : null;
+        if (redirectUrl) {
+          if (typeof token        === "string" && token.length > 0)        redirectUrl.searchParams.set("token", token);
+          if (typeof refreshToken === "string" && refreshToken.length > 0) redirectUrl.searchParams.set("refreshToken", refreshToken);
         }
+        window.location.href = callbackUrl || redirectUrl?.toString() || "/incident";
+        return;
+    }
 
     if (accountType === "DEVELOPER") {
       window.location.href = "/developer/dashboard";
