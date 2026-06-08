@@ -13,7 +13,9 @@ type ModalProps = {
 
 const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
@@ -30,16 +32,16 @@ const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
         >
           <motion.div
             initial={{ scale: 0.96, opacity: 0 }}
-            animate={{ scale: 1,    opacity: 1 }}
-            exit={{   scale: 0.96, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.96, opacity: 0 }}
             transition={{ type: "spring", stiffness: 280, damping: 22 }}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "relative w-full mx-4 sm:max-w-lg max-h-[90vh] overflow-y-auto",
+              "relative w-full mx-4 sm:max-w-xl max-h-[90vh] overflow-y-auto",
               "rounded-xl border border-zinc-500 dark:border-zinc-700/60",
               "bg-white dark:bg-zinc-900 shadow-xl",
               "p-2",
-              className
+              className,
             )}
           >
             {/* Close button */}

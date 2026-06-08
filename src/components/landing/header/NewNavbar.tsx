@@ -349,40 +349,40 @@ function ConnectionsDropdown() {
     {
       label: "Code & Version Control",
       links: [
-        { title: "GitHub", href: "/connectors/github" },
-        { title: "GitLab", href: "/connectors/gitlab" },
-        { title: "Bitbucket", href: "/connectors/bitbucket" },
+        { title: "GitHub", href: "/connector/github" },
+        { title: "GitLab", href: "/connector/gitlab" },
+        { title: "Bitbucket", href: "/" },
       ],
       caption: "Track deployments & commits that trigger incidents",
     },
     {
       label: "Cloud & Infrastructure",
       links: [
-        { title: "AWS", href: "/connectors/aws" },
-        { title: "Azure", href: "/connectors/azure" },
-        { title: "Google Cloud", href: "/connectors/google-cloud" },
+        { title: "AWS", href: "/" },
+        { title: "Azure", href: "/" },
+        { title: "Google Cloud", href: "/" },
       ],
       caption: "Monitor infra signals, scaling events & service health",
     },
     {
       label: "Orchestration & Runtime",
-      links: [{ title: "Kubernetes", href: "/connectors/kubernetes" }],
+      links: [{ title: "Kubernetes", href: "/" }],
       caption: "Track deployments & commits that trigger incidents",
     },
     {
       label: "Warroom & Alerts",
       links: [
-        { title: "Slack", href: "/connectors/slack" },
-        { title: "Microsoft Teams", href: "/connectors/teams" },
+        { title: "Slack", href: "/" },
+        { title: "Microsoft Teams", href: "/" },
       ],
       caption: "Ingests alert & Spin up context-rich warrooms",
     },
     {
       label: "Observability",
       links: [
-        { title: "Datadog", href: "/connectors/datadog" },
-        { title: "Prometheus", href: "/connectors/prometheus" },
-        { title: "Grafana", href: "/connectors/grafana" },
+        { title: "Datadog", href: "/" },
+        { title: "Prometheus", href: "/" },
+        { title: "Grafana", href: "/" },
       ],
       caption: "Metrics, logs & alerts from your existing stack",
     },
@@ -549,7 +549,8 @@ function SecurityDropdown() {
     <div className="grid grid-cols-2 gap-0 h-full">
       <div className="p-6 border-r border-gray-100">
         <h3 className="text-[20px] font-bold text-black leading-tight mb-2">
-          Built for secure, controlled operation in production environments.{" "}
+          Built for secure, controlled operation in production
+          environments.{" "}
         </h3>
 
         <div className="grid grid-cols-2 gap-2">
@@ -661,8 +662,8 @@ function NavItem({ label }: { label: DropdownKey }) {
           label == "PRICING"
             ? router.push("/pricing")
             : label == "CONTACT US"
-            ? router.push("/contact-us")
-            : setOpen((o) => !o)
+              ? router.push("/contact-us")
+              : setOpen((o) => !o)
         }
         className="flex items-center gap-1 px-0.5 py-1 text-[11.5px] font-bold tracking-wider text-gray-600 hover:text-black transition-colors bg-transparent border-none cursor-pointer"
       >
