@@ -26,22 +26,15 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
 
   const isMobile = width < 768;
 
-  // Apply theme class to <html> whenever theme changes
-  // useEffect(() => {
-  //   const root = document.documentElement;
-  //   const prefersDark = window.matchMedia(
-  //     "(prefers-color-scheme: dark)"
-  //   ).matches;
-  //   const isDark = theme === "dark" || prefersDark;
-  //   root.classList.toggle("dark", isDark);
-  // }, [theme]);
-
   // Close sidebar on route change (mobile)
   useEffect(() => {
     if (!collapse && window.innerWidth < 768) {
       toggle();
     }
   }, [pathname]);
+
+
+  const showPallete = pathname.includes("code-engine") ? "hidden" : "block";
 
   return (
     <div className="w-full bg-white dark:bg-dark h-screen overflow-hidden flex flex-col md:flex-row relative">
@@ -99,7 +92,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
             {isMobile ? <DesktopRestrictionScreen /> : children}
 
             {/* ── Command palette button ── */}
-            <div className="fixed bottom-6 right-6 z-40">
+            <div className={clsx("fixed bottom-6 right-6 z-40", showPallete)}>
               <button
                 onClick={() => setOpenCommandPalette(true)}
                 className={clsx(

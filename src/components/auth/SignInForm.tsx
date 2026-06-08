@@ -360,10 +360,16 @@ export default function SignInForm() {
         const incidentBase = process.env.NEXT_PUBLIC_INCIDENT_URL ?? "";
         const redirectUrl  = incidentBase ? new URL("/incident/tickets", incidentBase) : null;
         if (redirectUrl) {
-          if (typeof token        === "string" && token.length > 0)        redirectUrl.searchParams.set("token", token);
-          if (typeof refreshToken === "string" && refreshToken.length > 0) redirectUrl.searchParams.set("refreshToken", refreshToken);
+          if (typeof token === "string" && token.length > 0)   {
+            redirectUrl.searchParams.set("token", token);
+          }     
+          if (typeof refreshToken === "string" && refreshToken.length > 0) {
+            redirectUrl.searchParams.set("refreshToken", refreshToken);
+          }
+          window.location.href = callbackUrl || redirectUrl?.toString() || "/incident";
+          return;
         }
-        window.location.href = callbackUrl || redirectUrl?.toString() || "/incident";
+        window.location.href = callbackUrl || "/incident";
         return;
     }
 
@@ -384,7 +390,7 @@ export default function SignInForm() {
       const res = await apiClient.get(endpoint.auth.sso_discover, { params: { email } });
       const result: SsoDiscoveryResult = res.data?.data ?? res.data ?? {};
       setSsoResult(result);
-
+ 
       if (result.enforced) {
         // SSO is enforced — redirect to the identity provider
         if (result.loginUrl) {
