@@ -6,7 +6,7 @@ const page = () => {
   redirect("/incident/tickets");
   return (
     <div>
-      <NewIncidentList />
+      <NewIncidentList tabs="overview" />
     </div>
   );
 };

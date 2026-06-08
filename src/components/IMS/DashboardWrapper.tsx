@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
-import { motion } from "framer-motion";
+import { motion, useMotionValue } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/lib/stores/useSidebar";
 import { useCommands } from "@/lib/stores/command.store";
@@ -19,6 +19,9 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const { setOpenCommandPalette, openCommandPalette } = useCommands();
   const { theme } = useThemeStore();
   const [width, setWidth] = useState(0);
+  const dragX = useMotionValue(0);
+  const dragY = useMotionValue(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     setWidth(window.innerWidth);
@@ -27,14 +30,12 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const isMobile = width < 768;
 
   // Apply theme class to <html> whenever theme changes
-  // useEffect(() => {
-  //   const root = document.documentElement;
-  //   const prefersDark = window.matchMedia(
-  //     "(prefers-color-scheme: dark)"
-  //   ).matches;
-  //   const isDark = theme === "dark" || prefersDark;
-  //   root.classList.toggle("dark", isDark);
-  // }, [theme]);
+  useEffect(() => {
+    const root = document.documentElement;
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = theme === "dark" 
+    root.classList.toggle("dark", isDark);
+  }, [theme]);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -45,12 +46,13 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="w-full bg-white dark:bg-dark h-screen overflow-hidden flex flex-col md:flex-row relative">
+
       {/* ── 1. Mobile navbar ── */}
-      <div className="md:hidden w-full h-16 flex items-center px-5 gap-4 border-b border-zinc-500 dark:border-white/10 bg-white dark:bg-dark z-[55]">
+      <div className="md:hidden w-full h-16 flex items-center px-5 gap-4 border-b border-zinc-200 dark:border-white/10 bg-white dark:bg-dark z-[55]">
         <div className="h-6">
           {/* light logo */}
           <img
-            src="/IMS/blacklogo.png"
+            src="/IMS/darklogo.png"
             alt="logo"
             className="h-full object-contain block dark:hidden"
           />
@@ -98,15 +100,22 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
           >
             {isMobile ? <DesktopRestrictionScreen /> : children}
 
-            {/* ── Command palette button ── */}
-            <div className="fixed bottom-6 right-6 z-40">
+            {/* ── Command palette button — draggable ── */}
+            <motion.div
+              drag
+              dragMomentum={false}
+              dragElastic={0}
+              style={{ x: dragX, y: dragY, bottom: 24, right: 24, position: "fixed" }}
+              onDragStart={() => setIsDragging(true)}
+              onDragEnd={() => setTimeout(() => setIsDragging(false), 50)}
+              className="z-40 cursor-grab active:cursor-grabbing touch-none select-none"
+              whileDrag={{ scale: 1.05, boxShadow: "0 20px 40px rgba(0,0,0,0.15)" }}
+            >
               <button
-                onClick={() => setOpenCommandPalette(true)}
+                onClick={() => { if (!isDragging) setOpenCommandPalette(true); }}
                 className={clsx(
                   "flex items-center gap-2 px-4 py-2.5 rounded-full md:rounded-lg text-xs font-medium shadow-2xl transition-all",
-                  // light
-                  "bg-white border border-zinc-500 text-zinc-500 hover:border-zinc-400",
-                  // dark
+                  "bg-white border border-zinc-200 text-zinc-500 hover:border-zinc-400",
                   "dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-500"
                 )}
               >
@@ -115,14 +124,14 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
                 <kbd
                   className={clsx(
                     "hidden md:block ml-1 px-1.5 py-0.5 rounded font-mono text-[10px]",
-                    "bg-zinc-100 text-black border border-zinc-500",
+                    "bg-zinc-100 text-zinc-400 border border-zinc-200",
                     "dark:bg-neutral-800 dark:text-neutral-500 dark:border-neutral-700"
                   )}
                 >
                   ⌘K
                 </kbd>
               </button>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
