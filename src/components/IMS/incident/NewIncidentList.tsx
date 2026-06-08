@@ -15,7 +15,11 @@ import { cn } from "@/lib/utils";
 import { useIncidentWorkspace } from "@/hooks/useIncidentWorkspace";
 import IncidentDetailSkeleton from "@/components/loaders/incidentDetailLoader";
 
-const IncidentOverview: React.FC = () => {
+type Props = {
+  children?: React.ReactNode;
+  tabs?: "overview" | "signal-graph" | "code-engine" | "delivery" | "playbook";
+};
+const IncidentOverview = ({ children, tabs }: Props) => {
   const {
     currentTab,
     incidentId,
@@ -36,14 +40,13 @@ const IncidentOverview: React.FC = () => {
 
   return (
     <div className="flex h-screen dark:text-slate-300 text-black font-sans overflow-hidden">
-
       {/* ── Sidebar ── */}
       <aside
         className={cn(
           "md:border-r border-white/5 flex flex-col h-full shrink-0",
           "md:w-[350px] md:flex",
           // on mobile: hide sidebar when something is selected or loading
-          showMainPanel || isSelectionLoading ? "hidden" : "w-full flex"
+          showMainPanel || isSelectionLoading ? "hidden" : "w-full flex",
         )}
       >
         <ExactIncidentSidebar />
@@ -54,7 +57,7 @@ const IncidentOverview: React.FC = () => {
         className={cn(
           "flex-1 flex flex-col overflow-y-auto h-full",
           // on mobile: only show when there is something to render
-          showMainPanel || isSelectionLoading ? "flex" : "hidden md:flex"
+          showMainPanel || isSelectionLoading ? "flex" : "hidden md:flex",
         )}
       >
         {/* Loading skeleton — takes the full main panel */}
@@ -76,31 +79,49 @@ const IncidentOverview: React.FC = () => {
 
             {selectedIncident && (
               <>
-                <IncidentHeader incident={selectedIncident} stats={stats} context={context} />
+                <IncidentHeader
+                  incident={selectedIncident}
+                  stats={stats}
+                  context={context}
+                  activeTab={tabs}
+                />
 
-                {(currentTab === "overview" || !currentTab) && (
+                {tabs === "overview" ? (
                   <>
-                    <IncidentLifecycle currentStep={selectedIncident.lifecycleStep} />
+                    <IncidentLifecycle
+                      currentStep={selectedIncident.lifecycleStep}
+                    />
                     <DetectionSignals incident={selectedIncident} />
                     <ScrubbeIntelligence incident={selectedIncident} />
-                    <IncidentContextModule incident={selectedIncident} context={context} />
+                    <IncidentContextModule
+                      incident={selectedIncident}
+                      context={context}
+                    />
                     <ActivityAuditTrail history={history} />
                   </>
+                ) : (
+                  <>{children}</>
                 )}
 
-                {currentTab === "context" && (
+                {/* {tabs === "context" && (
                   <>
-                    <ContextList context={context} incident={selectedIncident} />
-                    <AddContextForm context={context} incident={selectedIncident} />
+                    <ContextList
+                      context={context}
+                      incident={selectedIncident}
+                    />
+                    <AddContextForm
+                      context={context}
+                      incident={selectedIncident}
+                    />
                   </>
-                )}
+                )} */}
               </>
             )}
           </>
         )}
 
         {/* Empty state — desktop only, nothing selected and not loading */}
-        {!showMainPanel  && (
+        {!showMainPanel && (
           <div className="hidden md:flex flex-1 items-center justify-center p-10">
             <div className="max-w-lg rounded-3xl border border-white/10 bg-white/[0.02] p-8 text-center">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
