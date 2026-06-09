@@ -15,7 +15,7 @@ const TABS = [
     label: "Detect",
     title: "Detect",
     desc: "Webhooks from GitHub, Kubernetes, Datadog, and PagerDuty arrive simultaneously. Scrubbe absorbs them all and collapses 40 duplicate alerts in 30 seconds into a single incident. Your engineers see one clear signal, not a flood.",
-    image: "/IMS/how/detect.jpg",
+    image: "/IMS/how/detect.gif",
   },
   {
     id: 2,
@@ -23,7 +23,7 @@ const TABS = [
     label: "Pattern Match",
     title: "Pattern Match",
     desc: "Scrubbe checks the signal against your organisation's policy rules to decide whether an incident should be raised. A single pod restart isn't automatically a crisis. Context matters — and Scrubbe applies it deterministically every time.",
-    image: "/IMS/how/pattern.jpg",
+    image: "/IMS/how/pattern_match.gif",
   },
   {
     id: 3,
@@ -31,7 +31,7 @@ const TABS = [
     label: "Investigate",
     title: "Investigate",
     desc: "The right playbooks are matched against the incident with a confidence score. Ranked remediation options are surfaced — including past resolutions for the same pattern. Your team sees what worked last time, immediately.",
-    image: "/IMS/how/investigate.jpg",
+    image: "/IMS/how/investigate.gif",
   },
   {
     id: 4,
@@ -39,7 +39,7 @@ const TABS = [
     label: "Blast Radius",
     title: "Blast Radius",
     desc: "Before any fix is proposed, Scrubbe maps exactly which services would be affected. If the impact is unclear, the execution gate holds — it never assumes a fix is safe. Unknowns block action, not enable it.",
-    image: "/IMS/how/blast-radius.jpg",
+    image: "/IMS/how/blast_2.gif",
   },
   {
     id: 5,
@@ -224,7 +224,7 @@ export default function HowItWorks() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.97 }}
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative w-full h-full min-h-[310px]"
+                  className="relative w-full h-full min-h-[350px]"
                 >
                   <Image
                     src={tab.image}

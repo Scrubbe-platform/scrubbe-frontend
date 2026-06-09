@@ -22,6 +22,8 @@ import WarRoomSection from "./WarRoomSection";
 import APISection from "./ApiSection";
 import EzraCodeEngineSection from "./CodeEngineSuggestionSection";
 import MigrationSection from "./MigrationSection";
+import RecommendedActions from "./RecommendedAction";
+import RecentFindings from "./RecentFindings";
 
 const Index = () => {
   return (
@@ -30,17 +32,19 @@ const Index = () => {
       <CategoryShiftBanner />
       <TickerItem />
       <CategoryStatement />
-      <ProblemSection />
+      {/* <ProblemSection /> */}
       <TransformationSection />
       <WhyScrubbeExists />
       <WhoUsesScrubbe />
       <ClosedLoopProof />
       <HowItWorks />
-      <FeaturesSection />
+      {/* <FeaturesSection /> */}
+      <RecommendedActions />
       <VideoSection />
       <ConnectorsSection />
       <IndustriesSection />
-      <GovernanceSection />
+      <RecentFindings />
+      {/* <GovernanceSection /> */}
       <WarRoomSection />
       <APISection />
       <EzraCodeEngineSection />

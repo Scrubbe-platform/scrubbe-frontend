@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-
+import Image from "next/image";
 // ─────────────────────────────────────────────────────────────────
 // Pipeline steps data
 // ─────────────────────────────────────────────────────────────────
@@ -78,7 +78,7 @@ export default function TransformationSection() {
           className="font-bold text-gray-950 leading-[1.08] tracking-[-0.03em] mb-5"
           style={{ fontSize: "clamp(36px, 4.5vw, 72px)" }}
         >
-          From signals to safe action.
+          From raw signal to operational understanding
         </motion.h2>
 
         {/* Subtext */}
@@ -88,66 +88,24 @@ export default function TransformationSection() {
           transition={{ duration: 0.6, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
           className="text-gray-500 text-[15px] leading-relaxed mb-12 max-w-lg"
         >
-          Scrubbe is the system that turns fragmented production signals into
-          executable decisions — with policy deciding whether action is allowed.
+          Every signal is correlated, weighed for confidence and evidence, and
+          surfaced where it changes a decision — across the workspace..
         </motion.p>
 
         {/* Pipeline card */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
+          className="w-full"
           transition={{ duration: 0.6, delay: 0.24, ease: [0.22, 1, 0.36, 1] }}
-          className="relative grid grid-cols-1 md:grid-cols-4 bg-white"
-          style={{
-            border: "1px solid #d1d5db",
-            borderRadius: 4,
-          }}
         >
-          {STEPS.map((step, i) => (
-            <div key={step.title} className="relative flex">
-              {/* Step content */}
-              <div
-                className="flex-1 px-6 py-7"
-                style={{
-                  borderRight:
-                    i < STEPS.length - 1 ? "1px solid #d1d5db" : "none",
-                }}
-              >
-                {/* Tags */}
-                <p
-                  className="text-[11px] text-gray-400 mb-3 tracking-wide"
-                  style={{ fontFamily: "monospace", letterSpacing: "0.06em" }}
-                >
-                  {step.tags.join(" · ")}
-                </p>
-
-                {/* Title */}
-                <h3 className="text-[22px] font-black text-black tracking-tight mb-3">
-                  {step.title}
-                </h3>
-
-                {/* Description */}
-                <p className="text-[13.5px] text-gray-500 leading-relaxed">
-                  {step.desc}
-                </p>
-              </div>
-
-              {/* Arrow between steps */}
-              {i < STEPS.length - 1 && (
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 flex items-center justify-center w-6 h-6 bg-white">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path
-                      d="M2 7h10M8 3l4 4-4 4"
-                      stroke="#22c55e"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-              )}
-            </div>
-          ))}
+          <Image
+            src="/IMS/gif/first_illustration.gif"
+            height={600}
+            width={600}
+            alt="Pipeline"
+            className="w-full m-auto"
+          />
         </motion.div>
       </div>
     </section>

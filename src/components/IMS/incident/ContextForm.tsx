@@ -17,8 +17,16 @@ import {
 import { querykeys } from "@/lib/constant";
 import MajorIncidentWorkbench from "./MajorIncidentWorkbench";
 import P0UpgradePromptModal from "./UpgradePromptModal";
+import IncidentRelationship from "./IncidentRelation";
 
 // ── Schema ────────────────────────────────────────────────────────
+
+const linkedChildSchema = z.object({
+  id: z.string(),
+  ticketId: z.string(),
+  title: z.string(),
+  severity: z.string(),
+});
 
 export const incidentContextSchema = z.object({
   affectedService: z.string(),
@@ -33,6 +41,7 @@ export const incidentContextSchema = z.object({
   additionalContext: z.string(),
   labels: z.array(z.string()),
   relatedIncidents: z.string(),
+  childIncidents: z.array(linkedChildSchema).optional(), // ← new
   runbookOverrideUrl: z
     .string()
     .url("Must be a valid URL")
@@ -101,6 +110,8 @@ const AddContextForm = ({
         context?.incidentCommander ?? incident.incidentCommander ?? "",
       additionalContext: context?.additionalContext ?? "",
       relatedIncidents: (context?.relatedIncidents ?? []).join(", "),
+      childIncidents: [], // ← new
+      // childIncidents: context?.childIncidents ?? [], // ← new
       runbookOverrideUrl: context?.runbookOverrideUrl ?? "",
       escalateTo: context?.escalateTo ?? "",
       attachments: [],
@@ -126,6 +137,7 @@ const AddContextForm = ({
   }, [defaultValues, reset]);
 
   const currentTags = watch("labels");
+  const childIncidents = watch("childIncidents") ?? [];
   const attachments = watch("attachments") ?? [];
 
   const saveMutation = useMutation({
@@ -135,13 +147,11 @@ const AddContextForm = ({
         : [];
 
       return saveIncidentContext(incident.id, {
-        // ── Fields that were previously missing ──────────────────
         affectedService: data.affectedService,
         environment: data.environment,
         assignedTo: data.assignedTo,
         priority: data.priority,
         description: data.description,
-        // ── Existing fields ──────────────────────────────────────
         customerImpact: data.customerImpact,
         externalCommunication: data.externalCommunication,
         incidentCommander: data.incidentCommander,
@@ -152,6 +162,7 @@ const AddContextForm = ({
           .split(",")
           .map((v) => v.trim())
           .filter(Boolean),
+        childIncidents: data.childIncidents ?? [], // ← new
         runbookOverrideUrl: data.runbookOverrideUrl,
         escalateTo: data.escalateTo,
         attachments: attachmentMetadata,
@@ -170,8 +181,6 @@ const AddContextForm = ({
           queryKey: [querykeys.INCIDENT_DETAIL, incident.id],
         }),
       ]);
-
-      // Detect P0 upgrade and prompt workbench
       const newPriority = getValues("priority");
       if (newPriority === "P0" && prevPriority.current !== "P0") {
         setShowP0Prompt(true);
@@ -188,13 +197,8 @@ const AddContextForm = ({
     }
   };
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files) return;
-    setValue("attachments", [...(attachments as File[]), ...Array.from(files)]);
-  };
-
   return (
-    <div className="">
+    <div>
       <form
         onSubmit={handleSubmit(async (data) => {
           setSaveNotice("");
@@ -283,7 +287,7 @@ const AddContextForm = ({
             )}
           />
 
-          {/* Description — full width */}
+          {/* Description */}
           <div className="col-span-2">
             <Controller
               name="description"
@@ -396,7 +400,7 @@ const AddContextForm = ({
             )}
           />
 
-          {/* Additional Context — full width */}
+          {/* Additional Context */}
           <div className="col-span-2">
             <Controller
               name="additionalContext"
@@ -414,7 +418,7 @@ const AddContextForm = ({
             />
           </div>
 
-          {/* Labels / Tags — full width */}
+          {/* Labels / Tags */}
           <div className="col-span-2">
             <SectionLabel>Labels / Tags</SectionLabel>
             <div className="flex flex-wrap items-center gap-2 p-2.5 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-700 rounded-xl focus-within:border-zinc-400 dark:focus-within:border-zinc-500 transition-colors min-h-[46px]">
@@ -449,20 +453,6 @@ const AddContextForm = ({
                 {errors.labels.message}
               </p>
             )}
-          </div>
-
-          {/* Related Incidents — full width */}
-          <div className="col-span-2">
-            <Controller
-              name="relatedIncidents"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <SectionLabel>Related Incidents</SectionLabel>
-                  <Input {...field} placeholder="SI-0002310, SI-0001870" />
-                </div>
-              )}
-            />
           </div>
 
           {/* Runbook Override URL + Escalate to */}
@@ -508,7 +498,16 @@ const AddContextForm = ({
             )}
           />
 
-          {/* Evidence & Attachments — full width drag-drop */}
+          {/* ── Incident Relationship — full width ── */}
+          <div className="col-span-2">
+            <IncidentRelationship
+              incident={incident}
+              value={childIncidents}
+              onChange={(children) => setValue("childIncidents", children)}
+            />
+          </div>
+
+          {/* Evidence & Attachments */}
           <div className="col-span-2">
             <SectionLabel>Evidence &amp; Attachments</SectionLabel>
             <Controller
@@ -525,8 +524,10 @@ const AddContextForm = ({
                     onDrop={(e) => {
                       e.preventDefault();
                       setDragOver(false);
-                      const files = Array.from(e.dataTransfer.files);
-                      field.onChange([...(field.value ?? []), ...files]);
+                      field.onChange([
+                        ...(field.value ?? []),
+                        ...Array.from(e.dataTransfer.files),
+                      ]);
                     }}
                     onClick={() => fileRef.current?.click()}
                     className={`rounded-xl border-2 border-dashed px-6 py-8 flex flex-col items-center justify-center cursor-pointer transition-colors ${
@@ -543,7 +544,7 @@ const AddContextForm = ({
                       Attach Screenshots , Logs , Dashboards
                     </p>
                     <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
-                      PNG , JPG , PDF , .Log , .txt , .json , .yami · max 25MB
+                      PNG , JPG , PDF , .Log , .txt , .json , .yaml · max 25MB
                       per file
                     </p>
                     {(field.value ?? []).length > 0 && (
@@ -565,10 +566,12 @@ const AddContextForm = ({
                     multiple
                     accept=".png,.jpg,.jpeg,.pdf,.log,.txt,.json,.yaml,.yml"
                     className="hidden"
-                    onChange={(e) => {
-                      const files = Array.from(e.target.files ?? []);
-                      field.onChange([...(field.value ?? []), ...files]);
-                    }}
+                    onChange={(e) =>
+                      field.onChange([
+                        ...(field.value ?? []),
+                        ...Array.from(e.target.files ?? []),
+                      ])
+                    }
                   />
                 </div>
               )}
@@ -616,7 +619,6 @@ const AddContextForm = ({
         </div>
       </form>
 
-      {/* P0 upgrade prompt */}
       {showP0Prompt && !showWorkbench && (
         <P0UpgradePromptModal
           incident={incident}
@@ -628,7 +630,6 @@ const AddContextForm = ({
         />
       )}
 
-      {/* Major incident workbench */}
       {showWorkbench && (
         <MajorIncidentWorkbench
           incident={incident}

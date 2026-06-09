@@ -2,10 +2,9 @@
 
 import { useRef, useState } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
+import { Settings } from "lucide-react";
 
-// ─────────────────────────────────────────────────────────────────
-// Code samples per language
-// ─────────────────────────────────────────────────────────────────
+// ── Code samples ──────────────────────────────────────────────────
 
 const CODE_SAMPLES: Record<
   string,
@@ -24,7 +23,7 @@ const CODE_SAMPLES: Record<
       { text: '  "service": "checkout-api",', color: "#fde68a" },
       { text: '  "environment": "production",', color: "#fde68a" },
       {
-        text: '  "description": "Deployment failed for commit a1b2c3d. Error rate ↑',
+        text: '  "description": "Deployment failed for commit a1b2c3d. Error rate ↑",',
         color: "#fde68a",
       },
       { text: '  "metadata": {', color: "#fde68a" },
@@ -110,10 +109,6 @@ const CODE_SAMPLES: Record<
       { text: '  "environment": "production",', color: "#fde68a" },
       { text: "}" },
       { text: "body, _ := json.Marshal(payload)", color: "#86efac" },
-      {
-        text: 'req, _ := http.NewRequest("POST", url, bytes.NewBuffer(body))',
-        color: "#86efac",
-      },
     ],
   },
   Ruby: {
@@ -147,174 +142,61 @@ const CODE_SAMPLES: Record<
   },
 };
 
-const RESPONSE_CODE = `{
-  "incident_id": "inc_8f4a7c2b",
-  "status": "created",
-  "severity": "high",
-  "service": "checkout-api",
-  "created_at": "2023-05-20T10:24:31Z",
-  "investigation": {
-    "investigation_id": "inv_d3e9b1a2",
-    "status": "started"
+const RESPONSE_LINES: { text: string; color?: string }[] = [
+  { text: "{" },
+  { text: '  "incident_id": "inc_8f4a7c2b",', color: "#86efac" },
+  { text: '  "status": "created",', color: "#86efac" },
+  { text: '  "severity": "high",', color: "#86efac" },
+  { text: '  "service": "checkout-api",', color: "#86efac" },
+  { text: '  "created_at": "2023-05-20T10:24:31Z",', color: "#86efac" },
+  { text: '  "investigation": {' },
+  { text: '    "investigation_id": "inv_d3e9b1a2",', color: "#86efac" },
+  { text: '    "status": "started"', color: "#86efac" },
+  { text: "  }," },
+  { text: '  "links": {' },
+  {
+    text: '    "self": "https://api.scrubbe.com/v1/incidents/inc_8f4a7c2b"',
+    color: "#86efac",
   },
-  "links": {
-    "self": "https://api.scrubbe.com/v1/incidents/inc_8f4a7c2b"
-  }
-}`;
-
-// ─────────────────────────────────────────────────────────────────
-// Why teams use API cards
-// ─────────────────────────────────────────────────────────────────
+  { text: "  }" },
+  { text: "}" },
+];
 
 const WHY_CARDS = [
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M10 2l2 6h6l-5 3.5 2 6L10 14l-5 3.5 2-6L2 8h6z"
-          stroke="#22c55e"
-          strokeWidth="1.4"
-          fill="none"
-        />
-      </svg>
-    ),
     title: "Trigger incidents from anywhere",
-    content: `Raise incidents directly from your own systems. Send incidents directly from your own systems\n• Monitoring tools\n• Internal services\n• CI/CD pipelines\n• Custom webhooks\n• Security alerts\n\nInstead of manually opening incidents, teams can automatically trigger workflows when critical thresholds are reacted`,
+    content:
+      "Raise incidents directly from your own systems — monitoring tools, CI/CD pipelines, custom webhooks, and security alerts. Instead of manually opening incidents, teams can automatically trigger workflows when critical thresholds are reached.",
   },
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <circle
-          cx="9"
-          cy="9"
-          r="6"
-          stroke="#22c55e"
-          strokeWidth="1.4"
-          fill="none"
-        />
-        <path
-          d="M14 14l4 4"
-          stroke="#22c55e"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
     title: "Automate investigations",
-    content: `Programmatically start investigations the moment an incident is raised.\n\nThe API can:\n• create investigation sessions\n• fetch correlated signals\n• match playbooks\n• retrieve root cause hypotheses\n• generate remediation options\n\nThis means your systems can automatically move from detection to analysis without waiting for human coordination.`,
+    content:
+      "Programmatically start investigations the moment an incident is raised. Create investigation sessions, fetch correlated signals, match playbooks, retrieve root cause hypotheses, and generate remediation options.",
   },
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M10 2L3 6v5c0 4 3.5 7 7 8 3.5-1 7-4 7-8V6L10 2z"
-          stroke="#22c55e"
-          strokeWidth="1.4"
-          fill="none"
-        />
-        <path
-          d="M7 10l2 2 4-4"
-          stroke="#22c55e"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
     title: "Enforce approvals before execution",
-    content: `Scrubbe API is policy-aware.\n\nEvery execution request is evaluated against:\n• approval rules\n• risk thresholds\n• service criticality\n• blast radius analysis\n• role permissions\n\nHigh-risk actions can be blocked or routed for approval automatically. This lets teams automate safely without giving uncontrolled execution access.`,
+    content:
+      "Every execution request is evaluated against approval rules, risk thresholds, service criticality, blast radius analysis, and role permissions. High-risk actions can be blocked or routed for approval automatically.",
   },
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M4 4h5v5H4zM11 4h5v5h-5zM4 11h5v5H4z"
-          stroke="#22c55e"
-          strokeWidth="1.3"
-          fill="none"
-        />
-        <path
-          d="M13.5 13.5m-2 0a2 2 0 104 0 2 2 0 10-4 0"
-          stroke="#22c55e"
-          strokeWidth="1.3"
-          fill="none"
-        />
-      </svg>
-    ),
     title: "Execute remediation through code",
-    content: `Trigger approved remediation actions directly through API.\n\nExamples:\n• rollback deployment\n• restart service\n• scale replicas\n• invalidate cache\n• rotate credentials\n• pause rollout\n\nExecution only proceeds when policies allow it. This gives teams automation speed without sacrificing operational governance.`,
+    content:
+      "Trigger approved remediation actions directly — rollback deployment, restart service, scale replicas, invalidate cache, rotate credentials, or pause rollout. Execution only proceeds when policies allow it.",
   },
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <rect
-          x="3"
-          y="3"
-          width="14"
-          height="14"
-          rx="2"
-          stroke="#22c55e"
-          strokeWidth="1.3"
-          fill="none"
-        />
-        <path
-          d="M7 10h6M7 7h6M7 13h4"
-          stroke="#22c55e"
-          strokeWidth="1.3"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
     title: "Build internal tooling on top of Scrubbe",
-    content: `Engineering teams can embed Scrubbe directly into internal platforms.\n\nCommon use cases:\n• internal incident portals\n• deployment gates\n• release health checks\n• runbook automation\n• engineering command centers\n• custom dashboards\n\nScrubbe becomes infrastructure, not just another UI.`,
+    content:
+      "Embed Scrubbe into internal platforms — incident portals, deployment gates, release health checks, runbook automation, engineering command centers. Scrubbe becomes infrastructure, not just another UI.",
   },
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <circle
-          cx="10"
-          cy="6"
-          r="2.5"
-          stroke="#22c55e"
-          strokeWidth="1.3"
-          fill="none"
-        />
-        <circle
-          cx="5"
-          cy="15"
-          r="2"
-          stroke="#22c55e"
-          strokeWidth="1.3"
-          fill="none"
-        />
-        <circle
-          cx="15"
-          cy="15"
-          r="2"
-          stroke="#22c55e"
-          strokeWidth="1.3"
-          fill="none"
-        />
-        <path
-          d="M10 8.5v3M10 11.5l-3 1.5M10 11.5l3 1.5"
-          stroke="#22c55e"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-    title: "Scrubbe API enables controlled, programmatic incident remediation",
-    content: `Allow external systems to trigger governed multi-agent workflows that diagnose issues, evaluate safe fixes, and execute approved actions.\n\n• Controlled, programmatic incident remediation\n• External systems trigger governed multi-agent workflows\n• Diagnose issues, evaluate safe fixes, execute approved actions\n• Strict policies and audit controls\n\nAutomatically detect and fix problems using AI agents — but with guardrails, approvals, and logging so nothing goes rogue or unchecked.`,
+    title: "Controlled, programmatic incident remediation",
+    content:
+      "Allow external systems to trigger governed multi-agent workflows that diagnose issues, evaluate safe fixes, and execute approved actions — with guardrails, approvals, and logging so nothing goes unchecked.",
   },
 ];
 
-// ─────────────────────────────────────────────────────────────────
-// API Capabilities
-// ─────────────────────────────────────────────────────────────────
-
 const CAPABILITIES = [
   {
-    icon: "📋",
     title: "Incident APIs",
     items: [
       "Create incident",
@@ -324,7 +206,6 @@ const CAPABILITIES = [
     ],
   },
   {
-    icon: "🔍",
     title: "Investigation APIs",
     items: [
       "Start Investigation",
@@ -334,7 +215,6 @@ const CAPABILITIES = [
     ],
   },
   {
-    icon: "✅",
     title: "Approval APIs",
     items: [
       "Request approval",
@@ -344,7 +224,6 @@ const CAPABILITIES = [
     ],
   },
   {
-    icon: "⚡",
     title: "Execution APIs",
     items: [
       "Execute remediation",
@@ -355,12 +234,29 @@ const CAPABILITIES = [
   },
 ];
 
+const CONNECTED_TAGS = [
+  "Source control",
+  "Deployment",
+  "Cloud",
+  "Infrastructure",
+  "Observability",
+  "Collaboration",
+  "Ticketing",
+  "Security",
+  "Internal systems",
+];
+
 const LANGS = ["TypeScript", "Python", "JavaScript", "Go", "Ruby"] as const;
 type Lang = (typeof LANGS)[number];
 
-// ─────────────────────────────────────────────────────────────────
-// Code block with line numbers
-// ─────────────────────────────────────────────────────────────────
+// Display label for each lang tab (short labels matching screenshot)
+const LANG_LABELS: Record<Lang, string> = {
+  TypeScript: "Typescript",
+  Python: "Python",
+  JavaScript: "Javascript",
+  Go: "GO",
+  Ruby: "RB",
+};
 
 function CodeBlock({ lang }: { lang: Lang }) {
   const sample = CODE_SAMPLES[lang];
@@ -371,15 +267,12 @@ function CodeBlock({ lang }: { lang: Lang }) {
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -4 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
         className="font-mono text-[12.5px] leading-6"
       >
         {sample.lines.map((line, i) => (
           <div key={i} className="flex gap-4">
-            <span
-              className="select-none w-5 text-right shrink-0"
-              style={{ color: "#4b5563" }}
-            >
+            <span className="select-none w-5 text-right shrink-0 text-gray-600">
               {line.text !== "" ? i + 1 : ""}
             </span>
             <span style={{ color: line.color ?? "#d1d5db" }}>{line.text}</span>
@@ -390,264 +283,284 @@ function CodeBlock({ lang }: { lang: Lang }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────
-// Main Section
-// ─────────────────────────────────────────────────────────────────
+// ── Main component ────────────────────────────────────────────────
 
 export default function APISection() {
   const [activeLang, setActiveLang] = useState<Lang>("TypeScript");
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
-  const [showResponse, setShowResponse] = useState(false);
+
   return (
     <div ref={ref} className="w-full bg-white">
-      {/* ── HERO BLOCK ── */}
-      <section className="max-w-[960px] mx-auto px-6 py-16">
-        {/* Label */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5 }}
-          className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-500 mb-4"
-          style={{ fontFamily: "monospace" }}
-        >
-          Scrubbe API Section
-        </motion.p>
-
-        {/* Heading */}
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="font-black text-gray-950 leading-[1.08] tracking-[-0.03em] mb-4"
-          style={{ fontSize: "clamp(30px, 4vw, 54px)" }}
-        >
-          Programmable
-          <br />
-          Incident <span className="text-emerald-500">Control.</span>
-        </motion.h2>
-
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.55, delay: 0.1 }}
-          className="text-[14.5px] text-gray-500 leading-relaxed mb-8 max-w-lg"
-        >
-          Build incident automation directly into your stack with Scrubbe's
-          governed API.
-        </motion.p>
-
-        {/* Info box */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.15 }}
-          className="flex items-start gap-4 border border-gray-200 rounded-xl p-5 mb-8"
-        >
-          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <circle
-                cx="9"
-                cy="9"
-                r="7"
-                stroke="#374151"
-                strokeWidth="1.4"
-                fill="none"
-              />
-              <path
-                d="M6 9l2 2 4-4"
-                stroke="#374151"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <div>
-            <p className="text-[13.5px] text-gray-600 leading-relaxed mb-2">
-              Integrate incident intelligence, approvals, investigations, and
-              remediation into your internal tools, CI/CD pipelines, chatops
-              workflows, and monitoring systems.
-            </p>
-            <p className="text-[13.5px] text-gray-500 leading-relaxed">
-              Scrubbe API gives engineering teams a programmable control plane
-              for incident response — so incidents can be triggered, analyzed,
-              approved, and resolved through code.
-            </p>
-          </div>
-        </motion.div>
-
-        {/* ── CODE PLAYGROUND ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="border border-gray-200 rounded-xl overflow-hidden"
-        >
-          {/* Top pill bar */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-gray-50">
-            <span className="px-2.5 py-1 rounded text-[11px] font-bold bg-emerald-500 text-white">
-              API REQUEST
-            </span>
-            <span className="px-2.5 py-1 rounded text-[11px] font-semibold border border-gray-300 text-gray-600">
-              EXAMPLE: CREATE INCIDENT
-            </span>
-            <button
-              className="px-2.5 py-1 rounded text-[11px] font-bold border border-none cursor-pointer"
-              style={{
-                background: "linear-gradient(90deg, #1a2a1a, #22c55e)",
-                color: "#fff",
-              }}
-              onClick={() => setShowResponse(true)}
+      <div className="max-w-[960px] mx-auto px-6 py-16 space-y-20">
+        {/* ── Hero block: outer bordered white card ── */}
+        <div className="border border-gray-200 rounded-2xl bg-white overflow-hidden">
+          <div className="px-8 pt-10 pb-8">
+            {/* Label */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.5 }}
+              className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-500 mb-4 font-mono"
             >
-              Try it
-            </button>
-          </div>
+              Scrubbe API Section
+            </motion.p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2">
-            {/* ── LEFT: Code editor ── */}
-            <div
-              style={{
-                background: "#0d1117",
-                borderRight: "1px solid #1f2937",
-              }}
+            {/* Heading */}
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="font-black text-gray-950 leading-[1.08] tracking-[-0.03em] mb-4"
+              style={{ fontSize: "clamp(30px, 4vw, 54px)" }}
             >
-              {/* Language tabs */}
-              <div className="flex items-center border-b border-[#1f2937] overflow-x-auto">
-                {LANGS.map((lang) => (
-                  <button
-                    key={lang}
-                    onClick={() => setActiveLang(lang)}
-                    className="flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-medium whitespace-nowrap cursor-pointer border-none bg-transparent transition-colors"
-                    style={{
-                      color: activeLang === lang ? "#f9fafb" : "#6b7280",
-                      borderBottom:
-                        activeLang === lang
-                          ? "2px solid #22c55e"
-                          : "2px solid transparent",
-                    }}
-                  >
-                    <span style={{ fontSize: 10 }}>◯</span>
-                    {lang}
-                  </button>
-                ))}
-              </div>
+              Programmable
+              <br />
+              Incident <span className="text-emerald-500">Control.</span>
+            </motion.h2>
 
-              {/* Code area */}
-              <div className="p-5 min-h-[280px]">
-                <CodeBlock lang={activeLang} />
-              </div>
-            </div>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.55, delay: 0.1 }}
+              className="text-[15px] text-gray-500 leading-relaxed mb-8 max-w-xl"
+            >
+              Build incident automation directly into your stack with Scrubbe's
+              governed API.
+            </motion.p>
 
-            {/* ── RIGHT: Response panel ── */}
-            <div className="bg-white">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200">
-                <span
-                  className="text-[11px] font-bold uppercase tracking-widest text-gray-400"
-                  style={{ fontFamily: "monospace" }}
-                >
-                  Response
-                </span>
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200">
-                  201 CREATED
-                </span>
-              </div>
-              {showResponse && (
-                <pre className="p-5 text-[12px] font-mono text-gray-600 leading-6 overflow-auto">
-                  {RESPONSE_CODE}
-                </pre>
-              )}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Start with Doc button */}
-        <div className="flex justify-end mt-5">
-          <button
-            className="px-6 py-3 rounded-lg font-bold text-[14px] text-white border-none cursor-pointer transition-all hover:brightness-110"
-            style={{
-              background:
-                "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
-            }}
-          >
-            Start with Doc
-          </button>
-        </div>
-      </section>
-
-      {/* ── WHY TEAMS USE SCRUBBE API ── */}
-      <section className="max-w-[960px] mx-auto px-6 pb-16">
-        <h3 className="text-[22px] font-black text-black tracking-tight mb-8">
-          Why teams use Scrubbe API
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {WHY_CARDS.map((card, i) => (
+            {/* Info box — gear icon matching screenshot */}
             <motion.div
-              key={card.title}
+              initial={{ opacity: 0, y: 12 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="flex items-start gap-4 border border-gray-200 rounded-xl p-5 mb-8"
+            >
+              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                <Settings size={18} className="text-gray-600" />
+              </div>
+              <div>
+                <p className="text-[13.5px] text-gray-600 leading-relaxed mb-2">
+                  Integrate incident intelligence, approvals, investigations,
+                  and remediation into your internal tools, CI/CD pipelines,
+                  chatops workflows, and monitoring systems.
+                </p>
+                <p className="text-[13.5px] text-gray-500 leading-relaxed">
+                  Scrubbe API gives engineering teams a programmable control
+                  plane for incident response — so incidents can be triggered,
+                  analyzed, approved, and resolved through code.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* ── Code playground ── */}
+            <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{
-                duration: 0.45,
-                delay: 0.05 * i,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="border border-gray-200 rounded-xl p-5"
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="border border-gray-200 rounded-xl overflow-hidden"
             >
-              <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center mb-4">
-                {card.icon}
+              {/* Top bar */}
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-gray-50">
+                <span className="px-2.5 py-1 rounded text-[11px] font-bold bg-emerald-500 text-white tracking-wide uppercase">
+                  API Request
+                </span>
+                <span className="px-2.5 py-1 rounded text-[11px] font-semibold border border-gray-300 text-gray-600 tracking-wide uppercase">
+                  Example : Create Incident
+                </span>
+                <button
+                  className="px-3 py-1 rounded text-[12px] font-bold text-white border-0 cursor-pointer transition-all hover:brightness-110"
+                  style={{
+                    background: "linear-gradient(90deg, #1a2a1a, #22c55e)",
+                  }}
+                >
+                  Try it
+                </button>
               </div>
-              <h4 className="text-[14px] font-black text-black mb-3 leading-snug">
-                {card.title}
-              </h4>
-              <p className="text-[12.5px] text-gray-500 leading-relaxed whitespace-pre-line">
-                {card.content}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
-      {/* ── API CAPABILITIES ── */}
-      <section className="max-w-[960px] mx-auto px-6 pb-20">
-        <h3 className="text-[22px] font-black text-black tracking-tight mb-8">
-          API Capabilities
-        </h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {CAPABILITIES.map((cap, i) => (
-            <motion.div
-              key={cap.title}
-              initial={{ opacity: 0, y: 14 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.45, delay: 0.07 * i }}
-              className="border border-gray-200 rounded-xl p-5"
-            >
-              {/* <div className="text-2xl mb-3">{cap.icon}</div> */}
-              <h4 className="text-[14px] font-bold text-black mb-4">
-                {cap.title}
-              </h4>
-              <div className="space-y-2.5">
-                {cap.items.map((item) => (
-                  <div key={item} className="flex items-center gap-2">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <circle cx="7" cy="7" r="6" fill="#dcfce7" />
-                      <path
-                        d="M4.5 7l2 2 3-3"
-                        stroke="#16a34a"
-                        strokeWidth="1.3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="text-[12.5px] text-gray-600">{item}</span>
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr]">
+                {/* Left — dark code editor */}
+                <div
+                  style={{
+                    background: "#0d1117",
+                    borderRight: "1px solid #1f2937",
+                  }}
+                >
+                  <div className="flex items-center border-b border-[#1f2937] overflow-x-auto">
+                    {LANGS.map((lang) => (
+                      <button
+                        key={lang}
+                        onClick={() => setActiveLang(lang)}
+                        className="flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-medium whitespace-nowrap cursor-pointer border-0 bg-transparent transition-colors"
+                        style={{
+                          color: activeLang === lang ? "#f9fafb" : "#6b7280",
+                          borderBottom:
+                            activeLang === lang
+                              ? "2px solid #22c55e"
+                              : "2px solid transparent",
+                        }}
+                      >
+                        <span style={{ fontSize: 9, color: "#6b7280" }}>◯</span>
+                        {LANG_LABELS[lang]}
+                      </button>
+                    ))}
                   </div>
-                ))}
+                  <div className="p-5 min-h-[300px]">
+                    <CodeBlock lang={activeLang} />
+                  </div>
+                </div>
+
+                {/* Right — white response panel, always visible */}
+                <div className="bg-white">
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 font-mono">
+                      Response
+                    </span>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200 font-mono">
+                      201 CREATED
+                    </span>
+                  </div>
+                  <div className="p-5 font-mono text-[12.5px] leading-6 min-h-[300px]">
+                    {RESPONSE_LINES.map((line, i) => (
+                      <div key={i} className="flex gap-4">
+                        <span className="select-none w-5 text-right shrink-0 text-gray-400">
+                          {i + 1}
+                        </span>
+                        <span style={{ color: line.color ?? "#374151" }}>
+                          {line.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </motion.div>
-          ))}
+
+            {/* Start with Doc — inside card, right-aligned */}
+            <div className="flex justify-end mt-6">
+              <button
+                className="px-6 py-3 rounded-lg font-bold text-[14px] text-white border-0 cursor-pointer transition-all hover:brightness-110"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
+                }}
+              >
+                Start with Doc
+              </button>
+            </div>
+          </div>
         </div>
-      </section>
+
+        {/* ── Connected Systems — two-column editorial matching the screenshot ── */}
+        <section className="grid grid-cols-[200px_1fr] gap-8 items-start">
+          <div className="pt-1">
+            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-gray-400 font-mono">
+              Connected Systems
+            </span>
+          </div>
+          <div>
+            <h2
+              className="font-black text-gray-950 leading-[1.15] tracking-[-0.02em] mb-5"
+              style={{ fontSize: "clamp(24px, 3vw, 38px)" }}
+            >
+              Intelligence is strengthened by context.
+            </h2>
+            <p className="text-[16px] text-gray-500 leading-relaxed mb-8 max-w-2xl">
+              Scrubbe integrates with source control, deployment platforms,
+              cloud providers, infrastructure, observability tools,
+              collaboration platforms, ticketing systems, security platforms,
+              and internal engineering systems to build a unified operational
+              graph. As more systems connect, investigations get faster,
+              recommendations get more accurate, and understanding becomes more
+              complete.
+            </p>
+            <div className="flex flex-wrap gap-2.5">
+              {CONNECTED_TAGS.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-4 py-1.5 rounded-full border border-gray-200 bg-white text-[13px] text-gray-700 font-medium"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Why teams use API ── */}
+        {/* <section>
+          <h3 className="text-[22px] font-black text-gray-950 tracking-tight mb-6">
+            Why teams use Scrubbe API
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {WHY_CARDS.map((card, i) => (
+              <motion.div
+                key={card.title}
+                initial={{ opacity: 0, y: 16 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{
+                  duration: 0.45,
+                  delay: 0.05 * i,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="bg-white border border-gray-200 rounded-xl p-5"
+              >
+                <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-4">
+                  <div className="w-4 h-4 rounded-sm bg-emerald-400/30 border border-emerald-500/40" />
+                </div>
+                <h4 className="text-[14px] font-black text-gray-900 mb-2 leading-snug">
+                  {card.title}
+                </h4>
+                <p className="text-[12.5px] text-gray-500 leading-relaxed">
+                  {card.content}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </section> */}
+
+        {/* ── API Capabilities ── */}
+        {/* <section>
+          <h3 className="text-[22px] font-black text-gray-950 tracking-tight mb-6">
+            API Capabilities
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {CAPABILITIES.map((cap, i) => (
+              <motion.div
+                key={cap.title}
+                initial={{ opacity: 0, y: 14 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.45, delay: 0.07 * i }}
+                className="bg-white border border-gray-200 rounded-xl p-5"
+              >
+                <h4 className="text-[14px] font-bold text-gray-900 mb-4">
+                  {cap.title}
+                </h4>
+                <div className="space-y-2.5">
+                  {cap.items.map((item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                          <path
+                            d="M1.5 4l2 2 3-3"
+                            stroke="#16a34a"
+                            strokeWidth="1.3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                      <span className="text-[12.5px] text-gray-600">
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section> */}
+      </div>
     </div>
   );
 }
