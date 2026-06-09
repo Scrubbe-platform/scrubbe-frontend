@@ -81,6 +81,13 @@ const CONNECTORS = [
     comingSoon: true,
   },
   {
+    id: "vercel",
+    name: "Vercel",
+    icon: "/integration/vercel.png",
+    desc: "Deploy intelligence . Application Runtime Signals. Release impact Analysis",
+    comingSoon: true,
+  },
+  {
     id: "slack",
     name: "Slack",
     icon: "/integration/slack.png",
@@ -94,38 +101,46 @@ const CONNECTORS = [
     desc: "Auto-create tickets on incident raise, sync state transitions",
     comingSoon: true,
   },
- {
+  {
     id: "circleci",
     name: "Circle CI",
     icon: "/integration/circle.png",
     desc: "Monitors CI/CD workflows and job execution. Captures pipeline failures and deployment events.",
     comingSoon: true,
   },
- {
+  {
     id: "argocd",
     name: "Argo CD",
     icon: "/integration/argo.png",
     desc: "Tracks Git-to-cluster deployments and synchronization events.",
     comingSoon: true,
-  },{
+  },
+  {
     id: "octopus",
     name: "Octopus Deploy",
     icon: "/integration/octopus.png",
     desc: "Tracks release promotions across environments. Captures deployment approvals and execution history.",
     comingSoon: true,
   },
-   {
+  {
     id: "mongodb",
     name: "MongoDB",
     icon: "/integration/mongo.png",
     desc: "Correlates database degradation with application failures.",
     comingSoon: true,
   },
-    {
+  {
     id: "teamcity",
     name: "Team City",
     icon: "/integration/teamcity.png",
     desc: "Monitors build executions and failures.Provides build artifacts and pipeline execution evidence.",
+    comingSoon: true,
+  },
+  {
+    id: "neon",
+    name: "Neon",
+    icon: "/integration/neon.png",
+    desc: "Database Health Intelligence. Application Runtime Signals. Release Impact Analysis",
     comingSoon: true,
   },
   {
@@ -170,13 +185,7 @@ const CONNECTORS = [
     desc: "Incident notifications, approval actions, war room channels",
     comingSoon: true,
   },
-  {
-    id: "bit-bucket",
-    name: "Bit Bucket",
-    icon: "/integration/bitbucket.png",
-    desc: "Repository push, pipeline failures, pull request events",
-    comingSoon: true,
-  },
+
   {
     id: "linear",
     name: "Linear",
