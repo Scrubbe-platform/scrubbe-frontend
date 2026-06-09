@@ -34,7 +34,7 @@ const Index = () => {
       <CategoryStatement />
       {/* <ProblemSection /> */}
       <TransformationSection />
-      <WhyScrubbeExists />
+      {/* <WhyScrubbeExists /> */}
       <WhoUsesScrubbe />
       <ClosedLoopProof />
       <HowItWorks />

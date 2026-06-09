@@ -248,7 +248,7 @@ function CodeEngineContent() {
         <div className="flex flex-col flex-1 items-center justify-center gap-6 px-6">
           <div className="max-w-lg w-full bg-white dark:bg-grayscrubbe-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-6 flex flex-col gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-yellow-400 text-xl">⚡</span>
+              <span className="text-yellow-400 text-xl"> </span>
               <span className="font-semibold text-base text-black dark:text-neutral-200">
                 Scrubbe Code Engine
               </span>
@@ -302,7 +302,7 @@ function CodeEngineContent() {
                   Analyzing incident…
                 </>
               ) : (
-                <>⚡ Generate Code Fix</>
+                <> Generate Code Fix</>
               )}
             </button>
 
@@ -334,7 +334,7 @@ function CodeEngineContent() {
                     }`}
                 >
                   {t === "original" && <span className="text-red-600">○</span>}
-                  {t === "diff" && <span className="text-yellow-400">⚡</span>}
+                  {t === "diff" && <span className="text-yellow-400"> </span>}
                   <span className="uppercase">{label}</span>
                 </button>
               );
@@ -354,7 +354,7 @@ function CodeEngineContent() {
           {view === "diff" && (
             <div className="md:flex hidden items-center justify-between px-4 py-1.5 bg-white dark:bg-grayscrubbe-800 border-b border-gray-200 dark:border-neutral-800 shrink-0">
               <div className="flex items-center gap-2 text-xs text-neutral-400">
-                <span className="text-yellow-400">⚡</span>
+                <span className="text-yellow-400"> </span>
                 <span>{filename} → Scrubbe fix</span>
               </div>
               <div className="flex items-center gap-3">
@@ -483,7 +483,7 @@ function CodeEngineContent() {
             {/* Status bar */}
             <div className="flex items-center justify-between px-5 py-1.5 border-t border-gray-200 dark:border-neutral-800 text-[11px] text-gray-600 dark:text-neutral-400">
               <div className="flex items-center gap-4">
-                <span className="text-yellow-500">⚡ Scrubbe Code Engine</span>
+                <span className="text-yellow-500"> Scrubbe Code Engine</span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 dark:bg-emerald-400 inline-block" />
                   FIX GENERATED

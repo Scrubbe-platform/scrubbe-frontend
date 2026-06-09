@@ -168,7 +168,7 @@ export default function EzraCodeEngineSection() {
                 className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-500 mb-3 flex items-center gap-1.5"
                 style={{ fontFamily: "monospace" }}
               >
-                ⚡ Ezra Code Engine
+                Ezra Code Engine
               </p>
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
@@ -280,7 +280,7 @@ export default function EzraCodeEngineSection() {
                       : "2px solid transparent",
                 }}
               >
-                ⚡ EZRA SUGGESTION — PR #2847
+                EZRA SUGGESTION — PR #2847
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-900/40 text-green-400">
                   +14
                 </span>
@@ -445,7 +445,7 @@ export default function EzraCodeEngineSection() {
                       className="w-full mt-4 py-2.5 rounded text-[12px] font-bold text-black border-none cursor-pointer hover:brightness-110"
                       style={{ background: "#f59e0b" }}
                     >
-                      ⚡ View Ezra's fix →
+                      View Ezra's fix →
                     </button>
                     <p className="text-[10px] text-gray-600 text-center mt-2">
                       Root cause logged to audit trail
