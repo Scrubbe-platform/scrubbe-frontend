@@ -80,29 +80,36 @@ export default function CodeEngineRecommendation({
   const [sideBySide, setSideBySide] = useState(false);
 
   const tabs: { id: ViewMode; label: string; badge: string }[] = [
-    { id: "original", label: "Failed PR",        badge: "3 issues" },
-    { id: "diff",     label: "Ezra Suggestion",  badge: "+14 −7"   },
+    { id: "original", label: "Failed PR", badge: "3 issues" },
+    { id: "diff", label: "Ezra Suggestion", badge: "+14 −7" },
   ];
 
   return (
     <div className="flex flex-col h-[600px] rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900 overflow-hidden text-[13px]">
-
       {/* ── Top bar ── */}
       <header className="flex items-center justify-between px-4 h-10 border-b border-zinc-100 dark:border-zinc-800 shrink-0 bg-zinc-50 dark:bg-zinc-900">
         <div className="flex items-center gap-2">
           <span className="px-2 py-0.5 rounded text-[10px] font-semibold border border-red-200 dark:border-red-500/25 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/8">
             {incidentId}
           </span>
-          <span className="text-zinc-500 dark:text-zinc-400 hidden md:block">{service}</span>
-          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-black dark:text-zinc-400 hidden md:block">{environment}</span>
-          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold border border-red-200 dark:border-red-500/25 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/8">{severity}</span>
+          <span className="text-zinc-500 dark:text-zinc-400 hidden md:block">
+            {service}
+          </span>
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-black dark:text-zinc-400 hidden md:block">
+            {environment}
+          </span>
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold border border-red-200 dark:border-red-500/25 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/8">
+            {severity}
+          </span>
         </div>
         <div className="items-center gap-3 hidden md:flex">
           <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Action proposed
           </span>
-          <span className="text-[11px] text-black dark:text-zinc-500">14:22:07 UTC</span>
+          <span className="text-[11px] text-black dark:text-zinc-500">
+            14:22:07 UTC
+          </span>
         </div>
       </header>
 
@@ -120,14 +127,24 @@ export default function CodeEngineRecommendation({
                   : "border-transparent text-black hover:text-zinc-600 dark:hover:text-zinc-300"
               }`}
             >
-              {t.id === "original" && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
-              {t.id === "diff"     && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+              {t.id === "original" && (
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+              )}
+              {t.id === "diff" && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              )}
               {t.label}
-              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium hidden md:block ${
-                active && t.id === "original" ? "bg-red-50 dark:bg-red-500/10 text-red-500"
-                : active && t.id === "diff"   ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                : "bg-zinc-100 dark:bg-zinc-800 text-black"
-              }`}>{t.badge}</span>
+              <span
+                className={`px-1.5 py-0.5 rounded text-[10px] font-medium hidden md:block ${
+                  active && t.id === "original"
+                    ? "bg-red-50 dark:bg-red-500/10 text-red-500"
+                    : active && t.id === "diff"
+                      ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-black"
+                }`}
+              >
+                {t.badge}
+              </span>
             </button>
           );
         })}
@@ -143,13 +160,22 @@ export default function CodeEngineRecommendation({
       {view === "diff" && (
         <div className="hidden md:flex items-center justify-between px-4 py-1.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 shrink-0">
           <div className="flex items-center gap-2 text-[11px] text-black dark:text-zinc-500">
-            <span className="text-amber-500">⚡</span>
-            <span>{filename} → Ezra fix (PR {prNumber})</span>
+            <span className="text-amber-500"> </span>
+            <span>
+              {filename} → Ezra fix (PR {prNumber})
+            </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400">+14 −7</span>
+            <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
+              +14 −7
+            </span>
             <label className="flex items-center gap-1.5 text-[11px] text-black cursor-pointer">
-              <input type="checkbox" checked={sideBySide} onChange={(e) => setSideBySide(e.target.checked)} className="accent-zinc-600" />
+              <input
+                type="checkbox"
+                checked={sideBySide}
+                onChange={(e) => setSideBySide(e.target.checked)}
+                className="accent-zinc-600"
+              />
               Side by side
             </label>
           </div>
@@ -180,26 +206,41 @@ export default function CodeEngineRecommendation({
         <div className="flex items-stretch divide-x divide-zinc-100 dark:divide-zinc-800">
           {/* Confidence */}
           <div className="flex items-center gap-3 px-5 py-3">
-            <span className="text-[18px] font-semibold text-black dark:text-zinc-100">{confidence}</span>
+            <span className="text-[18px] font-semibold text-black dark:text-zinc-100">
+              {confidence}
+            </span>
             <div>
               <div className="w-20 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full mb-1.5">
-                <div className="h-full bg-zinc-700 dark:bg-zinc-300 rounded-full transition-all" style={{ width: `${Math.round(confidence * 100)}%` }} />
+                <div
+                  className="h-full bg-zinc-700 dark:bg-zinc-300 rounded-full transition-all"
+                  style={{ width: `${Math.round(confidence * 100)}%` }}
+                />
               </div>
-              <p className="text-[10px] text-black dark:text-zinc-500">High · auto-PR eligible</p>
+              <p className="text-[10px] text-black dark:text-zinc-500">
+                High · auto-PR eligible
+              </p>
             </div>
           </div>
 
           {/* PR title */}
           <div className="flex items-center px-5 py-3 flex-1 min-w-0">
-            <p className="text-[12px] text-black dark:text-zinc-500 truncate">{prTitle}</p>
+            <p className="text-[12px] text-black dark:text-zinc-500 truncate">
+              {prTitle}
+            </p>
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2 px-5 py-3 shrink-0">
-            <button onClick={onApprove} className="px-4 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-black text-[12px] font-semibold hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors">
+            <button
+              onClick={onApprove}
+              className="px-4 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-black text-[12px] font-semibold hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors"
+            >
               ✓ Approve & merge
             </button>
-            <button onClick={onDecline} className="px-4 py-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 text-black dark:text-zinc-400 text-[12px] font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            <button
+              onClick={onDecline}
+              className="px-4 py-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 text-black dark:text-zinc-400 text-[12px] font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            >
               ✕ Decline
             </button>
           </div>
@@ -208,7 +249,7 @@ export default function CodeEngineRecommendation({
         {/* Status bar */}
         <div className="flex items-center justify-between px-5 py-1.5 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-black dark:text-zinc-500">
           <div className="flex items-center gap-4">
-            <span>⚡ Ezra Code Engine</span>
+            <span> Ezra Code Engine</span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               Action proposed
