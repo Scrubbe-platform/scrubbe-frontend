@@ -18,6 +18,7 @@ import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { toast } from "sonner";
 import useMember from "@/hooks/useMember";
+import { useRouter } from "next/navigation";
 
 // ── Types ─────────────────────────────────────────────────────────
 
@@ -51,8 +52,6 @@ interface WorkbenchFormData {
 
 interface Props {
   incident: IncidentDetailRecord;
-  onClose: () => void;
-  onDeclared?: () => void;
 }
 
 // ── Shared input style ────────────────────────────────────────────
@@ -115,17 +114,13 @@ const SectionHead = ({ children }: { children: React.ReactNode }) => (
 
 // ── Main component ────────────────────────────────────────────────
 
-const MajorIncidentWorkbench: React.FC<Props> = ({
-  incident,
-  onClose,
-  onDeclared,
-}) => {
+const MajorIncidentWorkbench: React.FC<Props> = ({ incident }) => {
   const { post } = useFetch();
   const queryClient = useQueryClient();
   const { data: members = [] } = useMember();
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
-
+  const router = useRouter();
   const memberOptions = [
     "",
     ...members.map(
@@ -188,8 +183,7 @@ const MajorIncidentWorkbench: React.FC<Props> = ({
     onSuccess: () => {
       toast.success("Major Incident declared successfully");
       queryClient.invalidateQueries({ queryKey: ["incident", incident.id] });
-      onDeclared?.();
-      onClose();
+      router.push(`/incident/ticket?id=${incident.id}/`);
     },
     onError: () => toast.error("Failed to declare Major Incident"),
   });
@@ -221,15 +215,9 @@ const MajorIncidentWorkbench: React.FC<Props> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-[760px] max-h-[95vh] overflow-y-auto rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl">
+    <div className="bg-white">
+      <div className=" w-full mx-auto max-w-6xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
         {/* Close */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-        >
-          <X size={14} />
-        </button>
 
         {/* ── Header ── */}
         <div className="px-7 pt-7 pb-5 border-b border-zinc-100 dark:border-zinc-800">
@@ -906,7 +894,7 @@ const MajorIncidentWorkbench: React.FC<Props> = ({
           <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => router.back()}
               className="text-[13px] font-semibold text-zinc-600 dark:text-zinc-300 hover:text-zinc-800 dark:hover:text-zinc-100 transition-colors px-4 py-2.5"
             >
               Cancel
