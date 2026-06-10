@@ -15,7 +15,7 @@ import {
   IncidentDetailRecord,
 } from "@/lib/incident/incident.types";
 import { querykeys } from "@/lib/constant";
-import MajorIncidentWorkbench from "./MajorIncidentWorkbench";
+import MajorIncidentWorkbench from "../Workbench/MajorIncidentWorkbench";
 import P0UpgradePromptModal from "./UpgradePromptModal";
 import IncidentRelationship from "./IncidentRelation";
 
@@ -132,6 +132,8 @@ const AddContextForm = ({
     defaultValues,
   });
 
+  console.log("Previous Priority:", watch("priority"));
+
   useEffect(() => {
     reset(defaultValues);
   }, [defaultValues, reset]);
@@ -170,6 +172,11 @@ const AddContextForm = ({
     },
     onSuccess: async () => {
       setSaveNotice("Incident context saved.");
+      const newPriority = watch("priority");
+
+      if (newPriority === "P0" && prevPriority.current !== "P0") {
+        setShowP0Prompt(true);
+      }
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["INCIDENT_CONTEXT", incident.id],
@@ -181,10 +188,6 @@ const AddContextForm = ({
           queryKey: [querykeys.INCIDENT_DETAIL, incident.id],
         }),
       ]);
-      const newPriority = getValues("priority");
-      if (newPriority === "P0" && prevPriority.current !== "P0") {
-        setShowP0Prompt(true);
-      }
     },
   });
 
@@ -630,7 +633,7 @@ const AddContextForm = ({
         />
       )}
 
-      {showWorkbench && (
+      {/* {showWorkbench && (
         <MajorIncidentWorkbench
           incident={incident}
           onClose={() => setShowWorkbench(false)}
@@ -641,7 +644,7 @@ const AddContextForm = ({
             });
           }}
         />
-      )}
+      )} */}
     </div>
   );
 };

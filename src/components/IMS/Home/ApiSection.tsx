@@ -194,6 +194,20 @@ const WHY_CARDS = [
       "Allow external systems to trigger governed multi-agent workflows that diagnose issues, evaluate safe fixes, and execute approved actions — with guardrails, approvals, and logging so nothing goes unchecked.",
   },
 ];
+const RESPONSE_CODE = `{
+  "incident_id": "inc_8f4a7c2b",
+  "status": "created",
+  "severity": "high",
+  "service": "checkout-api",
+  "created_at": "2023-05-20T10:24:31Z",
+  "investigation": {
+    "investigation_id": "inv_d3e9b1a2",
+    "status": "started"
+  },
+  "links": {
+    "self": "https://api.scrubbe.com/v1/incidents/inc_8f4a7c2b"
+  }
+}`;
 
 const CAPABILITIES = [
   {
@@ -289,7 +303,7 @@ export default function APISection() {
   const [activeLang, setActiveLang] = useState<Lang>("TypeScript");
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
-
+  const [showResponse, setShowResponse] = useState(false);
   return (
     <div ref={ref} className="w-full bg-white">
       <div className="max-w-[960px] mx-auto px-6 py-16 space-y-20">
@@ -373,6 +387,7 @@ export default function APISection() {
                   style={{
                     background: "linear-gradient(90deg, #1a2a1a, #22c55e)",
                   }}
+                  onClick={() => setShowResponse(true)}
                 >
                   Try it
                 </button>
@@ -420,7 +435,12 @@ export default function APISection() {
                       201 CREATED
                     </span>
                   </div>
-                  <div className="p-5 font-mono text-[12.5px] leading-6 min-h-[300px]">
+                  {showResponse && (
+                    <pre className="p-5 text-[12px] font-mono text-gray-600 leading-6 overflow-auto">
+                      {RESPONSE_CODE}
+                    </pre>
+                  )}
+                  {/* <div className="p-5 font-mono text-[12.5px] leading-6 min-h-[300px]">
                     {RESPONSE_LINES.map((line, i) => (
                       <div key={i} className="flex gap-4">
                         <span className="select-none w-5 text-right shrink-0 text-gray-400">
@@ -431,7 +451,7 @@ export default function APISection() {
                         </span>
                       </div>
                     ))}
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </motion.div>
