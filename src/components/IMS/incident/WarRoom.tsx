@@ -2,17 +2,18 @@
 import React, { useState } from "react";
 import {
   X, Clock, Calendar, CheckCircle2, AlertTriangle,
-  Info, Plus, ChevronDown, Shield, Sparkles,
+  Info, Plus, ChevronDown, Shield, Sparkles, Loader2,
 } from "lucide-react";
 import { SiZoom, SiGooglemeet } from "react-icons/si";
 import { BiLogoMicrosoftTeams } from "react-icons/bi";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
+import { useCreateWarRoom } from "@/hooks/useWarRoom";
 
 interface ExternalContact { name: string; email: string }
 interface Props {
   incident: IncidentDetailRecord;
   onClose: () => void;
-  onDeclare: (data: WarRoomFormData) => void;
+  onDeclare?: (data: WarRoomFormData) => void;
 }
 interface WarRoomFormData {
   platform: string; startMode: "immediate" | "scheduled";
@@ -127,12 +128,22 @@ const DeclareWarRoom: React.FC<Props> = ({ incident, onClose, onDeclare }) => {
   const [contacts,     setContacts]     = useState<ExternalContact[]>([{ name: "Vendor Support", email: "support@vendor.io" }]);
   const [copied,       setCopied]       = useState(false);
 
+  // Real API mutation
+  const { createWarRoom, loading: declaring, error: declareError, data: declaredRoom } = useCreateWarRoom();
+
   const ticketId       = incident?.ticketId     ?? "SI-245789";
   const severity       = incident?.severity     ?? "P1";
   const environment    = incident?.environment  ?? "Production";
   const elapsed        = incident?.elapsedLabel ?? "00:19:59";
   const blastRadius    = incident?.blastRadius  ?? "4 services";
   const automationLevel = 2;
+
+  // Map client provider IDs to server provider keys
+  const providerMap: Record<string, string> = {
+    teams: "teams",
+    zoom:  "zoom",
+    meet:  "google",
+  };
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -144,6 +155,39 @@ const DeclareWarRoom: React.FC<Props> = ({ incident, onClose, onDeclare }) => {
     if (e.key === "Enter" && managerInput.trim()) {
       setManagers(p => [...p, managerInput.trim()]);
       setManagerInput("");
+    }
+  };
+
+  const handleDeclare = async () => {
+    const formData: WarRoomFormData = {
+      platform,
+      startMode,
+      scheduleDate: startMode === "scheduled" ? scheduleDate : undefined,
+      scheduleZone: startMode === "scheduled" ? scheduleZone : undefined,
+      slackChannel,
+      escalationPolicy: escalation,
+      managers,
+      externalContacts: contacts,
+    };
+
+    try {
+      // Derive priority from escalation policy
+      const priority = escalation.startsWith("P1") ? "P1"
+        : escalation.startsWith("P2") ? "P2"
+        : severity ?? "P1";
+
+      await createWarRoom({
+        incidentId: incident?.id,
+        provider: providerMap[platform] ?? "slack",
+        reason: `War room declared for incident ${ticketId} via ${platform}. Escalation: ${escalation}`,
+        principals: managers,
+        priority,
+      });
+
+      // Notify parent if callback provided
+      onDeclare?.(formData);
+    } catch {
+      // Error is already set in state via the hook
     }
   };
 
@@ -474,20 +518,53 @@ const DeclareWarRoom: React.FC<Props> = ({ incident, onClose, onDeclare }) => {
             </p>
           </div>
 
+          {/* ── API Error ── */}
+          {declareError && (
+            <div className="flex items-start gap-3 px-4 py-3 rounded-xl border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/5">
+              <AlertTriangle size={15} className="text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+              <p className="text-[12px] text-red-700 dark:text-red-300 leading-relaxed">{declareError}</p>
+            </div>
+          )}
+
+          {/* ── Success State ── */}
+          {declaredRoom && (
+            <div className="flex items-start gap-3 px-4 py-3 rounded-xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/5">
+              <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[13px] font-semibold text-emerald-800 dark:text-emerald-300">
+                  War Room declared successfully
+                </p>
+                <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5 font-mono">
+                  ID: {declaredRoom.warRoomId} · State: {declaredRoom.state}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* ── Buttons ── */}
           <div className="flex gap-3 pt-1">
             <button
               onClick={onClose}
               className={`flex-1 py-3.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-[14px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors`}
             >
-              Cancel
+              {declaredRoom ? "Close" : "Cancel"}
             </button>
-            <button
-              onClick={() => onDeclare({ platform, startMode, scheduleDate: startMode === 'scheduled' ? scheduleDate : undefined, scheduleZone: startMode === 'scheduled' ? scheduleZone : undefined, slackChannel, escalationPolicy: escalation, managers, externalContacts: contacts })}
-              className="flex-1 py-3.5 rounded-xl text-[14px] font-bold text-white bg-red-600 hover:bg-red-500 transition-colors"
-            >
-              Declare War room
-            </button>
+            {!declaredRoom && (
+              <button
+                onClick={handleDeclare}
+                disabled={declaring}
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl text-[14px] font-bold text-white bg-red-600 hover:bg-red-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {declaring ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Provisioning…
+                  </>
+                ) : (
+                  "Declare War room"
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

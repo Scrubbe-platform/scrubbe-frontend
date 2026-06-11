@@ -681,7 +681,11 @@ const EditIncidentTicket = () => {
       </Modal>
 
       <Modal isOpen={openWarRoom} onClose={() => setOpenWarRoom(false)}>
-        <CreateWarRoom onClose={() => setOpenWarRoom(false)} />
+        <CreateWarRoom
+          onClose={() => setOpenWarRoom(false)}
+          incidentId={ticket?.id}
+          priority={ticket?.priority}
+        />
       </Modal>
     </div>
   );
