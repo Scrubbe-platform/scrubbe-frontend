@@ -1,4 +1,4 @@
-import Postmortems from "@/components/IMS/Postmortems";
+import Postmortems from "@/components/postmortems/Postmortems";
 import React from "react";
 
 const Page = () => {
