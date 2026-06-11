@@ -27,6 +27,7 @@ const NAV_COLUMNS = [
       { label: "API Reference", href: "/#" },
       { label: "SDKs", href: "/#" },
       { label: "Changelog", href: "/#" },
+      { label: "MCP", href: "/#" },
     ],
   },
   {
