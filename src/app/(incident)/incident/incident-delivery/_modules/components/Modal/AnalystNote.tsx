@@ -48,7 +48,7 @@ const AnalystNote: React.FC<AnalystNoteProps> = ({ incident, onClose }) => {
   });
 
   return (
-    <div className="text-white space-y-4">
+    <div className="dark:text-white text-black space-y-4">
       <div className="border border-neutral-500 rounded-xl p-4 space-y-3">
         <TextArea
           label="Note"

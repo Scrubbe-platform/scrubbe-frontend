@@ -102,7 +102,10 @@ const Header = ({ incident }: { incident: IncidentDetailRecord }) => {
           title="Analyst Note"
           subTitle="Add note (author + timestamp)"
         >
-          <AnalystNote />
+          <AnalystNote
+            incident={incident}
+            onClose={() => setIsAnalystNote(false)}
+          />
         </SideModal>
       )}
     </>
