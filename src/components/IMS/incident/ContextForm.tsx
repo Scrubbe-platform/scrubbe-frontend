@@ -110,8 +110,7 @@ const AddContextForm = ({
         context?.incidentCommander ?? incident.incidentCommander ?? "",
       additionalContext: context?.additionalContext ?? "",
       relatedIncidents: (context?.relatedIncidents ?? []).join(", "),
-      childIncidents: [], // ← new
-      // childIncidents: context?.childIncidents ?? [], // ← new
+      childIncidents: context?.childIncidents ?? [],
       runbookOverrideUrl: context?.runbookOverrideUrl ?? "",
       escalateTo: context?.escalateTo ?? "",
       attachments: [],

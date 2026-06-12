@@ -64,6 +64,13 @@ export interface IncidentContextAttachmentRecord {
   type?: string;
 }
 
+export interface IncidentContextChildRecord {
+  id: string;
+  ticketId: string;
+  title: string;
+  severity: string;
+}
+
 export interface IncidentContextRecord {
   id?: string;
   customerImpact: string;
@@ -73,6 +80,7 @@ export interface IncidentContextRecord {
   additionalContext: string;
   labels: string[];
   relatedIncidents: string[];
+  childIncidents: IncidentContextChildRecord[];
   runbookOverrideUrl: string;
   escalateTo: string;
   attachments: IncidentContextAttachmentRecord[];

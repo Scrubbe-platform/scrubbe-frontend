@@ -296,6 +296,17 @@ export const extractIncidentContextResponse = (payload: unknown): IncidentContex
     additionalContext: asString(context.additionalContext),
     labels: asStringArray(context.labels),
     relatedIncidents: asStringArray(context.relatedIncidents),
+    childIncidents: Array.isArray(context.childIncidents)
+      ? context.childIncidents.map((c: unknown) => {
+          const r = (c && typeof c === "object" ? c : {}) as Record<string, unknown>;
+          return {
+            id: String(r.id ?? ""),
+            ticketId: String(r.ticketId ?? ""),
+            title: String(r.title ?? ""),
+            severity: String(r.severity ?? ""),
+          };
+        })
+      : [],
     runbookOverrideUrl: asString(context.runbookOverrideUrl),
     escalateTo: asString(context.escalateTo),
     attachments,
