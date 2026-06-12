@@ -70,7 +70,7 @@ export function useCreateCluster() {
     setState({ data: null, loading: true, error: null });
     try {
       const response = await customAxios.post<{ success: boolean; data: Cluster }>(
-        "/api/v1/clusters",
+        "/clusters",
         input
       );
       const result = response.data.data;
@@ -112,7 +112,7 @@ export function useCluster(id: string | null | undefined): QueryState<Cluster> {
     setState((s) => ({ ...s, loading: true, error: null }));
 
     customAxios
-      .get<{ success: boolean; data: Cluster }>(`/api/v1/clusters/${id}`)
+      .get<{ success: boolean; data: Cluster }>(`/clusters/${id}`)
       .then((res) => {
         if (!cancelled) setState({ data: res.data.data, loading: false, error: null });
       })
@@ -151,7 +151,7 @@ export function useClusters(anchorIncidentId?: string): QueryState<Cluster[]> & 
     if (anchorIncidentId) params.anchorIncidentId = anchorIncidentId;
 
     customAxios
-      .get<{ success: boolean; clusters: Cluster[]; total: number }>("/api/v1/clusters", { params })
+      .get<{ success: boolean; clusters: Cluster[]; total: number }>("/clusters", { params })
       .then((res) => {
         if (!cancelled) {
           setState({
@@ -188,7 +188,7 @@ export function useAddClusterMember() {
     setState({ data: null, loading: true, error: null });
     try {
       const response = await customAxios.post<{ success: boolean; data: Cluster }>(
-        `/api/v1/clusters/${clusterId}/members`,
+        `/clusters/${clusterId}/members`,
         { incidentId }
       );
       const result = response.data.data;
@@ -221,7 +221,7 @@ export function useSetCanonicalResolution() {
       setState({ data: null, loading: true, error: null });
       try {
         const response = await customAxios.post<{ success: boolean; data: Cluster }>(
-          `/api/v1/clusters/${clusterId}/canonical-resolution`,
+          `/clusters/${clusterId}/canonical-resolution`,
           data
         );
         const result = response.data.data;

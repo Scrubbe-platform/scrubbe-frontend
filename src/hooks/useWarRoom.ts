@@ -65,7 +65,7 @@ export function useCreateWarRoom() {
     setState({ data: null, loading: true, error: null });
     try {
       const response = await customAxios.post<{ success: boolean; data: { warRoomId: string; state: string } }>(
-        "/api/v1/warrooms",
+        "/warrooms",
         input
       );
       const result = response.data.data;
@@ -108,7 +108,7 @@ export function useWarRoom(id: string | null | undefined): QueryState<WarRoom> {
     setState((s) => ({ ...s, loading: true, error: null }));
 
     customAxios
-      .get<{ success: boolean; data: WarRoom }>(`/api/v1/warrooms/${id}`)
+      .get<{ success: boolean; data: WarRoom }>(`/warrooms/${id}`)
       .then((res) => {
         if (!cancelled) setState({ data: res.data.data, loading: false, error: null });
       })
@@ -148,7 +148,7 @@ export function useWarRooms(incidentId?: string): QueryState<WarRoom[]> & { tota
     if (incidentId) params.incidentId = incidentId;
 
     customAxios
-      .get<{ success: boolean; warRooms: WarRoom[]; total: number }>("/api/v1/warrooms", { params })
+      .get<{ success: boolean; warRooms: WarRoom[]; total: number }>("/warrooms", { params })
       .then((res) => {
         if (!cancelled) {
           setState({
@@ -185,7 +185,7 @@ export function useProvisionWarRoom() {
     setState({ data: null, loading: true, error: null });
     try {
       const response = await customAxios.post<{ success: boolean; data: WarRoom }>(
-        `/api/v1/warrooms/${warRoomId}/provision`
+        `/warrooms/${warRoomId}/provision`
       );
       const result = response.data.data;
       setState({ data: result, loading: false, error: null });
@@ -214,7 +214,7 @@ export function useCaptureWarRoomDecision() {
       setState({ data: null, loading: true, error: null });
       try {
         const response = await customAxios.post<{ success: boolean; data: WarRoomDecision }>(
-          `/api/v1/warrooms/${warRoomId}/decisions`,
+          `/warrooms/${warRoomId}/decisions`,
           decision
         );
         const result = response.data.data;

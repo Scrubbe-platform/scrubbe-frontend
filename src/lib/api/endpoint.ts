@@ -224,6 +224,21 @@ export const endpoint = {
     resolve: "/signals",                  // PATCH /signals/:id/resolve
     suppress: "/signals",                 // PATCH /signals/:id/suppress
   },
+  warrooms: {
+    create: "/warrooms",
+    list: "/warrooms",
+    getOne: "/warrooms",              // GET /warrooms/:id
+    provision: "/warrooms",           // POST /warrooms/:id/provision
+    archive: "/warrooms",             // POST /warrooms/:id/archive
+    decisions: "/warrooms",           // POST /warrooms/:id/decisions
+  },
+  clusters: {
+    create: "/clusters",
+    list: "/clusters",
+    getOne: "/clusters",              // GET /clusters/:id
+    addMember: "/clusters",           // POST /clusters/:id/members
+    resolve: "/clusters",             // POST /clusters/:id/canonical-resolution
+  },
   blast_radius: {
     list: "/blast-radius",
     calculate: "/blast-radius/calculate",
