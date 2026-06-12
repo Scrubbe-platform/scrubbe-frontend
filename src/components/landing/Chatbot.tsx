@@ -89,16 +89,25 @@ const mdComponents: Components = {
 
 function getRefLink(text: string): { href: string; label: string } {
   const t = text.toLowerCase();
-  if (/pricing|plan|cost|billing|enterprise|starter|professional|tier/.test(t))
+  // Pricing — only when pricing/cost is the actual topic
+  if (/how much (does|is|will)|pricing plan|compare plan|which plan|subscription cost|billing|per month|per seat|what (does it|will it) cost/.test(t))
     return { href: "https://scrubbe.com/pricing", label: "scrubbe.com/pricing" };
-  if (/book.*demo|demo|schedule.*call|talk.*sales/.test(t))
+  // Demo booking — only when actively booking or requesting a demo
+  if (/book a demo|schedule a demo|request a demo|book your demo|talk to (our )?sales|schedule.*walkthrough/.test(t))
     return { href: "https://scrubbe.com/demo", label: "scrubbe.com/demo" };
-  if (/sign.?up|free.?trial|trial|register|get.?started/.test(t))
+  // Signup — only when directing someone to start
+  if (/(sign up|create an account|start your (free )?trial|get started for free|14.day (free )?trial) at/.test(t))
     return { href: "https://scrubbe.com/signup", label: "scrubbe.com/signup" };
-  if (/api\.scrubbe|docs\.scrubbe|documentation|developer|api.key/.test(t))
+  // Docs / API — only explicit doc references
+  if (/api\.scrubbe\.com|docs\.scrubbe\.com/.test(t))
     return { href: "https://docs.scrubbe.com", label: "docs.scrubbe.com" };
-  if (/support@scrubbe|support team|contact/.test(t))
-    return { href: "https://scrubbe.com", label: "scrubbe.com" };
+  // Auth pages
+  if (/scrubbe\.com\/login|scrubbe\.com\/signup|sign(in|up) (page|at scrubbe)/.test(t))
+    return { href: "https://scrubbe.com/login", label: "scrubbe.com/login" };
+  // Status page
+  if (/status\.scrubbe\.com|platform status/.test(t))
+    return { href: "https://status.scrubbe.com", label: "status.scrubbe.com" };
+  // Default — always anchor to homepage
   return { href: "https://scrubbe.com", label: "scrubbe.com" };
 }
 

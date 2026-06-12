@@ -66,7 +66,7 @@ const Header = ({ incident }: { incident: IncidentDetailRecord }) => {
       )}
       {isAnalystNote && (
         <SideModal isOpen={isAnalystNote} onClose={() => setIsAnalystNote(false)} title="Analyst Note" subTitle="Add note (author + timestamp)">
-          <AnalystNote />
+          <AnalystNote incident={incident} onClose={() => setIsAnalystNote(false)} />
         </SideModal>
       )}
     </>

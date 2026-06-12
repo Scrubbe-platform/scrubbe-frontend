@@ -170,24 +170,18 @@ const AddContextForm = ({
         attachments: attachmentMetadata,
       });
     },
-    onSuccess: async () => {
-      setSaveNotice("Incident context saved.");
+    onSuccess: async (_data, _vars, ctx) => {
       const newPriority = watch("priority");
-
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["INCIDENT_CONTEXT", incident.id] }),
+        queryClient.invalidateQueries({ queryKey: [querykeys.HISTORY, incident.id] }),
+        queryClient.invalidateQueries({ queryKey: [querykeys.INCIDENT_DETAIL, incident.id] }),
+      ]);
       if (newPriority === "P0" && prevPriority.current !== "P0") {
         setShowP0Prompt(true);
+      } else {
+        onCancel?.();
       }
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["INCIDENT_CONTEXT", incident.id],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: [querykeys.HISTORY, incident.id],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: [querykeys.INCIDENT_DETAIL, incident.id],
-        }),
-      ]);
     },
   });
 
@@ -605,6 +599,7 @@ const AddContextForm = ({
               handleSubmit(async (data) => {
                 setSaveNotice("");
                 await saveMutation.mutateAsync(data);
+                setSaveNotice("Saved as draft.");
               })()
             }
             disabled={isSubmitting || saveMutation.isPending}
