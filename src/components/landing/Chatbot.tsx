@@ -23,6 +23,37 @@ interface ChatMessage {
   escalated?: boolean;
 }
 
+// ─── Markdown renderer (bold + bullets only) ──────────────────────────────────
+
+function renderInline(text: string): React.ReactNode[] {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) =>
+    part.startsWith("**") && part.endsWith("**")
+      ? <strong key={i}>{part.slice(2, -2)}</strong>
+      : part
+  );
+}
+
+function renderMarkdown(text: string): React.ReactNode {
+  const lines = text.split("\n");
+  return (
+    <>
+      {lines.map((line, i) => {
+        if (/^[•\-*]\s/.test(line)) {
+          return (
+            <div key={i} className="flex gap-1.5 items-start">
+              <span className="mt-1 shrink-0 w-1 h-1 rounded-full bg-current opacity-60" />
+              <span>{renderInline(line.replace(/^[•\-*]\s/, ""))}</span>
+            </div>
+          );
+        }
+        if (line === "") return <div key={i} className="h-2" />;
+        return <div key={i}>{renderInline(line)}</div>;
+      })}
+    </>
+  );
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.scrubbe.com/api/v1";
@@ -155,7 +186,7 @@ const Chatbot: React.FC = () => {
       setTimeout(() => {
         setMessages([{
           id: "welcome",
-          text: "Hi there! I'm Ezra, Scrubbe's AI assistant. I can answer questions about Scrubbe's features, pricing, integrations, and getting started. What can I help you with today?",
+          text: "Hi there! I'm **Ezra**, Scrubbe's AI assistant.\n\nI can answer questions about Scrubbe's features, pricing, integrations, and getting started. What can I help you with today?",
           isUser: false,
         }]);
       }, 300);
@@ -211,7 +242,7 @@ const Chatbot: React.FC = () => {
     setTimeout(() => {
       setMessages([{
         id: "welcome",
-        text: "Hi there! I'm Ezra, Scrubbe's AI assistant. What can I help you with today?",
+        text: "Hi there! I'm **Ezra**, Scrubbe's AI assistant.\n\nI can answer questions about Scrubbe's features, pricing, integrations, and getting started. What can I help you with today?",
         isUser: false,
       }]);
     }, 300);
@@ -295,9 +326,7 @@ const Chatbot: React.FC = () => {
                           : "bg-zinc-100 text-black self-start rounded-bl-sm"
                         }`}
                     >
-                      {msg.text.split("\n").map((line, j) => (
-                        <div key={j}>{line}</div>
-                      ))}
+                      {msg.isUser ? msg.text : renderMarkdown(msg.text)}
                     </div>
                     {/* Escalation badge */}
                     {msg.escalated && !msg.isUser && (
