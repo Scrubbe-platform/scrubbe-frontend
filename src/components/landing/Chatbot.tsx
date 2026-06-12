@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
 import {
   HelpCircle,
   CreditCard,
@@ -11,230 +10,248 @@ import {
   Minus,
   X,
   Sparkles,
+  UserCheck,
+  AlertCircle,
 } from "lucide-react";
 
-// ─── Types ────────────────────────────────────────────────────────
-interface KnowledgeItem {
-  title: string;
-  content: string;
-}
-interface KnowledgeBase {
-  [key: string]: KnowledgeItem;
-}
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 interface ChatMessage {
+  id: string;
   text: string;
   isUser: boolean;
+  escalated?: boolean;
 }
 
-// ─── Quick-action items ───────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.scrubbe.com/api/v1";
+const CONV_KEY = "scrubbe_chat_conv_id";
+const SESSION_TTL_MS = 30 * 60 * 1000; // 30 min — matches server session timeout
+
 const quickActions = [
-  { label: "LEARN ABOUT SCRUBBE", icon: HelpCircle, topic: "About Scrubbe" },
-  { label: "SEE PRICING PLANS", icon: CreditCard, topic: "Pricing" },
-  { label: "BOOK DEMO", icon: Calendar, topic: "Book Demo" },
-  { label: "START FREE TRIAL", icon: ShieldCheck, topic: "Contact Us" },
+  { label: "LEARN ABOUT SCRUBBE", icon: HelpCircle,  topic: "What is Scrubbe and what does it do?" },
+  { label: "SEE PRICING PLANS",   icon: CreditCard,  topic: "What pricing plans does Scrubbe offer?" },
+  { label: "BOOK A DEMO",         icon: Calendar,    topic: "How can I book a demo?" },
+  { label: "START FREE TRIAL",    icon: ShieldCheck, topic: "How do I start a free trial?" },
 ];
 
-// ─── Nav tags ─────────────────────────────────────────────────────
 const navTags = [
-  "WHAT IS SCRUBBE?",
-  "PRICING",
-  "BOOK DEMO",
-  "SIGN UP",
-  "HOW EZRA WORKS",
-  "INTEGRATIONS",
+  { label: "WHAT IS SCRUBBE?",  topic: "What is Scrubbe?" },
+  { label: "PRICING",           topic: "What are the pricing plans?" },
+  { label: "BOOK DEMO",         topic: "How do I book a demo?" },
+  { label: "SIGN UP",           topic: "How do I sign up or start a free trial?" },
+  { label: "HOW EZRA WORKS",    topic: "How does Ezra, the AI engine, work?" },
+  { label: "INTEGRATIONS",      topic: "What integrations does Scrubbe support?" },
 ];
 
-// ─── Knowledge base ───────────────────────────────────────────────
-const scrubbeKnowledge: KnowledgeBase = {
-  about: {
-    title: "About Scrubbe",
-    content:
-      "Scrubbe is an advanced SIEM and SOAR platform designed to help organizations detect, analyze, and respond to security threats in real-time. Our platform integrates with your existing security infrastructure to provide comprehensive visibility and automated response capabilities.",
-  },
-  features: {
-    title: "Key Features",
-    content:
-      "• Real-time threat detection\n• Automated incident response\n• AI-powered analytics\n• Customizable dashboards\n• Comprehensive log management\n• Compliance reporting\n• Threat intelligence integration\n• Case management workflow",
-  },
-  documentation: {
-    title: "Documentation",
-    content:
-      "Our comprehensive documentation includes installation guides, API references, integration tutorials, and best practices. Would you like me to direct you to a specific section?",
-  },
-  pricing: {
-    title: "Pricing",
-    content:
-      "Scrubbe offers flexible pricing plans:\n• Starter: For small teams and startups\n• Professional: For mid-sized organizations\n• Enterprise: For large organizations with advanced needs\n\nPlease contact our sales team for detailed pricing information.",
-  },
-  contact: {
-    title: "Contact Us",
-    content: "You can reach our support team at support@scrubbe.com",
-  },
-  installation: {
-    title: "Installation Guide",
-    content:
-      "Scrubbe can be deployed on-premises or in the cloud. Installation typically takes 2–4 hours. Our team can provide guided installation services if needed.",
-  },
-  integrations: {
-    title: "Integrations",
-    content:
-      "Scrubbe integrates with:\n• Firewall solutions (Cisco, Palo Alto, Fortinet)\n• Endpoint protection platforms\n• Cloud providers (AWS, Azure, GCP)\n• Identity providers\n• Vulnerability scanners\n• Threat intelligence feeds",
-  },
-  faq: {
-    title: "Frequently Asked Questions",
-    content:
-      "Common questions:\n• How long does implementation take?\n• Is training provided?\n• What kind of support is available?\n• How often are updates released?\n\nWhat specific question can I help you with?",
-  },
-};
+// ─── API helpers ──────────────────────────────────────────────────────────────
 
-const processInput = (input: string): string => {
-  const l = input.toLowerCase();
-  if (l.includes("about") || l.includes("what is") || l.includes("scrubbe"))
-    return scrubbeKnowledge.about.content;
-  if (
-    l.includes("feature") ||
-    l.includes("capabilities") ||
-    l.includes("what can")
-  )
-    return scrubbeKnowledge.features.content;
-  if (l.includes("doc") || l.includes("guide") || l.includes("manual"))
-    return scrubbeKnowledge.documentation.content;
-  if (
-    l.includes("price") ||
-    l.includes("cost") ||
-    l.includes("plan") ||
-    l.includes("pricing")
-  )
-    return scrubbeKnowledge.pricing.content;
-  if (l.includes("contact") || l.includes("support") || l.includes("talk"))
-    return scrubbeKnowledge.contact.content;
-  if (l.includes("install") || l.includes("deploy") || l.includes("setup"))
-    return scrubbeKnowledge.installation.content;
-  if (
-    l.includes("integrat") ||
-    l.includes("connect") ||
-    l.includes("work with")
-  )
-    return scrubbeKnowledge.integrations.content;
-  if (l.includes("faq") || l.includes("question") || l.includes("common"))
-    return scrubbeKnowledge.faq.content;
-  if (l.includes("demo") || l.includes("book"))
-    return "You can book a demo at scrubbe.com/demo or email us at hello@scrubbe.com — our team will get back to you within one business day.";
-  if (l.includes("trial") || l.includes("free"))
-    return "Start your free trial at scrubbe.com/signup — no credit card required. You'll get full access for 14 days.";
-  if (l.includes("thank"))
-    return "You're welcome! Anything else I can help you with?";
-  if (l.includes("bye") || l.includes("goodbye"))
-    return "Thanks for chatting! Feel free to come back anytime. Have a great day!";
-  return "I'm not sure I understand. You can ask me about Scrubbe's features, pricing, documentation, integrations, or how to book a demo.";
-};
+async function apiCreateConversation(): Promise<string> {
+  const res = await fetch(`${API_BASE}/chat/conversations`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ channel: "widget" }),
+  });
+  if (!res.ok) throw new Error("Failed to create conversation");
+  const body = await res.json();
+  return body.data.conversationId as string;
+}
 
-// ─── Main component ───────────────────────────────────────────────
+async function apiSendMessage(
+  conversationId: string,
+  content: string
+): Promise<{ content: string; escalated: boolean; intentClass: string }> {
+  const res = await fetch(`${API_BASE}/chat/conversations/${conversationId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content }),
+  });
+  if (!res.ok) throw new Error("Message send failed");
+  const body = await res.json();
+  return body.data;
+}
+
+async function apiEscalate(conversationId: string): Promise<void> {
+  await fetch(`${API_BASE}/chat/conversations/${conversationId}/escalate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reason: "User requested human agent via chat widget" }),
+  });
+}
+
+// ─── Session storage helpers ──────────────────────────────────────────────────
+
+function loadConvId(): string | null {
+  try {
+    const raw = sessionStorage.getItem(CONV_KEY);
+    if (!raw) return null;
+    const { id, ts } = JSON.parse(raw) as { id: string; ts: number };
+    if (Date.now() - ts > SESSION_TTL_MS) {
+      sessionStorage.removeItem(CONV_KEY);
+      return null;
+    }
+    return id;
+  } catch {
+    return null;
+  }
+}
+
+function saveConvId(id: string) {
+  try {
+    sessionStorage.setItem(CONV_KEY, JSON.stringify({ id, ts: Date.now() }));
+  } catch {}
+}
+
+function clearConvId() {
+  try {
+    sessionStorage.removeItem(CONV_KEY);
+  } catch {}
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 const Chatbot: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen]         = useState(false);
   const [isMinimised, setIsMinimised] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const chatBodyRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages]     = useState<ChatMessage[]>([]);
+  const [input, setInput]           = useState("");
+  const [isTyping, setIsTyping]     = useState(false);
+  const [isEscalated, setIsEscalated] = useState(false);
+  const [convId, setConvId]         = useState<string | null>(null);
+  const [initError, setInitError]   = useState(false);
+
+  const chatBodyRef  = useRef<HTMLDivElement>(null);
   const firstOpenRef = useRef(true);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef     = useRef<HTMLInputElement>(null);
 
-  const addMessage = useCallback((text: string, isUser = false) => {
-    setMessages((prev) => [...prev, { text, isUser }]);
-  }, []);
-
-  const handleSend = useCallback(() => {
-    if (!input.trim()) return;
-    const userText = input;
-    setInput("");
-    addMessage(userText, true);
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      addMessage(processInput(userText));
-    }, 900 + Math.random() * 700);
-  }, [input, addMessage]);
-
-  const handleQuickAction = (topic: string) => {
-    addMessage(topic, true);
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      addMessage(processInput(topic));
-    }, 900);
-  };
-
-  const handleClearChat = () => {
-    setMessages([]);
-    firstOpenRef.current = true;
-    setTimeout(() => {
-      addMessage(
-        "Hi 👋 I'm Ezra, Scrubbe's AI agent. I can help you understand how Scrubbe works, find the right pricing plan, book a demo, or get you signed up. What brings you here today?"
-      );
-    }, 300);
-  };
-
-  // Scroll to bottom on new messages
+  // Auto-scroll to bottom
   useEffect(() => {
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
   }, [messages, isTyping]);
 
+  // Lazily create / restore a conversation when the widget first opens
+  const ensureConversation = useCallback(async (): Promise<string> => {
+    if (convId) return convId;
+
+    const restored = loadConvId();
+    if (restored) {
+      setConvId(restored);
+      return restored;
+    }
+
+    const newId = await apiCreateConversation();
+    saveConvId(newId);
+    setConvId(newId);
+    return newId;
+  }, [convId]);
+
   // Welcome message on first open
   useEffect(() => {
     if (isOpen && firstOpenRef.current) {
       firstOpenRef.current = false;
       setTimeout(() => {
-        addMessage(
-          "Hi 👋 I'm Ezra, Scrubbe's AI agent. I can help you understand how Scrubbe works, find the right pricing plan, book a demo, or get you signed up. What brings you here today?"
-        );
+        setMessages([{
+          id: "welcome",
+          text: "Hi there! I'm Ezra, Scrubbe's AI assistant. I can answer questions about Scrubbe's features, pricing, integrations, and getting started. What can I help you with today?",
+          isUser: false,
+        }]);
       }, 300);
     }
-  }, [isOpen, addMessage]);
+  }, [isOpen]);
+
+  const addMessage = useCallback((msg: Omit<ChatMessage, "id">) => {
+    setMessages((prev) => [...prev, { ...msg, id: crypto.randomUUID() }]);
+  }, []);
+
+  const handleSend = useCallback(async (text?: string) => {
+    const content = (text ?? input).trim();
+    if (!content || isTyping) return;
+    setInput("");
+    addMessage({ text: content, isUser: true });
+    setIsTyping(true);
+
+    try {
+      const cid = await ensureConversation();
+      const reply = await apiSendMessage(cid, content);
+      setIsTyping(false);
+      addMessage({ text: reply.content, isUser: false, escalated: reply.escalated });
+      if (reply.escalated) setIsEscalated(true);
+    } catch {
+      setIsTyping(false);
+      setInitError(true);
+      addMessage({
+        text: "I'm having trouble connecting right now. Please try again in a moment, or reach us directly at support@scrubbe.com.",
+        isUser: false,
+      });
+    }
+  }, [input, isTyping, addMessage, ensureConversation]);
+
+  const handleTalkToHuman = useCallback(async () => {
+    try {
+      const cid = await ensureConversation();
+      await apiEscalate(cid);
+    } catch {}
+    setIsEscalated(true);
+    addMessage({
+      text: "I've connected you with our support team. Someone will follow up with you at your account email shortly. In the meantime, feel free to keep asking me questions about Scrubbe.",
+      isUser: false,
+    });
+  }, [addMessage, ensureConversation]);
+
+  const handleClearChat = useCallback(() => {
+    clearConvId();
+    setConvId(null);
+    setMessages([]);
+    setIsEscalated(false);
+    setInitError(false);
+    firstOpenRef.current = true;
+    setTimeout(() => {
+      setMessages([{
+        id: "welcome",
+        text: "Hi there! I'm Ezra, Scrubbe's AI assistant. What can I help you with today?",
+        isUser: false,
+      }]);
+    }, 300);
+  }, []);
 
   const hasConversation = messages.length > 0;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3">
-      {/* ── Chat panel ── */}
+
+      {/* ── Chat panel ─────────────────────────────────────────────────────── */}
       {isOpen && (
         <div
           className={`flex flex-col w-[340px] sm:w-[380px] rounded-2xl overflow-hidden shadow-2xl border border-zinc-700
-          transition-all duration-300 origin-bottom-right
-          ${
-            isOpen
-              ? "opacity-100 scale-100 pointer-events-auto"
-              : "opacity-0 scale-95 pointer-events-none"
-          }
-          ${isMinimised ? "h-[56px]" : "h-[580px]"}
-        `}
+            transition-all duration-300 origin-bottom-right
+            ${isMinimised ? "h-[56px]" : "h-[580px]"}
+          `}
           style={{ background: "#111" }}
         >
-          {/* ── Header ── */}
+          {/* Header */}
           <div className="flex items-center gap-3 px-4 py-3 bg-zinc-950 border-b border-zinc-800 flex-shrink-0">
             <div className="w-9 h-9 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
               <Sparkles size={18} className="text-emerald-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[15px] font-bold text-white tracking-wide">
-                EZRA
-              </p>
+              <p className="text-[15px] font-bold text-white tracking-wide">EZRA</p>
               <p className="text-[11px] text-emerald-400 font-mono tracking-widest uppercase">
-                Scrubbe AI · Online
+                {isEscalated ? "Support Agent Notified" : "Scrubbe AI · Online"}
               </p>
             </div>
             <button
               onClick={() => setIsMinimised(!isMinimised)}
-              className="p-1.5 rounded-md text-black hover:text-white hover:bg-zinc-800 transition-colors"
+              className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
               aria-label="Minimise"
             >
               <Minus size={14} />
             </button>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-md text-black hover:text-white hover:bg-zinc-800 transition-colors"
+              className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
               aria-label="Close"
             >
               <X size={14} />
@@ -243,25 +260,25 @@ const Chatbot: React.FC = () => {
 
           {!isMinimised && (
             <>
-              {/* ── Nav tags ── */}
+              {/* Nav tags */}
               <div className="flex flex-wrap gap-1.5 px-4 py-3 bg-white border-b border-zinc-200 flex-shrink-0">
-                {navTags.map((tag) => (
+                {navTags.map(({ label, topic }) => (
                   <button
-                    key={tag}
-                    onClick={() => handleQuickAction(tag)}
+                    key={label}
+                    onClick={() => handleSend(topic)}
                     className="px-2.5 py-1 text-[10px] font-bold tracking-wide border border-zinc-300 rounded text-black hover:bg-zinc-100 hover:border-zinc-400 transition-colors"
                   >
-                    {tag}
+                    {label}
                   </button>
                 ))}
               </div>
 
-              {/* ── Chat body ── */}
+              {/* Chat body */}
               <div
                 ref={chatBodyRef}
                 className="flex-1 overflow-y-auto px-4 py-4 bg-white flex flex-col gap-3"
               >
-                {/* Ezra avatar spark */}
+                {/* Ezra avatar */}
                 {messages.length > 0 && (
                   <div className="w-9 h-9 rounded-lg bg-zinc-900 flex items-center justify-center shrink-0 self-start">
                     <Sparkles size={16} className="text-emerald-400" />
@@ -269,19 +286,26 @@ const Chatbot: React.FC = () => {
                 )}
 
                 {/* Messages */}
-                {messages.map((msg, i) => (
-                  <div
-                    key={i}
-                    className={`max-w-[88%] px-4 py-3 rounded-2xl text-[14px] leading-relaxed
-                    ${
-                      msg.isUser
-                        ? "bg-zinc-900 text-white self-end rounded-br-sm"
-                        : "bg-zinc-100 text-black self-start rounded-bl-sm"
-                    }`}
-                  >
-                    {msg.text.split("\n").map((line, j) => (
-                      <div key={j}>{line}</div>
-                    ))}
+                {messages.map((msg) => (
+                  <div key={msg.id} className="flex flex-col gap-1">
+                    <div
+                      className={`max-w-[88%] px-4 py-3 rounded-2xl text-[14px] leading-relaxed
+                        ${msg.isUser
+                          ? "bg-zinc-900 text-white self-end rounded-br-sm"
+                          : "bg-zinc-100 text-black self-start rounded-bl-sm"
+                        }`}
+                    >
+                      {msg.text.split("\n").map((line, j) => (
+                        <div key={j}>{line}</div>
+                      ))}
+                    </div>
+                    {/* Escalation badge */}
+                    {msg.escalated && !msg.isUser && (
+                      <div className="flex items-center gap-1.5 self-start px-2 py-1 bg-amber-50 border border-amber-200 rounded-lg">
+                        <UserCheck size={11} className="text-amber-600 shrink-0" />
+                        <span className="text-[10px] text-amber-700 font-medium">Support team notified</span>
+                      </div>
+                    )}
                   </div>
                 ))}
 
@@ -298,13 +322,13 @@ const Chatbot: React.FC = () => {
                   </div>
                 )}
 
-                {/* Quick actions — shown only when no conversation yet */}
+                {/* Quick actions — only when no conversation yet */}
                 {!hasConversation && (
                   <div className="flex flex-col gap-2 mt-2">
                     {quickActions.map(({ label, icon: Icon, topic }) => (
                       <button
                         key={label}
-                        onClick={() => handleQuickAction(topic)}
+                        onClick={() => handleSend(topic)}
                         className="flex items-center gap-3 px-4 py-3 border border-zinc-200 rounded-xl text-left hover:bg-zinc-50 transition-colors group"
                       >
                         <div className="w-8 h-8 rounded-lg border border-zinc-200 flex items-center justify-center shrink-0 text-black group-hover:border-zinc-400 transition-colors">
@@ -313,17 +337,22 @@ const Chatbot: React.FC = () => {
                         <span className="flex-1 text-[11px] font-bold tracking-widest text-black uppercase">
                           {label}
                         </span>
-                        <ChevronRight
-                          size={14}
-                          className="text-emerald-500 shrink-0"
-                        />
+                        <ChevronRight size={14} className="text-emerald-500 shrink-0" />
                       </button>
                     ))}
                   </div>
                 )}
+
+                {/* Connection error banner */}
+                {initError && (
+                  <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-[12px] text-red-700">
+                    <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                    <span>Connection issue — responses may be delayed. Email us at support@scrubbe.com.</span>
+                  </div>
+                )}
               </div>
 
-              {/* ── Footer ── */}
+              {/* Footer */}
               <div className="px-4 pt-3 pb-2 bg-white border-t border-zinc-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <input
@@ -333,23 +362,33 @@ const Chatbot: React.FC = () => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSend()}
                     placeholder="Ask Ezra anything about Scrubbe..."
-                    className="flex-1 px-4 py-2.5 text-[13px] border border-zinc-200 rounded-xl focus:outline-none focus:border-emerald-400 placeholder:text-zinc-400 text-black"
+                    disabled={isTyping}
+                    className="flex-1 px-4 py-2.5 text-[13px] border border-zinc-200 rounded-xl focus:outline-none focus:border-emerald-400 placeholder:text-zinc-400 text-black disabled:opacity-50"
                   />
                   <button
-                    onClick={handleSend}
-                    className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center hover:bg-zinc-700 transition-colors shrink-0"
+                    onClick={() => handleSend()}
+                    disabled={isTyping || !input.trim()}
+                    className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center hover:bg-zinc-700 transition-colors shrink-0 disabled:opacity-40"
                     aria-label="Send"
                   >
                     <Send size={15} className="text-emerald-400" />
                   </button>
                 </div>
-                <div className="flex justify-end mt-2">
+
+                <div className="flex justify-between items-center mt-2">
+                  <button
+                    onClick={handleTalkToHuman}
+                    className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-zinc-800 transition-colors font-mono tracking-wide"
+                  >
+                    <UserCheck size={10} />
+                    TALK TO SUPPORT
+                  </button>
                   <button
                     onClick={handleClearChat}
-                    className="flex items-center gap-1 text-[11px] text-black hover:text-zinc-600 transition-colors font-mono tracking-wide"
+                    className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-600 transition-colors font-mono tracking-wide"
                   >
                     <X size={10} />
-                    CLEAR CHAT
+                    CLEAR
                   </button>
                 </div>
               </div>
@@ -358,7 +397,7 @@ const Chatbot: React.FC = () => {
         </div>
       )}
 
-      {/* ── Toggle button ── */}
+      {/* ── Toggle button ─────────────────────────────────────────────────────── */}
       <button
         onClick={() => {
           setIsOpen(!isOpen);
