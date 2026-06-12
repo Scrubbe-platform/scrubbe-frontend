@@ -239,6 +239,12 @@ export const endpoint = {
     addMember: "/clusters",           // POST /clusters/:id/members
     resolve: "/clusters",             // POST /clusters/:id/canonical-resolution
   },
+  chat: {
+    create_conversation: "/chat/conversations",
+    send_message: "/chat/conversations",       // POST /chat/conversations/:id/messages
+    get_conversation: "/chat/conversations",   // GET  /chat/conversations/:id
+    escalate: "/chat/conversations",           // POST /chat/conversations/:id/escalate
+  },
   blast_radius: {
     list: "/blast-radius",
     calculate: "/blast-radius/calculate",

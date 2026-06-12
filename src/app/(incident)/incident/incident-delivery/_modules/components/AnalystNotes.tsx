@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import SideModal from "@/components/ui/SideModal";
 import AnalystNote from "./Modal/AnalystNote";
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 interface AnalystNoteItem {
   id: string;
@@ -11,10 +12,11 @@ interface AnalystNoteItem {
 }
 
 interface AnalystNotesProps {
+  incident: IncidentDetailRecord;
   notes?: AnalystNoteItem[];
 }
 
-const AnalystNotes: React.FC<AnalystNotesProps> = ({ notes = [] }) => {
+const AnalystNotes: React.FC<AnalystNotesProps> = ({ incident, notes = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -82,7 +84,7 @@ const AnalystNotes: React.FC<AnalystNotesProps> = ({ notes = [] }) => {
           title="Analyst Note"
           subTitle="Add note (author + timestamp)"
         >
-          <AnalystNote />
+          <AnalystNote incident={incident} onClose={() => setIsOpen(false)} />
         </SideModal>
       )}
     </>

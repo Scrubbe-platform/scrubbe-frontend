@@ -44,7 +44,7 @@ const IncidentDelivery = ({ incident }: { incident: IncidentDetailRecord }) => {
             <Evidence incident={incident} />
             <IncidentDetails incident={incident} />
             <DecisionLog incidentId={incident.id} />
-            <AnalystNotes />
+            <AnalystNotes incident={incident} />
           </div>
           <div className="flex-1 space-y-4">
             <LinksThatOpen incident={incident} />
