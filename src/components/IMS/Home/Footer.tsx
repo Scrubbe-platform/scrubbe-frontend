@@ -25,9 +25,9 @@ const NAV_COLUMNS = [
     links: [
       { label: "Documentation", href: "/#" },
       { label: "API Reference", href: "/#" },
-      { label: "SDKs", href: "/#" },
-      { label: "Changelog", href: "/#" },
+      { label: "SDK and CLI", href: "/#" },
       { label: "MCP", href: "/#" },
+      { label: "Changelog", href: "/#" },
     ],
   },
   {
@@ -192,7 +192,8 @@ export default function Footer() {
 
           {/* ── RIGHT: Systems Operational pill ── */}
           <div className="flex items-start justify-end">
-            <Link href="/system-status"
+            <Link
+              href="/system-status"
               className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-semibold whitespace-nowrap"
               style={{
                 border: "1px solid #22c55e",

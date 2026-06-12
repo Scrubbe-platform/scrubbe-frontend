@@ -150,10 +150,13 @@ const Chatbot: React.FC = () => {
     setInput("");
     addMessage(userText, true);
     setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      addMessage(processInput(userText));
-    }, 900 + Math.random() * 700);
+    setTimeout(
+      () => {
+        setIsTyping(false);
+        addMessage(processInput(userText));
+      },
+      900 + Math.random() * 700,
+    );
   }, [input, addMessage]);
 
   const handleQuickAction = (topic: string) => {
@@ -170,7 +173,7 @@ const Chatbot: React.FC = () => {
     firstOpenRef.current = true;
     setTimeout(() => {
       addMessage(
-        "Hi 👋 I'm Ezra, Scrubbe's AI agent. I can help you understand how Scrubbe works, find the right pricing plan, book a demo, or get you signed up. What brings you here today?"
+        "Hi 👋 I'm Ezra, Scrubbe's AI agent. I can help you understand how Scrubbe works, find the right pricing plan, book a demo, or get you signed up. What brings you here today?",
       );
     }, 300);
   };
@@ -188,7 +191,7 @@ const Chatbot: React.FC = () => {
       firstOpenRef.current = false;
       setTimeout(() => {
         addMessage(
-          "Hi 👋 I'm Ezra, Scrubbe's AI agent. I can help you understand how Scrubbe works, find the right pricing plan, book a demo, or get you signed up. What brings you here today?"
+          "Hi 👋 I'm Ezra, Scrubbe's AI agent. I can help you understand how Scrubbe works, find the right pricing plan, book a demo, or get you signed up. What brings you here today?",
         );
       }, 300);
     }
@@ -234,7 +237,7 @@ const Chatbot: React.FC = () => {
             </button>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-md text-black hover:text-white hover:bg-zinc-800 transition-colors"
+              className="p-1.5 rounded-md text-white hover:bg-zinc-800 transition-colors"
               aria-label="Close"
             >
               <X size={14} />

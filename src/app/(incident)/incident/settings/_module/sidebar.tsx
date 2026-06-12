@@ -27,7 +27,7 @@ import { useThemeStore } from "@/lib/stores/theme.store";
 const Sidebar = () => {
   const navItems = [
     {
-      icon: <Building2 size={18}  />,
+      icon: <Building2 size={18} />,
       path: "/incident/settings",
       label: "Organization",
       active: true,
@@ -48,7 +48,7 @@ const Sidebar = () => {
       label: "CI/CD & PR Ingestion",
     },
     {
-      icon: <Bell size={18}  />,
+      icon: <Bell size={18} />,
       path: "/incident/settings/notification",
       label: "Notifications",
     },
@@ -64,17 +64,17 @@ const Sidebar = () => {
       margin: "mt-8",
     },
     {
-      icon: <Database size={18}  />,
+      icon: <Database size={18} />,
       path: "/incident/settings/code-engine",
       label: "Code & Engine",
     },
     {
-      icon: <Sparkles size={18}  />,
+      icon: <Sparkles size={18} />,
       path: "/incident/settings/ezra",
       label: "Ezra",
     },
     {
-      icon: <Lock size={18}  />,
+      icon: <Lock size={18} />,
       path: "/incident/settings/security",
       label: "Security & SSO",
     },
@@ -84,7 +84,7 @@ const Sidebar = () => {
       label: "Compliance",
     },
     {
-      icon: <Sliders size={18}  />,
+      icon: <Sliders size={18} />,
       path: "/incident/settings/features-flags",
       label: "Features Flags",
     },
@@ -98,7 +98,6 @@ const Sidebar = () => {
   const options: { value: Theme; label: string; icon: React.ReactNode }[] = [
     { value: "light", label: "Light", icon: <Sun size={18} /> },
     { value: "dark", label: "Dark", icon: <Moon size={18} /> },
-    // { value: "system", label: "System", icon: <Laptop size={18} /> },
   ];
 
   const { theme, setTheme } = useThemeStore();
@@ -117,7 +116,9 @@ const Sidebar = () => {
         </h2>
         <Command size={18} className="text-slate-500 dark:text-slate-400" />
       </div>
-      <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">Admin-only configuration</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">
+        Admin-only configuration
+      </p>
 
       {/* NAVIGATION ITEMS */}
       <nav className="flex-1 space-y-1">
@@ -137,7 +138,11 @@ const Sidebar = () => {
               }
             `}
             >
-              <span className={active ? "text-IMSCyan" : "text-slate-500 dark:text-slate-400"}>
+              <span
+                className={
+                  active ? "text-IMSCyan" : "text-slate-500 dark:text-slate-400"
+                }
+              >
                 {item.icon}
               </span>
               <span className="text-sm font-medium">{item.label}</span>
@@ -174,7 +179,6 @@ const Sidebar = () => {
             </button>
           ))}
         </div>
-        
       </div>
     </div>
   );

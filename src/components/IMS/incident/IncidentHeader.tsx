@@ -101,6 +101,7 @@ const IncidentHeader = ({
               incident.region,
               incident.environment,
               incident.status,
+              incident.ticketId,
             ]
               .filter(Boolean)
               .map((val) => (

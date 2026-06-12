@@ -431,9 +431,12 @@ export default function APISection() {
                     <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 font-mono">
                       Response
                     </span>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200 font-mono">
-                      201 CREATED
-                    </span>
+
+                    {showResponse && (
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200 font-mono">
+                        201 CREATED
+                      </span>
+                    )}
                   </div>
                   {showResponse && (
                     <pre className="p-5 text-[12px] font-mono text-gray-600 leading-6 overflow-auto">

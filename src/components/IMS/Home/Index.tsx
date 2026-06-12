@@ -24,6 +24,7 @@ import EzraCodeEngineSection from "./CodeEngineSuggestionSection";
 import MigrationSection from "./MigrationSection";
 import RecommendedActions from "./RecommendedAction";
 import RecentFindings from "./RecentFindings";
+import ScrubbeSDKSection from "./SdkSection";
 
 const Index = () => {
   return (
@@ -47,6 +48,7 @@ const Index = () => {
       {/* <GovernanceSection /> */}
       <WarRoomSection />
       <APISection />
+      <ScrubbeSDKSection />
       <EzraCodeEngineSection />
       <MigrationSection />
     </div>

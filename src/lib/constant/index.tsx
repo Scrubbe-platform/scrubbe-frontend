@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   ArrowUp,
   Code,
   LayoutDashboard,
@@ -1116,6 +1117,15 @@ export const NewMenu: Record<string, NavItem[]> = {
       Icon: FaBook,
       description: "Governance without ticket-first UX",
       link: "/incident/decision-logs",
+      isActive: false,
+      isMenu: false,
+      pillText: "audit",
+    },
+    {
+      name: "Workbench",
+      Icon: ArrowLeftRight,
+      description: "Upgrade Incident to major incident (P0)",
+      link: "/incident/workbench",
       isActive: false,
       isMenu: false,
       pillText: "audit",

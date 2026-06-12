@@ -12,7 +12,7 @@ const page = () => {
           <div>
             <div className="border-b border-gray-200 dark:border-white/10 bg-white dark:bg-grayscrubbe-900 px-6 py-4">
               <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-black dark:text-slate-300">
-                <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-green-400">
+                <span className="rounded-full border px-3 py-1 text-green-500">
                   {incident.ticketId}
                 </span>
                 <span>{incident.service || "Unknown service"}</span>
