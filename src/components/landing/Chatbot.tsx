@@ -1,5 +1,9 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
+import type { Components } from "react-markdown";
 import {
   HelpCircle,
   CreditCard,
@@ -12,6 +16,7 @@ import {
   Sparkles,
   UserCheck,
   AlertCircle,
+  ExternalLink,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -23,34 +28,105 @@ interface ChatMessage {
   escalated?: boolean;
 }
 
-// ─── Markdown renderer (bold + bullets only) ──────────────────────────────────
+// ─── Markdown component map ───────────────────────────────────────────────────
 
-function renderInline(text: string): React.ReactNode[] {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) =>
-    part.startsWith("**") && part.endsWith("**")
-      ? <strong key={i}>{part.slice(2, -2)}</strong>
-      : part
-  );
+const mdComponents: Components = {
+  a: ({ href, children }) => (
+    <a
+      href={href ?? "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-emerald-600 underline underline-offset-2 hover:text-emerald-800 font-medium break-all"
+    >
+      {children}
+    </a>
+  ),
+  h1: ({ children }) => <p className="font-bold text-[15px] mt-2 mb-1">{children}</p>,
+  h2: ({ children }) => <p className="font-bold text-[14px] mt-1.5 mb-0.5">{children}</p>,
+  h3: ({ children }) => <p className="font-semibold text-[13px] mt-1 mb-0.5">{children}</p>,
+  p:  ({ children }) => <p className="mb-1.5 last:mb-0 leading-relaxed">{children}</p>,
+  strong: ({ children }) => <strong className="font-semibold text-black">{children}</strong>,
+  em:     ({ children }) => <em className="italic text-zinc-700">{children}</em>,
+  ul: ({ children }) => <ul className="my-1.5 space-y-0.5">{children}</ul>,
+  ol: ({ children }) => <ol className="my-1.5 space-y-0.5 pl-4 list-decimal">{children}</ol>,
+  li: ({ children }) => (
+    <li className="flex gap-1.5 items-start leading-relaxed">
+      <span className="mt-[7px] shrink-0 w-1.5 h-1.5 rounded-full bg-zinc-500" />
+      <span className="flex-1">{children}</span>
+    </li>
+  ),
+  code: ({ children, className }) => {
+    const isBlock = Boolean(className);
+    return isBlock ? (
+      <pre className="bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-[11px] overflow-x-auto my-2 font-mono leading-relaxed">
+        <code>{children}</code>
+      </pre>
+    ) : (
+      <code className="bg-zinc-200 rounded px-1 py-0.5 text-[11px] font-mono">{children}</code>
+    );
+  },
+  blockquote: ({ children }) => (
+    <blockquote className="border-l-2 border-emerald-400 pl-3 italic text-zinc-600 my-1.5">
+      {children}
+    </blockquote>
+  ),
+  table: ({ children }) => (
+    <div className="overflow-x-auto my-2 rounded-lg border border-zinc-200 text-[12px]">
+      <table className="w-full border-collapse">{children}</table>
+    </div>
+  ),
+  thead: ({ children }) => <thead className="bg-zinc-100">{children}</thead>,
+  th: ({ children }) => (
+    <th className="border-b border-zinc-200 px-3 py-2 font-semibold text-left whitespace-nowrap">
+      {children}
+    </th>
+  ),
+  td: ({ children }) => <td className="border-b border-zinc-100 px-3 py-1.5">{children}</td>,
+  hr: () => <hr className="my-2 border-zinc-200" />,
+};
+
+// ─── Reference link resolver ──────────────────────────────────────────────────
+
+function getRefLink(text: string): { href: string; label: string } {
+  const t = text.toLowerCase();
+  if (/pricing|plan|cost|billing|enterprise|starter|professional|tier/.test(t))
+    return { href: "https://scrubbe.com/pricing", label: "scrubbe.com/pricing" };
+  if (/book.*demo|demo|schedule.*call|talk.*sales/.test(t))
+    return { href: "https://scrubbe.com/demo", label: "scrubbe.com/demo" };
+  if (/sign.?up|free.?trial|trial|register|get.?started/.test(t))
+    return { href: "https://scrubbe.com/signup", label: "scrubbe.com/signup" };
+  if (/api\.scrubbe|docs\.scrubbe|documentation|developer|api.key/.test(t))
+    return { href: "https://docs.scrubbe.com", label: "docs.scrubbe.com" };
+  if (/support@scrubbe|support team|contact/.test(t))
+    return { href: "https://scrubbe.com", label: "scrubbe.com" };
+  return { href: "https://scrubbe.com", label: "scrubbe.com" };
 }
 
-function renderMarkdown(text: string): React.ReactNode {
-  const lines = text.split("\n");
+// ─── AI message bubble with full markdown + reference link ───────────────────
+
+function MarkdownMessage({ text }: { text: string }) {
+  const ref = getRefLink(text);
   return (
-    <>
-      {lines.map((line, i) => {
-        if (/^[•\-*]\s/.test(line)) {
-          return (
-            <div key={i} className="flex gap-1.5 items-start">
-              <span className="mt-1 shrink-0 w-1 h-1 rounded-full bg-current opacity-60" />
-              <span>{renderInline(line.replace(/^[•\-*]\s/, ""))}</span>
-            </div>
-          );
-        }
-        if (line === "") return <div key={i} className="h-2" />;
-        return <div key={i}>{renderInline(line)}</div>;
-      })}
-    </>
+    <div className="flex flex-col gap-2">
+      <div className="text-[13.5px] [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeSanitize]}
+          components={mdComponents}
+        >
+          {text}
+        </ReactMarkdown>
+      </div>
+      <a
+        href={ref.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-1 text-[11px] text-emerald-600 hover:text-emerald-800 font-mono tracking-wide transition-colors w-fit border-t border-zinc-200 pt-1.5 mt-0.5"
+      >
+        <ExternalLink size={10} className="shrink-0" />
+        {ref.label}
+      </a>
+    </div>
   );
 }
 
@@ -326,7 +402,7 @@ const Chatbot: React.FC = () => {
                           : "bg-zinc-100 text-black self-start rounded-bl-sm"
                         }`}
                     >
-                      {msg.isUser ? msg.text : renderMarkdown(msg.text)}
+                      {msg.isUser ? msg.text : <MarkdownMessage text={msg.text} />}
                     </div>
                     {/* Escalation badge */}
                     {msg.escalated && !msg.isUser && (
