@@ -475,40 +475,6 @@ export default function APISection() {
         </div>
 
         {/* ── Connected Systems — two-column editorial matching the screenshot ── */}
-        <section className="grid grid-cols-[200px_1fr] gap-8 items-start">
-          <div className="pt-1">
-            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-gray-400 font-mono">
-              Connected Systems
-            </span>
-          </div>
-          <div>
-            <h2
-              className="font-black text-gray-950 leading-[1.15] tracking-[-0.02em] mb-5"
-              style={{ fontSize: "clamp(24px, 3vw, 38px)" }}
-            >
-              Intelligence is strengthened by context.
-            </h2>
-            <p className="text-[16px] text-gray-500 leading-relaxed mb-8 max-w-2xl">
-              Scrubbe integrates with source control, deployment platforms,
-              cloud providers, infrastructure, observability tools,
-              collaboration platforms, ticketing systems, security platforms,
-              and internal engineering systems to build a unified operational
-              graph. As more systems connect, investigations get faster,
-              recommendations get more accurate, and understanding becomes more
-              complete.
-            </p>
-            <div className="flex flex-wrap gap-2.5">
-              {CONNECTED_TAGS.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-4 py-1.5 rounded-full border border-gray-200 bg-white text-[13px] text-gray-700 font-medium"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* ── Why teams use API ── */}
         {/* <section>

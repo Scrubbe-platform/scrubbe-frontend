@@ -33,7 +33,7 @@ const LANGUAGES: Language[] = [
     name: "Java",
     snippets: [
       {
-        label: "Maven",
+        label: "Apache Maven",
         code: `<dependency>\n  <groupId>com.scrubbe</groupId>\n  <artifactId>scrubbe-sdk</artifactId>\n  <version>1.0.0</version>\n</dependency>`,
       },
       {
@@ -60,6 +60,10 @@ const LANGUAGES: Language[] = [
         label: "buildr",
         code: `'com.scrubbe:scrubbe-sdk:jar:1.0.0'`,
       },
+      {
+        label: "bid",
+        code: `dependency("com.scrubbe", "scrubbe-sdk", "1.0.0")`,
+      },
     ],
   },
   {
@@ -78,7 +82,7 @@ const LANGUAGES: Language[] = [
     snippets: [
       {
         label: "sh",
-        code: `go get github.com/scrubbe/sdk-go`,
+        code: `sh\ngo get github.com/scrubbe/sdk-go`,
       },
     ],
   },
@@ -88,7 +92,7 @@ const LANGUAGES: Language[] = [
     snippets: [
       {
         label: "sh",
-        code: `sh\ngo get github.com/scrubbe/sdk-go`,
+        code: `sh\ndotnet add package Scrubbe.Sdk\nOr Via the NuGet Package Manager:\nInstall-Package Scrubbe.Sdk`,
       },
     ],
   },

@@ -89,7 +89,7 @@ const AnalystNote: React.FC<AnalystNoteProps> = ({ incident, onClose }) => {
 
       <div className="border border-neutral-500 rounded-xl p-4">
         <p className="font-medium mb-2">What happens when you save</p>
-        <ul className="list-disc pl-4 text-sm space-y-1 text-zinc-300">
+        <ul className="list-disc pl-4 text-sm space-y-1 ">
           <li>Note becomes an immutable human entry in the Decision Log.</li>
           <li>It appears under "Analyst notes".</li>
           <li>It's included in the incident evidence pack export.</li>
