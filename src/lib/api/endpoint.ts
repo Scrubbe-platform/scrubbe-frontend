@@ -42,6 +42,7 @@ export const endpoint = {
     threat_intel: "/incident-ticket",
     context_get: "/incident-ticket",
     context_update: "/incident-ticket",
+    declare_major: "/incident-ticket",   // POST /incident-ticket/:id/declare-major
     analytics: "/incident-ticket/analytics",
     history: "/tickets/history",
     integrations: "/integrations",
@@ -168,6 +169,7 @@ export const endpoint = {
     getOne: "/playbooks",                // GET /playbooks/:id
     update: "/playbooks",                // PUT /playbooks/:id
     publish: "/playbooks",               // POST /playbooks/:id/publish
+    clone: "/playbooks",                 // POST /playbooks/:id/clone
     delete: "/playbooks",                // DELETE /playbooks/:id
     match: "/playbooks/match",
     suggest: "/playbooks/suggest",

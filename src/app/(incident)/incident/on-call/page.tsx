@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useMember from "@/hooks/useMember";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -160,10 +163,31 @@ function AssignModal({
   members: Member[];
   onClose: () => void;
 }) {
+  const { post } = useFetch();
+  const queryClient = useQueryClient();
   const [selected, setSelected] = useState<string[]>([]);
   const [shiftName, setShiftName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  const saveMutation = useMutation({
+    mutationFn: () =>
+      post(endpoint.on_call.assign_member, {
+        date: startDate,
+        shiftName,
+        teamMembers: selected.map((id) => ({
+          userId: id,
+          startTime: startDate,
+          endTime: endDate,
+        })),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["oncall-schedules"] });
+      onClose();
+    },
+  });
+
+  const canSave = selected.length > 0 && startDate.length > 0 && endDate.length > 0;
 
   const toggle = (id: string) =>
     setSelected((prev) =>
@@ -308,11 +332,12 @@ function AssignModal({
               Cancel
             </button>
             <button
-              onClick={onClose}
-              className="px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-colors"
+              onClick={() => saveMutation.mutate()}
+              disabled={!canSave || saveMutation.isPending}
+              className="px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-60"
               style={{ background: "linear-gradient(135deg,#10b981,#1a3a2a)" }}
             >
-              Save Assignment
+              {saveMutation.isPending ? "Saving…" : "Save Assignment"}
             </button>
           </div>
         </div>
@@ -592,43 +617,42 @@ function OverviewView({
 
 function ScheduleView({
   members,
+  apiSchedules,
   onEdit,
 }: {
   members: Member[];
+  apiSchedules: any[];
   onEdit: (shift: Shift) => void;
 }) {
-  // Build shifts dynamically from first 4 members
+  // Build shifts from real API data when available, fall back to derived
   const shifts: Shift[] = useMemo(() => {
+    if (apiSchedules.length > 0) {
+      return apiSchedules.map((s, i) => {
+        const memberIds = (s.teamMembers ?? [])
+          .map((m: any) => m.member ?? m.id ?? m.userId)
+          .filter(Boolean);
+        return {
+          id: s.id ?? `s${i}`,
+          name: s.shiftName ?? `Shift ${new Date(s.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+          start: new Date(s.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          end: memberIds.length > 0
+            ? (s.teamMembers[0]?.endTime
+              ? new Date(s.teamMembers[0].endTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+              : new Date(s.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }))
+            : new Date(s.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          members: memberIds,
+          type: i % 2 === 0 ? "primary" : "secondary",
+        } as Shift;
+      });
+    }
     if (members.length === 0) return [];
     const ids = members.map((m) => m.id);
     return [
-      {
-        id: "s1",
-        name: "Week 22 Primary",
-        start: "26 May",
-        end: "2 Jun",
-        members: ids.slice(0, 2),
-        type: "primary",
-      },
-      {
-        id: "s2",
-        name: "Week 23 Secondary",
-        start: "2 Jun",
-        end: "9 Jun",
-        members: ids.slice(2, 4),
-        type: "secondary",
-      },
-      {
-        id: "s3",
-        name: "Week 24 Primary",
-        start: "9 Jun",
-        end: "16 Jun",
-        members: ids.slice(0, 1),
-        type: "primary",
-        gap: true,
-      },
+      { id: "s1", name: "Week 22 Primary", start: "26 May", end: "2 Jun", members: ids.slice(0, 2), type: "primary" },
+      { id: "s2", name: "Week 23 Secondary", start: "2 Jun", end: "9 Jun", members: ids.slice(2, 4), type: "secondary" },
+      { id: "s3", name: "Week 24 Primary", start: "9 Jun", end: "16 Jun", members: ids.slice(0, 1), type: "primary", gap: true },
     ];
-  }, [members]);
+  }, [apiSchedules, members]);
 
   const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const calDays = Array.from({ length: 35 }, (_, i) => {
@@ -919,14 +943,31 @@ export default function OnCallDashboard() {
   const [assignOpen, setAssignOpen] = useState(false);
   const [editShift, setEditShift] = useState<Shift | null>(null);
 
+  const { get } = useFetch();
+
   // ── Real member data ──────────────────────────────────────────
   const { data: rawMembers = [], isLoading } = useMember();
 
-  // First 3 members are treated as on-call for the current shift
-  const onCallIds = useMemo(
-    () => new Set(rawMembers.slice(0, 3).map((m) => m.id)),
-    [rawMembers],
-  );
+  // ── Real schedule data ────────────────────────────────────────
+  const { data: apiSchedules = [] } = useQuery<any[]>({
+    queryKey: ["oncall-schedules"],
+    queryFn: async () => {
+      const res = await get(endpoint.on_call.get_all_assign);
+      return res.data?.data ?? [];
+    },
+    staleTime: 60_000,
+  });
+
+  // Derive on-call IDs from the most recent schedule
+  const onCallIds = useMemo(() => {
+    if (apiSchedules.length > 0) {
+      const latest = apiSchedules[apiSchedules.length - 1];
+      return new Set<string>(
+        (latest.teamMembers ?? []).map((m: any) => m.member ?? m.id ?? m.userId).filter(Boolean),
+      );
+    }
+    return new Set(rawMembers.slice(0, 3).map((m) => m.id));
+  }, [apiSchedules, rawMembers]);
 
   const members = useMemo<Member[]>(
     () => rawMembers.map((raw, i) => toMember(raw, i, onCallIds)),
@@ -1073,7 +1114,7 @@ export default function OnCallDashboard() {
             />
           )}
           {view === "schedule" && (
-            <ScheduleView members={members} onEdit={(s) => setEditShift(s)} />
+            <ScheduleView members={members} apiSchedules={apiSchedules} onEdit={(s) => setEditShift(s)} />
           )}
           {view === "roster" && (
             <RosterView members={members} isLoading={isLoading} />

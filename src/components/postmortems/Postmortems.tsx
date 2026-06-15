@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Columns,
@@ -9,6 +9,9 @@ import {
   MoreVertical,
 } from "lucide-react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 import { Table } from "@/components/ui/table";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -230,8 +233,32 @@ const columns: ColumnDef<PostmortemRow>[] = [
 
 export default function PostmortemListPage() {
   const router = useRouter();
+  const { get } = useFetch();
   const [page, setPage] = useState(1);
-  const totalPages = 257;
+
+  const { data: apiData } = useQuery({
+    queryKey: ["postmortems-list", page],
+    queryFn: async () => {
+      const res = await get(endpoint.incident_ticket.get_postmortems);
+      const items: any[] = res.data?.data ?? [];
+      return items.map((pm: any): PostmortemRow => ({
+        id: pm.id ?? pm.ticketId ?? pm.incidentId,
+        incidentId: pm.ticketId ?? pm.incidentId ?? pm.id,
+        severity: pm.severity ?? pm.priority ?? "P3",
+        service: pm.service ?? pm.affectedSystem ?? "Unknown",
+        duration: pm.elapsedLabel ?? pm.duration ?? "--",
+        rootCause: pm.rootCause ?? pm.causeCategory ?? "Unknown",
+        environment: pm.environment ?? "Production",
+        owner: pm.assignedToName ?? pm.assignedToEmail ?? pm.owningSquad ?? "Unassigned",
+        generated: pm.updatedAt ? new Date(pm.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "--",
+        status: pm.status === "RESOLVED" ? "Approved" : "In Review",
+      }));
+    },
+    staleTime: 30_000,
+  });
+
+  const rows = apiData && apiData.length > 0 ? apiData : ROWS;
+  const totalPages = Math.max(1, Math.ceil(rows.length / 20));
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 p-8">
@@ -310,7 +337,7 @@ export default function PostmortemListPage() {
           </div>
 
           <Table
-            data={ROWS}
+            data={rows}
             columns={columns}
             onRowClick={(row) =>
               router.push(`/incident/postmortems/${row.incidentId}`)

@@ -1,6 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+
+const LivePmContext = createContext<Record<string, any> | null>(null);
+const useLivePm = () => useContext(LivePmContext);
 import {
   ArrowLeft,
   Share2,
@@ -1394,8 +1400,27 @@ const TAG_STYLES: Record<string, string> = {
 };
 
 // ── Main page ─────────────────────────────────────────────────────
-export default function PostmortemDetailPage() {
+export default function PostmortemDetailPage({ incidentId }: { incidentId?: string }) {
+  const { get } = useFetch();
   const [activeTab, setActiveTab] = useState<TabId>("Incident Overview");
+
+  const { data: live } = useQuery({
+    queryKey: ["postmortem-detail", incidentId],
+    queryFn: async () => {
+      if (!incidentId) return null;
+      const res = await get(`${endpoint.incident_ticket.get_postmortems}/${incidentId}`);
+      return res.success ? (res.data?.data ?? null) : null;
+    },
+    enabled: !!incidentId,
+    staleTime: 30_000,
+  });
+
+  const pmId = live?.ticketId ?? live?.id ?? PM.incidentId;
+  const pmSeverity = live?.severity ? `${live.severity} — ${live.priority ?? ""}`.trim() : PM.incidentOverview.severity;
+  const pmStatus = live?.status ? live.status.charAt(0) + live.status.slice(1).toLowerCase() : PM.incidentOverview.status;
+  const pmEnv = live?.environment ?? PM.incidentOverview.environment;
+  const pmDuration = live?.elapsedLabel ?? PM.incidentOverview.duration;
+  const pmService = live?.service ?? live?.affectedSystem ?? undefined;
 
   const TAB_CONTENT: Record<TabId, React.ReactNode> = {
     "Incident Overview": <TabIncidentOverview />,
@@ -1413,6 +1438,7 @@ export default function PostmortemDetailPage() {
   };
 
   return (
+    <LivePmContext.Provider value={live ?? null}>
     <div className="min-h-screen bg-white dark:bg-zinc-950">
       {/* ── Top bar ── */}
       <div className="sticky top-0 z-20 bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-800 px-8 py-3 flex items-center justify-between">
@@ -1448,12 +1474,12 @@ export default function PostmortemDetailPage() {
                 Incident Postmortem
               </p>
               <h1 className="text-[28px] font-black text-zinc-900 dark:text-zinc-100">
-                {PM.incidentId}
+                {pmId}
               </h1>
             </div>
             <div className="text-right">
               <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
-                Generated: {PM.generatedAt}
+                Generated: {live?.updatedAt ? new Date(live.updatedAt).toLocaleString() : PM.generatedAt}
               </p>
               <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
                 Approved by:{" "}
@@ -1585,5 +1611,6 @@ export default function PostmortemDetailPage() {
         <div>{TAB_CONTENT[activeTab]}</div>
       </div>
     </div>
+    </LivePmContext.Provider>
   );
 }

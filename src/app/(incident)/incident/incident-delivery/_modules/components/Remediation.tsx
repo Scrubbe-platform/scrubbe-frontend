@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import {
   Sparkles,
   Code,
@@ -9,8 +9,9 @@ import {
   PlusSquare,
   ArrowUpRight,
   Link,
+  Loader2,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { useRouter } from "next/navigation";
@@ -46,8 +47,11 @@ const actionVariant: Record<string, string> = {
 // ── Component ─────────────────────────────────────────────────────
 
 const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
-  const { get } = useFetch();
+  const { get, post } = useFetch();
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const [ezraStatus, setEzraStatus] = useState<"idle" | "running" | "done" | "error">("idle");
+
   const { data: analysis } = useQuery({
     queryKey: ["ezra-analysis-delivery", incidentId],
     queryFn: async () => {
@@ -56,6 +60,25 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
       return res.success ? (res.data?.data ?? null) : null;
     },
     enabled: !!incidentId,
+  });
+
+  const generateEzra = useMutation({
+    mutationFn: async () => {
+      if (!incidentId) throw new Error("No incident");
+      const res = await post(endpoint.ezra.analyse, { incidentId });
+      if (!res.success) throw new Error("Ezra analysis failed");
+      return res.data;
+    },
+    onMutate: () => setEzraStatus("running"),
+    onSuccess: () => {
+      setEzraStatus("done");
+      queryClient.invalidateQueries({ queryKey: ["ezra-analysis-delivery", incidentId] });
+      setTimeout(() => setEzraStatus("idle"), 3000);
+    },
+    onError: () => {
+      setEzraStatus("error");
+      setTimeout(() => setEzraStatus("idle"), 3000);
+    },
   });
 
   const rawHypotheses: any[] =
@@ -93,7 +116,12 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
       label: "Execute safe action",
       variant: "red",
     },
-    { icon: <Zap size={13} />, label: "Generate Ezra", variant: "red" },
+    {
+      icon: ezraStatus === "running" ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />,
+      label: ezraStatus === "running" ? "Generating…" : ezraStatus === "done" ? "Generated ✓" : ezraStatus === "error" ? "Failed — retry" : "Generate Ezra",
+      variant: ezraStatus === "done" ? "emerald" : "red",
+      action: () => generateEzra.mutate(),
+    },
     {
       icon: <PlusSquare size={13} />,
       label: "Create PR",

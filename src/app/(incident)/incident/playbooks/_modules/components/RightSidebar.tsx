@@ -6,6 +6,57 @@ import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
+// Derive automation stage status from a real execution if present
+type StageStatus = "done" | "active" | "pending";
+function deriveStagesFromExecution(execution: any | null, lifecycleStep: string): { id: number; text: string; status: StageStatus }[] {
+  const ORDER = ["Detected", "Enriched", "Analysed", "Proposed", "Approved", "Executed", "Resolved"];
+  const idx = ORDER.indexOf(lifecycleStep ?? "");
+
+  if (execution) {
+    const execStatus: string = execution.status ?? "";
+    const outcomes: any[] = execution.stepOutcomes ?? [];
+    const completedCount = outcomes.filter((s: any) => s.status === "COMPLETED" || s.status === "SKIPPED").length;
+    const totalSteps = outcomes.length || 1;
+
+    const stageFromExec = (minStatus: string[], activeStatus: string[]): StageStatus => {
+      if (minStatus.some((s) => execStatus === s)) return "done";
+      if (activeStatus.some((s) => execStatus === s)) return "active";
+      return "pending";
+    };
+
+    return [
+      {
+        id: 1,
+        text: "Suggest investigation",
+        status: completedCount > 0 ? "done" : execStatus === "TRIGGERED" || execStatus === "INVESTIGATING" ? "active" : "pending",
+      },
+      {
+        id: 2,
+        text: "Propose remediation",
+        status: stageFromExec(["EXECUTING", "COMPLETED"], ["PROPOSING"]),
+      },
+      {
+        id: 3,
+        text: "Assisted execution",
+        status: stageFromExec(["COMPLETED"], ["EXECUTING"]),
+      },
+      {
+        id: 4,
+        text: "Safe automation",
+        status: execStatus === "COMPLETED" && completedCount === totalSteps ? "done" : "pending",
+      },
+    ];
+  }
+
+  // Fall back to lifecycle-derived stages
+  return [
+    { id: 1, text: "Suggest investigation", status: idx >= 2 ? "done" : idx >= 1 ? "active" : "pending" },
+    { id: 2, text: "Propose remediation",   status: idx >= 4 ? "done" : idx >= 2 ? "active" : "pending" },
+    { id: 3, text: "Assisted execution",    status: idx >= 6 ? "done" : idx >= 4 ? "active" : "pending" },
+    { id: 4, text: "Safe automation",       status: idx >= 7 ? "done" : idx >= 6 ? "active" : "pending" },
+  ];
+}
+
 // ── Types ─────────────────────────────────────────────────────────
 
 interface MatchCriteria {
@@ -73,6 +124,47 @@ const deriveIncidentContext = (
 
 // ── Sub-components ────────────────────────────────────────────────
 
+function LinkedPoliciesSection({ incidentId }: { incidentId: string }) {
+  const { get } = useFetch();
+  const { data: guardrails } = useQuery({
+    queryKey: ["guardrails-linked", incidentId],
+    queryFn: async () => {
+      const res = await get(endpoint.guardrails.list);
+      const items: any[] = res.data?.data ?? [];
+      return items.slice(0, 4).map((g: any, i: number) => ({
+        id: `POL-${String(i + 1).padStart(3, "0")}`,
+        val: g.name ?? g.description ?? g.rule ?? `policy.rule.${i}`,
+      }));
+    },
+    staleTime: 60_000,
+  });
+
+  const policies = guardrails ?? [
+    { id: "POL-001", val: "prod.rollback.requires_approval" },
+    { id: "POL-017", val: "blast_radius.automation_limit = 3" },
+    { id: "POL-042", val: "pod.restart.auto = true" },
+    { id: "POL-089", val: "business_hours.escalation" },
+  ];
+
+  return (
+    <section>
+      <SectionHeader>Linked Policies</SectionHeader>
+      <div className="space-y-2">
+        {policies.map((p) => (
+          <div key={p.id} className="flex gap-2.5 items-center text-[10px]">
+            <span className="text-violet-600 dark:text-purple-400 font-bold bg-violet-50 dark:bg-purple-400/10 px-1.5 py-0.5 rounded border border-violet-200 dark:border-purple-400/20 shrink-0">
+              {p.id}
+            </span>
+            <span className="text-zinc-700 dark:text-zinc-300 font-mono truncate">
+              {p.val}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 const SectionHeader = ({ children }: { children: React.ReactNode }) => (
   <h3 className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-3">
     {children}
@@ -101,7 +193,7 @@ const MatchRow = ({ label, weight, met }: MatchCriteria) => (
 const PlaybookRightSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({
   incident,
 }) => {
-  const { get } = useFetch();
+  const { get, post } = useFetch();
   const incidentContext = deriveIncidentContext(incident);
   const isDeployAware = /deploy|pipeline|ci\/cd|rollback|release/i.test(
     `${incident.sourceType ?? ""} ${incident.detection ?? ""} ${incident.title ?? ""}`,
@@ -110,16 +202,20 @@ const PlaybookRightSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({
   const { data: matchData } = useQuery({
     queryKey: ["playbook-match-confidence", incident.id],
     queryFn: async () => {
-      const res = await get(
-        `${endpoint.playbooks.match}?incidentId=${incident.id}`,
-      );
+      const res = await post(endpoint.playbooks.match, {
+        serviceNames: (incident.service || incident.affectedSystem)
+          ? [incident.service || incident.affectedSystem]
+          : undefined,
+        incidentType: incident.category || incident.sourceType,
+        signalTypes: incident.detection ? [incident.detection] : undefined,
+      });
       if (res.success) {
-        const items: any[] = res.data?.data?.playbooks ?? res.data?.data ?? [];
-        const top = items[0];
+        const matches: any[] = res.data?.data?.matches ?? res.data?.data ?? [];
+        const top = matches[0];
         return top
           ? {
               confidence: Math.round(
-                (top.matchConfidence ?? top.confidence ?? 0.91) * 100,
+                ((top.confidenceScore ?? top.matchConfidence ?? top.confidence ?? 0.91) * 100),
               ),
             }
           : null;
@@ -127,6 +223,19 @@ const PlaybookRightSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({
       return null;
     },
     enabled: !!incident.id,
+    refetchOnWindowFocus: false,
+  });
+
+  // Fetch the most recent playbook execution for this incident
+  const { data: activeExecution } = useQuery({
+    queryKey: ["playbook-execution-active", incident.id],
+    queryFn: async () => {
+      const res = await get(`${endpoint.playbooks.executions}?ticketId=${incident.id}&limit=1`);
+      const execs: any[] = res.data?.data?.executions ?? res.data?.data ?? [];
+      return execs[0] ?? null;
+    },
+    enabled: !!incident.id,
+    staleTime: 20_000,
     refetchOnWindowFocus: false,
   });
 
@@ -192,12 +301,7 @@ const PlaybookRightSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({
       <section>
         <SectionHeader>Automation Stage Progress</SectionHeader>
         <div className="space-y-3.5 px-1">
-          {[
-            { id: 1, text: "Suggest investigation", status: "done" },
-            { id: 2, text: "Propose remediation", status: "active" },
-            { id: 3, text: "Assisted execution", status: "pending" },
-            { id: 4, text: "Safe automation", status: "pending" },
-          ].map((step) => (
+          {deriveStagesFromExecution(activeExecution ?? null, incident.lifecycleStep).map((step) => (
             <div key={step.id} className="flex items-center justify-between">
               <span
                 className={`text-[12px] font-medium ${step.status === "pending" ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-700 dark:text-zinc-300"}`}
@@ -223,26 +327,7 @@ const PlaybookRightSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({
       </section>
 
       {/* Linked Policies */}
-      <section>
-        <SectionHeader>Linked Policies</SectionHeader>
-        <div className="space-y-2">
-          {[
-            { id: "POL-001", val: "prod.rollback.requires_approval" },
-            { id: "POL-017", val: "blast_radius.automation_limit = 3" },
-            { id: "POL-042", val: "pod.restart.auto = true" },
-            { id: "POL-089", val: "business_hours.escalation" },
-          ].map((p) => (
-            <div key={p.id} className="flex gap-2.5 items-center text-[10px]">
-              <span className="text-violet-600 dark:text-purple-400 font-bold bg-violet-50 dark:bg-purple-400/10 px-1.5 py-0.5 rounded border border-violet-200 dark:border-purple-400/20 shrink-0">
-                {p.id}
-              </span>
-              <span className="text-zinc-700 dark:text-zinc-300 font-mono truncate">
-                {p.val}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
+      <LinkedPoliciesSection incidentId={incident.id} />
 
       {/* Execution Outcome */}
       <section>

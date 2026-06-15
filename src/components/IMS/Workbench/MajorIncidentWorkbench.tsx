@@ -175,10 +175,12 @@ const MajorIncidentWorkbench: React.FC<Props> = ({ incident }) => {
         name: f.name,
         type: f.type,
       }));
-      //   return post(endpoint.incidents.declareMajor(incident.id), {
-      //     ...form,
-      //     attachments: attachmentMeta,
-      //   });
+      const res = await post(`${endpoint.incident_ticket.declare_major}/${incident.id}/declare-major`, {
+        ...form,
+        attachments: attachmentMeta,
+      });
+      if (!res.success) throw new Error("Failed to declare");
+      return res.data;
     },
     onSuccess: () => {
       toast.success("Major Incident declared successfully");

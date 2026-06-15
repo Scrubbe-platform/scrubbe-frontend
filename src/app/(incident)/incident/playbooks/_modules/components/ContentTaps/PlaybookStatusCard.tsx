@@ -1,6 +1,9 @@
 "use client";
-import React from "react";
-import { TriangleAlert, Copy, Play } from "lucide-react";
+import React, { useState } from "react";
+import { TriangleAlert, Copy, Play, Loader2 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 const getPlaybookTitle = (incident: IncidentDetailRecord) =>
@@ -15,7 +18,60 @@ const severityToRiskLevel = (incident: IncidentDetailRecord): number => {
 };
 
 export default function PlaybookStatusCard({ incident }: { incident: IncidentDetailRecord }) {
-  const playbookTitle = getPlaybookTitle(incident);
+  const { post } = useFetch();
+  const queryClient = useQueryClient();
+  const [cloneMsg, setCloneMsg] = useState("");
+
+  const { data: matchedPlaybook } = useQuery({
+    queryKey: ["playbook-matched-id", incident.id],
+    queryFn: async () => {
+      const res = await post(endpoint.playbooks.match, {
+        serviceNames: (incident.service || incident.affectedSystem)
+          ? [incident.service || incident.affectedSystem]
+          : undefined,
+        incidentType: incident.category || incident.sourceType,
+        signalTypes: incident.detection ? [incident.detection] : undefined,
+      });
+      const matches: any[] = res.data?.data?.matches ?? res.data?.data ?? [];
+      // Each match is { playbook, confidenceScore } — extract the playbook
+      return (matches[0]?.playbook ?? matches[0]) ?? null;
+    },
+    enabled: !!incident.id,
+    staleTime: 30_000,
+  });
+
+  const cloneMutation = useMutation({
+    mutationFn: async () => {
+      if (!matchedPlaybook?.id) throw new Error("No playbook to clone");
+      const res = await post(`${endpoint.playbooks.clone}/${matchedPlaybook.id}/clone`, {});
+      if (!res.success) throw new Error("Clone failed");
+      return res.data;
+    },
+    onSuccess: () => {
+      setCloneMsg("Cloned ✓");
+      queryClient.invalidateQueries({ queryKey: ["playbooks"] });
+      setTimeout(() => setCloneMsg(""), 3000);
+    },
+    onError: () => setCloneMsg("Clone failed"),
+  });
+
+  const dryRunMutation = useMutation({
+    mutationFn: async () => {
+      if (!matchedPlaybook?.id) throw new Error("No playbook to run");
+      const res = await post(`${endpoint.playbooks.execute}/${matchedPlaybook.id}/execute`, {
+        ticketId: incident.id,
+        confidenceScore: matchedPlaybook.confidenceScore ?? 0.91,
+      });
+      if (!res.success) throw new Error("Execution failed");
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["playbook-executions", incident.id] });
+      queryClient.invalidateQueries({ queryKey: ["playbook-execution-active", incident.id] });
+    },
+  });
+
+  const playbookTitle = matchedPlaybook?.name ?? getPlaybookTitle(incident);
   const serviceName   = incident.service || incident.affectedSystem || "unknown-service";
   const stageLabel    = incident.lifecycleStep === "Resolved" ? "STAGE 6 · RESOLVED" : "STAGE 3 · ASSISTED EXECUTION";
   const versionLabel  = incident.environment || "runtime";
@@ -25,7 +81,7 @@ export default function PlaybookStatusCard({ incident }: { incident: IncidentDet
 
   const riskLevel = severityToRiskLevel(incident);
   const automationLevels = [
-    { label: "playbook", value: "3",              active: true  },
+    { label: "playbook", value: String(matchedPlaybook?.automationLevel ?? 3), active: true  },
     { label: "policy",   value: "3",              active: true  },
     { label: "risk",     value: String(riskLevel), active: false },
   ];
@@ -58,18 +114,26 @@ export default function PlaybookStatusCard({ incident }: { incident: IncidentDet
 
         {/* Right — actions */}
         <div className="flex items-center gap-2 shrink-0">
-          {[
-            { icon: <Copy className="h-3 w-3" />, label: "Clone"   },
-            { icon: <Play className="h-3 w-3" />, label: "Dry Run" },
-          ].map(({ icon, label }) => (
-            <button
-              key={label}
-              className="flex items-center gap-2 rounded-lg border border-zinc-500 dark:border-zinc-700 px-3 py-1.5 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-            >
-              <span className="text-zinc-400 dark:text-zinc-500">{icon}</span>
-              {label}
-            </button>
-          ))}
+          <button
+            onClick={() => cloneMutation.mutate()}
+            disabled={cloneMutation.isPending || !matchedPlaybook}
+            className="flex items-center gap-2 rounded-lg border border-zinc-500 dark:border-zinc-700 px-3 py-1.5 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+          >
+            <span className="text-zinc-400 dark:text-zinc-500">
+              {cloneMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Copy className="h-3 w-3" />}
+            </span>
+            {cloneMsg || "Clone"}
+          </button>
+          <button
+            onClick={() => dryRunMutation.mutate()}
+            disabled={dryRunMutation.isPending || !matchedPlaybook}
+            className="flex items-center gap-2 rounded-lg border border-zinc-500 dark:border-zinc-700 px-3 py-1.5 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+          >
+            <span className="text-zinc-400 dark:text-zinc-500">
+              {dryRunMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+            </span>
+            {dryRunMutation.isPending ? "Running…" : dryRunMutation.isSuccess ? "Started ✓" : "Dry Run"}
+          </button>
         </div>
       </div>
 
