@@ -265,4 +265,24 @@ export const endpoint = {
     remove: "/service-map",                  // DELETE /service-map/:id
     removeDependency: "/service-map/dependencies", // DELETE /service-map/dependencies/:depId
   },
+  postmortems: {
+    list: "/postmortems",                    // GET /postmortems
+    getOne: "/postmortems",                  // GET /postmortems/:id
+    summary: "/postmortems/summary",         // GET /postmortems/summary
+    sections: "/postmortems",                // GET /postmortems/:id/sections
+    section: "/postmortems",                 // PATCH /postmortems/:id/sections/:type
+    submitReview: "/postmortems",            // POST /postmortems/:id/submit-review
+    approve: "/postmortems",                 // POST /postmortems/:id/approve
+    archive: "/postmortems",                 // POST /postmortems/:id/archive
+    restore: "/postmortems",                 // POST /postmortems/:id/restore
+    actions: "/postmortems",                 // GET/POST /postmortems/:id/actions
+    action: "/postmortems",                  // PATCH /postmortems/:id/actions/:actionId
+    audit: "/postmortems",                   // GET /postmortems/:id/audit
+  },
+  investigation_analysis: {
+    get: "/investigation-analysis",          // GET /investigation-analysis/:incidentId
+    generate: "/investigation-analysis",     // POST /investigation-analysis/:incidentId/generate
+    intelligence: "/investigation-analysis", // POST /investigation-analysis/:incidentId/intelligence
+    versions: "/investigation-analysis",     // GET /investigation-analysis/:incidentId/versions
+  },
 };

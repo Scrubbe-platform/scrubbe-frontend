@@ -123,6 +123,35 @@ const SEV_COLOR: Record<string, string> = {
   P4: "text-sky-500",
 };
 
+function mapPriority(p?: string): string {
+  if (!p) return "P3";
+  const m: Record<string, string> = { CRITICAL: "P0", HIGH: "P1", MEDIUM: "P2", LOW: "P3" };
+  return m[p.toUpperCase()] ?? p;
+}
+
+function mapStatus(s?: string): string {
+  const m: Record<string, string> = {
+    APPROVED: "Approved", IN_REVIEW: "In Review", DRAFT: "Draft", ARCHIVED: "Archived",
+  };
+  return m[s ?? ""] ?? s ?? "Draft";
+}
+
+function calcDuration(createdAt?: string, resolvedAt?: string): string {
+  if (!createdAt || !resolvedAt) return "--";
+  const mins = Math.round((new Date(resolvedAt).getTime() - new Date(createdAt).getTime()) / 60_000);
+  return mins < 60 ? `${mins}m` : `${Math.round(mins / 60)}h`;
+}
+
+function extractRootCause(rca: any): string {
+  if (!rca) return "Unknown";
+  if (typeof rca === "string") return rca.slice(0, 40);
+  if (typeof rca === "object") {
+    const keys = ["category", "title", "cause", "summary"];
+    for (const k of keys) { if (rca[k]) return String(rca[k]).slice(0, 40); }
+  }
+  return "Unknown";
+}
+
 const columns: ColumnDef<PostmortemRow>[] = [
   {
     id: "incidentId",
@@ -130,7 +159,7 @@ const columns: ColumnDef<PostmortemRow>[] = [
     accessorKey: "incidentId",
     cell: (info) => (
       <Link
-        href={`/incident/postmortems/${info.getValue() as string}`}
+        href={`/incident/postmortems/${(info.row.original as PostmortemRow).id}`}
         className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
         onClick={(e) => e.stopPropagation()}
       >
@@ -239,25 +268,39 @@ export default function PostmortemListPage() {
   const { data: apiData } = useQuery({
     queryKey: ["postmortems-list", page],
     queryFn: async () => {
-      const res = await get(endpoint.incident_ticket.get_postmortems);
-      const items: any[] = res.data?.data ?? [];
-      return items.map((pm: any): PostmortemRow => ({
-        id: pm.id ?? pm.ticketId ?? pm.incidentId,
-        incidentId: pm.ticketId ?? pm.incidentId ?? pm.id,
-        severity: pm.severity ?? pm.priority ?? "P3",
-        service: pm.service ?? pm.affectedSystem ?? "Unknown",
-        duration: pm.elapsedLabel ?? pm.duration ?? "--",
-        rootCause: pm.rootCause ?? pm.causeCategory ?? "Unknown",
-        environment: pm.environment ?? "Production",
-        owner: pm.assignedToName ?? pm.assignedToEmail ?? pm.owningSquad ?? "Unassigned",
-        generated: pm.updatedAt ? new Date(pm.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "--",
-        status: pm.status === "RESOLVED" ? "Approved" : "In Review",
-      }));
+      const res = await get(`${endpoint.postmortems.list}?page=${page}&limit=20`);
+      const payload = res.data?.data ?? res.data ?? {};
+      const items: any[] = payload.data ?? [];
+      return {
+        rows: items.map((pm: any): PostmortemRow => ({
+          id: pm.id,
+          incidentId: pm.ticket?.ticketId ?? pm.ticketId ?? pm.id,
+          severity: mapPriority(pm.ticket?.priority),
+          service: pm.ticket?.serviceArea ?? pm.ticket?.affectedSystem ?? "Unknown",
+          duration: calcDuration(pm.ticket?.createdAt, pm.ticket?.resolvedAt),
+          rootCause: extractRootCause(pm.rootCauseAnalysis),
+          environment: pm.ticket?.environment ?? "Production",
+          owner: pm.author ? `${pm.author.firstName} ${pm.author.lastName}`.trim() : "Unassigned",
+          generated: pm.updatedAt ? new Date(pm.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "--",
+          status: mapStatus(pm.status),
+        })),
+        pagination: payload.pagination ?? { total: items.length, page: 1, pages: 1 },
+      };
     },
     staleTime: 30_000,
   });
 
-  const rows = apiData && apiData.length > 0 ? apiData : ROWS;
+  const { data: summaryData } = useQuery({
+    queryKey: ["postmortems-summary"],
+    queryFn: async () => {
+      const res = await get(endpoint.postmortems.summary);
+      return res.data?.data ?? null;
+    },
+    staleTime: 60_000,
+  });
+
+  const rows = apiData?.rows && apiData.rows.length > 0 ? apiData.rows : ROWS;
+  const paginationMeta = apiData?.pagination;
   const totalPages = Math.max(1, Math.ceil(rows.length / 20));
 
   return (
@@ -292,7 +335,12 @@ export default function PostmortemListPage() {
 
         {/* ── Stats ── */}
         <div className="grid grid-cols-4 gap-4 mb-8">
-          {STATS.map((s) => (
+          {[
+            { label: "TOTAL POSTMORTEMS", value: summaryData?.total ?? STATS[0].value, trend: `${summaryData?.approvedLast30Days ?? 0} approved`, trendLabel: "last 30 days", trendColor: "text-emerald-500" },
+            { label: "DRAFT", value: summaryData?.draft ?? STATS[1].value, trend: "", trendLabel: "awaiting review", trendColor: "text-zinc-400" },
+            { label: "IN REVIEW", value: summaryData?.inReview ?? STATS[2].value, trend: "", trendLabel: "pending approval", trendColor: "text-orange-500", valueColor: summaryData?.inReview > 0 ? "text-orange-500" : undefined },
+            { label: "APPROVED", value: summaryData?.approved ?? STATS[3].value, trend: `↑ ${summaryData?.approvedLast30Days ?? 0}`, trendLabel: "this month", trendColor: "text-emerald-500" },
+          ].map((s: any) => (
             <div
               key={s.label}
               className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 bg-white dark:bg-zinc-900/40"
@@ -306,12 +354,8 @@ export default function PostmortemListPage() {
                 {s.value}
               </p>
               <p className="text-[12px]">
-                <span className={`font-semibold ${s.trendColor}`}>
-                  ↑ {s.trend}
-                </span>
-                <span className="text-zinc-400 dark:text-zinc-500 ml-1">
-                  {s.trendLabel}
-                </span>
+                {s.trend && <span className={`font-semibold ${s.trendColor}`}>{s.trend}</span>}
+                <span className="text-zinc-400 dark:text-zinc-500 ml-1">{s.trendLabel}</span>
               </p>
             </div>
           ))}
@@ -323,7 +367,7 @@ export default function PostmortemListPage() {
             <p className="text-[14px] font-bold text-zinc-900 dark:text-zinc-100">
               Incident Postmortems{" "}
               <span className="font-normal text-zinc-400 dark:text-zinc-500">
-                1,284 total
+                {paginationMeta?.total ?? rows.length} total
               </span>
             </p>
             <div className="flex items-center gap-3">
@@ -340,14 +384,14 @@ export default function PostmortemListPage() {
             data={rows}
             columns={columns}
             onRowClick={(row) =>
-              router.push(`/incident/postmortems/${row.incidentId}`)
+              router.push(`/incident/postmortems/${row.id}`)
             }
           />
 
           {/* Pagination */}
           <div className="flex items-center justify-between px-5 py-4 border-t border-zinc-100 dark:border-zinc-800">
             <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
-              Showing 1-4 of 1,284 postmortems
+              Showing {rows.length} of {paginationMeta?.total ?? rows.length} postmortems
             </p>
             <div className="flex items-center gap-1">
               <button

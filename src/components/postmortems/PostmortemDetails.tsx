@@ -1403,21 +1403,34 @@ const TAG_STYLES: Record<string, string> = {
 export default function PostmortemDetailPage({ incidentId }: { incidentId?: string }) {
   const { get } = useFetch();
   const [activeTab, setActiveTab] = useState<TabId>("Incident Overview");
+  const [lifecycleLoading, setLifecycleLoading] = useState(false);
 
-  const { data: live } = useQuery({
+  const { data: live, refetch } = useQuery({
     queryKey: ["postmortem-detail", incidentId],
     queryFn: async () => {
       if (!incidentId) return null;
-      const res = await get(`${endpoint.incident_ticket.get_postmortems}/${incidentId}`);
+      const res = await get(`${endpoint.postmortems.getOne}/${incidentId}`);
       return res.success ? (res.data?.data ?? null) : null;
     },
     enabled: !!incidentId,
     staleTime: 30_000,
   });
 
+  const handleLifecycle = async (action: "submit-review" | "approve" | "archive" | "restore") => {
+    if (!incidentId) return;
+    setLifecycleLoading(true);
+    try {
+      const { apiClient } = await import("@/lib/api/apiClient");
+      await apiClient.post(`${endpoint.postmortems.submitReview}/${incidentId}/${action}`);
+      await refetch();
+    } catch {}
+    setLifecycleLoading(false);
+  };
+
+  const pmStatus: string = live?.status ?? "DRAFT";
+
   const pmId = live?.ticketId ?? live?.id ?? PM.incidentId;
   const pmSeverity = live?.severity ? `${live.severity} — ${live.priority ?? ""}`.trim() : PM.incidentOverview.severity;
-  const pmStatus = live?.status ? live.status.charAt(0) + live.status.slice(1).toLowerCase() : PM.incidentOverview.status;
   const pmEnv = live?.environment ?? PM.incidentOverview.environment;
   const pmDuration = live?.elapsedLabel ?? PM.incidentOverview.duration;
   const pmService = live?.service ?? live?.affectedSystem ?? undefined;
@@ -1449,6 +1462,42 @@ export default function PostmortemDetailPage({ incidentId }: { incidentId?: stri
           <ArrowLeft size={14} /> Back to Postmortems
         </Link>
         <div className="flex items-center gap-2">
+          {pmStatus === "DRAFT" && (
+            <button
+              onClick={() => handleLifecycle("submit-review")}
+              disabled={lifecycleLoading}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-blue-300 text-[13px] font-semibold text-blue-600 hover:bg-blue-50 transition-colors disabled:opacity-50"
+            >
+              <FileEdit size={14} /> Submit for Review
+            </button>
+          )}
+          {pmStatus === "IN_REVIEW" && (
+            <button
+              onClick={() => handleLifecycle("approve")}
+              disabled={lifecycleLoading}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-emerald-300 text-[13px] font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-50"
+            >
+              <ShieldCheck size={14} /> Approve
+            </button>
+          )}
+          {pmStatus === "APPROVED" && (
+            <button
+              onClick={() => handleLifecycle("archive")}
+              disabled={lifecycleLoading}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-zinc-300 text-[13px] font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50"
+            >
+              Archive
+            </button>
+          )}
+          {pmStatus === "ARCHIVED" && (
+            <button
+              onClick={() => handleLifecycle("restore")}
+              disabled={lifecycleLoading}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-zinc-300 text-[13px] font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50"
+            >
+              Restore to Draft
+            </button>
+          )}
           {[
             { icon: <Share2 size={14} />, label: "Share" },
             { icon: <FileText size={14} />, label: "Export PDF" },
@@ -1500,7 +1549,17 @@ export default function PostmortemDetailPage({ incidentId }: { incidentId?: stri
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {PM.tags.map((tag) => (
+            {live?.status && (
+              <span className={`text-[12px] font-semibold px-2.5 py-1 rounded border ${
+                live.status === "APPROVED" ? "text-emerald-600 border-emerald-300 bg-emerald-50" :
+                live.status === "IN_REVIEW" ? "text-blue-600 border-blue-300 bg-blue-50" :
+                live.status === "ARCHIVED" ? "text-zinc-500 border-zinc-300 bg-zinc-100" :
+                "text-zinc-600 border-zinc-200"
+              }`}>
+                {live.status === "APPROVED" ? "✓ " : ""}{live.status.replace("_", " ")}
+              </span>
+            )}
+            {!live && PM.tags.map((tag) => (
               <span
                 key={tag}
                 className={`text-[12px] font-semibold px-2.5 py-1 rounded border ${TAG_STYLES[tag] ?? "text-zinc-600 border-zinc-200"}`}
