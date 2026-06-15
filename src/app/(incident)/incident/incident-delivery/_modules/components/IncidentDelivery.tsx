@@ -14,10 +14,11 @@ import CButton from "@/components/ui/Cbutton";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useIncidentWorkspace } from "@/hooks/useIncidentWorkspace";
 
 const IncidentDelivery = ({ incident }: { incident: IncidentDetailRecord }) => {
   const queryClient = useQueryClient();
-
+  const { comments } = useIncidentWorkspace();
   const handleSaveDraft = () => {
     queryClient.invalidateQueries({ queryKey: ["decisions-log", incident.id] });
     queryClient.invalidateQueries({
@@ -44,7 +45,7 @@ const IncidentDelivery = ({ incident }: { incident: IncidentDetailRecord }) => {
             <Evidence incident={incident} />
             <IncidentDetails incident={incident} />
             <DecisionLog incidentId={incident.id} />
-            <AnalystNotes incident={incident} />
+            <AnalystNotes incident={incident} notes={comments} />
           </div>
           <div className="flex-1 space-y-4">
             <LinksThatOpen incident={incident} />

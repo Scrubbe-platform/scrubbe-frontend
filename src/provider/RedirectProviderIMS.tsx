@@ -14,7 +14,7 @@ interface RedirectContextType {
 }
 
 const RedirectContext = createContext<RedirectContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export const RedirectProviderIMS = ({ children }: { children: ReactNode }) => {
@@ -23,16 +23,17 @@ export const RedirectProviderIMS = ({ children }: { children: ReactNode }) => {
 
   // Warn at 14 minutes; dismiss the toast if the user becomes active before logout
   useIdle(
-    14 * 60 * 1000,
-    () => toast.warning("You will be logged out in 1 minute due to inactivity.", {
-      id: "inactivity-warn",
-      duration: 60000,
-    }),
+    38 * 60 * 1000,
+    () =>
+      toast.warning("You will be logged out in 1 minute due to inactivity.", {
+        id: "inactivity-warn",
+        duration: 60000,
+      }),
     () => toast.dismiss("inactivity-warn"),
   );
 
   // Log out at 15 minutes of inactivity
-  useIdle(15 * 60 * 1000, handleLogout);
+  useIdle(40 * 60 * 1000, handleLogout);
 
   const router = useRouter();
 

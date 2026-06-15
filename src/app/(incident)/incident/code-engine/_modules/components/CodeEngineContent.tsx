@@ -339,15 +339,7 @@ function CodeEngineContent() {
                 </button>
               );
             })}
-            <div className="ml-auto items-center gap-2 pr-4 text-[11px] text-gray-600 dark:text-neutral-400 md:flex hidden">
-              <span>{filename}</span>
-              <span>·</span>
-              <span>{analysis.ticketId}</span>
-              <span>·</span>
-              <span className={confidenceColor(confidence)}>
-                conf: {confidence}%
-              </span>
-            </div>
+            <div className="ml-auto items-center gap-2 pr-4 text-[11px] text-gray-600 dark:text-neutral-400 md:flex hidden"></div>
           </div>
 
           {/* File subbar */}

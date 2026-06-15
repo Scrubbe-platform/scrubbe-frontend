@@ -40,7 +40,7 @@ const IncidentHeader = ({
     {
       id: "overview",
       label: "Overview",
-      link: `/incident?id=${activeId}&tab=overview`,
+      link: `/incident/tickets?id=${activeId}`,
     },
     {
       id: "signal-graph",

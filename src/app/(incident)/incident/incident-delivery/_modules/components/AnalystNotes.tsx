@@ -2,7 +2,10 @@
 import React, { useState } from "react";
 import SideModal from "@/components/ui/SideModal";
 import AnalystNote from "./Modal/AnalystNote";
-import { IncidentDetailRecord } from "@/lib/incident/incident.types";
+import {
+  IncidentCommentRecord,
+  IncidentDetailRecord,
+} from "@/lib/incident/incident.types";
 
 interface AnalystNoteItem {
   id: string;
@@ -13,16 +16,18 @@ interface AnalystNoteItem {
 
 interface AnalystNotesProps {
   incident: IncidentDetailRecord;
-  notes?: AnalystNoteItem[];
+  notes?: IncidentCommentRecord[];
 }
 
-const AnalystNotes: React.FC<AnalystNotesProps> = ({ incident, notes = [] }) => {
+const AnalystNotes: React.FC<AnalystNotesProps> = ({
+  incident,
+  notes = [],
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
-
         {/* Header */}
         <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
           <div className="space-y-0.5">
@@ -33,7 +38,8 @@ const AnalystNotes: React.FC<AnalystNotesProps> = ({ incident, notes = [] }) => 
               Notes & observations
             </p>
             <p className="text-[12px] text-black dark:text-zinc-500">
-              Notes include author + timestamp and become part of the evidence pack.
+              Notes include author + timestamp and become part of the evidence
+              pack.
             </p>
           </div>
           <button
@@ -54,21 +60,21 @@ const AnalystNotes: React.FC<AnalystNotesProps> = ({ incident, notes = [] }) => 
             </div>
           ) : (
             <div className="space-y-2">
-              {notes.map((note) => (
+              {notes?.map((note) => (
                 <div
-                  key={note.id}
+                  key={note?.id}
                   className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-semibold text-black dark:text-zinc-400">
-                      {note.author}
+                    <span className="text-[11px] font-semibold text-black dark:text-zinc-400 capitalize">
+                      {note?.author?.firstName}
                     </span>
                     <span className="text-[11px] font-mono text-black dark:text-zinc-600 tabular-nums">
-                      {note.timestamp}
+                      {note?.createdAt}
                     </span>
                   </div>
                   <p className="text-[13px] text-zinc-600 dark:text-zinc-300 leading-relaxed">
-                    {note.content}
+                    {note?.content}
                   </p>
                 </div>
               ))}
