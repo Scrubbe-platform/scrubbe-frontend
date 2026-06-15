@@ -95,7 +95,7 @@ const IncidentHeader = ({
           </h1>
 
           {/* Meta chips */}
-          <div className="flex flex-wrap gap-1.5">
+          {/* <div className="flex flex-wrap gap-1.5">
             {[
               incident.service,
               incident.region,
@@ -112,7 +112,7 @@ const IncidentHeader = ({
                   {val}
                 </span>
               ))}
-          </div>
+          </div> */}
         </div>
 
         {/* Actions */}

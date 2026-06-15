@@ -206,7 +206,7 @@ function CodeEngineContent() {
   return (
     <div className="flex flex-col h-screen bg-white dark:bg-grayscrubbe-900 text-black dark:text-slate-200 font-sans text-sm">
       {/* ── TOP NAV ── */}
-      <header className="flex items-center justify-between px-4 h-10 bg-white dark:bg-grayscrubbe-900 border-b border-gray-200 dark:border-neutral-800 shrink-0">
+      {/* <header className="flex items-center justify-between px-4 h-10 bg-white dark:bg-grayscrubbe-900 border-b border-gray-200 dark:border-neutral-800 shrink-0">
         <div className="flex items-center gap-2.5">
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-red-700 text-red-600 bg-red-50 dark:bg-red-950/40 text-[11px] font-bold tracking-wider">
             INCIDENT
@@ -241,7 +241,7 @@ function CodeEngineContent() {
             {analysis.status}
           </span>
         </div>
-      </header>
+      </header> */}
 
       {/* ── NO FIX YET: PRE-ANALYSIS STATE ── */}
       {!fix && (
