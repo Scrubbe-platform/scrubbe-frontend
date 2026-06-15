@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { DiffEditor } from "@monaco-editor/react";
 import { apiClient } from "@/lib/api/apiClient";
 import { endpoint } from "@/lib/api/endpoint";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 interface CodeFix {
   filePath: string;
@@ -64,6 +66,7 @@ function CodeEngineContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const incidentParam = searchParams.get("id");
+  const pathname = usePathname();
 
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -318,7 +321,7 @@ function CodeEngineContent() {
       {fix && (
         <>
           {/* Tabs */}
-          <div className="flex items-stretch bg-white dark:bg-grayscrubbe-800 border-b border-gray-200 dark:border-neutral-800 shrink-0 pl-2">
+          <div className="flex items-end bg-white dark:bg-grayscrubbe-800 border-b border-gray-200 dark:border-neutral-800 shrink-0 pl-2">
             {(["original", "diff"] as const).map((t) => {
               const active = view === t;
               const label = t === "original" ? "FAILED CODE" : "EZRA FIX";
@@ -339,7 +342,23 @@ function CodeEngineContent() {
                 </button>
               );
             })}
-            <div className="ml-auto items-center gap-2 pr-4 text-[11px] text-gray-600 dark:text-neutral-400 md:flex hidden"></div>
+            <div className="ml-auto items-center gap-2 pr-4 text-[11px] text-gray-600 dark:text-neutral-400 md:flex hidden py-2">
+              <Link
+                href={`${pathname}/analysis?id=${incidentParam}`}
+                className="px-5 py-2.5 flex items-center gap-2 rounded-lg text-sm font-bold text-white border-none hover:brightness-110 transition-all"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
+                }}
+              >
+                View Investigation Analysis
+                <ArrowRight size={16} />
+              </Link>
+              <span>·</span>
+              <span className={confidenceColor(confidence)}>
+                conf: {confidence}%
+              </span>
+            </div>
           </div>
 
           {/* File subbar */}
