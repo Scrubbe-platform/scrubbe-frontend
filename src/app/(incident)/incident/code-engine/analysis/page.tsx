@@ -10,7 +10,7 @@ import {
 } from "../_modules/types/invetigation";
 import { useRouter } from "next/navigation";
 
-export const mockReports: Record<
+const mockReports: Record<
   "contributed" | "not-contributed",
   ReportData
 > = {
