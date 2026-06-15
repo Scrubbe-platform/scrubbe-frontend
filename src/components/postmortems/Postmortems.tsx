@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Columns,
@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MoreVertical,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -28,92 +29,6 @@ interface PostmortemRow {
   generated: string;
   status: string;
 }
-
-// ── Dummy data ────────────────────────────────────────────────────
-const ROWS: PostmortemRow[] = [
-  {
-    id: "pm-1",
-    incidentId: "SI-7939763",
-    severity: "P1",
-    service: "Checkout",
-    duration: "14m",
-    rootCause: "Deployment",
-    environment: "Production",
-    owner: "Platform Team",
-    generated: "May 14, 2026",
-    status: "Approved",
-  },
-  {
-    id: "pm-2",
-    incidentId: "SI-7939754",
-    severity: "P2",
-    service: "Payments",
-    duration: "22m",
-    rootCause: "Database",
-    environment: "Production",
-    owner: "Backend Team",
-    generated: "May 13, 2026",
-    status: "Approved",
-  },
-  {
-    id: "pm-3",
-    incidentId: "SI-7939738",
-    severity: "P1",
-    service: "Auth",
-    duration: "8m",
-    rootCause: "Config Drift",
-    environment: "Production",
-    owner: "SRE Team",
-    generated: "May 11, 2026",
-    status: "Approved",
-  },
-  {
-    id: "pm-4",
-    incidentId: "SI-7939721",
-    severity: "P3",
-    service: "API Gateway",
-    duration: "33m",
-    rootCause: "Dependency",
-    environment: "Staging",
-    owner: "Platform Team",
-    generated: "May 10, 2026",
-    status: "Approved",
-  },
-];
-
-const STATS = [
-  {
-    label: "TOTAL POSTMORTEMS",
-    value: "1,284",
-    trend: "+4.2%",
-    trendLabel: "vs last month",
-    trendColor: "text-emerald-500",
-  },
-  {
-    label: "AVERAGE RESOLUTION TIME",
-    value: "12 m",
-    trend: "+18%",
-    trendLabel: "improvement",
-    trendColor: "text-emerald-500",
-  },
-  {
-    label: "REPEAT INCIDENTS",
-    value: "18",
-    trend: "↑ 2",
-    trendLabel: "since last week",
-    trendColor: "text-orange-500",
-    valueColor: "text-orange-500",
-  },
-  {
-    label: "PLAYBOOKS UPDATED",
-    value: "342",
-    trend: "↑ 12",
-    trendLabel: "this month",
-    trendColor: "text-emerald-500",
-  },
-];
-
-const ACTIVE_FILTERS = ["Production", "Last 30 days", "Approved"];
 
 const SEV_COLOR: Record<string, string> = {
   P0: "text-red-600",
@@ -299,9 +214,10 @@ export default function PostmortemListPage() {
     staleTime: 60_000,
   });
 
-  const rows = apiData?.rows && apiData.rows.length > 0 ? apiData.rows : ROWS;
+  const rows: PostmortemRow[] = apiData?.rows ?? [];
   const paginationMeta = apiData?.pagination;
-  const totalPages = Math.max(1, Math.ceil(rows.length / 20));
+  const totalPages = Math.max(1, paginationMeta?.pages ?? 1);
+  const isLoading = !apiData;
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 p-8">
@@ -315,31 +231,13 @@ export default function PostmortemListPage() {
           learned, and operational improvements.
         </p>
 
-        {/* ── Active filters ── */}
-        <div className="flex items-center gap-2 mb-5 flex-wrap">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-            Active Filters:
-          </span>
-          {ACTIVE_FILTERS.map((f) => (
-            <span
-              key={f}
-              className="flex items-center gap-1.5 text-[12px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full px-3 py-1 border border-zinc-200 dark:border-zinc-700"
-            >
-              {f}
-              <button className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-
         {/* ── Stats ── */}
         <div className="grid grid-cols-4 gap-4 mb-8">
           {[
-            { label: "TOTAL POSTMORTEMS", value: summaryData?.total ?? STATS[0].value, trend: `${summaryData?.approvedLast30Days ?? 0} approved`, trendLabel: "last 30 days", trendColor: "text-emerald-500" },
-            { label: "DRAFT", value: summaryData?.draft ?? STATS[1].value, trend: "", trendLabel: "awaiting review", trendColor: "text-zinc-400" },
-            { label: "IN REVIEW", value: summaryData?.inReview ?? STATS[2].value, trend: "", trendLabel: "pending approval", trendColor: "text-orange-500", valueColor: summaryData?.inReview > 0 ? "text-orange-500" : undefined },
-            { label: "APPROVED", value: summaryData?.approved ?? STATS[3].value, trend: `↑ ${summaryData?.approvedLast30Days ?? 0}`, trendLabel: "this month", trendColor: "text-emerald-500" },
+            { label: "TOTAL POSTMORTEMS", value: summaryData?.total ?? "--", trend: `${summaryData?.approvedLast30Days ?? 0} approved`, trendLabel: "last 30 days", trendColor: "text-emerald-500" },
+            { label: "DRAFT", value: summaryData?.draft ?? "--", trend: "", trendLabel: "awaiting review", trendColor: "text-zinc-400" },
+            { label: "IN REVIEW", value: summaryData?.inReview ?? "--", trend: "", trendLabel: "pending approval", trendColor: "text-orange-500", valueColor: summaryData?.inReview > 0 ? "text-orange-500" : undefined },
+            { label: "APPROVED", value: summaryData?.approved ?? "--", trend: `↑ ${summaryData?.approvedLast30Days ?? 0}`, trendLabel: "this month", trendColor: "text-emerald-500" },
           ].map((s: any) => (
             <div
               key={s.label}
@@ -380,13 +278,22 @@ export default function PostmortemListPage() {
             </div>
           </div>
 
-          <Table
-            data={rows}
-            columns={columns}
-            onRowClick={(row) =>
-              router.push(`/incident/postmortems/${row.id}`)
-            }
-          />
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 size={22} className="animate-spin text-zinc-400" />
+            </div>
+          ) : rows.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-zinc-400 dark:text-zinc-500">
+              <p className="text-[14px] font-medium">No postmortems found</p>
+              <p className="text-[12px] mt-1">Postmortems are created when incidents are resolved.</p>
+            </div>
+          ) : (
+            <Table
+              data={rows}
+              columns={columns}
+              onRowClick={(row) => router.push(`/incident/postmortems/${row.id}`)}
+            />
+          )}
 
           {/* Pagination */}
           <div className="flex items-center justify-between px-5 py-4 border-t border-zinc-100 dark:border-zinc-800">
