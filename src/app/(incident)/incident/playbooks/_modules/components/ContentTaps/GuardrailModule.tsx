@@ -141,7 +141,10 @@ const GuardrailModule: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   ).length;
 
   return (
-    <div className="w-full rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-5">
+    <div
+      id="guardrail"
+      className="w-full rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-5"
+    >
       <div className="flex justify-between items-start">
         <div className="flex gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 shrink-0">

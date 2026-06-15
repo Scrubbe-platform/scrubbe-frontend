@@ -19,6 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
+import Link from "next/link";
 
 interface PlaybookItem {
   id: string;
@@ -123,13 +124,25 @@ const buildPlaybooks = (incident: IncidentDetailRecord): PlaybookItem[] => {
 // ── Legend ────────────────────────────────────────────────────────
 
 const legends = [
-  { id: 1, label: "Lifecycle Stages", status: "completed" as const },
-  { id: 2, label: "Investigation Steps", status: "active" as const },
-  { id: 3, label: "Remediation Options", status: "pending" as const },
-  { id: 4, label: "Blast Radius Eval", status: "pending" as const },
-  { id: 5, label: "Guardrail Check", status: "pending" as const },
-  { id: 6, label: "Execution Gate", status: "pending" as const },
-  { id: 7, label: "Audit Trail", status: "pending" as const },
+  { id: "trigger", label: "Trigger Condition", status: "completed" as const },
+  {
+    id: "investigation",
+    label: "Investigation Steps",
+    status: "active" as const,
+  },
+  {
+    id: "remediation",
+    label: "Remediation Options",
+    status: "pending" as const,
+  },
+  {
+    id: "blast-radius",
+    label: "Blast Radius Eval",
+    status: "pending" as const,
+  },
+  { id: "guardrail", label: "Guardrail Check", status: "pending" as const },
+  { id: "execution", label: "Execution Gate", status: "pending" as const },
+  { id: "audit", label: "Audit Trail", status: "pending" as const },
 ];
 
 // ── Sidebar ───────────────────────────────────────────────────────
@@ -202,13 +215,14 @@ const PlaybookSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({
           Legend
         </p>
         <div className="flex flex-col gap-2.5">
-          {legends.map(({ id, label, status }) => (
-            <div
-              key={id}
+          {legends.map(({ id, label, status }, idx) => (
+            <Link
+              key={idx}
               className="flex items-center justify-between group cursor-default"
+              href={`#${id}`}
             >
               <span className="text-[12px] text-black dark:text-zinc-400 group-hover:text-black dark:group-hover:text-zinc-200 transition-colors">
-                {id}. {label}
+                {idx + 1}. {label}
               </span>
               {status === "completed" ? (
                 <CheckCircle2
@@ -229,7 +243,7 @@ const PlaybookSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({
                   className="text-zinc-200 dark:text-black shrink-0"
                 />
               )}
-            </div>
+            </Link>
           ))}
         </div>
       </div>

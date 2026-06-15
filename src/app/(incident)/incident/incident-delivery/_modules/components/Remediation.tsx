@@ -94,7 +94,6 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
       variant: "red",
     },
     { icon: <Zap size={13} />, label: "Generate Ezra", variant: "red" },
-    { icon: <Info size={13} />, label: "Suggestion details", variant: "sky" },
     {
       icon: <PlusSquare size={13} />,
       label: "Create PR",
@@ -111,6 +110,7 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
       icon: <ArrowUpRight size={13} />,
       label: "Open Ezra full view",
       variant: "emerald",
+      action: () => router.push(`/incident/ezra`),
     },
   ];
 

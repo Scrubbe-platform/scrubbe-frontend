@@ -12,39 +12,6 @@ import {
   Check,
 } from "lucide-react";
 
-const signals = [
-  {
-    icon: <BeakerIcon size={13} />,
-    label: "CI failed (tests)",
-    variant: "amber",
-  },
-  {
-    icon: <HammerIcon size={13} />,
-    label: "CI failed (build)",
-    variant: "amber",
-  },
-  {
-    icon: <GitPullRequestIcon size={13} />,
-    label: "PR checks failed",
-    variant: "red",
-  },
-  {
-    icon: <GitMergeIcon size={13} />,
-    label: "Merge conflicts",
-    variant: "red",
-  },
-  {
-    icon: <RocketIcon size={13} />,
-    label: "Deploy failed (staging)",
-    variant: "sky",
-  },
-  {
-    icon: <SearchIcon size={13} />,
-    label: "Flaky tests detected",
-    variant: "violet",
-  },
-];
-
 const signalVariant: Record<string, string> = {
   amber:
     "bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/25 text-amber-700 dark:text-amber-400",
@@ -85,18 +52,6 @@ const DeliverySignal = () => (
           <RefreshCcw size={14} />
         </button>
       </div>
-    </div>
-
-    {/* ── Signal buttons ── */}
-    <div className="flex flex-wrap gap-2">
-      {signals.map(({ icon, label, variant }) => (
-        <button
-          key={label}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors hover:opacity-80 ${signalVariant[variant]}`}
-        >
-          {icon} {label}
-        </button>
-      ))}
     </div>
 
     {/* ── Trace ── */}

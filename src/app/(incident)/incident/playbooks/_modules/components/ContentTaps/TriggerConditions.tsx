@@ -128,7 +128,10 @@ const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({
   const conditions = buildConditions(incident);
 
   return (
-    <div className="w-full rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5">
+    <div
+      id="trigger"
+      className="w-full rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5"
+    >
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div className="flex gap-3">

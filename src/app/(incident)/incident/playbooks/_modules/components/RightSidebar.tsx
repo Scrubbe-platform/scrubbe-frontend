@@ -267,27 +267,27 @@ const PlaybookRightSidebar: React.FC<{ incident: IncidentDetailRecord }> = ({
           {[
             {
               label: "resolved",
-              cls: "border-emerald-300 dark:border-emerald-500/40 text-emerald-600 dark:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10",
+              cls: "border-emerald-300 dark:border-emerald-500/40 text-emerald-600 dark:text-emerald-500",
             },
             {
               label: "degraded",
-              cls: "border-amber-300 dark:border-yellow-500/40 text-amber-600 dark:text-yellow-500 hover:bg-amber-50 dark:hover:bg-yellow-500/10",
+              cls: "border-amber-300 dark:border-yellow-500/40 text-amber-600 dark:text-yellow-500 ",
             },
             {
               label: "neutral",
-              cls: "border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-700/20",
+              cls: "border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-500 ",
             },
             {
               label: "worsened",
-              cls: "border-red-300 dark:border-red-500/40 text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10",
+              cls: "border-red-300 dark:border-red-500/40 text-red-600 dark:text-red-500",
             },
           ].map(({ label, cls }) => (
-            <button
+            <div
               key={label}
-              className={`text-[9px] font-bold py-1.5 rounded border capitalize transition-colors ${cls}`}
+              className={`text-[9px] text-center font-bold py-1.5 rounded border capitalize transition-colors ${cls}`}
             >
               {label}
-            </button>
+            </div>
           ))}
         </div>
       </section>
