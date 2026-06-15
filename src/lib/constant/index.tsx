@@ -4,6 +4,7 @@ import {
   Code,
   LayoutDashboard,
   Lock,
+  LucideAlertTriangle,
   LucideDatabaseBackup,
   LucideLayoutDashboard,
   Search,
@@ -13,7 +14,6 @@ import {
   SquareKanban,
   UsersRound,
 } from "lucide-react";
-import { LuRefreshCw } from "react-icons/lu";
 import {
   BsBoxSeam,
   BsBriefcaseFill,
@@ -72,16 +72,36 @@ import { PiBookFill, PiStarFourFill, PiEngineFill } from "react-icons/pi";
 import { RiPencilFill } from "react-icons/ri";
 import { TbTimelineEventFilled } from "react-icons/tb";
 import { HiOutlineLink } from "react-icons/hi";
-import { IoMap } from "react-icons/io5";
-import { HiMiniBuildingOffice } from "react-icons/hi2";
-
+import { IoMap, IoWarningOutline } from "react-icons/io5";
+import {
+  HiMiniBuildingOffice,
+  HiOutlineArrowsRightLeft,
+} from "react-icons/hi2";
+import {
+  LuVideo,
+  LuRefreshCw,
+  LuRadio,
+  LuLayoutGrid,
+  LuFileText,
+  LuGitPullRequest,
+  LuShieldAlert,
+  LuFolderClosed,
+  LuLayers,
+  LuWorkflow,
+} from "react-icons/lu";
+import { FiUser } from "react-icons/fi";
+import { HiOutlineArrowRight } from "react-icons/hi2";
+import { VscSymbolInterface } from "react-icons/vsc";
+import { RxBarChart, RxDisc } from "react-icons/rx";
+import { PiInfinityBold } from "react-icons/pi";
+import { IoSettingsOutline, IoWalletOutline } from "react-icons/io5";
 export type NavItem = {
   name: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Icon: any;
   link: string;
   isMenu?: boolean;
-  isActive: boolean;
+  isActive?: boolean;
   menu?: NavItemChild[];
   description?: string;
   pillText?: string;
@@ -930,245 +950,166 @@ export const popularTimezones = [
 ];
 
 export const NewMenu: Record<string, NavItem[]> = {
-  overview: [
-    {
-      name: "Dashboard",
-      Icon: BiSolidDashboard,
-      link: "/incident",
-      isActive: true,
-      isMenu: false,
-      description: "Health + Active Incidents + Reliability Signals",
-    },
-  ],
-  incident_command: [
-    // {
-    //   name: "New incident",
-    //   Icon: BiPlus,
-    //   description: "Admin-only configuration",
-    //   link: "/incident/tickets/create",
-    //   isActive: false,
-    //   isMenu: false,
-    //   pillText: "create",
-    //   pillBorderColor: "border-green",
-    //   pillTextColor: "text-green",
-    // },
+  incident_management: [
     {
       name: "Incidents",
-      Icon: IoIosWarning,
-      description: "Active, resolved, and backing",
+      Icon: LucideAlertTriangle,
       link: "/incident/tickets",
-      isActive: false,
+      isActive: true,
       isMenu: false,
-      pillText: "list",
     },
     {
-      name: "Delivery Incidents",
-      Icon: ArrowUp,
-      description: "Healable failures before runtime impact",
+      name: "War Rooms",
+      Icon: LuVideo,
+      link: "/incident/war-rooms",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Incident Delivery",
+      Icon: LuRadio,
       link: "/incident/delivery-incidents",
       isActive: false,
       isMenu: false,
-      pillText: "12",
-      pillBorderColor: "border-orange-400",
-      pillTextColor: "text-orange-400",
     },
     {
-      name: "Runtime Warning",
-      Icon: FaBolt,
-      description: "Signal graph guides safe remediation",
-      link: "/incident/runtime-warning",
-      isActive: false,
-      isMenu: false,
-      pillText: "p1",
-      pillBorderColor: "border-red-400",
-      pillTextColor: "text-red-400",
-    },
-    {
-      name: "Playbooks",
-      Icon: PiBookFill,
-      description: "Suggested steps based on Incidents + signals",
-      link: "/incident/playbooks",
-      isActive: false,
-      isMenu: false,
-      pillText: "step 5",
-    },
-    {
-      name: "Past Incidents",
-      Icon: FaRedo,
-      description: "Similarity by service, playbook, and root cause",
-      link: "/incident/past-incidents",
-      isActive: false,
-      isMenu: false,
-      pillText: "History",
-    },
-  ],
-  signals_control: [
-    {
-      name: "Signal Graph",
-      Icon: FaSignal,
-      description: "The substrate for reasoning and remediation",
-      link: "/incident/signal-graph",
-      isActive: false,
-      isMenu: false,
-      pillText: "create",
-    },
-    {
-      name: "Signals",
-      Icon: BsBroadcast,
-      description: "Connect and Scope the exact streams that matter",
-      link: "/incident/signals",
-      isActive: false,
-      isMenu: false,
-      pillText: "list",
-    },
-    {
-      name: "Code Engine",
-      Icon: PiEngineFill,
-      description: "Diffs, rollouts, rollbacks, and verification",
-      link: "/incident/code-engine",
-      isActive: false,
-      isMenu: false,
-      pillText: "list",
-    },
-    {
-      name: "Guardrails",
-      Icon: MdShield,
-      description: "Staging-fit=rst, PR=approval for production",
-      link: "/incident/guardrails",
-      isActive: false,
-      isMenu: false,
-      pillText: "list",
-    },
-  ],
-  ezra: [
-    {
-      name: "Ask Ezra",
-      Icon: FaBrain,
-      description: "SRE detail vs exec narrative vs risk lens",
-      link: "/incident/ezra",
-      isActive: false,
-      isMenu: false,
-      pillText: "Agent",
-      pillBorderColor: "border-IMSCyan",
-      pillTextColor: "text-IMSCyan",
-    },
-    {
-      name: "Incident Summaries",
-      Icon: RiPencilFill,
-      description: "Communication without losing technical truth",
-      link: "/incident/ezra/incident-summaries",
-      isActive: false,
-      isMenu: false,
-      pillText: "brief",
-    },
-    {
-      name: "Post Mortems",
-      Icon: FaBook,
-      description: "SRE detail vs exec narrative vs risk lens",
-      link: "/incident/post-mortems",
-      isActive: false,
-      isMenu: false,
-      pillText: "rca",
-      pillBorderColor: "border-red-400",
-      pillTextColor: "text-red-400",
-    },
-  ],
-  reliability: [
-    {
-      name: "On-call & Escalations",
-      Icon: IoIosCall,
-      description: "Schedules, overrides, escalation policies",
-      link: "/incident/on-call",
-      isActive: false,
-      isMenu: false,
-      pillText: "rota",
-    },
-    {
-      name: "SLO/SLA",
-      Icon: BiSolidChart,
-      description: "Derives from incidents + Signals ( not tickets )",
-      link: "/incident/sla",
-      isActive: false,
-      isMenu: false,
-      pillText: "burn",
-    },
-    {
-      name: "Risk Exposure",
-      Icon: MdBalance,
-      description: "Risk lens informs urgency and guardrails",
-      link: "/incident/risk-exposure",
-      isActive: false,
-      isMenu: false,
-      pillText: "risk",
-    },
-  ],
-  audit: [
-    {
-      name: "Incident Timeline",
-      Icon: TbTimelineEventFilled,
-      description: "What happened, when , and what we did.",
-      link: "/incident/timeline",
-      isActive: false,
-      isMenu: false,
-      pillText: "stream",
-    },
-    {
-      name: "Decision Logs",
-      Icon: FaBook,
-      description: "Governance without ticket-first UX",
-      link: "/incident/decision-logs",
-      isActive: false,
-      isMenu: false,
-      pillText: "audit",
-    },
-    {
-      name: "Workbench",
-      Icon: ArrowLeftRight,
-      description: "Upgrade Incident to major incident (P0)",
+      name: "Major Incidents Workbench",
+      Icon: LuLayoutGrid,
       link: "/incident/workbench",
       isActive: false,
       isMenu: false,
-      pillText: "audit",
     },
-  ],
-  integrations: [
     {
-      name: "Connections",
-      Icon: HiOutlineLink,
-      description: "GitHub/GitLab, Datadog, Grafana, Slack, risk systems",
-      link: "/connections",
+      name: "Postmortems",
+      Icon: LuFileText,
+      link: "/incident/post-mortems",
       isActive: false,
       isMenu: false,
-      pillText: "hook",
     },
     {
-      name: "Service Map",
-      Icon: IoMap,
-      description: "Blast radius and ownership paths",
-      link: "/incident/service-map",
+      name: "Problems",
+      Icon: HiOutlineArrowsRightLeft,
+      link: "/incident/problems",
       isActive: false,
       isMenu: false,
-      pillText: "map",
+    },
+    {
+      name: "On-Call",
+      Icon: FiUsers,
+      link: "/incident/on-call",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Handover",
+      Icon: LuShieldAlert,
+      link: "/incident/handover",
+      isActive: false,
+      isMenu: false,
     },
   ],
-  workspace: [
+  intelligence: [
     {
-      name: "Workspace Settings",
-      Icon: HiMiniBuildingOffice,
-      description: "Environments, regions , access , policies",
+      name: "Intelligence Control Plane",
+      Icon: VscSymbolInterface,
+      link: "/incident/control-plane",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Code Engine",
+      Icon: LuFolderClosed,
+      link: "/incident/code-engine",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Signal Graph",
+      Icon: RxBarChart,
+      link: "/incident/signal-graph",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Playbooks",
+      Icon: LuLayers,
+      link: "/incident/playbooks",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Mother ↔ Child",
+      Icon: RxDisc,
+      link: "/incident/mother-child",
+      isActive: false,
+      isMenu: false,
+    },
+  ],
+  engineering_ecosystem: [
+    {
+      name: "Services",
+      Icon: LuFolderClosed,
+      link: "/incident/services",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Repositories",
+      Icon: LuGitPullRequest,
+      link: "/incident/repositories",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Deployments",
+      Icon: LuLayers,
+      link: "/incident/deployments",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Pipelines",
+      Icon: LuWorkflow,
+      link: "/incident/pipelines",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Infrastructure",
+      Icon: LuLayers,
+      link: "/incident/infrastructure",
+      isActive: false,
+      isMenu: false,
+    },
+  ],
+  platform: [
+    {
+      name: "API & SDK",
+      Icon: LuFolderClosed,
+      link: "/incident/sdk",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Connectors",
+      Icon: PiInfinityBold,
+      link: "/incident/connectors",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Settings",
+      Icon: IoSettingsOutline,
       link: "/incident/settings",
       isActive: false,
       isMenu: false,
-      pillText: "Admin",
     },
     {
-      name: "Notifications",
-      Icon: BsFillBellFill,
-      description: "Routing for war rooms , approvals , updates",
-      link: "/incident/notification",
+      name: "Plans and Billings",
+      Icon: IoWalletOutline,
+      link: "/incident/billing",
       isActive: false,
       isMenu: false,
-      pillText: "list",
     },
   ],
 };

@@ -8,13 +8,14 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import useGetConfig from "@/hooks/useConfig";
 import { useState } from "react";
+import Image from "next/image";
 
 // Collapsed width — wide enough so icons breathe
 const W_COLLAPSED = 64;
-const W_EXPANDED  = 280;
+const W_EXPANDED = 280;
 
 const Sidebar = () => {
-  const pathname  = usePathname();
+  const pathname = usePathname();
   const { collapse } = useSidebar();
   const { imsConfig, isLoading } = useGetConfig();
   const [hovered, setHovered] = useState(false);
@@ -28,12 +29,12 @@ const Sidebar = () => {
       animate={{ width: expanded ? W_EXPANDED : W_COLLAPSED }}
       transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "flex flex-col py-5 overflow-hidden whitespace-nowrap z-40",
-        "bg-white dark:bg-dark",
+        "flex flex-col py-5 overflow-hidden whitespace-nowrap z-40 ",
+        "bg-[#111827] dark:bg-dark",
         "fixed inset-y-0 left-0 md:relative md:inset-auto md:flex",
         "border-r border-zinc-200 dark:border-white/[0.08]",
         "shrink-0",
-        collapse && "hidden"
+        collapse && "hidden",
       )}
     >
       {/* ── Logo ── */}
@@ -46,10 +47,20 @@ const Sidebar = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="h-7 w-[160px] shrink-0"
+              className="h-7 w-[160px] shrink-0 relative"
             >
-              <img src="/IMS/whitelogo.png" alt="scrubbe" className="object-contain h-full hidden dark:block" />
-              <img src="/IMS/blacklogo.png" alt="scrubbe" className="object-contain h-full block dark:hidden" />
+              <Image
+                src="/IMS/whitelogo.png"
+                alt="scrubbe"
+                fill
+                className="object-contain h-full hidden dark:block absolute"
+              />
+              <Image
+                src="/IMS/whitelogo.png"
+                alt="scrubbe"
+                fill
+                className="object-contain h-full block dark:hidden absolute"
+              />
             </motion.div>
           ) : (
             <motion.div
@@ -60,15 +71,27 @@ const Sidebar = () => {
               transition={{ duration: 0.15 }}
               className="flex items-center justify-center w-8 h-7"
             >
-              <img src="/IMS/icons/scrubbe-white-icon.svg"      alt="S" className="h-6 w-6 object-contain hidden dark:block" />
-              <img src="/IMS/icons/scrubbe-icon.svg" alt="S" className="h-6 w-6 object-contain block dark:hidden" />
+              <Image
+                src="/IMS/icons/scrubbe-white-icon.svg"
+                alt="S"
+                height={24}
+                width={24}
+                className="h-6 w-6 object-contain hidden dark:block"
+              />
+              <Image
+                src="/IMS/icons/scrubbe-white-icon.svg"
+                alt="S"
+                height={24}
+                width={24}
+                className="h-6 w-6 object-contain block dark:hidden"
+              />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       {/* ── Org pill ── */}
-      <AnimatePresence initial={false}>
+      {/* <AnimatePresence initial={false}>
         {expanded && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -85,14 +108,14 @@ const Sidebar = () => {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
       {/* ── Menu ── */}
-      <div className="overflow-y-auto overflow-x-hidden flex-1 mt-1">
+      <div className="overflow-y-auto overflow-x-hidden flex-1 mt-1 no-scrollbar">
         {Object.entries(NewMenu).map(([key, items]) => (
           <div
             key={key}
-            className="flex flex-col gap-0.5 mt-3 w-full border-b border-zinc-100 dark:border-white/[0.06] pb-3"
+            className="flex flex-col gap-0.5 mt-3 w-full border-b border-white/15 pb-3"
           >
             {/* Section label */}
             <AnimatePresence initial={false}>
@@ -102,7 +125,7 @@ const Sidebar = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
-                  className="text-[10px] text-zinc-400 dark:text-zinc-500 pl-3 pb-1.5 uppercase font-semibold tracking-widest"
+                  className="text-[14px] text-white pl-3 pb-1.5 uppercase  tracking-widest"
                 >
                   {key.replace("_", " ")}
                 </motion.p>
@@ -144,25 +167,17 @@ const AdminSidebarItem = ({
       <div
         title={!expanded ? item.name : undefined}
         className={cn(
-          "flex items-center rounded-lg cursor-pointer transition-all duration-150 py-2.5 w-full border",
+          "flex items-center cursor-pointer transition-all duration-150 py-2.5 w-full",
           // When collapsed: center the icon with equal padding
           // When expanded: left-align with gap and horizontal padding
           expanded ? "gap-3 px-2.5" : "justify-center px-0",
           active
-            ? "border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800/60"
-            : "border-transparent hover:bg-zinc-50 dark:hover:bg-white/5"
+            ? "border-l-2 border-[#02DD86] bg-[#02DD86]/20 dark:bg-zinc-800/60"
+            : "border-transparent hover:bg-[#02DD86]/20 dark:hover:bg-white/5",
         )}
       >
         {/* Icon — always visible, never squished */}
-        <item.Icon
-          size={18}
-          className={cn(
-            "shrink-0",
-            active
-              ? "text-emerald-500 dark:text-emerald-400"
-              : "text-zinc-400 dark:text-zinc-500"
-          )}
-        />
+        <item.Icon size={18} className={cn("shrink-0 text-white")} />
 
         {/* Label + description — animate in/out */}
         <AnimatePresence initial={false}>
@@ -174,16 +189,13 @@ const AdminSidebarItem = ({
               transition={{ duration: 0.18, ease: "easeOut" }}
               className="overflow-hidden flex-1 min-w-0"
             >
-              <p className={cn(
-                "text-[13px] font-medium leading-tight truncate",
-                active
-                  ? "text-zinc-900 dark:text-zinc-100"
-                  : "text-zinc-600 dark:text-zinc-400"
-              )}>
+              <p
+                className={cn(
+                  "text-[13px] leading-tight truncate",
+                  active ? "text-white" : "text-zinc-100",
+                )}
+              >
                 {item.name}
-              </p>
-              <p className="text-[11px] text-zinc-400 dark:text-zinc-600 leading-tight truncate mt-0.5">
-                {item.description}
               </p>
             </motion.div>
           )}

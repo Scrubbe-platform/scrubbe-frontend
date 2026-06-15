@@ -1,7 +1,8 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Bolt, Info, Check, Plus, TriangleAlert } from "lucide-react";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
+import AddConditionForm from "./AddConditionForm";
 
 type Operator = "eq" | "gt" | "in";
 
@@ -126,7 +127,7 @@ const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({
   incident,
 }) => {
   const conditions = buildConditions(incident);
-
+  const [toggleConditionForm, setToggleConditionForm] = useState(false);
   return (
     <div
       id="trigger"
@@ -176,7 +177,11 @@ const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({
       </div>
 
       {/* Add */}
-      <button className="flex items-center gap-2 rounded-lg border border-zinc-500 dark:border-zinc-700 px-4 py-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+      {toggleConditionForm && <AddConditionForm />}
+      <button
+        onClick={() => setToggleConditionForm((prev) => !prev)}
+        className="flex items-center gap-2 rounded-lg border border-zinc-500 dark:border-zinc-700 px-4 py-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+      >
         <Plus size={14} /> Add Condition
       </button>
     </div>
