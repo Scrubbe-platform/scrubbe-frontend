@@ -14,6 +14,7 @@ import ContextList from "./ContextList";
 import { cn } from "@/lib/utils";
 import { useIncidentWorkspace } from "@/hooks/useIncidentWorkspace";
 import IncidentDetailSkeleton from "@/components/loaders/incidentDetailLoader";
+import Image from "next/image";
 
 type Props = {
   children?: React.ReactNode;
@@ -88,9 +89,7 @@ const IncidentOverview = ({ children, tabs }: Props) => {
 
                 {tabs === "overview" ? (
                   <>
-                    <IncidentLifecycle
-                      currentStep={selectedIncident.lifecycleStep}
-                    />
+                    <IncidentLifecycle incident={selectedIncident} />
                     <DetectionSignals incident={selectedIncident} />
                     <ScrubbeIntelligence incident={selectedIncident} />
                     <IncidentContextModule
@@ -123,10 +122,14 @@ const IncidentOverview = ({ children, tabs }: Props) => {
         {/* Empty state — desktop only, nothing selected and not loading */}
         {!showMainPanel && (
           <div className="hidden md:flex flex-1 items-center justify-center p-10">
-            <div className="max-w-lg rounded-3xl border border-white/10 bg-white/[0.02] p-8 text-center">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
-                Incident Workspace
-              </p>
+            <div className="max-w-lg rounded-xl shadow-md border border-white/10 bg-white/[0.02] p-8 text-center flex flex-col items-center justify-center">
+              <Image
+                src={"/IMS/folder.png"}
+                alt="empty"
+                height={100}
+                width={100}
+              />
+
               <h2 className="mt-4 text-2xl font-bold text-black dark:text-white">
                 Select an incident to open the live workspace
               </h2>

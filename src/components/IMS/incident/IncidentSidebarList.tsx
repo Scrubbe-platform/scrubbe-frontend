@@ -1,6 +1,13 @@
 "use client";
 import React, { useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import {
+  Filter,
+  ListFilter,
+  PlusIcon,
+  Search,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import RaiseIncidentModal from "./IncidentForm";
 import { useIncidentList } from "@/hooks/useIncidentList";
 import { useIncidentSelection } from "@/hooks/useIncidentSelection";
@@ -9,6 +16,8 @@ import {
   IncidentSidebarStatus,
 } from "@/lib/incident/incident.types";
 import IncidentFilterPanel, { IncidentFilters } from "./IncidentFilterPanel";
+import Button from "@/components/ui/Button1";
+import Dropdown from "@/components/ui/Dropdown";
 
 // ── Severity badge ────────────────────────────────────────────────
 
@@ -21,7 +30,9 @@ const SEVERITY_STYLES: Record<string, string> = {
 };
 
 const SeverityBadge = ({ severity }: { severity: string }) => (
-  <div className={`px-2 py-0.5 rounded border text-[10px] font-black ${SEVERITY_STYLES[severity] ?? SEVERITY_STYLES.P4}`}>
+  <div
+    className={`px-2 py-0.5 rounded border text-[10px] font-black ${SEVERITY_STYLES[severity] ?? SEVERITY_STYLES.P4}`}
+  >
     {severity}
   </div>
 );
@@ -30,18 +41,29 @@ const SeverityBadge = ({ severity }: { severity: string }) => (
 
 const StatusBadge = ({ status }: { status: IncidentSidebarStatus }) => {
   const styles: Record<IncidentSidebarStatus, string> = {
-    Investigating: "border-amber-500/50  text-amber-600  dark:text-amber-500  bg-amber-500/5",
-    Proposed:      "border-blue-500/50   text-blue-600   dark:text-blue-400   bg-blue-500/5",
-    Detected:      "border-green-500/50  text-green-600  dark:text-green-400  bg-green-500/5",
-    Approved:      "border-emerald-500/50 text-emerald-600 dark:text-emerald-500 bg-emerald-500/5",
-    Enriched:      "border-purple-500/50 text-purple-600  dark:text-purple-400 bg-purple-500/5",
-    Analyzed:      "border-indigo-500/50 text-indigo-600  dark:text-indigo-400 bg-indigo-500/5",
-    Executing:     "border-yellow-500/50 text-yellow-600  dark:text-yellow-500 bg-yellow-500/5",
-    Resolved:      "border-slate-400/50  text-slate-500   dark:text-slate-400  bg-slate-500/5",
-    "Post-Mortem": "border-pink-500/50   text-pink-600    dark:text-pink-400   bg-pink-500/5",
+    Investigating:
+      "border-amber-500/50  text-amber-600  dark:text-amber-500  bg-amber-500/5",
+    Proposed:
+      "border-blue-500/50   text-blue-600   dark:text-blue-400   bg-blue-500/5",
+    Detected:
+      "border-green-500/50  text-green-600  dark:text-green-400  bg-green-500/5",
+    Approved:
+      "border-emerald-500/50 text-emerald-600 dark:text-emerald-500 bg-emerald-500/5",
+    Enriched:
+      "border-purple-500/50 text-purple-600  dark:text-purple-400 bg-purple-500/5",
+    Analyzed:
+      "border-indigo-500/50 text-indigo-600  dark:text-indigo-400 bg-indigo-500/5",
+    Executing:
+      "border-yellow-500/50 text-yellow-600  dark:text-yellow-500 bg-yellow-500/5",
+    Resolved:
+      "border-slate-400/50  text-slate-500   dark:text-slate-400  bg-slate-500/5",
+    "Post-Mortem":
+      "border-pink-500/50   text-pink-600    dark:text-pink-400   bg-pink-500/5",
   };
   return (
-    <span className={`text-[9px] px-2 py-0.5 rounded border font-black uppercase tracking-tighter ${styles[status]}`}>
+    <span
+      className={`text-[9px] px-2 py-0.5 rounded border font-black uppercase tracking-tighter ${styles[status]}`}
+    >
       {status}
     </span>
   );
@@ -59,7 +81,15 @@ const PROGRESS_COLOR: Record<string, string> = {
 
 // ── Filter pill ───────────────────────────────────────────────────
 
-const FilterPill = ({ label, active = false, onClick }: { label: string; active?: boolean; onClick?: () => void }) => (
+const FilterPill = ({
+  label,
+  active = false,
+  onClick,
+}: {
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+}) => (
   <button
     onClick={onClick}
     className={`px-3 py-1 rounded-md border text-[11px] font-bold uppercase tracking-wider transition-all ${
@@ -74,7 +104,15 @@ const FilterPill = ({ label, active = false, onClick }: { label: string; active?
 
 // ── Incident card ─────────────────────────────────────────────────
 
-const IncidentCard = ({ incident, onClick, isActive }: { incident: IncidentListItem; onClick: () => void; isActive: boolean }) => (
+const IncidentCard = ({
+  incident,
+  onClick,
+  isActive,
+}: {
+  incident: IncidentListItem;
+  onClick: () => void;
+  isActive: boolean;
+}) => (
   <div
     onClick={onClick}
     className={`border rounded-xl p-4 mb-3 transition-all cursor-pointer group ${
@@ -88,19 +126,26 @@ const IncidentCard = ({ incident, onClick, isActive }: { incident: IncidentListI
       <StatusBadge status={incident.sidebarStatus} />
     </div>
     <div className="mb-2">
-      <span className="text-[10px] font-mono text-black dark:text-slate-600 block mb-1 uppercase tracking-widest">{incident.ticketId}</span>
-      <h3 className="text-[13px] font-semibold dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300 leading-snug line-clamp-2">{incident.title}</h3>
+      <span className="text-[10px] font-mono text-black dark:text-slate-600 block mb-1 uppercase tracking-widest">
+        {incident.ticketId}
+      </span>
+      <h3 className="text-[13px] font-semibold dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300 leading-snug line-clamp-2">
+        {incident.title}
+      </h3>
     </div>
     <div className="text-[10px] text-black dark:text-slate-500 mb-4 font-medium">
       {incident.service} · {incident.region} · {incident.elapsedLabel}
     </div>
     <div className="flex gap-1">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className={`h-1 flex-1 rounded-sm transition-all duration-700 ${
-          i + 1 <= Math.round((incident.progressPercentage / 100) * 8)
-            ? (PROGRESS_COLOR[incident.severity] ?? PROGRESS_COLOR.P4)
-            : "bg-zinc-100 dark:bg-white/5"
-        }`} />
+        <div
+          key={i}
+          className={`h-1 flex-1 rounded-sm transition-all duration-700 ${
+            i + 1 <= Math.round((incident.progressPercentage / 100) * 8)
+              ? (PROGRESS_COLOR[incident.severity] ?? PROGRESS_COLOR.P4)
+              : "bg-zinc-100 dark:bg-white/5"
+          }`}
+        />
       ))}
     </div>
   </div>
@@ -111,12 +156,17 @@ const IncidentCard = ({ incident, onClick, isActive }: { incident: IncidentListI
 export const ExactIncidentSidebar: React.FC = () => {
   const { data, isLoading } = useIncidentList();
   const { incidentId: activeId, setSelectedIncident } = useIncidentSelection();
-  const [open,        setOpen]        = useState(false);
-  const [query,       setQuery]       = useState("");
-  const [filterOpen,  setFilterOpen]  = useState(false);
-  const [activeFilters, setActiveFilters] = useState<IncidentFilters | null>(null);
-  const [filter, setFilter] = useState<"all"|"p0"|"p1"|"p2"|"p3"|"resolved"|"auto"|"manual">("all");
-
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<IncidentFilters | null>(
+    null,
+  );
+  const [filter, setFilter] = useState<"all" | "p0" | "p1" | "p2" | "p3">(
+    "all",
+  );
+  const [type, setType] = useState<"all" | "auto" | "manual">("all");
+  const [status, setStatus] = useState("all");
   const incidents = data?.incidents ?? [];
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -132,31 +182,66 @@ export const ExactIncidentSidebar: React.FC = () => {
 
   const filteredIncidents = incidents.filter((incident) => {
     // Text search
-    const matchesSearch = !normalizedQuery ||
-      [incident.ticketId, incident.title, incident.service, incident.region, incident.sourceType]
-        .join(" ").toLowerCase().includes(normalizedQuery);
+    const matchesSearch =
+      !normalizedQuery ||
+      [
+        incident.ticketId,
+        incident.title,
+        incident.service,
+        incident.region,
+        incident.sourceType,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedQuery);
 
     // Quick filter pills
     const matchesFilter =
-      filter === "all"      ? true :
-      filter === "p0"       ? incident.severity === "P0" :
-      filter === "p1"       ? incident.severity === "P1" :
-      filter === "p2"       ? incident.severity === "P2" :
-      filter === "p3"       ? incident.severity === "P3" :
-      filter === "resolved" ? incident.sidebarStatus === "Resolved" || incident.status === "RESOLVED" :
-      filter === "auto"     ? incident.sourceType.toLowerCase() !== "manual" :
-                              incident.sourceType.toLowerCase() === "manual";
+      filter === "all"
+        ? true
+        : filter === "p0"
+          ? incident.severity === "P0"
+          : filter === "p1"
+            ? incident.severity === "P1"
+            : filter === "p2"
+              ? incident.severity === "P2"
+              : filter === "p3"
+                ? incident.severity === "P3"
+                : filter === "resolved"
+                  ? incident.sidebarStatus === "Resolved" ||
+                    incident.status === "RESOLVED"
+                  : filter === "auto"
+                    ? incident.sourceType.toLowerCase() !== "manual"
+                    : incident.sourceType.toLowerCase() === "manual";
 
     // Advanced filters
     if (activeFilters) {
-      if (activeFilters.priorities.length > 0 && !activeFilters.priorities.includes(incident.severity)) return false;
-      if (activeFilters.incidentId.trim() && !incident.ticketId.toLowerCase().includes(activeFilters.incidentId.trim().toLowerCase())) return false;
-      if (activeFilters.titleQuery.trim() && !incident.title.toLowerCase().includes(activeFilters.titleQuery.trim().toLowerCase())) return false;
+      if (
+        activeFilters.priorities.length > 0 &&
+        !activeFilters.priorities.includes(incident.severity)
+      )
+        return false;
+      if (
+        activeFilters.incidentId.trim() &&
+        !incident.ticketId
+          .toLowerCase()
+          .includes(activeFilters.incidentId.trim().toLowerCase())
+      )
+        return false;
+      if (
+        activeFilters.titleQuery.trim() &&
+        !incident.title
+          .toLowerCase()
+          .includes(activeFilters.titleQuery.trim().toLowerCase())
+      )
+        return false;
       if (activeFilters.dateFrom || activeFilters.dateTo) {
         const created = new Date(incident.createdAt ?? "");
-        if (activeFilters.dateFrom && created < activeFilters.dateFrom) return false;
-        if (activeFilters.dateTo)   {
-          const end = new Date(activeFilters.dateTo); end.setHours(23,59,59);
+        if (activeFilters.dateFrom && created < activeFilters.dateFrom)
+          return false;
+        if (activeFilters.dateTo) {
+          const end = new Date(activeFilters.dateTo);
+          end.setHours(23, 59, 59);
           if (created > end) return false;
         }
       }
@@ -167,7 +252,6 @@ export const ExactIncidentSidebar: React.FC = () => {
 
   return (
     <div className="w-full h-screen md:border-r border-zinc-500 dark:border-white/5 flex flex-col overflow-hidden bg-white dark:bg-transparent">
-
       {/* ── Filter panel — fixed overlay so it never gets clipped ── */}
       {filterOpen && (
         <>
@@ -181,7 +265,10 @@ export const ExactIncidentSidebar: React.FC = () => {
             <div className="pointer-events-auto w-full md:w-[600px] lg:w-[900px] h-[80vh] max-h-[95vh] overflow-y-auto">
               <IncidentFilterPanel
                 incidents={incidents}
-                onApply={(f) => { setActiveFilters(f); setFilterOpen(false); }}
+                onApply={(f) => {
+                  setActiveFilters(f);
+                  setFilterOpen(false);
+                }}
                 onCancel={() => setFilterOpen(false)}
               />
             </div>
@@ -195,37 +282,105 @@ export const ExactIncidentSidebar: React.FC = () => {
           <p className="font-semibold text-black dark:text-white">
             Incidents {incidents.length > 0 ? `(${incidents.length})` : ""}
           </p>
-          <button
+          <Button
             onClick={() => setOpen((prev) => !prev)}
-            className="px-5 py-2 border border-IMSCyan text-IMSCyan rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-green-400/5 transition-all"
+            variant="solid"
+            size="sm"
+            leftIcon={<PlusIcon size={16} />}
           >
             Raise Incident
-          </button>
+          </Button>
         </div>
 
         {/* Quick filter pills */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {(["all","p0","p1","p2","p3","resolved","auto","manual"] as const).map((f) => (
-            <FilterPill key={f} label={f} active={filter === f} onClick={() => setFilter(f)} />
-          ))}
+          <Dropdown
+            items={[
+              { label: "All", value: "all" },
+              { label: "P0", value: "p0" },
+              { label: "P1", value: "p1" },
+              { label: "P2", value: "p2" },
+              { label: "P3", value: "p3" },
+            ]}
+            trigger={
+              <Button
+                variant="outline-dark"
+                size="sm"
+                className=" capitalize"
+                rightIcon={<ListFilter size={14} />}
+              >
+                {filter == "all" ? "Priority" : filter}
+              </Button>
+            }
+            defaultValue="all"
+            onChange={(value, _) => setFilter(value as any)}
+          />
+
+          <Dropdown
+            items={[
+              { label: "All", value: "all" },
+              { label: "Auto", value: "auto" },
+              { label: "Manual", value: "manual" },
+            ]}
+            trigger={
+              <Button
+                variant="outline-dark"
+                size="sm"
+                className=" capitalize"
+                rightIcon={<ListFilter size={14} />}
+              >
+                {type === "all" ? "Type" : type}
+              </Button>
+            }
+            defaultValue="all"
+            onChange={(value, _) => setType(value as any)}
+          />
+          <Dropdown
+            items={[
+              { label: "All", value: "all" },
+              { label: "Open", value: "Open" },
+              { label: "Investigation", value: "Investigation" },
+              { label: "Diagnosed", value: "Diagnosed" },
+              { label: "Remediating", value: "Remediating" },
+              { label: "Monitoring", value: "Monitoring" },
+              { label: "Review", value: "Review" },
+              { label: "Resolved", value: "Resolved" },
+              { label: "Closed", value: "Closed" },
+            ]}
+            trigger={
+              <Button
+                variant="outline-dark"
+                size="sm"
+                className=" capitalize"
+                rightIcon={<ListFilter size={14} />}
+              >
+                {status == "all" ? "Status" : status}
+              </Button>
+            }
+            defaultValue="all"
+            onChange={(value, _) => setStatus(value as any)}
+          />
         </div>
 
         {/* Search + filter button */}
         <div className="flex items-center gap-2 mb-5">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-black dark:text-slate-600" size={14} />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-black dark:text-slate-600"
+              size={14}
+            />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search incidents, services, ID"
-              className="w-full bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs text-black dark:text-slate-300 focus:outline-none focus:border-green-500/40 dark:focus:border-green-400/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-slate-600 font-medium"
+              className="w-full bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-black dark:text-slate-300 focus:outline-none focus:border-green-500/40 dark:focus:border-green-400/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-slate-600 font-medium"
             />
           </div>
 
           {/* Filter button */}
           <button
-            onClick={() => setFilterOpen(v => !v)}
+            onClick={() => setFilterOpen((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-2.5 rounded-lg border text-[12px] font-semibold transition-all shrink-0 ${
               filterOpen || advancedFilterCount > 0
                 ? "border-violet-500 text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10"
@@ -255,10 +410,24 @@ export const ExactIncidentSidebar: React.FC = () => {
         {/* Active filter summary chips */}
         {activeFilters && advancedFilterCount > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
-            {activeFilters.priorities.map(p => (
-              <span key={p} className="flex items-center gap-1 text-[11px] font-medium bg-violet-50 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/20 text-violet-700 dark:text-violet-400 rounded-full px-2.5 py-0.5">
+            {activeFilters.priorities.map((p) => (
+              <span
+                key={p}
+                className="flex items-center gap-1 text-[11px] font-medium bg-violet-50 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/20 text-violet-700 dark:text-violet-400 rounded-full px-2.5 py-0.5"
+              >
                 {p}
-                <button onClick={() => setActiveFilters(f => f ? { ...f, priorities: f.priorities.filter(x => x !== p) } : null)}>
+                <button
+                  onClick={() =>
+                    setActiveFilters((f) =>
+                      f
+                        ? {
+                            ...f,
+                            priorities: f.priorities.filter((x) => x !== p),
+                          }
+                        : null,
+                    )
+                  }
+                >
                   <X size={10} />
                 </button>
               </span>
@@ -266,29 +435,58 @@ export const ExactIncidentSidebar: React.FC = () => {
             {activeFilters.incidentId && (
               <span className="flex items-center gap-1 text-[11px] font-medium bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 rounded-full px-2.5 py-0.5">
                 #{activeFilters.incidentId}
-                <button onClick={() => setActiveFilters(f => f ? { ...f, incidentId: "" } : null)}><X size={10} /></button>
+                <button
+                  onClick={() =>
+                    setActiveFilters((f) =>
+                      f ? { ...f, incidentId: "" } : null,
+                    )
+                  }
+                >
+                  <X size={10} />
+                </button>
               </span>
             )}
             {activeFilters.titleQuery && (
               <span className="flex items-center gap-1 text-[11px] font-medium bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 rounded-full px-2.5 py-0.5">
-                {activeFilters.titleQuery.slice(0, 20)}{activeFilters.titleQuery.length > 20 ? "…" : ""}
-                <button onClick={() => setActiveFilters(f => f ? { ...f, titleQuery: "" } : null)}><X size={10} /></button>
+                {activeFilters.titleQuery.slice(0, 20)}
+                {activeFilters.titleQuery.length > 20 ? "…" : ""}
+                <button
+                  onClick={() =>
+                    setActiveFilters((f) =>
+                      f ? { ...f, titleQuery: "" } : null,
+                    )
+                  }
+                >
+                  <X size={10} />
+                </button>
               </span>
             )}
             {(activeFilters.dateFrom || activeFilters.dateTo) && (
               <span className="flex items-center gap-1 text-[11px] font-medium bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 rounded-full px-2.5 py-0.5">
-                {activeFilters.dateFrom?.toLocaleDateString() ?? "?"} – {activeFilters.dateTo?.toLocaleDateString() ?? "?"}
-                <button onClick={() => setActiveFilters(f => f ? { ...f, dateFrom: null, dateTo: null } : null)}><X size={10} /></button>
+                {activeFilters.dateFrom?.toLocaleDateString() ?? "?"} –{" "}
+                {activeFilters.dateTo?.toLocaleDateString() ?? "?"}
+                <button
+                  onClick={() =>
+                    setActiveFilters((f) =>
+                      f ? { ...f, dateFrom: null, dateTo: null } : null,
+                    )
+                  }
+                >
+                  <X size={10} />
+                </button>
               </span>
             )}
           </div>
         )}
 
         {/* Incident list */}
-        <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto space-y-1 no-scrollbar">
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="mb-3 h-32 rounded-xl border border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.03] animate-pulse" />
+              <div
+                key={i}
+                className="mb-3 h-32 rounded-xl border border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.03] animate-pulse"
+              />
             ))
           ) : filteredIncidents.length > 0 ? (
             filteredIncidents.map((incident) => (
@@ -296,7 +494,9 @@ export const ExactIncidentSidebar: React.FC = () => {
                 key={incident.id}
                 incident={incident}
                 onClick={() => setSelectedIncident(incident.id)}
-                isActive={activeId === incident.id || activeId === incident.ticketId}
+                isActive={
+                  activeId === incident.id || activeId === incident.ticketId
+                }
               />
             ))
           ) : (

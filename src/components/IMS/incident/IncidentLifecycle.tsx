@@ -1,93 +1,377 @@
 "use client";
-import React from "react";
-import { Check } from "lucide-react";
+
+import React, { useState, useRef, useEffect } from "react";
+import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Modal from "@/components/ui/Modal";
+import ResolveIncidentForm from "./ResolveIncidentForm";
+import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
-type LifecycleStepLabel =
-  | "Detected"
-  | "Enriched"
-  | "Analysed"
-  | "Proposed"
-  | "Approved"
-  | "Executed"
-  | "Resolved";
+// --- Types ---
 
-interface IncidentLifecycleProps {
-  currentStep: LifecycleStepLabel;
+export type LifecycleStage =
+  | "OPEN"
+  | "INVESTIGATING"
+  | "DIAGNOSED"
+  | "REMEDIATING"
+  | "MONITORING"
+  | "REVIEW"
+  | "RESOLVED"
+  | "CLOSED";
+
+interface StageMetadata {
+  id: number;
+  label: LifecycleStage;
+  display: string;
+  // Dynamic custom color mapping pairs
+  dotColor: string; // Used for dropdown dots
+  ribbonActive: string; // Active ribbon style block
+  ribbonDone: string; // Completed ribbon style block
+  textColor: string; // Color matching text strings
 }
 
-const steps: LifecycleStepLabel[] = [
-  "Detected", "Enriched", "Analysed", "Proposed", "Approved", "Executed", "Resolved",
+const STAGES_CONFIG: StageMetadata[] = [
+  {
+    id: 1,
+    label: "OPEN",
+    display: "Open",
+    dotColor: "bg-cyan-400",
+    ribbonActive:
+      "bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-l-cyan-500",
+    ribbonDone: "bg-cyan-500/5 text-cyan-600 dark:text-cyan-400/40",
+    textColor: "text-cyan-600 dark:text-cyan-400",
+  },
+  {
+    id: 2,
+    label: "INVESTIGATING",
+    display: "Investigating",
+    dotColor: "bg-amber-500",
+    ribbonActive:
+      "bg-amber-500/20 text-amber-600 dark:text-[#f3ab3d] border-l-amber-500",
+    ribbonDone: "bg-amber-500/5 text-amber-600 dark:text-[#f3ab3d]/40",
+    textColor: "text-amber-500 dark:text-[#f3ab3d]",
+  },
+  {
+    id: 3,
+    label: "DIAGNOSED",
+    display: "Diagnosed",
+    dotColor: "bg-blue-500",
+    ribbonActive:
+      "bg-blue-500/20 text-blue-600 dark:text-blue-400 border-l-blue-500",
+    ribbonDone: "bg-blue-500/5 text-blue-600 dark:text-blue-400/40",
+    textColor: "text-blue-500 dark:text-blue-400",
+  },
+  {
+    id: 4,
+    label: "REMEDIATING",
+    display: "Remediating",
+    dotColor: "bg-orange-500",
+    ribbonActive:
+      "bg-orange-500/20 text-orange-600 dark:text-orange-400 border-l-orange-500",
+    ribbonDone: "bg-orange-500/5 text-orange-600 dark:text-orange-400/40",
+    textColor: "text-orange-500 dark:text-orange-400",
+  },
+  {
+    id: 5,
+    label: "MONITORING",
+    display: "Monitoring",
+    dotColor: "bg-cyan-400",
+    ribbonActive:
+      "bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-l-cyan-500",
+    ribbonDone: "bg-cyan-500/5 text-cyan-600 dark:text-cyan-400/40",
+    textColor: "text-cyan-500 dark:text-cyan-400",
+  },
+  {
+    id: 6,
+    label: "REVIEW",
+    display: "Review",
+    dotColor: "bg-purple-400",
+    ribbonActive:
+      "bg-purple-500/20 text-purple-600 dark:text-purple-400 border-l-purple-500",
+    ribbonDone: "bg-purple-500/5 text-purple-600 dark:text-purple-400/40",
+    textColor: "text-purple-500 dark:text-purple-400",
+  },
+  {
+    id: 7,
+    label: "RESOLVED",
+    display: "Resolved",
+    dotColor: "bg-emerald-500",
+    ribbonActive:
+      "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-l-emerald-500",
+    ribbonDone: "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400/40",
+    textColor: "text-emerald-500 dark:text-emerald-400",
+  },
+  {
+    id: 8,
+    label: "CLOSED",
+    display: "Closed",
+    dotColor: "bg-emerald-500",
+    ribbonActive:
+      "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-l-emerald-500",
+    ribbonDone: "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400/40",
+    textColor: "text-emerald-500 dark:text-emerald-400",
+  },
 ];
 
-const IncidentLifecycle: React.FC<IncidentLifecycleProps> = ({ currentStep }) => {
-  const currentStepIndex = steps.indexOf(currentStep);
-
-  return (
-    <div className="w-full px-5 md:px-8 py-6 border-b border-zinc-100 dark:border-white/[0.06]">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-6">
-        Incident Lifecycle
-      </p>
-
-      {/* scrollable on mobile */}
-      <div className="overflow-x-auto no-scrollbar">
-        <div className="relative flex items-start justify-between min-w-[600px] md:min-w-full pb-8">
-
-          {/* connector track */}
-          <div className="absolute top-[18px] left-5 right-5 h-px bg-zinc-600 dark:bg-zinc-800 z-0" />
-
-          {/* progress fill */}
-          {currentStepIndex > 0 && (
-            <div
-              className="absolute top-[18px] left-5 h-px bg-emerald-400 dark:bg-emerald-500 z-0 transition-all duration-700"
-              style={{ width: `calc(${(currentStepIndex / (steps.length - 1)) * 100}% - 2.5rem)` }}
-            />
-          )}
-
-          {steps.map((label, index) => {
-            const isCompleted = index < currentStepIndex;
-            const isCurrent = index === currentStepIndex;
-            const isPending = index > currentStepIndex;
-
-            return (
-              <div key={label} className="relative z-10 flex flex-col items-center gap-3">
-                {/* Step dot */}
-                <div
-                  className={cn(
-                    "w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300",
-                    isCompleted && "border-emerald-400 dark:border-emerald-500 bg-emerald-400 dark:bg-emerald-500",
-                    isCurrent  && "border-amber-400 dark:border-amber-400 bg-white dark:bg-zinc-900",
-                    isPending  && "border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-900"
-                  )}
-                >
-                  {isCompleted ? (
-                    <Check size={14} className="text-white" strokeWidth={3} />
-                  ) : (
-                    <span className={cn(
-                      "text-[11px] font-bold",
-                      isCurrent ? "text-amber-500 dark:text-amber-400" : "text-black dark:text-zinc-600"
-                    )}>
-                      {index + 1}
-                    </span>
-                  )}
-                </div>
-
-                {/* Label */}
-                <span className={cn(
-                  "text-[11px] font-medium whitespace-nowrap uppercase tracking-wide transition-colors",
-                  isCompleted && "text-emerald-500 dark:text-emerald-400",
-                  isCurrent  && "text-amber-500 dark:text-amber-400",
-                  isPending  && "text-black dark:text-zinc-600"
-                )}>
-                  {label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
+type Props = {
+  incident: IncidentDetailRecord;
 };
 
-export default IncidentLifecycle;
+export default function IncidentLifecycleManager({ incident }: Props) {
+  const [currentStage, setCurrentStage] =
+    useState<LifecycleStage>("INVESTIGATING");
+  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenResolve, setIsOpenResolve] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const activeIndex = STAGES_CONFIG.findIndex((s) => s.label === currentStage);
+  const activeMeta = STAGES_CONFIG[activeIndex];
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (label: LifecycleStage) => {
+    setCurrentStage(label);
+    setIsOpen(false);
+    if (label === "RESOLVED") {
+      setIsOpenResolve(true);
+    }
+  };
+
+  return (
+    <div className="w-full bg-slate-50 dark:bg-[#030712] p-4 md:p-6 space-y-6 font-sans transition-colors duration-300">
+      <Modal isOpen={isOpenResolve} onClose={() => setIsOpenResolve(false)}>
+        <ResolveIncidentForm
+          onClose={() => setIsOpenResolve(false)}
+          incident={incident}
+        />
+      </Modal>
+      {/* ─────────────────────────────────────────────────────────────────
+          RIBBON STEP TRACKER (Top Component)
+          ───────────────────────────────────────────────────────────────── */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <p className="text-[11px] font-mono font-bold tracking-[0.15em] text-black dark:text-slate-500 uppercase">
+            Incident Lifecycle
+          </p>
+          <div className="w-[70%] h-0.5 bg-zinc-100 " />
+        </div>
+
+        {/* Scrollable Ribbon Wrapper */}
+        <div className="overflow-x-auto no-scrollbar  dark:border-white/5 rounded-xl bg-white dark:bg-[#0b1329]">
+          <div className="flex w-full h-[58px] bg-transparent">
+            {STAGES_CONFIG.map((stage, idx) => {
+              const isCompleted = idx < activeIndex;
+              const isCurrent = idx === activeIndex;
+              const isPending = idx > activeIndex;
+
+              return (
+                <div
+                  key={stage.label}
+                  style={{ zIndex: STAGES_CONFIG.length + idx }}
+                  className={cn(
+                    "relative flex-1 flex flex-col justify-center pl-8 pr-4 h-full transition-all duration-300",
+                    // idx !== STAGES_CONFIG.length - 1 && "clip-path-chevron",
+                    "clip-path-chevron",
+                    isCompleted && stage.ribbonDone,
+                    isCurrent && stage.ribbonActive,
+                    isPending &&
+                      "bg-zinc-100 dark:bg-[#0e172e] text-zinc-500 dark:text-slate-600",
+                  )}
+                >
+                  <div className="flex items-center gap-2.5">
+                    {/* Status Node Indicators */}
+                    <div className="shrink-0 flex items-center justify-center">
+                      {isCompleted ? (
+                        <Check
+                          size={12}
+                          strokeWidth={3}
+                          className={stage.textColor}
+                        />
+                      ) : isCurrent ? (
+                        <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                      ) : (
+                        <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-slate-700" />
+                      )}
+                    </div>
+
+                    <div className="flex flex-col select-none">
+                      <span className="text-[9px] font-mono font-bold tracking-wider opacity-60 uppercase">
+                        Stage {stage.id}
+                      </span>
+                      <span className="text-[12px] font-bold tracking-tight uppercase">
+                        {stage.label}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────────
+          INCIDENT MANAGEMENT CONTROLLER CARD (Bottom Component)
+          ───────────────────────────────────────────────────────────────── */}
+      <div className="w-full bg-white dark:bg-[#080f21] border border-slate-200 dark:border-white/5 rounded-xl p-5 md:p-6 space-y-6 shadow-sm">
+        <div className=" flex justify-between gap-6 items-center">
+          {/* Dropdown Field */}
+          <div
+            ref={dropdownRef}
+            className="space-y-2 relative max-w-[400px] w-full"
+          >
+            <label className="block text-[11px] font-mono font-bold tracking-wider text-black dark:text-slate-500 uppercase">
+              Incident State
+            </label>
+
+            <button
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              className={cn(
+                "w-full h-[48px] px-4 rounded-xl border flex items-center justify-between text-left transition-all bg-white dark:bg-[#091124]",
+                isOpen
+                  ? "border-blue-500 dark:border-blue-500 ring-4 ring-blue-500/10 shadow-sm"
+                  : "border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10",
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={cn(
+                    "w-3 h-3 rounded-full shrink-0",
+                    activeMeta.dotColor,
+                  )}
+                />
+                <span className="text-[14px] font-bold text-black dark:text-white">
+                  {activeMeta.display}
+                </span>
+              </div>
+              <ChevronDown
+                size={16}
+                className={cn(
+                  "text-black dark:text-slate-500 transition-transform duration-200",
+                  isOpen && "rotate-180",
+                )}
+              />
+            </button>
+
+            {/* Custom Popover Dropdown Selection Options */}
+            {isOpen && (
+              <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-white/10 rounded-xl shadow-xl z-50 overflow-hidden p-1.5 space-y-0.5">
+                {STAGES_CONFIG.map((stage, idx) => {
+                  const isCurrentItem = stage.label === currentStage;
+                  const isDoneItem = idx < activeIndex;
+
+                  return (
+                    <button
+                      key={stage.label}
+                      type="button"
+                      onClick={() => handleSelect(stage.label)}
+                      className={cn(
+                        "w-full h-[42px] px-3 rounded-lg flex items-center justify-between text-left transition-colors group",
+                        isCurrentItem
+                          ? "bg-slate-100 dark:bg-white/5"
+                          : "hover:bg-slate-50 dark:hover:bg-white/[0.02]",
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={cn(
+                            "w-3 h-3 rounded-full shrink-0",
+                            stage.dotColor,
+                          )}
+                        />
+                        <span className="text-[13px] font-bold text-black dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white">
+                          {stage.display}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center">
+                        {isCurrentItem ? (
+                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-[#f3ab3d] rounded border border-amber-500/20">
+                            CURRENT
+                          </span>
+                        ) : isDoneItem ? (
+                          <span
+                            className={cn(
+                              "text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border bg-opacity-10 dark:bg-opacity-20",
+                              stage.textColor,
+                              "bg-current/10 border-current/20",
+                            )}
+                          >
+                            DONE
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-mono font-bold text-black dark:text-slate-600">
+                            Stage {stage.id}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Progress panel metric column */}
+          <div className="md:col-span-7 space-y-1.5 md:pl-6 md:border-l border-slate-100 dark:border-white/5 text-end">
+            <label className="block text-[11px] font-mono font-bold tracking-wider text-black dark:text-slate-500 uppercase">
+              Progress
+            </label>
+            <p className="text-xl font-bold text-black dark:text-white flex items-center">
+              Stage {activeMeta.id} of {STAGES_CONFIG.length}
+            </p>
+          </div>
+        </div>
+
+        <hr className="border-slate-100 dark:border-white/5" />
+
+        <p className="text-[13px] italic text-black dark:text-slate-500 leading-relaxed">
+          Set the incident state from the dropdown — the lifecycle ribbon
+          updates to reflect the current stage. Choosing{" "}
+          <span className="font-semibold text-slate-600 dark:text-slate-300">
+            Resolved
+          </span>{" "}
+          opens a resolution checklist that must be completed first. Every
+          change is written to the audit trail below.
+        </p>
+      </div>
+
+      {/* Clip-Path Utility Definitions */}
+      <style jsx global>{`
+        .clip-path-chevron {
+          clip-path: polygon(
+            0% 0%,
+            calc(100% - 14px) 0%,
+            100% 50%,
+            calc(100% - 14px) 100%,
+            0% 100%,
+            14px 50%
+          );
+        }
+        .clip-path-chevron:first-child {
+          padding-left: 1.5rem !important;
+          clip-path: polygon(
+            0% 0%,
+            calc(100% - 14px) 0%,
+            100% 50%,
+            calc(100% - 14px) 100%,
+            0% 100%
+          );
+        }
+      `}</style>
+    </div>
+  );
+}

@@ -26,13 +26,7 @@ type TagType = "inherited" | "auto" | "none";
 
 function getTag(inc: IncidentListItem): { tagType: TagType; tagLabel: string } {
   // Check for parent linkage (field may be absent — safe optional chain)
-  if ((inc as any).parentIncidentId) {
-    return {
-      tagType: "inherited",
-      tagLabel: `Inherited P0 · from ${(inc as any).parentIncidentId}`,
-    };
-  }
-  if (inc.sourceType && inc.sourceType.toLowerCase() !== "manual") {
+  if (inc.source !== "MANUAL") {
     return { tagType: "auto", tagLabel: "Auto-raised" };
   }
   return { tagType: "none", tagLabel: "No workbench" };
@@ -161,7 +155,7 @@ const WorkbenchAwaitingPage: React.FC = () => {
         </h1>
 
         {/* Overview stats */}
-        <div className="border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 mb-6">
+        {/* <div className="border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 mb-6">
           <p className="text-[14px] font-semibold text-zinc-700 dark:text-zinc-300 mb-4">
             Overview
           </p>
@@ -181,7 +175,7 @@ const WorkbenchAwaitingPage: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Tabs + search */}
         <div className="flex items-center gap-2 mb-6 flex-wrap">
@@ -280,7 +274,7 @@ const WorkbenchAwaitingPage: React.FC = () => {
                     )}
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/incident/${inc.id}`}
+                        href={`/incident/tickets?id=${inc.id}`}
                         onClick={(e) => e.stopPropagation()}
                         className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-[12px] font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                       >

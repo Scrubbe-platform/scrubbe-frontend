@@ -10,6 +10,9 @@ import {
 import Modal from "@/components/ui/Modal";
 import WarRoom from "./WarRoom";
 import AddContextForm from "./ContextForm";
+import Dropdown from "@/components/ui/Dropdown";
+import Button from "@/components/ui/Button1";
+import { EllipsisVertical, Plus, Video } from "lucide-react";
 
 interface TabItem {
   id: string;
@@ -59,13 +62,13 @@ const IncidentHeader = ({
     },
     {
       id: "playbook",
-      label: "Playbook. RBK.17",
+      label: "Playbook",
       link: `/incident/playbooks?id=${activeId}`,
     },
   ];
 
   return (
-    <div className="w-full px-5 md:px-8 pt-6 pb-0 flex flex-col gap-5 border-b border-zinc-100 dark:border-white/[0.06] bg-white dark:bg-transparent">
+    <div className="w-full px-5 md:px-8 py-6 flex flex-col gap-5 border-b border-zinc-100 dark:border-white/[0.06] bg-white dark:bg-transparent">
       {/* ── Top row ── */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div className="flex flex-col gap-3">
@@ -117,50 +120,63 @@ const IncidentHeader = ({
 
         {/* Actions */}
         <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => setOpenContext(true)}
-            className="px-4 py-2 text-[12px] font-semibold rounded-lg border border-zinc-500 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-          >
-            Add Context
-          </button>
-          <button
-            onClick={() => setOpenWarRoom(true)}
-            className="px-4 py-2 text-[12px] font-semibold rounded-lg  bg-red-500 text-white transition-colors"
-          >
-            War Room
-          </button>
+          <Dropdown
+            position="left"
+            items={[
+              {
+                value: "context",
+                label: "Add Context",
+                icon: <Plus size={14} />,
+                onClick: () => setOpenContext(true),
+              },
+              {
+                value: "problem-record",
+                label: "Add to Proble Record",
+                icon: <Plus size={14} />,
+              },
+              {
+                value: "war-room",
+                label: "War Room",
+                icon: <Video size={14} />,
+              },
+            ]}
+            trigger={
+              <Button size="sm" className="!bg-slate-200">
+                <EllipsisVertical size={14} color="black" />
+              </Button>
+            }
+          />
         </div>
       </div>
 
       {/* ── Tab nav ── */}
-      <nav className="flex overflow-x-auto no-scrollbar -mx-5 md:-mx-8 px-5 md:px-8">
-        {tabs.map((tab) => {
-          const isActive = activeTab
-            ? activeTab === tab.id
-            : currentTab === tab.id || (tab.id === "overview" && !currentTab);
+      <div className="px-4">
+        <nav className="flex overflow-x-auto no-scrollbar -mx-5 md:-mx-8  bg-green-200/30 rounded-full p-2">
+          {tabs.map((tab) => {
+            const isActive = activeTab
+              ? activeTab === tab.id
+              : currentTab === tab.id || (tab.id === "overview" && !currentTab);
 
-          return (
-            <Link
-              key={tab.id}
-              href={tab.link}
-              className="relative shrink-0 pb-3 mr-7 last:mr-0 group"
-            >
-              <span
-                className={`text-[13px] font-medium whitespace-nowrap transition-colors ${
-                  isActive
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-dark dark:text-zinc-500 group-hover:text-black dark:group-hover:text-zinc-300"
-                }`}
+            return (
+              <Link
+                key={tab.id}
+                href={tab.link}
+                className="flex-1 flex last:border-none border-r border-green-500 pl-2 pr-2"
               >
-                {tab.label}
-              </span>
-              {isActive && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full bg-emerald-500 dark:bg-emerald-400" />
-              )}
-            </Link>
-          );
-        })}
-      </nav>
+                <span
+                  className={`text-[13px] font-medium whitespace-nowrap transition-colors w-full justify-center rounded-full text-center py-2 md:py-3 ${
+                    isActive
+                      ? "bg-gradient-to-r from-[#A3D45D] to-[#167B48] via-[#0F5A35] text-white"
+                      : "text-dark dark:text-zinc-500 group-hover:text-black dark:group-hover:text-zinc-300"
+                  }`}
+                >
+                  {tab.label}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
       <Modal onClose={() => setOpenContext(false)} isOpen={openContext}>
         <AddContextForm
           incident={incident}

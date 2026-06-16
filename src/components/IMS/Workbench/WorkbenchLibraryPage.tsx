@@ -42,164 +42,6 @@ export interface WorkbenchRecord {
 
 // ── Mock data ─────────────────────────────────────────────────────
 
-const MOCK: WorkbenchRecord[] = [
-  {
-    id: "WB-0142",
-    incidentId: "SI-1024938",
-    title: "Payment Processing Failure",
-    type: "PO Declaration",
-    service: "Payments",
-    priority: "P0",
-    status: "Resolved",
-    declaredBy: "John Smith",
-    declaredAt: "Jun 4 2026",
-    incidentContext: {
-      "Incident ID": "SI-202500123",
-      Priority: "P0 (MAJOR INCIDENT)",
-      Status: "In-Progress",
-      "Short description": "Online banking is slow and intermittent",
-      "Reported on": "May 20, 2025 · 09:15 AM",
-      "Reported by": "Jane Smith",
-    },
-    incidentDetails: {
-      "Business Impact": "Customers are unable to complete transactions.",
-      "SLO burn-rate": "94% of error budget · 6.2× critical threshold",
-      "Scope of impact": "Customers / External Users",
-      "Regions affected": "LATAM",
-      "Tenant Affected": "Alex Sham",
-      "Affected service": "Email",
-    },
-    timeline: {
-      "Detection time": "Jun 4 2026 · 9:00 am",
-      "Start time of impact": "Jun 5 2026 · 9:00 am",
-      "Estimated end time": "Jun 5 2026 · 9:00 am",
-    },
-    diagnosis: {
-      "Root Cause": "Database Migration due to high load",
-      "Mitigation / workaround": "Scaling database, engaging vendor support",
-      "Risk justification for P0 upgrade":
-        "Customer facing transactions failing across all channels",
-    },
-    roles: {
-      "Incident Commander": "John Freda",
-      "Technical Lead": "Michelle Sky",
-      "Comms Lead": "Gabriel Munchi",
-    },
-    comms: {
-      "Communication Plan": "Public Status Page only",
-      "Stakeholders Notified": "Product Owner",
-    },
-    playbookUsed: "Major Incident Management",
-    playbookOwner: "Incident Commander",
-    completion: 96,
-    aiReasons: [
-      "Customer impact",
-      "Revenue impact",
-      "Multi-region outage",
-      "Regulatory exposure",
-    ],
-    modelConfidence: 97,
-    relatedIncidents: ["SI-1000321", "SI-1009122", "SI-1014432"],
-    handover: {
-      Commander: "John Smith",
-      "Expected completion": "30 mins",
-      "Current strategy": "Rollback deployment",
-    },
-    knowledgeQuery:
-      "Have we ever declared a P0 because of database pool exhaustion?",
-    knowledgeAnswer:
-      "Yes. Found 7 similar workbenches. Most common action: increase pool size. Success rate 86%. Average resolution 41 mins.",
-    postmortemItems: [
-      "Declaration rationale",
-      "Stakeholder impact",
-      "Communication timeline",
-      "Decision timeline",
-      "Escalation approvals",
-    ],
-  },
-  {
-    id: "WB-0141",
-    incidentId: "SI-1024940",
-    title: "Checkout Latency Surge",
-    type: "Rollback Approval",
-    service: "Checkout",
-    priority: "P1",
-    status: "Resolved",
-  },
-  {
-    id: "WB-0139",
-    incidentId: "SI-1024903",
-    title: "Database Pool Exhaustion",
-    type: "PO Declaration",
-    service: "Billing",
-    priority: "P0",
-    status: "Resolved",
-  },
-  {
-    id: "WB-0138",
-    incidentId: "SI-1024877",
-    title: "Auth Token Service Degradation",
-    type: "Major Incident",
-    service: "Auth",
-    priority: "P1",
-    status: "Resolved",
-  },
-  {
-    id: "WB-0137",
-    incidentId: "SI-1024855",
-    title: "API Gateway Timeout Error",
-    type: "Rollback Approval",
-    service: "Platform",
-    priority: "P1",
-    status: "Resolved",
-  },
-  {
-    id: "WB-0136",
-    incidentId: "SI-1024840",
-    title: "Stripe Webhook Mismatch",
-    type: "Major Incident",
-    service: "Payments",
-    priority: "P0",
-    status: "Resolved",
-  },
-  {
-    id: "WB-0135",
-    incidentId: "SI-1024822",
-    title: "Search Index Sync Delay",
-    type: "Rollback Approval",
-    service: "Search",
-    priority: "P1",
-    status: "Resolved",
-  },
-  {
-    id: "WB-0134",
-    incidentId: "SI-1024810",
-    title: "Inventory Stock Buffer Error",
-    type: "PO Declaration",
-    service: "Logistics",
-    priority: "P1",
-    status: "Resolved",
-  },
-  {
-    id: "WB-0133",
-    incidentId: "SI-1024799",
-    title: "Redis Cache Eviction Spikes",
-    type: "Major Incident",
-    service: "Core Services",
-    priority: "P0",
-    status: "Resolved",
-  },
-  {
-    id: "WB-0132",
-    incidentId: "SI-1024781",
-    title: "Promotional Email Loop",
-    type: "Rollback Approval",
-    service: "Marketing",
-    priority: "P1",
-    status: "Resolved",
-  },
-];
-
 const STATS = [
   { value: "432", label: "Total Workbenches" },
   { value: "217", label: "Major Incident Declarations" },
@@ -284,30 +126,51 @@ const WorkbenchLibraryPage: React.FC = () => {
       const res = await get(`${endpoint.incident_ticket.get}?limit=50&page=1`);
       const incidents: any[] = res.data?.data?.incidents ?? [];
       return incidents
-        .filter((i: any) => i.severity === "P0" || i.severity === "P1" || i.priority === "CRITICAL")
-        .map((i: any, idx: number): WorkbenchRecord => ({
-          id: `WB-${String(idx + 1).padStart(4, "0")}`,
-          incidentId: i.ticketId ?? i.id,
-          title: i.title ?? i.summary ?? "Untitled Incident",
-          type: i.priority === "CRITICAL" || i.severity === "P0" ? "PO Declaration" : "Major Incident",
-          service: i.service ?? i.affectedSystem ?? "Unknown",
-          priority: i.severity ?? "P1",
-          status: i.status === "RESOLVED" ? "Resolved" : i.status === "MITIGATED" ? "In Review" : "Open",
-          declaredBy: i.assignedToName ?? i.assignedToEmail ?? undefined,
-          declaredAt: i.createdAt ? new Date(i.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : undefined,
-        }));
+        .filter(
+          (i: any) =>
+            i.severity === "P0" ||
+            i.severity === "P1" ||
+            i.priority === "CRITICAL",
+        )
+        .map(
+          (i: any, idx: number): WorkbenchRecord => ({
+            id: `WB-${String(idx + 1).padStart(4, "0")}`,
+            incidentId: i.ticketId ?? i.id,
+            title: i.title ?? i.summary ?? "Untitled Incident",
+            type:
+              i.priority === "CRITICAL" || i.severity === "P0"
+                ? "PO Declaration"
+                : "Major Incident",
+            service: i.service ?? i.affectedSystem ?? "Unknown",
+            priority: i.severity ?? "P1",
+            status:
+              i.status === "RESOLVED"
+                ? "Resolved"
+                : i.status === "MITIGATED"
+                  ? "In Review"
+                  : "Open",
+            declaredBy: i.assignedToName ?? i.assignedToEmail ?? undefined,
+            declaredAt: i.createdAt
+              ? new Date(i.createdAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              : undefined,
+          }),
+        );
     },
     staleTime: 30_000,
   });
 
-  const rows = liveRecords && liveRecords.length > 0 ? liveRecords : MOCK;
+  const rows = liveRecords && liveRecords.length > 0 ? liveRecords : [];
 
   const liveStats = useMemo(() => {
     if (!liveRecords || liveRecords.length === 0) return STATS;
     const total = liveRecords.length;
-    const p0 = liveRecords.filter(r => r.priority === "P0").length;
-    const resolved = liveRecords.filter(r => r.status === "Resolved").length;
-    const open = liveRecords.filter(r => r.status === "Open").length;
+    const p0 = liveRecords.filter((r) => r.priority === "P0").length;
+    const resolved = liveRecords.filter((r) => r.status === "Resolved").length;
+    const open = liveRecords.filter((r) => r.status === "Open").length;
     return [
       { value: String(total), label: "Total Workbenches" },
       { value: String(p0), label: "Major Incident Declarations" },
@@ -539,14 +402,14 @@ const WorkbenchLibraryPage: React.FC = () => {
             >
               CLEAR
             </button>
-            <button className="px-4 py-2 rounded-lg text-[13px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors">
+            {/* <button className="px-4 py-2 rounded-lg text-[13px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors">
               EXPORT
-            </button>
+            </button> */}
           </div>
 
           {/* Table */}
           <Table
-            data={filtered}
+            data={rows}
             columns={columns}
             onRowClick={(row) => setSelected(row)}
             headerClassName="text-zinc-500 dark:text-zinc-400 bg-transparent"
