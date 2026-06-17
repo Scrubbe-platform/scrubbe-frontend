@@ -369,11 +369,6 @@ function CodeEngineContent() {
                 <span>{filename} → Scrubbe fix</span>
               </div>
               <div className="flex items-center gap-3">
-                <span
-                  className={`px-2 py-0.5 rounded border border-green-900 bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-emerald-300 text-[11px] font-bold`}
-                >
-                  {fix.fixType}
-                </span>
                 <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-neutral-400 cursor-pointer">
                   <input
                     type="checkbox"
@@ -409,7 +404,7 @@ function CodeEngineContent() {
           {/* Footer */}
           <div className="shrink-0 bg-white dark:bg-grayscrubbe-800 border-t border-gray-200 dark:border-neutral-800">
             {/* Confidence + explanation row */}
-            <div className="flex items-stretch divide-x divide-gray-200 dark:divide-neutral-800">
+            <div className="flex md:flex-row flex-col items-stretch divide-x divide-gray-200 dark:divide-neutral-800">
               {/* Confidence */}
               <div className="flex items-center gap-3 px-5 py-3 shrink-0">
                 <span

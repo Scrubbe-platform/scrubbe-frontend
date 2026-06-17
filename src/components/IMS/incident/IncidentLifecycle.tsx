@@ -36,8 +36,7 @@ const STAGES_CONFIG: StageMetadata[] = [
     label: "OPEN",
     display: "Open",
     dotColor: "bg-cyan-400",
-    ribbonActive:
-      "bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-l-cyan-500",
+    ribbonActive: "bg-cyan-500 text-white border-l-cyan-500",
     ribbonDone: "bg-cyan-500/5 text-cyan-600 dark:text-cyan-400/40",
     textColor: "text-cyan-600 dark:text-cyan-400",
   },
@@ -46,8 +45,7 @@ const STAGES_CONFIG: StageMetadata[] = [
     label: "INVESTIGATING",
     display: "Investigating",
     dotColor: "bg-amber-500",
-    ribbonActive:
-      "bg-amber-500/20 text-amber-600 dark:text-[#f3ab3d] border-l-amber-500",
+    ribbonActive: "bg-amber-500 text-white border-l-amber-500",
     ribbonDone: "bg-amber-500/5 text-amber-600 dark:text-[#f3ab3d]/40",
     textColor: "text-amber-500 dark:text-[#f3ab3d]",
   },
@@ -56,8 +54,7 @@ const STAGES_CONFIG: StageMetadata[] = [
     label: "DIAGNOSED",
     display: "Diagnosed",
     dotColor: "bg-blue-500",
-    ribbonActive:
-      "bg-blue-500/20 text-blue-600 dark:text-blue-400 border-l-blue-500",
+    ribbonActive: "bg-blue-500 text-white border-l-blue-500",
     ribbonDone: "bg-blue-500/5 text-blue-600 dark:text-blue-400/40",
     textColor: "text-blue-500 dark:text-blue-400",
   },
@@ -66,8 +63,7 @@ const STAGES_CONFIG: StageMetadata[] = [
     label: "REMEDIATING",
     display: "Remediating",
     dotColor: "bg-orange-500",
-    ribbonActive:
-      "bg-orange-500/20 text-orange-600 dark:text-orange-400 border-l-orange-500",
+    ribbonActive: "bg-orange-500 text-white border-l-orange-500",
     ribbonDone: "bg-orange-500/5 text-orange-600 dark:text-orange-400/40",
     textColor: "text-orange-500 dark:text-orange-400",
   },
@@ -76,8 +72,7 @@ const STAGES_CONFIG: StageMetadata[] = [
     label: "MONITORING",
     display: "Monitoring",
     dotColor: "bg-cyan-400",
-    ribbonActive:
-      "bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-l-cyan-500",
+    ribbonActive: "bg-cyan-500 text-white border-l-cyan-500",
     ribbonDone: "bg-cyan-500/5 text-cyan-600 dark:text-cyan-400/40",
     textColor: "text-cyan-500 dark:text-cyan-400",
   },
@@ -86,8 +81,7 @@ const STAGES_CONFIG: StageMetadata[] = [
     label: "REVIEW",
     display: "Review",
     dotColor: "bg-purple-400",
-    ribbonActive:
-      "bg-purple-500/20 text-purple-600 dark:text-purple-400 border-l-purple-500",
+    ribbonActive: "bg-purple-500 text-white border-l-purple-500",
     ribbonDone: "bg-purple-500/5 text-purple-600 dark:text-purple-400/40",
     textColor: "text-purple-500 dark:text-purple-400",
   },
@@ -96,8 +90,7 @@ const STAGES_CONFIG: StageMetadata[] = [
     label: "RESOLVED",
     display: "Resolved",
     dotColor: "bg-emerald-500",
-    ribbonActive:
-      "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-l-emerald-500",
+    ribbonActive: "bg-emerald-500 text-white border-l-emerald-500",
     ribbonDone: "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400/40",
     textColor: "text-emerald-500 dark:text-emerald-400",
   },
@@ -106,8 +99,7 @@ const STAGES_CONFIG: StageMetadata[] = [
     label: "CLOSED",
     display: "Closed",
     dotColor: "bg-emerald-500",
-    ribbonActive:
-      "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-l-emerald-500",
+    ribbonActive: "bg-emerald-500 text-white border-l-emerald-500",
     ribbonDone: "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400/40",
     textColor: "text-emerald-500 dark:text-emerald-400",
   },
@@ -169,7 +161,7 @@ export default function IncidentLifecycleManager({ incident }: Props) {
         </div>
 
         {/* Scrollable Ribbon Wrapper */}
-        <div className="overflow-x-auto no-scrollbar  dark:border-white/5 rounded-xl bg-white dark:bg-[#0b1329]">
+        <div className="overflow-x-auto no-scrollbar dark:border-white/5 rounded-xl bg-transparent dark:bg-[#0b1329]">
           <div className="flex w-full h-[58px] bg-transparent">
             {STAGES_CONFIG.map((stage, idx) => {
               const isCompleted = idx < activeIndex;
@@ -187,7 +179,7 @@ export default function IncidentLifecycleManager({ incident }: Props) {
                     isCompleted && stage.ribbonDone,
                     isCurrent && stage.ribbonActive,
                     isPending &&
-                      "bg-zinc-100 dark:bg-[#0e172e] text-zinc-500 dark:text-slate-600",
+                      "bg-zinc-200 dark:bg-[#0e172e] text-zinc-500 dark:text-slate-600",
                   )}
                 >
                   <div className="flex items-center gap-2.5">
@@ -225,7 +217,7 @@ export default function IncidentLifecycleManager({ incident }: Props) {
       {/* ─────────────────────────────────────────────────────────────────
           INCIDENT MANAGEMENT CONTROLLER CARD (Bottom Component)
           ───────────────────────────────────────────────────────────────── */}
-      <div className="w-full bg-white dark:bg-[#080f21] border border-slate-200 dark:border-white/5 rounded-xl p-5 md:p-6 space-y-6 shadow-sm">
+      <div className="w-full bg-white dark:bg-[#080f21] border border-zinc-700 dark:border-white/5 rounded-xl p-5 md:p-6 space-y-6 shadow-sm">
         <div className=" flex justify-between gap-6 items-center">
           {/* Dropdown Field */}
           <div

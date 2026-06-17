@@ -32,8 +32,10 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   // Apply theme class to <html> whenever theme changes
   useEffect(() => {
     const root = document.documentElement;
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const isDark = theme === "dark" 
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    const isDark = theme === "dark";
     root.classList.toggle("dark", isDark);
   }, [theme]);
 
@@ -46,13 +48,12 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="w-full bg-white dark:bg-dark h-screen overflow-hidden flex flex-col md:flex-row relative">
-
       {/* ── 1. Mobile navbar ── */}
       <div className="md:hidden w-full h-16 flex items-center px-5 gap-4 border-b border-zinc-200 dark:border-white/10 bg-white dark:bg-dark z-[55]">
         <div className="h-6">
           {/* light logo */}
           <img
-            src="/IMS/darklogo.png"
+            src="/IMS/blacklogo.png"
             alt="logo"
             className="h-full object-contain block dark:hidden"
           />
@@ -72,7 +73,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
           "cursor-pointer",
           collapse
             ? "absolute z-50 left-10 transition-all duration-150 ease-out rotate-180 bottom-12 bg-IMSLightGreen size-10 shadow-lg rounded-full hidden md:flex justify-center items-center"
-            : "hidden"
+            : "hidden",
         )}
       >
         <BsArrowBarLeft className="text-white" />
@@ -105,18 +106,29 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
               drag
               dragMomentum={false}
               dragElastic={0}
-              style={{ x: dragX, y: dragY, bottom: 24, right: 24, position: "fixed" }}
+              style={{
+                x: dragX,
+                y: dragY,
+                bottom: 24,
+                right: 24,
+                position: "fixed",
+              }}
               onDragStart={() => setIsDragging(true)}
               onDragEnd={() => setTimeout(() => setIsDragging(false), 50)}
               className="z-40 cursor-grab active:cursor-grabbing touch-none select-none"
-              whileDrag={{ scale: 1.05, boxShadow: "0 20px 40px rgba(0,0,0,0.15)" }}
+              whileDrag={{
+                scale: 1.05,
+                boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+              }}
             >
               <button
-                onClick={() => { if (!isDragging) setOpenCommandPalette(true); }}
+                onClick={() => {
+                  if (!isDragging) setOpenCommandPalette(true);
+                }}
                 className={clsx(
                   "flex items-center gap-2 px-4 py-2.5 rounded-full md:rounded-lg text-xs font-medium shadow-2xl transition-all",
                   "bg-white border border-zinc-200 text-zinc-500 hover:border-zinc-400",
-                  "dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-500"
+                  "dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-500",
                 )}
               >
                 <Terminal size={14} />
@@ -125,7 +137,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
                   className={clsx(
                     "hidden md:block ml-1 px-1.5 py-0.5 rounded font-mono text-[10px]",
                     "bg-zinc-100 text-zinc-400 border border-zinc-200",
-                    "dark:bg-neutral-800 dark:text-neutral-500 dark:border-neutral-700"
+                    "dark:bg-neutral-800 dark:text-neutral-500 dark:border-neutral-700",
                   )}
                 >
                   ⌘K

@@ -15,7 +15,7 @@ import { endpoint } from "@/lib/api/endpoint";
 
 function buildNarrativeDefaults(
   variant: InvestigationVariant,
-  ticketId: string
+  ticketId: string,
 ): Pick<
   ReportData,
   | "scopeTitle"
@@ -33,33 +33,51 @@ function buildNarrativeDefaults(
 > {
   if (variant === "contributed") {
     return {
-      scopeTitle: "Ezra consulted every intelligence source attached to the incident.",
+      scopeTitle:
+        "Ezra consulted every intelligence source attached to the incident.",
       scopeBody: `This analysis is not the Code Engine speaking alone. Ezra read the full incident corpus for ${ticketId} spanning code, infrastructure, pipeline, configuration, dependencies, signals, runbooks, and prior incidents — and reconciled their findings into one account.`,
-      scopeSub: "Multiple sources contributed evidence; the Code Engine was assessed as a contributing factor.",
-      analysisTitle: "Code, deployments, metrics, and dependencies were correlated against one timeline.",
+      scopeSub:
+        "Multiple sources contributed evidence; the Code Engine was assessed as a contributing factor.",
+      analysisTitle:
+        "Code, deployments, metrics, and dependencies were correlated against one timeline.",
       analysisBody: `Every artefact was tested against the same scenario: when degradation began, which services were affected, and in what order. That covered logs, metrics, the deployments and commits that reached the affected services, infrastructure and node state, configuration changes, and dependency behaviour.`,
-      analysisSub: "The question put to each was identical — does this correlate with onset, and does it touch the path that broke.",
-      unfoldedTitle: "A code change became an outage because conditions allowed it to.",
-      unfoldedBody1: "The deployment introduced a regression that under normal conditions might have remained contained. It did not fail in isolation.",
-      unfoldedBody2: "System conditions at the time amplified the impact and allowed the regression to cascade into a customer-visible failure.",
-      unfoldedBody3: "Recovery was slower than it should have been because automated mechanisms were not in place to catch and revert the change without manual intervention.",
-      highlightText: "A clear code origin is a result, not a diagnosis. It names the starting point — the conditions that let it spread are equally important.",
-      actionsTitle: "Stop impact first, then close the conditions that let it spread.",
+      analysisSub:
+        "The question put to each was identical — does this correlate with onset, and does it touch the path that broke.",
+      unfoldedTitle:
+        "A code change became an outage because conditions allowed it to.",
+      unfoldedBody1:
+        "The deployment introduced a regression that under normal conditions might have remained contained. It did not fail in isolation.",
+      unfoldedBody2:
+        "System conditions at the time amplified the impact and allowed the regression to cascade into a customer-visible failure.",
+      unfoldedBody3:
+        "Recovery was slower than it should have been because automated mechanisms were not in place to catch and revert the change without manual intervention.",
+      highlightText:
+        "A clear code origin is a result, not a diagnosis. It names the starting point — the conditions that let it spread are equally important.",
+      actionsTitle:
+        "Stop impact first, then close the conditions that let it spread.",
     };
   }
   return {
     scopeTitle: "Ezra consulted every intelligence source, code included.",
     scopeBody: `Being consulted is not the same as contributing. Ezra read the full incident corpus for ${ticketId} — spanning code, infrastructure, pipeline, configuration, dependencies, signals, runbooks, and prior incidents. The Code Engine was among them, and it returned a finding: analysed, no link.`,
-    scopeSub: "Code was examined thoroughly and excluded, which narrows the search rather than ending it.",
+    scopeSub:
+      "Code was examined thoroughly and excluded, which narrows the search rather than ending it.",
     analysisTitle: "The full code history was reviewed, not a sample.",
     analysisBody: `Every code artefact connected to the degraded services was correlated against the incident timeline — covering repositories, commits, pull requests, and deployments that reached affected services in the relevant window — alongside metrics, infrastructure state, and dependency behaviour.`,
-    analysisSub: "Each change was tested against two questions: did it land close enough in time to have triggered the failure, and does it touch the code that broke.",
-    unfoldedTitle: "The cause is operational, amplified by conditions outside the codebase.",
-    unfoldedBody1: "Impact originated outside the codebase. Infrastructure conditions and external dependencies were involved in the degradation.",
-    unfoldedBody2: "The codebase was settled at the time of the incident. No change correlated with onset across the examined repositories.",
-    unfoldedBody3: "Recovery was shaped by the infrastructure conditions and runbook availability rather than any code issue.",
-    highlightText: "Clearing code is a result, not a dead end. It removes an entire class of remediation and focuses the response where it matters.",
-    actionsTitle: "Restore stability, harden the environment, and close the runbook gap.",
+    analysisSub:
+      "Each change was tested against two questions: did it land close enough in time to have triggered the failure, and does it touch the code that broke.",
+    unfoldedTitle:
+      "The cause is operational, amplified by conditions outside the codebase.",
+    unfoldedBody1:
+      "Impact originated outside the codebase. Infrastructure conditions and external dependencies were involved in the degradation.",
+    unfoldedBody2:
+      "The codebase was settled at the time of the incident. No change correlated with onset across the examined repositories.",
+    unfoldedBody3:
+      "Recovery was shaped by the infrastructure conditions and runbook availability rather than any code issue.",
+    highlightText:
+      "Clearing code is a result, not a dead end. It removes an entire class of remediation and focuses the response where it matters.",
+    actionsTitle:
+      "Restore stability, harden the environment, and close the runbook gap.",
   };
 }
 
@@ -86,7 +104,12 @@ interface ApiAnalysis {
     windowLabel: string;
     windowValue: string;
   };
-  causalFactors: Array<{ id?: number; factor: string; confidence: number; meaning: string }>;
+  causalFactors: Array<{
+    id?: number;
+    factor: string;
+    confidence: number;
+    meaning: string;
+  }>;
   actions: string[];
   generatedAt: string;
 }
@@ -137,7 +160,7 @@ function InvestigationAnalysisInner() {
     setError(null);
     try {
       const res = await apiClient.get<{ data: ApiAnalysis }>(
-        `${endpoint.investigation_analysis.get}/${id}`
+        `${endpoint.investigation_analysis.get}/${id}`,
       );
       const api = res.data.data;
       setData(mapToReportData(api));
@@ -163,7 +186,7 @@ function InvestigationAnalysisInner() {
     setError(null);
     try {
       const res = await apiClient.post<{ data: ApiAnalysis }>(
-        `${endpoint.investigation_analysis.generate}/${target}/generate`
+        `${endpoint.investigation_analysis.generate}/${target}/generate`,
       );
       const api = res.data.data;
       setData(mapToReportData(api));
@@ -193,7 +216,9 @@ function InvestigationAnalysisInner() {
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="animate-spin text-slate-400" size={28} />
           <p className="text-sm text-slate-500 font-medium">
-            {generating ? "Generating investigation analysis…" : "Loading analysis…"}
+            {generating
+              ? "Generating investigation analysis…"
+              : "Loading analysis…"}
           </p>
         </div>
       </div>
@@ -228,7 +253,10 @@ function InvestigationAnalysisInner() {
   }
 
   const timeAgo = generatedAt
-    ? new Date(generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    ? new Date(generatedAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : null;
 
   return (
@@ -248,7 +276,9 @@ function InvestigationAnalysisInner() {
               Investigation Analysis
             </h1>
             {ticketId && (
-              <span className="text-xs font-mono text-slate-400">{ticketId}</span>
+              <span className="text-base font-mono font-medium text-green-500 ">
+                {ticketId}
+              </span>
             )}
           </div>
 
@@ -263,7 +293,11 @@ function InvestigationAnalysisInner() {
               disabled={generating}
               className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 bg-white hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50"
             >
-              {generating ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+              {generating ? (
+                <Loader2 size={13} className="animate-spin" />
+              ) : (
+                <RefreshCw size={13} />
+              )}
               <span>Re-run</span>
             </button>
             <button className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 bg-white hover:bg-slate-50 transition-colors shadow-sm">
@@ -356,10 +390,19 @@ function InvestigationAnalysisInner() {
 
               {/* Strict Value Numerical Strip Layout */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 pt-2">
-                <MetricBlock label="Deployments" value={data.metrics.deployments} />
+                <MetricBlock
+                  label="Deployments"
+                  value={data.metrics.deployments}
+                />
                 <MetricBlock label="Commits" value={data.metrics.commits} />
-                <MetricBlock label="Pull Requests" value={data.metrics.pullRequests} />
-                <MetricBlock label="Repositories" value={data.metrics.repositories} />
+                <MetricBlock
+                  label="Pull Requests"
+                  value={data.metrics.pullRequests}
+                />
+                <MetricBlock
+                  label="Repositories"
+                  value={data.metrics.repositories}
+                />
 
                 <div className="flex flex-col col-span-2 sm:col-span-1 border-t sm:border-t-0 sm:border-l border-slate-200/80 pt-4 sm:pt-0 sm:pl-6 min-w-0">
                   <span className="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider block truncate">
@@ -381,7 +424,8 @@ function InvestigationAnalysisInner() {
                   5. CAUSAL FACTORS
                 </h3>
                 <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 tracking-tight">
-                  Ezra records every factor, and does not collapse them into one root cause.
+                  Ezra records every factor, and does not collapse them into one
+                  root cause.
                 </h4>
               </div>
 
@@ -393,21 +437,25 @@ function InvestigationAnalysisInner() {
                       <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">
                         <th className="py-3 px-4 w-12 text-center">#</th>
                         <th className="py-3 px-4 w-1/4">Factor</th>
-                        <th className="py-3 px-4 w-24 text-right">Confidence</th>
+                        <th className="py-3 px-4 w-24 text-right">
+                          Confidence
+                        </th>
                         <th className="py-3 px-6">What It Means</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                       {data.causalFactors.map((factor, index: number) => {
                         const isHighlightedRow =
-                          (data.variant === "not-contributed" && factor.id === 4) ||
+                          (data.variant === "not-contributed" &&
+                            factor.id === 4) ||
                           (data.variant === "contributed" && factor.id === 1);
                         return (
                           <tr
                             key={factor.id}
                             className={cn(
                               "transition-colors hover:bg-slate-50/50 font-medium text-slate-700",
-                              isHighlightedRow && "bg-emerald-50/40 hover:bg-emerald-50/60"
+                              isHighlightedRow &&
+                                "bg-emerald-50/40 hover:bg-emerald-50/60",
                             )}
                           >
                             <td className="py-4 px-4 text-center font-mono text-xs text-slate-400">
@@ -430,7 +478,8 @@ function InvestigationAnalysisInner() {
                 </div>
                 <div className="bg-slate-50/50 px-4 py-2.5 border-t border-slate-100">
                   <p className="text-[10px] font-mono font-medium text-slate-400">
-                    Confidence Reflects Ezra&apos;s Assessment Per Factor, Not A Single Root Cause.
+                    Confidence Reflects Ezra&apos;s Assessment Per Factor, Not A
+                    Single Root Cause.
                   </p>
                 </div>
               </div>
@@ -479,7 +528,9 @@ function InvestigationAnalysisInner() {
                     key={i}
                     className="flex gap-3 text-[14px] font-medium leading-relaxed text-slate-600"
                   >
-                    <span className="font-mono text-slate-400 shrink-0 select-none">{i + 1}.</span>
+                    <span className="font-mono text-slate-400 shrink-0 select-none">
+                      {i + 1}.
+                    </span>
                     <p>{action}</p>
                   </li>
                 ))}
@@ -516,7 +567,9 @@ interface MetricBlockProps {
 function MetricBlock({ label, value }: MetricBlockProps) {
   return (
     <div className="flex flex-col min-w-0">
-      <span className="text-[14px] font-bold text-slate-800 tracking-tight block">{value}</span>
+      <span className="text-[14px] font-bold text-slate-800 tracking-tight block">
+        {value}
+      </span>
       <span className="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider block mt-0.5 truncate">
         {label}
       </span>
