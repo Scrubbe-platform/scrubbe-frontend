@@ -173,9 +173,9 @@ const MiniCalendar = ({
               }
               className={`text-[12px] h-7 w-7 mx-auto flex items-center justify-center rounded-full transition-colors font-medium ${
                 selected
-                  ? "bg-violet-600 text-white"
+                  ? "bg-green-600 text-white"
                   : rangeMiddle
-                    ? "bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 rounded-none"
+                    ? "bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-300 rounded-none"
                     : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
               }`}
             >
@@ -334,12 +334,12 @@ const IncidentFilterPanel: React.FC<Props> = ({
       {/* ── Top bar ── */}
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2">
-          <Filter size={14} className="text-violet-500" />
+          <Filter size={14} className="text-green-500" />
           <span className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100">
             Filters
           </span>
           {activeCount > 0 && (
-            <span className="text-[11px] font-bold bg-violet-100 dark:bg-violet-500/15 text-violet-600 dark:text-violet-400 rounded-full px-2 py-0.5">
+            <span className="text-[11px] font-bold bg-green-100 dark:bg-green-500/15 text-green-600 dark:text-green-400 rounded-full px-2 py-0.5">
               {activeCount}
             </span>
           )}
@@ -404,7 +404,7 @@ const IncidentFilterPanel: React.FC<Props> = ({
                           type="checkbox"
                           checked={priorities.includes(p.value)}
                           onChange={() => togglePriority(p.value)}
-                          className="mt-0.5 accent-violet-600 w-4 h-4 rounded"
+                          className="mt-0.5 accent-green-600 w-4 h-4 rounded"
                         />
                         <div
                           className={`w-3 h-3 rounded-full mt-0.5 shrink-0 ${p.dot}`}
@@ -424,7 +424,7 @@ const IncidentFilterPanel: React.FC<Props> = ({
                         setPriorities([]);
                         setPriorityOpen(false);
                       }}
-                      className="w-full text-center py-2.5 text-[13px] font-semibold text-violet-600 dark:text-violet-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                      className="w-full text-center py-2.5 text-[13px] font-semibold text-green-600 dark:text-green-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                     >
                       Clear
                     </button>
@@ -582,7 +582,7 @@ const IncidentFilterPanel: React.FC<Props> = ({
                           className={`w-full text-left px-4 py-2 text-[12px] font-medium transition-colors ${
                             r.label === "Last 7 days" ||
                             r.label === "Last 30 days"
-                              ? "text-violet-600 dark:text-violet-400"
+                              ? "text-green-600 dark:text-green-400"
                               : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
                           }`}
                         >
@@ -637,7 +637,7 @@ const IncidentFilterPanel: React.FC<Props> = ({
                     dateTo,
                   })
                 }
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-[13px] font-bold text-white transition-colors"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-[13px] font-bold text-white transition-colors"
               >
                 <Filter size={13} /> Apply Filters
               </button>

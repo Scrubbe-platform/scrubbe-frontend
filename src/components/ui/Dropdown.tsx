@@ -137,7 +137,7 @@ export default function Dropdown({
         <div
           role="menu"
           className={[
-            "absolute z-50 min-w-[180px] w-max max-w-xs",
+            "absolute z-[1000] min-w-[180px] w-max max-w-xs",
             "bg-white dark:bg-neutral-900",
             "border border-neutral-200 dark:border-neutral-700",
             "rounded-xl shadow-lg shadow-black/10 dark:shadow-black/40",
