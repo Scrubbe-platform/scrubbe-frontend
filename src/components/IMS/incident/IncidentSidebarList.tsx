@@ -18,6 +18,7 @@ import {
 import IncidentFilterPanel, { IncidentFilters } from "./IncidentFilterPanel";
 import Button from "@/components/ui/Button1";
 import Dropdown from "@/components/ui/Dropdown";
+import { STAGES_CONFIG } from "@/lib/constant/index";
 
 // ── Severity badge ────────────────────────────────────────────────
 
@@ -40,29 +41,13 @@ const SeverityBadge = ({ severity }: { severity: string }) => (
 // ── Status badge ──────────────────────────────────────────────────
 
 const StatusBadge = ({ status }: { status: IncidentSidebarStatus }) => {
-  const styles: Record<IncidentSidebarStatus, string> = {
-    Investigating:
-      "border-amber-500/50  text-amber-600  dark:text-amber-500  bg-amber-500/5",
-    Proposed:
-      "border-blue-500/50   text-blue-600   dark:text-blue-400   bg-blue-500/5",
-    Detected:
-      "border-green-500/50  text-green-600  dark:text-green-400  bg-green-500/5",
-    Approved:
-      "border-emerald-500/50 text-emerald-600 dark:text-emerald-500 bg-emerald-500/5",
-    Enriched:
-      "border-purple-500/50 text-purple-600  dark:text-purple-400 bg-purple-500/5",
-    Analyzed:
-      "border-indigo-500/50 text-indigo-600  dark:text-indigo-400 bg-indigo-500/5",
-    Executing:
-      "border-yellow-500/50 text-yellow-600  dark:text-yellow-500 bg-yellow-500/5",
-    Resolved:
-      "border-slate-400/50  text-slate-500   dark:text-slate-400  bg-slate-500/5",
-    "Post-Mortem":
-      "border-pink-500/50   text-pink-600    dark:text-pink-400   bg-pink-500/5",
-  };
+  const currentIncident = STAGES_CONFIG.find(
+    (value) => value.label === status.toUpperCase(),
+  )?.ribbonActive;
+
   return (
     <span
-      className={`text-[9px] px-2 py-0.5 rounded border font-black uppercase tracking-tighter ${styles[status]}`}
+      className={`text-[9px] px-2 py-0.5 rounded border font-medium uppercase tracking-tighter ${currentIncident}`}
     >
       {status}
     </span>
@@ -137,12 +122,17 @@ const IncidentCard = ({
       {incident.service} · {incident.region} · {incident.elapsedLabel}
     </div>
     <div className="flex gap-1">
-      {Array.from({ length: 8 }).map((_, i) => (
+      {STAGES_CONFIG.map((item, i) => (
         <div
           key={i}
           className={`h-1 flex-1 rounded-sm transition-all duration-700 ${
-            i + 1 <= Math.round((incident.progressPercentage / 100) * 8)
-              ? (PROGRESS_COLOR[incident.severity] ?? PROGRESS_COLOR.P4)
+            STAGES_CONFIG.findIndex(
+              (value) => incident?.sidebarStatus.toUpperCase() === value.label,
+            ) >= i
+              ? STAGES_CONFIG.find(
+                  (value) =>
+                    incident?.sidebarStatus.toUpperCase() === value.label,
+                )?.ribbonActive
               : "bg-zinc-100 dark:bg-white/5"
           }`}
         />
