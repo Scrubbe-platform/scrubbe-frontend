@@ -27,13 +27,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       info,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [showPassword, setShowPassword] = useState(false);
     const isPasswordType = type === "password";
 
     return (
-      <div className="mb-4">
+      <div>
         {label && (
           <label
             htmlFor={props.id}
@@ -121,7 +121,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

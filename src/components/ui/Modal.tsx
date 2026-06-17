@@ -28,7 +28,7 @@ const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm "
         >
           <motion.div
             initial={{ scale: 0.96, opacity: 0 }}
@@ -37,7 +37,7 @@ const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
             transition={{ type: "spring", stiffness: 280, damping: 22 }}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "relative w-full mx-4 sm:max-w-xl max-h-[90vh] overflow-y-auto",
+              "relative w-full mx-4 sm:max-w-xl max-h-[90vh] overflow-y-auto no-scrollbar",
               "rounded-xl border border-zinc-500 dark:border-zinc-700/60",
               "bg-white dark:bg-zinc-900 shadow-xl",
               "p-2",
