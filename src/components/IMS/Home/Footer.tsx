@@ -26,7 +26,7 @@ const NAV_COLUMNS = [
       { label: "Documentation", href: "/#" },
       { label: "API Reference", href: "/#" },
       { label: "SDK and CLI", href: "/#" },
-      { label: "MCP", href: "/#" },
+      { label: "MCP", href: "/" },
       { label: "Changelog", href: "/#" },
     ],
   },
@@ -42,7 +42,7 @@ const NAV_COLUMNS = [
   {
     heading: "Company",
     links: [
-      { label: "About", href: "/#" },
+      { label: "About", href: "/about" },
       { label: "Blog", href: "/#" },
       { label: "Careers", href: "/#" },
       { label: "Contact us", href: "/contact-us" },
