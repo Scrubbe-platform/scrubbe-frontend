@@ -43,6 +43,10 @@ export const endpoint = {
     context_get: "/incident-ticket",
     context_update: "/incident-ticket",
     declare_major: "/incident-ticket",   // POST /incident-ticket/:id/declare-major
+    acknowledge: "/incident-ticket",     // POST /incident-ticket/:id/acknowledge
+    investigate: "/incident-ticket",     // POST /incident-ticket/:id/investigate
+    mitigate: "/incident-ticket",        // POST /incident-ticket/:id/mitigate
+    close: "/incident-ticket",           // POST /incident-ticket/:id/close
     analytics: "/incident-ticket/analytics",
     history: "/tickets/history",
     integrations: "/integrations",

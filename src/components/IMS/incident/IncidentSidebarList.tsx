@@ -18,7 +18,49 @@ import {
 import IncidentFilterPanel, { IncidentFilters } from "./IncidentFilterPanel";
 import Button from "@/components/ui/Button1";
 import Dropdown from "@/components/ui/Dropdown";
-import { STAGES_CONFIG } from "@/lib/constant/index";
+
+// Real progression order of IncidentSidebarStatus. "Investigating" is a
+// renderer-side alias for "Analyzed" (see incident.mapper.ts toSidebarStatus)
+// and never co-occurs with it, so both share the same ordinal position.
+const SIDEBAR_STAGE_ORDER: IncidentSidebarStatus[] = [
+  "Detected",
+  "Enriched",
+  "Analyzed",
+  "Proposed",
+  "Approved",
+  "Executing",
+  "Resolved",
+  "Post-Mortem",
+];
+
+function sidebarStageIndex(status: IncidentSidebarStatus): number {
+  if (status === "Investigating") return SIDEBAR_STAGE_ORDER.indexOf("Analyzed");
+  return SIDEBAR_STAGE_ORDER.indexOf(status);
+}
+
+const SIDEBAR_STATUS_BADGE: Record<IncidentSidebarStatus, string> = {
+  Detected: "border-red-500/60 text-red-600 dark:text-red-400 bg-red-500/8",
+  Enriched: "border-amber-500/60 text-amber-600 dark:text-amber-400 bg-amber-500/8",
+  Analyzed: "border-blue-500/60 text-blue-600 dark:text-blue-400 bg-blue-500/8",
+  Investigating: "border-blue-500/60 text-blue-600 dark:text-blue-400 bg-blue-500/8",
+  Proposed: "border-purple-500/60 text-purple-600 dark:text-purple-400 bg-purple-500/8",
+  Approved: "border-indigo-500/60 text-indigo-600 dark:text-indigo-400 bg-indigo-500/8",
+  Executing: "border-orange-500/60 text-orange-600 dark:text-orange-400 bg-orange-500/8",
+  Resolved: "border-emerald-500/60 text-emerald-600 dark:text-emerald-400 bg-emerald-500/8",
+  "Post-Mortem": "border-zinc-500/60 text-zinc-600 dark:text-zinc-400 bg-zinc-500/8",
+};
+
+const SIDEBAR_STAGE_FILL: Record<IncidentSidebarStatus, string> = {
+  Detected: "bg-red-500",
+  Enriched: "bg-amber-500",
+  Analyzed: "bg-blue-500",
+  Investigating: "bg-blue-500",
+  Proposed: "bg-purple-500",
+  Approved: "bg-indigo-500",
+  Executing: "bg-orange-500",
+  Resolved: "bg-emerald-500",
+  "Post-Mortem": "bg-zinc-500",
+};
 
 // ── Severity badge ────────────────────────────────────────────────
 
@@ -40,19 +82,13 @@ const SeverityBadge = ({ severity }: { severity: string }) => (
 
 // ── Status badge ──────────────────────────────────────────────────
 
-const StatusBadge = ({ status }: { status: IncidentSidebarStatus }) => {
-  const currentIncident = STAGES_CONFIG.find(
-    (value) => value.label === status.toUpperCase(),
-  )?.ribbonActive;
-
-  return (
-    <span
-      className={`text-[9px] px-2 py-0.5 rounded border font-medium uppercase tracking-tighter ${currentIncident}`}
-    >
-      {status}
-    </span>
-  );
-};
+const StatusBadge = ({ status }: { status: IncidentSidebarStatus }) => (
+  <span
+    className={`text-[9px] px-2 py-0.5 rounded border font-medium uppercase tracking-tighter ${SIDEBAR_STATUS_BADGE[status]}`}
+  >
+    {status}
+  </span>
+);
 
 // ── Incident card ─────────────────────────────────────────────────
 
@@ -89,21 +125,17 @@ const IncidentCard = ({
       {incident.service} · {incident.region} · {incident.elapsedLabel}
     </div>
     <div className="flex gap-1">
-      {STAGES_CONFIG.map((item, i) => (
-        <div
-          key={i}
-          className={`h-1 flex-1 rounded-sm transition-all duration-700 ${
-            STAGES_CONFIG.findIndex(
-              (value) => incident?.sidebarStatus.toUpperCase() === value.label,
-            ) >= i
-              ? STAGES_CONFIG.find(
-                  (value) =>
-                    incident?.sidebarStatus.toUpperCase() === value.label,
-                )?.ribbonActive
-              : "bg-zinc-100 dark:bg-white/5"
-          }`}
-        />
-      ))}
+      {SIDEBAR_STAGE_ORDER.map((stage, i) => {
+        const filled = sidebarStageIndex(incident.sidebarStatus) >= i;
+        return (
+          <div
+            key={stage}
+            className={`h-1 flex-1 rounded-sm transition-all duration-700 ${
+              filled ? SIDEBAR_STAGE_FILL[incident.sidebarStatus] : "bg-zinc-100 dark:bg-white/5"
+            }`}
+          />
+        );
+      })}
     </div>
   </div>
 );

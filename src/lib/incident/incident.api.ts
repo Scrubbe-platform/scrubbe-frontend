@@ -43,6 +43,34 @@ export const updateIncident = async (
   return incident;
 };
 
+const transitionIncidentStatus = async (
+  stage: "acknowledge" | "investigate" | "mitigate" | "close",
+  incidentId: string
+) => {
+  const response = await customAxios.post(
+    `${endpoint.incident_ticket[stage]}/${incidentId}/${stage}`
+  );
+  const incident = extractIncidentDetailResponse(response.data);
+
+  if (!incident) {
+    throw new Error(`Unable to decode the incident after ${stage}.`);
+  }
+
+  return incident;
+};
+
+export const acknowledgeIncident = (incidentId: string) =>
+  transitionIncidentStatus("acknowledge", incidentId);
+
+export const investigateIncident = (incidentId: string) =>
+  transitionIncidentStatus("investigate", incidentId);
+
+export const mitigateIncident = (incidentId: string) =>
+  transitionIncidentStatus("mitigate", incidentId);
+
+export const closeIncident = (incidentId: string) =>
+  transitionIncidentStatus("close", incidentId);
+
 export const fetchIncidentDetail = async (incidentId: string) => {
   const response = await customAxios.get(
     `${endpoint.incident_ticket.getTicket}/${incidentId}`

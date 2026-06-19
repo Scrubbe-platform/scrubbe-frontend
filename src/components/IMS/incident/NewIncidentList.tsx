@@ -87,9 +87,11 @@ const IncidentOverview = ({ children, tabs }: Props) => {
                   activeTab={tabs}
                 />
 
+                {/* Lifecycle ribbon — visible across every incident-context tab, not just overview */}
+                <IncidentLifecycle incident={selectedIncident} />
+
                 {tabs === "overview" ? (
                   <>
-                    <IncidentLifecycle incident={selectedIncident} />
                     <DetectionSignals incident={selectedIncident} />
                     <ScrubbeIntelligence incident={selectedIncident} />
                     <IncidentContextModule

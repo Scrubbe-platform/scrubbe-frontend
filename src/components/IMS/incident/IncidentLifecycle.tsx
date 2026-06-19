@@ -8,7 +8,12 @@ import { cn } from "@/lib/utils";
 import Modal from "@/components/ui/Modal";
 import ResolveIncidentForm from "./ResolveIncidentForm";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
-import { updateIncident } from "@/lib/incident/incident.api";
+import {
+  acknowledgeIncident,
+  investigateIncident,
+  mitigateIncident,
+  closeIncident,
+} from "@/lib/incident/incident.api";
 import { querykeys } from "@/lib/constant";
 
 // --- Types ---
@@ -95,10 +100,19 @@ export default function IncidentLifecycleManager({ incident }: Props) {
       return;
     }
 
+    const transition = {
+      ACKNOWLEDGED: acknowledgeIncident,
+      INVESTIGATION: investigateIncident,
+      MITIGATED: mitigateIncident,
+      CLOSED: closeIncident,
+    }[label as "ACKNOWLEDGED" | "INVESTIGATION" | "MITIGATED" | "CLOSED"];
+
+    if (!transition) return;
+
     setIsSaving(true);
     setSaveError(null);
     try {
-      await updateIncident(incident.id, { status: label });
+      await transition(incident.id);
       refreshIncident();
     } catch {
       setSaveError("Failed to update incident status. Please try again.");
