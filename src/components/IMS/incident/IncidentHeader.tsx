@@ -130,14 +130,10 @@ const IncidentHeader = ({
                 onClick: () => setOpenContext(true),
               },
               {
-                value: "problem-record",
-                label: "Add to Proble Record",
-                icon: <Plus size={14} />,
-              },
-              {
                 value: "war-room",
                 label: "War Room",
                 icon: <Video size={14} />,
+                onClick: () => setOpenWarRoom(true),
               },
             ]}
             trigger={
@@ -185,11 +181,7 @@ const IncidentHeader = ({
         />
       </Modal>
       <Modal onClose={() => setOpenWarRoom(false)} isOpen={openWarRoom}>
-        <WarRoom
-          incident={incident}
-          onDeclare={(data) => console.log(data)}
-          onClose={() => setOpenWarRoom(false)}
-        />
+        <WarRoom incident={incident} onClose={() => setOpenWarRoom(false)} />
       </Modal>
     </div>
   );

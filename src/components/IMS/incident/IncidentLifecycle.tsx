@@ -1,28 +1,70 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { Check, ChevronDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Modal from "@/components/ui/Modal";
 import ResolveIncidentForm from "./ResolveIncidentForm";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
-import { LifecycleStage, STAGES_CONFIG } from "@/lib/constant/index";
+import { updateIncident } from "@/lib/incident/incident.api";
+import { querykeys } from "@/lib/constant";
 
 // --- Types ---
+
+// Real server-side ticket statuses that a human can manually transition between.
+// (DETECTED / ENRICHED / ACTION_PROPOSED / EXECUTING are automation-only states.)
+type TicketStatusValue =
+  | "OPEN"
+  | "ACKNOWLEDGED"
+  | "INVESTIGATION"
+  | "MITIGATED"
+  | "RESOLVED"
+  | "CLOSED";
+
+interface StatusMeta {
+  id: number;
+  label: TicketStatusValue;
+  display: string;
+  dotColor: string;
+  ribbonActive: string;
+  ribbonDone: string;
+  textColor: string;
+}
+
+const TICKET_STATUS_CONFIG: StatusMeta[] = [
+  { id: 1, label: "OPEN", display: "Open", dotColor: "bg-cyan-400", ribbonActive: "bg-cyan-500 text-white border-l-cyan-500", ribbonDone: "bg-cyan-500/5 text-cyan-600 dark:text-cyan-400/40", textColor: "text-cyan-600 dark:text-cyan-400" },
+  { id: 2, label: "ACKNOWLEDGED", display: "Acknowledged", dotColor: "bg-amber-500", ribbonActive: "bg-amber-500 text-white border-l-amber-500", ribbonDone: "bg-amber-500/5 text-amber-600 dark:text-[#f3ab3d]/40", textColor: "text-amber-500 dark:text-[#f3ab3d]" },
+  { id: 3, label: "INVESTIGATION", display: "Investigating", dotColor: "bg-blue-500", ribbonActive: "bg-blue-500 text-white border-l-blue-500", ribbonDone: "bg-blue-500/5 text-blue-600 dark:text-blue-400/40", textColor: "text-blue-500 dark:text-blue-400" },
+  { id: 4, label: "MITIGATED", display: "Mitigated", dotColor: "bg-orange-500", ribbonActive: "bg-orange-500 text-white border-l-orange-500", ribbonDone: "bg-orange-500/5 text-orange-600 dark:text-orange-400/40", textColor: "text-orange-500 dark:text-orange-400" },
+  { id: 5, label: "RESOLVED", display: "Resolved", dotColor: "bg-emerald-500", ribbonActive: "bg-emerald-500 text-white border-l-emerald-500", ribbonDone: "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400/40", textColor: "text-emerald-500 dark:text-emerald-400" },
+  { id: 6, label: "CLOSED", display: "Closed", dotColor: "bg-zinc-500", ribbonActive: "bg-zinc-600 text-white border-l-zinc-600", ribbonDone: "bg-zinc-500/5 text-zinc-600 dark:text-zinc-400/40", textColor: "text-zinc-500 dark:text-zinc-400" },
+];
 
 type Props = {
   incident: IncidentDetailRecord;
 };
 
 export default function IncidentLifecycleManager({ incident }: Props) {
-  const [currentStage, setCurrentStage] =
-    useState<LifecycleStage>("INVESTIGATING");
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const currentStatus = (incident.status || "OPEN").toUpperCase() as TicketStatusValue;
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenResolve, setIsOpenResolve] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const activeIndex = STAGES_CONFIG.findIndex((s) => s.label === currentStage);
-  const activeMeta = STAGES_CONFIG[activeIndex];
+  const activeIndex = TICKET_STATUS_CONFIG.findIndex((s) => s.label === currentStatus);
+  const activeMeta = activeIndex >= 0 ? TICKET_STATUS_CONFIG[activeIndex] : TICKET_STATUS_CONFIG[0];
+  const isTerminal = currentStatus === "CLOSED";
+
+  const refreshIncident = () => {
+    queryClient.invalidateQueries({ queryKey: [querykeys.INCIDENT_DETAIL, incident.id] });
+    queryClient.invalidateQueries({ queryKey: [querykeys.INCIDENT_TICKET] });
+  };
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -38,11 +80,38 @@ export default function IncidentLifecycleManager({ incident }: Props) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (label: LifecycleStage) => {
-    setCurrentStage(label);
+  const handleSelect = async (label: TicketStatusValue) => {
     setIsOpen(false);
+    if (label === currentStatus) return;
+
     if (label === "RESOLVED") {
+      if (currentStatus === "RESOLVED") return;
       setIsOpenResolve(true);
+      return;
+    }
+
+    if (label === "CLOSED" && currentStatus !== "RESOLVED") {
+      // Closing requires the incident to be resolved (and have a postmortem) first.
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      await updateIncident(incident.id, { status: label });
+      refreshIncident();
+    } catch {
+      setSaveError("Failed to update incident status. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleResolved = (postMortemId?: string) => {
+    setIsOpenResolve(false);
+    refreshIncident();
+    if (postMortemId) {
+      router.push(`/incident/postmortems/${postMortemId}`);
     }
   };
 
@@ -52,6 +121,7 @@ export default function IncidentLifecycleManager({ incident }: Props) {
         <ResolveIncidentForm
           onClose={() => setIsOpenResolve(false)}
           incident={incident}
+          onResolved={handleResolved}
         />
       </Modal>
       {/* ─────────────────────────────────────────────────────────────────
@@ -68,7 +138,7 @@ export default function IncidentLifecycleManager({ incident }: Props) {
         {/* Scrollable Ribbon Wrapper */}
         <div className="overflow-x-auto no-scrollbar dark:border-white/5 rounded-xl bg-transparent dark:bg-[#0b1329]">
           <div className="flex w-full h-[58px] bg-transparent">
-            {STAGES_CONFIG.map((stage, idx) => {
+            {TICKET_STATUS_CONFIG.map((stage, idx) => {
               const isCompleted = idx < activeIndex;
               const isCurrent = idx === activeIndex;
               const isPending = idx > activeIndex;
@@ -76,10 +146,9 @@ export default function IncidentLifecycleManager({ incident }: Props) {
               return (
                 <div
                   key={stage.label}
-                  style={{ zIndex: STAGES_CONFIG.length + idx }}
+                  style={{ zIndex: TICKET_STATUS_CONFIG.length + idx }}
                   className={cn(
                     "relative flex-1 flex flex-col justify-center pl-8 pr-4 h-full transition-all duration-300",
-                    // idx !== STAGES_CONFIG.length - 1 && "clip-path-chevron",
                     "clip-path-chevron",
                     isCompleted && stage.ribbonDone,
                     isCurrent && stage.ribbonActive,
@@ -136,22 +205,27 @@ export default function IncidentLifecycleManager({ incident }: Props) {
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
+              disabled={isSaving || isTerminal}
               className={cn(
-                "w-full h-[48px] px-4 rounded-xl border flex items-center justify-between text-left transition-all bg-white dark:bg-[#091124]",
+                "w-full h-[48px] px-4 rounded-xl border flex items-center justify-between text-left transition-all bg-white dark:bg-[#091124] disabled:opacity-70 disabled:cursor-not-allowed",
                 isOpen
                   ? "border-blue-500 dark:border-blue-500 ring-4 ring-blue-500/10 shadow-sm"
                   : "border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10",
               )}
             >
               <div className="flex items-center gap-3">
-                <div
-                  className={cn(
-                    "w-3 h-3 rounded-full shrink-0",
-                    activeMeta.dotColor,
-                  )}
-                />
+                {isSaving ? (
+                  <Loader2 size={14} className="animate-spin text-slate-400 shrink-0" />
+                ) : (
+                  <div
+                    className={cn(
+                      "w-3 h-3 rounded-full shrink-0",
+                      activeMeta.dotColor,
+                    )}
+                  />
+                )}
                 <span className="text-[14px] font-bold text-black dark:text-white">
-                  {activeMeta.display}
+                  {isSaving ? "Updating..." : activeMeta.display}
                 </span>
               </div>
               <ChevronDown
@@ -166,17 +240,21 @@ export default function IncidentLifecycleManager({ incident }: Props) {
             {/* Custom Popover Dropdown Selection Options */}
             {isOpen && (
               <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-white/10 rounded-xl shadow-xl z-50 overflow-hidden p-1.5 space-y-0.5">
-                {STAGES_CONFIG.map((stage, idx) => {
-                  const isCurrentItem = stage.label === currentStage;
+                {TICKET_STATUS_CONFIG.map((stage, idx) => {
+                  const isCurrentItem = stage.label === currentStatus;
                   const isDoneItem = idx < activeIndex;
+                  const isLockedClosed = stage.label === "CLOSED" && currentStatus !== "RESOLVED";
 
                   return (
                     <button
                       key={stage.label}
                       type="button"
                       onClick={() => handleSelect(stage.label)}
+                      disabled={isLockedClosed}
+                      title={isLockedClosed ? "Resolve the incident before closing it" : undefined}
                       className={cn(
                         "w-full h-[42px] px-3 rounded-lg flex items-center justify-between text-left transition-colors group",
+                        isLockedClosed && "opacity-40 cursor-not-allowed",
                         isCurrentItem
                           ? "bg-slate-100 dark:bg-white/5"
                           : "hover:bg-slate-50 dark:hover:bg-white/[0.02]",
@@ -228,21 +306,32 @@ export default function IncidentLifecycleManager({ incident }: Props) {
               Progress
             </label>
             <p className="text-xl font-bold text-black dark:text-white flex items-center">
-              Stage {activeMeta.id} of {STAGES_CONFIG.length}
+              Stage {activeMeta.id} of {TICKET_STATUS_CONFIG.length}
             </p>
           </div>
         </div>
 
         <hr className="border-slate-100 dark:border-white/5" />
 
+        {saveError && (
+          <p className="text-[13px] font-semibold text-red-500">{saveError}</p>
+        )}
+
         <p className="text-[13px] italic text-black dark:text-slate-500 leading-relaxed">
-          Set the incident state from the dropdown — the lifecycle ribbon
-          updates to reflect the current stage. Choosing{" "}
-          <span className="font-semibold text-slate-600 dark:text-slate-300">
-            Resolved
-          </span>{" "}
-          opens a resolution checklist that must be completed first. Every
-          change is written to the audit trail below.
+          {isTerminal ? (
+            <>This incident is <span className="font-semibold text-slate-600 dark:text-slate-300">closed</span> and its lifecycle is locked.</>
+          ) : (
+            <>
+              Set the incident state from the dropdown — the lifecycle ribbon
+              updates to reflect the current stage. Choosing{" "}
+              <span className="font-semibold text-slate-600 dark:text-slate-300">
+                Resolved
+              </span>{" "}
+              opens a resolution checklist that must be completed first. Closing
+              is only available once an incident is resolved. Every change is
+              written to the audit trail below.
+            </>
+          )}
         </p>
       </div>
 

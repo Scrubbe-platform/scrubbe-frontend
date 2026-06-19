@@ -2,11 +2,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check } from "lucide-react";
+import { Check, AlertTriangle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Select from "@/components/ui/select";
 import TextArea from "@/components/ui/text-area";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 
 // types/resolution.ts
 
@@ -98,10 +100,13 @@ const CATEGORY_OPTIONS: { value: ResolutionCategoryOption; label: string }[] = [
 export default function ResolveIncidentForm({
   onClose,
   incident,
+  onResolved,
 }: {
   onClose: () => void;
   incident: IncidentDetailRecord;
+  onResolved?: (postMortemId?: string) => void;
 }) {
+  const { post } = useFetch();
   const [form, setForm] = useState<ResolutionFormState>({
     criteria: {
       "root-cause": false,
@@ -117,6 +122,8 @@ export default function ResolveIncidentForm({
     summary: "",
     followUpActions: "",
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const totalCriteria = INITIAL_CRITERIA.length;
   const completedCriteriaCount = Object.values(form.criteria).filter(
@@ -127,7 +134,7 @@ export default function ResolveIncidentForm({
   // Track field requirements for bottom notification string dynamically
   const isRootCauseFilled = form.rootCause.trim().length > 0;
   const isSummaryFilled = form.summary.trim().length > 0;
-  const canSubmit = isRootCauseFilled && isSummaryFilled;
+  const canSubmit = isRootCauseFilled && isSummaryFilled && !submitting;
 
   const toggleCriteria = (id: string) => {
     setForm((prev) => ({
@@ -139,10 +146,48 @@ export default function ResolveIncidentForm({
     }));
   };
 
-  const handleResolve = (e: React.FormEvent) => {
+  const handleResolve = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit) return;
-    console.log("Resolving incident payload:", form);
+    if (!isRootCauseFilled || !isSummaryFilled || submitting) return;
+
+    setSubmitting(true);
+    setError(null);
+
+    const isWorkaround = form.category === "Workaround applied";
+    const payload = {
+      rootCauseAnalysis: {
+        rootCause: form.rootCause.trim(),
+        causeCategory: form.category,
+        criteriaMet: form.criteria,
+      },
+      resolutionDetails: isWorkaround
+        ? { temporaryFix: form.summary.trim() }
+        : { permanentFix: form.summary.trim() },
+      ...(form.followUpActions.trim()
+        ? { followUpActions: { task: form.followUpActions.trim(), status: "OPEN" } }
+        : {}),
+    };
+
+    const res = await post(
+      `${endpoint.incident_ticket.postmorterm.resolve}/${incident.id}`,
+      payload,
+    );
+
+    setSubmitting(false);
+
+    if (!res.success) {
+      setError(
+        typeof res.data === "string"
+          ? res.data
+          : "Failed to resolve incident. Please try again.",
+      );
+      return;
+    }
+
+    const postMortemId =
+      res.data?.data?.postMortem?.id ?? res.data?.data?.ResolveIncident?.id;
+    onResolved?.(postMortemId);
+    onClose();
   };
 
   return (
@@ -309,13 +354,19 @@ export default function ResolveIncidentForm({
         {/* 4. MODAL STICKY FOOTER ACTION ROW */}
         <div className="p-5 bg-slate-100 dark:bg-[#050914] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           {/* Dynamic Helper String Warnings Tracker */}
+          {error && (
+            <div className="flex items-center gap-2 text-[12px] font-semibold text-red-600 dark:text-red-400">
+              <AlertTriangle size={14} /> {error}
+            </div>
+          )}
 
           {/* Action CTAs */}
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="h-[38px] px-5 border border-slate-300 dark:border-white/[0.06] bg-white hover:bg-slate-50 dark:bg-transparent text-slate-600 dark:text-slate-300 font-semibold text-xs rounded-lg transition-all active:scale-95 shadow-sm dark:shadow-none"
+              disabled={submitting}
+              className="h-[38px] px-5 border border-slate-300 dark:border-white/[0.06] bg-white hover:bg-slate-50 dark:bg-transparent text-slate-600 dark:text-slate-300 font-semibold text-xs rounded-lg transition-all active:scale-95 shadow-sm dark:shadow-none disabled:opacity-50"
             >
               Cancel
             </button>
@@ -323,13 +374,14 @@ export default function ResolveIncidentForm({
               type="submit"
               disabled={!canSubmit}
               className={cn(
-                "h-[38px] px-5 font-bold text-xs rounded-lg transition-all shadow-sm active:scale-95 border",
+                "h-[38px] px-5 font-bold text-xs rounded-lg transition-all shadow-sm active:scale-95 border flex items-center gap-2",
                 canSubmit
                   ? "bg-[#00aa7f] dark:bg-[#00cc99] border-[#00aa7f] dark:border-[#00cc99] text-white dark:text-black hover:bg-[#008f6a] dark:hover:bg-[#00b386]"
                   : "bg-slate-200/60 dark:bg-white/[0.04] border-slate-200/10 dark:border-white/[0.04] text-slate-400 dark:text-slate-500 cursor-not-allowed",
               )}
             >
-              Resolve incident
+              {submitting && <Loader2 size={13} className="animate-spin" />}
+              {submitting ? "Resolving..." : "Resolve incident"}
             </button>
           </div>
         </div>

@@ -107,13 +107,18 @@ export default function ForgotPassword() {
     if (res.success) {
       resetPasswordForm();
       setStage(4);
+    } else {
+      toast.error(
+        typeof res.data === "string"
+          ? res.data
+          : "Invalid or expired reset link. Please request a new one.",
+      );
     }
   };
 
   useEffect(() => {
     const validateToken = async () => {
       const res = await post(endpoint.auth.valid_token, { token });
-      console.log({ res });
       if (res.success) {
         if (!res.data.valid) {
           toast.error("Invalid or Expired token");
