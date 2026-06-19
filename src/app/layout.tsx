@@ -90,6 +90,9 @@ export default function RootLayout({
       lang="en"
       className={`${airbnbCereal.variable} ${bersley.variable} ${bigshotOne.variable} ${electrolize.variable}`}
     >
+      <head>
+        <script src="https://t.contentsquare.net/uxa/8af75147dbd67.js" defer></script>
+      </head>
       <body className="antialiased min-h-screen w-full flex flex-col font-airbnb">
         <Suspense
           fallback={

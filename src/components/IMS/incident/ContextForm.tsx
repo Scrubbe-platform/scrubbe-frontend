@@ -9,7 +9,7 @@ import Select from "@/components/ui/select";
 import Input from "@/components/ui/input";
 import TextArea from "@/components/ui/text-area";
 import useMember from "@/hooks/useMember";
-import { saveIncidentContext } from "@/lib/incident/incident.api";
+import { saveIncidentContext, uploadIncidentAttachment } from "@/lib/incident/incident.api";
 import {
   IncidentContextRecord,
   IncidentDetailRecord,
@@ -131,8 +131,6 @@ const AddContextForm = ({
     defaultValues,
   });
 
-  console.log("Previous Priority:", watch("priority"));
-
   useEffect(() => {
     reset(defaultValues);
   }, [defaultValues, reset]);
@@ -143,9 +141,23 @@ const AddContextForm = ({
 
   const saveMutation = useMutation({
     mutationFn: async (data: IncidentContextFormValues) => {
-      const attachmentMetadata = Array.isArray(data.attachments)
-        ? data.attachments.map((f) => ({ name: f?.name, type: f?.type }))
-        : [];
+      const filesToUpload = (Array.isArray(data.attachments) ? data.attachments : []).filter(
+        (f): f is File => f instanceof File
+      );
+
+      const uploadResults = await Promise.allSettled(
+        filesToUpload.map((file) => uploadIncidentAttachment(incident.id, file))
+      );
+      const failedUploads = uploadResults.filter((r) => r.status === "rejected").length;
+      if (failedUploads > 0) {
+        throw new Error(`${failedUploads} of ${filesToUpload.length} attachment(s) failed to upload.`);
+      }
+      const attachmentMetadata = uploadResults
+        .filter(
+          (r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof uploadIncidentAttachment>>> =>
+            r.status === "fulfilled"
+        )
+        .map((r) => ({ name: r.value.name, type: r.value.type }));
 
       return saveIncidentContext(incident.id, {
         affectedService: data.affectedService,

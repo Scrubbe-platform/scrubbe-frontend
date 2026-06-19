@@ -47,6 +47,7 @@ export const endpoint = {
     investigate: "/incident-ticket",     // POST /incident-ticket/:id/investigate
     mitigate: "/incident-ticket",        // POST /incident-ticket/:id/mitigate
     close: "/incident-ticket",           // POST /incident-ticket/:id/close
+    attachments: "/incident-ticket",     // /incident-ticket/:id/attachments[/presign|/:attachmentId]
     analytics: "/incident-ticket/analytics",
     history: "/tickets/history",
     integrations: "/integrations",
