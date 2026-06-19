@@ -1,3 +1,4 @@
+import axios from "axios";
 import { customAxios } from "@/lib/api/axios";
 import { endpoint } from "@/lib/api/endpoint";
 import {
@@ -70,6 +71,60 @@ export const mitigateIncident = (incidentId: string) =>
 
 export const closeIncident = (incidentId: string) =>
   transitionIncidentStatus("close", incidentId);
+
+export interface IncidentAttachmentRecord {
+  id: string;
+  name: string;
+  type: string | null;
+  size: number | null;
+  createdAt: string;
+  downloadUrl?: string;
+}
+
+// Uploads a single file directly to S3 via a presigned URL, then confirms the
+// upload with the server so it's persisted against the incident.
+export const uploadIncidentAttachment = async (
+  incidentId: string,
+  file: File
+): Promise<IncidentAttachmentRecord> => {
+  const contentType = file.type || "application/octet-stream";
+
+  const presignResponse = await customAxios.post(
+    `${endpoint.incident_ticket.attachments}/${incidentId}/attachments/presign`,
+    { name: file.name, type: contentType, size: file.size }
+  );
+  const { uploadUrl, key } = presignResponse.data?.data ?? presignResponse.data ?? {};
+  if (!uploadUrl || !key) {
+    throw new Error("Unable to obtain an upload URL for this file.");
+  }
+
+  await axios.put(uploadUrl, file, { headers: { "Content-Type": contentType } });
+
+  const confirmResponse = await customAxios.post(
+    `${endpoint.incident_ticket.attachments}/${incidentId}/attachments`,
+    { key, name: file.name, type: contentType, size: file.size }
+  );
+  const attachment = confirmResponse.data?.data ?? confirmResponse.data;
+  return attachment as IncidentAttachmentRecord;
+};
+
+export const fetchIncidentAttachments = async (
+  incidentId: string
+): Promise<IncidentAttachmentRecord[]> => {
+  const response = await customAxios.get(
+    `${endpoint.incident_ticket.attachments}/${incidentId}/attachments`
+  );
+  return (response.data?.data ?? response.data ?? []) as IncidentAttachmentRecord[];
+};
+
+export const deleteIncidentAttachment = async (
+  incidentId: string,
+  attachmentId: string
+) => {
+  await customAxios.delete(
+    `${endpoint.incident_ticket.attachments}/${incidentId}/attachments/${attachmentId}`
+  );
+};
 
 export const fetchIncidentDetail = async (incidentId: string) => {
   const response = await customAxios.get(

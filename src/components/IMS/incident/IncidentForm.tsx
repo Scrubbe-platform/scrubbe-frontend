@@ -12,7 +12,7 @@ import Select from "@/components/ui/select";
 import TextArea from "@/components/ui/text-area";
 import useMember from "@/hooks/useMember";
 import { querykeys } from "@/lib/constant";
-import { createIncident } from "@/lib/incident/incident.api";
+import { createIncident, uploadIncidentAttachment } from "@/lib/incident/incident.api";
 
 // ── Schema ────────────────────────────────────────────────────────
 
@@ -192,18 +192,32 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
   ], [members]);
 
   const createMutation = useMutation({
-    mutationFn: async (data: RaiseIncidentFormValues) => createIncident({
-      summary: data.title.trim(), reason: data.title.trim(), description: data.description.trim(), techDescription: data.description.trim(),
-      impactSummary: buildImpactSummary(data) || data.description.trim(), serviceArea: data.service, affectedSystem: data.service,
-      environment: data.environment, severity: data.severity, priority: severityToPriority[data.severity],
-      status: "OPEN", state: "OPEN", source: "MANUAL", sourceType: "Manual raise",
-      detection: firstNoticedLabels[data.firstNoticed] ?? data.firstNoticed, reportedBy: "Incident workspace",
-      assignedToEmail: data.assignTo, incidentCommander: data.assignTo,
-      financialExposure: data.businessImpact?.trim() || undefined,
-      customerCommNeeded: data.notifyChannels !== "no-notification",
-      customerMessage: customerImpactLabels[data.customerImpact] ?? data.customerImpact,
-      recommendedActions: data.recentChange?.trim() ? [`Review recent change: ${data.recentChange.trim()}`] : [],
-    }),
+    mutationFn: async (data: RaiseIncidentFormValues) => {
+      const incident = await createIncident({
+        summary: data.title.trim(), reason: data.title.trim(), description: data.description.trim(), techDescription: data.description.trim(),
+        impactSummary: buildImpactSummary(data) || data.description.trim(), serviceArea: data.service, affectedSystem: data.service,
+        environment: data.environment, severity: data.severity, priority: severityToPriority[data.severity],
+        status: "OPEN", state: "OPEN", source: "MANUAL", sourceType: "Manual raise",
+        detection: firstNoticedLabels[data.firstNoticed] ?? data.firstNoticed, reportedBy: "Incident workspace",
+        assignedToEmail: data.assignTo, incidentCommander: data.assignTo,
+        financialExposure: data.businessImpact?.trim() || undefined,
+        customerCommNeeded: data.notifyChannels !== "no-notification",
+        customerMessage: customerImpactLabels[data.customerImpact] ?? data.customerImpact,
+        recommendedActions: data.recentChange?.trim() ? [`Review recent change: ${data.recentChange.trim()}`] : [],
+      });
+
+      if (attachedFiles.length > 0) {
+        const results = await Promise.allSettled(
+          attachedFiles.map((af) => uploadIncidentAttachment(incident.id, af.file))
+        );
+        const failed = results.filter((r) => r.status === "rejected").length;
+        if (failed > 0) {
+          toast.error(`${failed} of ${attachedFiles.length} attachment(s) failed to upload.`);
+        }
+      }
+
+      return incident;
+    },
     onSuccess: async (incident) => {
       await queryClient.invalidateQueries({ queryKey: [querykeys.INCIDENT_TICKET] });
       toast.success(`Incident ${incident.ticketId} created`);
@@ -370,9 +384,6 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
           <div className="sticky bottom-0 z-20 flex justify-end gap-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 py-4">
             <button type="button" onClick={onClose} className="rounded-lg border border-zinc-500 dark:border-zinc-700 px-5 py-2 text-[12px] font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
               Cancel
-            </button>
-            <button type="button" disabled={createMutation.isPending} className="rounded-lg border border-zinc-500 dark:border-zinc-700 px-5 py-2 text-[12px] font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50">
-              Save as draft
             </button>
             <button type="submit" disabled={createMutation.isPending} className="rounded-lg bg-emerald-500 hover:bg-emerald-600 px-6 py-2 text-[12px] font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50">
               {createMutation.isPending ? "Creating…" : "Save and raise incident"}
