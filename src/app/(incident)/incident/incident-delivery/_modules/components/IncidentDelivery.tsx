@@ -10,7 +10,6 @@ import PolicySection from "./PolicySection";
 import DecisionLog from "./DecisionLog";
 import Remediation from "./Remediation";
 import AnalystNotes from "./AnalystNotes";
-import CButton from "@/components/ui/Cbutton";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -19,7 +18,7 @@ import { useIncidentWorkspace } from "@/hooks/useIncidentWorkspace";
 const IncidentDelivery = ({ incident }: { incident: IncidentDetailRecord }) => {
   const queryClient = useQueryClient();
   const { comments } = useIncidentWorkspace();
-  const handleSaveDraft = () => {
+  const handleRefreshDeliverySignals = () => {
     queryClient.invalidateQueries({ queryKey: ["decisions-log", incident.id] });
     queryClient.invalidateQueries({
       queryKey: ["playbook-match", incident.id],
@@ -37,7 +36,7 @@ const IncidentDelivery = ({ incident }: { incident: IncidentDetailRecord }) => {
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-black dark:text-zinc-200">
       <div className="px-6 md:px-10 py-8 space-y-5">
         <Header incident={incident} />
-        <DeliverySignal />
+        <DeliverySignal onRefresh={handleRefreshDeliverySignals} />
 
         {/* ── Two-column layout ── */}
         <div className="flex flex-col md:flex-row gap-5 pt-2">

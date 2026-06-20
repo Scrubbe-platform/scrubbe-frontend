@@ -30,7 +30,7 @@ const traceSteps = [
   { title: "Remediation + verification", sub: "Suggest → verify → summarize" },
 ];
 
-const DeliverySignal = () => (
+const DeliverySignal = ({ onRefresh }: { onRefresh?: () => void }) => (
   <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-6 space-y-6">
     {/* ── Header ── */}
     <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -48,7 +48,12 @@ const DeliverySignal = () => (
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
-        <button className="p-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 text-black hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+        <button
+          type="button"
+          onClick={onRefresh}
+          title="Refresh from decision log + incident state"
+          className="p-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 text-black hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+        >
           <RefreshCcw size={14} />
         </button>
       </div>

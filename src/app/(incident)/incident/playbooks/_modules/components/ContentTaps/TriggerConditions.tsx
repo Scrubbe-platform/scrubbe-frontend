@@ -1,15 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Bolt, Info, Check, Plus, TriangleAlert } from "lucide-react";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
-import AddConditionForm from "./AddConditionForm";
-
-type Operator = "eq" | "gt" | "in";
+import AddConditionForm, { ConditionFormState } from "./AddConditionForm";
 
 interface Condition {
   id: string;
   field: string;
-  operator: Operator;
+  operator: ConditionFormState["operator"];
   value: string | number;
   weight: number;
   isMatched: boolean;
@@ -126,8 +124,27 @@ const buildConditions = (incident: IncidentDetailRecord): Condition[] => [
 const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({
   incident,
 }) => {
-  const conditions = buildConditions(incident);
+  const [conditions, setConditions] = useState<Condition[]>(() => buildConditions(incident));
   const [toggleConditionForm, setToggleConditionForm] = useState(false);
+
+  useEffect(() => {
+    setConditions(buildConditions(incident));
+  }, [incident.id]);
+
+  const handleAddCondition = (form: ConditionFormState) => {
+    setConditions((prev) => [
+      ...prev,
+      {
+        id: `custom-${Date.now()}`,
+        field: form.field,
+        operator: form.operator,
+        value: form.value,
+        weight: form.weight,
+        isMatched: false,
+      },
+    ]);
+    setToggleConditionForm(false);
+  };
   return (
     <div
       id="trigger"
@@ -177,7 +194,12 @@ const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({
       </div>
 
       {/* Add */}
-      {toggleConditionForm && <AddConditionForm />}
+      {toggleConditionForm && (
+        <AddConditionForm
+          onAdd={handleAddCondition}
+          onCancel={() => setToggleConditionForm(false)}
+        />
+      )}
       <button
         onClick={() => setToggleConditionForm((prev) => !prev)}
         className="flex items-center gap-2 rounded-lg border border-zinc-500 dark:border-zinc-700 px-4 py-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
