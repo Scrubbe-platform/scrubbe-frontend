@@ -5,6 +5,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useMember from "@/hooks/useMember";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
+import Button from "@/components/ui/Button1";
+import { ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import ActiveEscalationCard from "./_module/component/ActiveEscalation";
+import RosterView from "./_module/component/RosterView";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -187,7 +192,8 @@ function AssignModal({
     },
   });
 
-  const canSave = selected.length > 0 && startDate.length > 0 && endDate.length > 0;
+  const canSave =
+    selected.length > 0 && startDate.length > 0 && endDate.length > 0;
 
   const toggle = (id: string) =>
     setSelected((prev) =>
@@ -633,13 +639,28 @@ function ScheduleView({
           .filter(Boolean);
         return {
           id: s.id ?? `s${i}`,
-          name: s.shiftName ?? `Shift ${new Date(s.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
-          start: new Date(s.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-          end: memberIds.length > 0
-            ? (s.teamMembers[0]?.endTime
-              ? new Date(s.teamMembers[0].endTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-              : new Date(s.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }))
-            : new Date(s.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          name:
+            s.shiftName ??
+            `Shift ${new Date(s.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+          start: new Date(s.date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          }),
+          end:
+            memberIds.length > 0
+              ? s.teamMembers[0]?.endTime
+                ? new Date(s.teamMembers[0].endTime).toLocaleDateString(
+                    "en-US",
+                    { month: "short", day: "numeric" },
+                  )
+                : new Date(s.date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+              : new Date(s.date).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                }),
           members: memberIds,
           type: i % 2 === 0 ? "primary" : "secondary",
         } as Shift;
@@ -648,9 +669,31 @@ function ScheduleView({
     if (members.length === 0) return [];
     const ids = members.map((m) => m.id);
     return [
-      { id: "s1", name: "Week 22 Primary", start: "26 May", end: "2 Jun", members: ids.slice(0, 2), type: "primary" },
-      { id: "s2", name: "Week 23 Secondary", start: "2 Jun", end: "9 Jun", members: ids.slice(2, 4), type: "secondary" },
-      { id: "s3", name: "Week 24 Primary", start: "9 Jun", end: "16 Jun", members: ids.slice(0, 1), type: "primary", gap: true },
+      {
+        id: "s1",
+        name: "Week 22 Primary",
+        start: "26 May",
+        end: "2 Jun",
+        members: ids.slice(0, 2),
+        type: "primary",
+      },
+      {
+        id: "s2",
+        name: "Week 23 Secondary",
+        start: "2 Jun",
+        end: "9 Jun",
+        members: ids.slice(2, 4),
+        type: "secondary",
+      },
+      {
+        id: "s3",
+        name: "Week 24 Primary",
+        start: "9 Jun",
+        end: "16 Jun",
+        members: ids.slice(0, 1),
+        type: "primary",
+        gap: true,
+      },
     ];
   }, [apiSchedules, members]);
 
@@ -815,124 +858,6 @@ function ScheduleView({
   );
 }
 
-function RosterView({
-  members,
-  isLoading,
-}: {
-  members: Member[];
-  isLoading: boolean;
-}) {
-  const [search, setSearch] = useState("");
-  const [deptFilter, setDeptFilter] = useState("All");
-
-  // Unique departments derived from real members (default to "Engineering" since API doesn't expose it)
-  const depts = [
-    "All",
-    ...Array.from(new Set(members.map((m) => m.department))),
-  ];
-
-  const filtered = members.filter((m) => {
-    const matchSearch =
-      m.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      m.email.toLowerCase().includes(search.toLowerCase()) ||
-      m.handle.includes(search.toLowerCase());
-    const matchDept = deptFilter === "All" || m.department === deptFilter;
-    return matchSearch && matchDept;
-  });
-
-  if (isLoading)
-    return (
-      <div className="space-y-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-16 rounded-xl bg-neutral-100 dark:bg-neutral-800 animate-pulse"
-          />
-        ))}
-      </div>
-    );
-
-  return (
-    <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-      <div className="flex flex-wrap items-center gap-3 p-4 border-b border-neutral-100 dark:border-neutral-800">
-        <div className="relative flex-1 min-w-[180px]">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">
-            🔍
-          </span>
-          <input
-            type="text"
-            placeholder="Search members..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-        </div>
-        <select
-          value={deptFilter}
-          onChange={(e) => setDeptFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm text-neutral-700 dark:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none pr-7"
-        >
-          {depts.map((d) => (
-            <option key={d}>{d}</option>
-          ))}
-        </select>
-        <div className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
-          <div className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-            {filtered.length} MEMBERS
-          </span>
-        </div>
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="py-12">
-          <EmptyMembers />
-        </div>
-      ) : (
-        <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
-          {filtered.map((m, i) => (
-            <div
-              key={m.id}
-              className="flex flex-wrap items-center gap-3 px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
-            >
-              <Avatar member={m} />
-              <div className="flex-1 min-w-[160px]">
-                <div className="text-sm font-semibold text-neutral-900 dark:text-white">
-                  {m.fullName}
-                </div>
-                <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-                  {m.email} ·{" "}
-                  <span className="text-neutral-400">{m.handle}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 ml-auto">
-                <span
-                  className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
-                    i < 3
-                      ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400"
-                      : "border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-500"
-                  }`}
-                >
-                  {i < 3 ? "On-call" : "Off"}
-                </span>
-                <button className="text-xs px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-                  Edit
-                </button>
-                <button className="text-xs px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-                  Re-assign
-                </button>
-                <button className="text-xs px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
-                  Remove
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 type View = "overview" | "schedule" | "roster";
@@ -942,7 +867,7 @@ export default function OnCallDashboard() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [editShift, setEditShift] = useState<Shift | null>(null);
-
+  const router = useRouter();
   const { get } = useFetch();
 
   // ── Real member data ──────────────────────────────────────────
@@ -963,7 +888,9 @@ export default function OnCallDashboard() {
     if (apiSchedules.length > 0) {
       const latest = apiSchedules[apiSchedules.length - 1];
       return new Set<string>(
-        (latest.teamMembers ?? []).map((m: any) => m.member ?? m.id ?? m.userId).filter(Boolean),
+        (latest.teamMembers ?? [])
+          .map((m: any) => m.member ?? m.id ?? m.userId)
+          .filter(Boolean),
       );
     }
     return new Set(rawMembers.slice(0, 3).map((m) => m.id));
@@ -1004,12 +931,14 @@ export default function OnCallDashboard() {
 
         <div className="flex items-center gap-2 flex-shrink-0 relative">
           <div className="relative">
-            <button
+            <Button
               onClick={() => setMenuOpen((o) => !o)}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+              variant="outline-dark"
+              rightIcon={<ChevronDown size={15} />}
+              size="sm"
             >
-              Menu <span className="text-neutral-400">▾</span>
-            </button>
+              Menu
+            </Button>
             {menuOpen && (
               <div className="absolute right-0 top-full mt-2 z-40 w-[480px] bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xl p-4">
                 <div className="grid grid-cols-3 gap-4">
@@ -1048,6 +977,13 @@ export default function OnCallDashboard() {
                     <nav className="space-y-0.5">
                       {["Escalation", "Auto-Escalation"].map((l) => (
                         <button
+                          onClick={() => {
+                            if (l == "Escalation") {
+                              router.push("/incident/on-call/escalation");
+                            } else if (l == "Auto-Escalation") {
+                              router.push("/incident/on-call/auto-escalation");
+                            }
+                          }}
                           key={l}
                           className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors text-left"
                         >
@@ -1108,13 +1044,20 @@ export default function OnCallDashboard() {
       ) : (
         <>
           {view === "overview" && (
-            <OverviewView
-              members={members}
-              onAssign={() => setAssignOpen(true)}
-            />
+            <div className="space-y-5">
+              <OverviewView
+                members={members}
+                onAssign={() => setAssignOpen(true)}
+              />
+              <ActiveEscalationCard />
+            </div>
           )}
           {view === "schedule" && (
-            <ScheduleView members={members} apiSchedules={apiSchedules} onEdit={(s) => setEditShift(s)} />
+            <ScheduleView
+              members={members}
+              apiSchedules={apiSchedules}
+              onEdit={(s) => setEditShift(s)}
+            />
           )}
           {view === "roster" && (
             <RosterView members={members} isLoading={isLoading} />
