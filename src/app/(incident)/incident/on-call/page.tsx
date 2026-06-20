@@ -32,6 +32,7 @@ type Member = {
   handle: string;
   color: string;
   onCall: boolean;
+  assignmentId?: string | null;
 };
 
 type Shift = {
@@ -60,7 +61,12 @@ const COLORS = [
 const colorFor = (i: number) => COLORS[i % COLORS.length];
 
 // ─── Derive a Member from ApiMember ──────────────────────────────────────────
-function toMember(raw: ApiMember, idx: number, onCallIds: Set<string>): Member {
+function toMember(
+  raw: ApiMember,
+  idx: number,
+  onCallIds: Set<string>,
+  assignmentIdByUserId: Map<string, string>,
+): Member {
   const first = raw.firstname ?? "";
   const last = raw.lastname ?? "";
   const fullName = (first + " " + last).trim() || raw.email.split("@")[0];
@@ -78,6 +84,7 @@ function toMember(raw: ApiMember, idx: number, onCallIds: Set<string>): Member {
     handle: `@${raw.email.split("@")[0]}`,
     color: colorFor(idx),
     onCall: onCallIds.has(raw.id),
+    assignmentId: assignmentIdByUserId.get(raw.id) ?? null,
   };
 }
 
@@ -869,6 +876,7 @@ export default function OnCallDashboard() {
   const [editShift, setEditShift] = useState<Shift | null>(null);
   const router = useRouter();
   const { get } = useFetch();
+  const queryClient = useQueryClient();
 
   // ── Real member data ──────────────────────────────────────────
   const { data: rawMembers = [], isLoading } = useMember();
@@ -896,9 +904,25 @@ export default function OnCallDashboard() {
     return new Set(rawMembers.slice(0, 3).map((m) => m.id));
   }, [apiSchedules, rawMembers]);
 
+  // Map each user id to their assignment row id from the latest schedule
+  const assignmentIdByUserId = useMemo(() => {
+    const map = new Map<string, string>();
+    if (apiSchedules.length > 0) {
+      const latest = apiSchedules[apiSchedules.length - 1];
+      for (const m of latest.teamMembers ?? []) {
+        const userId = m.member ?? m.id ?? m.userId;
+        if (userId && m.assignmentId) map.set(userId, m.assignmentId);
+      }
+    }
+    return map;
+  }, [apiSchedules]);
+
   const members = useMemo<Member[]>(
-    () => rawMembers.map((raw, i) => toMember(raw, i, onCallIds)),
-    [rawMembers, onCallIds],
+    () =>
+      rawMembers.map((raw, i) =>
+        toMember(raw, i, onCallIds, assignmentIdByUserId),
+      ),
+    [rawMembers, onCallIds, assignmentIdByUserId],
   );
 
   const titles: Record<View, { h1: string; sub: string }> = {
@@ -1060,7 +1084,15 @@ export default function OnCallDashboard() {
             />
           )}
           {view === "roster" && (
-            <RosterView members={members} isLoading={isLoading} />
+            <RosterView
+              members={members}
+              isLoading={isLoading}
+              onChanged={() =>
+                queryClient.invalidateQueries({
+                  queryKey: ["oncall-schedules"],
+                })
+              }
+            />
           )}
         </>
       )}

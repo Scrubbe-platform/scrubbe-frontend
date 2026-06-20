@@ -1,25 +1,32 @@
-export interface EscalationStep {
-  target: string; // e.g., 'Primary on-call', 'Team Lead'
-  timeout: number; // duration in minutes
-  channels: string; // e.g., 'Page + SMS', 'All channels'
+export type EscalationChannel = "EMAIL" | "SMS" | "SLACK" | "CALL";
+export type EscalationTargetType = "USER" | "TEAM" | "ROLE";
+
+export interface EscalationStepRecord {
+  id?: string;
+  order: number;
+  targetType: EscalationTargetType;
+  targetUserId?: string | null;
+  targetLabel?: string | null;
+  channel: EscalationChannel;
+  timeoutMinutes: number;
 }
 
-export interface EscalationPolicy {
+export interface EscalationPolicyRecord {
   id: string;
   name: string;
-  severity: string; // e.g., 'P0 only', 'P1 & above'
-  steps: EscalationStep[];
-  warRoom: boolean; // Auto-create Slack + Zoom war room
-  autoEscalate: boolean; // Move to next step if no acknowledgment
+  severities: string[];
+  autoEscalate: boolean;
+  warRoomOnFinalStep: boolean;
+  isActive: boolean;
+  steps: EscalationStepRecord[];
+  createdAt: string;
 }
 
-// types/autoEscalation.ts
-
-export type MatchStrategy = "all" | "any";
+export type MatchStrategy = "ALL" | "ANY";
 
 export interface RuleCondition {
   field: string;
-  op: string;
+  operator: string;
   value: string | number;
 }
 
@@ -28,35 +35,59 @@ export interface RuleAction {
   params: Record<string, string | number>;
 }
 
-export interface AutoEscalationRule {
-  id: number;
+export interface AutoEscalationRuleRecord {
+  id: string;
   name: string;
   enabled: boolean;
-  match: MatchStrategy;
+  matchType: MatchStrategy;
   conditions: RuleCondition[];
   action: RuleAction;
+  order: number;
 }
 
-export interface TimeoutMatrixRow {
-  sev: string;
-  label: string;
-  badgeStyle: string;
-  cells: string[];
+export interface OnCallConfigRecord {
+  id: string;
+  businessId: string;
+  autoEscalateEnabled: boolean;
+  warRoomTriggerEnabled: boolean;
+  channelsAutoCreate: boolean;
+  smsFallback: boolean;
+  offHoursStrict: boolean;
+  timeoutMatrix: Record<string, number[]>;
 }
 
-export interface TimelineEvent {
-  timestamp: string;
-  text: string;
-  type: "detected" | "matched" | "escalated" | "warroom";
+export type EscalationEventType =
+  | "STARTED"
+  | "ESCALATED"
+  | "ACKNOWLEDGED"
+  | "WAR_ROOM_TRIGGERED"
+  | "EXHAUSTED"
+  | "CANCELLED";
+
+export interface EscalationEventRecord {
+  id: string;
+  type: EscalationEventType;
+  message: string;
+  createdAt: string;
 }
 
-export interface ActiveEscalation {
-  incidentId: string;
-  title: string;
-  severity: string;
-  durationUnacknowledged: string;
-  currentStep: string;
-  nextTarget: string;
-  initialRemainingSeconds: number;
-  timeline: TimelineEvent[];
+export interface ActiveEscalationTicketRecord {
+  id: string;
+  ticketId: string;
+  summary: string;
+  severity: string | null;
+  priority: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface ActiveEscalationRecord {
+  id: string;
+  ticketId: string;
+  currentStepIndex: number;
+  status: "ACTIVE" | "ACKNOWLEDGED" | "EXHAUSTED" | "CANCELLED";
+  stepStartedAt: string;
+  ticket: ActiveEscalationTicketRecord;
+  policy: EscalationPolicyRecord;
+  events: EscalationEventRecord[];
 }

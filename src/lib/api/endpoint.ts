@@ -147,6 +147,15 @@ export const endpoint = {
     assign_member: "/assign-member",
     get_all_assign: "/get-all-assign",
     get_assign: "/get-assign",
+    update_assignment: "/assignments",  // PATCH /assignments/:id
+    remove_assignment: "/assignments",  // DELETE /assignments/:id
+  },
+  escalation: {
+    policies: "/escalation/policies",
+    rules: "/escalation/rules",
+    config: "/escalation/config",
+    active: "/escalation/active",
+    forTicket: "/escalation/ticket",   // GET /escalation/ticket/:ticketId
   },
   dashboard: {
     get_metrics: "/dashboard/metrics",

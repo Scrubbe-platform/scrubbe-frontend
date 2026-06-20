@@ -9,7 +9,9 @@ import {
   RefreshCw,
   UserMinus,
 } from "lucide-react";
+import { toast } from "sonner";
 import EditAssignmentModal from "./EditAssignmentModal"; // Import missing modal block
+import { removeOnCallAssignment, updateOnCallAssignment } from "@/lib/escalation/escalation.api";
 
 export type Member = {
   id: string;
@@ -21,14 +23,16 @@ export type Member = {
   handle: string;
   color: string;
   onCall: boolean;
+  assignmentId?: string | null;
 };
 
 interface RosterViewProps {
   members: Member[];
   isLoading: boolean;
+  onChanged?: () => void;
 }
 
-export default function RosterView({ members, isLoading }: RosterViewProps) {
+export default function RosterView({ members, isLoading, onChanged }: RosterViewProps) {
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("All");
 
@@ -56,13 +60,40 @@ export default function RosterView({ members, isLoading }: RosterViewProps) {
     setIsModalOpen(true);
   };
 
-  const handleSaveMutation = (payload: any) => {
-    console.log("MUTATION PAYLOAD DISPATCHED:", payload);
-    // TODO: Pass payload parameters directly to backend API endpoint layers
+  const handleSaveMutation = async (payload: {
+    memberId: string;
+    reassignToId: string;
+    reason: string;
+    notes: string;
+  }) => {
+    if (!selectedMember?.assignmentId) {
+      toast.error("This person has no active on-call assignment to reassign.");
+      return;
+    }
+    if (!payload.reassignToId || payload.reassignToId === payload.memberId) {
+      return;
+    }
+    try {
+      await updateOnCallAssignment(selectedMember.assignmentId, { userId: payload.reassignToId });
+      toast.success("On-call assignment reassigned");
+      onChanged?.();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reassign on-call shift");
+    }
   };
 
-  const handleRemoveMutation = (id: string) => {
-    console.log("PURGE DIRECTORY RECORD DISPATCHED ID:", id);
+  const handleRemoveMutation = async () => {
+    if (!selectedMember?.assignmentId) {
+      toast.error("This person has no active on-call assignment to remove.");
+      return;
+    }
+    try {
+      await removeOnCallAssignment(selectedMember.assignmentId);
+      toast.success("Removed from on-call rotation");
+      onChanged?.();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to remove from rotation");
+    }
   };
 
   if (isLoading) return <div className="animate-pulse space-y-3">...</div>;

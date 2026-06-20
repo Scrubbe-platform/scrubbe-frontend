@@ -1,74 +1,148 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, Plus, Trash2 } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import Button from "@/components/ui/Button1";
 import Modal from "@/components/ui/Modal";
-import { EscalationStep } from "../types/oncall-type";
+import useMember from "@/hooks/useMember";
+import {
+  EscalationChannel,
+  EscalationPolicyRecord,
+  EscalationStepRecord,
+} from "../types/oncall-type";
+import { createEscalationPolicy, updateEscalationPolicy } from "@/lib/escalation/escalation.api";
 
 interface CreateEscalationPolicyModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSaved: () => void;
+  policy?: EscalationPolicyRecord | null;
 }
 
-const TARGET_OPTIONS = [
-  "Primary on-call",
-  "Secondary on-call",
-  "Team lead",
-  "Engineering Manager",
-  "VP Engineering",
-  "CTO",
-  "CEO",
+const SEVERITY_OPTIONS = ["P0", "P1", "P2", "P3", "P4"];
+const CHANNEL_OPTIONS: { value: EscalationChannel; label: string }[] = [
+  { value: "EMAIL", label: "Email" },
+  { value: "SMS", label: "SMS" },
+  { value: "SLACK", label: "Slack" },
+  { value: "CALL", label: "Phone call" },
 ];
-const CHANNEL_OPTIONS = [
-  "Page + SMS",
-  "Page only",
-  "Email",
-  "Slack + Page",
-  "All channels",
-];
+
+const blankStep = (order: number): EscalationStepRecord => ({
+  order,
+  targetType: "USER",
+  targetUserId: null,
+  targetLabel: "",
+  channel: "EMAIL",
+  timeoutMinutes: 15,
+});
 
 export default function CreateEscalationPolicyModal({
   isOpen,
   onClose,
+  onSaved,
+  policy,
 }: CreateEscalationPolicyModalProps) {
-  // Main Controlled Configuration States
+  const { data: members = [] } = useMember();
+  const isEditing = Boolean(policy);
+
   const [policyName, setPolicyName] = useState("");
-  const [severity, setSeverity] = useState("P1 & above");
+  const [severities, setSeverities] = useState<string[]>(["P1"]);
   const [autoEscalate, setAutoEscalate] = useState(true);
   const [warRoom, setWarRoom] = useState(false);
+  const [steps, setSteps] = useState<EscalationStepRecord[]>([blankStep(0)]);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Dynamic Array handling the sub-steps form elements
-  const [steps, setSteps] = useState<EscalationStep[]>([
-    { target: "Primary on-call", timeout: 5, channels: "Page + SMS" },
-  ]);
+  useEffect(() => {
+    if (!isOpen) return;
+    if (policy) {
+      setPolicyName(policy.name);
+      setSeverities(policy.severities.length ? policy.severities : ["P1"]);
+      setAutoEscalate(policy.autoEscalate);
+      setWarRoom(policy.warRoomOnFinalStep);
+      setSteps(
+        policy.steps.length
+          ? policy.steps.map((s, i) => ({ ...s, order: i }))
+          : [blankStep(0)]
+      );
+    } else {
+      setPolicyName("");
+      setSeverities(["P1"]);
+      setAutoEscalate(true);
+      setWarRoom(false);
+      setSteps([blankStep(0)]);
+    }
+  }, [isOpen, policy]);
 
-  const handleAddStep = () => {
-    setSteps([
-      ...steps,
-      { target: "Secondary on-call", timeout: 15, channels: "All channels" },
-    ]);
+  const memberOptions = useMemo(
+    () => [
+      { value: "", label: "Unassigned (role placeholder only)" },
+      ...members.map((m) => {
+        const name = `${m.firstname ?? ""} ${m.lastname ?? ""}`.trim() || m.email;
+        return { value: m.id, label: `${name} (${m.email})` };
+      }),
+    ],
+    [members]
+  );
+
+  const toggleSeverity = (sev: string) => {
+    setSeverities((prev) => (prev.includes(sev) ? prev.filter((s) => s !== sev) : [...prev, sev]));
   };
 
-  const handleRemoveStep = (index: number) => {
-    setSteps(steps.filter((_, i) => i !== index));
+  const handleAddStep = () => setSteps((prev) => [...prev, blankStep(prev.length)]);
+  const handleRemoveStep = (index: number) =>
+    setSteps((prev) => prev.filter((_, i) => i !== index).map((s, i) => ({ ...s, order: i })));
+
+  const handleStepChange = (index: number, field: keyof EscalationStepRecord, value: any) => {
+    setSteps((prev) => prev.map((step, i) => (i === index ? { ...step, [field]: value } : step)));
   };
 
-  const handleStepChange = (
-    index: number,
-    field: keyof EscalationStep,
-    value: any,
-  ) => {
+  const handleTargetUserChange = (index: number, userId: string) => {
+    const member = members.find((m) => m.id === userId);
+    const label = member
+      ? `${member.firstname ?? ""} ${member.lastname ?? ""}`.trim() || member.email
+      : "";
     setSteps((prev) =>
-      prev.map((step, i) => (i === index ? { ...step, [field]: value } : step)),
+      prev.map((step, i) =>
+        i === index ? { ...step, targetUserId: userId || null, targetLabel: label } : step
+      )
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Connect compiled structure directly into orchestration API context layers
-    console.log({ policyName, severity, steps, autoEscalate, warRoom });
-    onClose();
+    if (!policyName.trim()) {
+      toast.error("Policy name is required");
+      return;
+    }
+    if (severities.length === 0) {
+      toast.error("Select at least one severity");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const payload = {
+        name: policyName.trim(),
+        severities,
+        autoEscalate,
+        warRoomOnFinalStep: warRoom,
+        steps,
+      };
+      if (isEditing && policy) {
+        await updateEscalationPolicy(policy.id, payload);
+        toast.success("Escalation policy updated");
+      } else {
+        await createEscalationPolicy(payload);
+        toast.success("Escalation policy created");
+      }
+      onSaved();
+      onClose();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save escalation policy");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -77,11 +151,10 @@ export default function CreateEscalationPolicyModal({
         onSubmit={handleSubmit}
         className="w-full overflow-hidden bg-white dark:bg-zinc-950 rounded-lg"
       >
-        {/* Component Header & Integrated Title */}
         <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
           <div>
             <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-white">
-              Create Escalation Policy
+              {isEditing ? "Edit Escalation Policy" : "Create Escalation Policy"}
             </h2>
             <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
               Define escalation chain rules and timeouts
@@ -89,9 +162,7 @@ export default function CreateEscalationPolicyModal({
           </div>
         </div>
 
-        {/* Modal Scroll Body */}
         <div className="space-y-4 p-6 max-h-[70vh] overflow-y-auto">
-          {/* Policy Name String Input */}
           <div className="flex flex-col">
             <label className="mb-1.5 text-xs font-bold tracking-wide text-zinc-700 dark:text-zinc-400">
               Policy Name
@@ -106,26 +177,30 @@ export default function CreateEscalationPolicyModal({
             />
           </div>
 
-          {/* Severity Dropdown Trigger */}
           <div className="flex flex-col">
             <label className="mb-1.5 text-xs font-bold tracking-wide text-zinc-700 dark:text-zinc-400">
               Severity Trigger
             </label>
-            <select
-              value={severity}
-              onChange={(e) => setSeverity(e.target.value)}
-              className="h-9 w-full rounded-md border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white"
-            >
-              <option value="P0 only">P0 — Critical</option>
-              <option value="P1 only">P1 — High</option>
-              <option value="P1 & above">P1 & above</option>
-              <option value="All severities">All severities</option>
-            </select>
+            <div className="flex flex-wrap gap-2">
+              {SEVERITY_OPTIONS.map((sev) => (
+                <button
+                  key={sev}
+                  type="button"
+                  onClick={() => toggleSeverity(sev)}
+                  className={`rounded-full border px-3 py-1 text-[12px] font-semibold transition-colors ${
+                    severities.includes(sev)
+                      ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                      : "border-zinc-200 text-zinc-500 dark:border-zinc-700 dark:text-zinc-400"
+                  }`}
+                >
+                  {sev}
+                </button>
+              ))}
+            </div>
           </div>
 
           <hr className="border-zinc-100 dark:border-zinc-900 my-2" />
 
-          {/* Dynamic Steps Mapping Loop Elements block */}
           <div className="flex flex-col">
             <label className="mb-2 text-xs font-bold tracking-wide text-zinc-700 dark:text-zinc-400">
               Escalation Steps
@@ -137,29 +212,33 @@ export default function CreateEscalationPolicyModal({
                   key={index}
                   className="flex items-start gap-3 rounded-xl border border-zinc-100 bg-zinc-50/30 p-3.5 dark:border-zinc-900 dark:bg-zinc-900/10"
                 >
-                  {/* Step Index Number Shield */}
                   <div className="h-7 w-7 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
                     {index + 1}
                   </div>
 
-                  {/* Form Element Select Grid Matrix row */}
                   <div className="flex-1 space-y-2">
                     <select
-                      value={step.target}
-                      onChange={(e) =>
-                        handleStepChange(index, "target", e.target.value)
-                      }
+                      value={step.targetUserId ?? ""}
+                      onChange={(e) => handleTargetUserChange(index, e.target.value)}
                       className="h-8 w-full rounded border border-zinc-200 bg-white px-2 text-[12px] text-zinc-900 outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white"
                     >
-                      {TARGET_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
+                      {memberOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
                         </option>
                       ))}
                     </select>
+                    {!step.targetUserId && (
+                      <input
+                        type="text"
+                        value={step.targetLabel ?? ""}
+                        onChange={(e) => handleStepChange(index, "targetLabel", e.target.value)}
+                        placeholder="Role label, e.g. VP Engineering (no real recipient until a member is assigned)"
+                        className="h-7 w-full rounded border border-zinc-200 bg-white px-2 text-[11px] text-zinc-700 outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
+                      />
+                    )}
 
                     <div className="grid grid-cols-12 gap-2">
-                      {/* Timeout Input */}
                       <div className="col-span-5 flex items-center gap-1.5">
                         <span className="text-[11px] text-zinc-400 whitespace-nowrap">
                           Timeout:
@@ -168,13 +247,9 @@ export default function CreateEscalationPolicyModal({
                           <input
                             type="number"
                             min="1"
-                            value={step.timeout}
+                            value={step.timeoutMinutes}
                             onChange={(e) =>
-                              handleStepChange(
-                                index,
-                                "timeout",
-                                Number(e.target.value),
-                              )
+                              handleStepChange(index, "timeoutMinutes", Number(e.target.value))
                             }
                             className="w-10 h-7 text-center text-xs font-mono text-zinc-900 bg-transparent outline-none dark:text-white"
                           />
@@ -182,18 +257,17 @@ export default function CreateEscalationPolicyModal({
                         </div>
                       </div>
 
-                      {/* Channel Override Select */}
                       <div className="col-span-7">
                         <select
-                          value={step.channels}
+                          value={step.channel}
                           onChange={(e) =>
-                            handleStepChange(index, "channels", e.target.value)
+                            handleStepChange(index, "channel", e.target.value as EscalationChannel)
                           }
                           className="h-8 w-full rounded border border-zinc-200 bg-white px-2 text-[11px] text-zinc-700 outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white"
                         >
                           {CHANNEL_OPTIONS.map((opt) => (
-                            <option key={opt} value={opt}>
-                              {opt}
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
                             </option>
                           ))}
                         </select>
@@ -201,7 +275,6 @@ export default function CreateEscalationPolicyModal({
                     </div>
                   </div>
 
-                  {/* Delete step index element action button trigger */}
                   {steps.length > 1 && (
                     <button
                       type="button"
@@ -226,9 +299,7 @@ export default function CreateEscalationPolicyModal({
 
           <hr className="border-zinc-100 dark:border-zinc-900 my-2" />
 
-          {/* Toggle Rule Toggles Stack Options */}
           <div className="space-y-3 pt-1">
-            {/* Auto-escalate Toggle Switch */}
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-[13px] font-bold text-zinc-800 dark:text-zinc-200">
@@ -249,14 +320,13 @@ export default function CreateEscalationPolicyModal({
               </label>
             </div>
 
-            {/* War room Trigger Toggle Switch */}
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-[13px] font-bold text-zinc-800 dark:text-zinc-200">
                   War room trigger
                 </div>
                 <div className="text-[11px] text-zinc-400 dark:text-zinc-500">
-                  Create Slack + Zoom war room channels on execution timeouts
+                  Auto-create a war room if the final step is exhausted with no acknowledgement
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -272,12 +342,13 @@ export default function CreateEscalationPolicyModal({
           </div>
         </div>
 
-        {/* Modal Actions Footer row controls */}
         <div className="flex justify-end gap-2 border-t border-zinc-100 p-4 dark:border-zinc-800">
           <Button type="button" variant="outline-dark" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit">Save Policy</Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Saving..." : "Save Policy"}
+          </Button>
         </div>
       </form>
     </Modal>

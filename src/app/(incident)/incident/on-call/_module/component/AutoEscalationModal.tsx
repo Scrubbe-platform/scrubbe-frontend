@@ -1,15 +1,19 @@
 // components/oncall/AutoEscalationRuleModal.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { X, Plus, Trash2, Code } from "lucide-react";
+import { toast } from "sonner";
 import Button from "@/components/ui/Button1";
 import Modal from "@/components/ui/Modal";
-import { RuleCondition, MatchStrategy } from "../types/oncall-type";
+import { AutoEscalationRuleRecord, RuleCondition, MatchStrategy } from "../types/oncall-type";
+import { createAutoEscalationRule, updateAutoEscalationRule } from "@/lib/escalation/escalation.api";
 
 interface RuleBuilderModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSaved: () => void;
+  rule?: AutoEscalationRuleRecord | null;
 }
 
 // Global engine dropdown configuration structures mapped cleanly outside the re-render cycles
@@ -96,22 +100,46 @@ const ACTION_DEFS: Record<
 export default function AutoEscalationRuleModal({
   isOpen,
   onClose,
+  onSaved,
+  rule,
 }: RuleBuilderModalProps) {
+  const isEditing = Boolean(rule);
   const [ruleName, setRuleName] = useState("");
-  const [matchStrategy, setMatchStrategy] = useState<MatchStrategy>("all");
+  const [matchStrategy, setMatchStrategy] = useState<MatchStrategy>("ALL");
   const [actionType, setActionType] = useState("advance");
   const [actionParam, setActionParam] = useState<string | number>("");
   const [enabled, setEnabled] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   // Controlled condition rows array state
   const [conditions, setConditions] = useState<RuleCondition[]>([
-    { field: "severity", op: "is", value: "P0" },
+    { field: "severity", operator: "is", value: "P0" },
   ]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (rule) {
+      setRuleName(rule.name);
+      setMatchStrategy(rule.matchType);
+      setEnabled(rule.enabled);
+      setConditions(rule.conditions.length ? rule.conditions : [{ field: "severity", operator: "is", value: "P0" }]);
+      setActionType(rule.action.type);
+      const param = rule.action.params ? Object.values(rule.action.params)[0] : "";
+      setActionParam(param ?? "");
+    } else {
+      setRuleName("");
+      setMatchStrategy("ALL");
+      setEnabled(true);
+      setConditions([{ field: "severity", operator: "is", value: "P0" }]);
+      setActionType("advance");
+      setActionParam("");
+    }
+  }, [isOpen, rule]);
 
   const addConditionRow = () => {
     setConditions([
       ...conditions,
-      { field: "severity", op: "is", value: "P0" },
+      { field: "severity", operator: "is", value: "P0" },
     ]);
   };
 
@@ -126,7 +154,7 @@ export default function AutoEscalationRuleModal({
         i === idx
           ? {
               field: fieldKey,
-              op: def.ops[0],
+              operator: def.ops[0],
               value: def.type === "number" ? 15 : def.options![0],
             }
           : c,
@@ -144,17 +172,36 @@ export default function AutoEscalationRuleModal({
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Connect clean output contract to your backend execution worker sync endpoints
-    console.log({
-      name: ruleName,
-      enabled,
-      match: matchStrategy,
-      conditions,
-      action: { type: actionType, params: { value: actionParam } },
-    });
-    onClose();
+    if (!ruleName.trim()) {
+      toast.error("Rule name is required");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const payload = {
+        name: ruleName.trim(),
+        enabled,
+        matchType: matchStrategy,
+        conditions,
+        action: { type: actionType, params: actionParam !== "" ? { value: actionParam } : {} },
+      };
+      if (isEditing && rule) {
+        await updateAutoEscalationRule(rule.id, payload);
+        toast.success("Auto-escalation rule updated");
+      } else {
+        await createAutoEscalationRule(payload);
+        toast.success("Auto-escalation rule created");
+      }
+      onSaved();
+      onClose();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save rule");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -167,8 +214,8 @@ export default function AutoEscalationRuleModal({
         <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
           <div>
             <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-white flex items-center gap-1.5">
-              <Code size={16} className="text-zinc-400" /> New Auto-Escalation
-              Rule
+              <Code size={16} className="text-zinc-400" />
+              {isEditing ? "Edit Auto-Escalation Rule" : "New Auto-Escalation Rule"}
             </h2>
             <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
               Build an IF / THEN conditional rule, evaluated on top of the
@@ -202,9 +249,9 @@ export default function AutoEscalationRuleModal({
             <div className="flex gap-[1px] rounded bg-zinc-200/60 p-[2px] dark:bg-zinc-800">
               <button
                 type="button"
-                onClick={() => setMatchStrategy("all")}
+                onClick={() => setMatchStrategy("ALL")}
                 className={`rounded-[3px] px-3 py-1 font-sans text-[11px] font-semibold transition-all ${
-                  matchStrategy === "all"
+                  matchStrategy === "ALL"
                     ? "bg-white text-zinc-900 shadow-xs dark:bg-zinc-700 dark:text-white"
                     : "text-zinc-500"
                 }`}
@@ -213,9 +260,9 @@ export default function AutoEscalationRuleModal({
               </button>
               <button
                 type="button"
-                onClick={() => setMatchStrategy("any")}
+                onClick={() => setMatchStrategy("ANY")}
                 className={`rounded-[3px] px-3 py-1 font-sans text-[11px] font-semibold transition-all ${
-                  matchStrategy === "any"
+                  matchStrategy === "ANY"
                     ? "bg-white text-zinc-900 shadow-xs dark:bg-zinc-700 dark:text-white"
                     : "text-zinc-500"
                 }`}
@@ -230,7 +277,7 @@ export default function AutoEscalationRuleModal({
             {conditions.map((cond, idx) => {
               const currentDef = FIELD_DEFS[cond.field];
               const joinerLabel =
-                idx === 0 ? "IF" : matchStrategy === "all" ? "AND" : "OR";
+                idx === 0 ? "IF" : matchStrategy === "ALL" ? "AND" : "OR";
 
               return (
                 <div key={idx} className="grid grid-cols-12 gap-2 items-center">
@@ -239,7 +286,7 @@ export default function AutoEscalationRuleModal({
                     className={`col-span-1 text-center text-[11px] font-extrabold tracking-wider ${
                       idx === 0
                         ? "text-zinc-400"
-                        : matchStrategy === "all"
+                        : matchStrategy === "ALL"
                           ? "text-emerald-700 dark:text-emerald-400"
                           : "text-purple-600 dark:text-purple-400"
                     }`}
@@ -265,9 +312,9 @@ export default function AutoEscalationRuleModal({
                   {/* Relational Evaluation Operator drop-down */}
                   <div className="col-span-3">
                     <select
-                      value={cond.op}
+                      value={cond.operator}
                       onChange={(e) =>
-                        updateConditionValue(idx, "op", e.target.value)
+                        updateConditionValue(idx, "operator", e.target.value)
                       }
                       className="h-9 w-full rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-900 outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white"
                     >
@@ -436,7 +483,9 @@ export default function AutoEscalationRuleModal({
           <Button type="button" variant="outline-dark" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit">Save Escalation Rule</Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Saving..." : "Save Escalation Rule"}
+          </Button>
         </div>
       </form>
     </Modal>
