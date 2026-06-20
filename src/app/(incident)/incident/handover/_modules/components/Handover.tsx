@@ -1,61 +1,75 @@
 // app/handovers/page.tsx
 "use client";
 
-import React, { useState } from "react";
-import { ColumnDef } from "@tanstack/react-table"; // Import TanStack types
+import React, { useMemo, useState } from "react";
+import { ColumnDef } from "@tanstack/react-table";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Topbar from "../components/Topbar";
 import ArchivePanel from "../components/ArchivePanel";
 import SchedulePanel from "../components/SchedulePanel";
-import { Table } from "@/components/ui/table"; // Your TanStack Table component
+import { Table } from "@/components/ui/table";
 import Button from "@/components/ui/Button1";
-
-import { mockHandovers } from "../libs/handoverTickets";
-import { Status, Handover } from "../types/index"; // Make sure to import Handover type
+import { fetchHandovers } from "@/lib/handover/handover.api";
+import { HandoverRecord, HandoverStatus } from "../types/index";
 import CreateHandoverModal from "./CreateHandoverModal";
-import TransferOwnershipModal from "./TransferOwnership";
-import AddTaskModal from "./AddTaskModal";
 import ManageSchedulesModal from "../components/ManageScheduleModal";
 import { useRouter } from "next/navigation";
 
+const STATUS_TABS: { label: string; value: "All" | HandoverStatus }[] = [
+  { label: "All", value: "All" },
+  { label: "Active", value: "ACTIVE" },
+  { label: "Scheduled", value: "SCHEDULED" },
+  { label: "Completed", value: "COMPLETED" },
+];
+
 export default function HandoverCenterPage() {
-  const [activeTab, setActiveTab] = useState<"All" | Status>("All");
+  const [activeTab, setActiveTab] = useState<"All" | HandoverStatus>("All");
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isScheduleModalOpen, setScheduleModalOpen] = useState(false);
-  const [isTransferModalOpen, setTransferModalOpen] = useState(false);
-  const [isAddTaskModalOpen, setAddTaskModalOpen] = useState(false);
-  const [activeShift, setActiveShift] = useState<"12hr" | "8hr">("12hr");
   const router = useRouter();
-  // Filter logic based on tabs
-  const filteredHandovers =
-    activeTab === "All"
-      ? mockHandovers
-      : mockHandovers.filter((h) => h.status === activeTab);
+  const queryClient = useQueryClient();
 
-  // TanStack React Table Column Definitions
-  const columns: ColumnDef<Handover>[] = [
+  const { data: handovers = [], isLoading } = useQuery({
+    queryKey: ["handovers"],
+    queryFn: () => fetchHandovers(),
+    refetchInterval: 30_000,
+  });
+
+  const filteredHandovers = useMemo(
+    () => (activeTab === "All" ? handovers : handovers.filter((h) => h.status === activeTab)),
+    [handovers, activeTab]
+  );
+
+  const activeIncidentCount = useMemo(
+    () =>
+      handovers
+        .filter((h) => h.status === "ACTIVE")
+        .reduce((sum, h) => sum + h.incidents.length, 0),
+    [handovers]
+  );
+
+  const columns: ColumnDef<HandoverRecord>[] = [
     {
       header: "Handover ID",
-      accessorKey: "id",
+      accessorKey: "handoverRef",
       cell: ({ row }) => (
-        <div className="font-mono text-xs font-medium text-blue-600">
-          {row.original.id}
-        </div>
+        <div className="font-mono text-xs font-medium text-blue-600">{row.original.handoverRef}</div>
       ),
     },
     {
       header: "Primary Incident",
-      id: "primaryIncident", // Use id instead of accessorKey for complex nested objects
+      id: "primaryIncident",
       cell: ({ row }) => {
-        const { primaryIncident, additionalIncidentsCount } = row.original;
+        const primary = row.original.incidents.find((i) => i.isPrimary) ?? row.original.incidents[0];
+        const extra = row.original.incidents.length - 1;
+        if (!primary) {
+          return <div className="text-xs text-stone-400">No linked incidents</div>;
+        }
         return (
           <>
-            <div className="font-medium text-stone-900">
-              {primaryIncident.title}
-            </div>
+            <div className="font-medium text-stone-900">{primary.incident.summary}</div>
             <div className="mt-[1px] font-mono text-[11px] text-stone-500">
-              {primaryIncident.id}{" "}
-              {additionalIncidentsCount > 0 &&
-                `+${additionalIncidentsCount} MORE`}
+              {primary.incident.ticketId} {extra > 0 && `+${extra} MORE`}
             </div>
           </>
         );
@@ -63,30 +77,27 @@ export default function HandoverCenterPage() {
     },
     {
       header: "Incidents",
-      accessorKey: "totalIncidents",
-      cell: ({ getValue }) => (
+      id: "totalIncidents",
+      cell: ({ row }) => (
         <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 font-mono text-[10px] font-bold text-blue-600 whitespace-nowrap">
-          {getValue<number>()} incidents
+          {row.original.incidents.length} incidents
         </span>
       ),
     },
     {
       header: "Severity",
-      accessorKey: "severity",
-      cell: ({ getValue }) => {
-        const severity = getValue<string>();
+      id: "severity",
+      cell: ({ row }) => {
+        const primary = row.original.incidents.find((i) => i.isPrimary) ?? row.original.incidents[0];
+        const severity = primary?.incident.severity || primary?.incident.priority || "—";
         const severityStyles: Record<string, string> = {
-          Critical: "text-red-600",
-          High: "text-amber-600",
-          Medium: "text-blue-600",
-          Low: "text-green-600",
+          CRITICAL: "text-red-600",
+          HIGH: "text-amber-600",
+          MEDIUM: "text-blue-600",
+          LOW: "text-green-600",
         };
         return (
-          <span
-            className={`text-xs font-semibold ${severityStyles[severity] || "text-stone-500"}`}
-          >
-            {severity}
-          </span>
+          <span className={`text-xs font-semibold ${severityStyles[severity] || "text-stone-500"}`}>{severity}</span>
         );
       },
     },
@@ -94,11 +105,13 @@ export default function HandoverCenterPage() {
       header: "Status",
       accessorKey: "status",
       cell: ({ getValue }) => {
-        const status = getValue<string>();
-        const badgeStyles: Record<string, string> = {
-          Active: "bg-red-50 text-red-600 border-red-200",
-          Scheduled: "bg-amber-50 text-amber-600 border-amber-200",
-          Completed: "bg-green-50 text-green-600 border-green-200",
+        const status = getValue<HandoverStatus>();
+        const badgeStyles: Record<HandoverStatus, string> = {
+          ACTIVE: "bg-red-50 text-red-600 border-red-200",
+          SCHEDULED: "bg-amber-50 text-amber-600 border-amber-200",
+          COMPLETING: "bg-orange-50 text-orange-600 border-orange-200",
+          COMPLETED: "bg-green-50 text-green-600 border-green-200",
+          MERGED: "bg-stone-100 text-stone-500 border-stone-200",
         };
         return (
           <span
@@ -112,19 +125,22 @@ export default function HandoverCenterPage() {
     },
     {
       header: "Owner",
-      accessorKey: "owner",
+      accessorKey: "currentOwnerLabel",
       cell: ({ getValue }) => (
-        <span className="text-[13px] text-stone-800 whitespace-nowrap">
-          {getValue<string>()}
-        </span>
+        <span className="text-[13px] text-stone-800 whitespace-nowrap">{getValue<string>()}</span>
       ),
     },
     {
       header: "Transfer",
-      accessorKey: "transferTime",
+      accessorKey: "transferAt",
       cell: ({ getValue }) => (
         <span className="font-mono text-xs text-amber-600 whitespace-nowrap">
-          {getValue<string>()}
+          {new Date(getValue<string>()).toLocaleString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: "UTC",
+          })}{" "}
+          UTC
         </span>
       ),
     },
@@ -132,7 +148,7 @@ export default function HandoverCenterPage() {
 
   return (
     <main className="flex min-h-screen flex-1 flex-col bg-white dark:bg-transparent">
-      <Topbar activeIncidents={3} />
+      <Topbar activeIncidents={activeIncidentCount} />
 
       <div className="flex-1 p-7">
         {/* Page Header */}
@@ -147,43 +163,7 @@ export default function HandoverCenterPage() {
           </div>
 
           <div className="flex gap-2">
-            {/* Shift Selector */}
-            {/* Dynamic Shift Selector */}
-            <div className="flex items-center gap-[1px] rounded bg-stone-100 p-[3px] dark:bg-zinc-800">
-              {/* Prefix Label */}
-              <span className="whitespace-nowrap px-2 text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-zinc-400">
-                Shift
-              </span>
-
-              {/* Shift Options */}
-              {["12hr", "8hr"].map((shift) => {
-                const isActive = activeShift === shift;
-                return (
-                  <button
-                    key={shift}
-                    type="button"
-                    onClick={() => setActiveShift(shift as any)}
-                    className={`rounded-[3px] px-2.5 py-1 font-mono text-[11px] font-medium transition-all ${
-                      isActive
-                        ? "bg-white text-stone-900 shadow-sm dark:bg-zinc-700 dark:text-white"
-                        : "text-stone-500 hover:text-stone-900 dark:text-zinc-400 dark:hover:text-white"
-                    }`}
-                  >
-                    {shift}
-                  </button>
-                );
-              })}
-
-              {/* Dynamic Time Window Display */}
-              <span className="ml-1 rounded-[3px] border border-stone-200 bg-white px-2 py-1 font-mono text-[11px] text-stone-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
-                {activeShift === "12hr" ? "06:00–18:00 UTC" : "06:00–14:00 UTC"}
-              </span>
-            </div>
-            <Button
-              size="sm"
-              variant="outline-dark"
-              onClick={() => setScheduleModalOpen(true)}
-            >
+            <Button size="sm" variant="outline-dark" onClick={() => setScheduleModalOpen(true)}>
               Scheduled
             </Button>
             <Button size="sm" onClick={() => setCreateModalOpen(true)}>
@@ -194,24 +174,22 @@ export default function HandoverCenterPage() {
 
         {/* Tabs */}
         <div className="mb-5 flex w-fit gap-[1px] rounded bg-stone-100 p-[3px] dark:bg-zinc-800">
-          {["All", "Active", "Scheduled", "Completed"].map((tab) => {
-            const isActive = activeTab === tab;
+          {STATUS_TABS.map((tab) => {
+            const isActive = activeTab === tab.value;
             const count =
-              tab === "All"
-                ? mockHandovers.length
-                : mockHandovers.filter((h) => h.status === tab).length;
+              tab.value === "All" ? handovers.length : handovers.filter((h) => h.status === tab.value).length;
 
             return (
               <div
-                key={tab}
+                key={tab.value}
                 className={`flex cursor-pointer items-center gap-2 rounded-[3px] px-4 py-1.5 text-[13px] transition-all hover:text-stone-900 dark:hover:text-white ${
                   isActive
                     ? "bg-white font-medium text-stone-900 shadow-sm dark:bg-zinc-700 dark:text-white"
                     : "text-stone-500 dark:text-zinc-400"
                 }`}
-                onClick={() => setActiveTab(tab as any)}
+                onClick={() => setActiveTab(tab.value)}
               >
-                {tab}
+                {tab.label}
                 <span
                   className={`rounded-full px-1.5 py-[1px] font-mono text-[10px] font-semibold ${
                     isActive
@@ -226,15 +204,19 @@ export default function HandoverCenterPage() {
           })}
         </div>
 
-        {/* TanStack Table Integration */}
+        {/* Table */}
         <div className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-          <Table
-            data={filteredHandovers}
-            columns={columns}
-            onRowClick={(value) =>
-              router.push(`/incident/handover/${value.id}`)
-            }
-          />
+          {isLoading ? (
+            <div className="p-8 text-center text-sm text-stone-400">Loading handovers…</div>
+          ) : filteredHandovers.length === 0 ? (
+            <div className="p-8 text-center text-sm text-stone-400">No handovers in this view.</div>
+          ) : (
+            <Table
+              data={filteredHandovers}
+              columns={columns}
+              onRowClick={(value) => router.push(`/incident/handover/${value.id}`)}
+            />
+          )}
         </div>
 
         {/* Follow the Sun Schedule */}
@@ -248,21 +230,10 @@ export default function HandoverCenterPage() {
       <CreateHandoverModal
         isOpen={isCreateModalOpen}
         onClose={() => setCreateModalOpen(false)}
+        onCreated={() => queryClient.invalidateQueries({ queryKey: ["handovers"] })}
       />
 
-      <TransferOwnershipModal
-        isOpen={isTransferModalOpen}
-        onClose={() => setTransferModalOpen(false)}
-      />
-
-      <AddTaskModal
-        isOpen={isAddTaskModalOpen}
-        onClose={() => setAddTaskModalOpen(false)}
-      />
-      <ManageSchedulesModal
-        isOpen={isScheduleModalOpen}
-        onClose={() => setScheduleModalOpen(false)}
-      />
+      <ManageSchedulesModal isOpen={isScheduleModalOpen} onClose={() => setScheduleModalOpen(false)} />
     </main>
   );
 }

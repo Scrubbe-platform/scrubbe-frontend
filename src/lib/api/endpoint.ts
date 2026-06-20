@@ -157,6 +157,11 @@ export const endpoint = {
     active: "/escalation/active",
     forTicket: "/escalation/ticket",   // GET /escalation/ticket/:ticketId
   },
+  handover: {
+    base: "/handovers",
+    schedules: "/handovers/schedules",
+    automation: "/handovers/automation",
+  },
   dashboard: {
     get_metrics: "/dashboard/metrics",
     get_analytics: "/dashboard/analytics",
