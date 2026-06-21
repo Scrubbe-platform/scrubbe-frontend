@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { io, Socket } from "socket.io-client";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
@@ -26,6 +27,7 @@ interface ChatMessage {
   text: string;
   isUser: boolean;
   escalated?: boolean;
+  fromAgent?: boolean;
 }
 
 // ─── Markdown component map ───────────────────────────────────────────────────
@@ -178,6 +180,8 @@ function MarkdownMessage({ text }: { text: string }) {
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.scrubbe.com/api/v1";
+const SOCKET_BASE =
+  process.env.NEXT_PUBLIC_SOCKET_BASE_URL ?? "https://api.scrubbe.com";
 const CONV_KEY = "scrubbe_chat_conv_id";
 const SESSION_TTL_MS = 30 * 60 * 1000; // 30 min — matches server session timeout
 
@@ -225,7 +229,12 @@ async function apiCreateConversation(): Promise<string> {
 async function apiSendMessage(
   conversationId: string,
   content: string,
-): Promise<{ content: string; escalated: boolean; intentClass: string }> {
+): Promise<{
+  content: string | null;
+  escalated: boolean;
+  intentClass: string | null;
+  aiEnabled?: boolean;
+}> {
   const res = await fetch(
     `${API_BASE}/chat/conversations/${conversationId}/messages`,
     {
@@ -289,10 +298,13 @@ const Chatbot: React.FC = () => {
   const [isEscalated, setIsEscalated] = useState(false);
   const [convId, setConvId] = useState<string | null>(null);
   const [initError, setInitError] = useState(false);
+  const [agentHandling, setAgentHandling] = useState(false);
 
   const chatBodyRef = useRef<HTMLDivElement>(null);
   const firstOpenRef = useRef(true);
   const inputRef = useRef<HTMLInputElement>(null);
+  const socketRef = useRef<Socket | null>(null);
+  const waitingForAgentTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -337,6 +349,38 @@ const Chatbot: React.FC = () => {
     setMessages((prev) => [...prev, { ...msg, id: crypto.randomUUID() }]);
   }, []);
 
+  // Join this conversation's realtime room — a support agent may reply
+  // asynchronously (not as the direct response to our own POST), so we need
+  // a push channel to receive it. No login required: knowing the
+  // server-generated conversation UUID is the only credential, same trust
+  // model as a checkout-session link.
+  useEffect(() => {
+    if (!convId) return;
+
+    const socket = io(`${SOCKET_BASE}/chat`, { transports: ["websocket", "polling"] });
+    socketRef.current = socket;
+    socket.emit("join", convId);
+
+    socket.on("chat:message:new", (data: { senderType?: string; content?: string }) => {
+      if (data?.senderType !== "AGENT" || !data.content) return;
+      if (waitingForAgentTimeoutRef.current) {
+        clearTimeout(waitingForAgentTimeoutRef.current);
+        waitingForAgentTimeoutRef.current = null;
+      }
+      setIsTyping(false);
+      addMessage({ text: data.content, isUser: false, fromAgent: true });
+    });
+
+    socket.on("chat:agent-joined", () => setAgentHandling(true));
+    socket.on("chat:ai-resumed", () => setAgentHandling(false));
+
+    return () => {
+      socket.emit("leave", convId);
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [convId, addMessage]);
+
   const handleSend = useCallback(
     async (text?: string) => {
       const content = (text ?? input).trim();
@@ -348,9 +392,25 @@ const Chatbot: React.FC = () => {
       try {
         const cid = await ensureConversation();
         const reply = await apiSendMessage(cid, content);
+
+        if (reply.aiEnabled === false) {
+          // A human agent has taken over — no synchronous reply. Keep the
+          // typing indicator on for a bit; the real reply arrives over the
+          // socket. Fall back to a reassuring note if nothing comes quickly.
+          setAgentHandling(true);
+          waitingForAgentTimeoutRef.current = setTimeout(() => {
+            setIsTyping(false);
+            addMessage({
+              text: "A member of our support team has this conversation and will reply shortly.",
+              isUser: false,
+            });
+          }, 8000);
+          return;
+        }
+
         setIsTyping(false);
         addMessage({
-          text: reply.content,
+          text: reply.content ?? "",
           isUser: false,
           escalated: reply.escalated,
         });
@@ -384,6 +444,7 @@ const Chatbot: React.FC = () => {
     setConvId(null);
     setMessages([]);
     setIsEscalated(false);
+    setAgentHandling(false);
     setInitError(false);
     firstOpenRef.current = true;
     setTimeout(() => {
@@ -420,7 +481,11 @@ const Chatbot: React.FC = () => {
                 EZRA
               </p>
               <p className="text-[11px] text-emerald-400 font-mono tracking-widest uppercase">
-                {isEscalated ? "Support Agent Notified" : "Scrubbe AI · Online"}
+                {agentHandling
+                  ? "Support Agent · Online"
+                  : isEscalated
+                    ? "Support Agent Notified"
+                    : "Scrubbe AI · Online"}
               </p>
             </div>
             <button
@@ -469,15 +534,22 @@ const Chatbot: React.FC = () => {
                 {/* Messages */}
                 {messages.map((msg) => (
                   <div key={msg.id} className="flex flex-col gap-1">
+                    {msg.fromAgent && (
+                      <span className="self-start text-[10px] font-bold text-zinc-500 tracking-wide uppercase px-1">
+                        Support Agent
+                      </span>
+                    )}
                     <div
                       className={`max-w-[88%] px-4 py-3 rounded-2xl text-[14px] leading-relaxed
                         ${
                           msg.isUser
                             ? "bg-zinc-900 text-white self-end rounded-br-sm"
-                            : "bg-zinc-100 text-black self-start rounded-bl-sm"
+                            : msg.fromAgent
+                              ? "bg-emerald-50 border border-emerald-200 text-black self-start rounded-bl-sm"
+                              : "bg-zinc-100 text-black self-start rounded-bl-sm"
                         }`}
                     >
-                      {msg.isUser ? (
+                      {msg.isUser || msg.fromAgent ? (
                         msg.text
                       ) : (
                         <MarkdownMessage text={msg.text} />
