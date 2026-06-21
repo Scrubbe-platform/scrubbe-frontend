@@ -20,7 +20,10 @@ const PoliciesModule = () => {
   const [threshold, setThreshold] = useState(100);
   const [maxServices, setMaxServices] = useState("");
   const [maxEnvScope, setMaxEnvScope] = useState("PR-only");
- 
+  const [repeatCount, setRepeatCount] = useState(5);
+  const [windowMinutes, setWindowMinutes] = useState(10);
+  const [editingSuppression, setEditingSuppression] = useState(false);
+
   const { data: config } = useQuery({
     queryKey: ["ims-policies-config"],
     queryFn: async () => {
@@ -30,7 +33,7 @@ const PoliciesModule = () => {
     },
     refetchOnWindowFocus: false,
   });
- 
+
   useEffect(() => {
     if (config) {
       setAutoActivate(config.autoActivatePlaybooks ?? true);
@@ -39,9 +42,11 @@ const PoliciesModule = () => {
       setThreshold(config.confidenceThreshold ?? 100);
       setMaxServices(config.maxServicesPerExecution ?? "");
       setMaxEnvScope(config.maxEnvScope ?? "PR-only");
+      setRepeatCount(config.suppressionRepeatCount ?? 5);
+      setWindowMinutes(config.suppressionWindowMinutes ?? 10);
     }
   }, [config]);
- 
+
   const { mutateAsync: save, isPending } = useMutation({
     mutationFn: async () => {
       const res = await put(endpoint.auth.ims_config, {
@@ -51,6 +56,8 @@ const PoliciesModule = () => {
         confidenceThreshold: threshold,
         maxServicesPerExecution: maxServices,
         maxEnvScope,
+        suppressionRepeatCount: repeatCount,
+        suppressionWindowMinutes: windowMinutes,
       });
       if (!res.success) throw new Error(res.data?.message ?? "Failed to save");
       return res.data;
@@ -58,6 +65,7 @@ const PoliciesModule = () => {
     onSuccess: () => {
       toast.success("Policies saved");
       queryClient.invalidateQueries({ queryKey: ["ims-policies-config"] });
+      setEditingSuppression(false);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -113,17 +121,44 @@ const PoliciesModule = () => {
             <div className="p-5 border border-zinc-500 dark:border-neutral-500 rounded-2xl space-y-4 bg-white dark:bg-transparent">
               <div className="flex justify-between items-center">
                 <span className="text-black dark:text-white text-[15px] font-bold">Suppression rules</span>
-                <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
-                  Edit
+                <button
+                  onClick={() => (editingSuppression ? save() : setEditingSuppression(true))}
+                  disabled={isPending}
+                  className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all disabled:opacity-50"
+                >
+                  {editingSuppression ? "Save" : "Edit"}
                 </button>
               </div>
               <p className="text-zinc-400 dark:text-[#64748B] text-xs">
                 Reduce noise when flake storms or repeated failures happen.
               </p>
-              <div className="flex items-center gap-3 p-2.5 border border-zinc-500 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
-                <List size={14} className="text-[#A5B4FC]" />
-                <span className="text-[11px] text-zinc-600 dark:text-[#D1D5DB]">suppress after 5 repeats / 10 min</span>
-              </div>
+              {editingSuppression ? (
+                <div className="flex items-center gap-2 p-2.5 border border-zinc-500 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
+                  <List size={14} className="text-[#A5B4FC] shrink-0" />
+                  <span className="text-[11px] text-zinc-600 dark:text-[#D1D5DB] shrink-0">suppress after</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={repeatCount}
+                    onChange={(e) => setRepeatCount(Number(e.target.value))}
+                    className="w-14 border border-zinc-500 dark:border-neutral-500 rounded px-1.5 py-0.5 text-[11px] bg-white dark:bg-transparent text-black dark:text-white"
+                  />
+                  <span className="text-[11px] text-zinc-600 dark:text-[#D1D5DB] shrink-0">repeats /</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={windowMinutes}
+                    onChange={(e) => setWindowMinutes(Number(e.target.value))}
+                    className="w-14 border border-zinc-500 dark:border-neutral-500 rounded px-1.5 py-0.5 text-[11px] bg-white dark:bg-transparent text-black dark:text-white"
+                  />
+                  <span className="text-[11px] text-zinc-600 dark:text-[#D1D5DB] shrink-0">min</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 p-2.5 border border-zinc-500 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
+                  <List size={14} className="text-[#A5B4FC]" />
+                  <span className="text-[11px] text-zinc-600 dark:text-[#D1D5DB]">suppress after {repeatCount} repeats / {windowMinutes} min</span>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -143,9 +178,6 @@ const PoliciesModule = () => {
             <div className="p-6 border border-zinc-500 dark:border-neutral-500 rounded-2xl space-y-5 bg-white dark:bg-transparent">
               <div className="flex justify-between items-center">
                 <span className="text-black dark:text-white text-[15px] font-bold">Blast radius limits</span>
-                <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
-                  Configure
-                </button>
               </div>
               <p className="text-zinc-400 dark:text-[#64748B] text-xs">Prevent large-scale changes by default.</p>
  

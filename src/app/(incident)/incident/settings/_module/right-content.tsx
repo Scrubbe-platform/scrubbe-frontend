@@ -1,41 +1,57 @@
-import { Activity, GitBranch, Trash2, Lock } from "lucide-react";
+import { GitBranch, Lock } from "lucide-react";
 import React, { ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 
 const RightContent = () => {
+  const { get } = useFetch();
+  const { data: sso } = useQuery({
+    queryKey: ["ims-sso-status"],
+    queryFn: async () => {
+      const res = await get(endpoint.auth.ims_sso);
+      return res.success ? (res.data?.data ?? null) : null;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: connectors = [] } = useQuery({
+    queryKey: ["connectors-connections-status"],
+    queryFn: async () => {
+      const res = await get(endpoint.connectors.connections);
+      return res.success ? (res.data?.data?.connections ?? res.data?.data ?? []) : [];
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const ssoConfigured = Boolean(sso?.available);
+  const connectedCount = connectors.filter((c: { status?: string }) => c.status === "HEALTHY").length;
+
   return (
     <div>
       <div className=" p-6 overflow-y-auto bg-[#030D25]">
         <div className="w-full mx-auto space-y-8">
           {/* HEADER */}
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-base font-bold text-white">Admin status</h1>
-              <p className="text-[#94A3B8] text-base">
-                Health + audit of configuration changes.
-              </p>
-            </div>
-            <button className="p-2 text-[#94A3B8] hover:text-red-400 transition-colors">
-              <Trash2 size={20} />
-            </button>
+          <div>
+            <h1 className="text-base font-bold text-white">Admin status</h1>
+            <p className="text-[#94A3B8] text-base">
+              Health + audit of configuration changes.
+            </p>
           </div>
 
           {/* STATUS CARDS SECTION */}
           <div className="border border-neutral-500 rounded-2xl p-3 space-y-2 ">
             <StatusRow
-              icon={<Activity size={16} className="text-green" />}
-              label="Listener health"
-              value="Ok"
-            />
-            <StatusRow
               icon={<GitBranch size={16} className="text-orange-400" />}
               label="Delivery ingestion"
-              value="Connected"
+              value={connectedCount > 0 ? `${connectedCount} connected` : "None connected"}
+              isWarning={connectedCount === 0}
             />
             <StatusRow
               icon={<Lock size={16} className="text-lime-400" />}
               label="SSO"
-              value="Not configured"
-              isWarning
+              value={ssoConfigured ? (sso?.provider ?? "Configured") : "Not configured"}
+              isWarning={!ssoConfigured}
             />
           </div>
 

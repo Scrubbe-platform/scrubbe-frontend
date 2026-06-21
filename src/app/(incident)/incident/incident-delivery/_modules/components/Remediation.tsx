@@ -15,6 +15,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -81,6 +82,39 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
     },
   });
 
+  const executeSafeAction = useMutation({
+    mutationFn: async () => {
+      if (!incidentId) throw new Error("No incident");
+      const primary = analysis?.remediation?.options?.[0] ?? null;
+      const description =
+        analysis?.remediation?.recommendedAction ??
+        analysis?.remediation?.suggested ??
+        analysis?.remediation?.action ??
+        "Execute remediation action";
+      const res = await post(endpoint.decisions.propose, {
+        ticketId: incidentId,
+        proposal: {
+          action: "EXECUTE_REMEDIATION",
+          target: primary?.id ?? incidentId,
+          description,
+          parameters: {
+            prChange: analysis?.remediation?.prChange ?? primary?.prChange ?? null,
+            ciAction: analysis?.remediation?.ciAction ?? primary?.ciAction ?? null,
+            riskLevel: primary?.riskLevel ?? "LOW",
+            playbook: analysis?.remediation?.playbook ?? primary?.playbook ?? null,
+          },
+        },
+      });
+      if (!res.success) throw new Error((res.data as string) || "Failed to propose action");
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Safe action proposed — pending policy evaluation");
+      queryClient.invalidateQueries({ queryKey: ["decisions"] });
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to execute safe action"),
+  });
+
   const rawHypotheses: any[] =
     analysis?.rootCause?.hypotheses ??
     analysis?.situation?.hypotheses ??
@@ -112,9 +146,10 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
       action: () => router.push(`/incident/code-engine?id=${incidentId}`),
     },
     {
-      icon: <PlayCircle size={13} />,
-      label: "Execute safe action",
+      icon: executeSafeAction.isPending ? <Loader2 size={13} className="animate-spin" /> : <PlayCircle size={13} />,
+      label: executeSafeAction.isPending ? "Proposing…" : "Execute safe action",
       variant: "red",
+      action: () => executeSafeAction.mutate(),
     },
     {
       icon: ezraStatus === "running" ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />,

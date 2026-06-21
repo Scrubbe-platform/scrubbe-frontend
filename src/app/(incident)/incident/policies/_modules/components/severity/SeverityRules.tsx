@@ -20,14 +20,18 @@ import { endpoint } from '@/lib/api/endpoint'
 import { toast } from 'sonner'
 
 type TSeverityRule = {
+    id: string,
     name: string,
     enabled: boolean,
+    state: string,
     signal: string,
+    sourceType: string,
     threshold: string,
     environment: string,
     serviceScope: string,
     severity: string,
     isMajor: boolean,
+    major: boolean,
     note: string,
 }
 
@@ -46,8 +50,9 @@ const formScheme = z.object({
 type TformScheme = z.infer<typeof formScheme>
 
 const SeverityRules = () => {
-    const { get, post, patch } = useFetch()
+    const { get, post, patch, remove } = useFetch()
     const queryClient = useQueryClient()
+    const [editingId, setEditingId] = useState<string | null>(null)
 
     const { data: rules } = useQuery({
         queryKey: ['guardrails', 'severity'],
@@ -61,17 +66,56 @@ const SeverityRules = () => {
 
     const { mutateAsync: createRule, isPending: saving } = useMutation({
         mutationFn: async (data: TformScheme) => {
+            if (editingId) {
+                const res = await patch(`${endpoint.guardrails.update}/${editingId}`, { ...data, ruleType: 'SEVERITY' })
+                if (!res.success) throw new Error(res.data?.message ?? 'Failed to update rule')
+                return res.data
+            }
             const res = await post(endpoint.guardrails.create, { ...data, ruleType: 'SEVERITY' })
             if (!res.success) throw new Error(res.data?.message ?? 'Failed to save rule')
             return res.data
         },
         onSuccess: () => {
-            toast.success('Severity rule saved')
+            toast.success(editingId ? 'Severity rule updated' : 'Severity rule saved')
             queryClient.invalidateQueries({ queryKey: ['guardrails', 'severity'] })
             setOpenModal(false)
+            setEditingId(null)
         },
         onError: (e: Error) => toast.error(e.message),
     })
+
+    const { mutate: deleteRule } = useMutation({
+        mutationFn: async (id: string) => {
+            const res = await remove(endpoint.guardrails.delete, id)
+            if (!res.success) throw new Error(res.data?.message ?? 'Failed to delete rule')
+            return res.data
+        },
+        onSuccess: () => {
+            toast.success('Severity rule deleted')
+            queryClient.invalidateQueries({ queryKey: ['guardrails', 'severity'] })
+        },
+        onError: (e: Error) => toast.error(e.message),
+    })
+
+    const openEdit = (rule: TSeverityRule) => {
+        setEditingId(rule.id)
+        reset({
+            name: rule.name,
+            enable: rule.enabled ? 'true' : 'false',
+            signal: rule.signal,
+            threshold: rule.threshold,
+            environment: rule.environment || 'production',
+            serviceScope: rule.serviceScope,
+            severity: rule.severity,
+            note: rule.note,
+            isMajor: rule.isMajor,
+        })
+        setOpenModal(true)
+    }
+
+    const handleDelete = (id: string) => {
+        if (window.confirm('Delete this severity rule?')) deleteRule(id)
+    }
 
     const columns = [
         {
@@ -103,7 +147,7 @@ const SeverityRules = () => {
             header: () => <span className="font-semibold">Major</span>,
             cell: (info: CellContext<TSeverityRule, unknown>) => (
                 <div className="flex items-center gap-2">
-                    {/* {priorityColors((info.getValue() as string) ?? "low")} */}
+                    {info.getValue() ? "Yes" : "No"}
                 </div>
             ),
         },
@@ -111,8 +155,8 @@ const SeverityRules = () => {
             accessorKey: "state",
             header: () => <span className="font-semibold">State</span>,
             cell: (info: CellContext<TSeverityRule, unknown>) => (
-                <div className="flex items-center gap-2">
-                    {/* {statusColors(info.getValue() as string)} */}
+                <div className={info.getValue() === "ENABLED" ? "text-emerald-500" : "text-zinc-500"}>
+                    {(info.getValue() as string) ?? "—"}
                 </div>
             ),
         },
@@ -125,14 +169,18 @@ const SeverityRules = () => {
         {
             accessorKey: "Action",
             header: () => <span className="font-semibold">Action</span>,
-            cell: () => (
+            cell: (info: CellContext<TSeverityRule, unknown>) => (
                 <div className="flex items-center gap-3">
-                    <CButton className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
-                        {/* <AiStarIcon stroke="#06eefd"/> */}
+                    <CButton
+                        onClick={() => openEdit(info.row.original)}
+                        className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan"
+                    >
                         Edit
                     </CButton>
-                    <CButton className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
-                        {/* <AiStarIcon stroke="#06eefd"/> */}
+                    <CButton
+                        onClick={() => handleDelete(info.row.original.id)}
+                        className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan"
+                    >
                         Delete
                     </CButton>
                 </div>
@@ -141,7 +189,7 @@ const SeverityRules = () => {
     ];
 
     const [openModal, setOpenModal] = useState(false)
-    const { control, handleSubmit, formState: { isValid, errors }, setValue, watch } = useForm({
+    const { control, handleSubmit, formState: { isValid, errors }, setValue, watch, reset } = useForm({
         resolver: zodResolver(formScheme),
         mode: "onChange",
         defaultValues: {
@@ -164,7 +212,21 @@ const SeverityRules = () => {
                 subtitle='Turn signals into P1–P4 consistently.'
                 label='These rules drive incident priority, paging, and how Ezra writes summaries for leadership vs analysts.'
                 actionText={"Add rule"}
-                action={() => setOpenModal(true)}
+                action={() => {
+                    setEditingId(null)
+                    reset({
+                        enable: "true",
+                        environment: "production",
+                        isMajor: true,
+                        name: "",
+                        note: "",
+                        serviceScope: "",
+                        severity: "",
+                        signal: "",
+                        threshold: "",
+                    })
+                    setOpenModal(true)
+                }}
             >
                 <div className='space-y-3'>
                     <Table columns={columns} data={rules ?? []} />
@@ -209,7 +271,7 @@ const SeverityRules = () => {
                 </div>
             </FormWrapper>
             {
-                openModal && <SideModal isOpen={openModal} onClose={() => setOpenModal(false)} title='Add severity rule' subTitle='Map signals to P1–P4 and optionally mark as major.'>
+                openModal && <SideModal isOpen={openModal} onClose={() => { setOpenModal(false); setEditingId(null) }} title={editingId ? 'Edit severity rule' : 'Add severity rule'} subTitle='Map signals to P1–P4 and optionally mark as major.'>
                     <div>
                         <div className='border border-gray-300 rounded-md p-2'>
                             <div className='flex gap-2 items-center text-sm font-semibold'>
@@ -330,7 +392,7 @@ const SeverityRules = () => {
                             </div>
 
                             <div className='flex justify-end gap-3 mt-3'>
-                                <CButton onClick={() => setOpenModal(false)} className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan w-fit">
+                                <CButton onClick={() => { setOpenModal(false); setEditingId(null) }} className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan w-fit">
                                     Cancel
                                 </CButton>
                                 <CButton
@@ -339,7 +401,7 @@ const SeverityRules = () => {
                                     onClick={handleSubmit(data => createRule(data))}
                                     className="hover:bg-IMSCyan bg-IMSCyan text-black w-fit"
                                 >
-                                    Save Rule
+                                    {editingId ? 'Update Rule' : 'Save Rule'}
                                 </CButton>
                             </div>
                         </div>

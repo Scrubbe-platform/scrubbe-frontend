@@ -7,16 +7,39 @@ import {
   IoDocumentOutline,
   IoDocumentTextOutline,
 } from "react-icons/io5";
+import { useQuery } from "@tanstack/react-query";
 import SideModal from "@/components/ui/SideModal";
 import Govern from "./Modal/Govern";
 import Playbook from "./Modal/Playbook";
 import AnalystNote from "./Modal/AnalystNote";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 
 const Header = ({ incident }: { incident: IncidentDetailRecord }) => {
   const [isGoverned, setIsGoverned] = useState(false);
   const [isAnalystNote, setIsAnalystNote] = useState(false);
   const [isPlaybook, setIsPlaybook] = useState(false);
+  const { post } = useFetch();
+
+  // Shares its cache key with PlaybookSection's match query so this tag and
+  // that section never disagree about which playbook actually matched.
+  const { data: matched } = useQuery({
+    queryKey: ["playbook-match", incident.id, incident.category],
+    queryFn: async () => {
+      const res = await post(endpoint.playbooks.match, {
+        incidentId: incident.id,
+        category: incident.category,
+        context: { incidentId: incident.id, category: incident.category },
+      });
+      if (res.success) {
+        const d = res.data?.data;
+        return (d?.playbook ?? d?.playbooks?.[0] ?? null) as any;
+      }
+      return null;
+    },
+    enabled: !!(incident.id || incident.category),
+  });
 
   const sourceLabel = incident.sourceType || incident.source || "Manual";
 
@@ -92,7 +115,15 @@ const Header = ({ incident }: { incident: IncidentDetailRecord }) => {
           title="Playbook"
           subTitle="Active playbook"
         >
-          <Playbook />
+          <Playbook
+            name={matched?.name ?? "No playbook matched"}
+            description={
+              matched?.description ??
+              "No active playbook matched this incident's category yet."
+            }
+            scope={matched?.config?.scope ?? matched?.scope ?? "unscoped"}
+            steps={matched?.steps ?? []}
+          />
         </SideModal>
       )}
       {isAnalystNote && (

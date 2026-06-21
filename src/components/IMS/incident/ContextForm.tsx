@@ -5,6 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Upload } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import Select from "@/components/ui/select";
 import Input from "@/components/ui/input";
 import TextArea from "@/components/ui/text-area";
@@ -15,7 +16,6 @@ import {
   IncidentDetailRecord,
 } from "@/lib/incident/incident.types";
 import { querykeys } from "@/lib/constant";
-import MajorIncidentWorkbench from "../Workbench/MajorIncidentWorkbench";
 import P0UpgradePromptModal from "./UpgradePromptModal";
 import IncidentRelationship from "./IncidentRelation";
 
@@ -76,9 +76,9 @@ const AddContextForm = ({
   const [saveNotice, setSaveNotice] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [showP0Prompt, setShowP0Prompt] = useState(false);
-  const [showWorkbench, setShowWorkbench] = useState(false);
   const prevPriority = useRef(incident.severity);
   const fileRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data: members = [] } = useMember();
 
@@ -628,29 +628,16 @@ const AddContextForm = ({
         </div>
       </form>
 
-      {showP0Prompt && !showWorkbench && (
+      {showP0Prompt && (
         <P0UpgradePromptModal
           incident={incident}
           onClose={() => setShowP0Prompt(false)}
           onGoToWorkbench={() => {
             setShowP0Prompt(false);
-            setShowWorkbench(true);
+            router.push(`/incident/workbench/${incident.id}`);
           }}
         />
       )}
-
-      {/* {showWorkbench && (
-        <MajorIncidentWorkbench
-          incident={incident}
-          onClose={() => setShowWorkbench(false)}
-          onDeclared={() => {
-            setShowWorkbench(false);
-            queryClient.invalidateQueries({
-              queryKey: [querykeys.INCIDENT_DETAIL, incident.id],
-            });
-          }}
-        />
-      )} */}
     </div>
   );
 };

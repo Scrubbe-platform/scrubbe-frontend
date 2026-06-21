@@ -1,9 +1,15 @@
 "use client";
 import React from "react";
-import { Bolt, Info, TriangleAlert } from "lucide-react";
+import { Bolt, Info } from "lucide-react";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
+import useMember from "@/hooks/useMember";
+import {
+  PlaybookExecution,
+  PlaybookStepOutcome,
+  useActiveExecution,
+} from "../../hooks/usePlaybookExecution";
 
-type AuditType = "Playbook" | "Step" | "Decision" | "Guardrail" | "Execution";
+type AuditType = "Playbook" | "Step" | "Decision" | "Execution";
 interface AuditEvent {
   timestamp: string;
   type: AuditType;
@@ -11,89 +17,100 @@ interface AuditEvent {
   actor: string;
 }
 
-// All badges unified — type still distinguishable via label, no color needed
 const AuditBadge = ({ type }: { type: AuditType }) => (
   <span className="w-24 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-2 py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-black dark:text-zinc-400 shrink-0">
     {type}
   </span>
 );
 
-const fmtTime = (base: Date, offsetMinutes: number): string => {
-  const d = new Date(base.getTime() + offsetMinutes * 60_000);
-  return d.toLocaleTimeString([], {
+const fmtTime = (iso?: string | null): string => {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
   });
 };
 
-const buildAuditEvents = (incident: IncidentDetailRecord): AuditEvent[] => {
-  const playbookLabel =
-    incident.title ||
-    incident.reason ||
-    incident.summary ||
-    "Selected incident";
-  const serviceName =
-    incident.service || incident.affectedSystem || "unknown-service";
-  const recommended =
-    incident.recommendedActions[0] ||
-    incident.aiAnalysis?.suggestion ||
-    "Validate the current remediation path";
-  const base = incident.createdAt ? new Date(incident.createdAt) : new Date();
-
-  return [
+const buildAuditEvents = (
+  execution: PlaybookExecution,
+  resolveActor: (id?: string | null) => string
+): AuditEvent[] => {
+  const events: AuditEvent[] = [
     {
-      timestamp: fmtTime(base, 0),
+      timestamp: fmtTime(execution.startedAt),
       type: "Playbook",
-      description: `Playbook "${playbookLabel}" matched to ${incident.ticketId} · matchConfidence: 0.91 · service: ${serviceName}`,
-      actor: "system/matcher",
-    },
-    {
-      timestamp: fmtTime(base, 1),
-      type: "Step",
-      description:
-        'Step 1 "Review Recent Incident Signals" started · agent/deploy-scanner-01 assigned · status: in_progress',
-      actor: "agent/orchestrator",
-    },
-    {
-      timestamp: fmtTime(base, 3),
-      type: "Step",
-      description: `Step 1 completed · outcome: context collected · recommendation: ${recommended}`,
-      actor: "agent/deploy-scanner-01",
-    },
-    {
-      timestamp: fmtTime(base, 5),
-      type: "Step",
-      description:
-        'Step 2 "Inspect Service Logs" started · branch conditions registered for remediation review',
-      actor: "agent/orchestrator",
-    },
-    {
-      timestamp: fmtTime(base, 6),
-      type: "Decision",
-      description: `effectiveAutomationLevel computed: min(playbook:3, policy:3, risk:2) = 2 · execution mode locked to ASSISTED · incident status: ${incident.status}`,
-      actor: "system/execution-gate",
-    },
-    {
-      timestamp: fmtTime(base, 7),
-      type: "Guardrail",
-      description:
-        "GuardrailCheck: rollback approval and blast-radius review remain enforced before execution",
-      actor: "system/policy-engine",
-    },
-    {
-      timestamp: fmtTime(base, 8),
-      type: "Execution",
-      description: `Execution prepared for ${incident.ticketId} · awaiting approval · owner: ${incident.assignedToName || incident.assignedToEmail || incident.incidentCommander || "unassigned"}`,
-      actor: "system/execution-gate",
+      description: `Playbook "${execution.playbook.name}" triggered · matchConfidence: ${execution.confidenceScore.toFixed(2)} · status: ${execution.status}`,
+      actor: resolveActor(execution.triggeredBy) ,
     },
   ];
+
+  const sortedSteps = [...execution.stepOutcomes].sort(
+    (a, b) => a.stepIndex - b.stepIndex
+  );
+
+  for (const step of sortedSteps as PlaybookStepOutcome[]) {
+    if (step.status === "PENDING") continue;
+    const outputSummary = step.output
+      ? Object.entries(step.output)
+          .map(([k, v]) => `${k}: ${String(v)}`)
+          .join(", ")
+      : undefined;
+    events.push({
+      timestamp: fmtTime(step.completedAt ?? step.startedAt),
+      type: "Step",
+      description: `Step "${step.stepName}" ${step.status.toLowerCase()}${
+        outputSummary ? ` · ${outputSummary}` : ""
+      }`,
+      actor: resolveActor(step.performedBy) || "unassigned",
+    });
+  }
+
+  if (execution.selectedActionId) {
+    const action = execution.playbook.remediationActions?.find(
+      (a) => a.actionId === execution.selectedActionId
+    );
+    events.push({
+      timestamp: fmtTime(execution.completedAt ?? execution.startedAt),
+      type: "Decision",
+      description: `Remediation action "${action?.name ?? execution.selectedActionId}" selected${
+        execution.decisionId ? ` · decision: ${execution.decisionId}` : ""
+      }`,
+      actor: resolveActor(execution.triggeredBy),
+    });
+  }
+
+  if (
+    execution.status === "COMPLETED" ||
+    execution.status === "FAILED" ||
+    execution.status === "CANCELLED"
+  ) {
+    events.push({
+      timestamp: fmtTime(execution.completedAt),
+      type: "Execution",
+      description: `Execution ${execution.status.toLowerCase()}${
+        execution.notes ? ` · ${execution.notes}` : ""
+      }`,
+      actor: resolveActor(execution.triggeredBy),
+    });
+  }
+
+  return events;
 };
 
 const AuditTrail: React.FC<{ incident: IncidentDetailRecord }> = ({
   incident,
 }) => {
-  const logs = buildAuditEvents(incident);
+  const { data: execution, isLoading } = useActiveExecution(incident.id);
+  const { data: members = [] } = useMember();
+
+  const resolveActor = (id?: string | null) => {
+    if (!id) return "system";
+    const member = members.find((m) => m.id === id);
+    return member ? `${member.firstname} ${member.lastname}` : id;
+  };
+
+  const logs = execution ? buildAuditEvents(execution, resolveActor) : [];
 
   return (
     <div
@@ -127,30 +144,40 @@ const AuditTrail: React.FC<{ incident: IncidentDetailRecord }> = ({
           className="mt-0.5 shrink-0 text-black dark:text-zinc-500"
         />
         <p className="text-[12px] leading-relaxed text-black dark:text-zinc-400">
-          Every event is immutable. Audit records carry event type, actor,
-          timestamp, payload, and a link back to the incident timeline so the
-          learning system can reason from real outcomes.
+          Sourced from the playbook execution record for this incident —
+          actor, timestamp, and outcome are persisted per step and survive a
+          refresh.
         </p>
       </div>
 
       <div className="flex flex-col overflow-hidden rounded-xl border border-zinc-100 dark:border-zinc-800">
-        {logs.map((log, i) => (
-          <div
-            key={`${log.type}-${i}`}
-            className="flex items-center gap-4 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-3.5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors"
-          >
-            <span className="w-10 text-[11px] font-mono text-black dark:text-zinc-600 shrink-0 tabular-nums">
-              {log.timestamp}
-            </span>
-            <AuditBadge type={log.type} />
-            <p className="flex-1 text-[12px] leading-relaxed text-black dark:text-zinc-400 min-w-0">
-              {log.description}
-            </p>
-            <span className="w-36 text-right text-[11px] font-mono text-black dark:text-zinc-600 shrink-0 truncate">
-              {log.actor}
-            </span>
-          </div>
-        ))}
+        {isLoading ? (
+          <p className="p-5 text-center text-[12px] text-black dark:text-zinc-500">
+            Loading audit trail…
+          </p>
+        ) : logs.length === 0 ? (
+          <p className="p-5 text-center text-[12px] text-black dark:text-zinc-500">
+            No playbook execution recorded yet for this incident.
+          </p>
+        ) : (
+          logs.map((log, i) => (
+            <div
+              key={`${log.type}-${i}`}
+              className="flex items-center gap-4 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-3.5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors"
+            >
+              <span className="w-10 text-[11px] font-mono text-black dark:text-zinc-600 shrink-0 tabular-nums">
+                {log.timestamp}
+              </span>
+              <AuditBadge type={log.type} />
+              <p className="flex-1 text-[12px] leading-relaxed text-black dark:text-zinc-400 min-w-0">
+                {log.description}
+              </p>
+              <span className="w-36 text-right text-[11px] font-mono text-black dark:text-zinc-600 shrink-0 truncate">
+                {log.actor}
+              </span>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

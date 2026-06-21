@@ -6,7 +6,12 @@ import {
   Zap,
   CheckCircle2,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { useIncidentWorkspace } from "@/hooks/useIncidentWorkspace";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { usePipelineFilter } from "../state/usePipelineFilter";
 
 interface ActivityItem {
   id: number | string;
@@ -27,120 +32,94 @@ const iconMap: Record<string, ReactNode> = {
 
 const Sidebar = () => {
   const { selectedIncident } = useIncidentWorkspace();
+  const router = useRouter();
+  const { get } = useFetch();
+  const { setStatusFilter } = usePipelineFilter();
 
-  const serviceName =
-    selectedIncident?.service ||
-    selectedIncident?.affectedSystem ||
-    "selected-service";
-  const repoName = `Scrubbe/${serviceName.replace(/\s+/g, "-").toLowerCase()}`;
-  const ticketId = selectedIncident?.ticketId || "INCIDENT";
-  const incidentTitle =
-    selectedIncident?.title ||
-    selectedIncident?.reason ||
-    selectedIncident?.summary ||
-    "Selected incident";
-  const environment = selectedIncident?.environment || "runtime";
-  const statusLabel =
-    selectedIncident?.status === "RESOLVED" || selectedIncident?.status === "CLOSED"
-      ? "Resolved"
-      : "Approve";
+  const goToIncident = () => {
+    if (selectedIncident?.id) {
+      router.push(`/incident/incident-delivery?id=${selectedIncident.id}`);
+    }
+  };
+
+  const { data: health } = useQuery({
+    queryKey: ["pipeline-health"],
+    queryFn: async () => {
+      const res = await get(endpoint.pipelines.health);
+      return res.success ? res.data?.data ?? null : null;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const needsApproval: number = health?.needsApproval ?? 0;
+  const deliveryFailures: number = health?.deliveryFailures ?? 0;
+  const listenerHealth: { name: string; status: string; count?: number }[] =
+    health?.listenerHealth ?? [];
 
   const systemActivity = [
     {
       category: "Needs approval",
       items: [
         {
-          id: `${ticketId}-pr`,
-          type: "pr",
-          title: `Approve ${ticketId}`,
-          subtitle: repoName,
+          id: "pending-approvals",
+          type: "decision",
+          title: `${needsApproval} decision${needsApproval === 1 ? "" : "s"} pending approval`,
+          subtitle: "Across all open incidents",
           environment: "",
-          status: statusLabel,
+          status: needsApproval > 0 ? "Review" : "Clear",
           icon: "alert" as const,
+          onClick: () => router.push("/incident/workbench"),
         },
-        {
-          id: `${ticketId}-deploy`,
-          type: "deploy",
-          title: `Review ${serviceName} deploy`,
-          subtitle: repoName,
-          environment,
-          status: statusLabel,
-          icon: "alert" as const,
-        },
+        ...(selectedIncident?.id
+          ? [
+              {
+                id: "selected-incident",
+                type: "incident",
+                title: `Review ${selectedIncident.ticketId ?? "incident"} deploy`,
+                subtitle: selectedIncident.service || selectedIncident.affectedSystem || "selected-service",
+                environment: "",
+                status: "Approve",
+                icon: "git" as const,
+                onClick: goToIncident,
+              },
+            ]
+          : []),
       ],
     },
     {
       category: "Delivery Failures",
       items: [
         {
-          id: `${ticketId}-1`,
-          type: "incident",
-          title: ticketId,
-          subtitle: repoName,
-          environment,
-          status: selectedIncident?.status || "Failed",
-          icon: "git" as const,
-        },
-        {
-          id: `${ticketId}-2`,
-          type: "service",
-          title: incidentTitle,
-          subtitle: `${repoName} · ${serviceName}`,
-          environment: selectedIncident?.region || "",
-          status: selectedIncident?.severity || "P3",
-          icon: "git" as const,
-        },
-        {
-          id: `${ticketId}-3`,
-          type: "owner",
-          title: "Response owner",
-          subtitle:
-            selectedIncident?.assignedToName ||
-            selectedIncident?.assignedToEmail ||
-            selectedIncident?.incidentCommander ||
-            "Unassigned",
+          id: "delivery-failures",
+          type: "pipeline",
+          title: `${deliveryFailures} delivery failure${deliveryFailures === 1 ? "" : "s"} (24h)`,
+          subtitle: "Click to filter the run list",
           environment: "",
-          status: selectedIncident ? "Tracked" : "Pending",
-          icon: "alert" as const,
+          status: deliveryFailures > 0 ? "Failed" : "Clear",
+          icon: "git" as const,
+          onClick: () => setStatusFilter("error"),
         },
       ],
     },
   ];
 
-  const health = [
+  const healthGroups = [
     {
       category: "Listener health",
-      items: [
-        {
-          id: "webhook",
-          title: "Webhook Ingestion",
-          subtitle: selectedIncident
-            ? `${selectedIncident.elapsedLabel} · source ${
-                selectedIncident.sourceType || selectedIncident.source || "manual"
-              }`
-            : "Awaiting incident selection",
-          status: selectedIncident ? "Approve" : "Failed",
-          icon: "git" as const,
-        },
-        {
-          id: "connector",
-          title: "Connector",
-          subtitle: selectedIncident
-            ? `${serviceName} · ${environment}`
-            : "No service bound",
-          status: selectedIncident ? "Approve" : "Failed",
-          icon: "zap" as const,
-        },
-        {
-          id: "policy",
-          title: "Policy engine",
-          subtitle: selectedIncident
-            ? `${selectedIncident.severity || "P3"} · gates active`
-            : "Balanced · gates active",
-          status: "Approve",
-          icon: "check" as const,
-        },
-      ],
+      items: listenerHealth.map((item) => ({
+        id: item.name,
+        type: "",
+        title: item.name,
+        subtitle:
+          item.name === "Connectors" && typeof item.count === "number"
+            ? `${item.count} connector${item.count === 1 ? "" : "s"} healthy`
+            : item.status === "HEALTHY"
+            ? "Receiving events"
+            : "No recent activity",
+        environment: "",
+        status: item.status === "HEALTHY" ? "Approve" : "Failed",
+        icon: (item.name === "Connectors" ? "zap" : "git") as keyof typeof iconMap,
+      })),
     },
   ];
 
@@ -152,7 +131,7 @@ const Sidebar = () => {
 
           <div className="space-y-3">
             {group.items.map((item) => (
-              <SidebarRow key={item.id} item={item} />
+              <SidebarRow key={item.id} item={item} onClick={item.onClick} />
             ))}
           </div>
 
@@ -160,7 +139,7 @@ const Sidebar = () => {
         </div>
       ))}
 
-      {health.map((group, groupIdx) => (
+      {healthGroups.map((group, groupIdx) => (
         <div key={group.category}>
           <h3 className="mb-4 text-[17px] font-bold">{group.category}</h3>
 
@@ -170,7 +149,7 @@ const Sidebar = () => {
             ))}
           </div>
 
-          {groupIdx < health.length - 1 ? (
+          {groupIdx < healthGroups.length - 1 ? (
             <div className="my-6 h-px bg-[#1F2937]" />
           ) : null}
         </div>
@@ -186,7 +165,7 @@ const Sidebar = () => {
   );
 };
 
-const SidebarRow = ({ item }: { item: ActivityItem }) => (
+const SidebarRow = ({ item, onClick }: { item: ActivityItem; onClick?: () => void }) => (
   <div className="flex items-center justify-between rounded-2xl p-3 transition-all">
     <div className="flex items-center gap-3">
       <div className="text-white opacity-90">{iconMap[item.icon]}</div>
@@ -201,7 +180,9 @@ const SidebarRow = ({ item }: { item: ActivityItem }) => (
     </div>
 
     <button
-      className={`rounded-full border px-3 py-1 text-[10px] font-bold ${
+      onClick={onClick}
+      disabled={!onClick}
+      className={`rounded-full border px-3 py-1 text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed ${
         item.status === "Approve" || item.status === "Tracked" || item.status === "Resolved"
           ? "border-[#00CAD8] text-[#00CAD8]"
           : "border-[#EF4444] text-[#EF4444]"

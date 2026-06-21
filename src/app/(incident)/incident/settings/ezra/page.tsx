@@ -19,7 +19,11 @@ const EzraPage = () => {
   const [riskLensEnabled, setRiskLensEnabled] = useState(true);
   const [execFormat, setExecFormat] = useState("1 Paragragh + bullets + ETA");
   const [deliveryChannel, setDeliveryChannel] = useState("#eng-leadership");
- 
+  const [editingChannel, setEditingChannel] = useState(false);
+  const [maskingRules, setMaskingRules] = useState<string[]>([]);
+  const [editingMasking, setEditingMasking] = useState(false);
+  const [newMaskRule, setNewMaskRule] = useState("");
+
   const { data: config } = useQuery({
     queryKey: ["ims-ezra-config"],
     queryFn: async () => {
@@ -29,7 +33,7 @@ const EzraPage = () => {
     },
     refetchOnWindowFocus: false,
   });
- 
+
   useEffect(() => {
     if (config) {
       setAnalystEnabled(config.ezraAnalystSummary ?? true);
@@ -37,9 +41,10 @@ const EzraPage = () => {
       setRiskLensEnabled(config.ezraRiskLens ?? true);
       setExecFormat(config.ezraExecutiveFormat ?? "1 Paragragh + bullets + ETA");
       setDeliveryChannel(config.ezraDeliveryChannel ?? "#eng-leadership");
+      setMaskingRules(config.ezraMaskingRules ?? ["mask: secrets", "mask: PII", "hide: stack traces"]);
     }
   }, [config]);
- 
+
   const { mutateAsync: save, isPending } = useMutation({
     mutationFn: async () => {
       const res = await put(endpoint.auth.ims_config, {
@@ -48,6 +53,7 @@ const EzraPage = () => {
         ezraRiskLens: riskLensEnabled,
         ezraExecutiveFormat: execFormat,
         ezraDeliveryChannel: deliveryChannel,
+        ezraMaskingRules: maskingRules,
       });
       if (!res.success) throw new Error(res.data?.message ?? "Failed to save");
       return res.data;
@@ -55,6 +61,8 @@ const EzraPage = () => {
     onSuccess: () => {
       toast.success("Ezra settings saved");
       queryClient.invalidateQueries({ queryKey: ["ims-ezra-config"] });
+      setEditingChannel(false);
+      setEditingMasking(false);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -95,15 +103,30 @@ const EzraPage = () => {
             <div className="p-5 border border-zinc-500 dark:border-neutral-500 rounded-2xl space-y-4 bg-white dark:bg-transparent">
               <div className="flex justify-between items-center">
                 <span className="text-black dark:text-white text-[15px] font-bold">Delivery summary channel</span>
-                <button className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all">
-                  Change
+                <button
+                  onClick={() => (editingChannel ? save() : setEditingChannel(true))}
+                  disabled={isPending}
+                  className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#00CAD8]/5 transition-all disabled:opacity-50"
+                >
+                  {editingChannel ? "Save" : "Change"}
                 </button>
               </div>
               <p className="text-zinc-400 dark:text-[#64748B] text-xs leading-normal">Where executive updates go.</p>
-              <div className="flex items-center gap-3 p-2.5 border border-zinc-500 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
-                <Hash size={14} className="text-[#FDE047]" />
-                <span className="text-[11px] text-zinc-600 dark:text-[#D1D5DB] font-mono">{deliveryChannel}</span>
-              </div>
+              {editingChannel ? (
+                <div className="flex items-center gap-2 p-2.5 border border-zinc-500 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
+                  <Hash size={14} className="text-[#FDE047] shrink-0" />
+                  <input
+                    value={deliveryChannel}
+                    onChange={(e) => setDeliveryChannel(e.target.value)}
+                    className="flex-1 bg-transparent text-[11px] text-zinc-600 dark:text-[#D1D5DB] font-mono outline-none"
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 p-2.5 border border-zinc-500 dark:border-neutral-500 rounded-xl bg-zinc-50 dark:bg-[#0B1224]/50">
+                  <Hash size={14} className="text-[#FDE047]" />
+                  <span className="text-[11px] text-zinc-600 dark:text-[#D1D5DB] font-mono">{deliveryChannel}</span>
+                </div>
+              )}
             </div>
           </section>
  
@@ -119,12 +142,41 @@ const EzraPage = () => {
                   Prevent sensitive content from appearing in executive summaries.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <MaskTag label="mask: secrets" />
-                  <MaskTag label="mask: PII" />
-                  <MaskTag label="hide: stack traces" />
+                  {maskingRules.map((rule) => (
+                    <MaskTag
+                      key={rule}
+                      label={rule}
+                      onRemove={editingMasking ? () => setMaskingRules((p) => p.filter((r) => r !== rule)) : undefined}
+                    />
+                  ))}
                 </div>
-                <button className="text-[#00CAD8] border border-[#00CAD8] px-6 py-2 rounded-xl text-sm font-bold hover:bg-[#00CAD8]/5 transition-all">
-                  Edit
+                {editingMasking && (
+                  <div className="flex gap-2">
+                    <input
+                      value={newMaskRule}
+                      onChange={(e) => setNewMaskRule(e.target.value)}
+                      placeholder="e.g. mask: tokens"
+                      className="flex-1 border border-zinc-500 dark:border-neutral-500 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-transparent text-black dark:text-white"
+                    />
+                    <button
+                      onClick={() => {
+                        if (newMaskRule.trim()) {
+                          setMaskingRules((p) => [...p, newMaskRule.trim()]);
+                          setNewMaskRule("");
+                        }
+                      }}
+                      className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1.5 rounded-lg text-xs font-bold"
+                    >
+                      Add
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => (editingMasking ? save() : setEditingMasking(true))}
+                  disabled={isPending}
+                  className="text-[#00CAD8] border border-[#00CAD8] px-6 py-2 rounded-xl text-sm font-bold hover:bg-[#00CAD8]/5 transition-all disabled:opacity-50"
+                >
+                  {editingMasking ? "Save" : "Edit"}
                 </button>
               </div>
             </div>
@@ -167,9 +219,14 @@ const ToggleRow = ({ icon, label, active, onToggle }: { icon: ReactNode; label: 
   </div>
 );
  
-const MaskTag = ({ label }: { label: string }) => (
-  <span className="px-3 py-1.5 bg-zinc-100 dark:bg-[#0B1224] border border-zinc-500 dark:border-neutral-500 rounded-lg text-[10px] font-bold text-zinc-600 dark:text-[#D1D5DB] font-mono tracking-tight">
+const MaskTag = ({ label, onRemove }: { label: string; onRemove?: () => void }) => (
+  <span className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 dark:bg-[#0B1224] border border-zinc-500 dark:border-neutral-500 rounded-lg text-[10px] font-bold text-zinc-600 dark:text-[#D1D5DB] font-mono tracking-tight">
     {label}
+    {onRemove && (
+      <button onClick={onRemove} className="text-zinc-400 hover:text-red-400">
+        ×
+      </button>
+    )}
   </span>
 );
  

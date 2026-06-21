@@ -8,9 +8,9 @@ const LinksThatOpen = ({ incident }: { incident: IncidentDetailRecord }) => {
   const payload = buildDeliveryPayload(incident);
 
   const signals = [
-    { label: "repo",  value: payload.repo              },
-    { label: "pr",    value: `#${payload.pr.number}`   },
-    { label: "sha",   value: payload.commit.sha        },
+    { label: "repo", value: payload.repo ?? "—" },
+    { label: "pr", value: payload.pr ? `#${payload.pr.number}` : "—" },
+    { label: "sha", value: payload.commit?.sha ?? "—" },
   ];
 
   return (
@@ -37,8 +37,16 @@ const LinksThatOpen = ({ incident }: { incident: IncidentDetailRecord }) => {
             Artifacts
           </p>
           <div className="space-y-3">
-            <ArtifactLink label="runUrl"  href={payload.artifacts.runUrl}  />
-            <ArtifactLink label="diffUrl" href={payload.artifacts.diffUrl} />
+            {payload.artifacts?.runUrl || payload.artifacts?.diffUrl ? (
+              <>
+                <ArtifactLink label="runUrl" href={payload.artifacts.runUrl} />
+                <ArtifactLink label="diffUrl" href={payload.artifacts.diffUrl} />
+              </>
+            ) : (
+              <p className="text-[12px] text-black dark:text-zinc-500">
+                No run or diff artifacts captured for this incident.
+              </p>
+            )}
           </div>
         </div>
 
@@ -48,6 +56,11 @@ const LinksThatOpen = ({ incident }: { incident: IncidentDetailRecord }) => {
             Failing Units
           </p>
           <div className="flex flex-col gap-2">
+            {payload.failing.length === 0 && (
+              <p className="text-[12px] text-black dark:text-zinc-500">
+                No failing units reported.
+              </p>
+            )}
             {payload.failing.map((unit) => (
               <div
                 key={unit}
@@ -78,20 +91,23 @@ const LinksThatOpen = ({ incident }: { incident: IncidentDetailRecord }) => {
 
 // ── Sub-components ────────────────────────────────────────────────
 
-const ArtifactLink = ({ label, href }: { label: string; href: string }) => (
-  <div className="space-y-1">
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 text-[12px] font-medium text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
-    >
-      <Link2 size={12} />
-      {label}
-    </a>
-    <p className="font-mono text-[11px] text-black dark:text-zinc-500 truncate">{href}</p>
-  </div>
-);
+const ArtifactLink = ({ label, href }: { label: string; href?: string }) => {
+  if (!href) return null;
+  return (
+    <div className="space-y-1">
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
+      >
+        <Link2 size={12} />
+        {label}
+      </a>
+      <p className="font-mono text-[11px] text-black dark:text-zinc-500 truncate">{href}</p>
+    </div>
+  );
+};
 
 const SignalPill = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-center gap-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2.5 py-1.5 text-[11px] font-mono">

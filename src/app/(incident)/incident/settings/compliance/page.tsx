@@ -15,7 +15,9 @@ const CompliancePage = () => {
   const [decisionLogRetention, setDecisionLogRetention] = useState("90 days");
   const [artifactRetention, setArtifactRetention] = useState("30 days");
   const [piiRedaction, setPiiRedaction] = useState(true);
- 
+  const [exportDestination, setExportDestination] = useState("");
+  const [editingDestination, setEditingDestination] = useState(false);
+
   const { data: config } = useQuery({
     queryKey: ["ims-compliance-config"],
     queryFn: async () => {
@@ -25,22 +27,32 @@ const CompliancePage = () => {
     },
     refetchOnWindowFocus: false,
   });
- 
+
   useEffect(() => {
     if (config) {
       setDecisionLogRetention(config.decisionLogRetention ?? "90 days");
       setArtifactRetention(config.artifactRetention ?? "30 days");
       setPiiRedaction(config.piiRedactionOnExport ?? true);
+      setExportDestination(config.evidenceExportDestination ?? "");
     }
   }, [config]);
- 
+
   const { mutateAsync: save, isPending } = useMutation({
     mutationFn: async () => {
-      const res = await put(endpoint.auth.ims_config, { decisionLogRetention, artifactRetention, piiRedactionOnExport: piiRedaction });
+      const res = await put(endpoint.auth.ims_config, {
+        decisionLogRetention,
+        artifactRetention,
+        piiRedactionOnExport: piiRedaction,
+        evidenceExportDestination: exportDestination,
+      });
       if (!res.success) throw new Error(res.data?.message ?? "Failed to save");
       return res.data;
     },
-    onSuccess: () => { toast.success("Compliance settings saved"); queryClient.invalidateQueries({ queryKey: ["ims-compliance-config"] }); },
+    onSuccess: () => {
+      toast.success("Compliance settings saved");
+      queryClient.invalidateQueries({ queryKey: ["ims-compliance-config"] });
+      setEditingDestination(false);
+    },
     onError: (e: Error) => toast.error(e.message),
   });
  
@@ -91,8 +103,28 @@ const CompliancePage = () => {
                 <p className="text-zinc-600 dark:text-[#D1D5DB] text-sm leading-relaxed">
                   One-click export: incident timeline, approvals, diffs, verification results.
                 </p>
-                <button className="w-full py-2.5 rounded-xl border border-[#00CAD8] text-[#00CAD8] font-bold text-sm hover:bg-[#00CAD8]/10 transition-all tracking-tight">
-                  Configure export destination
+                {editingDestination ? (
+                  <div className="flex gap-2">
+                    <input
+                      value={exportDestination}
+                      onChange={(e) => setExportDestination(e.target.value)}
+                      placeholder="e.g. s3://bucket/evidence or webhook URL"
+                      className="flex-1 border border-zinc-500 dark:border-neutral-500 rounded-lg px-3 py-2 text-sm bg-white dark:bg-transparent text-black dark:text-white"
+                    />
+                  </div>
+                ) : exportDestination ? (
+                  <div className="border border-zinc-500 dark:border-neutral-500 rounded-xl px-3 py-2 text-xs font-mono text-zinc-600 dark:text-[#D1D5DB] truncate">
+                    {exportDestination}
+                  </div>
+                ) : (
+                  <p className="text-zinc-400 dark:text-[#64748B] text-xs">No export destination configured.</p>
+                )}
+                <button
+                  onClick={() => (editingDestination ? save() : setEditingDestination(true))}
+                  disabled={isPending}
+                  className="w-full py-2.5 rounded-xl border border-[#00CAD8] text-[#00CAD8] font-bold text-sm hover:bg-[#00CAD8]/10 transition-all tracking-tight disabled:opacity-50"
+                >
+                  {editingDestination ? "Save" : "Configure export destination"}
                 </button>
               </div>
  

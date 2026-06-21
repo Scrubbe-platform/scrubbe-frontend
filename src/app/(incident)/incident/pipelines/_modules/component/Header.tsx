@@ -5,10 +5,20 @@ import { IoFilter } from 'react-icons/io5'
 import { TbGitFork } from 'react-icons/tb'
 import { useRouter } from 'next/navigation'
 import CreateIncident from '@/components/IncidentTicket/CreateIncident'
+import { usePipelineFilter, PipelineStatusFilter } from '../state/usePipelineFilter'
+
+const STATUS_OPTIONS: { label: string; value: PipelineStatusFilter }[] = [
+  { label: 'All statuses', value: 'all' },
+  { label: 'Error', value: 'error' },
+  { label: 'Warning', value: 'warning' },
+  { label: 'Success', value: 'success' },
+]
 
 const Header = () => {
   const router = useRouter()
   const [showCreate, setShowCreate] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+  const { search, setSearch, statusFilter, setStatusFilter } = usePipelineFilter()
 
   return (
     <div className='flex justify-between gap-5'>
@@ -21,15 +31,41 @@ const Header = () => {
           <div>
             <Search className="text-white" size={14} />
           </div>
-          <input placeholder="Search repo, service, run id, PR number" className="h-9 border-none outline-none bg-transparent text-sm flex-1" />
+          <input
+            placeholder="Search repo, service, run id, PR number"
+            className="h-9 border-none outline-none bg-transparent text-sm flex-1"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
       </div>
       <div className='flex items-center gap-2'>
         <div className='text-sm px-2 py-1 border rounded-lg text-white flex items-center gap-1 flex-nowrap cursor-pointer hover:bg-white/5 transition-colors' onClick={() => router.push('/incident/settings/ingestion')}>
           <TbGitFork />Delivery config
         </div>
-        <div className='text-sm px-2 py-1 border rounded-lg text-white flex items-center gap-1 cursor-pointer hover:bg-white/5 transition-colors'>
-          <IoFilter />Filters
+        <div className='relative'>
+          <div
+            className='text-sm px-2 py-1 border rounded-lg text-white flex items-center gap-1 cursor-pointer hover:bg-white/5 transition-colors'
+            onClick={() => setShowFilters((v) => !v)}
+          >
+            <IoFilter />Filters{statusFilter !== 'all' ? ` · ${statusFilter}` : ''}
+          </div>
+          {showFilters && (
+            <div className='absolute right-0 mt-1 z-20 bg-[#0B1224] border border-[#1F2937] rounded-lg overflow-hidden w-40'>
+              {STATUS_OPTIONS.map((opt) => (
+                <div
+                  key={opt.value}
+                  onClick={() => {
+                    setStatusFilter(opt.value)
+                    setShowFilters(false)
+                  }}
+                  className={`text-sm px-3 py-2 cursor-pointer hover:bg-white/5 ${statusFilter === opt.value ? 'text-IMSCyan' : 'text-white'}`}
+                >
+                  {opt.label}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div
           onClick={() => setShowCreate(true)}

@@ -1,7 +1,6 @@
 "use client";
 
 import ConnectorsSection from "@/components/IMS/Home/ConnectorSection";
-import CButton from "@/components/ui/Cbutton";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaGitlab } from "react-icons/fa";
@@ -17,6 +16,7 @@ const MINT = "#e8f4ec";
 // ─────────────────────────────────────────────────────────────────
 
 function Hero() {
+  const router = useRouter();
   return (
     <section
       className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden"
@@ -92,6 +92,7 @@ function Hero() {
 
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <button
+            onClick={() => router.push("/auth/signin")}
             className="px-7 py-3 font-semibold text-white rounded-lg text-sm transition-all hover:opacity-90 active:scale-95"
             style={{ background: "linear-gradient(135deg,#1a5c34,#2d9e5f)" }}
           >
@@ -493,6 +494,7 @@ const moments = [
 ];
 
 function PreserveSection() {
+  const router = useRouter();
   return (
     <section className="px-6 md:px-16 py-24 bg-IMSDarkGreen bg-[url('/IMS/preserve.png')] bg-cover">
       <div className="mx-auto max-w-5xl text-white">
@@ -520,6 +522,7 @@ function PreserveSection() {
 
           <div className="flex items-center gap-4 mt-10">
             <button
+              onClick={() => router.push("/auth/signin")}
               className="px-7 py-3 font-semibold text-white rounded-lg text-sm transition-all hover:opacity-90 active:scale-95"
               style={{
                 background:
@@ -857,13 +860,13 @@ function CTASection() {
           </div>
           <div className="flex flex-wrap gap-6">
             <a
-              href="#"
+              href="/contact-us"
               className="text-[12px] font-mono tracking-wide text-white/70 hover:text-white transition-colors"
             >
               Talk to Solutions Engineering →
             </a>
             <a
-              href="#"
+              href="/contact-us"
               className="text-[12px] font-mono tracking-wide text-white/70 hover:text-white transition-colors"
             >
               See Live Platform Demo →

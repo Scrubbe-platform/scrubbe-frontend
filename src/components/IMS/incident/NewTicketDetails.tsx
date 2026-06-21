@@ -1,9 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Modal from "../../ui/Modal";
-import Select from "../../ui/select";
-import CButton from "../../ui/Cbutton";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
@@ -17,9 +14,6 @@ const TABS = ["Details", "Comments", "Timeline", "Collaboration"];
 
 const NewTicketDetails = () => {
   const [tab, setTab] = useState(0);
-  const [isExcuteLockAccount, setIsExcuteLockAccount] = useState(false);
-  const [isMergeTicket, setIsMergeTicket] = useState(false);
-  const [isEscalateTicket, setIsEscalateTicket] = useState(false);
   const router = useRouter();
   const ticketQuery = useTicketDetails();
   const ticket = ticketQuery.data ?? null;
@@ -118,122 +112,6 @@ const NewTicketDetails = () => {
           {tab === 3 && <Collaboration ticket={ticket} />}
         </motion.div>
       </div>
-
-      <Modal
-        isOpen={isExcuteLockAccount}
-        onClose={() => setIsExcuteLockAccount(false)}
-      >
-        <div className="p-6 max-w-2xl w-full">
-          <h1 className="text-2xl font-bold dark:text-white mb-4">
-            Confirm Playbook Execution
-          </h1>
-
-          <div className="mb-4 flex justify-between">
-            <b className="dark:text-white">Playbook:</b>
-            <p className="dark:text-white">Lock Account</p>
-          </div>
-
-          <div className="mb-4 flex justify-between">
-            <b className="dark:text-white">Description:</b>
-            <p className="dark:text-white">Locks a compromised user account</p>
-          </div>
-
-          <div className="mb-4">
-            <b className="dark:text-white">Steps:</b>
-            <ul className="list-disc list-inside dark:text-white space-y-1 mt-2">
-              <li>Suspend account in AD</li>
-              <li>Notify user via email</li>
-              <li>Lock account</li>
-            </ul>
-          </div>
-
-          <div className="flex justify-end gap-4">
-            <CButton
-              className="border-white/10 border bg-transparent text-white w-fit"
-              onClick={() => setIsExcuteLockAccount(false)}
-            >
-              Cancel
-            </CButton>
-            <CButton
-              className="bg-green w-fit text-white rounded-lg py-2 font-medium hover:bg-green"
-              onClick={() => setIsExcuteLockAccount(false)}
-            >
-              Execute
-            </CButton>
-          </div>
-        </div>
-      </Modal>
-
-      <Modal isOpen={isMergeTicket} onClose={() => setIsMergeTicket(false)}>
-        <div className="p-6 max-w-2xl w-full">
-          <h1 className="text-2xl font-bold dark:text-white mb-4">
-            Merge Tickets
-          </h1>
-
-          <Select
-            label="Select Ticket"
-            options={[
-              {
-                value: "INC39828-emma Taylor-Suspicious login location",
-                label: "INC39828-emma Taylor-Suspicious login location",
-              },
-              {
-                value: "INC39828-emma Taylor-Suspicious login location",
-                label: "INC39828-emma Taylor-Suspicious login location",
-              },
-            ]}
-          />
-
-          <div className="flex justify-end gap-4">
-            <CButton
-              className="border-colorScBlue text-colorScBlue border bg-transparent w-fit"
-              onClick={() => setIsMergeTicket(false)}
-            >
-              Cancel
-            </CButton>
-            <CButton
-              className="bg-green w-fit text-white rounded-lg py-2 font-medium hover:bg-green"
-              onClick={() => setIsMergeTicket(false)}
-            >
-              Execute
-            </CButton>
-          </div>
-        </div>
-      </Modal>
-
-      <Modal
-        isOpen={isEscalateTicket}
-        onClose={() => setIsEscalateTicket(false)}
-      >
-        <div className="p-6 max-w-2xl w-full">
-          <h1 className="text-2xl font-bold dark:text-white mb-4">
-            Escalate Ticket
-          </h1>
-
-          <Select
-            label="Escalation Level"
-            options={[
-              { value: "Tier 2 Analyst", label: "Tier 2 Analyst" },
-              { value: "Security Manager", label: "Security Manager" },
-            ]}
-          />
-
-          <div className="flex justify-end gap-4">
-            <CButton
-              className="border-white/10 border bg-transparent text-white w-fit"
-              onClick={() => setIsEscalateTicket(false)}
-            >
-              Cancel
-            </CButton>
-            <CButton
-              className="bg-green w-fit text-white rounded-lg py-2 font-medium hover:bg-green"
-              onClick={() => setIsEscalateTicket(false)}
-            >
-              Execute
-            </CButton>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };

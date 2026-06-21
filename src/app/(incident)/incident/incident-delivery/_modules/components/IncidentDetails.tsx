@@ -6,7 +6,9 @@ import { buildDeliveryPayload } from "./incidentDelivery.data";
 
 const IncidentDetails = ({ incident }: { incident: IncidentDetailRecord }) => {
   const payload = buildDeliveryPayload(incident);
-  const correlationKey = `${payload.repo}::pr${payload.pr.number}::${payload.artifacts.runUrl}::${payload.commit.sha}`;
+  const correlationKey = payload.isLive
+    ? `${payload.repo}::pr${payload.pr?.number}::${payload.artifacts?.runUrl ?? "no-run"}::${payload.commit?.sha}`
+    : "Not available — no CI/VCS event linked to this incident";
 
   const fields = [
     {
@@ -16,12 +18,14 @@ const IncidentDetails = ({ incident }: { incident: IncidentDetailRecord }) => {
     {
       title: "Correlation key",
       value: correlationKey,
-      sub: "repo + pr + run + sha",
+      sub: payload.isLive ? "repo + pr + run + sha" : undefined,
     },
     {
       title: "Repo / PR / Commit",
-      value: `repo: ${payload.repo}`,
-      list: [`pr: #${payload.pr.number}`, `sha: ${payload.commit.sha}`],
+      value: payload.repo ? `repo: ${payload.repo}` : "Not linked to a repo",
+      list: payload.isLive
+        ? [`pr: #${payload.pr?.number ?? "—"}`, `sha: ${payload.commit?.sha ?? "—"}`]
+        : undefined,
     },
   ];
 
@@ -73,7 +77,7 @@ const IncidentDetails = ({ incident }: { incident: IncidentDetailRecord }) => {
             Incident title
           </p>
           <p className="text-[13px] font-medium text-black dark:text-zinc-200 leading-snug">
-            {incident.title || payload.pr.title}
+            {incident.title || payload.pr?.title || incident.summary || "Untitled incident"}
           </p>
         </div>
       </div>

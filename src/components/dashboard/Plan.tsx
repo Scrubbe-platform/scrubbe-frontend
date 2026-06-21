@@ -71,7 +71,6 @@ const Plan = () => {
   }, [data, billingCycle]);
 
   const handlePayment = async (plan: any) => {
-    console.log({ plan });
     if (plan) {
       const data = {
         planType: plan.type,
@@ -83,7 +82,6 @@ const Plan = () => {
       setLoading(plan.type);
       const res = await post(endpoint.plans.create_session, data);
       setLoading("");
-      console.log(res);
       if (res.status === 401) {
         toast.error("Please signup to continue");
         router.push("/auth/signin?to=payment");

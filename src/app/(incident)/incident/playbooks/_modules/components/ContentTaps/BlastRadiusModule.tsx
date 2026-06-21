@@ -62,26 +62,11 @@ const DataRow = ({
   </div>
 );
 
-const FALLBACK: ServiceImpact[] = [
-  { name: "payments-apt", subtext: "Root cause · All traffic", type: "Direct" },
-  {
-    name: "checkout-service",
-    subtext: "Cascading · 29% abandon",
-    type: "Cascade",
-  },
-  {
-    name: "api-gateway",
-    subtext: "CB open · 2.1% error rate",
-    type: "InDirect",
-  },
-  { name: "user-service", subtext: "Healthy · Monitored", type: "InDirect" },
-];
-
 const BlastRadiusModule: React.FC<{ incidentId?: string }> = ({
   incidentId,
 }) => {
   const { get } = useFetch();
-  const { data: report } = useQuery({
+  const { data: report, isLoading } = useQuery({
     queryKey: ["blast-radius-incident", incidentId],
     queryFn: async () => {
       if (!incidentId) return null;
@@ -93,17 +78,16 @@ const BlastRadiusModule: React.FC<{ incidentId?: string }> = ({
     enabled: !!incidentId,
   });
 
-  const services: ServiceImpact[] = report?.affectedServices?.length
-    ? report.affectedServices.map((s: any) => ({
-        name: s.name ?? "Unknown",
-        subtext: s.subtext ?? s.impact ?? "Affected",
-        type: (s.type as ImpactType) ?? "InDirect",
-      }))
-    : FALLBACK;
+  const services: ServiceImpact[] =
+    report?.affectedServices?.map((s: any) => ({
+      name: s.name ?? "Unknown",
+      subtext: s.subtext ?? s.impact ?? "Affected",
+      type: (s.type as ImpactType) ?? "InDirect",
+    })) ?? [];
 
-  const riskLevel = report?.riskLevel ?? "MEDIUM";
-  const userImpact = report?.estimatedUserImpact ?? "30%";
-  const userImpactPct = parseInt(String(userImpact)) || 30;
+  const riskLevel = report?.riskLevel ?? "UNKNOWN";
+  const userImpact = report?.estimatedUserImpact ?? "—";
+  const userImpactPct = parseInt(String(userImpact)) || 0;
 
   return (
     <div
@@ -145,24 +129,32 @@ const BlastRadiusModule: React.FC<{ incidentId?: string }> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-        {services.map((svc) => (
-          <ImpactCard key={svc.name} {...svc} />
-        ))}
-      </div>
+      {isLoading ? (
+        <p className="text-[12px] text-black dark:text-zinc-500">Calculating blast radius…</p>
+      ) : services.length === 0 ? (
+        <p className="text-[12px] text-black dark:text-zinc-500">
+          No blast radius report has been calculated for this incident yet.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          {services.map((svc) => (
+            <ImpactCard key={svc.name} {...svc} />
+          ))}
+        </div>
+      )}
 
       <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
         <DataRow
           label="Services Affected"
-          value={report?.servicesAffected ?? "3 direct"}
+          value={report?.servicesAffected ?? "—"}
         />
         <DataRow label="Estimated User Impact" value={userImpact} />
         <DataRow
           label="Revenue Impact / min"
-          value={report?.revenueImpactPerMin ?? "~$4,200"}
+          value={report?.revenueImpactPerMin ?? "—"}
         />
         <DataRow label="Risk Classification" value={riskLevel} />
-        <DataRow label="riskClassifier.level" value={report?.riskScore ?? 2} />
+        <DataRow label="riskClassifier.level" value={report?.riskScore ?? "—"} />
       </div>
 
       <div className="space-y-2">

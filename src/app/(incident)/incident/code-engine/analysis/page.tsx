@@ -259,6 +259,20 @@ function InvestigationAnalysisInner() {
       })
     : null;
 
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify({ ticketId, generatedAt, ...data }, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `investigation-analysis-${ticketId || incidentId || "report"}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-[#1e293b] p-4 md:p-8 max-w-[1000px] mx-auto font-sans antialiased">
       <button
@@ -300,7 +314,10 @@ function InvestigationAnalysisInner() {
               )}
               <span>Re-run</span>
             </button>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 bg-white hover:bg-slate-50 transition-colors shadow-sm">
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 bg-white hover:bg-slate-50 transition-colors shadow-sm"
+            >
               <Download size={13} />
               <span>Export</span>
             </button>

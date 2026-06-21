@@ -177,10 +177,13 @@ export const endpoint = {
   silent_hours: {
     get: "/silent-hours",
     save: "/silent-hours",
+    update: "/silent-hours",
+    delete: "/silent-hours",
   },
   pipelines: {
     list: "/pipelines",
     getOne: "/pipelines",                // GET /pipelines/:id
+    health: "/pipelines/health",         // GET /pipelines/health
   },
   playbooks: {
     list: "/playbooks",
@@ -303,5 +306,8 @@ export const endpoint = {
     generate: "/investigation-analysis",     // POST /investigation-analysis/:incidentId/generate
     intelligence: "/investigation-analysis", // POST /investigation-analysis/:incidentId/intelligence
     versions: "/investigation-analysis",     // GET /investigation-analysis/:incidentId/versions
+  },
+  role_permissions: {
+    matrix: "/role-permissions/matrix",      // GET/PUT /role-permissions/matrix
   },
 };

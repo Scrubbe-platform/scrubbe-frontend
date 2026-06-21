@@ -1,16 +1,25 @@
 "use client";
 import React from "react";
-import { FileText, Check, TriangleAlert, Info, Bolt } from "lucide-react";
+import { FileText, Check, Info, Bolt, Loader2 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { toast } from "sonner";
+import {
+  useActiveExecution,
+  useExecutionDetail,
+} from "../../hooks/usePlaybookExecution";
 
-interface RemediationData {
+interface RemediationOption {
+  actionId: string;
   title: string;
-  isRecommended?: boolean;
+  isSelected?: boolean;
   confidence: number;
-  risk: "Low" | "MED" | "High";
+  risk: "LOW" | "MEDIUM" | "HIGH";
   blast: string;
   tags: string[];
-  progress: number;
+  sampleSize?: number;
 }
 
 const MetricBox = ({
@@ -30,15 +39,9 @@ const MetricBox = ({
   </div>
 );
 
-const OptionCard: React.FC<RemediationData> = ({
-  title,
-  isRecommended,
-  confidence,
-  risk,
-  blast,
-  tags,
-  progress,
-}) => (
+const OptionCard: React.FC<
+  RemediationOption & { onSelect: () => void; selecting: boolean; selectable: boolean }
+> = ({ title, isSelected, confidence, risk, blast, tags, sampleSize, onSelect, selecting, selectable }) => (
   <div className="flex flex-col gap-3.5 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-2.5">
@@ -49,9 +52,9 @@ const OptionCard: React.FC<RemediationData> = ({
           {title}
         </h4>
       </div>
-      {isRecommended && (
-        <span className="rounded border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 py-0.5 text-[10px] font-semibold text-zinc-600 dark:text-zinc-300 shrink-0">
-          Recommended
+      {isSelected && (
+        <span className="rounded border border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+          Selected
         </span>
       )}
     </div>
@@ -60,13 +63,6 @@ const OptionCard: React.FC<RemediationData> = ({
       <MetricBox label="Confidence" value={`${confidence}%`} />
       <MetricBox label="Risk" value={risk} />
       <MetricBox label="Blast" value={blast} />
-    </div>
-
-    <div className="h-1 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-      <div
-        className="h-full bg-zinc-400 dark:bg-zinc-500 transition-all"
-        style={{ width: `${progress}%` }}
-      />
     </div>
 
     <div className="flex flex-wrap gap-1.5">
@@ -78,61 +74,92 @@ const OptionCard: React.FC<RemediationData> = ({
           {tag}
         </span>
       ))}
+      {sampleSize !== undefined && sampleSize > 0 && (
+        <span className="rounded border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2.5 py-1 text-[10px] font-medium text-black dark:text-zinc-400">
+          sample: {sampleSize}
+        </span>
+      )}
     </div>
+
+    {selectable && !isSelected && (
+      <button
+        onClick={onSelect}
+        disabled={selecting}
+        className="flex items-center justify-center gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+      >
+        {selecting ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+        Select for remediation
+      </button>
+    )}
   </div>
 );
-
-const buildOptions = (incident: IncidentDetailRecord): RemediationData[] => {
-  const svc = incident.service || incident.affectedSystem || "selected-service";
-  const blast = incident.blastRadius || incident.region || "1 svc";
-  const primary =
-    incident.recommendedActions[0] ||
-    incident.aiAnalysis?.suggestion ||
-    "Review telemetry and confirm rollback safety";
-  return [
-    {
-      title: primary,
-      confidence: Math.max(incident.score || 0, incident.riskScore || 0, 72),
-      isRecommended: true,
-      risk:
-        incident.severity === "P0" || incident.severity === "P1"
-          ? "MED"
-          : "Low",
-      blast,
-      progress: 100,
-      tags: ["playbook: 3", "rollback: self", `${svc} + impact context`],
-    },
-    {
-      title: "Rollback Deployment",
-      confidence: 64,
-      risk: "Low",
-      blast,
-      progress: 100,
-      tags: ["Reversible", "auto-eligible"],
-    },
-    {
-      title: "Scale Up Capacity",
-      confidence: 58,
-      risk: "Low",
-      blast,
-      progress: 75,
-      tags: ["Reversible", "auto-eligible"],
-    },
-    {
-      title: "Disable Feature Flag",
-      confidence: 42,
-      risk: "MED",
-      blast,
-      progress: 100,
-      tags: ["State impact", incident.environment || "runtime impact"],
-    },
-  ];
-};
 
 const RemediationModule: React.FC<{ incident: IncidentDetailRecord }> = ({
   incident,
 }) => {
-  const options = buildOptions(incident);
+  const { post } = useFetch();
+  const queryClient = useQueryClient();
+  const { data: activeExecution } = useActiveExecution(incident.id);
+  const { data: execution, isLoading } = useExecutionDetail(activeExecution?.id);
+
+  const { data: suggestions = [] } = useQuery({
+    queryKey: ["playbook-suggested-actions", incident.id],
+    queryFn: async () => {
+      const res = await post(endpoint.playbooks.suggest, {
+        serviceNames: (incident.service || incident.affectedSystem)
+          ? [incident.service || incident.affectedSystem]
+          : undefined,
+        signalTypes: incident.detection ? [incident.detection] : undefined,
+      });
+      return res.data?.data ?? [];
+    },
+    enabled: !!incident.id,
+    staleTime: 30_000,
+  });
+
+  const selectAction = useMutation({
+    mutationFn: async (actionId: string) => {
+      if (!execution) throw new Error("No active execution");
+      const res = await post(
+        `${endpoint.playbooks.selectAction}/${execution.id}/action`,
+        { actionId }
+      );
+      if (!res.success) throw new Error("Failed to select action");
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Remediation action selected");
+      queryClient.invalidateQueries({
+        queryKey: ["playbook-execution-detail", execution?.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["playbook-execution-active", incident.id],
+      });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const actions = execution?.playbook?.remediationActions ?? [];
+  const selectable = execution?.status === "REMEDIATING";
+
+  const options: RemediationOption[] = actions.map((action) => {
+    const suggestion = suggestions.find(
+      (s: { actionId: string }) => s.actionId === action.actionId
+    );
+    return {
+      actionId: action.actionId,
+      title: action.name,
+      isSelected: execution?.selectedActionId === action.actionId,
+      confidence: suggestion?.successRate ?? action.confidenceScore ?? 0,
+      risk: action.riskLevel,
+      blast: action.blastRadiusEstimate
+        ? `${action.blastRadiusEstimate} svc`
+        : "unknown",
+      tags: [action.type, action.system ?? "no system tag"].filter(Boolean),
+      sampleSize: suggestion?.sampleSize,
+    };
+  });
+
   return (
     <div
       id="remediation "
@@ -148,13 +175,15 @@ const RemediationModule: React.FC<{ incident: IncidentDetailRecord }> = ({
               Remediation Options
             </h2>
             <p className="mt-0.5 text-[12px] text-black dark:text-zinc-500">
-              confidence · blast radius · risk level · reversibility
+              confidence · blast radius · risk level — from the matched
+              playbook's remediation actions
             </p>
           </div>
         </div>
         <div className="flex gap-2">
           <span className="flex items-center gap-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-1.5 text-[11px] font-medium text-black dark:text-zinc-400">
-            <Check size={12} /> Awaiting Investigation
+            <Check size={12} />{" "}
+            {execution ? execution.status.replace("_", " ") : "Awaiting Investigation"}
           </span>
         </div>
       </div>
@@ -165,17 +194,33 @@ const RemediationModule: React.FC<{ incident: IncidentDetailRecord }> = ({
           className="mt-0.5 shrink-0 text-black dark:text-zinc-500"
         />
         <p className="text-[12px] leading-relaxed text-black dark:text-zinc-400">
-          Agent findings from investigation steps will dynamically update
-          confidence scores and may add or remove options before this stage
-          activates. Blast radius must be evaluated before guardrail check.
+          {selectable
+            ? "All investigation steps are complete — select a remediation action to propose it through the decision engine."
+            : "Complete all investigation steps to unlock remediation action selection."}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        {options.map((o, i) => (
-          <OptionCard key={`${o.title}-${i}`} {...o} />
-        ))}
-      </div>
+      {isLoading ? (
+        <p className="py-8 text-center text-[12px] text-black dark:text-zinc-500">
+          Loading remediation options…
+        </p>
+      ) : options.length === 0 ? (
+        <p className="py-8 text-center text-[12px] text-black dark:text-zinc-500">
+          No playbook execution triggered for this incident yet.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {options.map((o) => (
+            <OptionCard
+              key={o.actionId}
+              {...o}
+              selectable={!!selectable}
+              selecting={selectAction.isPending}
+              onSelect={() => selectAction.mutate(o.actionId)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

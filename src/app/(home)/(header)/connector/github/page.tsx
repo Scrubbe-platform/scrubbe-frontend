@@ -72,13 +72,13 @@ function HeroSection() {
 
           <div className="flex flex-wrap gap-6">
             <a
-              href="#"
+              href="/contact-us"
               className="text-[11px] font-mono tracking-wide text-white/50 hover:text-white transition-colors"
             >
               Talk to Solutions Engineering →
             </a>
             <a
-              href="#"
+              href="/contact-us"
               className="text-[11px] font-mono tracking-wide text-white/50 hover:text-white transition-colors"
             >
               See Live Demo →

@@ -7,8 +7,8 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import { Table } from '@/components/ui/table';
-import { activityData } from '@/lib/constant/index';
 import { useActivitySelector } from './_modules/state/useActivitySelector';
+import { usePipelineFilter } from './_modules/state/usePipelineFilter';
 import SideModal from '@/components/ui/SideModal';
 import RunDetailPanel from './_modules/component/RunDetailPanel';
 import { useQuery } from '@tanstack/react-query';
@@ -30,6 +30,20 @@ const ActivityTable = () => {
     },
     refetchOnWindowFocus: false,
   });
+
+  const { search, statusFilter } = usePipelineFilter();
+
+  const filteredData = useMemo(() => {
+    const rows: any[] = apiData ?? [];
+    return rows.filter((row) => {
+      if (statusFilter !== 'all' && row.status?.type !== statusFilter) return false;
+      if (!search.trim()) return true;
+      const needle = search.trim().toLowerCase();
+      return [row.repoName, row.repoPath, row.service, row.run, row.metadata?.pr]
+        .filter(Boolean)
+        .some((field) => String(field).toLowerCase().includes(needle));
+    });
+  }, [apiData, search, statusFilter]);
 
   const columns = useMemo(() => [
     // COLUMN 1: RUN
@@ -98,19 +112,22 @@ const ActivityTable = () => {
     // COLUMN 5: EVIDENCE
     columnHelper.accessor('evidence', {
       header: 'Evidence',
-      cell: (info:any) => (
-        <div className="py-4 space-y-2">
-          <div className="flex gap-2">
-            <EvidenceButton text="run URL" />
-            <EvidenceButton text="logs URL" />
+      cell: (info:any) => {
+        const evidence = info.getValue();
+        return (
+          <div className="py-4 space-y-2">
+            <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+              <EvidenceButton text="run URL" url={evidence.runUrl} />
+              <EvidenceButton text="logs URL" url={evidence.logsUrl} />
+            </div>
+            <div className="bg-[#0B1224] border border-[#1F2937] px-3 py-1 rounded-md w-max">
+              <span className="text-[10px] text-[#64748B] font-mono tracking-tight">
+                {evidence.incidentId ? `incident ${evidence.incidentId}` : "no linked incident"}
+              </span>
+            </div>
           </div>
-          <div className="bg-[#0B1224] border border-[#1F2937] px-3 py-1 rounded-md w-max">
-            <span className="text-[10px] text-[#64748B] font-mono tracking-tight">
-              incident {info.getValue().incidentId}
-            </span>
-          </div>
-        </div>
-      ),
+        );
+      },
     }),
   ], []);
 
@@ -123,7 +140,7 @@ const handleSelect = (item:any) => {
   return (
     <div>
         <Table
-            data={(apiData && apiData.length > 0 ? apiData : activityData) as any}
+            data={filteredData as any}
             columns={columns as any}
             onRowClick={handleSelect}
         />
@@ -155,8 +172,13 @@ const Tag = ({ text }:{text:string}) => (
   </span>
 );
 
-const EvidenceButton = ({ text }:{text:string}) => (
-  <button className="px-2 py-1 rounded bg-[#0B1224] border border-[#1F2937] text-[10px] text-[#94A3B8] hover:text-white hover:border-[#64748B] transition-all">
+const EvidenceButton = ({ text, url }:{text:string, url?: string}) => (
+  <button
+    type="button"
+    disabled={!url}
+    onClick={() => url && window.open(url, "_blank", "noopener,noreferrer")}
+    className="px-2 py-1 rounded bg-[#0B1224] border border-[#1F2937] text-[10px] text-[#94A3B8] hover:text-white hover:border-[#64748B] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+  >
     {text}
   </button>
 );

@@ -1,7 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Bolt, Info, Check, Plus, TriangleAlert } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 import AddConditionForm, { ConditionFormState } from "./AddConditionForm";
 
 interface Condition {
@@ -126,24 +130,70 @@ const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({
 }) => {
   const [conditions, setConditions] = useState<Condition[]>(() => buildConditions(incident));
   const [toggleConditionForm, setToggleConditionForm] = useState(false);
+  const { post, put } = useFetch();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setConditions(buildConditions(incident));
   }, [incident.id]);
 
+  // Shares its cache key with PlaybookStatusCard's match query so the
+  // condition we persist below always targets the playbook actually shown
+  // as matched on this page.
+  const { data: matchedPlaybook } = useQuery({
+    queryKey: ["playbook-matched-id", incident.id],
+    queryFn: async () => {
+      const res = await post(endpoint.playbooks.match, {
+        serviceNames: (incident.service || incident.affectedSystem)
+          ? [incident.service || incident.affectedSystem]
+          : undefined,
+        incidentType: incident.category || incident.sourceType,
+        signalTypes: incident.detection ? [incident.detection] : undefined,
+      });
+      const matches: any[] = res.data?.data?.matches ?? res.data?.data ?? [];
+      return (matches[0]?.playbook ?? matches[0]) ?? null;
+    },
+    enabled: !!incident.id,
+    staleTime: 30_000,
+  });
+
+  const customConditions: Condition[] = Object.entries(
+    matchedPlaybook?.triggerConditions?.context ?? {}
+  ).map(([field, value]) => ({
+    id: `custom-${field}`,
+    field,
+    operator: "eq",
+    value: String(value),
+    weight: 0.5,
+    isMatched: true,
+  }));
+
+  const addCondition = useMutation({
+    mutationFn: async (form: ConditionFormState) => {
+      if (!matchedPlaybook?.id) throw new Error("No matched playbook to attach this condition to");
+      const nextContext = {
+        ...(matchedPlaybook.triggerConditions?.context ?? {}),
+        [form.field]: form.value,
+      };
+      const res = await put(`${endpoint.playbooks.update}/${matchedPlaybook.id}`, {
+        triggerConditions: {
+          ...matchedPlaybook.triggerConditions,
+          context: nextContext,
+        },
+      });
+      if (!res.success) throw new Error("Failed to save condition");
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Condition saved to playbook");
+      queryClient.invalidateQueries({ queryKey: ["playbook-matched-id", incident.id] });
+      setToggleConditionForm(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const handleAddCondition = (form: ConditionFormState) => {
-    setConditions((prev) => [
-      ...prev,
-      {
-        id: `custom-${Date.now()}`,
-        field: form.field,
-        operator: form.operator,
-        value: form.value,
-        weight: form.weight,
-        isMatched: false,
-      },
-    ]);
-    setToggleConditionForm(false);
+    addCondition.mutate(form);
   };
   return (
     <div
@@ -191,7 +241,16 @@ const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({
         {conditions.map((c) => (
           <ConditionRow key={c.id} {...c} />
         ))}
+        {customConditions.map((c) => (
+          <ConditionRow key={c.id} {...c} />
+        ))}
       </div>
+
+      {!matchedPlaybook && (
+        <p className="mb-3 text-[12px] text-black dark:text-zinc-500">
+          No playbook matched this incident — custom conditions can't be saved until one matches.
+        </p>
+      )}
 
       {/* Add */}
       {toggleConditionForm && (
@@ -202,7 +261,8 @@ const TriggerConditions: React.FC<{ incident: IncidentDetailRecord }> = ({
       )}
       <button
         onClick={() => setToggleConditionForm((prev) => !prev)}
-        className="flex items-center gap-2 rounded-lg border border-zinc-500 dark:border-zinc-700 px-4 py-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+        disabled={!matchedPlaybook || addCondition.isPending}
+        className="flex items-center gap-2 rounded-lg border border-zinc-500 dark:border-zinc-700 px-4 py-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-40"
       >
         <Plus size={14} /> Add Condition
       </button>

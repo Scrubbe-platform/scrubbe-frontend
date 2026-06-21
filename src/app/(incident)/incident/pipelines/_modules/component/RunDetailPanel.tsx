@@ -3,11 +3,13 @@ import { Search, Info } from 'lucide-react';
 import { ActivityItem } from '../type';
 import SideModal from '@/components/ui/SideModal';
 import ApprovalModal from './ApprovalModal';
+import { useRouter } from 'next/navigation';
 
 const RunDetailPanel = ({ data, onClose }: { data: ActivityItem, onClose: () => void }) => {
- 
+
     const { details, metadata, evidence, trigger, run, repoPath, service } = data;
     const [openRequestApproval, setOpenRequestApproval] = useState(false)
+    const router = useRouter();
     return (
         <div className="w-full h-screen bg-white dark:bg-grayscrubbe-900 text-black dark:text-white flex flex-col overflow-y-auto custom-scrollbar">
             {/* HEADER */}
@@ -76,7 +78,7 @@ const RunDetailPanel = ({ data, onClose }: { data: ActivityItem, onClose: () => 
                         <button onClick={() => setOpenRequestApproval(true)} className="flex-1 border border-IMSCyan text-IMSCyan font-bold py-2.5 rounded-xl text-sm hover:bg-IMSCyan/5">
                             Request approval
                         </button>
-                        <button className="flex-1 border border-IMSCyan text-IMSCyan font-bold py-2.5 rounded-xl text-sm hover:bg-IMSCyan/5">
+                        <button onClick={() => router.push('/incident/policies')} className="flex-1 border border-IMSCyan text-IMSCyan font-bold py-2.5 rounded-xl text-sm hover:bg-IMSCyan/5">
                             View Policy
                         </button>
                     </div>
@@ -85,9 +87,17 @@ const RunDetailPanel = ({ data, onClose }: { data: ActivityItem, onClose: () => 
                 {/* ANALYST ACTIONS */}
                 <section className="bg-white dark:bg-grayscrubbe-800 border border-zinc-500 dark:border-zinc-700 rounded-2xl p-5 flex flex-col gap-3">
                     <h4 className="font-bold text-sm mb-4 text-black dark:text-white">Analyst actions</h4>
-                    <ActionButton text="Open Investigation" />
-                    <ActionButton text="Review in code engine" />
-                    <ActionButton text="Open run url" />
+                    <ActionButton
+                        text="Open Investigation"
+                        disabled={!evidence.incidentId}
+                        onClick={() => router.push(`/incident/incident-delivery?id=${evidence.incidentId}`)}
+                    />
+                    <ActionButton text="Review in code engine" onClick={() => router.push('/incident/code-engine')} />
+                    <ActionButton
+                        text="Open run url"
+                        disabled={!evidence.runUrl}
+                        onClick={() => window.open(evidence.runUrl, '_blank', 'noopener,noreferrer')}
+                    />
                 </section>
             </div>
 
@@ -127,8 +137,12 @@ const Tag = ({ text }: { text: string }) => (
     </div>
 );
 
-const ActionButton = ({ text, onClick }: { text: string, onClick?: () => void }) => (
-    <button onClick={onClick} className="w-fit text-left border border-IMSCyan text-IMSCyan font-bold py-2 px-4 rounded-2xl text-base hover:bg-IMSCyan/5 transition-all">
+const ActionButton = ({ text, onClick, disabled }: { text: string, onClick?: () => void, disabled?: boolean }) => (
+    <button
+        onClick={onClick}
+        disabled={disabled}
+        className="w-fit text-left border border-IMSCyan text-IMSCyan font-bold py-2 px-4 rounded-2xl text-base hover:bg-IMSCyan/5 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+    >
         {text}
     </button>
 );

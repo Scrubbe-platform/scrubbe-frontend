@@ -41,48 +41,15 @@ const PatternCard = ({ title, description, confidence, tags }: PatternRow) => (
   </div>
 );
 
-const FALLBACK_PATTERNS: PatternRow[] = [
-  {
-    id: "1",
-    title: "Error spike + recent deployment → rollback resolves",
-    confidence: 92,
-    description:
-      "Based on 34 incidents. When error_rate_high follows a deployment within 60 minutes, rollback resulted in outcome: resolved in 82% of cases.",
-    tags: [
-      "error-rate high",
-      "recent_deployment: true",
-      "Window : 60m",
-      "Resolution : rollback",
-    ],
-  },
-  {
-    id: "2",
-    title: "DB connection exhaustion → scale replicas ineffective",
-    confidence: 92,
-    description:
-      'Scaling replicas worsened DB connection exhaustion in 71% of cases. Pattern suppresses "Scale Up" confidence when DB connection > 85%.',
-    tags: ["db_connections_high", "scale_action", "outcome: worsened"],
-  },
-  {
-    id: "3",
-    title: "Pod restart clears memory leak on first restart",
-    confidence: 92,
-    description:
-      "Pod restart with OOMKilled cause resolves in 93% of cases on first attempt. If restarts > 3, issue is persistent — escalate to rollback.",
-    tags: [],
-  },
-];
-
 const LearnedPatterns: React.FC = () => {
   const { get } = useFetch();
 
-  const { data: patterns } = useQuery({
+  const { data: patterns, isLoading } = useQuery({
     queryKey: ["ezra-patterns-playbook"],
     queryFn: async () => {
       const res = await get(endpoint.ezra.patterns);
       if (res.success) {
         const raw: any[] = res.data?.data?.patterns ?? res.data?.data ?? [];
-        if (!raw.length) return null;
         return raw.map((p: any) => ({
           id: p.id ?? String(Math.random()),
           title: p.pattern ?? p.title ?? p.name ?? "Unnamed pattern",
@@ -91,12 +58,12 @@ const LearnedPatterns: React.FC = () => {
           tags: p.tags ?? p.signals ?? [],
         })) as PatternRow[];
       }
-      return null;
+      return [];
     },
     refetchOnWindowFocus: false,
   });
 
-  const displayPatterns = patterns ?? FALLBACK_PATTERNS;
+  const displayPatterns = patterns ?? [];
 
   return (
     <div className="w-full rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-5">
@@ -124,9 +91,15 @@ const LearnedPatterns: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        {displayPatterns.map((p) => (
-          <PatternCard key={p.id} {...p} />
-        ))}
+        {isLoading ? (
+          <p className="text-[12px] text-black dark:text-zinc-500">Loading learned patterns…</p>
+        ) : displayPatterns.length === 0 ? (
+          <p className="text-[12px] text-black dark:text-zinc-500">
+            No learned patterns yet — patterns build up as playbook executions complete.
+          </p>
+        ) : (
+          displayPatterns.map((p) => <PatternCard key={p.id} {...p} />)
+        )}
       </div>
     </div>
   );

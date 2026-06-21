@@ -21,23 +21,6 @@ export interface WorkbenchRecord {
   status: string; // "Resolved" | "Open" | "In Review"
   declaredBy?: string;
   declaredAt?: string;
-  // detail fields (for modal)
-  incidentContext?: Record<string, string>;
-  incidentDetails?: Record<string, string>;
-  timeline?: Record<string, string>;
-  diagnosis?: Record<string, string>;
-  roles?: Record<string, string>;
-  comms?: Record<string, string>;
-  playbookUsed?: string;
-  playbookOwner?: string;
-  completion?: number;
-  aiReasons?: string[];
-  modelConfidence?: number;
-  relatedIncidents?: string[];
-  handover?: Record<string, string>;
-  knowledgeQuery?: string;
-  knowledgeAnswer?: string;
-  postmortemItems?: string[];
 }
 
 // ── Mock data ─────────────────────────────────────────────────────
@@ -165,6 +148,16 @@ const WorkbenchLibraryPage: React.FC = () => {
 
   const rows = liveRecords && liveRecords.length > 0 ? liveRecords : [];
 
+  const { data: rollbackCount } = useQuery({
+    queryKey: ["workbench-rollback-decisions"],
+    queryFn: async () => {
+      const res = await get(`${endpoint.decisions.list}?limit=200`);
+      const decisions: any[] = res.data?.data?.decisions ?? res.data?.data ?? [];
+      return decisions.filter((d) => d.proposal?.action === "ROLLBACK").length;
+    },
+    staleTime: 30_000,
+  });
+
   const liveStats = useMemo(() => {
     if (!liveRecords || liveRecords.length === 0) return STATS;
     const total = liveRecords.length;
@@ -175,11 +168,11 @@ const WorkbenchLibraryPage: React.FC = () => {
       { value: String(total), label: "Total Workbenches" },
       { value: String(p0), label: "Major Incident Declarations" },
       { value: String(resolved), label: "Successful Mitigations" },
-      { value: String(Math.round(total * 0.4)), label: "Roll back decisions" },
+      { value: String(rollbackCount ?? 0), label: "Roll back decisions" },
       { value: String(p0), label: "High Risk Changes" },
       { value: String(open), label: "Open Reviews" },
     ];
-  }, [liveRecords]);
+  }, [liveRecords, rollbackCount]);
 
   const filtered = useMemo(
     () =>
@@ -390,12 +383,6 @@ const WorkbenchLibraryPage: React.FC = () => {
               value={filterType}
               onChange={setFilterType}
             />
-            <button
-              onClick={() => {}}
-              className="text-[13px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 px-2 py-2 transition-colors"
-            >
-              MORE FILTERS
-            </button>
             <button
               onClick={clearFilters}
               className="text-[13px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 px-2 py-2 transition-colors"

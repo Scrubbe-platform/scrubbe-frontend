@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Switch } from "@heroui/react";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { toast } from "sonner";
@@ -115,9 +115,16 @@ const SectionHead = ({ children }: { children: React.ReactNode }) => (
 // ── Main component ────────────────────────────────────────────────
 
 const MajorIncidentWorkbench: React.FC<Props> = ({ incident }) => {
-  const { post } = useFetch();
+  const { post, get } = useFetch();
   const queryClient = useQueryClient();
   const { data: members = [] } = useMember();
+  const { data: serviceNodes = [] } = useQuery({
+    queryKey: ["service-map-list"],
+    queryFn: async () => {
+      const res = await get(endpoint.service_map.list);
+      return res.success ? (res.data?.data ?? []) : [];
+    },
+  });
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const router = useRouter();
@@ -354,12 +361,12 @@ const MajorIncidentWorkbench: React.FC<Props> = ({ incident }) => {
                     />
                   </div>
                   <div>
-                    <FieldLabel>SLO burn rate (auto detected)</FieldLabel>
+                    <FieldLabel>SLO burn rate</FieldLabel>
                     <FieldHint>
-                      Pulled from observability for the affected service.
+                      No observability integration is connected yet.
                     </FieldHint>
-                    <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2.5 text-[13px] text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/30">
-                      94% of error budget · 6.2× critical threshold
+                    <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2.5 text-[13px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/30">
+                      Not available
                     </div>
                   </div>
                 </div>
@@ -424,19 +431,15 @@ const MajorIncidentWorkbench: React.FC<Props> = ({ incident }) => {
                 <div>
                   <FieldLabel required>Affected Services</FieldLabel>
                   <FieldHint>
-                    Resolved from the CMDB and dependency graph.
+                    {serviceNodes.length > 0
+                      ? "Resolved from the service dependency graph."
+                      : "No services have been registered in the service map yet."}
                   </FieldHint>
                   <SelectInput
                     value={form.affectedServices[0] ?? ""}
                     onChange={(v) => set("affectedServices")([v])}
                     placeholder="Select"
-                    options={[
-                      "checkout-api",
-                      "payment-svc",
-                      "order-router",
-                      "user-session",
-                      "api-gateway",
-                    ]}
+                    options={serviceNodes.map((s: { name: string }) => s.name)}
                   />
                 </div>
               </div>
@@ -881,7 +884,10 @@ const MajorIncidentWorkbench: React.FC<Props> = ({ incident }) => {
                 Review our Major Incident Management policy and guidelines
                 before declaring.
               </p>
-              <button className="w-full py-2.5 rounded-xl border border-emerald-500 text-[13px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/5 transition-colors">
+              <button
+                onClick={() => router.push("/incident/policies")}
+                className="w-full py-2.5 rounded-xl border border-emerald-500 text-[13px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/5 transition-colors"
+              >
                 View Guidelines
               </button>
             </div>
@@ -889,15 +895,7 @@ const MajorIncidentWorkbench: React.FC<Props> = ({ incident }) => {
         </div>
 
         {/* ── Footer ── */}
-        <div className="flex items-center justify-between px-7 py-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-          <button
-            type="button"
-            onClick={() => declare()}
-            disabled={isPending}
-            className="text-[13px] font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 rounded-xl px-5 py-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
-          >
-            Save as Draft
-          </button>
+        <div className="flex items-center justify-end px-7 py-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950">
           <div className="flex items-center gap-2.5">
             <button
               type="button"

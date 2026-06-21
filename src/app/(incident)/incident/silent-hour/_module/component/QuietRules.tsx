@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Plus, ArrowRight } from "lucide-react";
+import { Plus, ArrowRight, Trash2 } from "lucide-react";
 import SideModal from "@/components/ui/SideModal";
 import QuietRuleForm from "./QuietRuleForm";
 
 export type QuietRule = {
+  id?: string;
   name: string;
   startTime: string;
   endTime: string;
@@ -13,10 +14,27 @@ export type QuietRule = {
   isActive: boolean;
 };
 
+const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const formatDays = (days: number[]) => {
+  if (!days || days.length === 0) return "No days set";
+  if (days.length === 7) return "Every day";
+  const sorted = [...days].sort();
+  if (sorted.join(",") === "1,2,3,4,5") return "Weekdays";
+  if (sorted.join(",") === "0,6") return "Weekends";
+  return sorted.map((d) => DAY_LABELS[d]).join(", ");
+};
+
 const QuietRules = ({
+  rules,
+  isLoading,
   onRuleAdded,
+  onRuleRemoved,
 }: {
+  rules: QuietRule[];
+  isLoading?: boolean;
   onRuleAdded?: (rule: QuietRule) => void;
+  onRuleRemoved?: (index: number) => void;
 }) => {
   const [open, setOpen] = useState(false);
   return (
@@ -49,50 +67,28 @@ const QuietRules = ({
           {/* GROUP HEADER */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-base font-semibold text-white">
-              Git providers
+              Quiet rules
             </h2>
             <ArrowRight size={16} className="text-slate-500" />
           </div>
 
-          {/* RULE CARD 1: FRONTEND PLATFORM */}
-          <RuleCard
-            title="Frontend Platform"
-            badge="Frontend"
-            badgeColor="text-green-400 border-green-400/30 bg-green-400/5"
-            rows={[
-              {
-                label: "Quiet window",
-                value: "21:00 - 08:00",
-                rightValue: "Suppression",
-              },
-              {
-                label: "P2 & below silenced",
-                value: "Rotation Link",
-                rightValue: "Frontend Primary",
-              },
-              { label: "Exceptions", value: "3 dates" },
-            ]}
-          />
-
-          {/* RULE CARD 2: CORE PAYMENTS */}
-          <RuleCard
-            title="Core Payments"
-            badge="Critical"
-            badgeColor="text-rose-500 border-rose-500/30 bg-rose-500/5"
-            rows={[
-              {
-                label: "Quiet window",
-                value: "Never quiet (P0/P1 always noisy)",
-                rightValue: "Suppression",
-              },
-              {
-                label: "Only p3+ at night",
-                value: "Rotation Link",
-                rightValue: "Payments Secondary",
-              },
-              { label: "Exceptions", value: "1 dates" },
-            ]}
-          />
+          {isLoading ? (
+            <p className="text-center text-sm text-slate-500 py-6">
+              Loading quiet rules…
+            </p>
+          ) : rules.length === 0 ? (
+            <p className="text-center text-sm text-slate-500 py-6">
+              No quiet rules configured yet. Add a team rule to get started.
+            </p>
+          ) : (
+            rules.map((rule, idx) => (
+              <RuleCard
+                key={rule.id ?? `pending-${idx}`}
+                rule={rule}
+                onRemove={() => onRuleRemoved?.(idx)}
+              />
+            ))
+          )}
 
           {/* FOOTER NOTE */}
           <p className="text-center text-xs text-slate-500 pt-4">
@@ -121,42 +117,56 @@ const QuietRules = ({
   );
 };
 
-interface RuleRow {
-  label: string;
-  value: string;
-  rightValue?: string;
-}
-
 const RuleCard = ({
-  title,
-  badge,
-  badgeColor,
-  rows,
+  rule,
+  onRemove,
 }: {
-  title: string;
-  badge: string;
-  badgeColor: string;
-  rows: RuleRow[];
+  rule: QuietRule;
+  onRemove: () => void;
 }) => {
   return (
     <div className="rounded-xl border border-white/40 p-5 hover:border-white/20 transition-all">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-base font-semibold text-slate-200">{title}</h3>
-        <span
-          className={`px-3 py-0.5 rounded-full border text-xs font-medium ${badgeColor}`}
-        >
-          {badge}
-        </span>
+        <h3 className="text-base font-semibold text-slate-200">
+          {rule.name || rule.teamScope || "Untitled rule"}
+        </h3>
+        <div className="flex items-center gap-3">
+          <span
+            className={`px-3 py-0.5 rounded-full border text-xs font-medium ${
+              rule.isActive
+                ? "text-green-400 border-green-400/30 bg-green-400/5"
+                : "text-slate-400 border-slate-400/30 bg-slate-400/5"
+            }`}
+          >
+            {rule.isActive ? "Active" : "Inactive"}
+          </span>
+          <button
+            onClick={onRemove}
+            className="text-slate-500 hover:text-rose-400 transition-colors"
+            aria-label="Remove rule"
+          >
+            <Trash2 size={15} />
+          </button>
+        </div>
       </div>
 
       <div className="space-y-1.5">
-        {rows.map((row, idx) => (
-          <div key={idx} className="grid grid-cols-3 text-[13px]">
-            <span className="text-slate-500">{row.label}</span>
-            <span className="text-slate-400 text-center">{row.value}</span>
-            <span className="text-slate-400 text-right">{row.rightValue}</span>
-          </div>
-        ))}
+        <div className="grid grid-cols-3 text-[13px]">
+          <span className="text-slate-500">Quiet window</span>
+          <span className="text-slate-400 text-center">
+            {rule.startTime} - {rule.endTime}
+          </span>
+          <span className="text-slate-400 text-right">{rule.timezone}</span>
+        </div>
+        <div className="grid grid-cols-3 text-[13px]">
+          <span className="text-slate-500">Days</span>
+          <span className="text-slate-400 text-center">
+            {formatDays(rule.daysOfWeek)}
+          </span>
+          <span className="text-slate-400 text-right">
+            {rule.teamScope || "Global"}
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -71,52 +71,9 @@ const statusFromGuardrail = (g: any): GuardrailStatus => {
   return "PASS";
 };
 
-const FALLBACK_POLICIES: PolicyRow[] = [
-  {
-    id: "1",
-    title: "Production Rollback Approval",
-    description:
-      "policy: prod.rollback.requires_approval = true · Applies to all P1/P2 incidents",
-    status: "APPROVAL REQUIRED",
-    icon: iconForType("APPROVAL"),
-  },
-  {
-    id: "2",
-    title: "Pod Restart Auto-Allowed",
-    description:
-      "policy: pod.restart.auto = true · reversible = true · blast_radius ≤ 1 service",
-    status: "AUTO-EXECUTE",
-    icon: iconForType("ROLLBACK"),
-  },
-  {
-    id: "3",
-    title: "Blast Radius Automation Limit",
-    description:
-      "policy: no automation if blast_radius > 3 services · Current: 3 — threshold met",
-    status: "BLOCK AUTO",
-    icon: iconForType("BLAST"),
-  },
-  {
-    id: "4",
-    title: "Reversibility Check",
-    description:
-      "policy: prefer reversible actions · Rollback: reversible ✓ · rollbackPlaybookId linked",
-    status: "PASS",
-    icon: iconForType(""),
-  },
-  {
-    id: "5",
-    title: "Business Hours Escalation",
-    description:
-      "policy: P1 outside 09:00–18:00 UTC requires on-call approval · Current: 00:15 UTC",
-    status: "APPROVAL REQUIRED",
-    icon: iconForType("ESCALATION"),
-  },
-];
-
 const GuardrailModule: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const { get } = useFetch();
-  const { data: guardrails } = useQuery({
+  const { data: guardrails, isLoading } = useQuery({
     queryKey: ["guardrails-playbook", incidentId],
     queryFn: async () => {
       const res = await get(endpoint.guardrails.list + "?activeOnly=true");
@@ -126,15 +83,13 @@ const GuardrailModule: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
     },
   });
 
-  const policies: PolicyRow[] = guardrails?.length
-    ? guardrails.map((g: any) => ({
-        id: g.id,
-        title: g.name,
-        description: g.description ?? `policy: ${g.type ?? "CUSTOM"}`,
-        status: statusFromGuardrail(g),
-        icon: iconForType(g.type ?? g.name ?? ""),
-      }))
-    : FALLBACK_POLICIES;
+  const policies: PolicyRow[] = (guardrails ?? []).map((g: any) => ({
+    id: g.id,
+    title: g.name,
+    description: g.description ?? `policy: ${g.type ?? "CUSTOM"}`,
+    status: statusFromGuardrail(g),
+    icon: iconForType(g.type ?? g.name ?? ""),
+  }));
 
   const approvalCount = policies.filter(
     (p) => p.status === "APPROVAL REQUIRED",
@@ -181,6 +136,13 @@ const GuardrailModule: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
         </p>
       </div>
 
+      {isLoading ? (
+        <p className="text-[12px] text-black dark:text-zinc-500">Loading guardrails…</p>
+      ) : policies.length === 0 ? (
+        <p className="text-[12px] text-black dark:text-zinc-500">
+          No active guardrails are configured for this business.
+        </p>
+      ) : (
       <div className="flex flex-col gap-2">
         {policies.map((policy) => (
           <div
@@ -204,6 +166,7 @@ const GuardrailModule: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 };

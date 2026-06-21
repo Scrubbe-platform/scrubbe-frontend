@@ -3,7 +3,6 @@ import SeverityRules from "./severity/SeverityRules";
 import RoutingNotification from "./routing/RoutingNotification";
 import AutoCreateIncident from "./autocreate/AutoCreateIncident";
 import SignalEnrichment from "./signal/SignalEnrichment";
-import CButton from "@/components/ui/Cbutton";
 
 const IncidentPolicy = () => {
   return (
@@ -43,16 +42,6 @@ const IncidentPolicy = () => {
             <p className="text-sm font-semibold">
               Tip: start strict. You can loosen auto-create rules after you see real noise patterns.
             </p>
-            <div className="flex items-center gap-3">
-              <CButton className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
-                {/* <AiStarIcon stroke="#06eefd"/> */}
-                Save Draft
-              </CButton>
-              <CButton className="border bg-transparent hover:bg-transparent border-IMSCyan text-IMSCyan">
-                {/* <AiStarIcon stroke="#06eefd"/> */}
-                Preview Policy Summary
-              </CButton>
-            </div>
           </div>
         </div>
         <div className="col-span-3">

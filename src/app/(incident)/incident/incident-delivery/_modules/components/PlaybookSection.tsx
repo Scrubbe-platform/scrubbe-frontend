@@ -30,10 +30,11 @@ const PlaybookSection: React.FC<{ incidentId?: string; category?: string }> = ({
     enabled: !!(incidentId || category),
   });
 
-  const name       = matched?.name                                ?? "Merge Conflict Remediation";
-  const description = matched?.description                        ?? "Resolve conflicts safely; propose resolution patch as PR.";
-  const stepCount  = matched?.steps?.length ?? matched?.stepCount ?? 5;
-  const scope      = matched?.config?.scope ?? matched?.scope     ?? "pr-only";
+  const name       = matched?.name                                ?? "No playbook matched";
+  const description = matched?.description                        ?? "No active playbook matched this incident's category yet.";
+  const steps: string[] = matched?.steps ?? [];
+  const stepCount  = steps.length;
+  const scope      = matched?.config?.scope ?? matched?.scope     ?? "unscoped";
 
   return (
     <>
@@ -90,7 +91,7 @@ const PlaybookSection: React.FC<{ incidentId?: string; category?: string }> = ({
           title="Playbook"
           subTitle="Active playbook"
         >
-          <Playbook />
+          <Playbook name={name} description={description} scope={scope} steps={steps} />
         </SideModal>
       )}
     </>

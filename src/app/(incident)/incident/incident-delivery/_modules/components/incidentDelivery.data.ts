@@ -3,9 +3,10 @@ import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 type RawRecord = Record<string, unknown>;
 
 interface DeliveryPayload {
-  provider: string;
-  org: string;
-  repo: string;
+  isLive: boolean;
+  provider?: string;
+  org?: string;
+  repo?: string;
   service: string;
   receivedAt: string;
   eventType: string;
@@ -13,27 +14,29 @@ interface DeliveryPayload {
   conclusion: string;
   failureCategory: string;
   failing: string[];
-  pr: { number: string; title: string };
-  commit: { sha: string; author: string };
-  artifacts: { diffUrl: string; runUrl: string };
+  pr?: { number: string; title: string };
+  commit?: { sha: string; author: string };
+  artifacts?: { diffUrl?: string; runUrl?: string };
 }
 
 const asRecord = (value: unknown): RawRecord =>
   value && typeof value === "object" ? (value as RawRecord) : {};
 
-const asString = (value: unknown, fallback = "") =>
-  typeof value === "string" && value.trim().length > 0 ? value : fallback;
+const asString = (value: unknown): string | undefined =>
+  typeof value === "string" && value.trim().length > 0 ? value : undefined;
 
 const asStringArray = (value: unknown) =>
   Array.isArray(value)
     ? value.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)
     : [];
 
-const buildRepoName = (incident: IncidentDetailRecord) => {
-  const serviceName = incident.service || incident.affectedSystem || "service";
-  return `scrubbe/${serviceName.replace(/\s+/g, "-").toLowerCase()}`;
-};
-
+/**
+ * `incident.raw` is populated server-side by matching the auto-raised
+ * ticket back to the GitHub/GitLab webhook delivery that created it (see
+ * `findIncidentDeliveryRaw` in incident.service.ts). Most webhook events
+ * still don't carry a real PR number or commit SHA, so only surface fields
+ * that are actually present — never invent plausible-looking values.
+ */
 export const buildDeliveryPayload = (
   incident: IncidentDetailRecord
 ): DeliveryPayload => {
@@ -41,59 +44,32 @@ export const buildDeliveryPayload = (
   const pr = asRecord(raw.pr);
   const commit = asRecord(raw.commit);
   const artifacts = asRecord(raw.artifacts);
-  const repo = asString(raw.repo, buildRepoName(incident));
-  const service = asString(raw.service, incident.service || incident.affectedSystem || "service");
-  const receivedAt = incident.createdAt || new Date().toISOString();
-  const eventType = asString(raw.eventType, incident.sourceType || incident.source || "incident");
-  const action = asString(raw.action, incident.status || "opened");
-  const conclusion = asString(raw.conclusion, incident.status || "open");
-  const failureCategory = asString(raw.failureCategory, incident.category || incident.subCategory || "incident");
-  const failing = asStringArray(raw.failing);
-  const prNumber = asString(pr.number, incident.ticketId.replace(/\D+/g, "").slice(-3) || "1");
-  const prTitle = asString(pr.title, incident.title || incident.summary || incident.reason || "Selected incident");
-  const commitSha = asString(commit.sha, incident.id.slice(0, 7));
-  const commitAuthor = asString(
-    commit.author,
-    incident.assignedToName || incident.assignedToEmail || incident.reportedBy || "scrubbe"
-  );
-  const runUrl = asString(
-    artifacts.runUrl,
-    `https://github.example/${repo}/actions/runs/${incident.id.slice(0, 8)}`
-  );
-  const diffUrl = asString(
-    artifacts.diffUrl,
-    `https://github.example/${repo}/pull/${prNumber}/files`
-  );
+
+  const repo = asString(raw.repo);
+  const prNumber = asString(pr.number);
+  const commitSha = asString(commit.sha);
+  const isLive = Boolean(repo || prNumber || commitSha);
 
   return {
-    provider: asString(raw.provider, "github"),
-    org: asString(raw.org, "scrubbe"),
+    isLive,
+    provider: asString(raw.provider),
+    org: asString(raw.org),
     repo,
-    service,
-    receivedAt,
-    eventType,
-    action,
-    conclusion,
-    failureCategory,
-    failing:
-      failing.length > 0
-        ? failing
-        : [
-            incident.service
-              ? `services/${incident.service.replace(/\s+/g, "-").toLowerCase()}/index.ts`
-              : "src/incident/index.ts",
-          ],
-    pr: {
-      number: prNumber,
-      title: prTitle,
-    },
-    commit: {
-      sha: commitSha,
-      author: commitAuthor,
-    },
-    artifacts: {
-      diffUrl,
-      runUrl,
-    },
+    service: incident.service || incident.affectedSystem || "service",
+    receivedAt: incident.createdAt || new Date().toISOString(),
+    eventType: asString(raw.eventType) ?? incident.sourceType ?? incident.source ?? "incident",
+    action: asString(raw.action) ?? incident.status ?? "opened",
+    conclusion: asString(raw.conclusion) ?? incident.status ?? "open",
+    failureCategory: asString(raw.failureCategory) ?? incident.category ?? incident.subCategory ?? "incident",
+    failing: asStringArray(raw.failing),
+    pr: prNumber
+      ? { number: prNumber, title: asString(pr.title) ?? incident.title ?? incident.summary ?? "" }
+      : undefined,
+    commit: commitSha
+      ? { sha: commitSha, author: asString(commit.author) ?? incident.assignedToName ?? incident.assignedToEmail ?? "" }
+      : undefined,
+    artifacts: artifacts.runUrl || artifacts.diffUrl
+      ? { runUrl: asString(artifacts.runUrl), diffUrl: asString(artifacts.diffUrl) }
+      : undefined,
   };
 };

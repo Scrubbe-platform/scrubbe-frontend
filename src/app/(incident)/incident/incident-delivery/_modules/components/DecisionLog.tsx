@@ -21,31 +21,6 @@ const iconForType = (type: string) => {
   return <Activity size={14} className="text-sky-500 dark:text-sky-400" />;
 };
 
-// ── Fallback entries shown when API returns nothing ───────────────
-
-const FALLBACK: LogEntryProps[] = [
-  {
-    icon: <ShieldCheck size={14} className="text-emerald-500 dark:text-emerald-400" />,
-    title: "policy.evaluated",
-    desc: "Policy evaluated for incident.",
-    time: "—",
-    payload: { autoActivate: false, humanGate: true, scope: "pr-only" },
-  },
-  {
-    icon: <ShieldCheck size={14} className="text-emerald-500 dark:text-emerald-400" />,
-    title: "policy.mode",
-    desc: "Policy mode set to standard.",
-    time: "—",
-  },
-  {
-    icon: <Lightbulb size={14} className="text-amber-500 dark:text-amber-400" />,
-    title: "hypotheses.generated",
-    desc: "Generated top 3 likely causes (not final RCA).",
-    time: "—",
-    payload: { top: [{ title: "Competing refactors touching same module", conf: 0.72 }] },
-  },
-];
-
 // ── Component ─────────────────────────────────────────────────────
 
 const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
@@ -65,16 +40,13 @@ const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
 
   const entries = data ?? [];
 
-  const displayEntries: LogEntryProps[] =
-    isLoading || entries.length === 0
-      ? FALLBACK
-      : entries.map((e: any) => ({
-          icon: iconForType(e.type ?? e.action ?? ""),
-          title: e.type ?? e.action ?? "event",
-          desc: e.summary ?? e.reason ?? e.description ?? "Decision recorded.",
-          time: e.createdAt ? new Date(e.createdAt).toLocaleTimeString() : "—",
-          payload: e.context ?? e.metadata ?? undefined,
-        }));
+  const displayEntries: LogEntryProps[] = entries.map((e: any) => ({
+    icon: iconForType(e.type ?? e.action ?? ""),
+    title: e.type ?? e.action ?? "event",
+    desc: e.summary ?? e.reason ?? e.description ?? "Decision recorded.",
+    time: e.createdAt ? new Date(e.createdAt).toLocaleTimeString() : "—",
+    payload: e.context ?? e.metadata ?? undefined,
+  }));
 
   return (
     <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
@@ -101,6 +73,11 @@ const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
       <div className="p-4 space-y-2">
         {isLoading && (
           <p className="text-[12px] text-black animate-pulse px-1">Loading decisions…</p>
+        )}
+        {!isLoading && displayEntries.length === 0 && (
+          <p className="text-[12px] text-black dark:text-zinc-500 px-1">
+            No decisions have been logged for this incident yet.
+          </p>
         )}
         {displayEntries.map((entry, i) => (
           <LogEntry key={i} {...entry} />

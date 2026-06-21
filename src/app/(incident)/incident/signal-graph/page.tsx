@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Background,
   BackgroundVariant,
@@ -324,6 +325,7 @@ function SignalGraphWorkspace({
 }: {
   incident: IncidentDetailRecord;
 }) {
+  const router = useRouter();
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string>("service");
@@ -507,6 +509,7 @@ function SignalGraphWorkspace({
               </div>
               <button
                 type="button"
+                onClick={() => router.push(`/incident/incident-delivery?id=${incident.id}`)}
                 className="flex items-center gap-2 rounded-lg border border-sky-100 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/10 p-3 text-left text-[13px] font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-500/15 transition-colors"
               >
                 <RefreshCcw size={13} />

@@ -9,17 +9,25 @@ import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { toast } from "sonner";
 import { Switch } from "@heroui/react";
- 
+import { useRouter } from "next/navigation";
+
 const page = () => {
   const { get, put } = useFetch();
   const queryClient = useQueryClient();
- 
+  const router = useRouter();
+
   const [mergeMethod, setMergeMethod] = useState("Squash");
   const [maxSuggestions, setMaxSuggestions] = useState("3");
   const [postAsPrComment, setPostAsPrComment] = useState(true);
   const [createPatchBranch, setCreatePatchBranch] = useState(true);
   const [requireApprovalBelowThreshold, setRequireApprovalBelowThreshold] = useState(true);
- 
+  const [protectedPaths, setProtectedPaths] = useState<string[]>([]);
+  const [requiredChecks, setRequiredChecks] = useState<string[]>([]);
+  const [editingPaths, setEditingPaths] = useState(false);
+  const [editingChecks, setEditingChecks] = useState(false);
+  const [newPath, setNewPath] = useState("");
+  const [newCheck, setNewCheck] = useState("");
+
   const { data: config } = useQuery({
     queryKey: ["ims-code-engine-config"],
     queryFn: async () => {
@@ -29,7 +37,7 @@ const page = () => {
     },
     refetchOnWindowFocus: false,
   });
- 
+
   useEffect(() => {
     if (config) {
       setMergeMethod(config.allowedMergeMethod ?? "Squash");
@@ -37,9 +45,11 @@ const page = () => {
       setPostAsPrComment(config.postSuggestionAsPrComment ?? true);
       setCreatePatchBranch(config.createPatchBranchAutomatically ?? true);
       setRequireApprovalBelowThreshold(config.requireApprovalBelowThreshold ?? true);
+      setProtectedPaths(config.protectedPaths ?? ["/policy/**", "/infra/**", "/terraform/**"]);
+      setRequiredChecks(config.requiredChecks ?? ["lint", "typecheck", "unit"]);
     }
   }, [config]);
- 
+
   const { mutateAsync: save, isPending } = useMutation({
     mutationFn: async () => {
       const res = await put(endpoint.auth.ims_config, {
@@ -48,6 +58,8 @@ const page = () => {
         postSuggestionAsPrComment: postAsPrComment,
         createPatchBranchAutomatically: createPatchBranch,
         requireApprovalBelowThreshold,
+        protectedPaths,
+        requiredChecks,
       });
       if (!res.success) throw new Error(res.data?.message ?? "Failed to save");
       return res.data;
@@ -55,6 +67,8 @@ const page = () => {
     onSuccess: () => {
       toast.success("Code Engine settings saved");
       queryClient.invalidateQueries({ queryKey: ["ims-code-engine-config"] });
+      setEditingPaths(false);
+      setEditingChecks(false);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -96,16 +110,45 @@ const page = () => {
                   <p className="text-zinc-400 dark:text-[#64748B] text-xs">Touching these requires stricter approvals.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <PathTag label="/policy/**" />
-                  <PathTag label="/infra/**" />
-                  <PathTag label="/terraform/**" />
+                  {protectedPaths.map((path) => (
+                    <PathTag
+                      key={path}
+                      label={path}
+                      onRemove={editingPaths ? () => setProtectedPaths((p) => p.filter((x) => x !== path)) : undefined}
+                    />
+                  ))}
                 </div>
-                <button className="text-[#00CAD8] border border-[#00CAD8] px-6 py-2 rounded-xl text-sm font-bold hover:bg-[#00CAD8]/5 transition-all">
-                  Edit
+                {editingPaths && (
+                  <div className="flex gap-2">
+                    <input
+                      value={newPath}
+                      onChange={(e) => setNewPath(e.target.value)}
+                      placeholder="/path/**"
+                      className="flex-1 border border-zinc-500 dark:border-neutral-500 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-transparent text-black dark:text-white"
+                    />
+                    <button
+                      onClick={() => {
+                        if (newPath.trim()) {
+                          setProtectedPaths((p) => [...p, newPath.trim()]);
+                          setNewPath("");
+                        }
+                      }}
+                      className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1.5 rounded-lg text-xs font-bold"
+                    >
+                      Add
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => (editingPaths ? save() : setEditingPaths(true))}
+                  disabled={isPending}
+                  className="text-[#00CAD8] border border-[#00CAD8] px-6 py-2 rounded-xl text-sm font-bold hover:bg-[#00CAD8]/5 transition-all disabled:opacity-50"
+                >
+                  {editingPaths ? "Save" : "Edit"}
                 </button>
               </div>
             </div>
- 
+
             {/* Verification requirement */}
             <div className="bg-transparent border border-zinc-500 dark:border-neutral-500 rounded-[24px] p-6 space-y-4">
               <div className="space-y-1">
@@ -113,10 +156,35 @@ const page = () => {
                 <p className="text-zinc-600 dark:text-white text-sm">Before merge: CI must be green for required checks.</p>
               </div>
               <div className="w-full border border-zinc-500 dark:border-neutral-500 p-3.5 rounded-xl text-sm text-zinc-600 dark:text-[#D1D5DB]">
-                required checks: lint, typecheck, unit
+                required checks: {requiredChecks.join(", ") || "none configured"}
               </div>
-              <button className="text-[#00CAD8] border border-[#00CAD8] px-6 py-2 rounded-xl text-sm font-bold hover:bg-[#00CAD8]/5 transition-all">
-                Configure
+              {editingChecks && (
+                <div className="flex gap-2">
+                  <input
+                    value={newCheck}
+                    onChange={(e) => setNewCheck(e.target.value)}
+                    placeholder="check name"
+                    className="flex-1 border border-zinc-500 dark:border-neutral-500 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-transparent text-black dark:text-white"
+                  />
+                  <button
+                    onClick={() => {
+                      if (newCheck.trim()) {
+                        setRequiredChecks((p) => [...p, newCheck.trim()]);
+                        setNewCheck("");
+                      }
+                    }}
+                    className="text-[#00CAD8] border border-[#00CAD8] px-3 py-1.5 rounded-lg text-xs font-bold"
+                  >
+                    Add
+                  </button>
+                </div>
+              )}
+              <button
+                onClick={() => (editingChecks ? save() : setEditingChecks(true))}
+                disabled={isPending}
+                className="text-[#00CAD8] border border-[#00CAD8] px-6 py-2 rounded-xl text-sm font-bold hover:bg-[#00CAD8]/5 transition-all disabled:opacity-50"
+              >
+                {editingChecks ? "Save" : "Configure"}
               </button>
             </div>
           </section>
@@ -152,9 +220,12 @@ const page = () => {
                 <p className="text-zinc-400 dark:text-[#64748B] text-xs leading-normal">Shows diff, affected files, risk, approvals, merge action.</p>
               </div>
               <div className="border border-zinc-500 dark:border-neutral-500 p-3 rounded-xl text-[11px] text-black dark:text-[#D1D5DB] text-center">
-                required checks: lint, typecheck, unit
+                required checks: {requiredChecks.join(", ") || "none configured"}
               </div>
-              <button className="w-full py-3 rounded-xl border border-[#00CAD8] text-[#00CAD8] font-bold text-sm hover:bg-[#00CAD8]/5 transition-all">
+              <button
+                onClick={() => router.push("/incident/code-engine")}
+                className="w-full py-3 rounded-xl border border-[#00CAD8] text-[#00CAD8] font-bold text-sm hover:bg-[#00CAD8]/5 transition-all"
+              >
                 Review in Code engine
               </button>
             </div>
@@ -171,8 +242,15 @@ const page = () => {
   );
 };
  
-const PathTag = ({ label }: { label: string }) => (
-  <span className="px-3 py-1.5 border border-zinc-500 dark:border-neutral-500 rounded-lg text-xs text-zinc-600 dark:text-[#D1D5DB] font-mono">{label}</span>
+const PathTag = ({ label, onRemove }: { label: string; onRemove?: () => void }) => (
+  <span className="flex items-center gap-1.5 px-3 py-1.5 border border-zinc-500 dark:border-neutral-500 rounded-lg text-xs text-zinc-600 dark:text-[#D1D5DB] font-mono">
+    {label}
+    {onRemove && (
+      <button onClick={onRemove} className="text-zinc-400 hover:text-red-400">
+        ×
+      </button>
+    )}
+  </span>
 );
  
 const IconToggleRow = ({ icon, label, active, onToggle }: { icon: ReactNode; label: string; active: boolean; onToggle: () => void }) => (

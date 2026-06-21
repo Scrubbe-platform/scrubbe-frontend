@@ -18,6 +18,21 @@ import { useFetch } from "@/hooks/useFetch";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
+// Mirrors the server's TaxonomyCategory enum (server/prisma/schema.prisma).
+const ROOT_CAUSE_CATEGORIES = [
+  { value: "RESOURCE_EXHAUSTION", label: "Resource exhaustion" },
+  { value: "NETWORK_FAILURE", label: "Network failure" },
+  { value: "DEPLOYMENT_FAILURE", label: "Deployment failure" },
+  { value: "DEPENDENCY_FAILURE", label: "Dependency failure" },
+  { value: "CONFIGURATION_ERROR", label: "Configuration error" },
+  { value: "DATA_CORRUPTION", label: "Data corruption" },
+  { value: "AUTHENTICATION_FAILURE", label: "Authentication failure" },
+  { value: "PERMISSION_DENIED", label: "Permission denied" },
+  { value: "RATE_LIMIT", label: "Rate limit" },
+  { value: "HARDWARE_FAILURE", label: "Hardware failure" },
+  { value: "UNKNOWN", label: "Unknown" },
+];
+
 const incidentSchema = z.object({
   // Section: Basics & Source
   summary: z.string().min(5, "Summary must be at least 5 characters"),
@@ -52,7 +67,6 @@ const incidentSchema = z.object({
 
   // Section: Signals & Code Engine
   playbook: z.string(),
-  suggestionId: z.string(),
   fixStatus: z.string(),
   metrics: z.array(z.string()).default([]).optional(),
   logStreams: z.array(z.string()).default([]).optional(),
@@ -62,6 +76,7 @@ const incidentSchema = z.object({
   // Section: Lifecycle & Ezra
   rootCauseCategory: z.string(),
   relatedIncident: z.string().optional(),
+  referenceLink: z.string().optional(),
   internalNotes: z.string().optional(),
   postActions: z.array(z.string()),
   ezraFocusMode: z.string().optional(),
@@ -138,15 +153,29 @@ const RaiseIncident = () => {
     queryFn: async () => {
       try {
         const res = await get(endpoint.incident_ticket.get_members);
-        console.log({ memeber: res });
         if (res.success) {
           return res.data.data ?? [];
         }
         return [];
       } catch (error) {
-        console.log(error);
         return [];
       }
+    },
+  });
+
+  const { data: activePlaybooks } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ["create-incident-playbooks"],
+    queryFn: async () => {
+      const res = await get(`${endpoint.playbooks.list}?status=ACTIVE`);
+      return res.success ? (res.data?.data ?? []) : [];
+    },
+  });
+
+  const { data: recentIncidents } = useQuery<{ id: string; ticketId: string; summary?: string }[]>({
+    queryKey: ["create-incident-related"],
+    queryFn: async () => {
+      const res = await get(`${endpoint.incident_ticket.get}?limit=50&page=1`);
+      return res.success ? (res.data?.data?.incidents ?? []) : [];
     },
   });
 
@@ -952,33 +981,19 @@ Refusal Reasons:"
                         <Select
                           {...field}
                           options={[
-                            {
-                              value: "db_pool",
-                              label: "DB Connection pool exhaustion",
-                            },
-                          ]}
+                            { value: "", label: "No playbook selected" },
+                          ].concat(
+                            activePlaybooks?.map((pb) => ({
+                              value: pb.id,
+                              label: pb.name,
+                            })) ?? []
+                          )}
                           className="!bg-[#08132F]"
                         />
                       )}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
-                        Code Engine Suggestion ID
-                      </label>
-                      <Controller
-                        name="suggestionId"
-                        control={control}
-                        render={({ field }) => (
-                          <Select
-                            {...field}
-                            options={[{ value: "li_sre", label: "LI SRE" }]}
-                            className="!bg-[#08132F]"
-                          />
-                        )}
-                      />
-                    </div>
+                  <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[11px] text-slate-200 font-bold uppercase tracking-tight">
                         Fix status
@@ -1045,7 +1060,7 @@ Refusal Reasons:"
                     render={({ field }) => (
                       <Select
                         {...field}
-                        options={[{ value: "config", label: "Config" }]}
+                        options={ROOT_CAUSE_CATEGORIES}
                         className="!bg-[#08132F]"
                       />
                     )}
@@ -1061,7 +1076,14 @@ Refusal Reasons:"
                     render={({ field }) => (
                       <Select
                         {...field}
-                        options={[{ value: "inc231", label: "INC-231" }]}
+                        options={[
+                          { value: "", label: "No related incident" },
+                        ].concat(
+                          recentIncidents?.map((inc) => ({
+                            value: inc.id,
+                            label: `${inc.ticketId}${inc.summary ? ` — ${inc.summary}` : ""}`,
+                          })) ?? []
+                        )}
                         className="!bg-[#08132F]"
                       />
                     )}
@@ -1073,7 +1095,7 @@ Refusal Reasons:"
                     Add Link
                   </label>
                   <Controller
-                    name="relatedIncident"
+                    name="referenceLink"
                     control={control}
                     render={({ field }) => (
                       <Input
@@ -1094,7 +1116,7 @@ Refusal Reasons:"
                   Internal Notes
                 </label>
                 <Controller
-                  name="relatedIncident"
+                  name="internalNotes"
                   control={control}
                   render={({ field }) => (
                     <TextArea
@@ -1162,12 +1184,6 @@ Refusal Reasons:"
               as soon as it is created.
             </div>
             <div className="flex justify-end gap-4">
-              <CButton
-                type="button"
-                className="px-6 py-2 border border-IMSCyan bg-transparent w-fit text-IMSCyan hover:bg-transparent font-bold text-sm"
-              >
-                Save Draft
-              </CButton>
               <CButton
                 type="submit"
                 isLoading={isCreating}

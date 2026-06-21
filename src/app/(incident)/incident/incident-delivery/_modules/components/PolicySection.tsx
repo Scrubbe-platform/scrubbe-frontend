@@ -10,7 +10,7 @@ const PolicySection: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { get } = useFetch();
 
-  const { data: guardrail } = useQuery({
+  const { data: guardrail, isLoading } = useQuery({
     queryKey: ["guardrails-incident", incidentId],
     queryFn: async () => {
       const res = await get(endpoint.guardrails.list);
@@ -23,16 +23,14 @@ const PolicySection: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   });
 
   const autoActivate  = guardrail?.config?.autoActivate    ?? false;
-  const approvalGate  = guardrail?.config?.requireApproval ?? true;
-  const scope         = guardrail?.config?.scope            ?? "pr-only";
-  const reasons: string[] = guardrail?.config?.reasons ?? [
-    "Merge conflicts are correctness-sensitive → approval required.",
-  ];
+  const approvalGate  = guardrail?.config?.requireApproval ?? false;
+  const scope         = guardrail?.config?.scope            ?? "—";
+  const reasons: string[] = guardrail?.config?.reasons ?? [];
 
   const policyFields = [
-    { title: "Auto-activate", value: autoActivate ? "Yes" : "No"                       },
-    { title: "Approval gate", value: approvalGate ? "Required" : "Not required"        },
-    { title: "Execution scope", value: scope                                            },
+    { title: "Auto-activate", value: guardrail ? (autoActivate ? "Yes" : "No") : "—"                },
+    { title: "Approval gate", value: guardrail ? (approvalGate ? "Required" : "Not required") : "—" },
+    { title: "Execution scope", value: scope                                                          },
   ];
 
   return (
@@ -85,14 +83,20 @@ const PolicySection: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
             <p className="text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-3">
               Reasons
             </p>
-            <ul className="space-y-2">
-              {reasons.map((r, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600 mt-1.5 shrink-0" />
-                  <p className="text-[12px] text-black dark:text-zinc-400 leading-relaxed">{r}</p>
-                </li>
-              ))}
-            </ul>
+            {reasons.length > 0 ? (
+              <ul className="space-y-2">
+                {reasons.map((r, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600 mt-1.5 shrink-0" />
+                    <p className="text-[12px] text-black dark:text-zinc-400 leading-relaxed">{r}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-[12px] text-black dark:text-zinc-500">
+                {isLoading ? "Loading…" : "No guardrail policy is configured for this incident."}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -104,7 +108,12 @@ const PolicySection: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
           title="Policy decision"
           subTitle="Why actions are allowed or blocked"
         >
-          <PolicyDecision />
+          <PolicyDecision
+            autoActivate={autoActivate}
+            approvalGate={approvalGate}
+            scope={scope}
+            reasons={reasons}
+          />
         </SideModal>
       )}
     </>

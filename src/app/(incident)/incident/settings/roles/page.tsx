@@ -99,6 +99,28 @@ const RBAC_ROLES = [
   },
 ];
 
+const MATRIX_ROLE_COLUMNS = [
+  { key: "WORKSPACE_OWNER", label: "Owner" },
+  { key: "ADMIN", label: "Admin" },
+  { key: "INCIDENT_COMMANDER", label: "IC" },
+  { key: "OPERATIONS_MANAGER", label: "Ops Mgr" },
+  { key: "RESPONDER", label: "Responder" },
+] as const;
+
+const MATRIX_ACTION_LABELS: Record<string, string> = {
+  APPROVE_MERGE: "Approve Merge",
+  APPROVE_ROLLBACK: "Approve Rollback",
+  EXECUTE_ROLLBACK: "Execute Rollback",
+  EXECUTE_LOW_RISK_ACTION: "Execute Low-Risk Action",
+  CHANGE_SEVERITY: "Change Severity",
+  CLOSE_INCIDENT: "Close Incident",
+};
+
+interface MatrixRow {
+  action: string;
+  roles: Record<string, boolean>;
+}
+
 const Page = () => {
   const { get, put } = useFetch();
   const queryClient = useQueryClient();
@@ -131,6 +153,36 @@ const Page = () => {
     }
   }, [config]);
 
+  const { data: matrix = [], isLoading: matrixLoading } = useQuery<MatrixRow[]>({
+    queryKey: ["role-permission-matrix"],
+    queryFn: async () => {
+      const res = await get(endpoint.role_permissions.matrix);
+      return res.success ? (res.data?.data ?? []) : [];
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const toggleCell = useMutation({
+    mutationFn: async ({ action, role, allowed }: { action: string; role: string; allowed: boolean }) => {
+      const res = await put(endpoint.role_permissions.matrix, {
+        entries: [{ action, role, allowed }],
+      });
+      if (!res.success) throw new Error(res.data?.message ?? "Failed to update permission");
+      return res.data;
+    },
+    onMutate: async ({ action, role, allowed }) => {
+      queryClient.setQueryData<MatrixRow[]>(["role-permission-matrix"], (prev) =>
+        (prev ?? []).map((row) =>
+          row.action === action ? { ...row, roles: { ...row.roles, [role]: allowed } } : row
+        )
+      );
+    },
+    onError: () => {
+      toast.error("Failed to update permission");
+      queryClient.invalidateQueries({ queryKey: ["role-permission-matrix"] });
+    },
+  });
+
   const { mutateAsync: save, isPending } = useMutation({
     mutationFn: async () => {
       const res = await put(endpoint.auth.ims_config, {
@@ -154,39 +206,53 @@ const Page = () => {
         description="Operational authority model — governance, incident authority, execution, and observation"
         sub="Eight roles covering every engineering organisation. Clear separation between governance, incident authority, operational execution, investigation, and observation."
       >
-        {/* PERMISSION MATRIX LEGEND */}
+        {/* PERMISSION MATRIX */}
         <div className="mb-6 p-4 dark:bg-[#0B1224] border border-[#1F2937] rounded-xl">
-          <h3 className="dark:text-white font-bold text-sm mb-3 uppercase tracking-widest">Merge & Rollback Approval Matrix</h3>
+          <h3 className="dark:text-white font-bold text-sm mb-1 uppercase tracking-widest">Merge & Rollback Approval Matrix</h3>
+          <p className="text-[#64748B] text-xs mb-3">Click a cell to toggle — changes save immediately.</p>
           <div className="overflow-x-auto">
             <table className="w-full text-xs dark:text-[#94A3B8]">
               <thead>
                 <tr className="border-b border-[#1F2937]">
                   <th className="text-left py-2 pr-4 dark:text-white font-bold">Action</th>
-                  {["Owner", "Admin", "IC", "Ops Mgr", "Responder"].map((r) => (
-                    <th key={r} className="text-center py-2 px-2 font-semibold">{r}</th>
+                  {MATRIX_ROLE_COLUMNS.map((r) => (
+                    <th key={r.key} className="text-center py-2 px-2 font-semibold">{r.label}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {[
-                  { action: "Approve Merge", perms: [true, true, true, false, false] },
-                  { action: "Approve Rollback", perms: [true, true, true, false, false] },
-                  { action: "Execute Rollback", perms: [true, true, true, false, false] },
-                  { action: "Execute Low-Risk Action", perms: [true, true, true, true, true] },
-                  { action: "Change Severity", perms: [true, true, true, true, false] },
-                  { action: "Close Incident", perms: [true, true, true, true, false] },
-                ].map(({ action, perms }) => (
-                  <tr key={action} className="border-b border-[#1F2937]/50">
-                    <td className="py-2 pr-4 dark:text-[#D1D5DB]">{action}</td>
-                    {perms.map((allowed, i) => (
-                      <td key={i} className="text-center py-2 px-2">
-                        {allowed
-                          ? <span className="text-emerald-400 font-bold">✓</span>
-                          : <span className="text-[#374151]">—</span>}
-                      </td>
-                    ))}
+                {matrixLoading ? (
+                  <tr>
+                    <td colSpan={MATRIX_ROLE_COLUMNS.length + 1} className="py-4 text-center text-[#64748B]">
+                      Loading matrix…
+                    </td>
                   </tr>
-                ))}
+                ) : (
+                  matrix.map((row) => (
+                    <tr key={row.action} className="border-b border-[#1F2937]/50">
+                      <td className="py-2 pr-4 dark:text-[#D1D5DB]">
+                        {MATRIX_ACTION_LABELS[row.action] ?? row.action}
+                      </td>
+                      {MATRIX_ROLE_COLUMNS.map(({ key }) => {
+                        const allowed = row.roles[key];
+                        return (
+                          <td key={key} className="text-center py-2 px-2">
+                            <button
+                              onClick={() =>
+                                toggleCell.mutate({ action: row.action, role: key, allowed: !allowed })
+                              }
+                              className="w-full"
+                            >
+                              {allowed
+                                ? <span className="text-emerald-400 font-bold">✓</span>
+                                : <span className="text-[#374151] hover:text-[#64748B]">—</span>}
+                            </button>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

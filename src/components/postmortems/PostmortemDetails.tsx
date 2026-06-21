@@ -1,14 +1,22 @@
 "use client";
 import React, { createContext, useContext, useState } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import {
-  ArrowLeft, Share2, FileText, Mail, Pencil, ChevronDown, ChevronUp,
+  fetchIncidentComments,
+  uploadIncidentAttachment,
+  fetchIncidentAttachments,
+  deleteIncidentAttachment,
+} from "@/lib/incident/incident.api";
+import {
+  ArrowLeft, Share2, FileText, Mail, ChevronDown, ChevronUp,
   Paperclip, Clock, Search, RefreshCw, FileEdit, Users, ShieldCheck,
-  Plus, Check, X, Loader2,
+  Plus, Check, X, Loader2, Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
+import useAuthStore from "@/lib/stores/auth.store";
 
 // ── Context ───────────────────────────────────────────────────────────────────
 interface PmCtx {
@@ -47,6 +55,7 @@ function calcDuration(a?: string, b?: string) {
   return m < 60 ? `${m}m` : `${(m / 60).toFixed(1)}h`;
 }
 function secBody(sections: any[], type: string): Record<string, any> | null {
+  if (!Array.isArray(sections)) return null;
   return sections.find((s) => s.type === type)?.body ?? null;
 }
 function initials(name?: string) {
@@ -266,11 +275,43 @@ const TabRootCause = () => {
 // ── Tab: Lessons Learned ──────────────────────────────────────────────────────
 const TabLessonsLearned = () => {
   const [comment, setComment] = useState("");
-  const { sections } = usePm();
+  const { sections, pm } = usePm();
+  const { post } = useFetch();
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const ticketId: string | undefined = pm?.ticket?.id;
   const body = secBody(sections, "LESSONS_LEARNED") as any;
   const lessons: any[] = body?.lessons ?? [];
   const headline: string = body?.headline ?? "";
   const intro: string = body?.intro ?? "";
+
+  const commentsQueryKey = ["postmortem-comments", ticketId];
+  const { data: comments = [] } = useQuery({
+    queryKey: commentsQueryKey,
+    queryFn: async () => fetchIncidentComments(ticketId as string),
+    enabled: !!ticketId,
+  });
+
+  const postComment = useMutation({
+    mutationFn: async (content: string) => {
+      const res = await post(endpoint.incident_ticket.send_comment, {
+        ticketId,
+        content,
+      });
+      if (!res.success) throw new Error((res.data as string) || "Failed to post comment");
+      return res.data;
+    },
+    onSuccess: () => {
+      setComment("");
+      queryClient.invalidateQueries({ queryKey: commentsQueryKey });
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to post comment"),
+  });
+
+  const handlePost = () => {
+    if (!comment.trim() || !ticketId) return;
+    postComment.mutate(comment.trim());
+  };
 
   return (
     <Section icon={<FileEdit size={16} />} title="Lessons Learned">
@@ -309,19 +350,48 @@ const TabLessonsLearned = () => {
       )}
       <div className="border-t border-zinc-100 dark:border-zinc-800 pt-5">
         <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">Comments</p>
+        {comments.length > 0 && (
+          <div className="space-y-4 mb-5">
+            {comments.map((c: any) => (
+              <div key={c.id} className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center shrink-0">
+                  <span className="text-zinc-500 dark:text-zinc-300 text-[11px] font-bold">
+                    {initials(`${c.author?.firstName ?? ""} ${c.author?.lastName ?? ""}`.trim())}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold text-zinc-800 dark:text-zinc-200">
+                    {`${c.author?.firstName ?? ""} ${c.author?.lastName ?? ""}`.trim() || "Unknown"}
+                    <span className="text-[11px] font-normal text-zinc-400 dark:text-zinc-500 ml-2">
+                      {new Date(c.createdAt).toLocaleString()}
+                    </span>
+                  </p>
+                  <p className="text-[13px] text-zinc-700 dark:text-zinc-300 mt-0.5">{c.content}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center shrink-0">
-            <span className="text-zinc-400 text-xs">You</span>
+            <span className="text-zinc-400 text-xs">
+              {initials(`${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim()) || "You"}
+            </span>
           </div>
           <input
             type="text"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handlePost()}
             placeholder="Add a comment..."
             className="flex-1 text-[13px] text-zinc-700 dark:text-zinc-300 bg-transparent outline-none placeholder:text-zinc-400"
           />
-          <button className="px-4 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-[12px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-            Post
+          <button
+            onClick={handlePost}
+            disabled={postComment.isPending || !comment.trim() || !ticketId}
+            className="px-4 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-[12px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+          >
+            {postComment.isPending ? <Loader2 size={12} className="animate-spin" /> : "Post"}
           </button>
         </div>
       </div>
@@ -409,7 +479,14 @@ const TabInvestigationRecord = () => {
   const [activeSubTab, setActiveSubTab] = useState("Overview");
   const { analysis } = usePm();
   const subTabs = ["Overview", "Intelligence Records", "Causal Factors"];
-  const metrics: any[] = analysis?.metrics ?? [];
+  const metricsObj = analysis?.metrics ?? {};
+  const metrics = [
+    { label: "Deployments", value: metricsObj.deployments },
+    { label: "Commits", value: metricsObj.commits },
+    { label: "Pull Requests", value: metricsObj.pullRequests },
+    { label: "Repositories", value: metricsObj.repositories },
+    { label: metricsObj.windowLabel ?? "Window", value: metricsObj.windowValue },
+  ].filter((m) => m.value !== undefined && m.value !== null);
   const records: any[] = analysis?.intelligenceRecords ?? [];
   const causalFactors: any[] = analysis?.causalFactors ?? [];
 
@@ -420,10 +497,10 @@ const TabInvestigationRecord = () => {
       ) : (
         <>
           <div className="grid grid-cols-5 gap-3 mb-6">
-            {metrics.slice(0, 5).map((m: any, i: number) => (
+            {metrics.map((m, i: number) => (
               <div key={i} className="border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 text-center">
                 <p className="text-[28px] font-black leading-none mb-1 text-zinc-900 dark:text-zinc-100">{m.value ?? "--"}</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">{m.label ?? m.key}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">{m.label}</p>
               </div>
             ))}
           </div>
@@ -862,34 +939,90 @@ const TabGovernance = () => {
 };
 
 // ── Tab: Attachments ──────────────────────────────────────────────────────────
-const ATTACH_ICONS: Record<string, string> = {
-  file: "📄", bar: "📊", graph: "📈", copy: "📋", trend: "📉", cal: "📅", chat: "💬",
-};
+function formatBytes(bytes?: number | null) {
+  if (!bytes) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 const TabAttachments = () => {
-  const { sections } = usePm();
-  const body = secBody(sections, "ATTACHMENTS") as any;
-  const attachments: any[] = body?.files ?? [];
+  const { pm } = usePm();
+  const queryClient = useQueryClient();
+  const ticketId: string | undefined = pm?.ticket?.id;
+  const [uploading, setUploading] = useState(false);
+
+  const attachmentsQueryKey = ["postmortem-attachments", ticketId];
+  const { data: attachments = [] } = useQuery({
+    queryKey: attachmentsQueryKey,
+    queryFn: async () => fetchIncidentAttachments(ticketId as string),
+    enabled: !!ticketId,
+  });
+
+  const handleUpload = async (file: File | undefined) => {
+    if (!file || !ticketId) return;
+    setUploading(true);
+    try {
+      await uploadIncidentAttachment(ticketId, file);
+      queryClient.invalidateQueries({ queryKey: attachmentsQueryKey });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to upload attachment");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDelete = async (attachmentId: string) => {
+    if (!ticketId) return;
+    try {
+      await deleteIncidentAttachment(ticketId, attachmentId);
+      queryClient.invalidateQueries({ queryKey: attachmentsQueryKey });
+    } catch {
+      toast.error("Failed to delete attachment");
+    }
+  };
 
   return (
     <Section icon={<Paperclip size={16} />} title="Attachments">
-      <div className="grid grid-cols-4 gap-3">
-        {attachments.map((a: any, i: number) => (
-          <div key={i} className="border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors cursor-pointer">
+      {attachments.length === 0 && (
+        <Empty label="No attachments uploaded yet for this postmortem." />
+      )}
+      <div className="grid grid-cols-4 gap-3 mt-3">
+        {attachments.map((a: any) => (
+          <a
+            key={a.id}
+            href={a.downloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors cursor-pointer"
+          >
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(a.id); }}
+              className="absolute top-2 right-2 text-zinc-300 dark:text-zinc-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <Trash2 size={13} />
+            </button>
             <div className="w-8 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center mb-3 text-lg">
-              {ATTACH_ICONS[a.icon] ?? "📄"}
+              📄
             </div>
-            <p className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-100 mb-0.5">{a.name}</p>
-            {a.size && <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{a.size}</p>}
-          </div>
+            <p className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-100 mb-0.5 truncate">{a.name}</p>
+            {a.size && <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{formatBytes(a.size)}</p>}
+          </a>
         ))}
-        <div className="border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl p-4 flex items-center justify-center cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors">
+        <label className="border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl p-4 flex items-center justify-center cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors">
+          <input
+            type="file"
+            className="hidden"
+            disabled={uploading || !ticketId}
+            onChange={(e) => handleUpload(e.target.files?.[0])}
+          />
           <div className="text-center">
             <div className="w-8 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Plus size={16} className="text-zinc-400" />
+              {uploading ? <Loader2 size={16} className="text-zinc-400 animate-spin" /> : <Plus size={16} className="text-zinc-400" />}
             </div>
-            <p className="text-[13px] text-zinc-400 dark:text-zinc-500">Add Attachment</p>
+            <p className="text-[13px] text-zinc-400 dark:text-zinc-500">{uploading ? "Uploading…" : "Add Attachment"}</p>
           </div>
-        </div>
+        </label>
       </div>
     </Section>
   );
@@ -952,6 +1085,25 @@ export default function PostmortemDetailPage({ incidentId }: { incidentId?: stri
     enabled: !!ticketId,
     staleTime: 60_000,
   });
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Postmortem link copied to clipboard");
+    } catch {
+      toast.error("Could not copy link");
+    }
+  };
+
+  const handleExportPdf = () => {
+    window.print();
+  };
+
+  const handleEmail = () => {
+    const subject = encodeURIComponent(`Postmortem: ${pm?.ticket?.ticketId ?? pm?.ticketId ?? incidentId ?? ""}`);
+    const body = encodeURIComponent(`Postmortem details: ${window.location.href}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
 
   const handleLifecycle = async (action: "submit-review" | "approve" | "archive" | "restore") => {
     if (!incidentId) return;
@@ -1056,13 +1208,13 @@ export default function PostmortemDetailPage({ incidentId }: { incidentId?: stri
               </button>
             )}
             {[
-              { icon: <Share2 size={14} />, label: "Share" },
-              { icon: <FileText size={14} />, label: "Export PDF" },
-              { icon: <Mail size={14} />, label: "Email" },
-              { icon: <Pencil size={14} />, label: "Edit" },
+              { icon: <Share2 size={14} />, label: "Share", onClick: handleShare },
+              { icon: <FileText size={14} />, label: "Export PDF", onClick: handleExportPdf },
+              { icon: <Mail size={14} />, label: "Email", onClick: handleEmail },
             ].map((btn) => (
               <button
                 key={btn.label}
+                onClick={btn.onClick}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-[13px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
               >
                 {btn.icon} {btn.label}
@@ -1165,24 +1317,23 @@ export default function PostmortemDetailPage({ incidentId }: { incidentId?: stri
             </p>
             <div className="grid grid-cols-4 gap-8">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Investigation Duration</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-[32px] font-black text-white">
-                    {analysis?.metrics?.find((m: any) => m.key === "duration")?.value ?? aiAnalysis?.duration ?? "--"}
-                  </span>
-                  <span className="text-[14px] text-slate-400">min</span>
-                </div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Deployments examined</p>
+                <span className="text-[32px] font-black text-white">
+                  {analysis?.metrics?.deployments ?? "--"}
+                </span>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Signals Correlated</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Commits examined</p>
                 <p className="text-[32px] font-black text-white">
-                  {analysis?.metrics?.find((m: any) => m.key === "signals")?.value ?? aiAnalysis?.signalCount ?? "--"}
+                  {analysis?.metrics?.commits ?? "--"}
                 </p>
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Root Cause Confidence</p>
                 <p className="text-[32px] font-black text-emerald-400">
-                  {analysis?.metrics?.find((m: any) => m.key === "confidence")?.value ?? aiAnalysis?.confidence ?? "--"}
+                  {Array.isArray(analysis?.causalFactors) && analysis.causalFactors.length > 0
+                    ? `${Math.max(...analysis.causalFactors.map((c: any) => c.confidence ?? 0))}%`
+                    : "--"}
                 </p>
               </div>
               <div>

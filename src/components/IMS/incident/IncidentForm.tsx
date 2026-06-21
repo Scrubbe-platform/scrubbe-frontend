@@ -3,7 +3,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Info, X, Upload, FileText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,6 +13,8 @@ import TextArea from "@/components/ui/text-area";
 import useMember from "@/hooks/useMember";
 import { querykeys } from "@/lib/constant";
 import { createIncident, uploadIncidentAttachment } from "@/lib/incident/incident.api";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 
 // ── Schema ────────────────────────────────────────────────────────
 
@@ -179,6 +181,14 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: members = [] } = useMember();
+  const { get } = useFetch();
+  const { data: serviceNodes = [] } = useQuery({
+    queryKey: ["service-map-list"],
+    queryFn: async () => {
+      const res = await get(endpoint.service_map.list);
+      return res.success ? (res.data?.data ?? []) : [];
+    },
+  });
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
 
   const { control, handleSubmit, watch, formState: { errors } } = useForm<RaiseIncidentFormValues>({
@@ -258,12 +268,10 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Controller name="service" control={control} render={({ field }) => (
                   <Select {...field} label="Affected Service *" error={errors.service?.message} options={[
-                    { value: "select-service",   label: "Select service..."  },
-                    { value: "checkout-service", label: "checkout-service"  },
-                    { value: "billing-service",  label: "billing-service"   },
-                    { value: "auth-service",     label: "auth-service"      },
-                    { value: "api-gateway",      label: "api-gateway"       },
-                  ]} />
+                    { value: "select-service", label: serviceNodes.length > 0 ? "Select service..." : "No services registered yet" },
+                  ].concat(
+                    serviceNodes.map((s: { id: string; name: string }) => ({ value: s.name, label: s.name }))
+                  )} />
                 )} />
                 <Controller name="environment" control={control} render={({ field }) => (
                   <Select {...field} label="Environment *" error={errors.environment?.message} options={[

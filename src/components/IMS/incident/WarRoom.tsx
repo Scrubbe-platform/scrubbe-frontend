@@ -15,8 +15,11 @@ import {
 } from "lucide-react";
 import { SiZoom, SiGooglemeet } from "react-icons/si";
 import { BiLogoMicrosoftTeams } from "react-icons/bi";
+import { useQuery } from "@tanstack/react-query";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 import { useCreateWarRoom } from "@/hooks/useWarRoom";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 
 interface ExternalContact {
   name: string;
@@ -75,51 +78,20 @@ const PLATFORMS = [
   },
 ];
 
-const AFFECTED_SERVICES = [
-  {
-    name: "checkout-api",
-    status: "Degraded",
-    color: "text-orange-600 dark:text-orange-400",
-    bg: "bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20",
-  },
-  {
-    name: "payment-svc",
-    status: "Offline",
+const STATUS_STYLE: Record<string, { color: string; bg: string }> = {
+  Direct: {
     color: "text-red-600 dark:text-red-400",
     bg: "bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20",
   },
-  {
-    name: "order-router",
-    status: "Degraded",
+  Cascade: {
     color: "text-orange-600 dark:text-orange-400",
     bg: "bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20",
   },
-  {
-    name: "user-session",
-    status: "Elevated",
+  InDirect: {
     color: "text-yellow-700 dark:text-yellow-400",
     bg: "bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/20",
   },
-];
-
-const EZRA_BULLETS: { type: "check" | "warn" | "info"; text: string }[] = [
-  {
-    type: "check",
-    text: "Playbook match confidence is high (94%). Ezra will auto-populate triage steps on War Room open.",
-  },
-  {
-    type: "warn",
-    text: "payment-svc is offline — Ezra recommends a circuit-breaker check as first step.",
-  },
-  {
-    type: "info",
-    text: "Similar incident SI-003841 resolved in 22 min. Root cause was a DB connection pool exhaustion.",
-  },
-  {
-    type: "info",
-    text: "Guardrails active: EAL-L2 requires human approval before any automated rollback is executed.",
-  },
-];
+};
 
 // ── Shared tokens — light base, dark override ─────────────────────
 
@@ -249,6 +221,82 @@ const DeclareWarRoom: React.FC<Props> = ({ incident, onClose, onDeclare }) => {
   const elapsed = incident?.elapsedLabel ?? "00:19:59";
   const blastRadius = incident?.blastRadius ?? "4 services";
   const automationLevel = 2;
+
+  const { get, post } = useFetch();
+
+  const { data: blastReport } = useQuery({
+    queryKey: ["blast-radius-incident", incident?.id],
+    queryFn: async () => {
+      if (!incident?.id) return null;
+      const res = await get(`${endpoint.blast_radius.getForTrigger}/${incident.id}`);
+      return res.success ? (res.data?.data ?? null) : null;
+    },
+    enabled: !!incident?.id,
+  });
+
+  const { data: matchedPlaybook } = useQuery({
+    queryKey: ["playbook-match", incident?.id, incident?.category],
+    queryFn: async () => {
+      const res = await post(endpoint.playbooks.match, {
+        serviceNames: (incident?.service || incident?.affectedSystem)
+          ? [incident?.service || incident?.affectedSystem]
+          : undefined,
+        incidentType: incident?.category || incident?.sourceType,
+        signalTypes: incident?.detection ? [incident.detection] : undefined,
+      });
+      if (res.success) {
+        const matches: any[] = res.data?.data?.matches ?? res.data?.data ?? [];
+        return matches[0] ?? null;
+      }
+      return null;
+    },
+    enabled: !!incident?.id,
+  });
+
+  const { data: ezraAnalysis } = useQuery({
+    queryKey: ["ezra-analysis-delivery", incident?.id],
+    queryFn: async () => {
+      if (!incident?.id) return null;
+      const res = await get(`${endpoint.ezra.analysis}/${incident.id}`);
+      return res.success ? (res.data?.data ?? null) : null;
+    },
+    enabled: !!incident?.id,
+  });
+
+  const affectedServices = (blastReport?.affectedServices ?? []).map((s: any) => ({
+    name: s.name ?? "Unknown service",
+    status: s.type === "Direct" ? "Direct impact" : s.type === "Cascade" ? "Cascading" : "Indirect",
+    ...(STATUS_STYLE[s.type as string] ?? STATUS_STYLE.InDirect),
+  }));
+
+  const matchedPlaybookData = matchedPlaybook?.playbook ?? matchedPlaybook;
+  const matchConfidencePct = Math.round(
+    ((matchedPlaybook?.confidenceScore ?? matchedPlaybookData?.confidenceScore ?? 0)) * 100
+  ) || Math.round(matchedPlaybook?.confidenceScore ?? 0);
+
+  const ezraBullets: { type: "check" | "warn" | "info"; text: string }[] = [];
+  if (matchedPlaybookData?.name) {
+    ezraBullets.push({
+      type: "check",
+      text: `Playbook match confidence is ${matchConfidencePct}%. "${matchedPlaybookData.name}" will guide triage steps on War Room open.`,
+    });
+  }
+  if (ezraAnalysis?.rootCause?.hypotheses?.[0]?.title) {
+    ezraBullets.push({
+      type: "info",
+      text: `Leading hypothesis: ${ezraAnalysis.rootCause.hypotheses[0].title}`,
+    });
+  }
+  if (affectedServices.some((s: { status: string }) => s.status === "Direct impact")) {
+    ezraBullets.push({
+      type: "warn",
+      text: "A directly impacted service is offline — review blast radius before remediation.",
+    });
+  }
+  ezraBullets.push({
+    type: "info",
+    text: "Guardrails active: human approval required before any automated rollback is executed.",
+  });
 
   // Map client provider IDs to server provider keys
   const providerMap: Record<string, string> = {
@@ -578,56 +626,64 @@ const DeclareWarRoom: React.FC<Props> = ({ incident, onClose, onDeclare }) => {
           <div className="mb-4">
             <p className={sLabel}>Affected services</p>
             <div className="flex flex-wrap gap-2">
-              {AFFECTED_SERVICES.map((s) => (
-                <div key={s.name} className={`rounded-lg px-3 py-2 ${s.bg}`}>
-                  <p className={`text-[12px] font-semibold ${headingText}`}>
-                    {s.name}
-                  </p>
-                  <p className={`text-[11px] font-semibold ${s.color}`}>
-                    {s.status}
-                  </p>
-                </div>
-              ))}
+              {affectedServices.length > 0 ? (
+                affectedServices.map((s: { name: string; status: string; color: string; bg: string }) => (
+                  <div key={s.name} className={`rounded-lg px-3 py-2 ${s.bg}`}>
+                    <p className={`text-[12px] font-semibold ${headingText}`}>
+                      {s.name}
+                    </p>
+                    <p className={`text-[11px] font-semibold ${s.color}`}>
+                      {s.status}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className={`text-[12px] ${mutedText}`}>
+                  No blast radius report yet for this incident.
+                </p>
+              )}
             </div>
           </div>
 
           {/* Matched Playbook */}
           <div className="mb-4">
             <p className={sLabel}>Matched Playbook</p>
-            <div className={`flex items-center gap-3 p-4 rounded-xl ${cardBg}`}>
-              <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 flex items-center justify-center shrink-0">
-                <Shield
-                  size={16}
-                  className="text-blue-600 dark:text-blue-400"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className={`text-[13px] font-semibold ${headingText}`}>
-                    Payment Gateway Outage Response
-                  </span>
-                  <span
-                    className={`text-[10px] border border-zinc-300 dark:border-zinc-600 ${mutedText} rounded px-1.5 py-0.5`}
-                  >
-                    Workspace
-                  </span>
-                </div>
-                <p className={`text-[11px] ${mutedText}`}>
-                  Est. 18 min · 12 steps · Rev. 4.2
-                </p>
-              </div>
-              <div className="text-right shrink-0">
-                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/5 rounded px-2 py-1">
-                  94% match
-                </span>
-                <div className="mt-1.5 w-16 h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 rounded-full"
-                    style={{ width: "94%" }}
+            {matchedPlaybookData ? (
+              <div className={`flex items-center gap-3 p-4 rounded-xl ${cardBg}`}>
+                <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 flex items-center justify-center shrink-0">
+                  <Shield
+                    size={16}
+                    className="text-blue-600 dark:text-blue-400"
                   />
                 </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className={`text-[13px] font-semibold ${headingText}`}>
+                      {matchedPlaybookData.name}
+                    </span>
+                  </div>
+                  <p className={`text-[11px] ${mutedText}`}>
+                    {(matchedPlaybookData.steps?.length ?? 0)} steps · rev.{" "}
+                    {matchedPlaybookData.version ?? 1}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/5 rounded px-2 py-1">
+                    {matchConfidencePct}% match
+                  </span>
+                  <div className="mt-1.5 w-16 h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 rounded-full"
+                      style={{ width: `${Math.min(matchConfidencePct, 100)}%` }}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <p className={`text-[12px] ${mutedText} p-4 rounded-xl ${cardBg}`}>
+                No playbook matched this incident yet.
+              </p>
+            )}
           </div>
 
           {/* Ezra Intelligence */}
@@ -645,7 +701,7 @@ const DeclareWarRoom: React.FC<Props> = ({ incident, onClose, onDeclare }) => {
               </span>
             </div>
             <div className="space-y-2.5">
-              {EZRA_BULLETS.map((b, i) => (
+              {ezraBullets.map((b, i) => (
                 <div key={i} className="flex items-start gap-2.5">
                   {b.type === "check" && (
                     <CheckCircle2

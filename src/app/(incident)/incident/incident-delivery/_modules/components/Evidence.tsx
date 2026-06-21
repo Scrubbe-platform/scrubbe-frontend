@@ -28,6 +28,14 @@ const Evidence = ({ incident }: { incident: IncidentDetailRecord }) => {
         </span>
       </div>
 
+      {!evidencePayload.isLive && (
+        <div className="px-5 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-amber-50 dark:bg-amber-500/5">
+          <p className="text-[11px] text-amber-700 dark:text-amber-400">
+            No CI/VCS event payload has been captured for this incident — showing incident metadata only.
+          </p>
+        </div>
+      )}
+
       {/* Code block */}
       <div className="relative group px-5 py-4 bg-zinc-50 dark:bg-zinc-950/60">
         <Terminal

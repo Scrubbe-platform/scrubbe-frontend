@@ -1,32 +1,29 @@
 "use client";
 import React from "react";
-import { Bolt, Info, Check, Loader2, TriangleAlert } from "lucide-react";
+import { Bolt, Info, Check, Loader2 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 import { cn } from "@/lib/utils";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { toast } from "sonner";
+import {
+  PlaybookStepOutcome,
+  useActiveExecution,
+} from "../../hooks/usePlaybookExecution";
 
-type StepStatus = "completed" | "in-progress" | "pending";
-
-interface InvestigationStep {
-  id: number;
-  title: string;
-  description: string;
-  status: StepStatus;
-  tags: string[];
-  outcome?: string;
-  streamingCmd?: string;
-  branching?: { label: string; options: string[] };
-}
-
-// ── Status badge — keep minimal color for state meaning ───────────
+type StepStatus = "completed" | "in-progress" | "pending" | "skipped";
 
 const StatusBadge = ({ status }: { status: StepStatus }) => {
-  const styles = {
+  const styles: Record<StepStatus, string> = {
     completed:
       "border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/8 text-emerald-600 dark:text-emerald-400",
     "in-progress":
       "border-sky-200 dark:border-sky-500/25 bg-sky-50 dark:bg-sky-500/8 text-sky-600 dark:text-sky-400",
     pending:
       "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-black dark:text-zinc-500",
+    skipped:
+      "border-amber-200 dark:border-amber-500/25 bg-amber-50 dark:bg-amber-500/8 text-amber-600 dark:text-amber-400",
   };
   return (
     <span
@@ -43,80 +40,71 @@ const StepTag = ({ text }: { text: string }) => (
   </span>
 );
 
-// ── Data builder ──────────────────────────────────────────────────
-
-const buildSteps = (incident: IncidentDetailRecord): InvestigationStep[] => {
-  const serviceName =
-    incident.service || incident.affectedSystem || "unknown-service";
-  const environment = incident.environment || "runtime";
-  const elapsed = incident.elapsedLabel || "moments ago";
-  const recommended =
-    incident.recommendedActions[0] ||
-    incident.aiAnalysis?.suggestion ||
-    "Validate the current mitigation path.";
-
-  return [
-    {
-      id: 1,
-      title: "Review Recent Incident Signals",
-      description:
-        "Inspect the latest incident signal changes, ownership data, and telemetry notes before proposing an automation path.",
-      status: "completed",
-      tags: [
-        `Completed ${elapsed}`,
-        "Agent: deploy-scanner",
-        `Incident: ${incident.ticketId}`,
-      ],
-      outcome: `Outcome: context collected for ${serviceName}. ${recommended}`,
-    },
-    {
-      id: 2,
-      title: "Inspect Service Logs for Exceptions",
-      description:
-        "Stream live logs from the affected service and correlate exception patterns with the current incident timeline.",
-      status:
-        incident.status === "RESOLVED" || incident.status === "CLOSED"
-          ? "completed"
-          : "in-progress",
-      tags: [
-        "Agent: log-analyst",
-        `Target: ${serviceName} · ${environment}`,
-        "Timeout: 5m",
-      ],
-      streamingCmd: `Agent log-analyst-02 streaming — inspect ${serviceName} in ${environment}`,
-      branching: {
-        label: "Branch on outcome",
-        options: ["In Progress", "No exceptions → Skip to Step 4"],
-      },
-    },
-    {
-      id: 3,
-      title: "Verify Downstream Dependency Health",
-      description:
-        "Check dependent services, queue pressure, and data store health to rule out cascading failure before remediation.",
-      status: "pending",
-      tags: [
-        "Agent: topology-scanner",
-        `Region: ${incident.region || "global"}`,
-      ],
-    },
-    {
-      id: 4,
-      title: "Compare Before / After Impact",
-      description:
-        "Use the incident timeline and current impact notes to confirm whether the spike is local to this service or part of a wider platform event.",
-      status: "pending",
-      tags: ["Agent: metrics-correlator", `Scope: ${incident.ticketId}`],
-    },
-  ];
+const toStatus = (
+  step: PlaybookStepOutcome,
+  isCurrent: boolean
+): StepStatus => {
+  if (step.status === "COMPLETED") return "completed";
+  if (step.status === "SKIPPED") return "skipped";
+  return isCurrent ? "in-progress" : "pending";
 };
-
-// ── Component ─────────────────────────────────────────────────────
 
 const InvestigationTimeline: React.FC<{ incident: IncidentDetailRecord }> = ({
   incident,
 }) => {
-  const steps = buildSteps(incident);
+  const { data: execution, isLoading } = useActiveExecution(incident.id);
+  const { post } = useFetch();
+  const queryClient = useQueryClient();
+
+  const completeStep = useMutation({
+    mutationFn: async (stepIndex: number) => {
+      if (!execution) throw new Error("No active execution");
+      const res = await post(
+        `${endpoint.playbooks.completeStep}/${execution.id}/steps/${stepIndex}/complete`,
+        { result: "Completed via Investigation Timeline" }
+      );
+      if (!res.success) throw new Error("Failed to complete step");
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Step marked complete");
+      queryClient.invalidateQueries({
+        queryKey: ["playbook-execution-active", incident.id],
+      });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const skipStep = useMutation({
+    mutationFn: async (stepIndex: number) => {
+      if (!execution) throw new Error("No active execution");
+      const reason = window.prompt("Reason for skipping this step:");
+      if (!reason) throw new Error("Skip cancelled");
+      const res = await post(
+        `${endpoint.playbooks.skipStep}/${execution.id}/steps/${stepIndex}/skip`,
+        { reason }
+      );
+      if (!res.success) throw new Error("Failed to skip step");
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Step skipped");
+      queryClient.invalidateQueries({
+        queryKey: ["playbook-execution-active", incident.id],
+      });
+    },
+    onError: (e: Error) => {
+      if (e.message !== "Skip cancelled") toast.error(e.message);
+    },
+  });
+
+  const steps = [...(execution?.stepOutcomes ?? [])].sort(
+    (a, b) => a.stepIndex - b.stepIndex
+  );
+  const completedCount = steps.filter(
+    (s) => s.status === "COMPLETED" || s.status === "SKIPPED"
+  ).length;
+  const currentIndex = execution?.currentStepIndex ?? 0;
 
   return (
     <div
@@ -134,16 +122,17 @@ const InvestigationTimeline: React.FC<{ incident: IncidentDetailRecord }> = ({
               Investigation Steps
             </h2>
             <p className="mt-0.5 text-[12px] text-black dark:text-zinc-500">
-              State machine — Step[] with conditional branching and live
-              incident context
+              Live step outcomes from the active playbook execution
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <span className="rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-1.5 text-[11px] font-semibold text-black dark:text-zinc-400">
-            2 / 5 in progress
-          </span>
-        </div>
+        {steps.length > 0 && (
+          <div className="flex gap-2">
+            <span className="rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-1.5 text-[11px] font-semibold text-black dark:text-zinc-400">
+              {completedCount} / {steps.length} done
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Info banner */}
@@ -153,115 +142,108 @@ const InvestigationTimeline: React.FC<{ incident: IncidentDetailRecord }> = ({
           className="mt-0.5 shrink-0 text-black dark:text-zinc-500"
         />
         <p className="text-[12px] leading-relaxed text-black dark:text-zinc-400">
-          Steps are a state machine, not a checklist. Each step carries status,
-          outcome, and conditional routing so agent findings can expand or
-          narrow remediation options downstream.
+          Steps are persisted on the playbook execution record. Completing or
+          skipping a step here writes back to the same record used by the
+          audit trail.
         </p>
       </div>
 
-      {/* Timeline */}
-      <div className="relative ml-4 space-y-10 border-l border-zinc-100 dark:border-zinc-800 pb-4 pl-9">
-        {steps.map((step) => (
-          <div key={step.id} className="relative">
-            {/* Step dot */}
-            <div
-              className={cn(
-                "absolute -left-[46px] top-0 z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors",
-                step.status === "completed" &&
-                  "border-emerald-400 bg-emerald-400",
-                step.status === "in-progress" &&
-                  "border-sky-400 bg-white dark:bg-zinc-950 text-sky-500",
-                step.status === "pending" &&
-                  "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-black dark:text-zinc-600",
-              )}
-            >
-              {step.status === "completed" ? (
-                <Check size={12} className="text-white" />
-              ) : (
-                <span className="text-[10px] font-bold">{step.id}</span>
-              )}
-            </div>
-
-            {/* Title + badge */}
-            <div className="mb-2 flex items-start justify-between gap-3">
-              <h3
-                className={cn(
-                  "text-[13px] font-semibold leading-snug",
-                  step.status === "pending"
-                    ? "text-zinc-400 dark:text-zinc-500"
-                    : "text-black dark:text-zinc-100",
-                )}
-              >
-                {step.title}
-              </h3>
-              <StatusBadge status={step.status} />
-            </div>
-
-            {/* Description */}
-            <p
-              className={cn(
-                "mb-3 max-w-3xl text-[12px] leading-relaxed",
-                step.status === "pending"
-                  ? "text-zinc-300 dark:text-zinc-600"
-                  : "text-zinc-500 dark:text-zinc-400",
-              )}
-            >
-              {step.description}
-            </p>
-
-            {/* Tags */}
-            <div className="mb-3 flex flex-wrap gap-1.5">
-              {step.tags.map((tag) => (
-                <StepTag key={tag} text={tag} />
-              ))}
-            </div>
-
-            {/* Outcome — keep emerald, it signals a positive result */}
-            {step.outcome && (
-              <div className="rounded-xl border border-emerald-100 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/5 p-3.5 text-[11px] font-mono leading-relaxed text-emerald-700 dark:text-emerald-400">
-                {step.outcome}
-              </div>
-            )}
-
-            {/* Streaming + branching */}
-            {step.streamingCmd && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2.5 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-3.5">
-                  <Loader2
-                    size={13}
-                    className="animate-spin text-black dark:text-zinc-500 shrink-0"
-                  />
-                  <span className="text-[11px] font-mono text-black dark:text-zinc-400">
-                    {step.streamingCmd}
-                  </span>
+      {isLoading ? (
+        <p className="py-8 text-center text-[12px] text-black dark:text-zinc-500">
+          Loading investigation steps…
+        </p>
+      ) : steps.length === 0 ? (
+        <p className="py-8 text-center text-[12px] text-black dark:text-zinc-500">
+          No playbook execution triggered for this incident yet. Run a Dry
+          Run from the playbook card above to start an investigation.
+        </p>
+      ) : (
+        <div className="relative ml-4 space-y-10 border-l border-zinc-100 dark:border-zinc-800 pb-4 pl-9">
+          {steps.map((step, i) => {
+            const isCurrent =
+              step.status === "PENDING" && step.stepIndex === currentIndex;
+            const status = toStatus(step, isCurrent);
+            return (
+              <div key={step.id} className="relative">
+                <div
+                  className={cn(
+                    "absolute -left-[46px] top-0 z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors",
+                    status === "completed" &&
+                      "border-emerald-400 bg-emerald-400",
+                    status === "skipped" &&
+                      "border-amber-400 bg-amber-400",
+                    status === "in-progress" &&
+                      "border-sky-400 bg-white dark:bg-zinc-950 text-sky-500",
+                    status === "pending" &&
+                      "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-black dark:text-zinc-600"
+                  )}
+                >
+                  {status === "completed" || status === "skipped" ? (
+                    <Check size={12} className="text-white" />
+                  ) : (
+                    <span className="text-[10px] font-bold">{i + 1}</span>
+                  )}
                 </div>
-                {step.branching && (
-                  <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
-                    <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
-                      {step.branching.label}
-                    </p>
-                    <div className="flex gap-2">
-                      {step.branching.options.map((option, i) => (
-                        <button
-                          key={option}
-                          className={cn(
-                            "rounded-lg border px-3 py-1.5 text-[11px] font-medium transition-colors",
-                            i === 0
-                              ? "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"
-                              : "border-zinc-100 dark:border-zinc-800 text-black dark:text-zinc-500",
-                          )}
-                        >
-                          {option}
-                        </button>
-                      ))}
-                    </div>
+
+                <div className="mb-2 flex items-start justify-between gap-3">
+                  <h3
+                    className={cn(
+                      "text-[13px] font-semibold leading-snug",
+                      status === "pending"
+                        ? "text-zinc-400 dark:text-zinc-500"
+                        : "text-black dark:text-zinc-100"
+                    )}
+                  >
+                    {step.stepName}
+                  </h3>
+                  <StatusBadge status={status} />
+                </div>
+
+                <div className="mb-3 flex flex-wrap gap-1.5">
+                  <StepTag text={`performedBy: ${step.performedBy ?? "—"}`} />
+                  {step.completedAt && (
+                    <StepTag
+                      text={`completed: ${new Date(step.completedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                    />
+                  )}
+                </div>
+
+                {step.output && (
+                  <div className="mb-3 rounded-xl border border-emerald-100 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/5 p-3.5 text-[11px] font-mono leading-relaxed text-emerald-700 dark:text-emerald-400">
+                    {Object.entries(step.output)
+                      .map(([k, v]) => `${k}: ${String(v)}`)
+                      .join(" · ")}
+                  </div>
+                )}
+
+                {status === "in-progress" && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => completeStep.mutate(step.stepIndex)}
+                      disabled={completeStep.isPending}
+                      className="flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                    >
+                      {completeStep.isPending ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : (
+                        <Check size={12} />
+                      )}
+                      Complete step
+                    </button>
+                    <button
+                      onClick={() => skipStep.mutate(step.stepIndex)}
+                      disabled={skipStep.isPending}
+                      className="rounded-lg border border-zinc-100 dark:border-zinc-800 px-3 py-1.5 text-[11px] font-medium text-black dark:text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+                    >
+                      Skip step
+                    </button>
                   </div>
                 )}
               </div>
-            )}
-          </div>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
