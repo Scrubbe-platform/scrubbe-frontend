@@ -1183,7 +1183,7 @@ export const NewMenu: Record<string, NavItem[]> = {
     {
       name: "API & SDK",
       Icon: LuFolderClosed,
-      link: "/incident/sdk",
+      link: "/incident/api-key",
       isActive: false,
       isMenu: false,
     },

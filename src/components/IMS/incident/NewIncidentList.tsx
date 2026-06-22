@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { useIncidentWorkspace } from "@/hooks/useIncidentWorkspace";
 import IncidentDetailSkeleton from "@/components/loaders/incidentDetailLoader";
 import Image from "next/image";
+import IncidentUpdatePage from "./IncidentUpdatePage";
 
 type Props = {
   children?: React.ReactNode;
@@ -92,12 +93,17 @@ const IncidentOverview = ({ children, tabs }: Props) => {
 
                 {tabs === "overview" ? (
                   <>
-                    <DetectionSignals incident={selectedIncident} />
-                    <ScrubbeIntelligence incident={selectedIncident} />
-                    <IncidentContextModule
+                    <IncidentUpdatePage
                       incident={selectedIncident}
+                      onCancel={() => {}}
                       context={context}
                     />
+                    {/* <DetectionSignals incident={selectedIncident} /> */}
+                    {/* <ScrubbeIntelligence incident={selectedIncident} /> */}
+                    {/* <IncidentContextModule
+                      incident={selectedIncident}
+                      context={context}
+                    /> */}
                     <ActivityAuditTrail history={history} />
                   </>
                 ) : (
