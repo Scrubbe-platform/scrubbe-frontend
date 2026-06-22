@@ -16,7 +16,7 @@ const NAV_COLUMNS = [
       { label: "Platform", href: "/#" },
       { label: "Ezra", href: "/#" },
       { label: "Playbooks", href: "/#" },
-      { label: "Connectors", href: "/#" },
+      { label: "Connectors", href: "/connector" },
       { label: "Pricing", href: "/#" },
     ],
   },
