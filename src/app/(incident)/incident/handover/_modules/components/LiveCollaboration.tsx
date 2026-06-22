@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { MessageSquare, UserPlus, Send, X } from "lucide-react";
+import InviteModal from "./InviteModal";
 
 // types/collab.ts
 
@@ -74,7 +75,7 @@ export default function LiveCollaborationSection() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
   // 2. Chat Feed History Array Initialization
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -170,6 +171,12 @@ export default function LiveCollaborationSection() {
 
   return (
     <div className="w-full space-y-4">
+      <InviteModal
+        isOpen={isInviteOpen}
+        onClose={() => setIsInviteOpen(false)}
+        handoverId="HO-001283"
+      />
+
       {/* ── COLLAB BAR PANEL ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
         <div className="flex items-center gap-4">
@@ -222,7 +229,7 @@ export default function LiveCollaborationSection() {
 
           <button
             type="button"
-            onClick={() => console.log("INVITE_MODAL_TRIGGER")}
+            onClick={() => setIsInviteOpen(true)}
             className="flex-1 sm:flex-none inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
           >
             <UserPlus size={13} />
