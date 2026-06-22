@@ -24,7 +24,7 @@ export default function InviteModal({
   const [permission, setPermission] = useState("Can view and comment");
   const [copied, setCopied] = useState(false);
 
-  const shareUrl = `https://app.scrubbe.io/handovers/${handoverId}`;
+  const shareUrl = `https://incidents.scrubbe.com/incident/handovers/${handoverId}`;
 
   // 2. Clipboard API Handler with visual feedback
   const handleCopyLink = async () => {

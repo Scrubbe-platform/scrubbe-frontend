@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MessageSquare, UserPlus, Send, X } from "lucide-react";
 import InviteModal from "./InviteModal";
+import { useParams } from "next/navigation";
 
 // types/collab.ts
 
@@ -76,6 +77,8 @@ export default function LiveCollaborationSection() {
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const params = useParams<{ id: string }>();
+  const handoverId = params?.id as string;
   // 2. Chat Feed History Array Initialization
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -174,7 +177,7 @@ export default function LiveCollaborationSection() {
       <InviteModal
         isOpen={isInviteOpen}
         onClose={() => setIsInviteOpen(false)}
-        handoverId="HO-001283"
+        handoverId={handoverId}
       />
 
       {/* ── COLLAB BAR PANEL ── */}
