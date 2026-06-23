@@ -3,6 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { IncidentHistoryRecord } from "@/lib/incident/incident.types";
+import { MdOutlineChat } from "react-icons/md";
 
 type AuditEventType =
   | "Signal"
@@ -24,17 +25,47 @@ interface AuditEvent {
 // ── Event type styles ────────────────────────────────────────────
 
 const typeConfig: Record<AuditEventType, { dot: string; badge: string }> = {
-  Signal:       { dot: "border-amber-400 text-amber-500 bg-amber-50 dark:bg-amber-500/10",           badge: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20"       },
-  Policy:       { dot: "border-purple-400 text-purple-500 bg-purple-50 dark:bg-purple-500/10",        badge: "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20"   },
-  Playbook:     { dot: "border-emerald-400 text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10",    badge: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20" },
-  Guardrail:    { dot: "border-orange-400 text-orange-500 bg-orange-50 dark:bg-orange-500/10",        badge: "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20"   },
-  Notification: { dot: "border-teal-400 text-teal-500 bg-teal-50 dark:bg-teal-500/10",               badge: "text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-500/10 border-teal-200 dark:border-teal-500/20"               },
-  Enrichment:   { dot: "border-indigo-400 text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10",       badge: "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20"   },
+  Signal: {
+    dot: "border-amber-400 bg-amber-500 dark:bg-amber-500",
+    badge:
+      "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500 border-amber-200 dark:border-amber-500/20",
+  },
+  Policy: {
+    dot: "border-purple-400 bg-purple-500 dark:bg-purple-500",
+    badge:
+      "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500 border-purple-200 dark:border-purple-500/20",
+  },
+  Playbook: {
+    dot: "border-emerald-400 bg-emerald-500 dark:bg-emerald-500",
+    badge:
+      "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500 border-emerald-200 dark:border-emerald-500/20",
+  },
+  Guardrail: {
+    dot: "border-orange-400 bg-orange-500 dark:bg-orange-500",
+    badge:
+      "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500 border-orange-200 dark:border-orange-500/20",
+  },
+  Notification: {
+    dot: "border-teal-400 bg-teal-500 dark:bg-teal-500",
+    badge:
+      "text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-500 border-teal-200 dark:border-teal-500/20",
+  },
+  Enrichment: {
+    dot: "border-indigo-400 bg-indigo-500 dark:bg-indigo-500",
+    badge:
+      "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500 border-indigo-200 dark:border-indigo-500/20",
+  },
 };
 
 // ── Single event row ─────────────────────────────────────────────
 
-const EventRow = ({ event, isLast }: { event: AuditEvent; isLast: boolean }) => {
+const EventRow = ({
+  event,
+  isLast,
+}: {
+  event: AuditEvent;
+  isLast: boolean;
+}) => {
   const cfg = typeConfig[event.type];
 
   return (
@@ -47,8 +78,8 @@ const EventRow = ({ event, isLast }: { event: AuditEvent; isLast: boolean }) => 
       {/* Avatar dot */}
       <div
         className={cn(
-          "w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 z-10 transition-colors",
-          cfg.dot
+          "w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 z-10 transition-colors text-white",
+          cfg.dot,
         )}
       >
         <span className="text-[11px] font-bold">{event.initial}</span>
@@ -59,10 +90,12 @@ const EventRow = ({ event, isLast }: { event: AuditEvent; isLast: boolean }) => 
         <div className="rounded-xl border border-zinc-500 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/40 px-4 py-3 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
           <div className="flex items-center justify-between gap-2 mb-2">
             {/* Type badge */}
-            <span className={cn(
-              "inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider border",
-              cfg.badge
-            )}>
+            <span
+              className={cn(
+                "inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider border",
+                cfg.badge,
+              )}
+            >
               {event.label}
             </span>
 
@@ -84,11 +117,11 @@ const EventRow = ({ event, isLast }: { event: AuditEvent; isLast: boolean }) => 
 // ── Data builder ─────────────────────────────────────────────────
 
 const actionTypeMap: Record<string, AuditEventType> = {
-  created:        "Signal",
+  created: "Signal",
   status_changed: "Policy",
-  updated:        "Enrichment",
-  resolved:       "Playbook",
-  comment_added:  "Notification",
+  updated: "Enrichment",
+  resolved: "Playbook",
+  comment_added: "Notification",
 };
 
 const buildAuditEvents = (history: IncidentHistoryRecord[]): AuditEvent[] =>
@@ -111,26 +144,34 @@ const buildAuditEvents = (history: IncidentHistoryRecord[]): AuditEvent[] =>
 
 // ── Section ──────────────────────────────────────────────────────
 
-const ActivityAuditTrail: React.FC<{ history: IncidentHistoryRecord[] }> = ({ history }) => {
+const ActivityAuditTrail: React.FC<{ history: IncidentHistoryRecord[] }> = ({
+  history,
+}) => {
   const events = buildAuditEvents(history);
 
   return (
-    <div className="px-5 md:px-8 py-6">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500 mb-5">
-        Activity & Audit Trail
-      </p>
+    <div className=" p-5">
+      <div className="bg-white dark:bg-zinc-950 w-full rounded-2xl border border-black dark:border-zinc-800 p-4">
+        <h3 className="text-base mb-3 font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 pb-2 border-b border-zinc-50 dark:border-zinc-900">
+          <MdOutlineChat size={17} /> Activity & Audit Trail
+        </h3>
 
-      {events.length > 0 ? (
-        <div className="flex flex-col">
-          {events.map((event, idx) => (
-            <EventRow key={event.id} event={event} isLast={idx === events.length - 1} />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-xl border border-dashed border-zinc-500 dark:border-zinc-700 px-5 py-6 text-[13px] text-black dark:text-zinc-500">
-          No audit events have been recorded for this incident yet.
-        </div>
-      )}
+        {events.length > 0 ? (
+          <div className="flex flex-col">
+            {events.map((event, idx) => (
+              <EventRow
+                key={event.id}
+                event={event}
+                isLast={idx === events.length - 1}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-zinc-500 dark:border-zinc-700 px-5 py-6 text-[13px] text-black dark:text-zinc-500">
+            No audit events have been recorded for this incident yet.
+          </div>
+        )}
+      </div>
     </div>
   );
 };

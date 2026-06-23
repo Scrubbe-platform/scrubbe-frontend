@@ -18,6 +18,7 @@ import {
 import IncidentFilterPanel, { IncidentFilters } from "./IncidentFilterPanel";
 import Button from "@/components/ui/Button1";
 import Dropdown from "@/components/ui/Dropdown";
+import { useRouter } from "next/navigation";
 
 // Real progression order of IncidentSidebarStatus. "Investigating" is a
 // renderer-side alias for "Analyzed" (see incident.mapper.ts toSidebarStatus)
@@ -34,20 +35,28 @@ const SIDEBAR_STAGE_ORDER: IncidentSidebarStatus[] = [
 ];
 
 function sidebarStageIndex(status: IncidentSidebarStatus): number {
-  if (status === "Investigating") return SIDEBAR_STAGE_ORDER.indexOf("Analyzed");
+  if (status === "Investigating")
+    return SIDEBAR_STAGE_ORDER.indexOf("Analyzed");
   return SIDEBAR_STAGE_ORDER.indexOf(status);
 }
 
 const SIDEBAR_STATUS_BADGE: Record<IncidentSidebarStatus, string> = {
   Detected: "border-red-500/60 text-red-600 dark:text-red-400 bg-red-500/8",
-  Enriched: "border-amber-500/60 text-amber-600 dark:text-amber-400 bg-amber-500/8",
+  Enriched:
+    "border-amber-500/60 text-amber-600 dark:text-amber-400 bg-amber-500/8",
   Analyzed: "border-blue-500/60 text-blue-600 dark:text-blue-400 bg-blue-500/8",
-  Investigating: "border-blue-500/60 text-blue-600 dark:text-blue-400 bg-blue-500/8",
-  Proposed: "border-purple-500/60 text-purple-600 dark:text-purple-400 bg-purple-500/8",
-  Approved: "border-indigo-500/60 text-indigo-600 dark:text-indigo-400 bg-indigo-500/8",
-  Executing: "border-orange-500/60 text-orange-600 dark:text-orange-400 bg-orange-500/8",
-  Resolved: "border-emerald-500/60 text-emerald-600 dark:text-emerald-400 bg-emerald-500/8",
-  "Post-Mortem": "border-zinc-500/60 text-zinc-600 dark:text-zinc-400 bg-zinc-500/8",
+  Investigating:
+    "border-blue-500/60 text-blue-600 dark:text-blue-400 bg-blue-500/8",
+  Proposed:
+    "border-purple-500/60 text-purple-600 dark:text-purple-400 bg-purple-500/8",
+  Approved:
+    "border-indigo-500/60 text-indigo-600 dark:text-indigo-400 bg-indigo-500/8",
+  Executing:
+    "border-orange-500/60 text-orange-600 dark:text-orange-400 bg-orange-500/8",
+  Resolved:
+    "border-emerald-500/60 text-emerald-600 dark:text-emerald-400 bg-emerald-500/8",
+  "Post-Mortem":
+    "border-zinc-500/60 text-zinc-600 dark:text-zinc-400 bg-zinc-500/8",
 };
 
 const SIDEBAR_STAGE_FILL: Record<IncidentSidebarStatus, string> = {
@@ -131,7 +140,9 @@ const IncidentCard = ({
           <div
             key={stage}
             className={`h-1 flex-1 rounded-sm transition-all duration-700 ${
-              filled ? SIDEBAR_STAGE_FILL[incident.sidebarStatus] : "bg-zinc-100 dark:bg-white/5"
+              filled
+                ? SIDEBAR_STAGE_FILL[incident.sidebarStatus]
+                : "bg-zinc-100 dark:bg-white/5"
             }`}
           />
         );
@@ -158,6 +169,7 @@ export const ExactIncidentSidebar: React.FC = () => {
   const [status, setStatus] = useState("all");
   const incidents = data?.incidents ?? [];
   const normalizedQuery = query.trim().toLowerCase();
+  const router = useRouter();
 
   // Count active advanced filters
   const advancedFilterCount = activeFilters
@@ -274,7 +286,7 @@ export const ExactIncidentSidebar: React.FC = () => {
               : ""}
           </p>
           <Button
-            onClick={() => setOpen((prev) => !prev)}
+            onClick={() => router.push("/incident/tickets/create")}
             variant="solid"
             size="sm"
             leftIcon={<PlusIcon size={16} />}
@@ -427,8 +439,6 @@ export const ExactIncidentSidebar: React.FC = () => {
           )}
         </div>
       </div>
-
-      {open && <RaiseIncidentModal onClose={() => setOpen(false)} />}
     </div>
   );
 };

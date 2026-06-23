@@ -60,6 +60,7 @@ export const incidentContextSchema = z.object({
   assignedTo: z.string().min(1, "Assignee is required"),
   priority: z.string(),
   description: z.string().min(1, "Description is required"),
+  summary: z.string().min(1, "Summary is required"),
   customerImpact: z.string(),
   externalCommunication: z.string(),
   incidentCommander: z.string(),
@@ -130,7 +131,8 @@ const AddContextForm = ({
       environment: incident.environment ?? "",
       assignedTo: incident.assignedToName ?? incident.assignedToEmail ?? "",
       priority: incident.severity ?? incident.priority ?? "P1",
-      description: incident.description ?? incident.summary ?? "",
+      description: incident.description || "",
+      summary: incident.summary || "",
       labels: context?.labels ?? [],
       businessImpact:
         context?.businessImpact ?? incident.financialExposure ?? "",
@@ -205,6 +207,7 @@ const AddContextForm = ({
         assignedTo: data.assignedTo,
         priority: data.priority,
         description: data.description,
+        summary: data.summary,
         customerImpact: data.customerImpact,
         externalCommunication: data.externalCommunication,
         incidentCommander: data.incidentCommander,
@@ -466,7 +469,7 @@ const AddContextForm = ({
               </h3>
 
               <Controller
-                name="description"
+                name="summary"
                 control={control}
                 render={({ field }) => (
                   <div>
@@ -493,7 +496,7 @@ const AddContextForm = ({
               />
 
               <Controller
-                name="additionalContext"
+                name="description"
                 control={control}
                 render={({ field }) => (
                   <div>

@@ -5,7 +5,16 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Info, X, Upload, FileText, Trash2 } from "lucide-react";
+import {
+  Info,
+  X,
+  Upload,
+  FileText,
+  Trash2,
+  ChevronLeft,
+  InfoIcon,
+  User,
+} from "lucide-react";
 import { toast } from "sonner";
 import Input from "@/components/ui/input";
 import Select from "@/components/ui/select";
@@ -18,6 +27,9 @@ import {
 } from "@/lib/incident/incident.api";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
+import Button from "@/components/ui/Button1";
+import { FaRegFileLines } from "react-icons/fa6";
+import RichTextEditor from "@/components/ui/RichTextEditor";
 
 // ── Schema ────────────────────────────────────────────────────────
 
@@ -30,6 +42,7 @@ export const raiseIncidentSchema = z.object({
   environment: z.string().min(1, "Environment is required"),
   severity: z.enum(["P0", "P1", "P2", "P3", "P4"]),
   description: z.string().min(20, "Please provide a more detailed description"),
+  summary: z.string().min(20, "Please provide a summary"),
   firstNoticed: z.string().min(1, "Selection required"),
   recentChange: z.string().optional(),
   customerImpact: z.string().min(1, "Impact status required"),
@@ -108,15 +121,20 @@ const severityConfig: Record<
 const FormSection = ({
   children,
   title,
+  icon,
 }: {
   children: React.ReactNode;
+  icon: React.ReactNode;
   title: string;
 }) => (
-  <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5">
-    <p className="text-[14px] font-semibold text-black dark:text-zinc-100 mb-4">
-      {title}
-    </p>
-    {children}
+  <div className="rounded-sm border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 ">
+    <div className="px-4 py-3 items-center border-b border-zinc-500 dark:border-zinc-700/60 flex flex-row gap-3">
+      {icon}
+      <p className="text-[14px] font-semibold text-black dark:text-zinc-100 ">
+        {title}
+      </p>
+    </div>
+    <div className="p-5">{children}</div>
   </div>
 );
 
@@ -208,12 +226,9 @@ function EvidenceSection({
         : `${(b / (1024 * 1024)).toFixed(1)}MB`;
 
   return (
-    <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 p-5">
-      <p className="text-[14px] font-semibold text-black dark:text-zinc-100 mb-0.5">
-        Evidence and Attachments
-      </p>
+    <div className="">
       <p className="text-[12px] text-black dark:text-zinc-500 mb-4">
-        Upload files as evidence
+        Attachments
       </p>
 
       <div
@@ -293,7 +308,7 @@ function EvidenceSection({
 
 // ── Main modal ────────────────────────────────────────────────────
 
-const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
+const RaiseIncidentModal = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: members = [] } = useMember();
@@ -319,7 +334,6 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
       environment: "Production",
       customerImpact: "unknown",
       title: "",
-      description: "",
       firstNoticed: "alert-alarm-fired",
       recentChange: "",
       businessImpact: "",
@@ -327,6 +341,8 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
       notifyChannels: "sre-oncall-pagerduty",
       service: "select-service",
       warRoom: "not-required",
+      description:
+        "<p><strong>Minimum Required</strong></p><p>1. Can customers access the service?<br>2. Partial outage or complete outage?<br>3. Are all regions affected?<br>4. Are all users affected?<br>5. Which deployment triggered this?<br>6. Rollback available?<br>7. Was deployment successful initially?<br>8. Affected environment?<br>9. Cloud provider?<br>10. Region?<br>11. Network impact?</p>",
     },
   });
 
@@ -344,7 +360,7 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
   const createMutation = useMutation({
     mutationFn: async (data: RaiseIncidentFormValues) => {
       const incident = await createIncident({
-        summary: data.title.trim(),
+        summary: data.summary,
         reason: data.title.trim(),
         description: data.description.trim(),
         techDescription: data.description.trim(),
@@ -392,7 +408,6 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
         queryKey: [querykeys.INCIDENT_TICKET],
       });
       toast.success(`Incident ${incident.ticketId} created`);
-      onClose?.();
       router.push(`/incident?id=${incident.id}&tab=overview`);
     },
     onError: (err: Error) =>
@@ -407,36 +422,36 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-y-auto rounded-2xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-950 shadow-xl">
-        {/* Header */}
-        <div className="sticky top-0 z-20 flex items-start justify-between border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 py-5">
-          <div>
-            <h2 className="text-[18px] font-bold text-black dark:text-zinc-100">
-              Raise Incident
-            </h2>
-            <p className="mt-0.5 text-[12px] text-black dark:text-zinc-500">
-              Manual raise · enters the same governance pipeline as
-              auto-detected incidents
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg bg-zinc-100 dark:bg-zinc-800 p-1.5 text-black hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+    <div className="flex w-full flex-col  bg-white dark:bg-zinc-950">
+      {/* Header */}
+      <div className="sticky top-0 z-20 flex items-start justify-between border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 py-5">
+        <div className=" space-y-3">
+          <Button
+            size="sm"
+            variant="outline-dark"
+            leftIcon={<ChevronLeft size={16} />}
+            onClick={() => router.back()}
           >
-            <X size={16} />
-          </button>
+            Back
+          </Button>
+          <h2 className="text-2xl font-bold text-black dark:text-zinc-100">
+            Raise Incident
+          </h2>
         </div>
+      </div>
 
-        <form
-          onSubmit={handleSubmit(async (data) =>
-            createMutation.mutateAsync(data),
-          )}
-          className="space-y-3 p-6"
-        >
+      <form
+        onSubmit={handleSubmit(async (data) =>
+          createMutation.mutateAsync(data),
+        )}
+        className="p-6"
+      >
+        <div className=" grid md:grid-cols-2 gap-6">
           {/* Core Details */}
-          <FormSection title="Core Details">
+          <FormSection
+            title="Incident Information"
+            icon={<InfoIcon size={17} />}
+          >
             <div className="space-y-5">
               <Controller
                 name="title"
@@ -495,55 +510,34 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
               </div>
 
               {/* Severity picker */}
-              <div>
-                <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
-                  Severity *
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {(["P0", "P1", "P2", "P3"] as const).map((sev) => (
-                    <Controller
-                      key={sev}
-                      name="severity"
-                      control={control}
-                      render={({ field }) => (
-                        <button
-                          type="button"
-                          onClick={() => field.onChange(sev)}
-                          className={`flex flex-col items-center rounded-xl border p-3 transition-colors ${
-                            field.value === sev
-                              ? severityConfig[sev].active
-                              : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/40 text-black dark:text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-600"
-                          }`}
-                        >
-                          <span className="text-[13px] font-bold">{sev}</span>
-                          <span className="text-[9px] uppercase opacity-70 mt-0.5">
-                            {severityConfig[sev].label}
-                          </span>
-                        </button>
-                      )}
+              <Controller
+                name="severity"
+                control={control}
+                render={({ field }) => (
+                  <div>
+                    <Select
+                      {...field}
+                      label="Severity"
+                      error={errors.service?.message}
+                      options={[
+                        { value: "P0", label: "P0 — Critical" },
+                        { value: "P1", label: "P1 — High" },
+                        { value: "P2", label: "P2 — Medium" },
+                        { value: "P3", label: "P3 — Low" },
+                      ]}
                     />
-                  ))}
-                </div>
-              </div>
+                  </div>
+                )}
+              />
             </div>
           </FormSection>
 
           {/* Context & Detail */}
-          <FormSection title="Context & Detail">
+          <FormSection
+            title="Incident Context"
+            icon={<FaRegFileLines size={17} />}
+          >
             <div className="space-y-5">
-              <Controller
-                name="description"
-                control={control}
-                render={({ field }) => (
-                  <TextArea
-                    {...field}
-                    label="What is happening? *"
-                    placeholder="Describe the symptoms, affected users, and what responders know so far."
-                    error={errors.description?.message}
-                    rows={4}
-                  />
-                )}
-              />
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Controller
                   name="firstNoticed"
@@ -612,8 +606,63 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
             </div>
           </FormSection>
 
+          <FormSection
+            title="Incident Details"
+            icon={<FaRegFileLines size={17} />}
+          >
+            <Controller
+              name="summary"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  {/* REPLACED: Passing RHF fields directly into the managed rich text editor instance */}
+
+                  <TextArea
+                    {...field}
+                    label="Short Description"
+                    required
+                    rows={3}
+                    placeholder="Add transient details or handoff items..."
+                    error={errors.description?.message}
+                  />
+
+                  {errors.description && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.description.message}
+                    </p>
+                  )}
+                </div>
+              )}
+            />
+
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <label className="text-[12px] text-black dark:text-zinc-500 mb-2 font-medium">
+                    Detailed Description
+                  </label>
+                  <RichTextEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+
+                  {errors.description && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.description.message}
+                    </p>
+                  )}
+                </div>
+              )}
+            />
+          </FormSection>
+
           {/* Assignment & Notifications */}
-          <FormSection title="Assignment & Notifications">
+          <FormSection
+            title="Assignment & Notifications"
+            icon={<User size={17} />}
+          >
             <div className="space-y-5">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Controller
@@ -661,73 +710,44 @@ const RaiseIncidentModal = ({ onClose }: { onClose?: () => void }) => {
                   />
                 )}
               />
+              <EvidenceSection
+                files={attachedFiles}
+                onAdd={(f) =>
+                  setAttachedFiles((p) => [
+                    ...p,
+                    ...f.map((file) => ({
+                      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                      file,
+                    })),
+                  ])
+                }
+                onRemove={(id) =>
+                  setAttachedFiles((p) => p.filter((f) => f.id !== id))
+                }
+              />
             </div>
           </FormSection>
+        </div>
 
-          <EvidenceSection
-            files={attachedFiles}
-            onAdd={(f) =>
-              setAttachedFiles((p) => [
-                ...p,
-                ...f.map((file) => ({
-                  id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-                  file,
-                })),
-              ])
-            }
-            onRemove={(id) =>
-              setAttachedFiles((p) => p.filter((f) => f.id !== id))
-            }
-          />
+        {/* Preview */}
 
-          {/* Preview */}
-          <div className="rounded-xl border border-emerald-100 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/5 p-5">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-500 mb-3">
-              Incident Preview
-            </p>
-            <p className="text-[18px] font-bold text-black dark:text-zinc-100 mb-1 break-words">
-              {watchedTitle || "Incident title will appear here…"}
-            </p>
-            <p className="text-[12px] text-black dark:text-zinc-400 mb-3">
-              {watchedService !== "select-service" ? watchedService : "Service"}{" "}
-              · {watchedEnv} · {watchedSeverity}
-            </p>
-            <div className="flex items-start gap-2 text-[11px] text-black dark:text-zinc-500">
-              <Info size={13} className="mt-0.5 shrink-0" />
-              <p>
-                Scrubbe will correlate this with active signals and run playbook
-                matching automatically once raised.
-              </p>
-            </div>
-          </div>
+        {createMutation.isError && (
+          <p className="text-[12px] text-red-500">
+            Unable to create the incident right now. Please try again.
+          </p>
+        )}
 
-          {createMutation.isError && (
-            <p className="text-[12px] text-red-500">
-              Unable to create the incident right now. Please try again.
-            </p>
-          )}
-
-          {/* Footer */}
-          <div className="sticky bottom-0 z-20 flex justify-end gap-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 py-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-zinc-500 dark:border-zinc-700 px-5 py-2 text-[12px] font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={createMutation.isPending}
-              className="rounded-lg bg-emerald-500 hover:bg-emerald-600 px-6 py-2 text-[12px] font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {createMutation.isPending
-                ? "Creating…"
-                : "Save and raise incident"}
-            </button>
-          </div>
-        </form>
-      </div>
+        {/* Footer */}
+        <div className="sticky bottom-0 z-20 flex gap-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 py-4">
+          <button
+            type="submit"
+            disabled={createMutation.isPending}
+            className="rounded-lg bg-emerald-500 hover:bg-emerald-600 px-6 py-2 text-[12px] font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {createMutation.isPending ? "Creating…" : "Raise Incident"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

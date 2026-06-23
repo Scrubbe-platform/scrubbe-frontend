@@ -13,6 +13,7 @@ import AddContextForm from "./ContextForm";
 import Dropdown from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button1";
 import { EllipsisVertical, Plus, Video } from "lucide-react";
+import LiveViewers from "./LiveViewers";
 
 interface TabItem {
   id: string;
@@ -28,7 +29,6 @@ interface IncidentHeaderProps {
 
 const IncidentHeader = ({
   incident,
-  stats,
   context,
   activeTab,
 }: IncidentHeaderProps) => {
@@ -120,15 +120,11 @@ const IncidentHeader = ({
 
         {/* Actions */}
         <div className="flex items-center gap-2 shrink-0">
+          <LiveViewers title="Viewing this Incident" />
           <Dropdown
             position="left"
+            showSelectedIcon={false}
             items={[
-              {
-                value: "context",
-                label: "Add Context",
-                icon: <Plus size={14} />,
-                onClick: () => setOpenContext(true),
-              },
               {
                 value: "war-room",
                 label: "War Room",

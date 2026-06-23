@@ -21,7 +21,8 @@ type DropdownAlign = "left" | "right";
 type DropdownPosition = "bottom" | "top" | "left" | "right";
 
 interface DropdownProps {
-  items: DropdownItem[];
+  items?: DropdownItem[];
+  children?: ReactNode;
   trigger?:
     | ReactNode
     | ((selected: DropdownItem | null, open: boolean) => ReactNode);
@@ -49,6 +50,7 @@ export default function Dropdown({
   defaultValue,
   onChange,
   showSelectedIcon = true,
+  children,
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
   const [internalValue, setInternalValue] = useState<string | undefined>(
@@ -58,7 +60,7 @@ export default function Dropdown({
   const activeValue = value !== undefined ? value : internalValue;
 
   const selectedItem =
-    items.find(
+    items?.find(
       (item): item is Extract<DropdownItem, { type?: "item" }> =>
         (!item.type || item.type === "item") && item.value === activeValue,
     ) ?? null;
@@ -147,78 +149,84 @@ export default function Dropdown({
             menuClassName,
           ].join(" ")}
         >
-          {items.map((item, i) => {
-            if (item.type === "divider") {
-              return (
-                <hr
-                  key={i}
-                  className="my-1 border-neutral-100 dark:border-neutral-800"
-                />
-              );
-            }
-
-            if (item.type === "label") {
-              return (
-                <div
-                  key={i}
-                  className="px-3 pt-2 pb-1 text-[10px] font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-500 select-none"
-                >
-                  {item.label}
-                </div>
-              );
-            }
-
-            const isSelected = activeValue === item.value;
-            return (
-              <button
-                key={i}
-                role="menuitem"
-                disabled={item.disabled}
-                onClick={() => {
-                  if (!item.disabled) {
-                    setInternalValue(item.value);
-                    onChange?.(item.value, item);
-                    item.onClick?.();
-                    setOpen(false);
-                  }
-                }}
-                className={[
-                  "w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-left",
-                  "transition-colors duration-150 focus:outline-none",
-                  item.disabled
-                    ? "opacity-40 cursor-not-allowed text-neutral-400 dark:text-neutral-500"
-                    : isSelected
-                      ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white font-medium"
-                      : "text-neutral-800 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 focus-visible:bg-neutral-50 dark:focus-visible:bg-neutral-800",
-                ].join(" ")}
-              >
-                {item.icon && (
-                  <span className="flex-shrink-0 text-neutral-500 dark:text-neutral-400 w-4 h-4 flex items-center justify-center">
-                    {item.icon}
-                  </span>
-                )}
-                <span className="flex-1">{item.label}</span>
-                {showSelectedIcon && isSelected && (
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="flex-shrink-0 text-[#22a156]"
-                  >
-                    <path
-                      d="M2.5 7L5.5 10L11.5 4"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+          {items ? (
+            <>
+              {items.map((item, i) => {
+                if (item.type === "divider") {
+                  return (
+                    <hr
+                      key={i}
+                      className="my-1 border-neutral-100 dark:border-neutral-800"
                     />
-                  </svg>
-                )}
-              </button>
-            );
-          })}
+                  );
+                }
+
+                if (item.type === "label") {
+                  return (
+                    <div
+                      key={i}
+                      className="px-3 pt-2 pb-1 text-[10px] font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-500 select-none"
+                    >
+                      {item.label}
+                    </div>
+                  );
+                }
+
+                const isSelected = activeValue === item.value;
+                return (
+                  <button
+                    key={i}
+                    role="menuitem"
+                    disabled={item.disabled}
+                    onClick={() => {
+                      if (!item.disabled) {
+                        setInternalValue(item.value);
+                        onChange?.(item.value, item);
+                        item.onClick?.();
+                        setOpen(false);
+                      }
+                    }}
+                    className={[
+                      "w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-left",
+                      "transition-colors duration-150 focus:outline-none",
+                      item.disabled
+                        ? "opacity-40 cursor-not-allowed text-neutral-400 dark:text-neutral-500"
+                        : isSelected
+                          ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white font-medium"
+                          : "text-neutral-800 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 focus-visible:bg-neutral-50 dark:focus-visible:bg-neutral-800",
+                    ].join(" ")}
+                  >
+                    {item.icon && (
+                      <span className="flex-shrink-0 text-neutral-500 dark:text-neutral-400 w-4 h-4 flex items-center justify-center">
+                        {item.icon}
+                      </span>
+                    )}
+                    <span className="flex-1">{item.label}</span>
+                    {showSelectedIcon && isSelected && (
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 14 14"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="flex-shrink-0 text-[#22a156]"
+                      >
+                        <path
+                          d="M2.5 7L5.5 10L11.5 4"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
+            </>
+          ) : (
+            <>{children}</>
+          )}
         </div>
       )}
     </div>
