@@ -1,5 +1,7 @@
+import MessagesModal from "@/app/(incident)/incident/handover/_modules/components/MessagesModal";
 import Dropdown from "@/components/ui/Dropdown";
-import React from "react";
+import React, { useState } from "react";
+import { BiMessageRoundedDetail } from "react-icons/bi";
 import { GiChatBubble } from "react-icons/gi";
 import { IoChatboxOutline } from "react-icons/io5";
 
@@ -40,6 +42,7 @@ type Props = {
   title: string;
 };
 const LiveViewers = ({ title }: Props) => {
+  const [openChatModal, setOpenChatModal] = useState(false);
   return (
     <div>
       <Dropdown
@@ -65,7 +68,7 @@ const LiveViewers = ({ title }: Props) => {
           </div>
         }
       >
-        <div className="min-w-[250px] px-4 py-4">
+        <div className="min-w-[270px] px-4 py-4">
           <div>
             <p className="text-base font-bold">{title}</p>
             <p className="text-xs text-zinc-400 dark:text-zinc-500">
@@ -91,14 +94,23 @@ const LiveViewers = ({ title }: Props) => {
                     <p className="text-xs">{viewer.department}</p>
                   </div>
                 </div>
-                <div className=" cursor-pointer">
-                  <IoChatboxOutline />
+
+                <div
+                  onClick={() => setOpenChatModal(true)}
+                  className="cursor-pointer text-sm text-IMSLightGreen border-IMSDarkGreen flex items-center gap-1 border rounded-sm px-2"
+                >
+                  <BiMessageRoundedDetail />
+                  Message
                 </div>
               </div>
             ))}
           </div>
         </div>
       </Dropdown>
+
+      {openChatModal && (
+        <MessagesModal onClose={() => setOpenChatModal(false)} />
+      )}
     </div>
   );
 };
