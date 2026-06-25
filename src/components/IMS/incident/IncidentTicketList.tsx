@@ -112,19 +112,19 @@ const IncidentTicketList = () => {
         statusFilter === "all"
           ? true
           : statusFilter === "resolved"
-          ? incident.status === "RESOLVED" ||
-            incident.sidebarStatus === "Resolved"
-          : incident.status !== "RESOLVED" &&
-            incident.sidebarStatus !== "Resolved";
+            ? incident.status === "RESOLVED" ||
+              incident.sidebarStatus === "Resolved"
+            : incident.status !== "RESOLVED" &&
+              incident.sidebarStatus !== "Resolved";
 
       const matchesSeverity =
         severityFilter === "all"
           ? true
           : severityFilter === "p1"
-          ? incident.severity === "P1"
-          : severityFilter === "p2p3"
-          ? incident.severity === "P2" || incident.severity === "P3"
-          : incident.severity === "P4";
+            ? incident.severity === "P1"
+            : severityFilter === "p2p3"
+              ? incident.severity === "P2" || incident.severity === "P3"
+              : incident.severity === "P4";
 
       return matchesQuery && matchesStatus && matchesSeverity;
     });
@@ -234,7 +234,7 @@ const IncidentTicketList = () => {
         ),
       },
     ],
-    [router]
+    [router],
   );
 
   return (
@@ -361,9 +361,7 @@ const IncidentTicketList = () => {
         </div>
       </div>
 
-      {openCreate && (
-        <RaiseIncidentModal onClose={() => setOpenCreate(false)} />
-      )}
+      {openCreate && <RaiseIncidentModal />}
     </div>
   );
 };

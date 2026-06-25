@@ -9,7 +9,7 @@ export interface ConnectorItem {
   subtext: string;
 }
 
-export interface ConnectorCategoryGroup {
+interface ConnectorCategoryGroup {
   category: string;
   items: ConnectorItem[];
 }
@@ -38,7 +38,7 @@ export interface CustomConnectorForm {
   signalImportance: "Informational" | "Low" | "Medium" | "High" | "Critical";
 }
 
-export const CONNECTORS_DIRECTORY: ConnectorCategoryGroup[] = [
+const CONNECTORS_DIRECTORY: ConnectorCategoryGroup[] = [
   {
     category: "Source Control",
     items: [
@@ -361,62 +361,8 @@ export default function ConnectorsPage() {
     sig: string;
   } | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isSuggestOpen, setIsSuggestOpen] = useState(false);
-  const [isWorkbenchOpen, setIsWorkbenchOpen] = useState(false);
-  const [workbenchStep, setWorkbenchStep] = useState<WorkbenchStep>(1);
-  const [toast, setToast] = useState<string | null>(null);
-
-  // --- Suggest Form State ---
-  const [suggestForm, setSuggestForm] = useState({
-    name: "",
-    category: "Source Control",
-    note: "",
-    email: "",
-    priority: "Nice to have",
-  });
-  const [isSuggestSuccess, setIsSuggestSuccess] = useState(false);
-
-  // --- Workbench State Tree ---
-  const [workbenchForm, setWorkbenchForm] = useState<CustomConnectorForm>({
-    name: "",
-    description: "",
-    category: "Source Control",
-    businessOwner: "Platform Engineering",
-    connectionType: "REST API",
-    baseUrl: "",
-    authMethod: "API Key",
-    supportedEventTypes: ["Deployment"],
-    eventMappings: [
-      {
-        id: "1",
-        sourceKey: "deployment.failed",
-        targetValue: "Deployment Failure",
-      },
-      {
-        id: "2",
-        sourceKey: "release.promoted",
-        targetValue: "Deployment Success",
-      },
-    ],
-    serviceMappings: [
-      { id: "1", sourceKey: "Payment-Service", targetValue: "Payment API" },
-    ],
-    environmentMappings: [
-      { id: "1", sourceKey: "production", targetValue: "Production" },
-    ],
-    downstreamConsumers: ["Incident Detection", "Incident Enrichment"],
-    signalImportance: "Medium",
-  });
 
   const directoryRef = useRef<HTMLDivElement>(null);
-  const workbenchRef = useRef<HTMLDivElement>(null);
-  const suggestRef = useRef<HTMLDivElement>(null);
-
-  // --- Helper Action: Flash Notification Triggers ---
-  const showToast = (message: string) => {
-    setToast(message);
-    setTimeout(() => setToast(null), 3000);
-  };
 
   // --- Flatten Lookups Map Index ---
   const lookupMap = useMemo(() => {
@@ -443,64 +389,6 @@ export default function ConnectorsPage() {
       behavior: "smooth",
       block: "center",
     });
-  };
-
-  // --- Dynamic Form Row Mutators ---
-  const addMappingRow = (
-    target: "eventMappings" | "serviceMappings" | "environmentMappings",
-  ) => {
-    const newRow: KeyValueMappingRow = {
-      id: Date.now().toString(),
-      sourceKey: "",
-      targetValue: "",
-    };
-    setWorkbenchForm((prev: any) => ({
-      ...prev,
-      [target]: [...prev[target], newRow],
-    }));
-  };
-
-  const updateMappingRow = (
-    target: "eventMappings" | "serviceMappings" | "environmentMappings",
-    id: string,
-    key: "sourceKey" | "targetValue",
-    val: string,
-  ) => {
-    setWorkbenchForm((prev: any) => ({
-      ...prev,
-      [target]: prev[target].map((row: any) =>
-        row.id === id ? { ...row, [key]: val } : row,
-      ),
-    }));
-  };
-
-  const removeMappingRow = (
-    target: "eventMappings" | "serviceMappings" | "environmentMappings",
-    id: string,
-  ) => {
-    setWorkbenchForm((prev: any) => ({
-      ...prev,
-      [target]: prev[target].filter((row: any) => row.id !== id),
-    }));
-  };
-
-  // --- Submit Actions ---
-  const submitSuggestion = () => {
-    if (!suggestForm.name.trim()) {
-      showToast("Please add a system name first.");
-      return;
-    }
-    setIsSuggestSuccess(true);
-    showToast(`Connector request submitted: ${suggestForm.name}`);
-  };
-
-  const executeCreateConnector = () => {
-    if (!workbenchForm.name.trim()) {
-      showToast("Give the connector a name first.");
-      setWorkbenchStep(1);
-      return;
-    }
-    setWorkbenchStep(7);
   };
 
   function SignalsDiagram() {
