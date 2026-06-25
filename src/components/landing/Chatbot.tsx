@@ -19,6 +19,7 @@ import {
   AlertCircle,
   ExternalLink,
 } from "lucide-react";
+import Image from "next/image";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -304,7 +305,9 @@ const Chatbot: React.FC = () => {
   const firstOpenRef = useRef(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const socketRef = useRef<Socket | null>(null);
-  const waitingForAgentTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const waitingForAgentTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -357,19 +360,24 @@ const Chatbot: React.FC = () => {
   useEffect(() => {
     if (!convId) return;
 
-    const socket = io(`${SOCKET_BASE}/chat`, { transports: ["websocket", "polling"] });
+    const socket = io(`${SOCKET_BASE}/chat`, {
+      transports: ["websocket", "polling"],
+    });
     socketRef.current = socket;
     socket.emit("join", convId);
 
-    socket.on("chat:message:new", (data: { senderType?: string; content?: string }) => {
-      if (data?.senderType !== "AGENT" || !data.content) return;
-      if (waitingForAgentTimeoutRef.current) {
-        clearTimeout(waitingForAgentTimeoutRef.current);
-        waitingForAgentTimeoutRef.current = null;
-      }
-      setIsTyping(false);
-      addMessage({ text: data.content, isUser: false, fromAgent: true });
-    });
+    socket.on(
+      "chat:message:new",
+      (data: { senderType?: string; content?: string }) => {
+        if (data?.senderType !== "AGENT" || !data.content) return;
+        if (waitingForAgentTimeoutRef.current) {
+          clearTimeout(waitingForAgentTimeoutRef.current);
+          waitingForAgentTimeoutRef.current = null;
+        }
+        setIsTyping(false);
+        addMessage({ text: data.content, isUser: false, fromAgent: true });
+      },
+    );
 
     socket.on("chat:agent-joined", () => setAgentHandling(true));
     socket.on("chat:ai-resumed", () => setAgentHandling(false));
@@ -673,7 +681,12 @@ const Chatbot: React.FC = () => {
         className="w-12 h-12 rounded-full bg-zinc-900 hover:bg-zinc-700 flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-105 focus:outline-none border border-zinc-700"
         aria-label="Open Ezra chat"
       >
-        <Sparkles size={20} className="text-emerald-400" />
+        <Image
+          src={"/IMS/icons/scrubbe-white-icon.svg"}
+          alt=""
+          height={30}
+          width={30}
+        />
       </button>
     </div>
   );

@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button1";
 import { useRouter } from "next/navigation";
 import React, { useState, useMemo, useRef } from "react";
 import CustomConnectorWorkbench from "./_module/components/CustomConnection";
+import SuggestionConnectorSection from "./_module/components/SuggestionConnectorSection";
 
 export interface ConnectorItem {
   name: string;
@@ -1131,30 +1132,7 @@ export default function ConnectorsPage() {
         </div>
       </section>
 
-      {/* ── 9. REQUEST A CONNECTOR ───────────────────────────────────────── */}
-      <section className="w-full py-16 px-6 bg-white border-t border-[#e5e7eb]">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-10 md:gap-20">
-            <div className="sticky top-28 before:mb-4">
-              <SectionLabel>
-                Request a<br />
-                Connector
-              </SectionLabel>
-            </div>
-            <div style={{ maxWidth: 640 }}>
-              <SerHead size="lg" className="mb-5">
-                Don't see a system you depend on?
-              </SerHead>
-              <p className="text-[#374151] text-[0.9375rem] leading-[1.75] mb-7">
-                Tell us what to build next. Connector requests are reviewed by
-                the integrations team and prioritised against demand across the
-                platform.
-              </p>
-              <MonoButton>Suggest a Connector</MonoButton>
-            </div>
-          </div>
-        </div>
-      </section>
+      <SuggestionConnectorSection />
 
       <CustomConnectorWorkbench />
 
