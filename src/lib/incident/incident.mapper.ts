@@ -195,8 +195,8 @@ export const extractIncidentHistoryResponse = (payload: unknown): IncidentHistor
   const history = Array.isArray(root.history)
     ? root.history
     : Array.isArray(data.history)
-    ? data.history
-    : [];
+      ? data.history
+      : [];
 
   return history.map((entry) => {
     const record = asRecord(entry);
@@ -219,8 +219,8 @@ export const extractIncidentCommentsResponse = (payload: unknown): IncidentComme
   const comments = Array.isArray(root.data)
     ? root.data
     : Array.isArray(root.comments)
-    ? root.comments
-    : [];
+      ? root.comments
+      : [];
 
   return comments.map((entry) => {
     const record = asRecord(entry);
@@ -245,8 +245,8 @@ export const extractIncidentMessagesResponse = (payload: unknown): IncidentMessa
   const messages = Array.isArray(payload)
     ? payload
     : Array.isArray(asRecord(payload).data)
-    ? (asRecord(payload).data as unknown[])
-    : [];
+      ? (asRecord(payload).data as unknown[])
+      : [];
 
   return messages.map((entry) => {
     const record = asRecord(entry);
@@ -277,14 +277,14 @@ export const extractIncidentContextResponse = (payload: unknown): IncidentContex
 
   const attachments = Array.isArray(context.attachments)
     ? context.attachments.map((entry) => {
-        const record = asRecord(entry);
-        return {
-          id: asString(record.id),
-          name: asString(record.name),
-          url: asString(record.url),
-          type: asString(record.type),
-        };
-      })
+      const record = asRecord(entry);
+      return {
+        id: asString(record.id),
+        name: asString(record.name),
+        url: asString(record.url),
+        type: asString(record.type),
+      };
+    })
     : [];
 
   return {
@@ -298,14 +298,14 @@ export const extractIncidentContextResponse = (payload: unknown): IncidentContex
     relatedIncidents: asStringArray(context.relatedIncidents),
     childIncidents: Array.isArray(context.childIncidents)
       ? context.childIncidents.map((c: unknown) => {
-          const r = (c && typeof c === "object" ? c : {}) as Record<string, unknown>;
-          return {
-            id: String(r.id ?? ""),
-            ticketId: String(r.ticketId ?? ""),
-            title: String(r.title ?? ""),
-            severity: String(r.severity ?? ""),
-          };
-        })
+        const r = (c && typeof c === "object" ? c : {}) as Record<string, unknown>;
+        return {
+          id: String(r.id ?? ""),
+          ticketId: String(r.ticketId ?? ""),
+          title: String(r.title ?? ""),
+          severity: String(r.severity ?? ""),
+        };
+      })
       : [],
     runbookOverrideUrl: asString(context.runbookOverrideUrl),
     escalateTo: asString(context.escalateTo),
@@ -361,8 +361,8 @@ export const extractIncidentPostMortemsResponse = (payload: unknown) => {
   const rows = Array.isArray(root.data)
     ? root.data
     : Array.isArray(root.postMortems)
-    ? root.postMortems
-    : [];
+      ? root.postMortems
+      : [];
 
   return rows.map((entry) => mapIncidentDetailRecord(entry));
 };
@@ -391,6 +391,7 @@ export const mapIncidentListItem = (entry: unknown): IncidentListItem => {
     region: firstNonEmpty(record.region, "Unknown region"),
     environment: firstNonEmpty(record.environment, "Unknown environment"),
     severity,
+    MTTR: 0,
     priority: firstNonEmpty(record.priority, "MEDIUM"),
     status: firstNonEmpty(record.status, "OPEN"),
     state: firstNonEmpty(record.state, record.status),
@@ -440,15 +441,15 @@ export const mapIncidentDetailRecord = (entry: unknown): IncidentDetailRecord =>
     userName: firstNonEmpty(record.userName),
     aiAnalysis: aiAnalysis
       ? {
-          suggestion: asString(aiAnalysis.suggestion),
-          stakeholderMsg: asString(aiAnalysis.stakeholderMsg),
-          fiveWhys: isRecord(aiAnalysis.fiveWhys)
-            ? Object.fromEntries(
-                Object.entries(aiAnalysis.fiveWhys).map(([key, value]) => [key, asString(value)])
-              )
-            : null,
-          customerKb: Array.isArray(aiAnalysis.customerKb) ? aiAnalysis.customerKb : [],
-        }
+        suggestion: asString(aiAnalysis.suggestion),
+        stakeholderMsg: asString(aiAnalysis.stakeholderMsg),
+        fiveWhys: isRecord(aiAnalysis.fiveWhys)
+          ? Object.fromEntries(
+            Object.entries(aiAnalysis.fiveWhys).map(([key, value]) => [key, asString(value)])
+          )
+          : null,
+        customerKb: Array.isArray(aiAnalysis.customerKb) ? aiAnalysis.customerKb : [],
+      }
       : null,
     comments: extractIncidentCommentsResponse({ data: record.comments }),
     messages: extractIncidentMessagesResponse(record.messages),

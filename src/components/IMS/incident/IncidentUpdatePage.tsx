@@ -44,6 +44,7 @@ import IncidentRelationship from "./IncidentRelation";
 import { FaRegFileLines } from "react-icons/fa6";
 import Button from "@/components/ui/Button1";
 import RichTextEditor from "@/components/ui/RichTextEditor";
+import FormatTimerDisplay from "./FormatTImerDisplay";
 
 // ── Schema Definitions ─────────────────────────────────────────────
 
@@ -54,10 +55,68 @@ const linkedChildSchema = z.object({
   severity: z.string(),
 });
 
+const TICKET_STATUS_CONFIG = [
+  {
+    id: 1,
+    label: "OPEN",
+    display: "Open",
+    dotColor: "bg-cyan-400",
+    ribbonActive: "bg-cyan-500 text-white border-l-cyan-500",
+    ribbonDone: "bg-cyan-500/5 text-cyan-600 dark:text-cyan-400/40",
+    textColor: "text-cyan-600 dark:text-cyan-400",
+  },
+  {
+    id: 2,
+    label: "ACKNOWLEDGED",
+    display: "Acknowledged",
+    dotColor: "bg-amber-500",
+    ribbonActive: "bg-amber-500 text-white border-l-amber-500",
+    ribbonDone: "bg-amber-500/5 text-amber-600 dark:text-[#f3ab3d]/40",
+    textColor: "text-amber-500 dark:text-[#f3ab3d]",
+  },
+  {
+    id: 3,
+    label: "INVESTIGATION",
+    display: "Investigating",
+    dotColor: "bg-blue-500",
+    ribbonActive: "bg-blue-500 text-white border-l-blue-500",
+    ribbonDone: "bg-blue-500/5 text-blue-600 dark:text-blue-400/40",
+    textColor: "text-blue-500 dark:text-blue-400",
+  },
+  {
+    id: 4,
+    label: "MITIGATED",
+    display: "Mitigated",
+    dotColor: "bg-orange-500",
+    ribbonActive: "bg-orange-500 text-white border-l-orange-500",
+    ribbonDone: "bg-orange-500/5 text-orange-600 dark:text-orange-400/40",
+    textColor: "text-orange-500 dark:text-orange-400",
+  },
+  {
+    id: 5,
+    label: "RESOLVED",
+    display: "Resolved",
+    dotColor: "bg-emerald-500",
+    ribbonActive: "bg-emerald-500 text-white border-l-emerald-500",
+    ribbonDone: "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400/40",
+    textColor: "text-emerald-500 dark:text-emerald-400",
+  },
+  {
+    id: 6,
+    label: "CLOSED",
+    display: "Closed",
+    dotColor: "bg-zinc-500",
+    ribbonActive: "bg-zinc-600 text-white border-l-zinc-600",
+    ribbonDone: "bg-zinc-500/5 text-zinc-600 dark:text-zinc-400/40",
+    textColor: "text-zinc-500 dark:text-zinc-400",
+  },
+];
+
 export const incidentContextSchema = z.object({
   affectedService: z.string().min(1, "Affected Service is required"),
   environment: z.string().min(1, "Environment is required"),
   assignedTo: z.string().min(1, "Assignee is required"),
+  state: z.string(),
   priority: z.string(),
   description: z.string().min(1, "Description is required"),
   summary: z.string().min(1, "Summary is required"),
@@ -76,6 +135,7 @@ export const incidentContextSchema = z.object({
     .or(z.literal("")),
   escalateTo: z.string(),
   attachments: z.array(z.any()).optional(),
+  title: z.string().min(1, "Title is required"),
 });
 
 export type IncidentContextFormValues = z.infer<typeof incidentContextSchema>;
@@ -131,8 +191,10 @@ const AddContextForm = ({
       environment: incident.environment ?? "",
       assignedTo: incident.assignedToName ?? incident.assignedToEmail ?? "",
       priority: incident.severity ?? incident.priority ?? "P1",
+      state: incident?.state,
       description: incident.description || "",
-      summary: incident.summary || "",
+      title: incident.title || "",
+      summary: incident.summary,
       labels: context?.labels ?? [],
       businessImpact:
         context?.businessImpact ?? incident.financialExposure ?? "",
@@ -206,7 +268,9 @@ const AddContextForm = ({
         environment: data.environment,
         assignedTo: data.assignedTo,
         priority: data.priority,
+        state: data.state,
         description: data.description,
+        title: data.title,
         summary: data.summary,
         customerImpact: data.customerImpact,
         externalCommunication: data.externalCommunication,
@@ -277,37 +341,21 @@ const AddContextForm = ({
   };
 
   return (
-    <div className="w-full px-6">
+    <div className="w-full">
       <form
         onSubmit={handleSubmit(async (data) => {
           setSaveNotice("");
           await saveMutation.mutateAsync(data);
         })}
-        className="bg-white dark:bg-zinc-950 w-full rounded-2xl border border-black dark:border-zinc-800 shadow-xs overflow-hidden"
+        className=" w-full overflow-hidden"
       >
         {/* ── Context Headline Header ── */}
-        <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/10">
-          <div>
-            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-              Incident Response Workspace
-            </h2>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
-              Update operational telemetry, scopes, text definitions, and
-              hierarchical linkages
-            </p>
-          </div>
-          {saveNotice && (
-            <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1 rounded-md">
-              {saveNotice}
-            </p>
-          )}
-        </div>
 
         <div className="p-6 space-y-6">
           {/* ── ROW 1: CORE FIELDS SPLIT ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* PANEL A: INCIDENT INFORMATION */}
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950">
+            <div className="border border-black dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950">
               <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 pb-2 border-b border-zinc-50 dark:border-zinc-900">
                 <InfoIcon size={17} /> Incident Information
               </h3>
@@ -319,9 +367,10 @@ const AddContextForm = ({
                     type="text"
                     readOnly
                     value={incident.id.slice(0, 12).toUpperCase()}
-                    className="h-9 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40 px-3 text-xs font-mono text-zinc-400 outline-none"
+                    className="h-9 w-full rounded-md border border-zinc-400 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40 px-3 text-sm font-mono  outline-none"
                   />
                 </div>
+                <FormatTimerDisplay totalSeconds={incident?.MTTR} />
                 <Controller
                   name="priority"
                   control={control}
@@ -337,6 +386,23 @@ const AddContextForm = ({
                           { value: "P2", label: "P2 — Medium" },
                           { value: "P3", label: "P3 — Low" },
                         ]}
+                      />
+                    </div>
+                  )}
+                />
+                <Controller
+                  name="state"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <Select
+                        {...field}
+                        label="State"
+                        error={errors.state?.message}
+                        options={TICKET_STATUS_CONFIG.map((item) => ({
+                          value: item.label,
+                          label: item.label,
+                        }))}
                       />
                     </div>
                   )}
@@ -374,7 +440,7 @@ const AddContextForm = ({
             </div>
 
             {/* PANEL B: INCIDENT CONTEXT */}
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950">
+            <div className="border border-black dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950">
               <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 pb-2 border-b border-zinc-50 dark:border-zinc-900">
                 <FaRegFileLines size={17} /> Incident Context
               </h3>
@@ -463,13 +529,13 @@ const AddContextForm = ({
           {/* ── ROW 2: DETAILS TEXT EDITOR CANVAS ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* PANEL C: DETAILED DESCRIPTION CANVAS WITH FORMATTING TOOLBAR */}
-            <div className=" border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950">
+            <div className=" border border-black dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950">
               <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 pb-2 border-b border-zinc-50 dark:border-zinc-900">
-                <FaRegFileLines size={17} /> Incident Details &amp; Analysis
+                <FaRegFileLines size={17} /> Incident Details
               </h3>
 
               <Controller
-                name="summary"
+                name="title"
                 control={control}
                 render={({ field }) => (
                   <div>
@@ -483,14 +549,8 @@ const AddContextForm = ({
                       {...field}
                       rows={3}
                       placeholder="Add transient details or handoff items..."
-                      error={errors.description?.message}
+                      error={errors.title?.message}
                     />
-
-                    {errors.description && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.description.message}
-                      </p>
-                    )}
                   </div>
                 )}
               />
@@ -518,7 +578,7 @@ const AddContextForm = ({
             </div>
 
             {/* PANEL D: ROUTING & ATTACHMENTS ASSIGNMENT */}
-            <div className=" border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950 flex flex-col">
+            <div className=" border border-black dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950 flex flex-col">
               <div className="space-y-4">
                 <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 pb-2 border-b border-zinc-50 dark:border-zinc-900">
                   <User size={17} />
@@ -604,14 +664,13 @@ const AddContextForm = ({
           </div>
 
           {/* ─── WORKSPACE BLOCK: PARENT & CHILD RELATIONSHIPS ─── */}
-          <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 space-y-5 bg-white dark:bg-zinc-950">
-            <div className="col-span-2">
-              <IncidentRelationship
-                incident={incident}
-                value={childIncidents}
-                onChange={(children) => setValue("childIncidents", children)}
-              />
-            </div>
+
+          <div className="col-span-2">
+            <IncidentRelationship
+              incident={incident}
+              value={childIncidents}
+              onChange={(children) => setValue("childIncidents", children)}
+            />
           </div>
         </div>
 

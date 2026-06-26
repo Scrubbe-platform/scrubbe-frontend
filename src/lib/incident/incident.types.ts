@@ -152,6 +152,7 @@ export interface IncidentListItem {
   commentsCount: number;
   recommendedActions: string[];
   raw: Record<string, unknown>;
+  MTTR: number
 }
 
 export interface IncidentDetailRecord extends IncidentListItem {

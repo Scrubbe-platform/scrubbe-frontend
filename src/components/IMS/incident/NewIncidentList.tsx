@@ -100,10 +100,10 @@ const IncidentOverview = ({ children, tabs }: Props) => {
                     />
                     {/* <DetectionSignals incident={selectedIncident} /> */}
                     {/* <ScrubbeIntelligence incident={selectedIncident} /> */}
-                    {/* <IncidentContextModule
+                    <IncidentContextModule
                       incident={selectedIncident}
                       context={context}
-                    /> */}
+                    />
                     <ActivityAuditTrail history={history} />
                   </>
                 ) : (

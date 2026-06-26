@@ -39,12 +39,60 @@ interface StatusMeta {
 }
 
 const TICKET_STATUS_CONFIG: StatusMeta[] = [
-  { id: 1, label: "OPEN", display: "Open", dotColor: "bg-cyan-400", ribbonActive: "bg-cyan-500 text-white border-l-cyan-500", ribbonDone: "bg-cyan-500/5 text-cyan-600 dark:text-cyan-400/40", textColor: "text-cyan-600 dark:text-cyan-400" },
-  { id: 2, label: "ACKNOWLEDGED", display: "Acknowledged", dotColor: "bg-amber-500", ribbonActive: "bg-amber-500 text-white border-l-amber-500", ribbonDone: "bg-amber-500/5 text-amber-600 dark:text-[#f3ab3d]/40", textColor: "text-amber-500 dark:text-[#f3ab3d]" },
-  { id: 3, label: "INVESTIGATION", display: "Investigating", dotColor: "bg-blue-500", ribbonActive: "bg-blue-500 text-white border-l-blue-500", ribbonDone: "bg-blue-500/5 text-blue-600 dark:text-blue-400/40", textColor: "text-blue-500 dark:text-blue-400" },
-  { id: 4, label: "MITIGATED", display: "Mitigated", dotColor: "bg-orange-500", ribbonActive: "bg-orange-500 text-white border-l-orange-500", ribbonDone: "bg-orange-500/5 text-orange-600 dark:text-orange-400/40", textColor: "text-orange-500 dark:text-orange-400" },
-  { id: 5, label: "RESOLVED", display: "Resolved", dotColor: "bg-emerald-500", ribbonActive: "bg-emerald-500 text-white border-l-emerald-500", ribbonDone: "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400/40", textColor: "text-emerald-500 dark:text-emerald-400" },
-  { id: 6, label: "CLOSED", display: "Closed", dotColor: "bg-zinc-500", ribbonActive: "bg-zinc-600 text-white border-l-zinc-600", ribbonDone: "bg-zinc-500/5 text-zinc-600 dark:text-zinc-400/40", textColor: "text-zinc-500 dark:text-zinc-400" },
+  {
+    id: 1,
+    label: "OPEN",
+    display: "Open",
+    dotColor: "bg-cyan-400",
+    ribbonActive: "bg-cyan-500 text-white border-l-cyan-500",
+    ribbonDone: "bg-cyan-500/5 text-cyan-600 dark:text-cyan-400/40",
+    textColor: "text-cyan-600 dark:text-cyan-400",
+  },
+  {
+    id: 2,
+    label: "ACKNOWLEDGED",
+    display: "Acknowledged",
+    dotColor: "bg-amber-500",
+    ribbonActive: "bg-amber-500 text-white border-l-amber-500",
+    ribbonDone: "bg-amber-500/5 text-amber-600 dark:text-[#f3ab3d]/40",
+    textColor: "text-amber-500 dark:text-[#f3ab3d]",
+  },
+  {
+    id: 3,
+    label: "INVESTIGATION",
+    display: "Investigating",
+    dotColor: "bg-blue-500",
+    ribbonActive: "bg-blue-500 text-white border-l-blue-500",
+    ribbonDone: "bg-blue-500/5 text-blue-600 dark:text-blue-400/40",
+    textColor: "text-blue-500 dark:text-blue-400",
+  },
+  {
+    id: 4,
+    label: "MITIGATED",
+    display: "Mitigated",
+    dotColor: "bg-orange-500",
+    ribbonActive: "bg-orange-500 text-white border-l-orange-500",
+    ribbonDone: "bg-orange-500/5 text-orange-600 dark:text-orange-400/40",
+    textColor: "text-orange-500 dark:text-orange-400",
+  },
+  {
+    id: 5,
+    label: "RESOLVED",
+    display: "Resolved",
+    dotColor: "bg-emerald-500",
+    ribbonActive: "bg-emerald-500 text-white border-l-emerald-500",
+    ribbonDone: "bg-emerald-500/5 text-emerald-600 dark:text-emerald-400/40",
+    textColor: "text-emerald-500 dark:text-emerald-400",
+  },
+  {
+    id: 6,
+    label: "CLOSED",
+    display: "Closed",
+    dotColor: "bg-zinc-500",
+    ribbonActive: "bg-zinc-600 text-white border-l-zinc-600",
+    ribbonDone: "bg-zinc-500/5 text-zinc-600 dark:text-zinc-400/40",
+    textColor: "text-zinc-500 dark:text-zinc-400",
+  },
 ];
 
 type Props = {
@@ -55,19 +103,28 @@ export default function IncidentLifecycleManager({ incident }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const currentStatus = (incident.status || "OPEN").toUpperCase() as TicketStatusValue;
+  const currentStatus = (
+    incident.status || "OPEN"
+  ).toUpperCase() as TicketStatusValue;
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenResolve, setIsOpenResolve] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const activeIndex = TICKET_STATUS_CONFIG.findIndex((s) => s.label === currentStatus);
-  const activeMeta = activeIndex >= 0 ? TICKET_STATUS_CONFIG[activeIndex] : TICKET_STATUS_CONFIG[0];
+  const activeIndex = TICKET_STATUS_CONFIG.findIndex(
+    (s) => s.label === currentStatus,
+  );
+  const activeMeta =
+    activeIndex >= 0
+      ? TICKET_STATUS_CONFIG[activeIndex]
+      : TICKET_STATUS_CONFIG[0];
   const isTerminal = currentStatus === "CLOSED";
 
   const refreshIncident = () => {
-    queryClient.invalidateQueries({ queryKey: [querykeys.INCIDENT_DETAIL, incident.id] });
+    queryClient.invalidateQueries({
+      queryKey: [querykeys.INCIDENT_DETAIL, incident.id],
+    });
     queryClient.invalidateQueries({ queryKey: [querykeys.INCIDENT_TICKET] });
   };
 
@@ -205,7 +262,7 @@ export default function IncidentLifecycleManager({ incident }: Props) {
       {/* ─────────────────────────────────────────────────────────────────
           INCIDENT MANAGEMENT CONTROLLER CARD (Bottom Component)
           ───────────────────────────────────────────────────────────────── */}
-      <div className="w-full bg-white dark:bg-[#080f21] border border-zinc-700 dark:border-white/5 rounded-xl p-5 md:p-6 space-y-6 shadow-sm">
+      <div className="w-full hidden bg-white dark:bg-[#080f21] border border-zinc-700 dark:border-white/5 rounded-xl p-5 md:p-6 space-y-6 shadow-sm">
         <div className=" flex justify-between gap-6 items-center">
           {/* Dropdown Field */}
           <div
@@ -229,7 +286,10 @@ export default function IncidentLifecycleManager({ incident }: Props) {
             >
               <div className="flex items-center gap-3">
                 {isSaving ? (
-                  <Loader2 size={14} className="animate-spin text-slate-400 shrink-0" />
+                  <Loader2
+                    size={14}
+                    className="animate-spin text-slate-400 shrink-0"
+                  />
                 ) : (
                   <div
                     className={cn(
@@ -257,7 +317,8 @@ export default function IncidentLifecycleManager({ incident }: Props) {
                 {TICKET_STATUS_CONFIG.map((stage, idx) => {
                   const isCurrentItem = stage.label === currentStatus;
                   const isDoneItem = idx < activeIndex;
-                  const isLockedClosed = stage.label === "CLOSED" && currentStatus !== "RESOLVED";
+                  const isLockedClosed =
+                    stage.label === "CLOSED" && currentStatus !== "RESOLVED";
 
                   return (
                     <button
@@ -265,7 +326,11 @@ export default function IncidentLifecycleManager({ incident }: Props) {
                       type="button"
                       onClick={() => handleSelect(stage.label)}
                       disabled={isLockedClosed}
-                      title={isLockedClosed ? "Resolve the incident before closing it" : undefined}
+                      title={
+                        isLockedClosed
+                          ? "Resolve the incident before closing it"
+                          : undefined
+                      }
                       className={cn(
                         "w-full h-[42px] px-3 rounded-lg flex items-center justify-between text-left transition-colors group",
                         isLockedClosed && "opacity-40 cursor-not-allowed",
@@ -333,7 +398,13 @@ export default function IncidentLifecycleManager({ incident }: Props) {
 
         <p className="text-[13px] italic text-black dark:text-slate-500 leading-relaxed">
           {isTerminal ? (
-            <>This incident is <span className="font-semibold text-slate-600 dark:text-slate-300">closed</span> and its lifecycle is locked.</>
+            <>
+              This incident is{" "}
+              <span className="font-semibold text-slate-600 dark:text-slate-300">
+                closed
+              </span>{" "}
+              and its lifecycle is locked.
+            </>
           ) : (
             <>
               Set the incident state from the dropdown — the lifecycle ribbon
