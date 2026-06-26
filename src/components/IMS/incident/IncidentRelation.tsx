@@ -91,21 +91,14 @@ const IncidentRelationship: React.FC<Props> = ({
     onChange(value.filter((c) => c.id !== id));
 
   return (
-    <div className="border border-zinc-500 dark:border-zinc-700/60 rounded-2xl bg-white dark:bg-zinc-900/40 p-6">
+    <div className=" ">
       {/* ── Header ── */}
-      <h3 className="text-[16px] font-bold text-zinc-900 dark:text-zinc-100 mb-1">
-        Incident Relationship
-      </h3>
-      <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mb-6 leading-relaxed">
-        Link incidents as Mother or Child. Enrichment and resolution will be
-        synced between linked incidents.
-      </p>
 
-      <div className="gap-4 grid md:grid-cols-2">
+      <div>
         {/* ── Mother incident (current) ── */}
         <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <p className="text-[14px] font-bold text-zinc-800 dark:text-zinc-200">
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
               Mother Incident{" "}
               <span className="text-zinc-400 dark:text-zinc-500 font-normal">
                 (Current Incident)
@@ -137,8 +130,8 @@ const IncidentRelationship: React.FC<Props> = ({
 
         {/* ── Child incidents ── */}
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <p className="text-[14px] font-bold text-zinc-800 dark:text-zinc-200">
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
               Child Incidents
             </p>
             <Tooltip text="Select one or more incidents to link as children. They will inherit enrichment and resolution updates from this incident." />

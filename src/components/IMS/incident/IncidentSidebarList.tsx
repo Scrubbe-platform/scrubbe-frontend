@@ -309,7 +309,7 @@ export const ExactIncidentSidebar: React.FC = () => {
               <Button
                 variant="outline-dark"
                 size="sm"
-                className="capitalize"
+                className="capitalize text-xs"
                 rightIcon={<ListFilter size={14} />}
               >
                 {filter === "all" ? "Priority" : filter}
@@ -335,7 +335,7 @@ export const ExactIncidentSidebar: React.FC = () => {
               <Button
                 variant="outline-dark"
                 size="sm"
-                className="capitalize"
+                className="capitalize text-xs"
                 rightIcon={<ListFilter size={14} />}
               >
                 {status === "all" ? "Status" : status}
@@ -354,7 +354,7 @@ export const ExactIncidentSidebar: React.FC = () => {
               <Button
                 variant="outline-dark"
                 size="sm"
-                className="capitalize"
+                className="capitalize text-xs"
                 rightIcon={<ListFilter size={14} />}
               >
                 {source === "all" ? "Source" : source}
@@ -367,36 +367,33 @@ export const ExactIncidentSidebar: React.FC = () => {
 
         {/* Search + filter button */}
         <div className="flex items-center gap-2 mb-5">
-          <div className="relative flex-1">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-black dark:text-slate-600"
-              size={14}
-            />
+          <div className="relative flex-1 flex flex-row items-center gap-1 w-full bg-zinc-50  dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-lg h-[38px] pl-2">
+            <Search className=" text-black dark:text-slate-600" size={14} />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search incidents, services, ID"
-              className="w-full bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-black dark:text-slate-300 focus:outline-none focus:border-green-500/40 dark:focus:border-green-400/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-slate-600 font-medium"
+              className="flex-1 h-full text-sm text-black dark:text-slate-300 focus:outline-none focus:border-green-500/40 dark:focus:border-green-400/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-slate-600 font-medium"
             />
+            <button
+              onClick={() => setFilterOpen((v) => !v)}
+              className={`flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-[12px] font-semibold transition-all shrink-0 ${
+                filterOpen || advancedFilterCount > 0
+                  ? "border-IMSDarkGreen text-IMSDarkGreen dark:text-IMSDarkGreen bg-violet-50 dark:bg-violet-500/10"
+                  : "border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-slate-400 hover:border-zinc-300 dark:hover:border-white/20"
+              }`}
+            >
+              <SlidersHorizontal size={14} />
+              {advancedFilterCount > 0 && (
+                <span className="text-[11px] font-bold bg-IMSDarkGreen text-white rounded-full px-1.5 py-0.5 leading-none">
+                  {advancedFilterCount}
+                </span>
+              )}
+            </button>
           </div>
 
           {/* Filter button */}
-          <button
-            onClick={() => setFilterOpen((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-2.5 rounded-lg border text-[12px] font-semibold transition-all shrink-0 ${
-              filterOpen || advancedFilterCount > 0
-                ? "border-violet-500 text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10"
-                : "border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-slate-400 hover:border-zinc-300 dark:hover:border-white/20"
-            }`}
-          >
-            <SlidersHorizontal size={14} />
-            {advancedFilterCount > 0 && (
-              <span className="text-[11px] font-bold bg-violet-600 text-white rounded-full px-1.5 py-0.5 leading-none">
-                {advancedFilterCount}
-              </span>
-            )}
-          </button>
 
           {/* Clear advanced filters */}
           {advancedFilterCount > 0 && (

@@ -34,7 +34,7 @@ const AISuggestionsCard: React.FC<AISuggestionsCardProps> = ({
     : "No similar incidents found";
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4 font-sans selection:bg-emerald-100">
+    <div className="w-full mx-auto p-4 font-sans selection:bg-emerald-100">
       <div className="bg-white dark:bg-zinc-950 rounded-xl border border-zinc-500 dark:border-zinc-800 shadow-sm overflow-hidden">
         {/* Header Section */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-900">
@@ -77,9 +77,7 @@ const AISuggestionsCard: React.FC<AISuggestionsCardProps> = ({
             <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
               Changes
             </h4>
-            <p className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed">
-              {recentChangesText}
-            </p>
+            ---
           </div>
 
           {/* Section 3: Similar Incidents */}

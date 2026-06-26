@@ -85,7 +85,7 @@ const EventRow = ({
   const cfg = typeConfig[event.type] || typeConfig.Enrichment;
 
   return (
-    <div className="flex items-start gap-4 relative group min-h-[56px]">
+    <div className="flex items-start gap-4 relative group">
       {/* Visual Vertical Timeline Line Indicator */}
       {!isLast && (
         <div className="absolute left-[14px] top-8 w-[2px] h-[calc(100%-20px)] bg-zinc-200 dark:bg-zinc-800 z-0" />
@@ -207,7 +207,7 @@ const ActivityAuditTrail: React.FC<{ history: IncidentHistoryRecord[] }> = ({
   const visibleEvents = isExpanded ? events : events.slice(0, 4);
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4">
+    <div className="w-full mx-auto p-4">
       <div className="bg-white dark:bg-zinc-950 rounded-xl border border-zinc-500 dark:border-zinc-800 shadow-sm p-5">
         <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-2 mb-4">
           <MdOutlineChat size={18} /> Comments & Activity

@@ -89,10 +89,10 @@ const IncidentOverview = ({ children, tabs }: Props) => {
                 />
 
                 {/* Lifecycle ribbon — visible across every incident-context tab, not just overview */}
-                <IncidentLifecycle incident={selectedIncident} />
 
                 {tabs === "overview" ? (
                   <>
+                    <IncidentLifecycle incident={selectedIncident} />
                     <IncidentUpdatePage
                       incident={selectedIncident}
                       onCancel={() => {}}
@@ -139,7 +139,8 @@ const IncidentOverview = ({ children, tabs }: Props) => {
               />
 
               <h2 className="mt-4 text-2xl font-bold text-black dark:text-white">
-                Select an incident to open the live workspace
+                Select an incident or Create a new Incident to open a live
+                workspace
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-400">
                 The workspace only appears when a real incident is selected. Use

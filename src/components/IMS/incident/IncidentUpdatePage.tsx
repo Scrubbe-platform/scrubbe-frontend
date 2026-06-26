@@ -22,6 +22,7 @@ import {
   InfoIcon,
   File,
   User,
+  FileText,
 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -45,6 +46,7 @@ import { FaRegFileLines } from "react-icons/fa6";
 import Button from "@/components/ui/Button1";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import FormatTimerDisplay from "./FormatTImerDisplay";
+import { AttachedFile, EvidenceSection } from "./IncidentForm";
 
 // ── Schema Definitions ─────────────────────────────────────────────
 
@@ -172,7 +174,7 @@ const AddContextForm = ({
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: members = [] } = useMember();
-
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const memberOptions = useMemo(
     () => [
       { value: "", label: "Select team member" },
@@ -339,6 +341,22 @@ const AddContextForm = ({
       childIncidents.filter((c) => c.id !== id),
     );
   };
+
+  const IMAGE_TYPES = [
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/gif",
+    "image/webp",
+  ];
+  const isImage = (file: File) => IMAGE_TYPES.includes(file.type);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const formatSize = (b: number) =>
+    b < 1024
+      ? `${b}B`
+      : b < 1024 * 1024
+        ? `${(b / 1024).toFixed(1)}KB`
+        : `${(b / (1024 * 1024)).toFixed(1)}MB`;
 
   return (
     <div className="w-full">
@@ -523,6 +541,11 @@ const AddContextForm = ({
                   )}
                 />
               </div>
+              <IncidentRelationship
+                incident={incident}
+                value={childIncidents}
+                onChange={(children) => setValue("childIncidents", children)}
+              />
             </div>
           </div>
 
@@ -602,6 +625,7 @@ const AddContextForm = ({
               </div>
 
               {/* Upload Dropzone Workspace Block */}
+
               <div className="pt-2">
                 <SectionLabel>Evidence &amp; Media Attachments</SectionLabel>
                 <div
@@ -632,19 +656,6 @@ const AddContextForm = ({
                       browse disk files
                     </span>
                   </p>
-
-                  {attachments.length > 0 && (
-                    <div className="mt-2.5 flex flex-wrap gap-1 justify-center max-h-16 overflow-y-auto">
-                      {(attachments as File[]).map((f, i) => (
-                        <span
-                          key={i}
-                          className="text-[10px] font-mono bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 py-0.5 rounded text-zinc-600 dark:text-zinc-400"
-                        >
-                          {f.name.slice(0, 15)}...
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
                 <input
                   ref={fileRef}
@@ -660,17 +671,87 @@ const AddContextForm = ({
                   }
                 />
               </div>
+              {attachments?.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {attachments?.map((af: File) => (
+                    <div
+                      key={af.name}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-4 py-3"
+                    >
+                      <div
+                        className={`flex items-center gap-3 min-w-0 ${isImage(af) ? "cursor-pointer" : ""}`}
+                        onClick={() => isImage(af) && setPreviewFile(af)}
+                      >
+                        {/* Thumbnail for images, icon for everything else */}
+                        {isImage(af) && URL.createObjectURL(af) ? (
+                          <div className="w-7 h-7 rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden shrink-0">
+                            <img
+                              src={URL.createObjectURL(af)}
+                              alt={af.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-7 h-7 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                            <FileText
+                              size={13}
+                              className="text-zinc-400 dark:text-zinc-500"
+                            />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-[12px] font-medium text-black dark:text-zinc-200 truncate">
+                            {af.name}
+                          </p>
+                          <p className="text-[11px] text-black dark:text-zinc-500">
+                            {formatSize(af.size)}
+                          </p>
+                        </div>
+                      </div>
+                      {/* <button
+                  type="button"
+                  onClick={() => onRemove(af.name)}
+                  className="p-1.5 rounded-lg text-black hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <Trash2 size={13} />
+                </button> */}
+                      {previewFile && (
+                        <div
+                          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+                          onClick={() => setPreviewFile(null)}
+                        >
+                          <div
+                            className="relative max-w-[90vw] max-h-[90vh]"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <img
+                              src={URL.createObjectURL(af)}
+                              alt={previewFile?.name}
+                              className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/60 to-transparent rounded-b-xl">
+                              <p className="text-[12px] text-white/90 truncate">
+                                {previewFile?.name}
+                              </p>
+                              <p className="text-[11px] text-white/60">
+                                {formatSize(previewFile?.size)}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setPreviewFile(null)}
+                              className="absolute -top-3 -right-3 w-7 h-7 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white hover:bg-zinc-700 transition-colors"
+                            >
+                              <X size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-
-          {/* ─── WORKSPACE BLOCK: PARENT & CHILD RELATIONSHIPS ─── */}
-
-          <div className="col-span-2">
-            <IncidentRelationship
-              incident={incident}
-              value={childIncidents}
-              onChange={(children) => setValue("childIncidents", children)}
-            />
           </div>
         </div>
 

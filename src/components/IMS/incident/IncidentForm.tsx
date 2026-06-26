@@ -240,13 +240,13 @@ function WarRoomToggle({
 }
 
 // ── EvidenceSection ───────────────────────────────────────────────
-interface AttachedFile {
+export interface AttachedFile {
   id: string;
   file: File;
   previewUrl?: string; // object URL for images
 }
 
-function EvidenceSection({
+export function EvidenceSection({
   files,
   onAdd,
   onRemove,
