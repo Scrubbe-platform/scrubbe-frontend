@@ -48,6 +48,8 @@ export const endpoint = {
     mitigate: "/incident-ticket",        // POST /incident-ticket/:id/mitigate
     close: "/incident-ticket",           // POST /incident-ticket/:id/close
     attachments: "/incident-ticket",     // /incident-ticket/:id/attachments[/presign|/:attachmentId]
+    attachments_staging_presign: "/incident-ticket/attachments/presign", // POST — before a ticket exists (manual-create flow)
+    attachments_staging_delete: "/incident-ticket/attachments/staging",  // DELETE { key } — removes a staged, not-yet-submitted upload
     analytics: "/incident-ticket/analytics",
     history: "/tickets/history",
     integrations: "/integrations",

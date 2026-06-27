@@ -108,6 +108,55 @@ export const uploadIncidentAttachment = async (
   return attachment as IncidentAttachmentRecord;
 };
 
+export interface StagedAttachment {
+  key: string;
+  name: string;
+  type: string;
+  size: number;
+  downloadUrl: string;
+}
+
+// Uploads a file directly to S3 before any incident ticket exists yet (the
+// manual-create flow's "auto-upload immediately on add" requirement). The
+// returned `key` is what gets passed in `attachments` when the incident is
+// created — the server adopts it into a real IncidentAttachment row at that
+// point. `onProgress` receives 0-100 as the browser reports upload progress.
+export const uploadStagingIncidentAttachment = async (
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<StagedAttachment> => {
+  const contentType = file.type || "application/octet-stream";
+
+  const presignResponse = await customAxios.post(
+    endpoint.incident_ticket.attachments_staging_presign,
+    { name: file.name, type: contentType, size: file.size }
+  );
+  const { uploadUrl, downloadUrl, key } = presignResponse.data?.data ?? presignResponse.data ?? {};
+  if (!uploadUrl || !key) {
+    throw new Error("Unable to obtain an upload URL for this file.");
+  }
+
+  await axios.put(uploadUrl, file, {
+    headers: { "Content-Type": contentType },
+    onUploadProgress: (event) => {
+      if (!onProgress || !event.total) return;
+      onProgress(Math.round((event.loaded / event.total) * 100));
+    },
+  });
+
+  return { key, name: file.name, type: contentType, size: file.size, downloadUrl };
+};
+
+// Best-effort cleanup for a staged file the user removed before submitting
+// the create form. Never throws — an orphaned staging object is harmless.
+export const deleteStagingIncidentAttachment = async (key: string): Promise<void> => {
+  try {
+    await customAxios.delete(endpoint.incident_ticket.attachments_staging_delete, { data: { key } });
+  } catch {
+    // Best-effort.
+  }
+};
+
 export const fetchIncidentAttachments = async (
   incidentId: string
 ): Promise<IncidentAttachmentRecord[]> => {

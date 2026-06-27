@@ -24,7 +24,8 @@ import useMember from "@/hooks/useMember";
 import { querykeys } from "@/lib/constant";
 import {
   createIncident,
-  uploadIncidentAttachment,
+  uploadStagingIncidentAttachment,
+  deleteStagingIncidentAttachment,
 } from "@/lib/incident/incident.api";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
@@ -244,6 +245,11 @@ export interface AttachedFile {
   id: string;
   file: File;
   previewUrl?: string; // object URL for images
+  status: "uploading" | "uploaded" | "error";
+  progress: number; // 0-100, only meaningful while status === "uploading"
+  key?: string; // S3 key once uploaded — what gets sent on incident creation
+  downloadUrl?: string; // short-lived presigned GET, for "view what was uploaded"
+  errorMessage?: string;
 }
 
 export function EvidenceSection({
@@ -343,7 +349,7 @@ export function EvidenceSection({
                 className="flex items-center justify-between gap-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-4 py-3"
               >
                 <div
-                  className={`flex items-center gap-3 min-w-0 ${isImage(af.file) ? "cursor-pointer" : ""}`}
+                  className={`flex items-center gap-3 min-w-0 flex-1 ${isImage(af.file) ? "cursor-pointer" : ""}`}
                   onClick={() => isImage(af.file) && setPreviewFile(af)}
                 >
                   {/* Thumbnail for images, icon for everything else */}
@@ -363,19 +369,51 @@ export function EvidenceSection({
                       />
                     </div>
                   )}
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-[12px] font-medium text-black dark:text-zinc-200 truncate">
                       {af.file.name}
                     </p>
                     <p className="text-[11px] text-black dark:text-zinc-500">
                       {formatSize(af.file.size)}
                     </p>
+
+                    {af.status === "uploading" && (
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <div className="h-1.5 flex-1 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-emerald-500 transition-all"
+                            style={{ width: `${af.progress}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-zinc-500 tabular-nums">
+                          {af.progress}%
+                        </span>
+                      </div>
+                    )}
+
+                    {af.status === "uploaded" && af.downloadUrl && (
+                      <a
+                        href={af.downloadUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline truncate"
+                      >
+                        ✓ Uploaded — view file
+                      </a>
+                    )}
+
+                    {af.status === "error" && (
+                      <p className="mt-1 text-[10px] font-medium text-red-500">
+                        {af.errorMessage ?? "Upload failed"}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => onRemove(af.id)}
-                  className="p-1.5 rounded-lg text-black hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="p-1.5 rounded-lg text-black hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
                 >
                   <Trash2 size={13} />
                 </button>
@@ -435,8 +473,80 @@ const RaiseIncidentModal = () => {
       return res.success ? (res.data?.data ?? []) : [];
     },
   });
+  // Auto-populated SI Number — generated server-side before the incident
+  // exists, and sent back as `incidentId` on create so the ticket actually
+  // gets created with the ID shown here, not a different one.
+  const { data: generatedTicket, isLoading: isGeneratingTicketId } = useQuery({
+    queryKey: [querykeys.GET_INCIDENT_ID],
+    queryFn: async () => {
+      const res = await get(endpoint.incident_ticket.get_incident_id);
+      if (!res.success) throw new Error("Failed to generate incident ID");
+      return (res.data?.data ?? res.data) as { ticketId: string };
+    },
+    refetchOnWindowFocus: false,
+  });
   const [totalSeconds, setTotalSeconds] = useState(0);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+
+  // Uploads start the moment a file is added, not on form submit — each
+  // entry tracks its own progress/status so EvidenceSection can render a
+  // progress bar, then an "uploaded" link, independently per file.
+  const addAndUploadFiles = (incoming: File[]) => {
+    const entries: AttachedFile[] = incoming.map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      file,
+      previewUrl: file.type.startsWith("image/")
+        ? URL.createObjectURL(file)
+        : undefined,
+      status: "uploading",
+      progress: 0,
+    }));
+    setAttachedFiles((prev) => [...prev, ...entries]);
+
+    entries.forEach((entry) => {
+      uploadStagingIncidentAttachment(entry.file, (pct) => {
+        setAttachedFiles((prev) =>
+          prev.map((f) => (f.id === entry.id ? { ...f, progress: pct } : f))
+        );
+      })
+        .then((staged) => {
+          setAttachedFiles((prev) =>
+            prev.map((f) =>
+              f.id === entry.id
+                ? {
+                    ...f,
+                    status: "uploaded",
+                    progress: 100,
+                    key: staged.key,
+                    downloadUrl: staged.downloadUrl,
+                  }
+                : f
+            )
+          );
+        })
+        .catch(() => {
+          setAttachedFiles((prev) =>
+            prev.map((f) =>
+              f.id === entry.id
+                ? { ...f, status: "error", errorMessage: "Upload failed — remove and try again" }
+                : f
+            )
+          );
+          toast.error(`Failed to upload ${entry.file.name}`);
+        });
+    });
+  };
+
+  const removeFile = (id: string) => {
+    setAttachedFiles((prev) => {
+      const target = prev.find((f) => f.id === id);
+      if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
+      if (target?.status === "uploaded" && target.key) {
+        void deleteStagingIncidentAttachment(target.key);
+      }
+      return prev.filter((f) => f.id !== id);
+    });
+  };
   // Add near your other state
   const [customImpact, setCustomImpact] = useState("");
   const [showCustomImpact, setShowCustomImpact] = useState(false);
@@ -477,8 +587,20 @@ const RaiseIncidentModal = () => {
 
   const createMutation = useMutation({
     mutationFn: async (data: RaiseIncidentFormValues) => {
+      const uploaded = attachedFiles.filter((f) => f.status === "uploaded" && f.key);
+
       const incident = await createIncident({
-        MTTR: totalSeconds,
+        incidentId: generatedTicket?.ticketId,
+        // MTTR must be a string — the backend's normalizer silently drops
+        // non-string values (returns undefined), so a number here means
+        // "time worked" never actually gets saved.
+        MTTR: String(totalSeconds),
+        attachments: uploaded.map((f) => ({
+          key: f.key,
+          name: f.file.name,
+          type: f.file.type || undefined,
+          size: f.file.size,
+        })),
         reason: data.title.trim(),
         description: data.description.trim(),
         techDescription: data.description.trim(),
@@ -504,20 +626,6 @@ const RaiseIncidentModal = () => {
           ? [`Review recent change: ${data.recentChange.trim()}`]
           : [],
       });
-
-      if (attachedFiles.length > 0) {
-        const results = await Promise.allSettled(
-          attachedFiles.map((af) =>
-            uploadIncidentAttachment(incident.id, af.file),
-          ),
-        );
-        const failed = results.filter((r) => r.status === "rejected").length;
-        if (failed > 0) {
-          toast.error(
-            `${failed} of ${attachedFiles.length} attachment(s) failed to upload.`,
-          );
-        }
-      }
 
       return incident;
     },
@@ -568,9 +676,13 @@ const RaiseIncidentModal = () => {
       </div>
 
       <form
-        onSubmit={handleSubmit(async (data) =>
-          createMutation.mutateAsync(data),
-        )}
+        onSubmit={handleSubmit(async (data) => {
+          if (attachedFiles.some((f) => f.status === "uploading")) {
+            toast.error("Please wait for attachments to finish uploading.");
+            return;
+          }
+          createMutation.mutateAsync(data);
+        })}
         className="p-6"
       >
         <div className=" grid md:grid-cols-2 gap-6">
@@ -582,7 +694,13 @@ const RaiseIncidentModal = () => {
           >
             <div className="space-y-5">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Input value={""} readOnly label="SI Number" />
+                <Input
+                  value={generatedTicket?.ticketId ?? ""}
+                  isLoading={isGeneratingTicketId}
+                  placeholder={isGeneratingTicketId ? "Generating…" : undefined}
+                  readOnly
+                  label="SI Number"
+                />
                 <FormatTimerDisplay totalSeconds={totalSeconds} />
                 <Controller
                   name="severity"
@@ -854,26 +972,8 @@ const RaiseIncidentModal = () => {
               />
               <EvidenceSection
                 files={attachedFiles}
-                onAdd={(f) =>
-                  setAttachedFiles((p) => [
-                    ...p,
-                    ...f.map((file) => ({
-                      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-                      file,
-                      previewUrl: file.type.startsWith("image/")
-                        ? URL.createObjectURL(file)
-                        : undefined,
-                    })),
-                  ])
-                }
-                onRemove={(id) => {
-                  setAttachedFiles((p) => {
-                    const target = p.find((f) => f.id === id);
-                    if (target?.previewUrl)
-                      URL.revokeObjectURL(target.previewUrl);
-                    return p.filter((f) => f.id !== id);
-                  });
-                }}
+                onAdd={addAndUploadFiles}
+                onRemove={removeFile}
               />
             </div>
           </FormSection>
@@ -891,7 +991,10 @@ const RaiseIncidentModal = () => {
         <div className="sticky bottom-0 z-20 flex gap-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 py-4">
           <button
             type="submit"
-            disabled={createMutation.isPending}
+            disabled={
+              createMutation.isPending ||
+              attachedFiles.some((f) => f.status === "uploading")
+            }
             className="rounded-lg bg-emerald-500 hover:bg-emerald-600 px-6 py-2 text-[12px] font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
             {createMutation.isPending ? "Creating…" : "Raise Incident"}
