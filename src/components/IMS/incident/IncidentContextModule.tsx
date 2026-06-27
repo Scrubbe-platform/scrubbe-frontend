@@ -2,31 +2,74 @@
 
 import React from "react";
 import { Sparkles } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
+import { toast } from "sonner";
 import {
   IncidentContextRecord,
   IncidentDetailRecord,
 } from "@/lib/incident/incident.types";
 
+interface EzraAnalysis {
+  id: string;
+  rootCause: { hypothesis: string; riskLevel?: string };
+  impact: { blastRadius: { summary: string }; affectedUsers?: number; severity?: string };
+  remediation: { action: string };
+}
+
 interface AISuggestionsCardProps {
   incident: IncidentDetailRecord;
   context: IncidentContextRecord | null;
-  onGenerate?: () => void;
-  isLoading?: boolean;
 }
 
 const AISuggestionsCard: React.FC<AISuggestionsCardProps> = ({
   incident,
   context,
-  onGenerate,
-  isLoading = false,
 }) => {
-  // 1. Build context-aware text strings using the real data properties
-  const businessImpactText =
-    context?.businessImpact || incident.financialExposure
+  const { get, post } = useFetch();
+  const queryClient = useQueryClient();
+
+  // Loads whatever analysis already exists for this incident (if Ezra has
+  // run before) so the card shows real output on first load, not just after
+  // a fresh click of "Generate".
+  const { data: analysis } = useQuery<EzraAnalysis | null>({
+    queryKey: ["ezra-analysis", incident.id],
+    queryFn: async () => {
+      const res = await get(`${endpoint.ezra.analysis}/${incident.id}`);
+      return res.success ? ((res.data?.data ?? res.data) as EzraAnalysis) : null;
+    },
+    enabled: Boolean(incident.id),
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+
+  const { mutate: generate, isPending: isLoading } = useMutation({
+    mutationFn: async () => {
+      const res = await post(endpoint.ezra.analyse, { incidentId: incident.id });
+      if (!res.success) throw new Error(res.data?.message ?? "Analysis failed");
+      return (res.data?.data ?? res.data) as EzraAnalysis;
+    },
+    onSuccess: (result) => {
+      queryClient.setQueryData(["ezra-analysis", incident.id], result);
+    },
+    onError: () => {
+      toast.error("Unable to generate AI suggestions right now.");
+    },
+  });
+
+  // 1. Build context-aware text strings using the real data properties —
+  // shown until a real Ezra analysis exists for this incident, then real
+  // analysis output takes over.
+  const businessImpactText = analysis
+    ? analysis.rootCause.hypothesis || "No root cause identified yet."
+    : context?.businessImpact || incident.financialExposure
       ? `Partial customer degradation. Business impact: ${context?.businessImpact || incident.financialExposure}.`
       : "No business impact recorded yet.";
 
-  const recentChangesText = incident.techDescription || "No recent change";
+  const changesText = analysis
+    ? analysis.remediation.action || "No recommended action yet."
+    : "---";
 
   // Safely display real quantitative metrics based on context configurations
   const similarIncidentsText = incident.blastRadius
@@ -49,7 +92,7 @@ const AISuggestionsCard: React.FC<AISuggestionsCardProps> = ({
 
           <button
             type="button"
-            onClick={onGenerate}
+            onClick={() => generate()}
             disabled={isLoading}
             className="rounded-lg border border-emerald-600 px-4 py-1.5 text-[12px] font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 active:scale-[0.98] transition-all disabled:opacity-50"
           >
@@ -72,12 +115,14 @@ const AISuggestionsCard: React.FC<AISuggestionsCardProps> = ({
             </p>
           </div>
 
-          {/* Section 2: Changes */}
+          {/* Section 2: Changes — recommended action once a real analysis exists */}
           <div className="flex flex-col gap-1">
             <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
               Changes
             </h4>
-            ---
+            <p className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed">
+              {changesText}
+            </p>
           </div>
 
           {/* Section 3: Similar Incidents */}

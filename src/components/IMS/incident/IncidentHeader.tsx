@@ -120,7 +120,7 @@ const IncidentHeader = ({
 
         {/* Actions */}
         <div className="flex items-center gap-2 shrink-0">
-          <LiveViewers title="Viewing this Incident" />
+          <LiveViewers title="Viewing this Incident" ticketId={incident.id} />
           <Dropdown
             position="left"
             showSelectedIcon={false}

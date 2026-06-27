@@ -10,25 +10,38 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useMember, { Member } from "@/hooks/useMember";
 import { IncidentListItem } from "@/lib/incident/incident.types";
 import { useIncidentDetail } from "@/hooks/useIncidentWorkspace";
+import useAuthStore from "@/lib/stores/auth.store";
+import { initSocket } from "@/lib/api/socket";
+import {
+  fetchConversations,
+  fetchConversationMessages,
+  getOrCreateConversation,
+  markConversationRead,
+  ConversationSummary,
+  DirectMessageRecord,
+} from "@/lib/direct-messages/direct-messages.api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Message {
   id: string;
-  senderId: string; // member id or "me"
+  senderId: string; // real userId — compared against the current user's id, not a literal "me"
   text: string;
   timestamp: Date;
 }
 
 interface Conversation {
-  memberId: string;
+  id: string; // DirectConversation id — needed to join the socket room / fetch / send
+  memberId: string; // the other participant's userId
   messages: Message[];
   lastMessage: string;
   lastAt: Date;
   unread: number;
+  online: boolean;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -309,107 +322,6 @@ function MessageText({ text, isMe }: { text: string; isMe: boolean }) {
   );
 }
 
-// ─── Seed dummy conversations ─────────────────────────────────────────────────
-
-function seedConversations(members: Member[]): Conversation[] {
-  if (!members.length) return [];
-
-  const now = new Date();
-  const mins = (n: number) => new Date(now.getTime() - n * 60_000);
-  const days = (n: number) => new Date(now.getTime() - n * 86_400_000);
-
-  const seeds: Omit<Conversation, "memberId">[] = [
-    {
-      lastMessage: "Deploy complete? Looking for the...",
-      lastAt: mins(20),
-      unread: 0,
-      messages: [
-        {
-          id: "1a",
-          senderId: members[0]?.id,
-          text: "Hi! Are we still on track for the v2.4 deployment? I'm seeing some spikes in the staging environment. Check SI-W27PHJ7 when you get a chance.",
-          timestamp: mins(30),
-        },
-        {
-          id: "1b",
-          senderId: "me",
-          text: "Checking the logs now. Staging-B had a minor cache miss issue but it's resolved. Deploying at 11:00 as planned.",
-          timestamp: mins(26),
-        },
-        {
-          id: "1c",
-          senderId: members[0]?.id,
-          text: "Great. Deploy complete? Looking for the final telemetry link in the Slack channel but haven't seen it yet.",
-          timestamp: mins(20),
-        },
-      ],
-    },
-    {
-      lastMessage: "The incident report is ready for review.",
-      lastAt: days(1),
-      unread: 1,
-      messages: [
-        {
-          id: "2a",
-          senderId: members[1]?.id,
-          text: "The incident report for SI-W27PHJ7 is ready for review.",
-          timestamp: days(1),
-        },
-      ],
-    },
-    {
-      lastMessage: "Fixed the memory leak in the prod...",
-      lastAt: days(3),
-      unread: 0,
-      messages: [
-        {
-          id: "3a",
-          senderId: "me",
-          text: "Can you check the memory leak in prod?",
-          timestamp: days(4),
-        },
-        {
-          id: "3b",
-          senderId: members[2]?.id,
-          text: "Fixed the memory leak in the prod environment. Monitoring now.",
-          timestamp: days(3),
-        },
-      ],
-    },
-    {
-      lastMessage: "Team sync at 0900 tomorrow.",
-      lastAt: days(7),
-      unread: 0,
-      messages: [
-        {
-          id: "4a",
-          senderId: members[3]?.id,
-          text: "Team sync at 0900 tomorrow.",
-          timestamp: days(7),
-        },
-      ],
-    },
-    {
-      lastMessage: "Security patches applied successfully.",
-      lastAt: days(14),
-      unread: 0,
-      messages: [
-        {
-          id: "5a",
-          senderId: members[4]?.id,
-          text: "Security patches applied successfully.",
-          timestamp: days(14),
-        },
-      ],
-    },
-  ];
-
-  return members.slice(0, seeds.length).map((m, i) => ({
-    memberId: m.id,
-    ...seeds[i],
-  }));
-}
-
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
 function Avatar({
@@ -461,7 +373,7 @@ function ConvoItem({
           : "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
       }`}
     >
-      <Avatar member={member} size={42} online={active} />
+      <Avatar member={member} size={42} online={conversation.online} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-0.5">
           <span className="text-[13.5px] font-semibold text-zinc-900 dark:text-zinc-100 truncate">
@@ -490,73 +402,168 @@ function ConvoItem({
 
 interface MessagesModalProps {
   onClose: () => void;
+  /** When set, opens straight into the conversation with this member instead of the first one in the list. */
+  initialMemberId?: string;
 }
 
-export default function MessagesModal({ onClose }: MessagesModalProps) {
+function toMessage(m: DirectMessageRecord): Message {
+  return { id: m.id, senderId: m.senderId, text: m.content, timestamp: new Date(m.createdAt) };
+}
+
+export default function MessagesModal({ onClose, initialMemberId }: MessagesModalProps) {
+  const { user } = useAuthStore();
+  const currentUserId = user?.id ?? "";
   const { data: members = [] } = useMember();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null); // memberId of the active conversation
   const [draft, setDraft] = useState("");
+  const [typingMemberIds, setTypingMemberIds] = useState<Set<string>>(new Set());
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const socketRef = useRef<ReturnType<typeof initSocket> | null>(null);
+  const typingStopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { data: summaries = [] } = useQuery<ConversationSummary[]>({
+    queryKey: ["dm-conversations"],
+    queryFn: fetchConversations,
+    refetchOnWindowFocus: false,
+  });
+
+  // Conversations keyed by the conversation's real id, hydrated from the
+  // summary list plus whatever messages have been fetched/received so far.
+  const [messagesByConversation, setMessagesByConversation] = useState<Record<string, Message[]>>({});
+
+  const conversations: Conversation[] = useMemo(
+    () =>
+      summaries.map((s) => ({
+        id: s.id,
+        memberId: s.otherUserId,
+        messages: messagesByConversation[s.id] ?? [],
+        lastMessage: s.lastMessage ?? "",
+        lastAt: new Date(s.lastMessageAt),
+        unread: s.unreadCount,
+        online: s.online,
+      })),
+    [summaries, messagesByConversation]
+  );
+
+  const memberMap = useMemo(() => new Map(members.map((m) => [m.id, m])), [members]);
+
+  // Opening the modal targeting a specific member who doesn't have a
+  // conversation yet — get-or-create it, then select it.
+  useEffect(() => {
+    if (!initialMemberId) return;
+    const existing = summaries.find((s) => s.otherUserId === initialMemberId);
+    if (existing) {
+      setActiveId(initialMemberId);
+      return;
+    }
+    void getOrCreateConversation(initialMemberId).then(() => {
+      setActiveId(initialMemberId);
+      void queryClient.invalidateQueries({ queryKey: ["dm-conversations"] });
+    });
+  }, [initialMemberId, summaries, queryClient]);
 
   useEffect(() => {
-    if (members.length && !conversations.length) {
-      const seeded = seedConversations(members);
-      setConversations(seeded);
-      setActiveId(seeded[0]?.memberId ?? null);
+    if (!activeId && summaries.length) {
+      setActiveId(summaries[0].otherUserId);
     }
-  }, [members]);
+  }, [activeId, summaries]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [activeId, conversations]);
-
-  const memberMap = useMemo(
-    () => new Map(members.map((m) => [m.id, m])),
-    [members],
-  );
+  }, [activeId, messagesByConversation]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return conversations;
     const q = search.toLowerCase();
     return conversations.filter((c) => {
       const m = memberMap.get(c.memberId);
-      return (
-        m &&
-        (fullName(m).toLowerCase().includes(q) ||
-          m.email.toLowerCase().includes(q))
-      );
+      return m && (fullName(m).toLowerCase().includes(q) || m.email.toLowerCase().includes(q));
     });
   }, [conversations, search, memberMap]);
 
   const activeConvo = conversations.find((c) => c.memberId === activeId);
   const activeMember = activeId ? memberMap.get(activeId) : undefined;
 
+  // Fetch message history + join the socket room once a conversation becomes active.
+  useEffect(() => {
+    if (!activeConvo?.id) return;
+    const conversationId = activeConvo.id;
+
+    void fetchConversationMessages(conversationId).then((records) => {
+      setMessagesByConversation((prev) => ({ ...prev, [conversationId]: records.map(toMessage) }));
+    });
+    void markConversationRead(conversationId).then(() => {
+      void queryClient.invalidateQueries({ queryKey: ["dm-conversations"] });
+    });
+
+    const socket = socketRef.current;
+    if (!socket) return;
+    socket.emit("dm:join", { conversationId });
+    socket.emit("dm:read", { conversationId });
+
+    return () => {
+      socket.emit("dm:leave", { conversationId });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeConvo?.id]);
+
+  // One socket connection for the whole modal — message delivery, typing,
+  // and online-status updates all flow through it for as long as it's open.
+  useEffect(() => {
+    const socket = initSocket();
+    socketRef.current = socket;
+
+    const handleMessage = (payload: { conversationId: string; message: DirectMessageRecord }) => {
+      setMessagesByConversation((prev) => {
+        const existing = prev[payload.conversationId] ?? [];
+        if (existing.some((m) => m.id === payload.message.id)) return prev;
+        return { ...prev, [payload.conversationId]: [...existing, toMessage(payload.message)] };
+      });
+      void queryClient.invalidateQueries({ queryKey: ["dm-conversations"] });
+    };
+
+    const handleTypingStart = (payload: { conversationId: string; userId: string }) => {
+      setTypingMemberIds((prev) => new Set(prev).add(payload.userId));
+    };
+    const handleTypingStop = (payload: { conversationId: string; userId: string }) => {
+      setTypingMemberIds((prev) => {
+        const next = new Set(prev);
+        next.delete(payload.userId);
+        return next;
+      });
+    };
+    const handlePresenceChange = () => {
+      void queryClient.invalidateQueries({ queryKey: ["dm-conversations"] });
+    };
+
+    socket.on("dm:message", handleMessage);
+    socket.on("dm:typing_started", handleTypingStart);
+    socket.on("dm:typing_stopped", handleTypingStop);
+    socket.on("presence:online", handlePresenceChange);
+    socket.on("presence:offline", handlePresenceChange);
+
+    return () => {
+      socket.off("dm:message", handleMessage);
+      socket.off("dm:typing_started", handleTypingStart);
+      socket.off("dm:typing_stopped", handleTypingStop);
+      socket.off("presence:online", handlePresenceChange);
+      socket.off("presence:offline", handlePresenceChange);
+      socket.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const sendMessage = () => {
     const text = draft.trim();
-    if (!text || !activeId) return;
-    const newMsg: Message = {
-      id: crypto.randomUUID(),
-      senderId: "me",
-      text,
-      timestamp: new Date(),
-    };
-    setConversations((prev) =>
-      prev.map((c) =>
-        c.memberId === activeId
-          ? {
-              ...c,
-              messages: [...c.messages, newMsg],
-              lastMessage: text,
-              lastAt: new Date(),
-            }
-          : c,
-      ),
-    );
+    const conversationId = activeConvo?.id;
+    if (!text || !conversationId || !socketRef.current) return;
+
+    socketRef.current.emit("dm:send", { conversationId, content: text });
+    socketRef.current.emit("dm:typing_stop", { conversationId });
     setDraft("");
-    // Reset textarea height
     if (inputRef.current) {
       inputRef.current.style.height = "auto";
       inputRef.current.focus();
@@ -567,9 +574,19 @@ export default function MessagesModal({ onClose }: MessagesModalProps) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+      return;
     }
+
+    const conversationId = activeConvo?.id;
+    if (!conversationId || !socketRef.current) return;
+    socketRef.current.emit("dm:typing_start", { conversationId });
+    if (typingStopTimer.current) clearTimeout(typingStopTimer.current);
+    typingStopTimer.current = setTimeout(() => {
+      socketRef.current?.emit("dm:typing_stop", { conversationId });
+    }, 2000);
   };
 
+  const isActivePartnerTyping = activeId ? typingMemberIds.has(activeId) : false;
   const groups = activeConvo ? groupByDay(activeConvo.messages) : [];
 
   return (
@@ -635,7 +652,7 @@ export default function MessagesModal({ onClose }: MessagesModalProps) {
             <>
               {/* Header */}
               <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-                <Avatar member={activeMember} size={36} online />
+                <Avatar member={activeMember} size={36} online={activeConvo?.online} />
                 <div>
                   <p className="text-[14px] font-semibold text-zinc-900 dark:text-zinc-100 leading-tight">
                     {fullName(activeMember)}
@@ -645,8 +662,10 @@ export default function MessagesModal({ onClose }: MessagesModalProps) {
                       </span>
                     )}
                   </p>
-                  <p className="text-[11.5px] text-emerald-500 font-medium">
-                    Active now
+                  <p
+                    className={`text-[11.5px] font-medium ${activeConvo?.online ? "text-emerald-500" : "text-zinc-400 dark:text-zinc-500"}`}
+                  >
+                    {activeConvo?.online ? "Active now" : "Offline"}
                   </p>
                 </div>
               </div>
@@ -665,7 +684,7 @@ export default function MessagesModal({ onClose }: MessagesModalProps) {
 
                     <div className="space-y-3">
                       {group.messages.map((msg) => {
-                        const isMe = msg.senderId === "me";
+                        const isMe = msg.senderId === currentUserId;
                         return (
                           <div
                             key={msg.id}
@@ -713,6 +732,12 @@ export default function MessagesModal({ onClose }: MessagesModalProps) {
                 ))}
                 <div ref={bottomRef} />
               </div>
+
+              {isActivePartnerTyping && (
+                <p className="px-5 pb-1 text-[11.5px] text-zinc-400 dark:text-zinc-500 italic">
+                  {fullName(activeMember)} is typing…
+                </p>
+              )}
 
               {/* Input */}
               <div className="px-4 py-4 border-t border-zinc-100 dark:border-zinc-800">

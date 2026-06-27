@@ -164,6 +164,13 @@ export const endpoint = {
     schedules: "/handovers/schedules",
     automation: "/handovers/automation",
   },
+  incident_workspace: {
+    presence: "/incident-workspace",     // GET /incident-workspace/:ticketId/presence
+  },
+  direct_messages: {
+    conversations: "/direct-messages/conversations", // GET (list), POST { recipientId } (get-or-create)
+    onlineStatus: "/direct-messages/online-status",
+  },
   dashboard: {
     get_metrics: "/dashboard/metrics",
     get_analytics: "/dashboard/analytics",
