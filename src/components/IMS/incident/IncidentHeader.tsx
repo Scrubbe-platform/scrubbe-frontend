@@ -14,6 +14,8 @@ import Dropdown from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button1";
 import { EllipsisVertical, Plus, Video } from "lucide-react";
 import LiveViewers from "./LiveViewers";
+import { BiMessageRoundedDetail } from "react-icons/bi";
+import MessagesModal from "@/app/(incident)/incident/handover/_modules/components/MessagesModal";
 
 interface TabItem {
   id: string;
@@ -38,7 +40,7 @@ const IncidentHeader = ({
   const currentTab = searchParams.get("tab");
   const [openWarRoom, setOpenWarRoom] = useState(false);
   const [openContext, setOpenContext] = useState(false);
-
+  const [openChatModal, setOpenChatModal] = useState(false);
   const tabs: TabItem[] = [
     {
       id: "overview",
@@ -131,6 +133,12 @@ const IncidentHeader = ({
                 icon: <Video size={14} />,
                 onClick: () => setOpenWarRoom(true),
               },
+              {
+                value: "message",
+                label: "Messages",
+                icon: <BiMessageRoundedDetail size={14} />,
+                onClick: () => setOpenChatModal(true),
+              },
             ]}
             trigger={
               <Button size="sm" className="!bg-slate-200">
@@ -179,6 +187,9 @@ const IncidentHeader = ({
       <Modal onClose={() => setOpenWarRoom(false)} isOpen={openWarRoom}>
         <WarRoom incident={incident} onClose={() => setOpenWarRoom(false)} />
       </Modal>
+      {openChatModal && (
+        <MessagesModal onClose={() => setOpenChatModal(false)} />
+      )}
     </div>
   );
 };

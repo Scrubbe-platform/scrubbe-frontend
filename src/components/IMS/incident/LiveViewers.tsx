@@ -34,13 +34,18 @@ const LiveViewers = ({ title, ticketId }: Props) => {
   const { data: members = [] } = useMember();
   const presenceRows = useIncidentPresence(ticketId);
 
-  const memberMap = useMemo(() => new Map(members.map((m) => [m.id, m])), [members]);
+  const memberMap = useMemo(
+    () => new Map(members.map((m) => [m.id, m])),
+    [members],
+  );
 
   const viewers = useMemo(
     () =>
       presenceRows.map((row) => {
         const member = memberMap.get(row.userId);
-        const name = member ? `${member.firstname} ${member.lastname}`.trim() : row.userId;
+        const name = member
+          ? `${member.firstname} ${member.lastname}`.trim()
+          : row.userId;
         return {
           userId: row.userId,
           name: name || member?.email || "Unknown",
@@ -49,7 +54,7 @@ const LiveViewers = ({ title, ticketId }: Props) => {
           isYou: row.userId === user?.id,
         };
       }),
-    [presenceRows, memberMap, user?.id]
+    [presenceRows, memberMap, user?.id],
   );
 
   const openChatWith = (userId: string) => {
@@ -60,6 +65,7 @@ const LiveViewers = ({ title, ticketId }: Props) => {
   return (
     <div>
       <Dropdown
+        position="left"
         trigger={
           <div className=" border items-center flex gap-2 p-1 px-2 rounded-md bg-gray-50">
             <div className="flex items-center -space-x-2 select-none">
@@ -89,7 +95,8 @@ const LiveViewers = ({ title, ticketId }: Props) => {
           <div>
             <p className="text-base font-bold">{title}</p>
             <p className="text-xs text-zinc-400 dark:text-zinc-500">
-              {viewers.length} team member{viewers.length === 1 ? "" : "s"} · live
+              {viewers.length} team member{viewers.length === 1 ? "" : "s"} ·
+              live
             </p>
           </div>
 
@@ -100,7 +107,10 @@ const LiveViewers = ({ title, ticketId }: Props) => {
               </p>
             )}
             {viewers.map((viewer) => (
-              <div key={viewer.userId} className="flex justify-between items-center py-2">
+              <div
+                key={viewer.userId}
+                className="flex justify-between items-center py-2"
+              >
                 <div className="flex items-end gap-3">
                   <div
                     className={`relative h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold shadow-2xs dark:border-zinc-950 cursor-pointer transition-transform hover:-translate-y-0.5 z-10 ${viewer.colorClass}`}

@@ -51,7 +51,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           </label>
         )}
         <div
-          className={`w-full dark:text-white  h-[38px] bg-transparent text-sm px-3 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full dark:text-white  h-[34px] bg-transparent text-sm px-3 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             isLoading
               ? "border-gray-400 bg-gray-50 opacity-70 cursor-not-allowed"
               : "border-gray-400"

@@ -57,7 +57,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             type={isPasswordType ? (showPassword ? "text" : "password") : type}
-            className={`w-full read-only:opacity-70 dark:text-white bg-transparent h-[38px] px-3 text-sm py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full read-only:opacity-70 dark:text-white bg-transparent h-[34px] px-3 text-sm py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               isLoading
                 ? "border-gray-300 bg-gray-50 opacity-70 cursor-not-allowed"
                 : "border-gray-400"

@@ -9,6 +9,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import useGetConfig from "@/hooks/useConfig";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useCurrentUser } from "@/lib/api";
+import { User } from "@/lib/stores/auth.store";
+import Dropdown from "../ui/Dropdown";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { LogOut } from "lucide-react";
+import useLogout from "@/hooks/useLogout";
 
 const W_COLLAPSED = 64;
 const W_EXPANDED = 280;
@@ -19,10 +25,12 @@ const TRANSITION = { duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] };
 const Sidebar = () => {
   const pathname = usePathname();
   const { collapse } = useSidebar();
-  const { imsConfig, isLoading } = useGetConfig();
+  const [user, setUser] = useState<User | null>();
+  const { execute: getUser } = useCurrentUser();
   const [hovered, setHovered] = useState(false);
   // showLabels trails hovered so text never clips the closing edge
   const [showLabels, setShowLabels] = useState(false);
+  const { handleLogout } = useLogout();
 
   useEffect(() => {
     let t: ReturnType<typeof setTimeout>;
@@ -33,6 +41,13 @@ const Sidebar = () => {
     }
     return () => clearTimeout(t);
   }, [hovered]);
+
+  useEffect(() => {
+    (async () => {
+      const resp = await getUser();
+      setUser(resp as User);
+    })();
+  }, []);
 
   return (
     <motion.div
@@ -121,6 +136,53 @@ const Sidebar = () => {
             ))}
           </div>
         ))}
+      </div>
+
+      <div className="pl-3 flex items-center gap-2  pt-3 ">
+        <div className="size-8 min-w-8 rounded-full border-2 border-white/40 flex justify-center items-center bg-indigo-500 text-white font-semibold text-sm uppercase">
+          {user?.firstName?.slice(0, 2)}
+        </div>
+        <motion.div
+          animate={{ opacity: showLabels ? 1 : 0, x: showLabels ? 0 : -4 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="flex-1 min-w-0 overflow-hidden"
+        >
+          <p
+            className={cn(
+              "text-[13px] leading-tight truncate pr-2 capitalize",
+              showLabels ? "text-white font-medium" : "text-zinc-300",
+            )}
+          >
+            {user?.firstName} {user?.lastName}
+          </p>
+          <p className="text-[10px] leading-tight text-white/50">
+            {user?.roles[0]}
+          </p>
+        </motion.div>
+
+        <motion.div
+          animate={{ opacity: showLabels ? 1 : 0, x: showLabels ? 0 : -4 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+        >
+          <Dropdown
+            position="left"
+            trigger={
+              <div className="px-2">
+                <BsThreeDotsVertical className="text-white" />
+              </div>
+            }
+            items={[
+              {
+                value: "logout",
+                label: "Logout",
+                icon: <LogOut />,
+                onClick() {
+                  handleLogout();
+                },
+              },
+            ]}
+          />
+        </motion.div>
       </div>
     </motion.div>
   );

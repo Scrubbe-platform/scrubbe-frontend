@@ -98,7 +98,7 @@ const IncidentRelationship: React.FC<Props> = ({
         {/* ── Mother incident (current) ── */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
-            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
               Mother Incident{" "}
               <span className="text-zinc-400 dark:text-zinc-500 font-normal">
                 (Current Incident)
@@ -110,7 +110,7 @@ const IncidentRelationship: React.FC<Props> = ({
           {/* Mother card — read-only */}
           <div className="flex-1 bg-transparent outline-none text-[13px] text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 dark:placeholder:text-zinc-500">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5 border p-2 rounded-lg">
+              <div className="flex items-center gap-2 mb-0.5 border  border-gray-400 p-2 rounded-lg">
                 <span className="text-[11px] font-mono font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
                   {incident.ticketId}
                 </span>
@@ -131,7 +131,7 @@ const IncidentRelationship: React.FC<Props> = ({
         {/* ── Child incidents ── */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
               Child Incidents
             </p>
             <Tooltip text="Select one or more incidents to link as children. They will inherit enrichment and resolution updates from this incident." />
@@ -146,10 +146,10 @@ const IncidentRelationship: React.FC<Props> = ({
           <div ref={dropRef} className="relative mb-4">
             <div
               onClick={() => setDropOpen((v) => !v)}
-              className={`flex items-center gap-2 border rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800/60 cursor-pointer transition-colors ${
+              className={`flex items-center gap-2 border border-gray-400 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800/60 cursor-pointer transition-colors ${
                 dropOpen
-                  ? "border-zinc-400 dark:border-zinc-500"
-                  : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
+                  ? "border-gray-400 dark:border-zinc-500"
+                  : "border-gray-400 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
               }`}
             >
               <Search size={14} className="text-zinc-400 shrink-0" />

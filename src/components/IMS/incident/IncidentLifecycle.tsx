@@ -229,24 +229,26 @@ export default function IncidentLifecycleManager({ incident }: Props) {
                 >
                   <div className="flex items-center gap-2.5">
                     {/* Status Node Indicators */}
-                    <div className="shrink-0 flex items-center justify-center">
-                      {isCompleted ? (
-                        <Check
-                          size={12}
-                          strokeWidth={3}
-                          className={stage.textColor}
-                        />
-                      ) : isCurrent ? (
-                        <div className="w-1.5 h-1.5 rounded-full bg-current" />
-                      ) : (
-                        <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-slate-700" />
-                      )}
-                    </div>
 
                     <div className="flex flex-col select-none">
-                      <span className="text-[9px] font-mono font-bold tracking-wider opacity-60 uppercase">
-                        Stage {stage.id}
-                      </span>
+                      <div className="flex items-center  gap-2">
+                        <div className="shrink-0 flex items-center justify-center">
+                          {isCompleted ? (
+                            <Check
+                              size={12}
+                              strokeWidth={3}
+                              className={stage.textColor}
+                            />
+                          ) : isCurrent ? (
+                            <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                          ) : (
+                            <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-slate-700" />
+                          )}
+                        </div>
+                        <span className="text-[9px] font-mono font-bold tracking-wider opacity-60 uppercase">
+                          Stage {stage.id}
+                        </span>
+                      </div>
                       <span className="text-[12px] font-bold tracking-tight uppercase">
                         {stage.label}
                       </span>

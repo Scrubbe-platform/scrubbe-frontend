@@ -413,9 +413,9 @@ const AddContextForm = ({
                   control={control}
                   render={({ field }) => (
                     <div>
+                      <SectionLabel>State</SectionLabel>
                       <Select
                         {...field}
-                        label="State"
                         error={errors.state?.message}
                         options={TICKET_STATUS_CONFIG.map((item) => ({
                           value: item.label,

@@ -509,21 +509,24 @@ function SignalGraphWorkspace({
               </div>
               <button
                 type="button"
-                onClick={() => router.push(`/incident/incident-delivery?id=${incident.id}`)}
+                onClick={() =>
+                  router.push(`/incident/incident-delivery?id=${incident.id}`)
+                }
                 className="flex items-center gap-2 rounded-lg border border-sky-100 dark:border-sky-500/20 bg-sky-50 dark:bg-sky-500/10 p-3 text-left text-[13px] font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-500/15 transition-colors"
               >
                 <RefreshCcw size={13} />
                 Review {incident.service || "service"} telemetry and recent
                 change path
               </button>
-              <div className="rounded-lg border border-zinc-100 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/40 p-3 text-[12px] text-black dark:text-zinc-400 leading-relaxed">
-                {shortText(
-                  incident.techDescription ||
+              <div
+                dangerouslySetInnerHTML={{
+                  __html:
+                    incident.techDescription ||
                     incident.description ||
                     "Technical context has not been captured yet.",
-                  180,
-                )}
-              </div>
+                }}
+                className="rounded-lg border border-zinc-100 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/40 p-3 text-[12px] text-black dark:text-zinc-400 leading-relaxed"
+              />
             </div>
           </div>
 
