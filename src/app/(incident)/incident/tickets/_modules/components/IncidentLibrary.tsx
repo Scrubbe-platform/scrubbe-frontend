@@ -1,0 +1,588 @@
+// app/incidents/library/page.tsx
+"use client";
+
+import React, { useState, useMemo } from "react";
+import {
+  Search,
+  SlidersHorizontal,
+  Layers,
+  Download,
+  BarChart3,
+  Sparkles,
+  RefreshCw,
+  X,
+  FileText,
+  Check,
+  Trash2,
+  ShieldAlert,
+} from "lucide-react";
+import { IncidentListItem } from "@/lib/incident/incident.types";
+
+// Import modular layouts compiled below
+import KpiStrip from "./KpiStrip";
+import FilterRail from "./FilterRail";
+import BulkActionBar from "./BulkActionBar";
+import {
+  ReplayModal,
+  CompareModal,
+  TrendsModal,
+  DocGenModal,
+  PlaybookModal,
+} from "./LibraryModals";
+
+// Native baseline mock dataset mapped explicitly to your type contracts
+const MOCK_INCIDENTS: IncidentListItem[] = Array.from({ length: 42 }).map(
+  (_, idx) => {
+    const categories = [
+      "Code Regression",
+      "Infrastructure",
+      "Configuration",
+      "Database",
+      "Network",
+      "Third Party",
+    ];
+    const services = [
+      "Checkout",
+      "Payments",
+      "API Gateway",
+      "Authentication",
+      "Database",
+      "Notifications",
+    ];
+    const priorities = ["P0", "P1", "P2", "P3"];
+    const statuses = ["Resolved", "Closed", "Investigating", "Monitoring"];
+
+    const id = `SI-1024${100 - idx}`;
+    const cat = categories[idx % categories.length];
+    const service = services[idx % services.length];
+    const priority = priorities[idx % priorities.length];
+    const status =
+      idx === 2 || idx === 7
+        ? "Investigating"
+        : statuses[idx % statuses.length];
+
+    return {
+      id,
+      ticketId: id,
+      title: `${cat} anomaly impacting ${service} flow`,
+      summary: `Observed connectivity limits breaking parameters on the ${service} engine layers.`,
+      reason: `${service} connection pools exhausted under load; saturated endpoints rejected connections.`,
+      description: `Full triage logs register thread starvation events coinciding with recent deployment vectors.`,
+      service,
+      region: "eu-west-1",
+      environment:
+        idx % 3 === 0
+          ? "Production"
+          : idx % 3 === 1
+            ? "Staging"
+            : "Development",
+      severity: priority,
+      priority,
+      status,
+      state: status,
+      source: "Prometheus Alertmanager",
+      sourceType: "automated",
+      assignedToEmail: "sre-team@company.com",
+      assignedToName: idx % 2 === 0 ? "A. Okafor" : "M. Lindqvist",
+      incidentCommander: idx % 2 === 0 ? "A. Okafor" : "M. Lindqvist",
+      owningSquad: "Platform Engineering",
+      createdAt: new Date(Date.now() - idx * 1.5 * 86400000).toISOString(),
+      updatedAt: new Date().toISOString(),
+      elapsedLabel: "34m",
+      elapsedMinutes: 34,
+      sidebarStatus: "ACTIVE" as any,
+      lifecycleStep: "MITIGATED" as any,
+      stageProgress: 80,
+      progressPercentage: 80,
+      commentsCount: 3,
+      recommendedActions: [
+        `${cat} Recovery Runbook Procedures`,
+        "Verify baseline health checks",
+      ],
+      raw: {},
+      MTTR: status === "Investigating" ? 0 : Math.max(15, 35 + idx * 12),
+    };
+  },
+);
+
+export default function IncidentLibraryPage() {
+  // 1. Core State Handlers
+  const [incidents, setKeys] = useState<IncidentListItem[]>(MOCK_INCIDENTS);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("opened-desc");
+  const [density, setDensity] = useState<"comfortable" | "compact">(
+    "comfortable",
+  );
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
+
+  // 2. Selection & Filter Toggles
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [filters, setFilters] = useState({
+    status: new Set<string>(),
+    priority: new Set<string>(),
+    environment: new Set<string>(),
+    service: new Set<string>(),
+  });
+
+  // 3. Modals Visibility State Machine
+  const [activeModal, setActiveModal] = useState<{
+    type: "replay" | "compare" | "trends" | "doc" | "playbook" | null;
+    kind?: "rca" | "report" | "exec";
+    payload?: any;
+  }>({ type: null });
+
+  // Filter Evaluation Pipeline Loop
+  const filteredIncidents = useMemo(() => {
+    return incidents
+      .filter((i) => {
+        const matchesSearch =
+          i.id.toLowerCase().includes(search.toLowerCase()) ||
+          i.title.toLowerCase().includes(search.toLowerCase()) ||
+          i.service.toLowerCase().includes(search.toLowerCase()) ||
+          i.incidentCommander.toLowerCase().includes(search.toLowerCase());
+
+        const matchesStatus =
+          filters.status.size === 0 || filters.status.has(i.status);
+        const matchesPriority =
+          filters.priority.size === 0 || filters.priority.has(i.priority);
+        const matchesEnv =
+          filters.environment.size === 0 ||
+          filters.environment.has(i.environment);
+        const matchesService =
+          filters.service.size === 0 || filters.service.has(i.service);
+
+        return (
+          matchesSearch &&
+          matchesStatus &&
+          matchesPriority &&
+          matchesEnv &&
+          matchesService
+        );
+      })
+      .sort((a, b) => {
+        if (sort === "opened-desc")
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        if (sort === "opened-asc")
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        if (sort === "duration-desc") return b.MTTR - a.MTTR;
+        if (sort === "priority-asc")
+          return a.priority.localeCompare(b.priority);
+        return 0;
+      });
+  }, [incidents, search, sort, filters]);
+
+  // Pagination bounds math
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredIncidents.length / pageSize),
+  );
+  const paginatedIncidents = filteredIncidents.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
+
+  const handleToggleSelectRow = (id: string) => {
+    const next = new Set(selectedIds);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setSelectedIds(next);
+  };
+
+  const handleSelectAllRows = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(new Set(paginatedIncidents.map((i) => i.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      status: new Set(),
+      priority: new Set(),
+      environment: new Set(),
+      service: new Set(),
+    });
+    setSearch("");
+  };
+
+  return (
+    <main className="p-4 sm:p-6 pb-24 max-w-[1600px] mx-auto space-y-6 font-sans">
+      {/* Page Title Context Header Row */}
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200 pb-5">
+        <div>
+          <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 mb-1">
+            Operational Memory
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-900">
+            Incident Library
+          </h1>
+          <p className="text-sm text-zinc-500 mt-1 max-w-2xl">
+            Searchable operational repository for post-mortems, root cause
+            metrics, and automated remediation telemetry.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setActiveModal({ type: "trends" })}
+            className="h-9 px-3.5 rounded-lg border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 hover:bg-zinc-50 flex items-center gap-2 shadow-2xs transition-colors"
+          >
+            <BarChart3 size={14} /> Analytics Trends
+          </button>
+          <button
+            onClick={() => alert("CSV Export complete.")}
+            className="h-9 px-4 rounded-lg bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-800 flex items-center gap-2 shadow-xs transition-all"
+          >
+            <Download size={14} /> Bulk Export CSV
+          </button>
+        </div>
+      </div>
+
+      {/* 1. Metrics KPI Strip subcomponent */}
+      <KpiStrip
+        incidents={incidents}
+        onKpiFilter={(p) =>
+          setFilters((prev) => ({ ...prev, priority: new Set([p]) }))
+        }
+      />
+
+      {/* 2. Toolbar Operations Block */}
+      <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-2xs grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Search Suggestion Section */}
+        <div className="lg:col-span-8 space-y-2">
+          <div className="relative">
+            <Search
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
+              size={16}
+            />
+            <input
+              type="text"
+              placeholder="Search by instance identifier key, service parameter, engineer, or deployment tags..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full h-11 pl-11 pr-4 rounded-lg bg-zinc-50 border border-zinc-200 text-sm text-zinc-900 outline-none focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+            />
+          </div>
+          <div className="flex items-center gap-2 flex-wrap text-xs text-zinc-500">
+            <span>Try lookups:</span>
+            {[
+              "payments failure",
+              "Kubernetes pod crash",
+              "Database latency",
+            ].map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setSearch(tag)}
+                className="px-2 py-0.5 rounded border border-zinc-200 bg-zinc-50 hover:text-indigo-600 hover:border-indigo-300 transition-colors"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Ezra Semantic Engine Widget Container */}
+        <div className="lg:col-span-4 bg-indigo-50/60 border border-indigo-100 rounded-lg p-3 space-y-2">
+          <div className="flex items-center justify-between text-xs font-bold text-indigo-900 uppercase">
+            <span className="flex items-center gap-1.5">
+              <Sparkles size={13} className="text-indigo-600" /> Ask Ezra AI
+            </span>
+            <span className="font-mono text-[9px] text-indigo-400">
+              Semantic Link
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5 text-[11px] font-medium text-indigo-950">
+            <button
+              type="button"
+              onClick={() => {
+                if (selectedIds.size === 0)
+                  return alert("Select a row item first.");
+                setActiveModal({
+                  type: "compare",
+                  payload: Array.from(selectedIds).slice(0, 2),
+                });
+              }}
+              className="w-full text-left p-1.5 bg-white rounded border border-indigo-100 hover:border-indigo-300 transition-all truncate"
+            >
+              "Find duplicates side-by-side"
+            </button>
+            <button
+              type="button"
+              onClick={() => setSearch("Database")}
+              className="w-full text-left p-1.5 bg-white rounded border border-indigo-100 hover:border-indigo-300 transition-all truncate"
+            >
+              Show DB Outages
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Core Workspace Matrix Split Panel layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* Left Side: Filter Rails Sidebar controls */}
+        <div className="lg:col-span-3 xl:col-span-2">
+          <FilterRail
+            filters={filters}
+            onFilterChange={setFilters}
+            onClear={clearAllFilters}
+            dataList={incidents}
+          />
+        </div>
+
+        {/* Center Canvas Area: Main Datagrid Panel */}
+        <div className="col-span-12 lg:col-span-9 xl:col-span-10 bg-white border border-zinc-200 rounded-xl shadow-2xs overflow-hidden">
+          <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100 bg-zinc-50/50">
+            <div className="text-xs font-bold text-zinc-700">
+              Records Register{" "}
+              <span className="text-zinc-400 font-mono font-medium ml-1">
+                ({filteredIncidents.length} match filters)
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-xs font-medium">
+              <div className="flex items-center gap-1 border border-zinc-200 bg-white rounded-lg px-2 h-7">
+                <span className="text-zinc-400">Density:</span>
+                <button
+                  onClick={() => setDensity("comfortable")}
+                  className={`px-1.5 py-0.5 rounded ${density === "comfortable" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+                >
+                  Normal
+                </button>
+                <button
+                  onClick={() => setDensity("compact")}
+                  className={`px-1.5 py-0.5 rounded ${density === "compact" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}
+                >
+                  Compact
+                </button>
+              </div>
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                className="h-7 border border-zinc-200 rounded-lg px-2 bg-white outline-none cursor-pointer"
+              >
+                <option value="opened-desc">Newest First</option>
+                <option value="opened-asc">Oldest First</option>
+                <option value="duration-desc">MTTR Duration</option>
+                <option value="priority-asc">Priority (P0-P3)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Datagrid content tables matrix */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse min-w-[900px]">
+              <thead className="bg-zinc-50/70 border-b border-zinc-100 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                <tr>
+                  <th className="p-3 w-10">
+                    <input
+                      type="checkbox"
+                      onChange={(e) => handleSelectAllRows(e.target.checked)}
+                      checked={
+                        paginatedIncidents.length > 0 &&
+                        paginatedIncidents.every((i) => selectedIds.has(i.id))
+                      }
+                      className="accent-indigo-600 h-3.5 w-3.5"
+                    />
+                  </th>
+                  <th className="p-3 w-32">Incident ID</th>
+                  <th className="p-3">Summary Headline Title</th>
+                  <th className="p-3 w-20">Priority</th>
+                  <th className="p-3 w-28">Status</th>
+                  <th className="p-3 w-32">Affected System</th>
+                  <th className="p-3 w-36">Opened Date</th>
+                  <th className="p-3 w-24">MTTR</th>
+                  <th className="p-3 w-20">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100 text-zinc-800">
+                {paginatedIncidents.map((i) => {
+                  const isChecked = selectedIds.has(i.id);
+                  const priColors = {
+                    P0: "text-red-600 bg-red-50 border-red-100",
+                    P1: "text-amber-600 bg-amber-50 border-amber-100",
+                    P2: "text-blue-600 bg-blue-50 border-blue-100",
+                    P3: "text-zinc-500 bg-zinc-50 border-zinc-100",
+                  }[i.priority];
+                  const statusDots =
+                    {
+                      Resolved: "bg-emerald-500",
+                      Open: "bg-red-500",
+                      Investigating: "bg-amber-500",
+                      Monitoring: "bg-blue-500",
+                      Closed: "bg-zinc-400",
+                    }[i.status] || "bg-zinc-400";
+
+                  return (
+                    <tr
+                      key={i.id}
+                      onClick={() => handleToggleSelectRow(i.id)}
+                      className={`hover:bg-zinc-50/50 cursor-pointer group transition-colors ${isChecked ? "bg-indigo-50/30" : ""}`}
+                    >
+                      <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleToggleSelectRow(i.id)}
+                          className="accent-indigo-600 h-3.5 w-3.5"
+                        />
+                      </td>
+                      <td className="p-3 font-mono font-bold text-zinc-900 flex items-center gap-1.5">
+                        {i.id}{" "}
+                        {i.priority === "P0" && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                        )}
+                      </td>
+                      <td
+                        className={`p-3 max-w-xs ${density === "compact" ? "py-1.5" : "py-3.5"}`}
+                      >
+                        <div className="font-semibold text-zinc-900 truncate">
+                          {i.title}
+                        </div>
+                        <div className="text-[10px] text-zinc-400 mt-0.5 font-medium flex items-center gap-2">
+                          <span>IC: {i.incidentCommander}</span> &bull;{" "}
+                          <span>Actions: {i.recommendedActions.length}</span>
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={`px-2 py-0.5 border rounded-md text-[10.5px] font-bold ${priColors}`}
+                        >
+                          {i.priority}
+                        </span>
+                      </td>
+                      <td className="p-3 font-medium text-zinc-700">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${statusDots}`}
+                          />
+                          {i.status}
+                        </span>
+                      </td>
+                      <td className="p-3 text-zinc-500 font-medium">
+                        {i.service}
+                      </td>
+                      <td className="p-3 text-zinc-400 tnum font-medium">
+                        {new Date(i.createdAt).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="p-3 font-mono font-semibold text-zinc-600 tnum">
+                        {i.status === "Investigating" ? "—" : `${i.MTTR}m`}
+                      </td>
+                      <td
+                        className="p-3 text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={() =>
+                            setActiveModal({ type: "replay", payload: i })
+                          }
+                          className="h-7 px-2.5 rounded-md border border-zinc-200 bg-white hover:bg-zinc-50 text-[11px] font-bold text-zinc-600 shadow-2xs transition-colors"
+                        >
+                          Replay
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Fallback state display */}
+          {filteredIncidents.length === 0 && (
+            <div className="p-12 text-center text-sm text-zinc-400 italic border-t border-zinc-100">
+              No telemetry log entries found matching criteria parameters.
+            </div>
+          )}
+
+          {/* Pagination Toolbar Row controls */}
+          <div className="h-11 px-4 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-400 bg-zinc-50/50">
+            <span className="font-medium font-mono">
+              Showing{" "}
+              {Math.min(filteredIncidents.length, (page - 1) * pageSize + 1)}-
+              {Math.min(filteredIncidents.length, page * pageSize)} of{" "}
+              {filteredIncidents.length} entries
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+                className="h-7 px-2.5 rounded-md border bg-white enabled:hover:bg-zinc-50 disabled:opacity-40 transition-colors font-semibold text-zinc-700"
+              >
+                Prev
+              </button>
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+                className="h-7 px-2.5 rounded-md border bg-white enabled:hover:bg-zinc-50 disabled:opacity-40 transition-colors font-semibold text-zinc-700"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Action toolbar bar dock row */}
+      <BulkActionBar
+        selectedIds={selectedIds}
+        onClear={() => setSelectedIds(new Set())}
+        onTriggerDoc={(kind) =>
+          setActiveModal({
+            type: "doc",
+            kind,
+            payload: Array.from(selectedIds),
+          })
+        }
+        onTriggerCompare={() =>
+          setActiveModal({
+            type: "compare",
+            payload: Array.from(selectedIds).slice(0, 2),
+          })
+        }
+      />
+
+      {/* Modals Mounting Injection Registry hooks */}
+      <ReplayModal
+        isOpen={activeModal.type === "replay"}
+        incident={activeModal.payload}
+        onClose={() => setActiveModal({ type: null })}
+        onOpenPlaybook={(i) => setActiveModal({ type: "playbook", payload: i })}
+      />
+      <CompareModal
+        isOpen={activeModal.type === "compare"}
+        incidentIds={activeModal.payload}
+        allData={incidents}
+        onClose={() => setActiveModal({ type: null })}
+      />
+      <TrendsModal
+        isOpen={activeModal.type === "trends"}
+        allData={incidents}
+        onClose={() => setActiveModal({ type: null })}
+      />
+      <DocGenModal
+        isOpen={activeModal.type === "doc"}
+        kind={activeModal.kind}
+        incidentIds={activeModal.payload}
+        allData={incidents}
+        onClose={() => setActiveModal({ type: null })}
+      />
+      <PlaybookModal
+        isOpen={activeModal.type === "playbook"}
+        incident={activeModal.payload}
+        onClose={() => setActiveModal({ type: null })}
+      />
+    </main>
+  );
+}
