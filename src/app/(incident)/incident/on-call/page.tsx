@@ -220,12 +220,6 @@ function AssignModal({
                 Select members and date range for this shift
               </p>
             </div>
-            <button
-              onClick={onClose}
-              className="w-7 h-7 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center text-neutral-500 hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
-            >
-              ✕
-            </button>
           </div>
 
           <div className="mt-5 space-y-4">
@@ -393,6 +387,10 @@ function EditModal({
     </select>
   );
 
+  const handleReassign = () => {};
+
+  const handleRemove = () => {};
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl w-full max-w-lg">
@@ -458,13 +456,19 @@ function EditModal({
 
           <div className="flex items-center justify-end gap-3 mt-6">
             <button
+              onClick={handleRemove}
+              className="px-5 py-2.5 rounded-lg border border-red-300 dark:border-red-600 text-sm font-medium text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-500 transition-colors"
+            >
+              Remove
+            </button>
+            <button
               onClick={onClose}
               className="px-5 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-600 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
             >
               Cancel
             </button>
             <button
-              onClick={onClose}
+              onClick={handleReassign}
               className="px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-colors"
               style={{ background: "linear-gradient(135deg,#10b981,#1a3a2a)" }}
             >
@@ -482,9 +486,11 @@ function EditModal({
 function OverviewView({
   members,
   onAssign,
+  setView,
 }: {
   members: Member[];
   onAssign: () => void;
+  setView: (value: View) => void;
 }) {
   // First 4 members = on-call for display; first = primary, rest = secondary
   const onCallMembers = members.slice(0, 4);
@@ -552,7 +558,10 @@ function OverviewView({
                 {onCallMembers.length !== 1 ? "s" : ""} active this shift
               </div>
             </div>
-            <button className="text-xs px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+            <button
+              onClick={() => setView("roster")}
+              className="text-xs px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+            >
               Manage
             </button>
           </div>
@@ -768,7 +777,7 @@ function ScheduleView({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
           <div className="font-semibold text-neutral-900 dark:text-white mb-3">
             Upcoming Shifts
@@ -815,7 +824,7 @@ function ScheduleView({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+        {/* <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
           <div className="flex items-center gap-2 mb-3">
             <span className="font-semibold text-neutral-900 dark:text-white">
               Coverage Gaps
@@ -859,7 +868,7 @@ function ScheduleView({
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
@@ -1021,9 +1030,13 @@ export default function OnCallDashboard() {
                       ACTIVITY
                     </div>
                     <nav className="space-y-0.5">
-                      {["Incidents", "Audit Log"].map((l) => (
+                      {["Audit Log"].map((l) => (
                         <button
                           key={l}
+                          onClick={() =>
+                            l == "Audit Log" &&
+                            router.push("/incident/on-call/audit-log")
+                          }
                           className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors text-left"
                         >
                           <span>{l === "Incidents" ? "🕐" : "📄"}</span> {l}
@@ -1072,6 +1085,7 @@ export default function OnCallDashboard() {
               <OverviewView
                 members={members}
                 onAssign={() => setAssignOpen(true)}
+                setView={setView}
               />
               <ActiveEscalationCard />
             </div>

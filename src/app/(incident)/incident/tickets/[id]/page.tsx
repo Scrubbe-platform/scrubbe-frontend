@@ -1,8 +1,9 @@
-import NewTicketDetails from "@/components/IMS/incident/NewTicketDetails";
-import React from "react";
+"use client";
+import { redirect, useParams } from "next/navigation";
 
 const Page = () => {
-  return <NewTicketDetails />;
+  const { id } = useParams();
+  redirect(`/incident/tickets?id=${id}`);
 };
 
 export default Page;

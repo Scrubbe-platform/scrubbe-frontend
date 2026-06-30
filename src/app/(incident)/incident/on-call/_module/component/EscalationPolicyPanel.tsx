@@ -15,7 +15,10 @@ import {
 import Button from "@/components/ui/Button1";
 import CreateEscalationPolicyModal from "./CreateEscalationPolicyModal";
 import { useRouter } from "next/navigation";
-import { deleteEscalationPolicy, fetchEscalationPolicies } from "@/lib/escalation/escalation.api";
+import {
+  deleteEscalationPolicy,
+  fetchEscalationPolicies,
+} from "@/lib/escalation/escalation.api";
 import { EscalationPolicyRecord } from "../types/oncall-type";
 
 const ESCALATION_POLICIES_QUERY_KEY = ["escalation-policies"];
@@ -24,14 +27,16 @@ export default function EscalationPoliciesPanel() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPolicy, setEditingPolicy] = useState<EscalationPolicyRecord | null>(null);
+  const [editingPolicy, setEditingPolicy] =
+    useState<EscalationPolicyRecord | null>(null);
 
   const { data: policies = [], isLoading } = useQuery({
     queryKey: ESCALATION_POLICIES_QUERY_KEY,
     queryFn: fetchEscalationPolicies,
   });
 
-  const refetchPolicies = () => queryClient.invalidateQueries({ queryKey: ESCALATION_POLICIES_QUERY_KEY });
+  const refetchPolicies = () =>
+    queryClient.invalidateQueries({ queryKey: ESCALATION_POLICIES_QUERY_KEY });
 
   const handleEditPolicy = (policy: EscalationPolicyRecord) => {
     setEditingPolicy(policy);
@@ -50,7 +55,9 @@ export default function EscalationPoliciesPanel() {
       toast.success("Escalation policy deleted");
       refetchPolicies();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete policy");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to delete policy",
+      );
     }
   };
 
@@ -75,7 +82,11 @@ export default function EscalationPoliciesPanel() {
             Define escalation chains for each incident severity
           </p>
         </div>
-        <Button onClick={handleNewPolicy} leftIcon={<Plus size={14} className="mr-1" />}>
+        <Button
+          size="sm"
+          onClick={handleNewPolicy}
+          leftIcon={<Plus size={14} className="mr-1" />}
+        >
           New Policy
         </Button>
       </div>
@@ -89,7 +100,8 @@ export default function EscalationPoliciesPanel() {
 
         {!isLoading && policies.length === 0 && (
           <div className="rounded-xl border border-zinc-200 bg-white p-5 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
-            No escalation policies yet. Create one to start auto-escalating unacknowledged incidents.
+            No escalation policies yet. Create one to start auto-escalating
+            unacknowledged incidents.
           </div>
         )}
 

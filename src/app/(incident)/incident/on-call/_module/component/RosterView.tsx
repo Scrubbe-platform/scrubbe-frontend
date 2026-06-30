@@ -11,7 +11,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import EditAssignmentModal from "./EditAssignmentModal"; // Import missing modal block
-import { removeOnCallAssignment, updateOnCallAssignment } from "@/lib/escalation/escalation.api";
+import {
+  removeOnCallAssignment,
+  updateOnCallAssignment,
+} from "@/lib/escalation/escalation.api";
 
 export type Member = {
   id: string;
@@ -32,7 +35,11 @@ interface RosterViewProps {
   onChanged?: () => void;
 }
 
-export default function RosterView({ members, isLoading, onChanged }: RosterViewProps) {
+export default function RosterView({
+  members,
+  isLoading,
+  onChanged,
+}: RosterViewProps) {
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("All");
 
@@ -74,11 +81,15 @@ export default function RosterView({ members, isLoading, onChanged }: RosterView
       return;
     }
     try {
-      await updateOnCallAssignment(selectedMember.assignmentId, { userId: payload.reassignToId });
+      await updateOnCallAssignment(selectedMember.assignmentId, {
+        userId: payload.reassignToId,
+      });
       toast.success("On-call assignment reassigned");
       onChanged?.();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to reassign on-call shift");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to reassign on-call shift",
+      );
     }
   };
 
@@ -92,7 +103,9 @@ export default function RosterView({ members, isLoading, onChanged }: RosterView
       toast.success("Removed from on-call rotation");
       onChanged?.();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to remove from rotation");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to remove from rotation",
+      );
     }
   };
 
@@ -142,12 +155,7 @@ export default function RosterView({ members, isLoading, onChanged }: RosterView
 
                 <div className="flex items-center gap-1">
                   {/* Both Edit and Re-assign actions wire into the single dynamic context modal */}
-                  <button
-                    onClick={() => triggerModal(m)}
-                    className="inline-flex h-7 px-2.5 items-center gap-1 rounded-md border border-neutral-200 bg-white text-[11px] font-semibold text-neutral-600 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800"
-                  >
-                    <Pencil size={11} /> Edit
-                  </button>
+
                   <button
                     onClick={() => triggerModal(m)}
                     className="inline-flex h-7 px-2.5 items-center gap-1 rounded-md border border-neutral-200 bg-white text-[11px] font-semibold text-neutral-600 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800"

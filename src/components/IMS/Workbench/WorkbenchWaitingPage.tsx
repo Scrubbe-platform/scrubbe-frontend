@@ -139,7 +139,7 @@ const WorkbenchAwaitingPage: React.FC = () => {
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-[12px] text-zinc-400 dark:text-zinc-500 mb-2">
           <Link
-            href="/workbench"
+            href="/incident/workbench"
             className="hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
           >
             Workbench

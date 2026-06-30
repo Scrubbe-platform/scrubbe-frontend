@@ -195,7 +195,7 @@ const MajorIncidentWorkbench: React.FC<Props> = ({ incident }) => {
     onSuccess: () => {
       toast.success("Major Incident declared successfully");
       queryClient.invalidateQueries({ queryKey: ["incident", incident.id] });
-      router.push(`/incident/tickets?id=${incident.id}/`);
+      router.push(`/incident/workbench`);
     },
     onError: () => toast.error("Failed to declare Major Incident"),
   });
@@ -313,7 +313,7 @@ const MajorIncidentWorkbench: React.FC<Props> = ({ incident }) => {
             </div>
             <button
               onClick={() =>
-                window.open(`/incident/ticket?id${incident.id}`, "_blank")
+                window.open(`/incident/tickets?id${incident.id}`, "_blank")
               }
               className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 rounded-lg px-4 py-2 hover:bg-emerald-50 dark:hover:bg-emerald-500/5 transition-colors"
             >

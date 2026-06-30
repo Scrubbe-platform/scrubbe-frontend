@@ -26,12 +26,12 @@ export interface WorkbenchRecord {
 // ── Mock data ─────────────────────────────────────────────────────
 
 const STATS = [
-  { value: "432", label: "Total Workbenches" },
-  { value: "217", label: "Major Incident Declarations" },
-  { value: "198", label: "Successful Mitigations" },
-  { value: "74", label: "Roll back decisions" },
-  { value: "58", label: "High Risk Changes" },
-  { value: "12", label: "Open Reviews" },
+  { value: "0", label: "Total Workbenches" },
+  { value: "0", label: "Major Incident Declarations" },
+  { value: "0", label: "Successful Mitigations" },
+  { value: "0", label: "Roll back decisions" },
+  { value: "0", label: "High Risk Changes" },
+  { value: "0", label: "Open Reviews" },
 ];
 
 const SEV: Record<string, string> = {
@@ -152,7 +152,8 @@ const WorkbenchLibraryPage: React.FC = () => {
     queryKey: ["workbench-rollback-decisions"],
     queryFn: async () => {
       const res = await get(`${endpoint.decisions.list}?limit=200`);
-      const decisions: any[] = res.data?.data?.decisions ?? res.data?.data ?? [];
+      const decisions: any[] =
+        res.data?.data?.decisions ?? res.data?.data ?? [];
       return decisions.filter((d) => d.proposal?.action === "ROLLBACK").length;
     },
     staleTime: 30_000,

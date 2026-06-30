@@ -5,8 +5,14 @@ import { X, ExternalLink } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { WorkbenchRecord } from "./WorkbenchLibraryPage";
-import { fetchIncidentDetail, fetchIncidentHistory } from "@/lib/incident/incident.api";
-import { fetchHandovers, addHandoverIncident } from "@/lib/handover/handover.api";
+import {
+  fetchIncidentDetail,
+  fetchIncidentHistory,
+} from "@/lib/incident/incident.api";
+import {
+  fetchHandovers,
+  addHandoverIncident,
+} from "@/lib/handover/handover.api";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import useMember from "@/hooks/useMember";
@@ -92,7 +98,9 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
   const { data: execution } = useQuery({
     queryKey: ["workbench-playbook-execution", wb.incidentId],
     queryFn: async () => {
-      const res = await get(`${endpoint.playbooks.executions}?ticketId=${wb.incidentId}&limit=1`);
+      const res = await get(
+        `${endpoint.playbooks.executions}?ticketId=${wb.incidentId}&limit=1`,
+      );
       const execs: any[] = res.data?.data?.executions ?? res.data?.data ?? [];
       return execs[0] ?? null;
     },
@@ -117,25 +125,32 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
     queryKey: ["workbench-postmortems"],
     queryFn: async () => {
       const res = await get(`${endpoint.postmortems.list}?limit=50`);
-      return res.data?.data?.postmortems ?? res.data?.data ?? [];
+      return res.data?.data?.postmortems.data ?? res.data?.data ?? [];
     },
   });
 
   const matchingHandover = handovers.find((h) =>
     h.incidents.some(
-      (link) => link.incident.id === incident?.id || link.incidentId === wb.incidentId || link.incident.ticketId === wb.incidentId
-    )
+      (link) =>
+        link.incident.id === incident?.id ||
+        link.incidentId === wb.incidentId ||
+        link.incident.ticketId === wb.incidentId,
+    ),
   );
   const activeHandover = handovers.find((h) => h.status !== "COMPLETED");
 
-  const matchingPostmortem = postmortems.find(
-    (pm: any) => pm.ticket?.id === incident?.id || pm.ticket?.ticketId === wb.incidentId
+  const matchingPostmortem = postmortems?.find(
+    (pm: any) =>
+      pm.ticket?.id === incident?.id || pm.ticket?.ticketId === wb.incidentId,
   );
 
   const feedToHandover = useMutation({
     mutationFn: async () => {
-      if (!activeHandover || !incident) throw new Error("No active handover or incident");
-      return addHandoverIncident(activeHandover.id, { incidentId: incident.id });
+      if (!activeHandover || !incident)
+        throw new Error("No active handover or incident");
+      return addHandoverIncident(activeHandover.id, {
+        incidentId: incident.id,
+      });
     },
     onSuccess: () => {
       toast.success("Incident added to active handover");
@@ -162,22 +177,25 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
       }
     : null;
 
-  const timeline = history.length > 0
-    ? history.slice(0, 6).reduce<Record<string, string>>((acc, item) => {
-        const ts = new Date(item.timestamp).toLocaleString([], {
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-        acc[ts] = `${item.action}${item.newValue ? ` → ${item.newValue}` : ""}`;
-        return acc;
-      }, {})
-    : null;
+  const timeline =
+    history.length > 0
+      ? history.slice(0, 6).reduce<Record<string, string>>((acc, item) => {
+          const ts = new Date(item.timestamp).toLocaleString([], {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          acc[ts] =
+            `${item.action}${item.newValue ? ` → ${item.newValue}` : ""}`;
+          return acc;
+        }, {})
+      : null;
 
   const diagnosis = incident
     ? {
-        "Root cause": incident.aiAnalysis?.suggestion || "No AI analysis generated yet.",
+        "Root cause":
+          incident.aiAnalysis?.suggestion || "No AI analysis generated yet.",
         "Tech description": incident.techDescription || "—",
         Impact: incident.impactSummary || "—",
       }
@@ -186,7 +204,8 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
   const roles = incident
     ? {
         "Incident commander": incident.incidentCommander || "—",
-        "Assigned to": incident.assignedToName || incident.assignedToEmail || "—",
+        "Assigned to":
+          incident.assignedToName || incident.assignedToEmail || "—",
         "Owning squad": incident.owningSquad || "—",
       }
     : null;
@@ -196,17 +215,24 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
     : null;
 
   const playbookUsed = execution?.playbook?.name;
-  const playbookOwner = execution ? resolveActor(execution.triggeredBy) : undefined;
+  const playbookOwner = execution
+    ? resolveActor(execution.triggeredBy)
+    : undefined;
   const completion = execution?.stepOutcomes?.length
     ? Math.round(
-        (execution.stepOutcomes.filter((s: any) => s.status === "COMPLETED" || s.status === "SKIPPED").length /
+        (execution.stepOutcomes.filter(
+          (s: any) => s.status === "COMPLETED" || s.status === "SKIPPED",
+        ).length /
           execution.stepOutcomes.length) *
-          100
+          100,
       )
     : undefined;
 
-  const aiReasons: string[] | undefined = ezraAnalysis?.rootCause?.hypotheses?.length
-    ? ezraAnalysis.rootCause.hypotheses.map((h: any) => h.title ?? h.description).filter(Boolean)
+  const aiReasons: string[] | undefined = ezraAnalysis?.rootCause?.hypotheses
+    ?.length
+    ? ezraAnalysis.rootCause.hypotheses
+        .map((h: any) => h.title ?? h.description)
+        .filter(Boolean)
     : undefined;
   const modelConfidence = ezraAnalysis?.rootCause?.confidence
     ? Math.round(ezraAnalysis.rootCause.confidence * 100)
@@ -248,7 +274,11 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
               <FieldGrid fields={incidentContext} />
               <div className="flex justify-end mt-4">
                 <button
-                  onClick={() => router.push(`/incident/tickets/${incident?.id ?? wb.incidentId}`)}
+                  onClick={() =>
+                    router.push(
+                      `/incident/tickets/${incident?.id ?? wb.incidentId}`,
+                    )
+                  }
                   className="text-[12px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500 dark:border-emerald-500/40 rounded-lg px-4 py-2 hover:bg-emerald-50 dark:hover:bg-emerald-500/5 transition-colors flex items-center gap-1.5"
                 >
                   <ExternalLink size={12} /> View Incident
@@ -268,7 +298,11 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
           {/* Timeline */}
           <Card>
             <CardTitle>Timeline</CardTitle>
-            {timeline ? <FieldGrid fields={timeline} /> : <EmptyNote>No history recorded for this incident yet.</EmptyNote>}
+            {timeline ? (
+              <FieldGrid fields={timeline} />
+            ) : (
+              <EmptyNote>No history recorded for this incident yet.</EmptyNote>
+            )}
           </Card>
 
           {/* Diagnosis & response */}
@@ -330,7 +364,9 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
                 )}
               </>
             ) : (
-              <EmptyNote>No playbook has been executed for this incident.</EmptyNote>
+              <EmptyNote>
+                No playbook has been executed for this incident.
+              </EmptyNote>
             )}
           </Card>
 
@@ -376,7 +412,9 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
                 )}
               </>
             ) : (
-              <EmptyNote>No Ezra analysis has been generated for this incident yet.</EmptyNote>
+              <EmptyNote>
+                No Ezra analysis has been generated for this incident yet.
+              </EmptyNote>
             )}
           </Card>
 
@@ -392,7 +430,9 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
                 }}
               />
             ) : (
-              <EmptyNote>This incident is not part of any handover record.</EmptyNote>
+              <EmptyNote>
+                This incident is not part of any handover record.
+              </EmptyNote>
             )}
             {!matchingHandover && (
               <div className="flex justify-end mt-4">
@@ -401,7 +441,9 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
                   disabled={!activeHandover || feedToHandover.isPending}
                   className="text-[12px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500 dark:border-emerald-500/40 rounded-lg px-4 py-2 hover:bg-emerald-50 dark:hover:bg-emerald-500/5 transition-colors disabled:opacity-40"
                 >
-                  {activeHandover ? "Feed to active handover" : "No active handover"}
+                  {activeHandover
+                    ? "Feed to active handover"
+                    : "No active handover"}
                 </button>
               </div>
             )}
@@ -410,7 +452,9 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
           {/* Knowledge Intelligence */}
           <Card>
             <CardTitle>Knowledge intelligence</CardTitle>
-            <EmptyNote>Knowledge search is not available yet — coming soon.</EmptyNote>
+            <EmptyNote>
+              Knowledge search is not available yet — coming soon.
+            </EmptyNote>
           </Card>
 
           {/* Postmortem Integration */}
@@ -419,17 +463,24 @@ const WorkbenchDetailModal: React.FC<Props> = ({ workbench: wb, onClose }) => {
             {matchingPostmortem ? (
               <>
                 <p className="text-[13px] text-zinc-700 dark:text-zinc-300 mb-5">
-                  {matchingPostmortem.title ?? "Postmortem record found for this incident."}
+                  {matchingPostmortem.title ??
+                    "Postmortem record found for this incident."}
                 </p>
                 <button
-                  onClick={() => router.push(`/incident/postmortems/${matchingPostmortem.id}`)}
+                  onClick={() =>
+                    router.push(
+                      `/incident/postmortems/${matchingPostmortem.id}`,
+                    )
+                  }
                   className="w-full py-2.5 rounded-xl text-[13px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
                 >
                   Open PostMortem
                 </button>
               </>
             ) : (
-              <EmptyNote>No postmortem has been created for this incident yet.</EmptyNote>
+              <EmptyNote>
+                No postmortem has been created for this incident yet.
+              </EmptyNote>
             )}
           </Card>
         </div>
