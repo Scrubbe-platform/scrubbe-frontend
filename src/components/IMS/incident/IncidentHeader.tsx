@@ -12,7 +12,7 @@ import WarRoom from "./WarRoom";
 import AddContextForm from "./ContextForm";
 import Dropdown from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button1";
-import { EllipsisVertical, Plus, Video } from "lucide-react";
+import { ChevronLeft, EllipsisVertical, Plus, Video } from "lucide-react";
 import LiveViewers from "./LiveViewers";
 import { BiMessageRoundedDetail } from "react-icons/bi";
 import MessagesModal from "@/app/(incident)/incident/handover/_modules/components/MessagesModal";
@@ -75,6 +75,15 @@ const IncidentHeader = ({
       <div className="flex flex-row items-start justify-between gap-4">
         <div className="flex flex-col gap-3">
           {/* Ticket ID + badges */}
+          <Button
+            variant="outline-dark"
+            size="sm"
+            onClick={() => router.back()}
+            leftIcon={<ChevronLeft size={14} color="black" />}
+            className="w-fit"
+          >
+            Back
+          </Button>
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="text-xl font-mono font-semibold text-black dark:text-zinc-500 tracking-wider">
               {incident.ticketId}

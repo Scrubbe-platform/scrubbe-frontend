@@ -15,6 +15,7 @@ import {
   Check,
   Trash2,
   ShieldAlert,
+  Plus,
 } from "lucide-react";
 import { IncidentListItem } from "@/lib/incident/incident.types";
 
@@ -29,85 +30,27 @@ import {
   DocGenModal,
   PlaybookModal,
 } from "./LibraryModals";
+import Button from "@/components/ui/Button1";
+import { useIncidentList } from "@/hooks/useIncidentList";
+import { TICKET_STATUS_CONFIG } from "@/components/IMS/incident/IncidentLifecycle";
+import Dropdown from "@/components/ui/Dropdown";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import IncidentContextDetails from "./IncidentContextDetails";
 
-// Native baseline mock dataset mapped explicitly to your type contracts
-const MOCK_INCIDENTS: IncidentListItem[] = Array.from({ length: 42 }).map(
-  (_, idx) => {
-    const categories = [
-      "Code Regression",
-      "Infrastructure",
-      "Configuration",
-      "Database",
-      "Network",
-      "Third Party",
-    ];
-    const services = [
-      "Checkout",
-      "Payments",
-      "API Gateway",
-      "Authentication",
-      "Database",
-      "Notifications",
-    ];
-    const priorities = ["P0", "P1", "P2", "P3"];
-    const statuses = ["Resolved", "Closed", "Investigating", "Monitoring"];
-
-    const id = `SI-1024${100 - idx}`;
-    const cat = categories[idx % categories.length];
-    const service = services[idx % services.length];
-    const priority = priorities[idx % priorities.length];
-    const status =
-      idx === 2 || idx === 7
-        ? "Investigating"
-        : statuses[idx % statuses.length];
-
-    return {
-      id,
-      ticketId: id,
-      title: `${cat} anomaly impacting ${service} flow`,
-      summary: `Observed connectivity limits breaking parameters on the ${service} engine layers.`,
-      reason: `${service} connection pools exhausted under load; saturated endpoints rejected connections.`,
-      description: `Full triage logs register thread starvation events coinciding with recent deployment vectors.`,
-      service,
-      region: "eu-west-1",
-      environment:
-        idx % 3 === 0
-          ? "Production"
-          : idx % 3 === 1
-            ? "Staging"
-            : "Development",
-      severity: priority,
-      priority,
-      status,
-      state: status,
-      source: "Prometheus Alertmanager",
-      sourceType: "automated",
-      assignedToEmail: "sre-team@company.com",
-      assignedToName: idx % 2 === 0 ? "A. Okafor" : "M. Lindqvist",
-      incidentCommander: idx % 2 === 0 ? "A. Okafor" : "M. Lindqvist",
-      owningSquad: "Platform Engineering",
-      createdAt: new Date(Date.now() - idx * 1.5 * 86400000).toISOString(),
-      updatedAt: new Date().toISOString(),
-      elapsedLabel: "34m",
-      elapsedMinutes: 34,
-      sidebarStatus: "ACTIVE" as any,
-      lifecycleStep: "MITIGATED" as any,
-      stageProgress: 80,
-      progressPercentage: 80,
-      commentsCount: 3,
-      recommendedActions: [
-        `${cat} Recovery Runbook Procedures`,
-        "Verify baseline health checks",
-      ],
-      raw: {},
-      MTTR: status === "Investigating" ? 0 : Math.max(15, 35 + idx * 12),
-    };
-  },
-);
-
+export const priColors: { [key: string]: string } = {
+  CRITICAL: "text-red-600 bg-red-50 border-red-100",
+  HIGH: "text-amber-600 bg-amber-50 border-amber-100",
+  MEDIUM: "text-blue-600 bg-blue-50 border-blue-100",
+  LOW: "text-zinc-500 bg-zinc-50 border-zinc-100",
+};
+export const priText: { [key: string]: string } = {
+  CRITICAL: "P0",
+  HIGH: "P1",
+  MEDIUM: "P2",
+  LOW: "P3",
+};
 export default function IncidentLibraryPage() {
   // 1. Core State Handlers
-  const [incidents, setKeys] = useState<IncidentListItem[]>(MOCK_INCIDENTS);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("opened-desc");
   const [density, setDensity] = useState<"comfortable" | "compact">(
@@ -116,6 +59,8 @@ export default function IncidentLibraryPage() {
   const [page, setPage] = useState(1);
   const pageSize = 12;
 
+  const { data, isLoading } = useIncidentList();
+  const incidents = data?.incidents ?? [];
   // 2. Selection & Filter Toggles
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -191,6 +136,7 @@ export default function IncidentLibraryPage() {
     const next = new Set(selectedIds);
     next.has(id) ? next.delete(id) : next.add(id);
     setSelectedIds(next);
+    setActiveId(id);
   };
 
   const handleSelectAllRows = (checked: boolean) => {
@@ -211,37 +157,32 @@ export default function IncidentLibraryPage() {
     setSearch("");
   };
 
+  const selectedIncident = useMemo(
+    () => incidents.find((i) => i.id === activeId) || null,
+    [incidents, activeId],
+  );
+
   return (
     <main className="p-4 sm:p-6 pb-24 max-w-[1600px] mx-auto space-y-6 font-sans">
       {/* Page Title Context Header Row */}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-200 pb-5">
+      <div className="flex flex-wrap items-center justify-between gap-4 ">
         <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 mb-1">
-            Operational Memory
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-900">
+          <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-zinc-900">
             Incident Library
           </h1>
           <p className="text-sm text-zinc-500 mt-1 max-w-2xl">
-            Searchable operational repository for post-mortems, root cause
-            metrics, and automated remediation telemetry.
+            Your organization's searchable operational memory for every
+            incident, investigation, and resolution.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setActiveModal({ type: "trends" })}
-            className="h-9 px-3.5 rounded-lg border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 hover:bg-zinc-50 flex items-center gap-2 shadow-2xs transition-colors"
-          >
-            <BarChart3 size={14} /> Analytics Trends
-          </button>
-          <button
-            onClick={() => alert("CSV Export complete.")}
-            className="h-9 px-4 rounded-lg bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-800 flex items-center gap-2 shadow-xs transition-all"
-          >
-            <Download size={14} /> Bulk Export CSV
-          </button>
-        </div>
+        <Button
+          size="sm"
+          leftIcon={<Plus size={14} />}
+          onClick={() => alert("Raise Incident")}
+        >
+          Raise Incident
+        </Button>
       </div>
 
       {/* 1. Metrics KPI Strip subcomponent */}
@@ -269,7 +210,7 @@ export default function IncidentLibraryPage() {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full h-11 pl-11 pr-4 rounded-lg bg-zinc-50 border border-zinc-200 text-sm text-zinc-900 outline-none focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+              className="w-full h-[36px] pl-11 pr-4 rounded-sm text-xs border border-zinc-200 text-zinc-900 outline-none focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
             />
           </div>
           <div className="flex items-center gap-2 flex-wrap text-xs text-zinc-500">
@@ -282,7 +223,7 @@ export default function IncidentLibraryPage() {
               <button
                 key={tag}
                 onClick={() => setSearch(tag)}
-                className="px-2 py-0.5 rounded border border-zinc-200 bg-zinc-50 hover:text-indigo-600 hover:border-indigo-300 transition-colors"
+                className="px-2 py-0.5 rounded border border-zinc-200 bg-gray-50 hover:text-IMSDarkGreen hover:border-IMSDarkGreen transition-colors"
               >
                 {tag}
               </button>
@@ -290,46 +231,34 @@ export default function IncidentLibraryPage() {
           </div>
         </div>
 
-        {/* Ezra Semantic Engine Widget Container */}
-        <div className="lg:col-span-4 bg-indigo-50/60 border border-indigo-100 rounded-lg p-3 space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-indigo-900 uppercase">
-            <span className="flex items-center gap-1.5">
-              <Sparkles size={13} className="text-indigo-600" /> Ask Ezra AI
-            </span>
-            <span className="font-mono text-[9px] text-indigo-400">
-              Semantic Link
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5 text-[11px] font-medium text-indigo-950">
-            <button
-              type="button"
-              onClick={() => {
-                if (selectedIds.size === 0)
-                  return alert("Select a row item first.");
-                setActiveModal({
-                  type: "compare",
-                  payload: Array.from(selectedIds).slice(0, 2),
-                });
-              }}
-              className="w-full text-left p-1.5 bg-white rounded border border-indigo-100 hover:border-indigo-300 transition-all truncate"
-            >
-              "Find duplicates side-by-side"
-            </button>
-            <button
-              type="button"
-              onClick={() => setSearch("Database")}
-              className="w-full text-left p-1.5 bg-white rounded border border-indigo-100 hover:border-indigo-300 transition-all truncate"
-            >
-              Show DB Outages
-            </button>
-          </div>
+        <div className="flex gap-2 lg:col-span-4 justify-end">
+          <Button
+            leftIcon={<BarChart3 size={14} />}
+            onClick={() => setActiveModal({ type: "trends" })}
+            size="sm"
+            variant="outline-dark"
+            className="h-fit text-sm"
+          >
+            Trends
+          </Button>
+          <Button
+            leftIcon={<Download size={14} />}
+            onClick={() => alert("CSV Export complete.")}
+            size="sm"
+            variant="outline-dark"
+            className="h-fit text-sm"
+          >
+            Export
+          </Button>
         </div>
+
+        {/* Ezra Semantic Engine Widget Container */}
       </div>
 
       {/* 3. Core Workspace Matrix Split Panel layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Left Side: Filter Rails Sidebar controls */}
-        <div className="lg:col-span-3 xl:col-span-2">
+        <div className="lg:col-span-2">
           <FilterRail
             filters={filters}
             onFilterChange={setFilters}
@@ -339,16 +268,16 @@ export default function IncidentLibraryPage() {
         </div>
 
         {/* Center Canvas Area: Main Datagrid Panel */}
-        <div className="col-span-12 lg:col-span-9 xl:col-span-10 bg-white border border-zinc-200 rounded-xl shadow-2xs overflow-hidden">
-          <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100 bg-zinc-50/50">
-            <div className="text-xs font-bold text-zinc-700">
-              Records Register{" "}
-              <span className="text-zinc-400 font-mono font-medium ml-1">
+        <div className="col-span-12 lg:col-span-7  bg-white border border-zinc-200 rounded-md shadow-2xs overflow-hidden">
+          <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100">
+            <div className="text-xs font-bold ">
+              Incident List{" "}
+              {/* <span className="text-zinc-400 font-mono font-medium ml-1">
                 ({filteredIncidents.length} match filters)
-              </span>
+              </span> */}
             </div>
             <div className="flex items-center gap-4 text-xs font-medium">
-              <div className="flex items-center gap-1 border border-zinc-200 bg-white rounded-lg px-2 h-7">
+              {/* <div className="flex items-center gap-1 border border-zinc-200 bg-white rounded-lg px-2 h-7">
                 <span className="text-zinc-400">Density:</span>
                 <button
                   onClick={() => setDensity("comfortable")}
@@ -362,11 +291,12 @@ export default function IncidentLibraryPage() {
                 >
                   Compact
                 </button>
-              </div>
+              </div> */}
+              <span className="text-xs opacity-60">Sort</span>
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                className="h-7 border border-zinc-200 rounded-lg px-2 bg-white outline-none cursor-pointer"
+                className="h-7 rounded-lg px-2 bg-white outline-none cursor-pointer"
               >
                 <option value="opened-desc">Newest First</option>
                 <option value="opened-asc">Oldest First</option>
@@ -379,7 +309,7 @@ export default function IncidentLibraryPage() {
           {/* Datagrid content tables matrix */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse min-w-[900px]">
-              <thead className="bg-zinc-50/70 border-b border-zinc-100 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+              <thead className="border-b border-zinc-100 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
                 <tr>
                   <th className="p-3 w-10">
                     <input
@@ -392,38 +322,28 @@ export default function IncidentLibraryPage() {
                       className="accent-indigo-600 h-3.5 w-3.5"
                     />
                   </th>
-                  <th className="p-3 w-32">Incident ID</th>
-                  <th className="p-3">Summary Headline Title</th>
-                  <th className="p-3 w-20">Priority</th>
+                  <th className="p-3 w-32">Incident</th>
+                  <th className="p-3">Title</th>
+                  <th className="p-3 w-20">Pri</th>
                   <th className="p-3 w-28">Status</th>
-                  <th className="p-3 w-32">Affected System</th>
-                  <th className="p-3 w-36">Opened Date</th>
-                  <th className="p-3 w-24">MTTR</th>
+                  <th className="p-3 w-32">Service</th>
+                  <th className="p-3 w-36">Opened</th>
+                  <th className="p-3 w-24">Owner</th>
                   <th className="p-3 w-20">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 text-zinc-800">
                 {paginatedIncidents.map((i) => {
                   const isChecked = selectedIds.has(i.id);
-                  const priColors = {
-                    P0: "text-red-600 bg-red-50 border-red-100",
-                    P1: "text-amber-600 bg-amber-50 border-amber-100",
-                    P2: "text-blue-600 bg-blue-50 border-blue-100",
-                    P3: "text-zinc-500 bg-zinc-50 border-zinc-100",
-                  }[i.priority];
+
                   const statusDots =
-                    {
-                      Resolved: "bg-emerald-500",
-                      Open: "bg-red-500",
-                      Investigating: "bg-amber-500",
-                      Monitoring: "bg-blue-500",
-                      Closed: "bg-zinc-400",
-                    }[i.status] || "bg-zinc-400";
+                    TICKET_STATUS_CONFIG.find((s) => s.label === i.status)
+                      ?.dotColor || "bg-zinc-400";
 
                   return (
                     <tr
                       key={i.id}
-                      onClick={() => handleToggleSelectRow(i.id)}
+                      onClick={() => setActiveId(i.id)}
                       className={`hover:bg-zinc-50/50 cursor-pointer group transition-colors ${isChecked ? "bg-indigo-50/30" : ""}`}
                     >
                       <td className="p-3" onClick={(e) => e.stopPropagation()}>
@@ -435,10 +355,7 @@ export default function IncidentLibraryPage() {
                         />
                       </td>
                       <td className="p-3 font-mono font-bold text-zinc-900 flex items-center gap-1.5">
-                        {i.id}{" "}
-                        {i.priority === "P0" && (
-                          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                        )}
+                        {i?.ticketId}{" "}
                       </td>
                       <td
                         className={`p-3 max-w-xs ${density === "compact" ? "py-1.5" : "py-3.5"}`}
@@ -446,16 +363,12 @@ export default function IncidentLibraryPage() {
                         <div className="font-semibold text-zinc-900 truncate">
                           {i.title}
                         </div>
-                        <div className="text-[10px] text-zinc-400 mt-0.5 font-medium flex items-center gap-2">
-                          <span>IC: {i.incidentCommander}</span> &bull;{" "}
-                          <span>Actions: {i.recommendedActions.length}</span>
-                        </div>
                       </td>
                       <td className="p-3">
                         <span
-                          className={`px-2 py-0.5 border rounded-md text-[10.5px] font-bold ${priColors}`}
+                          className={`px-2 py-0.5 border rounded-md text-[10.5px] font-bold ${priColors[i.priority]}`}
                         >
-                          {i.priority}
+                          {priText[i.priority] || i.priority}
                         </span>
                       </td>
                       <td className="p-3 font-medium text-zinc-700">
@@ -476,21 +389,33 @@ export default function IncidentLibraryPage() {
                           year: "numeric",
                         })}
                       </td>
-                      <td className="p-3 font-mono font-semibold text-zinc-600 tnum">
-                        {i.status === "Investigating" ? "—" : `${i.MTTR}m`}
+                      <td className="p-3 capitalize text-nowrap">
+                        {i.assignedToName}
                       </td>
                       <td
                         className="p-3 text-right"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <button
-                          onClick={() =>
-                            setActiveModal({ type: "replay", payload: i })
+                        <Dropdown
+                          position="left"
+                          showSelectedIcon={false}
+                          trigger={
+                            <div>
+                              <BsThreeDotsVertical
+                                size={14}
+                                className="text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer ml-3"
+                              />
+                            </div>
                           }
-                          className="h-7 px-2.5 rounded-md border border-zinc-200 bg-white hover:bg-zinc-50 text-[11px] font-bold text-zinc-600 shadow-2xs transition-colors"
-                        >
-                          Replay
-                        </button>
+                          items={[
+                            {
+                              label: "Replay",
+                              value: "replay",
+                              onClick: () =>
+                                setActiveModal({ type: "replay", payload: i }),
+                            },
+                          ]}
+                        />
                       </td>
                     </tr>
                   );
@@ -531,6 +456,43 @@ export default function IncidentLibraryPage() {
               </button>
             </div>
           </div>
+        </div>
+
+        <div className=" lg:col-span-3 space-y-4">
+          <div className="lg:col-span-4 bg-indigo-50/60 border border-indigo-100 rounded-lg p-3 space-y-2">
+            <div className="flex items-center justify-between text-[9px] font-medium text-indigo-900 uppercase">
+              <span className="flex items-center text-indigo-600 gap-1.5">
+                <Sparkles size={13} className="" /> Ask Ezra AI
+              </span>
+              <span className="font-mono text-[7px] text-indigo-400">
+                Semantic
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5 text-[9px] text-zinc-600">
+              <button
+                type="button"
+                onClick={() => {
+                  if (selectedIds.size === 0)
+                    return alert("Select a row item first.");
+                  setActiveModal({
+                    type: "compare",
+                    payload: Array.from(selectedIds).slice(0, 2),
+                  });
+                }}
+                className="w-full text-left p-1.5 bg-white rounded border border-indigo-100 hover:border-indigo-300 transition-all truncate"
+              >
+                "Find duplicates side-by-side"
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearch("Database")}
+                className="w-full text-left p-1.5 bg-white rounded border border-indigo-100 hover:border-indigo-300 transition-all truncate"
+              >
+                Show DB Outages
+              </button>
+            </div>
+          </div>
+          <IncidentContextDetails incident={selectedIncident} />
         </div>
       </div>
 

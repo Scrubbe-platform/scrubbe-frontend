@@ -43,16 +43,18 @@ const IncidentOverview = ({ children, tabs }: Props) => {
   return (
     <div className="flex h-screen dark:text-slate-300 text-black font-sans overflow-hidden">
       {/* ── Sidebar ── */}
-      <aside
-        className={cn(
-          "md:border-r border-white/5 flex flex-col h-full shrink-0",
-          "md:w-[350px] md:flex",
-          // on mobile: hide sidebar when something is selected or loading
-          showMainPanel || isSelectionLoading ? "hidden" : "w-full flex",
-        )}
-      >
-        <ExactIncidentSidebar />
-      </aside>
+      {tabs !== "overview" && (
+        <aside
+          className={cn(
+            "md:border-r border-white/5 flex flex-col h-full shrink-0",
+            "md:w-[350px] md:flex",
+            // on mobile: hide sidebar when something is selected or loading
+            showMainPanel || isSelectionLoading ? "hidden" : "w-full flex",
+          )}
+        >
+          <ExactIncidentSidebar />
+        </aside>
+      )}
 
       {/* ── Main panel — skeleton, content, or empty state ── */}
       <main

@@ -38,7 +38,7 @@ interface StatusMeta {
   textColor: string;
 }
 
-const TICKET_STATUS_CONFIG: StatusMeta[] = [
+export const TICKET_STATUS_CONFIG: StatusMeta[] = [
   {
     id: 1,
     label: "OPEN",

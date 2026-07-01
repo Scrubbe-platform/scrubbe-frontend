@@ -74,15 +74,15 @@ export default function FilterRail({
   );
 
   return (
-    <div className="bg-white border border-zinc-200 rounded-xl shadow-2xs sticky top-20 max-h-[calc(100vh-120px)] overflow-y-auto">
-      <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100 bg-zinc-50/50">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-          Filter Controls
+    <div className="bg-white border border-zinc-200 rounded-md shadow-2xs sticky top-20 max-h-[calc(100vh-120px)] overflow-y-auto">
+      <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100">
+        <span className="text-[10px]  uppercase text-zinc-500 font-medium">
+          Filter
         </span>
         {totalActive > 0 && (
           <button
             onClick={onClear}
-            className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+            className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
           >
             Clear All
           </button>
@@ -92,7 +92,7 @@ export default function FilterRail({
       <div className="divide-y divide-zinc-100 p-2">
         {groupsConfig.map((g) => (
           <div key={g.label} className="p-3 space-y-2">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+            <div className="text-[11px] font-medium tracking-wider">
               {g.label}
             </div>
             <div className="space-y-1.5">
@@ -108,7 +108,7 @@ export default function FilterRail({
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => handleCheckboxToggle(g.key, opt)}
-                      className="accent-indigo-600 h-3.5 w-3.5 rounded border-zinc-300"
+                      className="accent-IMSDarkGreen h-3.5 w-3.5 rounded border-zinc-300"
                     />
                     <span className="flex-1 truncate">{opt}</span>
                     <span className="font-mono text-[10.5px] text-zinc-400">
