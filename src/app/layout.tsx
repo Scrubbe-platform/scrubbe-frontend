@@ -9,6 +9,7 @@ import AuthProvider from "@/provider/AuthProvider";
 import ThemeProvider from "@/components/ThemeProvider";
 import Image from "next/image";
 import { QueryClientProviders } from "@/provider/QueryClientProvider";
+import WorkspaceLoader from "@/components/ui/LoaderUI/WorkspaceLoader";
 
 const bersley = localFont({
   src: [
@@ -91,22 +92,13 @@ export default function RootLayout({
       className={`${airbnbCereal.variable} ${bersley.variable} ${bigshotOne.variable} ${electrolize.variable}`}
     >
       <head>
-        <script src="https://t.contentsquare.net/uxa/8af75147dbd67.js" defer></script>
+        <script
+          src="https://t.contentsquare.net/uxa/8af75147dbd67.js"
+          defer
+        ></script>
       </head>
       <body className="antialiased min-h-screen w-full flex flex-col font-airbnb">
-        <Suspense
-          fallback={
-            <div className="h-screen bg-white flex justify-center items-center">
-              <Image
-                src="/blacklogo.png"
-                alt="scrubbe-logo-01.png"
-                fill
-                sizes="(min-width: 300px) 100vw"
-                className="object-contain scale-75 "
-              />{" "}
-            </div>
-          }
-        >
+        <Suspense fallback={<WorkspaceLoader />}>
           <QueryClientProviders>
             <ThemeProvider>
               <AuthProvider>
