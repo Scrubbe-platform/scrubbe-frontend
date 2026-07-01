@@ -29,7 +29,7 @@ export const RedirectProviderIMS = ({ children }: { children: ReactNode }) => {
   };
 
   // Log out at 15 minutes of inactivity
-  useIdle(900000, triggerRedirect, refreshAccessToken);
+  useIdle(900000, triggerRedirect);
 
   return <>{children}</>;
 };
