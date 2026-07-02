@@ -159,29 +159,25 @@ const Sidebar = () => {
             {user?.roles[0]}
           </p>
         </motion.div>
-
+      </div>
+      <div
+        className="pl-5 flex items-center gap-2 py-3 mt-3 hover:bg-[#02DD86]/10 dark:hover:bg-white/5 cursor-pointer "
+        onClick={handleLogout}
+      >
+        <LogOut className="text-white" size={18} />
         <motion.div
           animate={{ opacity: showLabels ? 1 : 0, x: showLabels ? 0 : -4 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
+          className="flex-1 min-w-0 overflow-hidden"
         >
-          <Dropdown
-            position="left"
-            trigger={
-              <div className="px-2">
-                <BsThreeDotsVertical className="text-white" />
-              </div>
-            }
-            items={[
-              {
-                value: "logout",
-                label: "Logout",
-                icon: <LogOut />,
-                onClick() {
-                  handleLogout();
-                },
-              },
-            ]}
-          />
+          <p
+            className={cn(
+              "text-[13px] leading-tight truncate pr-2 capitalize",
+              showLabels ? "text-white font-medium" : "text-zinc-300",
+            )}
+          >
+            Logout
+          </p>
         </motion.div>
       </div>
     </motion.div>

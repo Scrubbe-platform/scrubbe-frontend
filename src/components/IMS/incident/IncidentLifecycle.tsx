@@ -38,7 +38,7 @@ interface StatusMeta {
   textColor: string;
 }
 
-const TICKET_STATUS_CONFIG: StatusMeta[] = [
+export const TICKET_STATUS_CONFIG: StatusMeta[] = [
   {
     id: 1,
     label: "OPEN",
@@ -203,12 +203,12 @@ export default function IncidentLifecycleManager({ incident }: Props) {
           <p className="text-[11px] font-mono font-bold tracking-[0.15em] text-black dark:text-slate-500 uppercase">
             Incident Lifecycle
           </p>
-          <div className="w-[70%] h-0.5 bg-zinc-100 " />
+          <div className="w-[70%] h-0.5 bg-zinc-200 " />
         </div>
 
         {/* Scrollable Ribbon Wrapper */}
         <div className="overflow-x-auto no-scrollbar dark:border-white/5 rounded-xl bg-transparent dark:bg-[#0b1329]">
-          <div className="flex w-full h-[58px] bg-transparent">
+          <div className="flex w-full h-[50px] bg-transparent">
             {TICKET_STATUS_CONFIG.map((stage, idx) => {
               const isCompleted = idx < activeIndex;
               const isCurrent = idx === activeIndex;
@@ -249,7 +249,7 @@ export default function IncidentLifecycleManager({ incident }: Props) {
                           Stage {stage.id}
                         </span>
                       </div>
-                      <span className="text-[12px] font-bold tracking-tight uppercase">
+                      <span className="text-[10px] font-bold tracking-tight uppercase">
                         {stage.label}
                       </span>
                     </div>

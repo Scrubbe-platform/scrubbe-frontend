@@ -43,21 +43,23 @@ const IncidentOverview = ({ children, tabs }: Props) => {
   return (
     <div className="flex h-screen dark:text-slate-300 text-black font-sans overflow-hidden">
       {/* ── Sidebar ── */}
-      <aside
-        className={cn(
-          "md:border-r border-white/5 flex flex-col h-full shrink-0",
-          "md:w-[350px] md:flex",
-          // on mobile: hide sidebar when something is selected or loading
-          showMainPanel || isSelectionLoading ? "hidden" : "w-full flex",
-        )}
-      >
-        <ExactIncidentSidebar />
-      </aside>
+      {tabs !== "overview" && (
+        <aside
+          className={cn(
+            "md:border-r border-white/5 flex flex-col h-full shrink-0",
+            "md:w-[350px] md:flex",
+            // on mobile: hide sidebar when something is selected or loading
+            showMainPanel || isSelectionLoading ? "hidden" : "w-full flex",
+          )}
+        >
+          <ExactIncidentSidebar />
+        </aside>
+      )}
 
       {/* ── Main panel — skeleton, content, or empty state ── */}
       <main
         className={cn(
-          "flex-1 flex flex-col overflow-y-auto h-full",
+          "flex-1 flex flex-col overflow-y-auto h-full px-5 md:px-8",
           // on mobile: only show when there is something to render
           showMainPanel || isSelectionLoading ? "flex" : "hidden md:flex",
         )}
@@ -90,26 +92,27 @@ const IncidentOverview = ({ children, tabs }: Props) => {
 
                 {/* Lifecycle ribbon — visible across every incident-context tab, not just overview */}
 
-                {tabs === "overview" ? (
-                  <>
-                    <IncidentLifecycle incident={selectedIncident} />
-                    <IncidentUpdatePage
-                      incident={selectedIncident}
-                      onCancel={() => {}}
-                      context={context}
-                    />
-                    {/* <DetectionSignals incident={selectedIncident} /> */}
-                    {/* <ScrubbeIntelligence incident={selectedIncident} /> */}
-                    <IncidentContextModule
-                      incident={selectedIncident}
-                      context={context}
-                    />
-                    <ActivityAuditTrail history={history} />
-                  </>
-                ) : (
-                  <>{children}</>
-                )}
-
+                <div className="border border-neutral-500">
+                  {tabs === "overview" ? (
+                    <>
+                      <IncidentLifecycle incident={selectedIncident} />
+                      <IncidentUpdatePage
+                        incident={selectedIncident}
+                        onCancel={() => {}}
+                        context={context}
+                      />
+                      {/* <DetectionSignals incident={selectedIncident} /> */}
+                      {/* <ScrubbeIntelligence incident={selectedIncident} /> */}
+                      <IncidentContextModule
+                        incident={selectedIncident}
+                        context={context}
+                      />
+                      <ActivityAuditTrail history={history} />
+                    </>
+                  ) : (
+                    <>{children}</>
+                  )}
+                </div>
                 {/* {tabs === "context" && (
                   <>
                     <ContextList
