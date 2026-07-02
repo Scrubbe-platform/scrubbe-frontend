@@ -161,7 +161,7 @@ const Sidebar = () => {
         </motion.div>
       </div>
       <div
-        className="pl-5 flex items-center gap-2 py-3 mt-3 hover:bg-[#02DD86]/10 dark:hover:bg-white/5 cursor-pointer "
+        className="pl-5 flex items-center gap-2 py-3 mt-4 hover:bg-[#02DD86]/10 dark:hover:bg-white/5 cursor-pointer "
         onClick={handleLogout}
       >
         <LogOut className="text-white" size={18} />

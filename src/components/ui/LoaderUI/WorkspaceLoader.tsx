@@ -57,7 +57,7 @@ function useWorkspaceLoader(steps: LoadingStep[], onComplete?: () => void) {
         stepElapsed >= steps[stepIndex].durationMs
       ) {
         const step = steps[stepIndex];
-        setCompletedSteps((prev) => new Set([...prev, step.id]));
+        setCompletedSteps((prev) => new Set([...Array.from(prev), step.id]));
         const next = steps[stepIndex + 1];
         setCurrentLabel(
           next
