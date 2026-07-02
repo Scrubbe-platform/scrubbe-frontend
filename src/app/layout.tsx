@@ -37,40 +37,30 @@ const electrolize = localFont({
   display: "swap",
 });
 
-const airbnbCereal = localFont({
+const IBM = localFont({
   src: [
     {
-      path: "./fonts/airbnb-cereal/AirbnbCereal_W_Lt.otf",
+      path: "./fonts/IBMPlexSans-Regular.ttf",
       weight: "300",
       style: "normal",
     },
     {
-      path: "./fonts/airbnb-cereal/AirbnbCereal_W_Bk.otf",
+      path: "./fonts/IBMPlexSans-Medium.ttf",
       weight: "400",
       style: "normal",
     },
     {
-      path: "./fonts/airbnb-cereal/AirbnbCereal_W_Md.otf",
+      path: "./fonts/IBMPlexSans-SemiBold.ttf",
       weight: "500",
       style: "normal",
     },
     {
-      path: "./fonts/airbnb-cereal/AirbnbCereal_W_Bd.otf",
+      path: "./fonts/IBMPlexSans-Bold.ttf",
       weight: "700",
       style: "normal",
     },
-    {
-      path: "./fonts/airbnb-cereal/AirbnbCereal_W_XBd.otf",
-      weight: "800",
-      style: "normal",
-    },
-    {
-      path: "./fonts/airbnb-cereal/AirbnbCereal_W_Blk.otf",
-      weight: "900",
-      style: "normal",
-    },
   ],
-  variable: "--font-airbnb-cereal",
+  variable: "--font-ibm",
   display: "swap",
 });
 
@@ -88,10 +78,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${airbnbCereal.variable} ${bersley.variable} ${bigshotOne.variable} ${electrolize.variable}`}
+      className={`${IBM.variable} ${bersley.variable} ${bigshotOne.variable} ${electrolize.variable}`}
     >
       <head>
-        <script src="https://t.contentsquare.net/uxa/8af75147dbd67.js" defer></script>
+        <script
+          src="https://t.contentsquare.net/uxa/8af75147dbd67.js"
+          defer
+        ></script>
       </head>
       <body className="antialiased min-h-screen w-full flex flex-col font-airbnb">
         <Suspense

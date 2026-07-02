@@ -59,7 +59,7 @@ const IncidentOverview = ({ children, tabs }: Props) => {
       {/* ── Main panel — skeleton, content, or empty state ── */}
       <main
         className={cn(
-          "flex-1 flex flex-col overflow-y-auto h-full",
+          "flex-1 flex flex-col overflow-y-auto h-full px-5 md:px-8",
           // on mobile: only show when there is something to render
           showMainPanel || isSelectionLoading ? "flex" : "hidden md:flex",
         )}
@@ -92,26 +92,27 @@ const IncidentOverview = ({ children, tabs }: Props) => {
 
                 {/* Lifecycle ribbon — visible across every incident-context tab, not just overview */}
 
-                {tabs === "overview" ? (
-                  <>
-                    <IncidentLifecycle incident={selectedIncident} />
-                    <IncidentUpdatePage
-                      incident={selectedIncident}
-                      onCancel={() => {}}
-                      context={context}
-                    />
-                    {/* <DetectionSignals incident={selectedIncident} /> */}
-                    {/* <ScrubbeIntelligence incident={selectedIncident} /> */}
-                    <IncidentContextModule
-                      incident={selectedIncident}
-                      context={context}
-                    />
-                    <ActivityAuditTrail history={history} />
-                  </>
-                ) : (
-                  <>{children}</>
-                )}
-
+                <div className="border border-neutral-500">
+                  {tabs === "overview" ? (
+                    <>
+                      <IncidentLifecycle incident={selectedIncident} />
+                      <IncidentUpdatePage
+                        incident={selectedIncident}
+                        onCancel={() => {}}
+                        context={context}
+                      />
+                      {/* <DetectionSignals incident={selectedIncident} /> */}
+                      {/* <ScrubbeIntelligence incident={selectedIncident} /> */}
+                      <IncidentContextModule
+                        incident={selectedIncident}
+                        context={context}
+                      />
+                      <ActivityAuditTrail history={history} />
+                    </>
+                  ) : (
+                    <>{children}</>
+                  )}
+                </div>
                 {/* {tabs === "context" && (
                   <>
                     <ContextList

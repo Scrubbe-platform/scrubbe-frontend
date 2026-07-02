@@ -70,7 +70,7 @@ const IncidentHeader = ({
   ];
 
   return (
-    <div className="w-full px-5 md:px-8 py-6 flex flex-col gap-5 border-b border-zinc-100 dark:border-white/[0.06] bg-white dark:bg-transparent">
+    <div className="w-full pt-6 flex flex-col gap-5 border-b border-zinc-100 dark:border-white/[0.06]  dark:bg-transparent">
       {/* ── Top row ── */}
       <div className="flex flex-row items-start justify-between gap-4">
         <div className="flex flex-col gap-3">
@@ -159,24 +159,20 @@ const IncidentHeader = ({
       </div>
 
       {/* ── Tab nav ── */}
-      <div className="px-4">
-        <nav className="flex overflow-x-auto min-w-[600px] -mx-5 md:-mx-8  bg-green-200/30 rounded-full p-2">
+      <div className="px-4 border bg-white border-neutral-500 border-b-transparent">
+        <nav className="flex w-full p-2">
           {tabs.map((tab) => {
             const isActive = activeTab
               ? activeTab === tab.id
               : currentTab === tab.id || (tab.id === "overview" && !currentTab);
 
             return (
-              <Link
-                key={tab.id}
-                href={tab.link}
-                className="flex-1 flex last:border-none border-r border-green-500 pl-2 pr-2"
-              >
+              <Link key={tab.id} href={tab.link} className="flex ">
                 <span
-                  className={`text-[13px] font-medium whitespace-nowrap transition-colors w-full justify-center rounded-full text-center py-2 ${
+                  className={`text-sm px-4 font-medium whitespace-nowrap transition-colors w-full justify-center rounded-sm text-center py-1 ${
                     isActive
-                      ? "bg-gradient-to-r from-[#A3D45D] to-[#167B48] via-[#0F5A35] text-white"
-                      : "text-dark dark:text-zinc-500 group-hover:text-black dark:group-hover:text-zinc-300"
+                      ? "bg-neutral-200 text-black dark:bg-zinc-800 dark:text-white"
+                      : "text-neutral-500 dark:text-zinc-500 group-hover:text-black dark:group-hover:text-zinc-300"
                   }`}
                 >
                   {tab.label}

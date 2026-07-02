@@ -36,6 +36,7 @@ import { TICKET_STATUS_CONFIG } from "@/components/IMS/incident/IncidentLifecycl
 import Dropdown from "@/components/ui/Dropdown";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import IncidentContextDetails from "./IncidentContextDetails";
+import { useRouter } from "next/navigation";
 
 export const priColors: { [key: string]: string } = {
   CRITICAL: "text-red-600 bg-red-50 border-red-100",
@@ -64,12 +65,18 @@ export default function IncidentLibraryPage() {
   // 2. Selection & Filter Toggles
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     status: new Set<string>(),
     priority: new Set<string>(),
     environment: new Set<string>(),
     service: new Set<string>(),
+    rootCause: new Set<string>(),
+    incidentType: new Set<string>(),
+    warRoom: new Set<string>(),
+    codeEngine: new Set<string>(),
   });
+  const router = useRouter();
 
   // 3. Modals Visibility State Machine
   const [activeModal, setActiveModal] = useState<{
@@ -153,7 +160,12 @@ export default function IncidentLibraryPage() {
       priority: new Set(),
       environment: new Set(),
       service: new Set(),
+      rootCause: new Set(),
+      incidentType: new Set(),
+      warRoom: new Set(),
+      codeEngine: new Set(),
     });
+    setDateRange(null);
     setSearch("");
   };
 
@@ -162,12 +174,98 @@ export default function IncidentLibraryPage() {
     [incidents, activeId],
   );
 
+  const handleDownloadCSV = (records: IncidentListItem[]) => {
+    const headers = [
+      "ID",
+      "Ticket ID",
+      "Title",
+      "Summary",
+      "Reason",
+      "Description",
+      "Service",
+      "Region",
+      "Environment",
+      "Severity",
+      "Priority",
+      "Status",
+      "State",
+      "Source",
+      "Source Type",
+      "Assigned To (Email)",
+      "Assigned To (Name)",
+      "Incident Commander",
+      "Owning Squad",
+      "Created At",
+      "Updated At",
+      "Elapsed Label",
+      "Elapsed Minutes",
+      "MTTR",
+      "Comments Count",
+      "Recommended Actions",
+    ];
+
+    const escape = (val: unknown) => {
+      const str = val == null ? "" : String(val);
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
+    const rows = records.map((i) => [
+      escape(i.id),
+      escape(i.ticketId),
+      escape(i.title),
+      escape(i.summary),
+      escape(i.reason),
+      escape(i.description),
+      escape(i.service),
+      escape(i.region),
+      escape(i.environment),
+      escape(i.severity),
+      escape(i.priority),
+      escape(i.status),
+      escape(i.state),
+      escape(i.source),
+      escape(i.sourceType),
+      escape(i.assignedToEmail),
+      escape(i.assignedToName),
+      escape(i.incidentCommander),
+      escape(i.owningSquad),
+      escape(i.createdAt),
+      escape(i.updatedAt),
+      escape(i.elapsedLabel),
+      escape(i.elapsedMinutes),
+      escape(i.MTTR),
+      escape(i.commentsCount),
+      escape(i.recommendedActions?.join("; ")),
+    ]);
+
+    const csv = [
+      headers.map(escape).join(","),
+      ...rows.map((r) => r.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `incidents-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportSelected = () => {
+    const selectedRecords = incidents.filter((i) => selectedIds.has(i.id));
+    handleDownloadCSV(selectedRecords);
+  };
+
+  const handleAssign = () => {};
+  const handleMerge = () => {};
+  const handleArchive = () => {};
   return (
-    <main className="p-4 sm:p-6 pb-24 max-w-[1600px] mx-auto space-y-6 font-sans">
+    <main className="p-4 sm:p-6 pb-24 max-w-[1600px] mx-auto space-y-6 font-ibm">
       {/* Page Title Context Header Row */}
       <div className="flex flex-wrap items-center justify-between gap-4 ">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-zinc-900">
+          <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-zinc-900 font-ibm">
             Incident Library
           </h1>
           <p className="text-sm text-zinc-500 mt-1 max-w-2xl">
@@ -243,7 +341,7 @@ export default function IncidentLibraryPage() {
           </Button>
           <Button
             leftIcon={<Download size={14} />}
-            onClick={() => alert("CSV Export complete.")}
+            onClick={() => handleDownloadCSV(incidents)}
             size="sm"
             variant="outline-dark"
             className="h-fit text-sm"
@@ -264,6 +362,8 @@ export default function IncidentLibraryPage() {
             onFilterChange={setFilters}
             onClear={clearAllFilters}
             dataList={incidents}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
           />
         </div>
 
@@ -272,7 +372,7 @@ export default function IncidentLibraryPage() {
           <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100">
             <div className="text-xs font-bold ">
               Incident List{" "}
-              {/* <span className="text-zinc-400 font-mono font-medium ml-1">
+              {/* <span className="text-zinc-400 font-ibm font-medium ml-1">
                 ({filteredIncidents.length} match filters)
               </span> */}
             </div>
@@ -354,7 +454,7 @@ export default function IncidentLibraryPage() {
                           className="accent-indigo-600 h-3.5 w-3.5"
                         />
                       </td>
-                      <td className="p-3 font-mono font-bold text-zinc-900 flex items-center gap-1.5">
+                      <td className="p-3 font-ibm font-bold text-zinc-900 flex items-center gap-1.5">
                         {i?.ticketId}{" "}
                       </td>
                       <td
@@ -409,10 +509,37 @@ export default function IncidentLibraryPage() {
                           }
                           items={[
                             {
+                              label: "Open incident",
+                              value: "open",
+                              onClick: () =>
+                                router.push(`/incident/tickets?id=${i.id}`),
+                            },
+                            {
                               label: "Replay",
                               value: "replay",
                               onClick: () =>
                                 setActiveModal({ type: "replay", payload: i }),
+                            },
+
+                            {
+                              label: "Add to compare",
+                              value: "compare",
+                              onClick: () => setActiveId(i.id),
+                            },
+                            {
+                              label: "Generate RCA",
+                              value: "rca",
+                              onClick: () =>
+                                setActiveModal({
+                                  type: "doc",
+                                  kind: "rca",
+                                  payload: [i.id],
+                                }),
+                            },
+                            {
+                              label: "Archive",
+                              value: "archive",
+                              onClick: () => handleArchive(),
                             },
                           ]}
                         />
@@ -433,7 +560,7 @@ export default function IncidentLibraryPage() {
 
           {/* Pagination Toolbar Row controls */}
           <div className="h-11 px-4 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-400 bg-zinc-50/50">
-            <span className="font-medium font-mono">
+            <span className="font-medium font-ibm">
               Showing{" "}
               {Math.min(filteredIncidents.length, (page - 1) * pageSize + 1)}-
               {Math.min(filteredIncidents.length, page * pageSize)} of{" "}
@@ -464,7 +591,7 @@ export default function IncidentLibraryPage() {
               <span className="flex items-center text-indigo-600 gap-1.5">
                 <Sparkles size={13} className="" /> Ask Ezra AI
               </span>
-              <span className="font-mono text-[7px] text-indigo-400">
+              <span className="font-ibm text-[7px] text-indigo-400">
                 Semantic
               </span>
             </div>
@@ -513,6 +640,7 @@ export default function IncidentLibraryPage() {
             payload: Array.from(selectedIds).slice(0, 2),
           })
         }
+        handleExportSelected={handleExportSelected}
       />
 
       {/* Modals Mounting Injection Registry hooks */}

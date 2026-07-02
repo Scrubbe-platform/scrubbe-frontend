@@ -38,6 +38,7 @@ const config: Config = {
         besley: ["var(--font-bersley)"],
         bigshotOne: ["var(--font-bigshotOne)"],
         electrolize: ["var(--font-electrolize)"],
+        ibm: ["var(--font-ibm)"],
       },
       colors: {
         IMSGreen: "#072929",
