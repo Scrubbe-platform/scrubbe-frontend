@@ -70,7 +70,7 @@ const IncidentHeader = ({
   ];
 
   return (
-    <div className="w-full pt-6 flex flex-col gap-5 border-b border-zinc-100 dark:border-white/[0.06]  dark:bg-transparent">
+    <div className="w-full pt-6 flex flex-col gap-5 dark:bg-transparent">
       {/* ── Top row ── */}
       <div className="flex flex-row items-start justify-between gap-4">
         <div className="flex flex-col gap-3">
@@ -159,7 +159,7 @@ const IncidentHeader = ({
       </div>
 
       {/* ── Tab nav ── */}
-      <div className="px-4 border bg-white border-neutral-500 border-b-transparent">
+      <div className="px-4 border bg-white border-neutral-300 border-b-transparent">
         <nav className="flex w-full p-2">
           {tabs.map((tab) => {
             const isActive = activeTab

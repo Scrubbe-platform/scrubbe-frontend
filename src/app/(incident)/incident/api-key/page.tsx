@@ -184,7 +184,7 @@ export default function ApiKeysPage() {
   const activeKey = activeKeyIdx !== null ? keys[activeKeyIdx] : null;
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 font-sans">
+    <div className="min-h-screen  text-zinc-900 font-sans">
       {/* Top action header bar */}
 
       {/* Main Content Workspace Layout */}

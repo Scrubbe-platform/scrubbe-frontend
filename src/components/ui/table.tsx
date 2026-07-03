@@ -55,7 +55,7 @@ const Table = <TData extends object>({
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
                 key={headerGroup.id}
-                className="border-b border-zinc-500 dark:border-zinc-600 transition-colors data-[state=selected]:bg-zinc-100 dark:data-[state=selected]:bg-zinc-800"
+                className="border-b border-zinc-300 dark:border-zinc-600 transition-colors data-[state=selected]:bg-zinc-100 dark:data-[state=selected]:bg-zinc-800"
               >
                 {headerGroup.headers.map((header) => (
                   <th
@@ -63,7 +63,7 @@ const Table = <TData extends object>({
                     colSpan={header.colSpan}
                     className={cn(
                       "h-12 px-4 text-left align-middle font-semibold text-xs uppercase tracking-wider [&:has([role=checkbox])]:pr-0",
-                      headerClassName
+                      headerClassName,
                     )}
                   >
                     {header.isPlaceholder ? null : (
@@ -77,7 +77,7 @@ const Table = <TData extends object>({
                       >
                         {flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                         {{ asc: " 🔼", desc: " 🔽" }[
                           header.column.getIsSorted() as string
@@ -91,20 +91,20 @@ const Table = <TData extends object>({
           </thead>
 
           {/* ── Body ── */}
-          <tbody className="[&_tr:last-child]:border-0 bg-white dark:bg-[#1F2937] text-black dark:text-white">
+          <tbody className="[&_tr:last-child]:border-0 bg-white dark:bg-[#1F2937] text-black dark:text-white min-h-[600px]">
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => onRowClick?.(row.original)}
                 className={cn(
-                  "border-b border-zinc-500 dark:border-zinc-600 transition-colors",
+                  "border-b border-zinc-300 dark:border-zinc-600 transition-colors",
                   "hover:bg-zinc-50 dark:hover:bg-zinc-700/40",
                   "data-[state=selected]:bg-zinc-100 dark:data-[state=selected]:bg-zinc-800",
                   typeof rowClassName === "function"
                     ? rowClassName(row.original)
                     : rowClassName,
-                  onRowClick && "cursor-pointer"
+                  onRowClick && "cursor-pointer",
                 )}
               >
                 {row.getVisibleCells().map((cell) => (
@@ -114,7 +114,7 @@ const Table = <TData extends object>({
                       "p-4 align-middle [&:has([role=checkbox])]:pr-0",
                       typeof cellClassName === "function"
                         ? cellClassName(row.original, cell.column.id)
-                        : cellClassName
+                        : cellClassName,
                     )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

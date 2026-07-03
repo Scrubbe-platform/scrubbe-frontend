@@ -8,6 +8,7 @@ import { endpoint } from "@/lib/api/endpoint";
 import { Table } from "@/components/ui/table";
 import { ColumnDef } from "@tanstack/react-table";
 import WorkbenchDetailModal from "./WorkbenchDetailLibrary";
+import Button from "@/components/ui/Button1";
 
 // ── Types ─────────────────────────────────────────────────────────
 
@@ -286,11 +287,11 @@ const WorkbenchLibraryPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 p-8">
-      <div className="max-w-[1100px] mx-auto">
+      <div className="max-w-[1600px] mx-auto">
         {/* ── Header ── */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-[24px] font-black text-zinc-900 dark:text-zinc-100 mb-1">
+            <h1 className="text-[24px] font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
               Workbench Library
             </h1>
             <p className="text-[13px] text-zinc-500 dark:text-zinc-400 max-w-2xl leading-relaxed">
@@ -300,26 +301,23 @@ const WorkbenchLibraryPage: React.FC = () => {
               forms; a record of operational judgment.
             </p>
           </div>
-          <button
+          <Button
             onClick={() => router.push("/incident/workbench/awaiting")}
-            className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-white border-0 cursor-pointer shrink-0 ml-6 transition-all hover:brightness-110"
-            style={{
-              background: "linear-gradient(135deg, #14532d 0%, #22c55e 100%)",
-            }}
+            size="sm"
           >
             New Workbench
-          </button>
+          </Button>
         </div>
 
         {/* ── Overview stats ── */}
-        <div className="border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 mb-8">
-          <p className="text-[14px] font-semibold text-zinc-700 dark:text-zinc-300 mb-4">
-            Overview
-          </p>
-          <div className="grid grid-cols-6 gap-0 divide-x divide-zinc-200 dark:divide-zinc-700">
+        <p className="text-[14px] font-semibold text-zinc-700 dark:text-zinc-300 mb-4">
+          Overview
+        </p>
+        <div className="border border-zinc-200 dark:border-zinc-800 rounded-2xl  mb-8">
+          <div className="grid grid-cols-6 gap-0 divide-x divide-zinc-200 dark:divide-zinc-700 py-3 px-3">
             {liveStats.map((s) => (
               <div key={s.label} className="px-4 first:pl-0">
-                <p className="text-[28px] font-black text-zinc-900 dark:text-zinc-100 leading-none mb-1">
+                <p className="text-[28px] font-semibold text-zinc-900 dark:text-zinc-100 leading-none mb-1">
                   {s.value}
                 </p>
                 <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
@@ -386,9 +384,9 @@ const WorkbenchLibraryPage: React.FC = () => {
             />
             <button
               onClick={clearFilters}
-              className="text-[13px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 px-2 py-2 transition-colors"
+              className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 px-2 py-2 transition-colors"
             >
-              CLEAR
+              Clear
             </button>
             {/* <button className="px-4 py-2 rounded-lg text-[13px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors">
               EXPORT

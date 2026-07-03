@@ -208,13 +208,13 @@ const ActivityAuditTrail: React.FC<{ history: IncidentHistoryRecord[] }> = ({
 
   return (
     <div className="w-full mx-auto p-4">
-      <div className="bg-white dark:bg-zinc-950 rounded-xl border border-zinc-500 dark:border-zinc-800 shadow-sm p-5">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-2 mb-4">
+      <div className="bg-white dark:bg-zinc-950 rounded-md border border-zinc-500 dark:border-zinc-800 shadow-sm ">
+        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 p-5 border-b border-zinc-400 dark:border-zinc-900 flex items-center gap-2 mb-4">
           <MdOutlineChat size={18} /> Comments & Activity
         </h3>
 
         {/* Comment Input Form Area */}
-        <div className="flex items-start gap-3 mb-6">
+        <div className="flex items-start gap-3 p-5">
           <div className="min-w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center shrink-0 text-white text-[11px] font-bold">
             {CURRENT_USER.initial}
           </div>

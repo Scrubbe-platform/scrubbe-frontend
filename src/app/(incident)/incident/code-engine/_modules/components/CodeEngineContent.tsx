@@ -209,42 +209,6 @@ function CodeEngineContent() {
   return (
     <div className="flex flex-col h-screen bg-white dark:bg-grayscrubbe-900 text-black dark:text-slate-200 font-sans text-sm">
       {/* ── TOP NAV ── */}
-      {/* <header className="flex items-center justify-between px-4 h-10 bg-white dark:bg-grayscrubbe-900 border-b border-gray-200 dark:border-neutral-800 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-red-700 text-red-600 bg-red-50 dark:bg-red-950/40 text-[11px] font-bold tracking-wider">
-            INCIDENT
-          </span>
-          <span className="text-black dark:text-neutral-200 font-semibold">
-            {analysis.ticketId}
-          </span>
-          {analysis.affectedSystem && (
-            <span className="text-blue-600 dark:text-blue-300 text-xs md:block hidden">
-              {analysis.affectedSystem}
-            </span>
-          )}
-          {analysis.environment && (
-            <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 text-[11px] font-semibold md:block hidden">
-              {analysis.environment}
-            </span>
-          )}
-          {analysis.severity && (
-            <span
-              className={`px-2 py-0.5 rounded border text-[11px] font-bold ${severityBadgeStyle(analysis.severity)}`}
-            >
-              {analysis.severity}
-            </span>
-          )}
-        </div>
-        <div className="items-center gap-4 md:flex hidden">
-          <span className="text-neutral-500 text-xs truncate max-w-xs">
-            {analysis.summary}
-          </span>
-          <span className="flex items-center gap-1.5 text-yellow-500 text-xs font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block" />
-            {analysis.status}
-          </span>
-        </div>
-      </header> */}
 
       {/* ── NO FIX YET: PRE-ANALYSIS STATE ── */}
       {!fix && (

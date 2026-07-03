@@ -207,8 +207,8 @@ export default function IncidentLifecycleManager({ incident }: Props) {
         </div>
 
         {/* Scrollable Ribbon Wrapper */}
-        <div className="overflow-x-auto no-scrollbar dark:border-white/5 rounded-xl bg-transparent dark:bg-[#0b1329]">
-          <div className="flex w-full h-[50px] bg-transparent">
+        <div className="overflow-x-auto no-scrollbar dark:border-white/5 rounded-sm bg-transparent dark:bg-[#0b1329]">
+          <div className="flex w-full max-w-2xl h-[50px] bg-transparent">
             {TICKET_STATUS_CONFIG.map((stage, idx) => {
               const isCompleted = idx < activeIndex;
               const isCurrent = idx === activeIndex;

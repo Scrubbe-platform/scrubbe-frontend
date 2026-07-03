@@ -950,7 +950,7 @@ export default function OnCallDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-100 dark:bg-neutral-950 p-4 md:p-6 lg:p-8 font-sans">
+    <div className="min-h-screen max-w-[1600px] mx-auto p-4 md:p-6 lg:p-8 font-sans">
       {/* Header */}
       <div className="flex items-start justify-between mb-6 gap-4">
         <div>

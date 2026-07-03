@@ -14,7 +14,11 @@ import {
 interface EzraAnalysis {
   id: string;
   rootCause: { hypothesis: string; riskLevel?: string };
-  impact: { blastRadius: { summary: string }; affectedUsers?: number; severity?: string };
+  impact: {
+    blastRadius: { summary: string };
+    affectedUsers?: number;
+    severity?: string;
+  };
   remediation: { action: string };
 }
 
@@ -37,7 +41,9 @@ const AISuggestionsCard: React.FC<AISuggestionsCardProps> = ({
     queryKey: ["ezra-analysis", incident.id],
     queryFn: async () => {
       const res = await get(`${endpoint.ezra.analysis}/${incident.id}`);
-      return res.success ? ((res.data?.data ?? res.data) as EzraAnalysis) : null;
+      return res.success
+        ? ((res.data?.data ?? res.data) as EzraAnalysis)
+        : null;
     },
     enabled: Boolean(incident.id),
     refetchOnWindowFocus: false,
@@ -46,7 +52,9 @@ const AISuggestionsCard: React.FC<AISuggestionsCardProps> = ({
 
   const { mutate: generate, isPending: isLoading } = useMutation({
     mutationFn: async () => {
-      const res = await post(endpoint.ezra.analyse, { incidentId: incident.id });
+      const res = await post(endpoint.ezra.analyse, {
+        incidentId: incident.id,
+      });
       if (!res.success) throw new Error(res.data?.message ?? "Analysis failed");
       return (res.data?.data ?? res.data) as EzraAnalysis;
     },
@@ -78,9 +86,9 @@ const AISuggestionsCard: React.FC<AISuggestionsCardProps> = ({
 
   return (
     <div className="w-full mx-auto p-4 font-sans selection:bg-emerald-100">
-      <div className="bg-white dark:bg-zinc-950 rounded-xl border border-zinc-500 dark:border-zinc-800 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-zinc-950 rounded-md border border-zinc-400 dark:border-zinc-800 shadow-sm overflow-hidden">
         {/* Header Section */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-900">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-400 dark:border-zinc-900">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <Sparkles size={15} fill="currentColor" className="opacity-90" />

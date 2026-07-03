@@ -185,8 +185,8 @@ const FormSection = ({
   icon: React.ReactNode;
   title: string;
 }) => (
-  <div className="rounded-sm border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 ">
-    <div className="px-4 py-3 items-center border-b border-zinc-500 dark:border-zinc-700/60 flex flex-row gap-3">
+  <div className="rounded-sm border border-zinc-400 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 ">
+    <div className="px-4 py-3 items-center border-b border-zinc-400 dark:border-zinc-700/60 flex flex-row gap-3">
       {icon}
       <p className="text-[14px] font-semibold text-black dark:text-zinc-100 ">
         {title}
@@ -506,7 +506,7 @@ const RaiseIncidentModal = () => {
     entries.forEach((entry) => {
       uploadStagingIncidentAttachment(entry.file, (pct) => {
         setAttachedFiles((prev) =>
-          prev.map((f) => (f.id === entry.id ? { ...f, progress: pct } : f))
+          prev.map((f) => (f.id === entry.id ? { ...f, progress: pct } : f)),
         );
       })
         .then((staged) => {
@@ -520,17 +520,21 @@ const RaiseIncidentModal = () => {
                     key: staged.key,
                     downloadUrl: staged.downloadUrl,
                   }
-                : f
-            )
+                : f,
+            ),
           );
         })
         .catch(() => {
           setAttachedFiles((prev) =>
             prev.map((f) =>
               f.id === entry.id
-                ? { ...f, status: "error", errorMessage: "Upload failed — remove and try again" }
-                : f
-            )
+                ? {
+                    ...f,
+                    status: "error",
+                    errorMessage: "Upload failed — remove and try again",
+                  }
+                : f,
+            ),
           );
           toast.error(`Failed to upload ${entry.file.name}`);
         });
@@ -587,7 +591,9 @@ const RaiseIncidentModal = () => {
 
   const createMutation = useMutation({
     mutationFn: async (data: RaiseIncidentFormValues) => {
-      const uploaded = attachedFiles.filter((f) => f.status === "uploaded" && f.key);
+      const uploaded = attachedFiles.filter(
+        (f) => f.status === "uploaded" && f.key,
+      );
 
       const incident = await createIncident({
         incidentId: generatedTicket?.ticketId,
@@ -657,7 +663,7 @@ const RaiseIncidentModal = () => {
   }, []);
 
   return (
-    <div className="flex w-full flex-col  bg-white dark:bg-zinc-950 relative">
+    <div className="flex w-full flex-col dark:bg-zinc-950 relative">
       {/* Header */}
       <div className="md:sticky top-0 z-20 flex items-start justify-between border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 py-5">
         <div className=" space-y-3">
@@ -693,7 +699,7 @@ const RaiseIncidentModal = () => {
             icon={<InfoIcon size={17} />}
           >
             <div className="space-y-5">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
                 <Input
                   value={generatedTicket?.ticketId ?? ""}
                   isLoading={isGeneratingTicketId}
@@ -791,7 +797,7 @@ const RaiseIncidentModal = () => {
             icon={<FaRegFileLines size={17} />}
           >
             <div className="space-y-5">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
                 <Controller
                   name="firstNoticed"
                   control={control}
@@ -924,7 +930,7 @@ const RaiseIncidentModal = () => {
             icon={<User size={17} />}
           >
             <div className="space-y-5">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
                 <Controller
                   name="assignTo"
                   control={control}

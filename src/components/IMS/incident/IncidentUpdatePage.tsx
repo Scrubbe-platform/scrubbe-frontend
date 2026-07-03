@@ -373,12 +373,12 @@ const AddContextForm = ({
           {/* ── ROW 1: CORE FIELDS SPLIT ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* PANEL A: INCIDENT INFORMATION */}
-            <div className="border border-black dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 pb-2 border-b border-zinc-50 dark:border-zinc-900">
+            <div className="border border-neutral-400 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950">
+              <h3 className="text-base font-bold text-zinc-900  dark:text-white tracking-wider flex items-center gap-1.5 px-5 py-2 border-b border-zinc-400 dark:border-zinc-900">
                 <InfoIcon size={17} /> Incident Information
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 pb-3">
                 <div className="flex flex-col">
                   <SectionLabel>SI Number</SectionLabel>
                   <input
@@ -458,12 +458,12 @@ const AddContextForm = ({
             </div>
 
             {/* PANEL B: INCIDENT CONTEXT */}
-            <div className="border border-black dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 pb-2 border-b border-zinc-50 dark:border-zinc-900">
+            <div className="border border-neutral-400 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950">
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 px-5 py-2 border-b border-zinc-400 dark:border-zinc-900">
                 <FaRegFileLines size={17} /> Incident Context
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 pb-3">
                 <Controller
                   name="customerImpact"
                   control={control}
@@ -540,217 +540,226 @@ const AddContextForm = ({
                     </div>
                   )}
                 />
+                <div className="col-span-2">
+                  <IncidentRelationship
+                    incident={incident}
+                    value={childIncidents}
+                    onChange={(children) =>
+                      setValue("childIncidents", children)
+                    }
+                  />
+                </div>
               </div>
-              <IncidentRelationship
-                incident={incident}
-                value={childIncidents}
-                onChange={(children) => setValue("childIncidents", children)}
-              />
             </div>
           </div>
 
           {/* ── ROW 2: DETAILS TEXT EDITOR CANVAS ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* PANEL C: DETAILED DESCRIPTION CANVAS WITH FORMATTING TOOLBAR */}
-            <div className=" border border-black dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 pb-2 border-b border-zinc-50 dark:border-zinc-900">
+            <div className=" border border-neutral-400 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950">
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider px-5 py-2 flex items-center gap-1.5 pb-2 border-b border-zinc-400 dark:border-zinc-900">
                 <FaRegFileLines size={17} /> Incident Details
               </h3>
 
-              <Controller
-                name="title"
-                control={control}
-                render={({ field }) => (
-                  <div>
-                    <SectionLabel>
-                      Short Description <span className="text-red-500">*</span>
-                    </SectionLabel>
-
-                    {/* REPLACED: Passing RHF fields directly into the managed rich text editor instance */}
-
-                    <TextArea
-                      {...field}
-                      rows={3}
-                      placeholder="Add transient details or handoff items..."
-                      error={errors.title?.message}
-                    />
-                  </div>
-                )}
-              />
-
-              <Controller
-                name="description"
-                control={control}
-                render={({ field }) => (
-                  <div>
-                    <SectionLabel>Detailed Description</SectionLabel>
-
-                    <RichTextEditor
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-
-                    {errors.description && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.description.message}
-                      </p>
-                    )}
-                  </div>
-                )}
-              />
-            </div>
-
-            {/* PANEL D: ROUTING & ATTACHMENTS ASSIGNMENT */}
-            <div className=" border border-black dark:border-zinc-800 rounded-xl p-5 space-y-4 bg-white dark:bg-zinc-950 flex flex-col">
-              <div className="space-y-4">
-                <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 pb-2 border-b border-zinc-50 dark:border-zinc-900">
-                  <User size={17} />
-                  Assignment &amp; Routing
-                </h3>
-
+              <div className="px-5 pb-3">
                 <Controller
-                  name="assignedTo"
+                  name="title"
                   control={control}
                   render={({ field }) => (
                     <div>
-                      <SectionLabel>Assigned Engineer Operator</SectionLabel>
-                      <Select
+                      <SectionLabel>
+                        Short Description{" "}
+                        <span className="text-red-500">*</span>
+                      </SectionLabel>
+
+                      {/* REPLACED: Passing RHF fields directly into the managed rich text editor instance */}
+
+                      <TextArea
                         {...field}
-                        options={memberOptions}
-                        error={errors.assignedTo?.message}
+                        rows={3}
+                        placeholder="Add transient details or handoff items..."
+                        error={errors.title?.message}
                       />
                     </div>
                   )}
                 />
-              </div>
 
-              {/* Upload Dropzone Workspace Block */}
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <SectionLabel>Detailed Description</SectionLabel>
 
-              <div className="pt-2">
-                <SectionLabel>Evidence &amp; Media Attachments</SectionLabel>
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setDragOver(true);
-                  }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setDragOver(false);
-                    setValue("attachments", [
-                      ...attachments,
-                      ...Array.from(e.dataTransfer.files),
-                    ]);
-                  }}
-                  onClick={() => fileRef.current?.click()}
-                  className={`rounded-xl border-2 border-dashed p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
-                    dragOver
-                      ? "border-emerald-500 bg-emerald-50/20 dark:bg-emerald-500/5"
-                      : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 hover:border-zinc-300 dark:hover:border-zinc-700"
-                  }`}
-                >
-                  <Upload size={18} className="text-zinc-400 mb-2" />
-                  <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                    Drop snapshots or{" "}
-                    <span className="text-IMSLightGreen underline">
-                      browse disk files
-                    </span>
-                  </p>
-                </div>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  multiple
-                  accept=".png,.jpg,.jpeg,.pdf,.log,.txt,.json,.yaml,.yml"
-                  className="hidden"
-                  onChange={(e) =>
-                    setValue("attachments", [
-                      ...attachments,
-                      ...Array.from(e.target.files ?? []),
-                    ])
-                  }
+                      <RichTextEditor
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+
+                      {errors.description && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.description.message}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 />
               </div>
-              {attachments?.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  {attachments?.map((af: File) => (
-                    <div
-                      key={af.name}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-4 py-3"
-                    >
-                      <div
-                        className={`flex items-center gap-3 min-w-0 ${isImage(af) ? "cursor-pointer" : ""}`}
-                        onClick={() => isImage(af) && setPreviewFile(af)}
-                      >
-                        {/* Thumbnail for images, icon for everything else */}
-                        {isImage(af) && URL.createObjectURL(af) ? (
-                          <div className="w-7 h-7 rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden shrink-0">
-                            <img
-                              src={URL.createObjectURL(af)}
-                              alt={af.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-7 h-7 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0">
-                            <FileText
-                              size={13}
-                              className="text-zinc-400 dark:text-zinc-500"
-                            />
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-[12px] font-medium text-black dark:text-zinc-200 truncate">
-                            {af.name}
-                          </p>
-                          <p className="text-[11px] text-black dark:text-zinc-500">
-                            {formatSize(af.size)}
-                          </p>
-                        </div>
+            </div>
+
+            {/* PANEL D: ROUTING & ATTACHMENTS ASSIGNMENT */}
+            <div className=" border border-neutral-400 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950 flex flex-col">
+              <div className="space-y-4">
+                <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center px-5 py-2 gap-1.5 border-b border-zinc-400 dark:border-zinc-900">
+                  <User size={17} />
+                  Assignment &amp; Routing
+                </h3>
+                <div className="px-5 pb-3">
+                  <Controller
+                    name="assignedTo"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <SectionLabel>Assigned Engineer Operator</SectionLabel>
+                        <Select
+                          {...field}
+                          options={memberOptions}
+                          error={errors.assignedTo?.message}
+                        />
                       </div>
-                      {/* <button
+                    )}
+                  />
+                  <div className="pt-2">
+                    <SectionLabel>
+                      Evidence &amp; Media Attachments
+                    </SectionLabel>
+                    <div
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setDragOver(true);
+                      }}
+                      onDragLeave={() => setDragOver(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDragOver(false);
+                        setValue("attachments", [
+                          ...attachments,
+                          ...Array.from(e.dataTransfer.files),
+                        ]);
+                      }}
+                      onClick={() => fileRef.current?.click()}
+                      className={`rounded-md border-2 border-dashed p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                        dragOver
+                          ? "border-emerald-500 bg-emerald-50/20 dark:bg-emerald-500/5"
+                          : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 hover:border-zinc-300 dark:hover:border-zinc-700"
+                      }`}
+                    >
+                      <Upload size={18} className="text-zinc-400 mb-2" />
+                      <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        Drop snapshots or{" "}
+                        <span className="text-IMSLightGreen underline">
+                          browse disk files
+                        </span>
+                      </p>
+                    </div>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      multiple
+                      accept=".png,.jpg,.jpeg,.pdf,.log,.txt,.json,.yaml,.yml"
+                      className="hidden"
+                      onChange={(e) =>
+                        setValue("attachments", [
+                          ...attachments,
+                          ...Array.from(e.target.files ?? []),
+                        ])
+                      }
+                    />
+                  </div>
+                  {attachments?.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      {attachments?.map((af: File) => (
+                        <div
+                          key={af.name}
+                          className="flex items-center justify-between gap-3 rounded-md border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-4 py-3"
+                        >
+                          <div
+                            className={`flex items-center gap-3 min-w-0 ${isImage(af) ? "cursor-pointer" : ""}`}
+                            onClick={() => isImage(af) && setPreviewFile(af)}
+                          >
+                            {/* Thumbnail for images, icon for everything else */}
+                            {isImage(af) && URL.createObjectURL(af) ? (
+                              <div className="w-7 h-7 rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden shrink-0">
+                                <img
+                                  src={URL.createObjectURL(af)}
+                                  alt={af.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-7 h-7 rounded-lg border border-zinc-4000 dark:border-zinc-700 bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                                <FileText
+                                  size={13}
+                                  className="text-zinc-400 dark:text-zinc-500"
+                                />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-[12px] font-medium text-black dark:text-zinc-200 truncate">
+                                {af.name}
+                              </p>
+                              <p className="text-[11px] text-black dark:text-zinc-500">
+                                {formatSize(af.size)}
+                              </p>
+                            </div>
+                          </div>
+                          {/* <button
                   type="button"
                   onClick={() => onRemove(af.name)}
                   className="p-1.5 rounded-lg text-black hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <Trash2 size={13} />
                 </button> */}
-                      {previewFile && (
-                        <div
-                          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
-                          onClick={() => setPreviewFile(null)}
-                        >
-                          <div
-                            className="relative max-w-[90vw] max-h-[90vh]"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <img
-                              src={URL.createObjectURL(af)}
-                              alt={previewFile?.name}
-                              className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl"
-                            />
-                            <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/60 to-transparent rounded-b-xl">
-                              <p className="text-[12px] text-white/90 truncate">
-                                {previewFile?.name}
-                              </p>
-                              <p className="text-[11px] text-white/60">
-                                {formatSize(previewFile?.size)}
-                              </p>
-                            </div>
-                            <button
-                              type="button"
+                          {previewFile && (
+                            <div
+                              className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
                               onClick={() => setPreviewFile(null)}
-                              className="absolute -top-3 -right-3 w-7 h-7 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white hover:bg-zinc-700 transition-colors"
                             >
-                              <X size={13} />
-                            </button>
-                          </div>
+                              <div
+                                className="relative max-w-[90vw] max-h-[90vh]"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <img
+                                  src={URL.createObjectURL(af)}
+                                  alt={previewFile?.name}
+                                  className="max-w-full max-h-[85vh] rounded-md object-contain shadow-2xl"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/60 to-transparent rounded-b-xl">
+                                  <p className="text-[12px] text-white/90 truncate">
+                                    {previewFile?.name}
+                                  </p>
+                                  <p className="text-[11px] text-white/60">
+                                    {formatSize(previewFile?.size)}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewFile(null)}
+                                  className="absolute -top-3 -right-3 w-7 h-7 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white hover:bg-zinc-700 transition-colors"
+                                >
+                                  <X size={13} />
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
+
+                {/* Upload Dropzone Workspace Block */}
+              </div>
             </div>
           </div>
         </div>

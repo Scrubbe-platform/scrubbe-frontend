@@ -11,15 +11,12 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useCurrentUser } from "@/lib/api";
 import { User } from "@/lib/stores/auth.store";
-import Dropdown from "../ui/Dropdown";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { LogOut } from "lucide-react";
+import { LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import useLogout from "@/hooks/useLogout";
 
 const W_COLLAPSED = 64;
 const W_EXPANDED = 280;
 
-// Single transition used everywhere — consistent feel
 const TRANSITION = { duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] };
 
 const Sidebar = () => {
@@ -27,20 +24,19 @@ const Sidebar = () => {
   const { collapse } = useSidebar();
   const [user, setUser] = useState<User | null>();
   const { execute: getUser } = useCurrentUser();
-  const [hovered, setHovered] = useState(false);
-  // showLabels trails hovered so text never clips the closing edge
+  const [expanded, setExpanded] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
   const { handleLogout } = useLogout();
 
   useEffect(() => {
     let t: ReturnType<typeof setTimeout>;
-    if (hovered) {
+    if (expanded) {
       t = setTimeout(() => setShowLabels(true), 60);
     } else {
       setShowLabels(false);
     }
     return () => clearTimeout(t);
-  }, [hovered]);
+  }, [expanded]);
 
   useEffect(() => {
     (async () => {
@@ -51,9 +47,7 @@ const Sidebar = () => {
 
   return (
     <motion.div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      animate={{ width: hovered ? W_EXPANDED : W_COLLAPSED }}
+      animate={{ width: expanded ? W_EXPANDED : W_COLLAPSED }}
       transition={TRANSITION as any}
       className={cn(
         "flex flex-col py-5 overflow-hidden whitespace-nowrap z-40",
@@ -64,8 +58,8 @@ const Sidebar = () => {
         collapse && "hidden",
       )}
     >
-      {/* ── Logo ── */}
-      <div className="h-7 mb-5 overflow-hidden px-3 flex items-center">
+      {/* ── Logo + toggle ── */}
+      <div className="h-7 mb-5 overflow-hidden px-3 flex items-center justify-between">
         <AnimatePresence mode="wait" initial={false}>
           {showLabels ? (
             <motion.div
@@ -74,7 +68,7 @@ const Sidebar = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -6 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="h-7 w-[160px] shrink-0 relative"
+              className="h-7 w-[160px] border-white -ml-4 shrink-0 relative"
             >
               <Image
                 src="/IMS/whitelogo.png"
@@ -84,24 +78,22 @@ const Sidebar = () => {
               />
             </motion.div>
           ) : (
-            <motion.div
-              key="logo-icon"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center justify-center w-8 h-7"
-            >
-              <Image
-                src="/IMS/icons/scrubbe-white-icon.svg"
-                alt="S"
-                height={24}
-                width={24}
-                className="h-6 w-6 object-contain"
-              />
-            </motion.div>
+            <></>
           )}
         </AnimatePresence>
+
+        {/* Toggle button — always visible */}
+        <button
+          onClick={() => setExpanded((p) => !p)}
+          className="shrink-0 flex items-center justify-center w-7 h-7 rounded-md text-white/40 hover:text-white hover:bg-white/10 transition-colors duration-150"
+          title={expanded ? "Collapse sidebar" : "Expand sidebar"}
+        >
+          {expanded ? (
+            <PanelLeftClose size={15} />
+          ) : (
+            <PanelLeftOpen size={15} />
+          )}
+        </button>
       </div>
 
       {/* ── Menu ── */}
@@ -111,7 +103,6 @@ const Sidebar = () => {
             key={key}
             className="flex flex-col gap-0.5 mt-3 w-full border-b border-white/15 pb-3"
           >
-            {/* Section label — fixed height so items don't jump */}
             <div className="h-6 overflow-hidden">
               <motion.p
                 animate={{
@@ -130,7 +121,7 @@ const Sidebar = () => {
                 key={index}
                 item={item}
                 pathname={pathname}
-                expanded={hovered}
+                expanded={expanded}
                 showLabels={showLabels}
               />
             ))}
@@ -138,7 +129,8 @@ const Sidebar = () => {
         ))}
       </div>
 
-      <div className="pl-3 flex items-center gap-2  pt-3 ">
+      {/* ── User ── */}
+      <div className="pl-3 flex items-center gap-2 pt-3">
         <div className="size-8 min-w-8 rounded-full border-2 border-white/40 flex justify-center items-center bg-indigo-500 text-white font-semibold text-sm uppercase">
           {user?.firstName?.slice(0, 2)}
         </div>
@@ -147,12 +139,7 @@ const Sidebar = () => {
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="flex-1 min-w-0 overflow-hidden"
         >
-          <p
-            className={cn(
-              "text-[13px] leading-tight truncate pr-2 capitalize",
-              showLabels ? "text-white font-medium" : "text-zinc-300",
-            )}
-          >
+          <p className="text-[13px] leading-tight truncate pr-2 capitalize text-white font-medium">
             {user?.firstName} {user?.lastName}
           </p>
           <p className="text-[10px] leading-tight text-white/50">
@@ -160,22 +147,19 @@ const Sidebar = () => {
           </p>
         </motion.div>
       </div>
+
+      {/* ── Logout ── */}
       <div
-        className="pl-5 flex items-center gap-2 py-3 mt-4 hover:bg-[#02DD86]/10 dark:hover:bg-white/5 cursor-pointer "
+        className="pl-5 flex items-center gap-2 py-3 mt-4 hover:bg-[#02DD86]/10 dark:hover:bg-white/5 cursor-pointer"
         onClick={handleLogout}
       >
-        <LogOut className="text-white" size={18} />
+        <LogOut className="text-white shrink-0" size={18} />
         <motion.div
           animate={{ opacity: showLabels ? 1 : 0, x: showLabels ? 0 : -4 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="flex-1 min-w-0 overflow-hidden"
         >
-          <p
-            className={cn(
-              "text-[13px] leading-tight truncate pr-2 capitalize",
-              showLabels ? "text-white font-medium" : "text-zinc-300",
-            )}
-          >
+          <p className="text-[13px] leading-tight truncate pr-2 capitalize text-white font-medium">
             Logout
           </p>
         </motion.div>
@@ -207,7 +191,6 @@ const AdminSidebarItem = ({
       <div
         title={!expanded ? item.name : undefined}
         className={cn(
-          // Keep justify-center always — icon stays put, label grows beside it
           "flex items-center justify-center cursor-pointer py-2.5 w-full gap-0",
           "border-l-2 transition-colors duration-150",
           active
@@ -216,16 +199,13 @@ const AdminSidebarItem = ({
           !isDone && "opacity-30 cursor-not-allowed",
         )}
       >
-        {/* Icon — never moves, always centered in the collapsed strip */}
         <div className="w-9 flex items-center justify-center shrink-0">
           <item.Icon size={18} className="shrink-0 text-white" />
         </div>
 
-        {/* Label — clips smoothly as the sidebar width changes */}
         <motion.div
           animate={{ opacity: showLabels ? 1 : 0, x: showLabels ? 0 : -4 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          // flex-1 fills remaining space; overflow-hidden clips text during resize
           className="flex-1 min-w-0 overflow-hidden"
         >
           <p

@@ -36,8 +36,11 @@ export default function HandoverCenterPage() {
   });
 
   const filteredHandovers = useMemo(
-    () => (activeTab === "All" ? handovers : handovers.filter((h) => h.status === activeTab)),
-    [handovers, activeTab]
+    () =>
+      activeTab === "All"
+        ? handovers
+        : handovers.filter((h) => h.status === activeTab),
+    [handovers, activeTab],
   );
 
   const activeIncidentCount = useMemo(
@@ -45,7 +48,7 @@ export default function HandoverCenterPage() {
       handovers
         .filter((h) => h.status === "ACTIVE")
         .reduce((sum, h) => sum + h.incidents.length, 0),
-    [handovers]
+    [handovers],
   );
 
   const columns: ColumnDef<HandoverRecord>[] = [
@@ -53,21 +56,29 @@ export default function HandoverCenterPage() {
       header: "Handover ID",
       accessorKey: "handoverRef",
       cell: ({ row }) => (
-        <div className="font-mono text-xs font-medium text-blue-600">{row.original.handoverRef}</div>
+        <div className="font-mono text-xs font-medium text-blue-600">
+          {row.original.handoverRef}
+        </div>
       ),
     },
     {
       header: "Primary Incident",
       id: "primaryIncident",
       cell: ({ row }) => {
-        const primary = row.original.incidents.find((i) => i.isPrimary) ?? row.original.incidents[0];
+        const primary =
+          row.original.incidents.find((i) => i.isPrimary) ??
+          row.original.incidents[0];
         const extra = row.original.incidents.length - 1;
         if (!primary) {
-          return <div className="text-xs text-stone-400">No linked incidents</div>;
+          return (
+            <div className="text-xs text-stone-400">No linked incidents</div>
+          );
         }
         return (
           <>
-            <div className="font-medium text-stone-900">{primary.incident.summary}</div>
+            <div className="font-medium text-stone-900">
+              {primary.incident.summary}
+            </div>
             <div className="mt-[1px] font-mono text-[11px] text-stone-500">
               {primary.incident.ticketId} {extra > 0 && `+${extra} MORE`}
             </div>
@@ -88,8 +99,11 @@ export default function HandoverCenterPage() {
       header: "Severity",
       id: "severity",
       cell: ({ row }) => {
-        const primary = row.original.incidents.find((i) => i.isPrimary) ?? row.original.incidents[0];
-        const severity = primary?.incident.severity || primary?.incident.priority || "—";
+        const primary =
+          row.original.incidents.find((i) => i.isPrimary) ??
+          row.original.incidents[0];
+        const severity =
+          primary?.incident.severity || primary?.incident.priority || "—";
         const severityStyles: Record<string, string> = {
           CRITICAL: "text-red-600",
           HIGH: "text-amber-600",
@@ -97,7 +111,11 @@ export default function HandoverCenterPage() {
           LOW: "text-green-600",
         };
         return (
-          <span className={`text-xs font-semibold ${severityStyles[severity] || "text-stone-500"}`}>{severity}</span>
+          <span
+            className={`text-xs font-semibold ${severityStyles[severity] || "text-stone-500"}`}
+          >
+            {severity}
+          </span>
         );
       },
     },
@@ -127,7 +145,9 @@ export default function HandoverCenterPage() {
       header: "Owner",
       accessorKey: "currentOwnerLabel",
       cell: ({ getValue }) => (
-        <span className="text-[13px] text-stone-800 whitespace-nowrap">{getValue<string>()}</span>
+        <span className="text-[13px] text-stone-800 whitespace-nowrap">
+          {getValue<string>()}
+        </span>
       ),
     },
     {
@@ -147,7 +167,7 @@ export default function HandoverCenterPage() {
   ];
 
   return (
-    <main className="flex min-h-screen flex-1 flex-col bg-white dark:bg-transparent">
+    <main className="flex min-h-screen max-w-[1600px] mx-auto flex-1 flex-col dark:bg-transparent">
       <Topbar activeIncidents={activeIncidentCount} />
 
       <div className="flex-1 p-7">
@@ -163,7 +183,11 @@ export default function HandoverCenterPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button size="sm" variant="outline-dark" onClick={() => setScheduleModalOpen(true)}>
+            <Button
+              size="sm"
+              variant="outline-dark"
+              onClick={() => setScheduleModalOpen(true)}
+            >
               Scheduled
             </Button>
             <Button size="sm" onClick={() => setCreateModalOpen(true)}>
@@ -177,7 +201,9 @@ export default function HandoverCenterPage() {
           {STATUS_TABS.map((tab) => {
             const isActive = activeTab === tab.value;
             const count =
-              tab.value === "All" ? handovers.length : handovers.filter((h) => h.status === tab.value).length;
+              tab.value === "All"
+                ? handovers.length
+                : handovers.filter((h) => h.status === tab.value).length;
 
             return (
               <div
@@ -207,14 +233,20 @@ export default function HandoverCenterPage() {
         {/* Table */}
         <div className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
           {isLoading ? (
-            <div className="p-8 text-center text-sm text-stone-400">Loading handovers…</div>
+            <div className="p-8 text-center text-sm text-stone-400">
+              Loading handovers…
+            </div>
           ) : filteredHandovers.length === 0 ? (
-            <div className="p-8 text-center text-sm text-stone-400">No handovers in this view.</div>
+            <div className="p-8 text-center text-sm text-stone-400">
+              No handovers in this view.
+            </div>
           ) : (
             <Table
               data={filteredHandovers}
               columns={columns}
-              onRowClick={(value) => router.push(`/incident/handover/${value.id}`)}
+              onRowClick={(value) =>
+                router.push(`/incident/handover/${value.id}`)
+              }
             />
           )}
         </div>
@@ -230,10 +262,15 @@ export default function HandoverCenterPage() {
       <CreateHandoverModal
         isOpen={isCreateModalOpen}
         onClose={() => setCreateModalOpen(false)}
-        onCreated={() => queryClient.invalidateQueries({ queryKey: ["handovers"] })}
+        onCreated={() =>
+          queryClient.invalidateQueries({ queryKey: ["handovers"] })
+        }
       />
 
-      <ManageSchedulesModal isOpen={isScheduleModalOpen} onClose={() => setScheduleModalOpen(false)} />
+      <ManageSchedulesModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setScheduleModalOpen(false)}
+      />
     </main>
   );
 }

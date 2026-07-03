@@ -46,7 +46,7 @@ export default function Topbar({ activeIncidents = 0 }: TopbarProps) {
   };
 
   return (
-    <div className="flex items-center justify-between px-8 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 sticky top-0 z-50">
+    <div className="flex items-center justify-between px-8 py-3 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-50">
       {/* Breadcrumbs Left */}
       <div className="flex items-center gap-1.5 text-[13px] text-zinc-400 dark:text-zinc-500">
         <span>Operations</span>

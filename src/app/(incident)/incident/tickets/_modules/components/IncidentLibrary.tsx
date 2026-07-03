@@ -277,7 +277,7 @@ export default function IncidentLibraryPage() {
         <Button
           size="sm"
           leftIcon={<Plus size={14} />}
-          onClick={() => alert("Raise Incident")}
+          onClick={() => router.push("/incident/tickets/create")}
         >
           Raise Incident
         </Button>
@@ -521,11 +521,6 @@ export default function IncidentLibraryPage() {
                                 setActiveModal({ type: "replay", payload: i }),
                             },
 
-                            {
-                              label: "Add to compare",
-                              value: "compare",
-                              onClick: () => setActiveId(i.id),
-                            },
                             {
                               label: "Generate RCA",
                               value: "rca",

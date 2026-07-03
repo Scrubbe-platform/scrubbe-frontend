@@ -16,6 +16,7 @@ import { useIncidentWorkspace } from "@/hooks/useIncidentWorkspace";
 import IncidentDetailSkeleton from "@/components/loaders/incidentDetailLoader";
 import Image from "next/image";
 import IncidentUpdatePage from "./IncidentUpdatePage";
+import Link from "next/link";
 
 type Props = {
   children?: React.ReactNode;
@@ -43,18 +44,6 @@ const IncidentOverview = ({ children, tabs }: Props) => {
   return (
     <div className="flex h-screen dark:text-slate-300 text-black font-sans overflow-hidden">
       {/* ── Sidebar ── */}
-      {tabs !== "overview" && (
-        <aside
-          className={cn(
-            "md:border-r border-white/5 flex flex-col h-full shrink-0",
-            "md:w-[350px] md:flex",
-            // on mobile: hide sidebar when something is selected or loading
-            showMainPanel || isSelectionLoading ? "hidden" : "w-full flex",
-          )}
-        >
-          <ExactIncidentSidebar />
-        </aside>
-      )}
 
       {/* ── Main panel — skeleton, content, or empty state ── */}
       <main
@@ -92,7 +81,7 @@ const IncidentOverview = ({ children, tabs }: Props) => {
 
                 {/* Lifecycle ribbon — visible across every incident-context tab, not just overview */}
 
-                <div className="border border-neutral-500">
+                <div className="border border-neutral-300">
                   {tabs === "overview" ? (
                     <>
                       <IncidentLifecycle incident={selectedIncident} />
@@ -145,9 +134,15 @@ const IncidentOverview = ({ children, tabs }: Props) => {
                 Select an incident or Create a new Incident to open a live
                 workspace
               </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-400">
+              <p className="mt-3 text-sm leading-2 text-slate-400">
                 The workspace only appears when a real incident is selected. Use
-                the sidebar to browse current incidents or raise a new one.
+                the sidebar to browse current incidents or raise a new one.{" "}
+                <Link
+                  href="/incident/tickets"
+                  className="text-IMSLightGreen font-semibold hover:underline"
+                >
+                  Go to incident library.
+                </Link>
               </p>
             </div>
           </div>
