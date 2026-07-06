@@ -872,13 +872,6 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
             <div className="px-5 py-5 border-t border-gray-100 space-y-3">
               <Link
-                href="/docs"
-                onClick={onClose}
-                className="block w-full text-center py-3 rounded-xl text-[14px] font-bold text-emerald-600 border border-emerald-500 hover:bg-emerald-50 transition-colors"
-              >
-                Docs
-              </Link>
-              <Link
                 href="/auth/signin"
                 onClick={onClose}
                 className="block w-full text-center py-3 rounded-xl text-[14px] font-bold text-white border-none"
@@ -925,12 +918,6 @@ export default function Navbar() {
           </div>
 
           <div className="hidden xl:flex items-center gap-3 ml-auto">
-            <Link
-              href="/docs"
-              className="px-5 py-2 rounded-lg text-[13.5px] font-bold text-emerald-600 border border-emerald-500 hover:bg-emerald-50 transition-colors"
-            >
-              Docs
-            </Link>
             <Link
               href="/auth/signin"
               className="px-5 py-2.5 rounded-lg text-[13.5px] font-bold text-white border-none hover:brightness-110 transition-all"
