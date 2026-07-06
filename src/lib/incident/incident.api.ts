@@ -189,6 +189,10 @@ export const fetchIncidentHistory = async (incidentId: string) => {
   return extractIncidentHistoryResponse(response.data);
 };
 
+export const deleteIncident = async (incidentId: string) => {
+  await customAxios.delete(`${endpoint.incident_ticket.update}/${incidentId}`);
+};
+
 export const fetchIncidentComments = async (incidentId: string) => {
   const response = await customAxios.get(
     `${endpoint.incident_ticket.get_comment}/${incidentId}`

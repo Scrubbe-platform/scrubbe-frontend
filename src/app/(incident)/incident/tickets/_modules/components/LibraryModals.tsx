@@ -584,11 +584,13 @@ export function CompareModal({
   incidentIds,
   allData,
   onClose,
+  onGenerateRca,
 }: {
   isOpen: boolean;
   incidentIds: string[];
   allData: IncidentListItem[];
   onClose: () => void;
+  onGenerateRca?: (ids: string[]) => void;
 }) {
   if (!isOpen || !incidentIds || incidentIds.length < 2) return null;
 
@@ -719,7 +721,10 @@ export function CompareModal({
 
         {/* Footer */}
         <div className="px-6 py-4 flex justify-end border-t border-zinc-100">
-          <button className="h-9 px-5 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-700 transition-colors">
+          <button
+            onClick={() => { onGenerateRca?.(incidentIds); onClose(); }}
+            className="h-9 px-5 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-700 transition-colors"
+          >
             Generate comparative RCA
           </button>
         </div>

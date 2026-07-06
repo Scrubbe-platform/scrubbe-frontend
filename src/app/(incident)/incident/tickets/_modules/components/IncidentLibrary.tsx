@@ -4,20 +4,16 @@
 import React, { useState, useMemo } from "react";
 import {
   Search,
-  SlidersHorizontal,
-  Layers,
   Download,
   BarChart3,
   Sparkles,
-  RefreshCw,
-  X,
-  FileText,
-  Check,
-  Trash2,
-  ShieldAlert,
   Plus,
 } from "lucide-react";
 import { IncidentListItem } from "@/lib/incident/incident.types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteIncident } from "@/lib/incident/incident.api";
+import { querykeys } from "@/lib/constant";
+import toast from "react-hot-toast";
 
 // Import modular layouts compiled below
 import KpiStrip from "./KpiStrip";
@@ -62,6 +58,17 @@ export default function IncidentLibraryPage() {
 
   const { data, isLoading } = useIncidentList();
   const incidents = data?.incidents ?? [];
+  const queryClient = useQueryClient();
+
+  const archiveMutation = useMutation({
+    mutationFn: (id: string) => deleteIncident(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [querykeys.INCIDENT_TICKET] });
+      setSelectedIds(new Set());
+      toast.success("Incident archived");
+    },
+    onError: () => toast.error("Failed to archive incident"),
+  });
   // 2. Selection & Filter Toggles
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -259,7 +266,15 @@ export default function IncidentLibraryPage() {
 
   const handleAssign = () => {};
   const handleMerge = () => {};
-  const handleArchive = () => {};
+  const handleArchive = () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Archive ${selectedIds.size} incident(s)? This cannot be undone.`)) return;
+    Promise.all(Array.from(selectedIds).map((id) => archiveMutation.mutateAsync(id))).catch(() => {});
+  };
+  const handleArchiveSingle = (id: string) => {
+    if (!confirm("Archive this incident? This cannot be undone.")) return;
+    archiveMutation.mutate(id);
+  };
   return (
     <main className="p-4 sm:p-6 pb-24 max-w-[1600px] mx-auto space-y-6 font-ibm">
       {/* Page Title Context Header Row */}
@@ -534,7 +549,7 @@ export default function IncidentLibraryPage() {
                             {
                               label: "Archive",
                               value: "archive",
-                              onClick: () => handleArchive(),
+                              onClick: () => handleArchiveSingle(i.id),
                             },
                           ]}
                         />
@@ -650,6 +665,7 @@ export default function IncidentLibraryPage() {
         incidentIds={activeModal.payload}
         allData={incidents}
         onClose={() => setActiveModal({ type: null })}
+        onGenerateRca={(ids) => setActiveModal({ type: "doc", kind: "rca", payload: ids })}
       />
       <TrendsModal
         isOpen={activeModal.type === "trends"}
