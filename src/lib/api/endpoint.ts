@@ -56,6 +56,7 @@ export const endpoint = {
     gitlab_projects: "/integrations/gitlab/projects",
     github_repos: "/integrations/github/repos",
     bitbucket_repos: "/integrations/bitbucket/repos",
+    qa: "/incident-ticket",              // POST /incident-ticket/:id/qa  GET /incident-ticket/:id/qa
     postmorterm: {
       five_why: "/incident-ticket/resolve/ai/five-whys",
       suggestion: "/incident-ticket/resolve/ai/suggestion",

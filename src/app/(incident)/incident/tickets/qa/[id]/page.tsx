@@ -28,6 +28,10 @@ import { FaBoltLightning } from "react-icons/fa6";
 import { TbBolt, TbMessageDots } from "react-icons/tb";
 import { HiMiniSparkles } from "react-icons/hi2";
 import ValidationLoadingModal from "./_modules/component/modal/ValidationLoadingModal";
+import { useParams } from "next/navigation";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 
 // ─── STATIC CONSTANTS & DICTIONARIES DIRECT FROM THE BLUEPRINT ───
 const SERVICES = [
@@ -363,6 +367,21 @@ const PLAYBOOK_STEPS_REGISTRY: Record<string, Array<[string, string]>> = {
   ],
 };
 
+// Priority helpers — map between IQA's P0-P3 and the server's CRITICAL/HIGH/MEDIUM/LOW
+const serverPriorityToP = (p?: string): string | null => {
+  const map: Record<string, string> = { CRITICAL: "P0", HIGH: "P1", MEDIUM: "P2", LOW: "P3" };
+  return map[(p ?? "").toUpperCase()] ?? null;
+};
+const pToServerPriority = (p?: string | null): string => {
+  const map: Record<string, string> = { P0: "CRITICAL", P1: "HIGH", P2: "MEDIUM", P3: "LOW" };
+  return map[p ?? ""] ?? "MEDIUM";
+};
+const mapSourceToEnum = (s: string): string => {
+  const upper = s.toUpperCase();
+  if (upper === "API" || upper === "WEBHOOK") return upper;
+  return "MANUAL";
+};
+
 export default function CompleteIncidentQualityAssurancePage() {
   // ─── STATE MANAGEMENT HOOKS ───
   const [title, setTitle] = useState("");
@@ -407,6 +426,62 @@ export default function CompleteIncidentQualityAssurancePage() {
   const [isPlaybookRunning, setIsPlaybookRunning] = useState(false);
 
   const ezraLogRef = useRef<HTMLDivElement>(null);
+
+  // ─── DATA FETCHING ───
+  const params = useParams<{ id: string }>();
+  const ticketId = params?.id;
+  const { get, post } = useFetch();
+
+  const { data: existingIncidentResp } = useQuery({
+    queryKey: ["incident", ticketId],
+    queryFn: () => get(`${endpoint.incident_ticket.get}/${ticketId}`),
+    enabled: !!ticketId && ticketId !== "new",
+    staleTime: 5 * 60_000,
+  });
+
+  const { data: recentIncidentsResp } = useQuery({
+    queryKey: ["iqa-recent-incidents"],
+    queryFn: () => get(`${endpoint.incident_ticket.get}?limit=20&page=1`),
+    staleTime: 2 * 60_000,
+  });
+
+  const liveIncidents = useMemo(() => {
+    const list: any[] = recentIncidentsResp?.data?.incidents ?? [];
+    return list
+      .filter((t: any) => t.ticketId !== ticketId && t.id !== ticketId)
+      .map((t: any) => ({
+        id: t.ticketId ?? t.id,
+        title: t.summary ?? "",
+        service: t.affectedSystem ?? "",
+        cat: t.category ?? "Unknown",
+        prio: serverPriorityToP(t.priority) ?? "P3",
+        tags: Array.isArray(t.labels) ? t.labels : [],
+      }));
+  }, [recentIncidentsResp, ticketId]);
+
+  const createMutation = useMutation({
+    mutationFn: (body: Record<string, any>) =>
+      post(endpoint.incident_ticket.create, body),
+  });
+
+  const saveQAMutation = useMutation({
+    mutationFn: ({ id, body }: { id: string; body: Record<string, any> }) =>
+      post(`${endpoint.incident_ticket.qa}/${id}/qa`, body),
+  });
+
+  // Pre-fill form when loaded by existing incident ID
+  useEffect(() => {
+    const t = existingIncidentResp?.data;
+    if (!t) return;
+    setTitle(t.summary ?? "");
+    const p = serverPriorityToP(t.priority);
+    if (p) setPriority(p);
+    setService(t.affectedSystem ?? "");
+    setEnv(t.environment ?? "");
+    setSource(t.sourceType ?? "");
+    setDesc(t.description ?? t.techDescription ?? "");
+    if (Array.isArray(t.labels) && t.labels.length) setTags(t.labels);
+  }, [existingIncidentResp]);
 
   // ─── DEFINED EXPLICIT HELPERS ───
   const addToast = (toastTitle: string, sub?: string) => {
@@ -688,16 +763,17 @@ export default function CompleteIncidentQualityAssurancePage() {
     };
   }, [title, service, attach, priority, customerImpactDetected, textContext]);
 
-  // Similar Incidents Scanning Engine
+  // Similar Incidents Scanning Engine — uses real incidents from API, falls back to [] when loading
   const similarHistory = useMemo(() => {
-    return HIST.map((h) => {
+    const source = liveIncidents;
+    return source.map((h) => {
       let matchScore = 0;
       if (h.service === service) matchScore += 42;
       if (h.cat === categoryDetected && categoryDetected !== "Unknown")
         matchScore += 30;
-      const sharedTagsCount = h.tags.filter((tg) => tags.includes(tg)).length;
+      const sharedTagsCount = h.tags.filter((tg: string) => tags.includes(tg)).length;
       matchScore += sharedTagsCount * 10;
-      h.tags.forEach((tg) => {
+      h.tags.forEach((tg: string) => {
         if (textContext.includes(tg)) matchScore += 4;
       });
       if (
@@ -705,7 +781,7 @@ export default function CompleteIncidentQualityAssurancePage() {
         h.title
           .toLowerCase()
           .split(" ")
-          .some((w) => w.length > 4 && textContext.includes(w))
+          .some((w: string) => w.length > 4 && textContext.includes(w))
       )
         matchScore += 6;
       return { ...h, m: Math.min(98, matchScore) };
@@ -713,7 +789,7 @@ export default function CompleteIncidentQualityAssurancePage() {
       .filter((h) => h.m > 20)
       .sort((a, b) => b.m - a.m)
       .slice(0, 3);
-  }, [service, categoryDetected, tags, textContext, title]);
+  }, [service, categoryDetected, tags, textContext, title, liveIncidents]);
 
   // Validation Checklist Matrix (11 rules)
   const checklistRules = useMemo(() => {
@@ -926,40 +1002,52 @@ export default function CompleteIncidentQualityAssurancePage() {
     warRoom,
   ]);
 
-  // AI findings list constructor
+  // AI findings list constructor — computed from real form state, no hardcoded values
   const aiFindingsList = useMemo(() => {
     return [
       {
         key: "deploy",
         label: "AI detected deployment",
-        status: "verified",
-        detail: "Release v4.2.1 correlated to the impact window (±6 min).",
+        status: deploymentDetected ? "verified" : ("evidence-missing" as string),
+        detail: deploymentDetected
+          ? `Deployment activity correlated to the impact window for ${service || "the affected service"}.`
+          : "No deployment signal detected in the incident window.",
       },
       {
         key: "impact",
         label: "AI detected customer impact",
-        status: verified.impact ? "verified" : "evidence-missing",
+        status: verified.impact ? "verified" : ("evidence-missing" as string),
         detail: verified.impact
           ? "Customer-impact evidence attached and confirmed."
-          : "Asserted from error rate, but no customer-facing evidence attached.",
+          : customerImpactDetected
+          ? `Customer impact inferred from signals on ${service || "the affected service"} — no explicit evidence attached.`
+          : "No customer impact detected from current signals.",
       },
       {
         key: "rollback",
         label: "AI detected rollback candidate",
-        status: verified.rollback ? "verified" : "confidence",
-        conf: 62,
+        status: verified.rollback ? "verified" : ("confidence" as string),
+        conf: categoryDetected === "Code Regression" ? 62 : 38,
         detail: verified.rollback
-          ? "Rollback to v4.2.0 confirmed by engineer."
-          : "Rollback to v4.2.0 proposed — more evidence required.",
+          ? "Rollback candidate confirmed by engineer."
+          : categoryDetected === "Code Regression"
+          ? `Rollback candidate proposed for ${service || "the affected service"} — more evidence required.`
+          : "Rollback confidence is low — incident category is not Code Regression.",
       },
       {
         key: "alert",
         label: "AI matched alert to incident",
-        status: "verified",
-        detail: "Monitoring alert “checkout-5xx” matches the reported symptom.",
+        status:
+          source === "Monitoring" || source === "Observability"
+            ? "verified"
+            : ("evidence-missing" as string),
+        detail:
+          source === "Monitoring" || source === "Observability"
+            ? `Monitoring alert matches the reported symptom on ${service || "the affected service"}.`
+            : "No monitoring alert confirmed — incident source is not from a monitoring system.",
       },
     ];
-  }, [verified]);
+  }, [verified, deploymentDetected, customerImpactDetected, categoryDetected, service, source]);
 
   // ─── ACTION DRIVERS ───
   const handleAutoRaise = () => {
@@ -1029,7 +1117,7 @@ export default function CompleteIncidentQualityAssurancePage() {
     executeIncidentRaiseSubmit();
   };
 
-  const executeIncidentRaiseSubmit = () => {
+  const executeIncidentRaiseSubmit = async () => {
     if (missingMandatoryFields.length > 0) {
       addToast(
         "Prerequisite fields needed",
@@ -1040,9 +1128,57 @@ export default function CompleteIncidentQualityAssurancePage() {
       else setFocusField("service");
       return;
     }
-    setSubmittedId("SI-1042" + String(100 + Math.floor(Math.random() * 899)));
-    setIsSubmitted(true);
-    setActiveEngineStep(0);
+
+    setIsLoading(true);
+
+    try {
+      let finalId = ticketId && ticketId !== "new" ? ticketId : null;
+
+      if (!finalId) {
+        // Create the incident
+        const payload = {
+          summary: title,
+          priority: pToServerPriority(priority),
+          description: desc,
+          techDescription: desc,
+          affectedSystem: service,
+          environment: env,
+          source: mapSourceToEnum(source),
+          sourceType: "MANUAL",
+          category:
+            categoryDetected !== "Unknown" ? categoryDetected : undefined,
+          labels: tags,
+        };
+        const result = await createMutation.mutateAsync(payload);
+        finalId = (result as any)?.data?.id ?? (result as any)?.data?.ticketId ?? null;
+      }
+
+      if (finalId) {
+        // Persist the QA review
+        await saveQAMutation.mutateAsync({
+          id: finalId,
+          body: {
+            score: iqaVerdict.score,
+            verdict: iqaVerdict.state,
+            policyLevel: policyRules.level,
+            checklist: checklistRules.map((c) => ({
+              k: c.k,
+              ok: c.ok,
+              note: c.note || "",
+            })),
+            missingFields: missingMandatoryFields,
+          },
+        });
+      }
+
+      setSubmittedId(finalId ?? "");
+      setIsSubmitted(true);
+      setActiveEngineStep(0);
+    } catch {
+      addToast("Submit failed", "Unable to raise incident — please try again");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const runPlaybookMacro = () => {
