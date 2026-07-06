@@ -10,10 +10,14 @@ interface KpiStripProps {
 export default function KpiStrip({ incidents, onKpiFilter }: KpiStripProps) {
   const total = incidents.length;
   const openCount = incidents.filter((i) =>
-    ["Investigating", "Monitoring"].includes(i.status),
+    ["Investigating", "Monitoring", "OPEN", "Open", "Investigation", "INVESTIGATION"].includes(i.status),
   ).length;
-  const p0Count = incidents.filter((i) => i.priority === "P0").length;
-  const p1Count = incidents.filter((i) => i.priority === "P1").length;
+  const resolvedCount = incidents.filter((i) =>
+    ["Resolved", "RESOLVED", "Closed", "CLOSED"].includes(i.status),
+  ).length;
+  const majorCount = incidents.filter(
+    (i) => i.priority === "CRITICAL" || i.priority === "P0" || i.priority === "P1" || i.priority === "HIGH",
+  ).length;
 
   const resolvedArr = incidents.filter((i) => i.MTTR > 0).map((i) => i.MTTR);
   const avgMttr = resolvedArr.length
@@ -23,7 +27,7 @@ export default function KpiStrip({ incidents, onKpiFilter }: KpiStripProps) {
   const cards = [
     {
       label: "Total Incidents",
-      val: "12,847",
+      val: String(total),
     },
     {
       label: "Open",
@@ -31,19 +35,19 @@ export default function KpiStrip({ incidents, onKpiFilter }: KpiStripProps) {
     },
     {
       label: "Resolved",
-      val: String(p0Count),
+      val: String(resolvedCount),
     },
     {
       label: "Major Incidents",
-      val: String(p1Count),
+      val: String(majorCount),
     },
     {
       label: "Average MTTR",
       val: `${avgMttr}m`,
     },
     {
-      label: "Knowledge Articles",
-      val: "641",
+      label: "P0 Critical",
+      val: String(incidents.filter((i) => i.priority === "CRITICAL" || i.priority === "P0").length),
     },
   ];
 

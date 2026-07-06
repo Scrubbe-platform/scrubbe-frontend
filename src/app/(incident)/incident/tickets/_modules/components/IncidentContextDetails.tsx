@@ -73,21 +73,23 @@ export default function IncidentContextDetails({
           </div>
 
           {/* Primary Signals Section */}
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-semibold uppercase text-zinc-400 dark:text-zinc-500">
-              Primary Signals
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {["Deployment", "DB saturation", "5xx surge"].map((signal) => (
-                <span
-                  key={signal}
-                  className="px-2.5 py-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-700 dark:text-zinc-300 font-medium font-mono text-[10px] shadow-3xs"
-                >
-                  {signal}
-                </span>
-              ))}
+          {activeData?.source && (
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-semibold uppercase text-zinc-400 dark:text-zinc-500">
+                Primary Signals
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {activeData.source.split(/[,;|]+/).map((signal) => signal.trim()).filter(Boolean).map((signal) => (
+                  <span
+                    key={signal}
+                    className="px-2.5 py-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-700 dark:text-zinc-300 font-medium font-mono text-[10px] shadow-3xs"
+                  >
+                    {signal}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Similar Incidents Section */}
 
@@ -116,15 +118,16 @@ export default function IncidentContextDetails({
           </div>
 
           {/* Lessons Learned Section */}
-          <div className="space-y-1">
-            <span className="text-[10px] font-semibold uppercase text-zinc-400 dark:text-zinc-500">
-              Lessons Learned
-            </span>
-            <p className="text-zinc-500 dark:text-zinc-400 font-normal leading-relaxed">
-              Pre-scale ahead of known traffic events; tune autoscaling
-              headroom.
-            </p>
-          </div>
+          {activeData?.summary && (
+            <div className="space-y-1">
+              <span className="text-[10px] font-semibold uppercase text-zinc-400 dark:text-zinc-500">
+                Summary
+              </span>
+              <p className="text-zinc-500 dark:text-zinc-400 font-normal leading-relaxed">
+                {activeData.summary}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
