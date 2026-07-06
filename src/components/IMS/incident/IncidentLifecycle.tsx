@@ -15,6 +15,7 @@ import {
   closeIncident,
 } from "@/lib/incident/incident.api";
 import { querykeys } from "@/lib/constant";
+import { CiWavePulse1 } from "react-icons/ci";
 
 // --- Types ---
 
@@ -198,66 +199,75 @@ export default function IncidentLifecycleManager({ incident }: Props) {
       {/* ─────────────────────────────────────────────────────────────────
           RIBBON STEP TRACKER (Top Component)
           ───────────────────────────────────────────────────────────────── */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <p className="text-[11px] font-mono font-bold tracking-[0.15em] text-black dark:text-slate-500 uppercase">
-            Incident Lifecycle
-          </p>
-          <div className="w-[70%] h-0.5 bg-zinc-200 " />
-        </div>
+      <div className="flex flex-row justify-between items-center gap-2">
+        <div className="space-y-4 w-full">
+          <div className="flex items-center gap-3">
+            <p className="text-[11px] font-mono font-bold tracking-[0.15em] text-black dark:text-slate-500 uppercase">
+              Incident Lifecycle
+            </p>
+            <div className="w-[70%] h-0.5 bg-zinc-200 " />
+          </div>
 
-        {/* Scrollable Ribbon Wrapper */}
-        <div className="overflow-x-auto no-scrollbar dark:border-white/5 rounded-sm bg-transparent dark:bg-[#0b1329]">
-          <div className="flex w-full max-w-2xl h-[50px] bg-transparent">
-            {TICKET_STATUS_CONFIG.map((stage, idx) => {
-              const isCompleted = idx < activeIndex;
-              const isCurrent = idx === activeIndex;
-              const isPending = idx > activeIndex;
+          {/* Scrollable Ribbon Wrapper */}
+          <div className="overflow-x-auto no-scrollbar dark:border-white/5 rounded-sm bg-transparent dark:bg-[#0b1329]">
+            <div className="flex w-full max-w-2xl h-[50px] bg-transparent">
+              {TICKET_STATUS_CONFIG.map((stage, idx) => {
+                const isCompleted = idx < activeIndex;
+                const isCurrent = idx === activeIndex;
+                const isPending = idx > activeIndex;
 
-              return (
-                <div
-                  key={stage.label}
-                  style={{ zIndex: TICKET_STATUS_CONFIG.length + idx }}
-                  className={cn(
-                    "relative flex-1 flex flex-col justify-center pl-8 pr-4 h-full transition-all duration-300",
-                    "clip-path-chevron",
-                    isCompleted && stage.ribbonDone,
-                    isCurrent && stage.ribbonActive,
-                    isPending &&
-                      "bg-zinc-200 dark:bg-[#0e172e] text-zinc-500 dark:text-slate-600",
-                  )}
-                >
-                  <div className="flex items-center gap-2.5">
-                    {/* Status Node Indicators */}
+                return (
+                  <div
+                    key={stage.label}
+                    style={{ zIndex: TICKET_STATUS_CONFIG.length + idx }}
+                    className={cn(
+                      "relative flex-1 flex flex-col justify-center pl-8 pr-4 h-full transition-all duration-300",
+                      "clip-path-chevron",
+                      isCompleted && stage.ribbonDone,
+                      isCurrent && stage.ribbonActive,
+                      isPending &&
+                        "bg-zinc-200 dark:bg-[#0e172e] text-zinc-500 dark:text-slate-600",
+                    )}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      {/* Status Node Indicators */}
 
-                    <div className="flex flex-col select-none">
-                      <div className="flex items-center  gap-2">
-                        <div className="shrink-0 flex items-center justify-center">
-                          {isCompleted ? (
-                            <Check
-                              size={12}
-                              strokeWidth={3}
-                              className={stage.textColor}
-                            />
-                          ) : isCurrent ? (
-                            <div className="w-1.5 h-1.5 rounded-full bg-current" />
-                          ) : (
-                            <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-slate-700" />
-                          )}
+                      <div className="flex flex-col select-none">
+                        <div className="flex items-center  gap-2">
+                          <div className="shrink-0 flex items-center justify-center">
+                            {isCompleted ? (
+                              <Check
+                                size={12}
+                                strokeWidth={3}
+                                className={stage.textColor}
+                              />
+                            ) : isCurrent ? (
+                              <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                            ) : (
+                              <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-slate-700" />
+                            )}
+                          </div>
+                          <span className="text-[9px] font-mono font-bold tracking-wider opacity-60 uppercase">
+                            Stage {stage.id}
+                          </span>
                         </div>
-                        <span className="text-[9px] font-mono font-bold tracking-wider opacity-60 uppercase">
-                          Stage {stage.id}
+                        <span className="text-[10px] font-bold tracking-tight uppercase">
+                          {stage.label}
                         </span>
                       </div>
-                      <span className="text-[10px] font-bold tracking-tight uppercase">
-                        {stage.label}
-                      </span>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
+        </div>
+
+        <div
+          onClick={() => router.push(`/incident/tickets/qa/${incident.id}`)}
+          className="size-10 flex justify-center items-center rounded-full bg-black shadow-lg shadow-zinc-200 cursor-pointer"
+        >
+          <CiWavePulse1 size={22} className="text-white stroke-2" />
         </div>
       </div>
 

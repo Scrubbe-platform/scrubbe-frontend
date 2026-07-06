@@ -27,6 +27,7 @@ import Button from "@/components/ui/Button1";
 import { FaBoltLightning } from "react-icons/fa6";
 import { TbBolt, TbMessageDots } from "react-icons/tb";
 import { HiMiniSparkles } from "react-icons/hi2";
+import ValidationLoadingModal from "./_modules/component/modal/ValidationLoadingModal";
 
 // ─── STATIC CONSTANTS & DICTIONARIES DIRECT FROM THE BLUEPRINT ───
 const SERVICES = [
@@ -398,6 +399,7 @@ export default function CompleteIncidentQualityAssurancePage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedId, setSubmittedId] = useState("");
   const [activeEngineStep, setActiveEngineStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Playbook Simulation Overlay States
   const [playbookName, setPlaybookName] = useState<string | null>(null);
@@ -1043,6 +1045,11 @@ export default function CompleteIncidentQualityAssurancePage() {
     setActiveEngineStep(0);
   };
 
+  const runPlaybookMacro = () => {
+    setIsPlaybookRunning(true);
+    setPlaybookStep(0);
+  };
+
   // Ticking effect for post-submit logs pipeline
   useEffect(() => {
     if (isSubmitted && activeEngineStep < POST_SUBMIT.length) {
@@ -1068,6 +1075,7 @@ export default function CompleteIncidentQualityAssurancePage() {
     }
   }, [isPlaybookRunning, playbookStep, playbookName]);
 
+  const handleAskEzraLog = (value: any) => {};
   const svgCircumference = 326.7;
   const strokeDashoffset = svgCircumference * (1 - iqaVerdict.score / 100);
   const activeGuide = GUIDE[focusField] || GUIDE.title;
@@ -1102,7 +1110,7 @@ export default function CompleteIncidentQualityAssurancePage() {
                   <div className="flex h-fit gap-2">
                     <Button
                       type="button"
-                      onClick={() => {}}
+                      onClick={handleAutoRaise}
                       variant="outline-dark"
                       size="sm"
                       leftIcon={<TbBolt size={13} />}
@@ -1191,7 +1199,7 @@ export default function CompleteIncidentQualityAssurancePage() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. Checkout API returning HTTP 503 for all users"
-                      className="inp h-8 px-3 text-[11px] border outline-none w-full rounded-md"
+                      className="inp h-8 px-3 text-[11px] border outline-none w-full rounded-md bg-white"
                     />
                     <div className="mt-1.5 text-[11px] text-zinc-300">
                       A concise summary of the problem — symptom, system, and
@@ -1357,14 +1365,14 @@ export default function CompleteIncidentQualityAssurancePage() {
                       value={desc}
                       onChange={(e) => setDesc(e.target.value)}
                       placeholder="Describe visible symptoms, what changed recently, what you have checked..."
-                      className="inp p-3 text-xs outline-none border resize-y bg-white text-zinc-800 leading-relaxed font-medium w-full rounded-md"
+                      className="inp p-3 text-xs outline-none border resize-y bg-white text-zinc-800 leading-relaxed font-medium w-full rounded-lg"
                     />
                     <div className="mt-1.5 flex justify-between items-center text-[10px] text-zinc-400 ">
                       <span>
                         Coverage of the six questions appears in the coach
                       </span>
                       <span className="tnum font-bold">
-                        {desc.length} words
+                        {desc?.length} words
                       </span>
                     </div>
                   </div>
@@ -1387,7 +1395,7 @@ export default function CompleteIncidentQualityAssurancePage() {
                     <select
                       value={entry}
                       onChange={(e) => setEntry(e.target.value)}
-                      className="inp h-10 px-2.5 bg-white border text-xs font-semibold outline-none cursor-pointer w-full rounded-md"
+                      className="inp h-10 px-2.5 bg-white border border-zinc-200 focus:border-indigo-500 text-xs font-semibold outline-none cursor-pointer w-full rounded-lg"
                     >
                       {ENTRY_TYPES.map((type) => (
                         <option key={type} value={type}>
@@ -1453,7 +1461,7 @@ export default function CompleteIncidentQualityAssurancePage() {
                         onChange={(e) => setTagInput(e.target.value)}
                         onKeyDown={handleCustomAddTagSubmit}
                         placeholder="Add custom metadata token and press enter..."
-                        className="inp h-9 px-3 border outline-none text-xs flex-1 rounded-md w-full"
+                        className="inp h-9 px-3 border border-zinc-200 focus:border-indigo-500 outline-none text-xs flex-1 rounded-lg w-full"
                       />
                     </div>
                     <div className="flex flex-wrap gap-1.5 mb-2 border-b pb-2">
@@ -1492,7 +1500,7 @@ export default function CompleteIncidentQualityAssurancePage() {
                     <div className="rounded-xl border border-[#ebebef] bg-white/95 backdrop-blur-md shadow-lg p-2.5 flex items-center gap-3">
                       <div className="flex items-center gap-2 pl-1 text-xs font-bold">
                         <span className="text-zinc-400 font-thin">IQA</span>
-                        <span className="text-sm">{iqaVerdict.score}</span>
+                        <span className="text-sm">{iqaVerdict.score}%</span>
                       </div>
                       <div className="flex-1 h-1.5 rounded-full bg-[#f2f2f5] overflow-hidden">
                         <div
@@ -1566,7 +1574,7 @@ export default function CompleteIncidentQualityAssurancePage() {
                           />
                         </svg>
                         <span className="absolute inset-0 flex items-center justify-center text-xl font-bold tracking-tight text-zinc-950">
-                          {iqaVerdict.score}
+                          {iqaVerdict.score}%
                         </span>
                       </div>
                       <div className="space-y-0.5">
@@ -1836,7 +1844,7 @@ export default function CompleteIncidentQualityAssurancePage() {
                     {/* Block G: Investigation Primers checklist questions */}
                     <div className="rounded-xl border border-zinc-200 bg-white p-3.5 shadow-sm space-y-2">
                       <div className="text-[10px]  text-zinc-500 uppercase border-b pb-1.5">
-                        Invstigation questions
+                        Investigation questions
                       </div>
                       <div className="space-y-2 text-xs font-semibold">
                         {investigationSuite.map((i, n) => (
@@ -1876,7 +1884,7 @@ export default function CompleteIncidentQualityAssurancePage() {
 
                   {/* Interactive Ezra Console Chat Interface module */}
                   <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-xs h-64 flex flex-col justify-between">
-                    <div className="px-4 h-9 border-b flex items-center gap-1.5 text-[10px]  uppercase  text-zinc-500 bg-zinc-50/50">
+                    <div className="px-4 h-9 border-b flex items-center gap-1.5 text-[10px]  uppercase  text-zinc-400 bg-zinc-50/50">
                       <TbMessageDots size={16} />
                       Ask IQA
                     </div>
@@ -1890,8 +1898,8 @@ export default function CompleteIncidentQualityAssurancePage() {
                           className={`flex gap-2 ${chat.who === "you" ? "justify-end" : "justify-start"}`}
                         >
                           {chat.who === "ezra" && (
-                            <span className="h-6 w-6 bg-IMSDarkGreen text-white rounded-full font-bold text-[9px] flex items-center justify-center mt-0.5">
-                              <HiMiniSparkles size={16} />
+                            <span className="h-6 w-6 bg-IMSDarkGreen text-white rounded-full font-bold text-[9px] flex items-center justify-center mt-0.5 shrink-0">
+                              <HiMiniSparkles size={14} />
                             </span>
                           )}
                           <div
@@ -1906,13 +1914,15 @@ export default function CompleteIncidentQualityAssurancePage() {
                         type="text"
                         value={chatInput}
                         onChange={(e) => setChatInput(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter"}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && handleAskEzraLog(chatInput)
+                        }
                         placeholder="Ask IQA about this incident."
                         className="h-8 bg-white border px-2.5 rounded-md text-xs flex-1 outline-none text-zinc-800"
                       />
                       <button
                         type="button"
-                        onClick={() => {}}
+                        onClick={() => handleAskEzraLog(chatInput)}
                         className="h-8 w-8 bg-IMSDarkGreen text-white rounded-md flex items-center justify-center shadow-2xs"
                       >
                         <Send size={11} />
@@ -1924,209 +1934,274 @@ export default function CompleteIncidentQualityAssurancePage() {
             </div>
           </>
         ) : (
-          // ─── POST-SUBMIT AUTOMATION ANALYSIS VIEW RENDER ───
+          // ─── Phase 2: FULL POST-SUBMISSION DETAILED SUMMARY REPORT VIEW ───
           <section className="space-y-6 pt-4 animate-growIn">
-            <div className="border-b pb-4 flex flex-wrap justify-between items-end gap-4">
+            {/* Header Status Bar Summary */}
+            <div className="border-b border-zinc-200 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
               <div>
-                <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1.5">
-                  ✓ Target Incident Operational Records Bound
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mt-1">
-                  {title}
-                </h2>
-                <div className="font-mono text-zinc-400 text-xs font-bold mt-1">
-                  Platform Identifier Stable Key:{" "}
-                  <span className="text-zinc-900">{submittedId}</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() =>
-                  setPlaybookName(
-                    PLAYBOOKS[categoryDetected] || "General Triage",
-                  )
-                }
-                className="h-9 px-4 rounded-lg bg-zinc-950 text-white text-xs font-bold shadow-xs flex items-center gap-2"
-              >
-                <BookOpen size={13} /> Open Remediation Runbook
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-              {/* Left Column Section: Sequential Pipeline Tick Progress Row */}
-              <div className="lg:col-span-8 bg-white border border-zinc-200 rounded-xl p-5 shadow-2xs space-y-4">
-                <div className="flex justify-between items-center text-xs font-bold text-zinc-400 border-b pb-2 uppercase tracking-wider">
-                  <span>Scrubbe Autonomous Pipelines Dispatched</span>
-                  <span className="font-mono">
-                    {Math.round(
-                      (Math.min(activeEngineStep, POST_SUBMIT.length) /
-                        POST_SUBMIT.length) *
-                        100,
-                    )}
-                    % Complete
+                <div className="flex items-center gap-2 mb-1 text-xs font-bold text-emerald-600">
+                  <span className="uppercase tracking-widest text-[10.5px]">
+                    Incident Raised Successfully
+                  </span>
+                  <span className="text-zinc-300 font-sans">&bull;</span>
+                  <span className="font-mono text-zinc-500 font-bold">
+                    {submittedId}
                   </span>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {POST_SUBMIT.map((pipeline, idx) => {
-                    const complete = idx < activeEngineStep;
-                    return (
-                      <div
-                        key={idx}
-                        className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2.5 transition-all ${complete ? "border-emerald-200 bg-emerald-50/40 text-emerald-800 font-bold" : "border-zinc-100 bg-zinc-50/20 text-zinc-300 opacity-40"}`}
-                      >
-                        <div
-                          className={`h-4 w-4 rounded-full border text-[9px] flex items-center justify-center font-bold ${complete ? "bg-emerald-500 border-emerald-500 text-white font-black" : "border-zinc-200 bg-white"}`}
-                        >
-                          {complete ? "✓" : "!"}
-                        </div>
-                        <span>{pipeline}</span>
-                      </div>
-                    );
-                  })}
-                </div>
+                <h2 className="font-tight font-bold text-[22px] sm:text-[26px] tracking-tight text-zinc-900 leading-snug">
+                  {title}
+                </h2>
               </div>
 
-              {/* Right Column Section: Gated Summary Telemetry Cache Box */}
-              <div className="lg:col-span-4 space-y-4">
-                <div className="bg-white border p-4 rounded-xl shadow-2xs space-y-2.5 text-xs">
-                  <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b pb-1">
-                    IQA Snapshot Telemetry Verification Logs
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Checklist Rules Pass Rating:</span>{" "}
-                    <span className="font-mono font-bold text-zinc-950">
-                      {iqaVerdict.score}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Inferred Incident Category:</span>{" "}
-                    <span className="font-bold text-zinc-800">
-                      {categoryDetected}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Bound SLA Timers Context:</span>{" "}
-                    <span className="font-semibold text-zinc-800">
-                      {priority
-                        ? `${SLA[priority].resp} / ${SLA[priority].res}`
-                        : "—"}
-                    </span>
-                  </div>
-                </div>
-
+              <div>
                 <button
                   type="button"
-                  onClick={() => setIsSubmitted(false)}
-                  className="w-full h-10 border bg-white rounded-xl text-xs font-bold text-zinc-700 shadow-2xs hover:bg-zinc-50 transition-colors"
+                  onClick={() =>
+                    setPlaybookName(
+                      PLAYBOOKS[categoryDetected] || "General Triage",
+                    )
+                  }
+                  className="h-10 px-4 rounded-lg bg-[#4f46e5] hover:bg-[#3730a3] text-white text-xs font-bold shadow-xs flex items-center gap-2 transition-all whitespace-nowrap"
                 >
-                  Return to Workspace Editor
+                  <BookOpen size={13} /> Open Recommended Playbook
                 </button>
               </div>
             </div>
 
-            {/* Simulated Runnable Playbook Remediator Modal Host Overlay Window */}
-            {playbookName && (
-              <div className="fixed inset-0 bg-zinc-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fadeIn">
-                <div className="bg-white rounded-2xl w-full max-w-md p-5 space-y-4 border shadow-2xl animate-growIn">
-                  <div className="border-b pb-2 flex justify-between items-center">
+            {/* Split Report Grid Channels Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+              {/* Left Column Profile Maps and Telemetry Status Counters */}
+              <div className="lg:col-span-8 space-y-4">
+                {/* Audit Information Parameter List Card */}
+                <div className="rounded-xl border border-zinc-200 bg-white shadow-xs overflow-hidden">
+                  <div className="px-4 py-2.5 border-b border-zinc-100 bg-zinc-50/50 text-[10.5px] font-bold uppercase tracking-wider text-zinc-400">
+                    Structured Incident Audit Profile Context
+                  </div>
+                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-xs font-medium text-zinc-600">
                     <div>
-                      <h3 className="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
-                        <Clock size={14} className="text-indigo-600" /> Playbook
-                        Runbook Simulator
-                      </h3>
-                      <span className="text-[10.5px] text-zinc-400 mt-0.5 font-medium">
-                        {playbookName}
+                      <span className="text-zinc-400 uppercase text-[10px] tracking-wider block mb-0.5 font-bold">
+                        Severity Priority
+                      </span>
+                      <strong className="text-zinc-900 font-bold font-mono text-sm">
+                        {priority}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-zinc-400 uppercase text-[10px] tracking-wider block mb-0.5 font-bold">
+                        Affected Microservice
+                      </span>
+                      <strong className="text-zinc-900 font-bold">
+                        {service || "—"}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-zinc-400 uppercase text-[10px] tracking-wider block mb-0.5 font-bold">
+                        Runtime Environment
+                      </span>
+                      <span className="text-zinc-800 font-semibold">
+                        {env || "—"}
                       </span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPlaybookName(null);
-                        setPlaybookStep(0);
-                        setIsPlaybookRunning(false);
-                      }}
-                      className="text-zinc-400 hover:text-zinc-700"
-                    >
-                      <X size={15} />
-                    </button>
+                    <div>
+                      <span className="text-zinc-400 uppercase text-[10px] tracking-wider block mb-0.5 font-bold">
+                        Signal Source Origin
+                      </span>
+                      <span className="text-zinc-800 font-semibold">
+                        {source || "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-zinc-400 uppercase text-[10px] tracking-wider block mb-0.5 font-bold">
+                        Log Entry Classification
+                      </span>
+                      <span className="text-zinc-800 font-semibold">
+                        {entry}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-zinc-400 uppercase text-[10px] tracking-wider block mb-0.5 font-bold">
+                        Likely Anomaly Category
+                      </span>
+                      <span className="text-zinc-800 font-semibold">
+                        {categoryDetected}
+                      </span>
+                    </div>
+
+                    <div className="sm:col-span-2 border-t border-zinc-100 pt-3">
+                      <span className="text-zinc-400 uppercase text-[10px] tracking-wider block mb-1 font-bold">
+                        Telemetry Narrative Log
+                      </span>
+                      <p className="text-zinc-700 leading-relaxed font-normal whitespace-pre-wrap">
+                        {desc || "—"}
+                      </p>
+                    </div>
+
+                    <div className="sm:col-span-2 border-t border-zinc-100 pt-3">
+                      <span className="text-zinc-400 uppercase text-[10px] tracking-wider block mb-1.5 font-bold">
+                        Linked Evidence Artifacts
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {attach.length ? (
+                          attach.map((a, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-0.5 rounded bg-zinc-50 border border-zinc-200 font-mono text-[11px] text-zinc-600 font-bold"
+                            >
+                              {a}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-zinc-400 italic">
+                            No evidence tokens attached.
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress Sequential Timeline Subroutines */}
+                <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs space-y-4">
+                  <div className="flex justify-between items-center text-xs font-bold text-zinc-400 border-b border-zinc-100 pb-2 uppercase tracking-wider">
+                    <span>Scrubbe Autonomous Pipelines Dispatched</span>
+                    <span className="font-mono text-indigo-600">
+                      {Math.round(
+                        (Math.min(activeEngineStep, POST_SUBMIT.length) /
+                          POST_SUBMIT.length) *
+                          100,
+                      )}
+                      % Complete
+                    </span>
                   </div>
 
-                  <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1 scroll-thin">
-                    {(
-                      PLAYBOOK_STEPS_REGISTRY[playbookName] || [
-                        ["Establish Scope", "Assess bounds"],
-                        ["Mitigate", "Apply patch"],
-                      ]
-                    ).map((s, n) => {
-                      const stepComplete = n < playbookStep;
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {POST_SUBMIT.map((pipeline, idx) => {
+                      const complete = idx < activeEngineStep;
                       return (
                         <div
-                          key={n}
-                          className={`p-2.5 rounded-lg border text-xs font-medium flex items-center gap-3 transition-colors ${stepComplete ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-zinc-100 text-zinc-400 bg-white"}`}
+                          key={idx}
+                          className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2.5 transition-all ${complete ? "border-emerald-200 bg-emerald-50/40 text-emerald-800 font-bold" : "border-zinc-100 bg-zinc-50/20 text-zinc-300 opacity-40"}`}
                         >
                           <div
-                            className={`h-5 w-5 rounded-full border text-[9px] flex items-center justify-center font-bold ${stepComplete ? "bg-emerald-500 border-emerald-500 text-white" : "border-zinc-200"}`}
+                            className={`h-4 w-4 rounded-full border text-[9px] flex items-center justify-center font-bold ${complete ? "bg-emerald-500 border-emerald-500 text-white font-black" : "border-zinc-200 bg-white"}`}
                           >
-                            {stepComplete ? "✓" : n + 1}
+                            {complete ? "✓" : "!"}
                           </div>
-                          <div>
-                            <div className="font-bold text-zinc-900">
-                              {s[0]}
-                            </div>
-                            <div className="text-[11px] text-zinc-400 mt-0.5 font-medium">
-                              {s[1]}
-                            </div>
-                          </div>
+                          <span>{pipeline}</span>
                         </div>
                       );
                     })}
                   </div>
-
-                  <div className="pt-2 border-t flex justify-end gap-1.5 text-xs font-semibold">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPlaybookName(null);
-                        setPlaybookStep(0);
-                        setIsPlaybookRunning(false);
-                      }}
-                      className="h-8.5 px-3 border rounded-lg bg-white text-zinc-600"
-                    >
-                      Close
-                    </button>
-                    <button
-                      type="button"
-                      disabled={
-                        isPlaybookRunning ||
-                        playbookStep ===
-                          (PLAYBOOK_STEPS_REGISTRY[playbookName]?.length || 2)
-                      }
-                      onClick={() => {}}
-                      className="h-8.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm"
-                    >
-                      {playbookStep ===
-                      (PLAYBOOK_STEPS_REGISTRY[playbookName]?.length || 2)
-                        ? "Remediation Complete ✓"
-                        : isPlaybookRunning
-                          ? "Running..."
-                          : "Trigger Playbook Sequence"}
-                    </button>
-                  </div>
                 </div>
               </div>
-            )}
+
+              {/* Right Column Validation Analytics Recaps Panel */}
+              <div className="lg:col-span-4 space-y-4">
+                {/* IQA Static Configuration Summary Snapshot Card */}
+                <div className="rounded-xl border border-indigo-100 bg-white shadow-xs overflow-hidden">
+                  <div className="px-4 py-2.5 border-b border-zinc-100 bg-[#eef0fe]/30 text-[10.5px] font-bold uppercase tracking-wider text-indigo-950">
+                    IQA Pre-Flight Audit Capture
+                  </div>
+                  <div className="p-4 space-y-3.5 text-xs text-zinc-700 font-medium leading-relaxed">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="font-mono font-black text-2xl tracking-tight animate-fadeIn"
+                        style={{ color: iqaVerdict.tone }}
+                      >
+                        {iqaVerdict.score}%
+                      </span>
+                      <div>
+                        <div className="font-bold text-zinc-900">
+                          {iqaVerdict.label}
+                        </div>
+                        <div className="text-[11px] text-zinc-400 font-mono font-medium">
+                          Pre-raise quality compliance evaluation record
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-zinc-100 pt-2.5">
+                      <span className="text-zinc-400 block mb-0.5 text-[10px] font-bold uppercase tracking-wider">
+                        Policy Priority Check
+                      </span>
+                      <p className="text-zinc-800 font-semibold leading-normal">
+                        Operational rules expected level:{" "}
+                        <b>{policyRules.level}</b>. Stated priority was:{" "}
+                        <b>{priority}</b>.
+                      </p>
+                    </div>
+
+                    <div className="border-t border-zinc-100 pt-2.5">
+                      <span className="text-zinc-400 block mb-0.5 text-[10px] font-bold uppercase tracking-wider">
+                        SLA Bound Window Thresholds
+                      </span>
+                      <p className="text-zinc-800 font-semibold font-mono">
+                        Respond within: {priority ? SLA[priority].resp : "—"} /
+                        Hard resolution limit:{" "}
+                        {priority ? SLA[priority].res : "—"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Similar Incidents Recaps list */}
+                {similarHistory.length > 0 && (
+                  <div className="rounded-xl border border-zinc-200 bg-white p-3.5 shadow-xs space-y-2">
+                    <div className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase block border-b border-zinc-100 pb-1.5">
+                      Historical Correlation Logs
+                    </div>
+                    <div className="space-y-1.5">
+                      {similarHistory.map((h) => (
+                        <div
+                          key={h.id}
+                          className="flex justify-between font-mono text-[11px] bg-zinc-50 border border-zinc-100 p-2 rounded-lg text-zinc-700 font-bold"
+                        >
+                          <span>{h.id}</span>
+                          <span className="truncate max-w-[130px] font-sans font-medium text-zinc-400">
+                            {h.title}
+                          </span>
+                          <span className="text-indigo-600 font-black">
+                            {h.m}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-between">
+              <Button
+                type="button"
+                onClick={() => setIsSubmitted(false)}
+                variant="outline-dark"
+                size="sm"
+              >
+                Edit Incident
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  setIsSubmitted(false);
+                  handleResetAll();
+                  setIsLoading(true);
+                }}
+                size="sm"
+                rightIcon={<ArrowRight size={15} />}
+              >
+                Submit
+              </Button>
+            </div>
           </section>
         )}
       </main>
+
+      <ValidationLoadingModal
+        isOpen={isLoading}
+        onComplete={() => {
+          setIsLoading(false);
+        }}
+      />
     </div>
   );
-
-  function esc(s: string) {
-    return s.replace(
-      /[&<>"]/g,
-      (c) =>
-        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] || c,
-    );
-  }
 }
