@@ -82,9 +82,10 @@ export const endpoint = {
   api_key: {
     create: "/apikey/createapikey",
     get: "/apikey/apikeys",
-    rotate: "/apikey",
-    revoke: "/apikey",
-    delete: "/apikey",
+    rotate: "/apikey",   // POST /:id/rotate
+    revoke: "/apikey",   // POST /:id/revoke
+    update: "/apikey",   // PUT /:id
+    delete: "/apikey",   // DELETE /:id
   },
   integration: {
     whatsapp: "/integrations/whatsapp/connect",

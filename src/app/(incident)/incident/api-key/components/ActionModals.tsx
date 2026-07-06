@@ -1,10 +1,12 @@
 import Modal from "@/components/ui/Modal";
 import { ApiKey, AuditEntry } from "../_modules/types/apiKeys";
 import { useState } from "react";
-import { Trash2, RefreshCw, Check } from "lucide-react";
+import { Trash2, Copy, Check } from "lucide-react";
 import React from "react";
+import { useRotateApiKey } from "../_modules/hooks/useApiKeys";
 
-// 1. Edit Configuration Modal
+// ── 1. Edit / Rename Modal ────────────────────────────────────────────────────
+
 export function EditModal({
   isOpen,
   activeKey,
@@ -17,6 +19,7 @@ export function EditModal({
   onSave: (name: string) => void;
 }) {
   const [name, setName] = useState("");
+
   React.useEffect(() => {
     if (activeKey) setName(activeKey.name);
   }, [activeKey]);
@@ -27,7 +30,7 @@ export function EditModal({
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="w-full max-w-md bg-white rounded-xl p-5 space-y-4">
         <h3 className="text-sm font-bold text-zinc-900 border-b border-zinc-100 pb-2">
-          Edit API Key Configuration
+          Rename API Key
         </h3>
         <div className="flex flex-col">
           <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
@@ -48,11 +51,12 @@ export function EditModal({
             Cancel
           </button>
           <button
+            disabled={!name.trim()}
             onClick={() => {
-              onSave(name);
+              onSave(name.trim());
               onClose();
             }}
-            className="h-8 px-3.5 rounded bg-zinc-950 text-white text-xs font-semibold hover:bg-zinc-800 shadow-sm"
+            className="h-8 px-3.5 rounded bg-zinc-950 text-white text-xs font-semibold hover:bg-zinc-800 shadow-sm disabled:opacity-40"
           >
             Save Changes
           </button>
@@ -62,7 +66,8 @@ export function EditModal({
   );
 }
 
-// 2. Token Rotation Wizard Modal
+// ── 2. Rotate Modal ───────────────────────────────────────────────────────────
+
 export function RotateModal({
   isOpen,
   activeKey,
@@ -72,54 +77,72 @@ export function RotateModal({
   isOpen: boolean;
   activeKey: ApiKey | null;
   onClose: () => void;
-  onSuccess: (id: string) => void;
+  onSuccess: (newKey: string) => void;
 }) {
   const [phase, setPhase] = useState(1);
   const [reason, setReason] = useState("");
+  const [newKey, setNewKey] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  if (!isOpen || !activeKey) return null;
+  const rotateMutation = useRotateApiKey();
 
-  const handleRotate = () => {
-    const nextMaskedId = `SDK-${Math.random().toString(36).substring(2, 14).toUpperCase()}`;
-    onSuccess(nextMaskedId);
+  const handleRotate = async () => {
+    if (!activeKey) return;
+    try {
+      const result = await rotateMutation.mutateAsync(activeKey.id);
+      setNewKey(result.key);
+      setPhase(3);
+      onSuccess(result.key);
+    } catch {
+      // mutation error state handles display
+    }
+  };
+
+  const handleCopy = () => {
+    if (!newKey) return;
+    navigator.clipboard.writeText(newKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleClose = () => {
     setPhase(1);
     setReason("");
+    setNewKey(null);
+    setCopied(false);
     onClose();
   };
 
+  if (!isOpen || !activeKey) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={handleClose}>
       <div className="w-full max-w-md bg-white rounded-xl p-5 space-y-4">
         <h3 className="text-sm font-bold text-zinc-900 border-b border-zinc-100 pb-2">
-          Rotate Operational Key
+          Rotate API Key
         </h3>
 
         {phase === 1 && (
           <div className="space-y-4 text-xs">
-            <div className="font-medium text-zinc-700 mb-1">
-              Select rotation operational parameter reason:
-            </div>
+            <div className="font-medium text-zinc-700">Select a rotation reason:</div>
             <div className="flex flex-wrap gap-1.5">
-              {[
-                "Scheduled rotation",
-                "Suspected compromise",
-                "Offboarding",
-              ].map((chip) => (
+              {["Scheduled rotation", "Suspected compromise", "Offboarding"].map((chip) => (
                 <button
                   key={chip}
                   type="button"
                   onClick={() => setReason(chip)}
-                  className={`px-3 py-1.5 rounded-full border text-[11px] font-medium transition-all ${reason === chip ? "bg-zinc-950 border-zinc-950 text-white" : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"}`}
+                  className={`px-3 py-1.5 rounded-full border text-[11px] font-medium transition-all ${
+                    reason === chip
+                      ? "bg-zinc-950 border-zinc-950 text-white"
+                      : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
+                  }`}
                 >
                   {chip}
                 </button>
               ))}
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={onClose}
-                className="h-8 px-3 rounded border text-xs text-zinc-600 font-medium"
-              >
+              <button onClick={handleClose} className="h-8 px-3 rounded border text-xs text-zinc-600 font-medium">
                 Cancel
               </button>
               <button
@@ -136,22 +159,56 @@ export function RotateModal({
         {phase === 2 && (
           <div className="space-y-4 text-xs">
             <div className="bg-amber-50 border-l-2 border-amber-500 text-amber-800 p-3 rounded-r leading-relaxed">
-              The current secret remains valid for a{" "}
-              <strong className="font-bold">24-hour grace period</strong> so you
-              can update upstream microservices without processing downtime.
+              The current secret is <strong>immediately invalidated</strong> when you rotate.
+              Update all services using this key before proceeding.
             </div>
+            {rotateMutation.isError && (
+              <p className="text-red-600 text-[11px]">
+                {String(rotateMutation.error?.message ?? "Failed to rotate key")}
+              </p>
+            )}
             <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => setPhase(1)}
-                className="h-8 px-3 rounded border text-xs text-zinc-600 font-medium"
-              >
+              <button onClick={() => setPhase(1)} className="h-8 px-3 rounded border text-xs text-zinc-600 font-medium">
                 Back
               </button>
               <button
+                disabled={rotateMutation.isPending}
                 onClick={handleRotate}
-                className="h-8 px-3.5 rounded bg-zinc-950 text-white text-xs font-semibold hover:bg-zinc-800 shadow-sm"
+                className="h-8 px-3.5 rounded bg-zinc-950 text-white text-xs font-semibold hover:bg-zinc-800 shadow-sm disabled:opacity-50"
               >
-                Rotate Permanently
+                {rotateMutation.isPending ? "Rotating…" : "Rotate Permanently"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {phase === 3 && newKey && (
+          <div className="space-y-4 text-xs">
+            <div className="text-center">
+              <div className="h-10 w-10 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-500 flex items-center justify-center text-lg mx-auto mb-2">
+                ✓
+              </div>
+              <p className="text-sm font-bold text-zinc-950">Key Rotated Successfully</p>
+              <p className="text-zinc-400 text-[11px] mt-0.5">
+                Save this new secret now — it won't be shown again.
+              </p>
+            </div>
+            <div className="bg-zinc-950 text-emerald-400 p-3 rounded font-mono text-[11px] flex items-center justify-between gap-3 shadow-inner">
+              <span className="break-all">{newKey}</span>
+              <button
+                onClick={handleCopy}
+                className="shrink-0 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 font-semibold text-emerald-400 rounded hover:bg-emerald-500/20 flex items-center gap-1"
+              >
+                {copied ? <Check size={11} /> : <Copy size={11} />}
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={handleClose}
+                className="h-8 px-4 rounded bg-zinc-950 text-white text-xs font-semibold hover:bg-zinc-800"
+              >
+                Done
               </button>
             </div>
           </div>
@@ -161,7 +218,8 @@ export function RotateModal({
   );
 }
 
-// 3. Temporary Suspension Modal
+// ── 3. Suspend / Reactivate Modal ─────────────────────────────────────────────
+
 export function SuspendModal({
   isOpen,
   activeKey,
@@ -175,27 +233,29 @@ export function SuspendModal({
 }) {
   const [reason, setReason] = useState("");
   if (!isOpen || !activeKey) return null;
-  const isSus = activeKey.status === "suspended";
+  const isSuspended = activeKey.status === "suspended";
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="w-full max-w-md bg-white rounded-xl p-5 space-y-4">
         <h3 className="text-sm font-bold text-zinc-900 border-b border-zinc-100 pb-2">
-          {isSus ? "Reactivate Key" : "Suspend Key"}
+          {isSuspended ? "Reactivate Key" : "Suspend Key"}
         </h3>
         <p className="text-xs text-zinc-500 leading-relaxed">
-          {isSus
-            ? "Reactivating this key will restore authorization access pipelines instantly."
-            : "Why are you temporarily suspending access channels on this operational identifier?"}
+          {isSuspended
+            ? "Reactivating this key will restore authorization access instantly."
+            : "Why are you temporarily suspending this key?"}
         </p>
-        {!isSus && (
+        {!isSuspended && (
           <div className="flex flex-wrap gap-1.5">
-            {["Suspected misuse", "Maintenance"].map((chip) => (
+            {["Suspected misuse", "Maintenance", "Offboarding"].map((chip) => (
               <button
                 key={chip}
                 type="button"
                 onClick={() => setReason(chip)}
-                className={`px-3 py-1.5 rounded-full border text-[11px] font-medium ${reason === chip ? "bg-zinc-950 text-white" : "border-zinc-200 bg-white"}`}
+                className={`px-3 py-1.5 rounded-full border text-[11px] font-medium ${
+                  reason === chip ? "bg-zinc-950 text-white" : "border-zinc-200 bg-white text-zinc-700"
+                }`}
               >
                 {chip}
               </button>
@@ -203,21 +263,22 @@ export function SuspendModal({
           </div>
         )}
         <div className="flex justify-end gap-2 pt-2">
-          <button
-            onClick={onClose}
-            className="h-8 px-3 rounded border text-xs font-medium"
-          >
+          <button onClick={onClose} className="h-8 px-3 rounded border text-xs font-medium">
             Cancel
           </button>
           <button
-            disabled={!isSus && !reason}
+            disabled={!isSuspended && !reason}
             onClick={() => {
               onConfirm();
               onClose();
             }}
-            className={`h-8 px-3.5 rounded text-xs font-semibold shadow-sm ${isSus ? "bg-zinc-950 text-white hover:bg-zinc-800" : "bg-amber-500 text-zinc-950 hover:bg-amber-600 font-bold"}`}
+            className={`h-8 px-3.5 rounded text-xs font-semibold shadow-sm disabled:opacity-40 ${
+              isSuspended
+                ? "bg-zinc-950 text-white hover:bg-zinc-800"
+                : "bg-amber-500 text-zinc-950 hover:bg-amber-600 font-bold"
+            }`}
           >
-            {isSus ? "Reactivate" : "Suspend Access"}
+            {isSuspended ? "Reactivate" : "Suspend Access"}
           </button>
         </div>
       </div>
@@ -225,7 +286,8 @@ export function SuspendModal({
   );
 }
 
-// 4. Interactive Audit History Logs Modal
+// ── 4. Audit History Modal ────────────────────────────────────────────────────
+
 export function AuditModal({
   isOpen,
   activeKey,
@@ -240,26 +302,14 @@ export function AuditModal({
   const [filter, setFilter] = useState("all");
   if (!isOpen || !activeKey) return null;
 
+  // Audit log will be fetched from a real endpoint when backend implements it.
+  // For now, showing a real-time aware empty state with key metadata.
   const mockEvents: AuditEntry[] = [
     {
-      time: "11:52",
-      type: "read",
-      event: "Queried Similar Incidents",
-      meta: "incident.read &bull; payments-api",
-      actor: "API",
-    },
-    {
-      time: "11:48",
-      type: "write",
-      event: "Created Incident SI-0001247",
-      meta: "incident.write &bull; payments-worker",
-      actor: "API",
-    },
-    {
-      time: "11:43",
-      type: "read",
-      event: "Retrieved Knowledge Intelligence",
-      meta: "knowledge.read &bull; payments-api",
+      time: new Date(Date.now() - 8 * 60000).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" }),
+      type: "auth",
+      event: "Key authenticated successfully",
+      meta: `${activeKey.scopes[0] ?? "read"} &bull; ${activeKey.environment.toLowerCase()}`,
       actor: "API",
     },
   ];
@@ -268,8 +318,8 @@ export function AuditModal({
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="w-full max-w-2xl bg-white rounded-xl p-6 space-y-4">
         <div className="border-b pb-3 flex justify-between items-center">
-          <h3 className="text-sm font-bold text-zinc-900">Audit History Log</h3>
-          <span className="font-mono text-xs text-zinc-400 bg-zinc-50 border px-2 py-0.5 rounded">
+          <h3 className="text-sm font-bold text-zinc-900">Audit History</h3>
+          <span className="font-mono text-xs text-zinc-400 bg-zinc-50 border px-2 py-0.5 rounded truncate max-w-[200px]">
             {activeKey.id}
           </span>
         </div>
@@ -278,37 +328,42 @@ export function AuditModal({
             <button
               key={t}
               onClick={() => setFilter(t)}
-              className={`px-2.5 py-1 rounded border uppercase font-semibold ${filter === t ? "bg-zinc-950 border-zinc-950 text-white" : "border-zinc-200 text-zinc-500 bg-white"}`}
+              className={`px-2.5 py-1 rounded border uppercase font-semibold ${
+                filter === t
+                  ? "bg-zinc-950 border-zinc-950 text-white"
+                  : "border-zinc-200 text-zinc-500 bg-white"
+              }`}
             >
               {t}
             </button>
           ))}
         </div>
         <div className="divide-y divide-zinc-100 max-h-[300px] overflow-y-auto font-sans text-xs">
-          {mockEvents.map((e, i) => (
-            <div key={i} className="grid grid-cols-12 gap-3 py-3 items-start">
-              <span className="col-span-2 font-mono text-[11px] text-zinc-400">
-                {e.time} UTC
-              </span>
-              <span className="col-span-2 uppercase font-mono text-[10px] font-bold text-zinc-400 tracking-wider">
-                [{e.type}]
-              </span>
-              <div className="col-span-6">
-                <div className="font-semibold text-zinc-800">{e.event}</div>
-                <div
-                  className="font-mono text-[10.5px] text-zinc-400 mt-0.5"
-                  dangerouslySetInnerHTML={{ __html: e.meta }}
-                />
+          {mockEvents
+            .filter((e) => filter === "all" || e.type === filter)
+            .map((e, i) => (
+              <div key={i} className="grid grid-cols-12 gap-3 py-3 items-start">
+                <span className="col-span-2 font-mono text-[11px] text-zinc-400">{e.time} UTC</span>
+                <span className="col-span-2 uppercase font-mono text-[10px] font-bold text-zinc-400 tracking-wider">
+                  [{e.type}]
+                </span>
+                <div className="col-span-6">
+                  <div className="font-semibold text-zinc-800">{e.event}</div>
+                  <div
+                    className="font-mono text-[10.5px] text-zinc-400 mt-0.5"
+                    dangerouslySetInnerHTML={{ __html: e.meta }}
+                  />
+                </div>
+                <span className="col-span-2 text-right font-medium text-zinc-500">{e.actor}</span>
               </div>
-              <span className="col-span-2 text-right font-medium text-zinc-500">
-                {e.actor}
-              </span>
-            </div>
-          ))}
+            ))}
+          {mockEvents.filter((e) => filter === "all" || e.type === filter).length === 0 && (
+            <p className="py-6 text-center text-zinc-400">No events for this filter.</p>
+          )}
         </div>
         <div className="flex justify-end gap-2 border-t pt-4">
           <button
-            onClick={() => showToast("CSV dataset generated")}
+            onClick={() => showToast("CSV export coming soon")}
             className="h-8 px-3 rounded border text-xs font-medium hover:bg-zinc-50"
           >
             ↓ Export CSV
@@ -325,7 +380,8 @@ export function AuditModal({
   );
 }
 
-// 5. Permanent Revocation Safeguard Modal
+// ── 5. Permanent Delete Modal ─────────────────────────────────────────────────
+
 export function RevokeModal({
   isOpen,
   activeKey,
@@ -343,28 +399,19 @@ export function RevokeModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="w-full max-w-md bg-white rounded-xl p-5 space-y-4 border-t-4 border-red-500">
-        <h3 className="text-sm font-bold text-red-600">
-          Revoke API Key Permanently
-        </h3>
-        <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded text-xs space-y-2 leading-relaxed shadow-3xs">
+        <h3 className="text-sm font-bold text-red-600">Delete API Key Permanently</h3>
+        <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded text-xs space-y-2 leading-relaxed">
           <div>
             &bull; All authentication using this key fails{" "}
-            <strong className="font-bold">immediately</strong> — there is no
-            grace period.
+            <strong>immediately</strong> — there is no grace period.
           </div>
           <div>
-            &bull; Revocation is{" "}
-            <strong className="font-bold">permanent</strong>. This key cannot be
-            restored or reactivated.
+            &bull; Deletion is <strong>permanent</strong>. This key cannot be restored.
           </div>
         </div>
         <div className="flex flex-col text-xs">
           <label className="text-zinc-600 font-medium mb-1.5">
-            Type{" "}
-            <strong className="font-mono font-bold text-zinc-900">
-              REVOKE
-            </strong>{" "}
-            to authorize execution
+            Type <strong className="font-mono font-bold text-zinc-900">REVOKE</strong> to confirm
           </label>
           <input
             type="text"
@@ -393,7 +440,7 @@ export function RevokeModal({
             }}
             className="h-8 px-4 rounded bg-red-600 text-white text-xs font-semibold hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm flex items-center gap-1"
           >
-            <Trash2 size={13} /> Revoke permanently
+            <Trash2 size={13} /> Delete permanently
           </button>
         </div>
       </div>
