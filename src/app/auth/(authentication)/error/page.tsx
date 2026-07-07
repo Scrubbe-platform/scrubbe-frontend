@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
+import IdleLoader from "@/components/ui/LoaderUI/IdleLoader";
 
 function ErrorContent() {
   const searchParams = useSearchParams();
@@ -59,7 +60,8 @@ function ErrorContent() {
       {error && (
         <div className="bg-gray-100 rounded-md p-4 mb-8 max-w-md w-full">
           <p className="text-sm text-gray-500 text-center">
-            Error code: <code className="bg-gray-200 px-2 py-1 rounded">{error}</code>
+            Error code:{" "}
+            <code className="bg-gray-200 px-2 py-1 rounded">{error}</code>
           </p>
         </div>
       )}
@@ -85,11 +87,7 @@ function ErrorContent() {
 
 export default function AuthErrorPage() {
   return (
-    <Suspense fallback={
-      <div className="w-full mx-auto p-6 flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    }>
+    <Suspense fallback={<IdleLoader />}>
       <ErrorContent />
     </Suspense>
   );

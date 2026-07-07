@@ -5,27 +5,30 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
 import { ChevronLeft, Loader2 } from "lucide-react";
- import CButton from "@/components/ui/Cbutton";
+import CButton from "@/components/ui/Cbutton";
 import useAuthStore from "@/lib/stores/auth.store";
+import IdleLoader from "@/components/ui/LoaderUI/IdleLoader";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const email = searchParams.get("email") || "";
   const userId = searchParams.get("userId") || "";
-  
-  const [verificationCode, setVerificationCode] = useState<string[]>(Array(6).fill(""));
+
+  const [verificationCode, setVerificationCode] = useState<string[]>(
+    Array(6).fill(""),
+  );
   const [resendTimer, setResendTimer] = useState<number>(60);
   const [isResendDisabled, setIsResendDisabled] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
-  
+
   const { verifyEmail, resendOTP } = useAuthStore();
 
   // Timer countdown
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
+
     if (resendTimer > 0 && isResendDisabled) {
       interval = setInterval(() => {
         setResendTimer((prev) => prev - 1);
@@ -43,7 +46,7 @@ function VerifyEmailContent() {
 
   const handleVerify = async () => {
     const code = verificationCode.join("");
-    
+
     if (code.length !== 6) {
       toast.error("Invalid code", {
         description: "Please enter the complete 6-digit code.",
@@ -61,15 +64,16 @@ function VerifyEmailContent() {
     try {
       setIsLoading(true);
       await verifyEmail(code);
-      
+
       toast.success("Email verified successfully!", {
         description: "You can now sign in to your account.",
       });
-      
+
       setIsVerified(true);
     } catch (error) {
       toast.error("Verification failed", {
-        description: error instanceof Error ? error.message : "Invalid or expired code.",
+        description:
+          error instanceof Error ? error.message : "Invalid or expired code.",
       });
     } finally {
       setIsLoading(false);
@@ -82,18 +86,19 @@ function VerifyEmailContent() {
     try {
       setIsLoading(true);
       await resendOTP();
-      
+
       // Reset timer
       setResendTimer(60);
       setIsResendDisabled(true);
       setVerificationCode(Array(6).fill(""));
-      
+
       toast.success("Code resent!", {
         description: "A new verification code has been sent to your email.",
       });
     } catch (error) {
       toast.error("Failed to resend code", {
-        description: error instanceof Error ? error.message : "Please try again later.",
+        description:
+          error instanceof Error ? error.message : "Please try again later.",
       });
     } finally {
       setIsLoading(false);
@@ -132,7 +137,8 @@ function VerifyEmailContent() {
         </h1>
 
         <p className="text-gray-600 text-center mb-8">
-          Your email has been successfully verified. You can now sign in to your account.
+          Your email has been successfully verified. You can now sign in to your
+          account.
         </p>
 
         <Link
@@ -154,15 +160,13 @@ function VerifyEmailContent() {
         <ChevronLeft />
         <p>back</p>
       </div>
-      
+
       <h1 className="text-2xl font-semibold mb-2">Verify Your Email</h1>
       <p className="text-gray-600 mb-4">
         We have sent a verification code to your email address
       </p>
 
-      {email && (
-        <p className="text-blue-600 mb-6 font-bold">{email}</p>
-      )}
+      {email && <p className="text-blue-600 mb-6 font-bold">{email}</p>}
 
       <div className="flex gap-2 mb-6 justify-center">
         {/* <OtpInput
@@ -172,9 +176,9 @@ function VerifyEmailContent() {
         /> */}
       </div>
 
-      <CButton 
-        onClick={handleVerify} 
-        disabled={isLoading || verificationCode.some(digit => !digit)}
+      <CButton
+        onClick={handleVerify}
+        disabled={isLoading || verificationCode.some((digit) => !digit)}
         isLoading={isLoading}
       >
         {isLoading ? (
@@ -198,10 +202,7 @@ function VerifyEmailContent() {
               : "text-blue-600 hover:underline"
           }`}
         >
-          {isResendDisabled 
-            ? `Resend code in ${resendTimer}s` 
-            : "Resend code"
-          }
+          {isResendDisabled ? `Resend code in ${resendTimer}s` : "Resend code"}
         </button>
       </div>
 
@@ -219,11 +220,7 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={
-      <div className="w-full mx-auto p-6 flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    }>
+    <Suspense fallback={<IdleLoader />}>
       <VerifyEmailContent />
     </Suspense>
   );

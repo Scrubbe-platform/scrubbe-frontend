@@ -26,6 +26,7 @@ import CompleteBusinessProfile, {
   BusinessProfileSignupFormData,
 } from "./CompleteBusinessProfile";
 import OtpInput from "../ui/OtpInput";
+import IdleLoader from "../ui/LoaderUI/IdleLoader";
 
 const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 
@@ -74,7 +75,7 @@ export const businessSignupSchema = z.object({
     .max(100)
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/,
-      "Must include uppercase, lowercase, number, and symbol"
+      "Must include uppercase, lowercase, number, and symbol",
     ),
   acceptTerms: z.literal(true, {
     errorMap: () => ({ message: "You must accept the terms" }),
@@ -337,7 +338,7 @@ export default function BusinessSignupForm() {
   // ── Main form ──────────────────────────────────────────────────
 
   return (
-    <Suspense fallback={<div>Loading…</div>}>
+    <Suspense fallback={<IdleLoader />}>
       <div className="w-full">
         {/* Loading overlay for OAuth */}
         {session.status === "loading" && (
