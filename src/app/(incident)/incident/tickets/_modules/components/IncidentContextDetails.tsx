@@ -79,14 +79,18 @@ export default function IncidentContextDetails({
                 Primary Signals
               </span>
               <div className="flex flex-wrap gap-1.5">
-                {activeData.source.split(/[,;|]+/).map((signal) => signal.trim()).filter(Boolean).map((signal) => (
-                  <span
-                    key={signal}
-                    className="px-2.5 py-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-700 dark:text-zinc-300 font-medium font-mono text-[10px] shadow-3xs"
-                  >
-                    {signal}
-                  </span>
-                ))}
+                {activeData.source
+                  .split(/[,;|]+/)
+                  .map((signal) => signal.trim())
+                  .filter(Boolean)
+                  .map((signal) => (
+                    <span
+                      key={signal}
+                      className="px-2.5 py-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-700 dark:text-zinc-300 font-medium font-mono text-[10px] shadow-3xs"
+                    >
+                      {signal}
+                    </span>
+                  ))}
               </div>
             </div>
           )}
@@ -154,9 +158,9 @@ export default function IncidentContextDetails({
           {/* Priority & Status Row badges line */}
           <div className="flex items-center gap-2.5 text-xs">
             <span
-              className={`inline-flex items-center justify-center h-5 min-w-[28px] px-1.5 rounded ${priColors[activeData?.priority || "LOW"]}`}
+              className={`inline-flex items-center justify-center h-5 min-w-[28px] px-1.5 rounded ${priColors[activeData?.severity || "P3"]}`}
             >
-              {priText[activeData?.priority || "LOW"]}
+              {activeData?.severity}
             </span>
 
             <span className="inline-flex items-center gap-1.5 font-semibold text-zinc-700 dark:text-zinc-300">

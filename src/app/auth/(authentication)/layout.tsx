@@ -3,11 +3,12 @@
 import { ReactNode, Suspense } from "react";
 import ParticleCanvas from "@/components/auth/Particle";
 import Link from "next/link";
+import IdleLoader from "@/components/ui/LoaderUI/IdleLoader";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="w-full h-screen overflow-hidden bg-white">
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<IdleLoader />}>
         <div className="grid md:grid-cols-2 h-full">
           {/* Left — fills full height, image contained inside */}
           <div className="hidden md:flex justify-center items-center w-full h-full overflow-hidden relative">

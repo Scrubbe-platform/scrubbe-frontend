@@ -263,11 +263,20 @@ export default function IncidentLifecycleManager({ incident }: Props) {
           </div>
         </div>
 
-        <div
-          onClick={() => router.push(`/incident/tickets/qa/${incident.id}`)}
-          className="size-10 flex justify-center items-center rounded-full bg-black shadow-lg shadow-zinc-200 cursor-pointer"
-        >
-          <CiWavePulse1 size={22} className="text-white stroke-2" />
+        <div className="relative group inline-block">
+          <span className="absolute inset-0 rounded-full bg-black/30 animate-ping pointer-events-none" />
+
+          <div
+            onClick={() => router.push(`/incident/tickets/qa/${incident.id}`)}
+            className="relative z-10 size-10 flex justify-center items-center rounded-full bg-black shadow-lg shadow-zinc-200 cursor-pointer active:scale-95 transition-transform"
+          >
+            <CiWavePulse1 size={22} className="text-white stroke-2" />
+          </div>
+
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-2.5 py-1.5 bg-zinc-900 text-white text-[11px] font-semibold font-sans rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-30 shadow-md transform translate-y-1 group-hover:translate-y-0">
+            Analyze Quality (IQA)
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-900" />
+          </div>
         </div>
       </div>
 

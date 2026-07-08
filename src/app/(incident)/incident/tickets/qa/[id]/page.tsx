@@ -28,7 +28,7 @@ import { FaBoltLightning } from "react-icons/fa6";
 import { TbBolt, TbMessageDots } from "react-icons/tb";
 import { HiMiniSparkles } from "react-icons/hi2";
 import ValidationLoadingModal from "./_modules/component/modal/ValidationLoadingModal";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
@@ -369,11 +369,21 @@ const PLAYBOOK_STEPS_REGISTRY: Record<string, Array<[string, string]>> = {
 
 // Priority helpers — map between IQA's P0-P3 and the server's CRITICAL/HIGH/MEDIUM/LOW
 const serverPriorityToP = (p?: string): string | null => {
-  const map: Record<string, string> = { CRITICAL: "P0", HIGH: "P1", MEDIUM: "P2", LOW: "P3" };
+  const map: Record<string, string> = {
+    CRITICAL: "P0",
+    HIGH: "P1",
+    MEDIUM: "P2",
+    LOW: "P3",
+  };
   return map[(p ?? "").toUpperCase()] ?? null;
 };
 const pToServerPriority = (p?: string | null): string => {
-  const map: Record<string, string> = { P0: "CRITICAL", P1: "HIGH", P2: "MEDIUM", P3: "LOW" };
+  const map: Record<string, string> = {
+    P0: "CRITICAL",
+    P1: "HIGH",
+    P2: "MEDIUM",
+    P3: "LOW",
+  };
   return map[p ?? ""] ?? "MEDIUM";
 };
 const mapSourceToEnum = (s: string): string => {
@@ -419,6 +429,8 @@ export default function CompleteIncidentQualityAssurancePage() {
   const [submittedId, setSubmittedId] = useState("");
   const [activeEngineStep, setActiveEngineStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
 
   // Playbook Simulation Overlay States
   const [playbookName, setPlaybookName] = useState<string | null>(null);
@@ -766,26 +778,29 @@ export default function CompleteIncidentQualityAssurancePage() {
   // Similar Incidents Scanning Engine — uses real incidents from API, falls back to [] when loading
   const similarHistory = useMemo(() => {
     const source = liveIncidents;
-    return source.map((h) => {
-      let matchScore = 0;
-      if (h.service === service) matchScore += 42;
-      if (h.cat === categoryDetected && categoryDetected !== "Unknown")
-        matchScore += 30;
-      const sharedTagsCount = h.tags.filter((tg: string) => tags.includes(tg)).length;
-      matchScore += sharedTagsCount * 10;
-      h.tags.forEach((tg: string) => {
-        if (textContext.includes(tg)) matchScore += 4;
-      });
-      if (
-        title &&
-        h.title
-          .toLowerCase()
-          .split(" ")
-          .some((w: string) => w.length > 4 && textContext.includes(w))
-      )
-        matchScore += 6;
-      return { ...h, m: Math.min(98, matchScore) };
-    })
+    return source
+      .map((h) => {
+        let matchScore = 0;
+        if (h.service === service) matchScore += 42;
+        if (h.cat === categoryDetected && categoryDetected !== "Unknown")
+          matchScore += 30;
+        const sharedTagsCount = h.tags.filter((tg: string) =>
+          tags.includes(tg),
+        ).length;
+        matchScore += sharedTagsCount * 10;
+        h.tags.forEach((tg: string) => {
+          if (textContext.includes(tg)) matchScore += 4;
+        });
+        if (
+          title &&
+          h.title
+            .toLowerCase()
+            .split(" ")
+            .some((w: string) => w.length > 4 && textContext.includes(w))
+        )
+          matchScore += 6;
+        return { ...h, m: Math.min(98, matchScore) };
+      })
       .filter((h) => h.m > 20)
       .sort((a, b) => b.m - a.m)
       .slice(0, 3);
@@ -1008,7 +1023,9 @@ export default function CompleteIncidentQualityAssurancePage() {
       {
         key: "deploy",
         label: "AI detected deployment",
-        status: deploymentDetected ? "verified" : ("evidence-missing" as string),
+        status: deploymentDetected
+          ? "verified"
+          : ("evidence-missing" as string),
         detail: deploymentDetected
           ? `Deployment activity correlated to the impact window for ${service || "the affected service"}.`
           : "No deployment signal detected in the incident window.",
@@ -1020,8 +1037,8 @@ export default function CompleteIncidentQualityAssurancePage() {
         detail: verified.impact
           ? "Customer-impact evidence attached and confirmed."
           : customerImpactDetected
-          ? `Customer impact inferred from signals on ${service || "the affected service"} — no explicit evidence attached.`
-          : "No customer impact detected from current signals.",
+            ? `Customer impact inferred from signals on ${service || "the affected service"} — no explicit evidence attached.`
+            : "No customer impact detected from current signals.",
       },
       {
         key: "rollback",
@@ -1031,8 +1048,8 @@ export default function CompleteIncidentQualityAssurancePage() {
         detail: verified.rollback
           ? "Rollback candidate confirmed by engineer."
           : categoryDetected === "Code Regression"
-          ? `Rollback candidate proposed for ${service || "the affected service"} — more evidence required.`
-          : "Rollback confidence is low — incident category is not Code Regression.",
+            ? `Rollback candidate proposed for ${service || "the affected service"} — more evidence required.`
+            : "Rollback confidence is low — incident category is not Code Regression.",
       },
       {
         key: "alert",
@@ -1047,7 +1064,14 @@ export default function CompleteIncidentQualityAssurancePage() {
             : "No monitoring alert confirmed — incident source is not from a monitoring system.",
       },
     ];
-  }, [verified, deploymentDetected, customerImpactDetected, categoryDetected, service, source]);
+  }, [
+    verified,
+    deploymentDetected,
+    customerImpactDetected,
+    categoryDetected,
+    service,
+    source,
+  ]);
 
   // ─── ACTION DRIVERS ───
   const handleAutoRaise = () => {
@@ -1150,7 +1174,8 @@ export default function CompleteIncidentQualityAssurancePage() {
           labels: tags,
         };
         const result = await createMutation.mutateAsync(payload);
-        finalId = (result as any)?.data?.id ?? (result as any)?.data?.ticketId ?? null;
+        finalId =
+          (result as any)?.data?.id ?? (result as any)?.data?.ticketId ?? null;
       }
 
       if (finalId) {
@@ -1647,13 +1672,7 @@ export default function CompleteIncidentQualityAssurancePage() {
                           }}
                         />
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {}}
-                        className="h-9 px-3.5 border rounded-lg text-xs font-bold hover:bg-zinc-50 bg-white shadow-2xs"
-                      >
-                        Save draft
-                      </button>
+
                       <Button
                         type="button"
                         onClick={executeIncidentRaiseSubmit}
@@ -2088,20 +2107,6 @@ export default function CompleteIncidentQualityAssurancePage() {
                   {title}
                 </h2>
               </div>
-
-              <div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setPlaybookName(
-                      PLAYBOOKS[categoryDetected] || "General Triage",
-                    )
-                  }
-                  className="h-10 px-4 rounded-lg bg-[#4f46e5] hover:bg-[#3730a3] text-white text-xs font-bold shadow-xs flex items-center gap-2 transition-all whitespace-nowrap"
-                >
-                  <BookOpen size={13} /> Open Recommended Playbook
-                </button>
-              </div>
             </div>
 
             {/* Split Report Grid Channels Layout */}
@@ -2315,18 +2320,32 @@ export default function CompleteIncidentQualityAssurancePage() {
               >
                 Edit Incident
               </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  setIsSubmitted(false);
-                  handleResetAll();
-                  setIsLoading(true);
-                }}
-                size="sm"
-                rightIcon={<ArrowRight size={15} />}
-              >
-                Submit
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    router.back();
+                  }}
+                  size="sm"
+                  variant="outline-dark"
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setIsSubmitted(false);
+                    handleResetAll();
+                    setIsLoading(true);
+                  }}
+                  size="sm"
+                  className="bg-red-500"
+                  rightIcon={<ArrowRight size={15} />}
+                >
+                  Merge
+                </Button>
+              </div>
             </div>
           </section>
         )}
@@ -2334,8 +2353,11 @@ export default function CompleteIncidentQualityAssurancePage() {
 
       <ValidationLoadingModal
         isOpen={isLoading}
-        onComplete={() => {
+        onComplete={() => {}}
+        actionLabel="Continue to incident"
+        onActionClick={() => {
           setIsLoading(false);
+          router.back();
         }}
       />
     </div>

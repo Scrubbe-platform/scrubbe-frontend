@@ -4,7 +4,7 @@ import { IncidentListItem } from "@/lib/incident/incident.types";
 
 type FilterKey =
   | "status"
-  | "priority"
+  | "severity"
   | "environment"
   | "service"
   | "rootCause"

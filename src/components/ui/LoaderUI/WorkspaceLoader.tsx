@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -35,6 +36,7 @@ function useWorkspaceLoader(steps: LoadingStep[], onComplete?: () => void) {
   const [currentLabel, setCurrentLabel] = useState("Initialising...");
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +70,7 @@ function useWorkspaceLoader(steps: LoadingStep[], onComplete?: () => void) {
         stepIndex++;
 
         if (stepIndex === steps.length) {
+          router.replace("/incident/tickets");
           clearInterval(ticker);
           setTimeout(() => {
             if (!cancelled) {

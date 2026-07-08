@@ -872,6 +872,17 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
             <div className="px-5 py-5 border-t border-gray-100 space-y-3">
               <Link
+                href="/waitlist"
+                onClick={onClose}
+                className="block w-full text-center py-3 rounded-xl text-[14px] font-bold text-white border-none"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
+                }}
+              >
+                Join Waitlist
+              </Link>
+              <Link
                 href="/auth/signin"
                 onClick={onClose}
                 className="block w-full text-center py-3 rounded-xl text-[14px] font-bold text-white border-none"
@@ -918,6 +929,12 @@ export default function Navbar() {
           </div>
 
           <div className="hidden xl:flex items-center gap-3 ml-auto">
+            <Link
+              href="/waitlist"
+              className="px-5 bg-IMSDarkGreen py-2.5 rounded-lg text-[13.5px] font-bold text-white border-none hover:brightness-110 transition-all"
+            >
+              Join Waitlist
+            </Link>
             <Link
               href="/auth/signin"
               className="px-5 py-2.5 rounded-lg text-[13.5px] font-bold text-white border-none hover:brightness-110 transition-all"

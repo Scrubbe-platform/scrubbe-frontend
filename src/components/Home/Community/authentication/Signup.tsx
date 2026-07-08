@@ -11,6 +11,7 @@ import { Suspense, useState } from "react";
 import { BiCheck } from "react-icons/bi";
 import OtpInput from "@/components/ui/OtpInput";
 import { toast } from "sonner";
+import IdleLoader from "@/components/ui/LoaderUI/IdleLoader";
 
 const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 
@@ -110,7 +111,7 @@ export default function SignUp() {
 
   const SuccessPage = ({ fullname }: { fullname: string }) => {
     return (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<IdleLoader />}>
         <div className="w-full p-6 flex flex-col items-center justify-center min-h-96">
           <div className="mb-8">
             {/* Enhanced Success Icon with concentric circles */}

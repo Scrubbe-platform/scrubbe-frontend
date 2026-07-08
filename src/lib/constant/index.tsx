@@ -1087,7 +1087,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Problems",
       Icon: HiOutlineArrowsRightLeft,
       link: "/incident/problems",
-      isActive: false,
+      isActive: true,
       isMenu: false,
     },
     {

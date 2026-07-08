@@ -25,6 +25,7 @@ import { AxiosError } from "axios";
 import { BiCheck } from "react-icons/bi";
 import { apiClient } from "@/lib/api/client";
 import { endpoint } from "@/lib/api/endpoint";
+import IdleLoader from "../ui/LoaderUI/IdleLoader";
 
 // Define the form schema using zod
 export const developerSignupSchema = z
@@ -42,9 +43,11 @@ export const developerSignupSchema = z
       .max(100, { message: "Password must be less than 100 characters" })
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/,
-        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
       ),
-    confirmPassword: z.string().min(1, { message: "Confirm password is required" }),
+    confirmPassword: z
+      .string()
+      .min(1, { message: "Confirm password is required" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -201,7 +204,7 @@ export default function DeveloperSignupForm() {
   // Success Page Component
   const SuccessPage = ({ firstName, lastName }: SuccessPageProps) => {
     return (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<IdleLoader />}>
         <div className="w-full p-6 flex flex-col items-center justify-center min-h-96">
           {session.status == "loading" && (
             <div className=" absolute inset-0 bg-black/20 z-50 flex justify-center pt-[20%]">
@@ -257,7 +260,7 @@ export default function DeveloperSignupForm() {
       toast.success("OTP sent successfully");
     } catch (error) {
       toast.error(
-        error instanceof AxiosError ? error.response?.data?.message : "failed"
+        error instanceof AxiosError ? error.response?.data?.message : "failed",
       );
     }
   };
@@ -273,7 +276,7 @@ export default function DeveloperSignupForm() {
     );
   };
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<IdleLoader />}>
       <div className="w-full p-6">
         {showSuccess && formData && (
           <SuccessPage

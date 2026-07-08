@@ -10,6 +10,7 @@ import ThemeProvider from "@/components/ThemeProvider";
 import Image from "next/image";
 import { QueryClientProviders } from "@/provider/QueryClientProvider";
 import WorkspaceLoader from "@/components/ui/LoaderUI/WorkspaceLoader";
+import IdleLoader from "@/components/ui/LoaderUI/IdleLoader";
 
 const bersley = localFont({
   src: [
@@ -88,7 +89,13 @@ export default function RootLayout({
         ></script>
       </head>
       <body className="antialiased min-h-screen w-full flex flex-col font-airbnb">
-        <Suspense fallback={<WorkspaceLoader />}>
+        <Suspense
+          fallback={
+            <>
+              <IdleLoader />
+            </>
+          }
+        >
           <QueryClientProviders>
             <ThemeProvider>
               <AuthProvider>

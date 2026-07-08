@@ -41,19 +41,21 @@ const LiveViewers = ({ title, ticketId }: Props) => {
 
   const viewers = useMemo(
     () =>
-      presenceRows.map((row) => {
-        const member = memberMap.get(row.userId);
-        const name = member
-          ? `${member.firstname} ${member.lastname}`.trim()
-          : row.userId;
-        return {
-          userId: row.userId,
-          name: name || member?.email || "Unknown",
-          role: member?.role ?? "",
-          colorClass: colorClassFor(row.userId),
-          isYou: row.userId === user?.id,
-        };
-      }),
+      presenceRows
+        .filter((i) => i?.userId !== user?.id)
+        .map((row) => {
+          const member = memberMap.get(row.userId);
+          const name = member
+            ? `${member.firstname} ${member.lastname}`.trim()
+            : row.userId;
+          return {
+            userId: row.userId,
+            name: name || member?.email || "Unknown",
+            role: member?.role ?? "",
+            colorClass: colorClassFor(row.userId),
+            isYou: row.userId === user?.id,
+          };
+        }),
     [presenceRows, memberMap, user?.id],
   );
 
@@ -61,6 +63,10 @@ const LiveViewers = ({ title, ticketId }: Props) => {
     setChatMemberId(userId);
     setOpenChatModal(true);
   };
+
+  if (viewers.length < 1) {
+    return null;
+  }
 
   return (
     <div>
