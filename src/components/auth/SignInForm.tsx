@@ -590,7 +590,7 @@ export default function SignInForm() {
 
   return (
     <Suspense fallback={<IdleLoader />}>
-      <div className="w-full relative">
+      <div className="w-full max-w-lg relative">
         {isSpinning && (
           <div className="absolute inset-0 bg-white/70 z-50 flex items-center justify-center rounded-2xl">
             <Loader2 className="animate-spin text-emerald-500" size={28} />

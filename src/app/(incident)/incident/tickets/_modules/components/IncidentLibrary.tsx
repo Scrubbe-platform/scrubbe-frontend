@@ -2,13 +2,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import {
-  Search,
-  Download,
-  BarChart3,
-  Sparkles,
-  Plus,
-} from "lucide-react";
+import { Search, Download, BarChart3, Sparkles, Plus } from "lucide-react";
 import { IncidentListItem } from "@/lib/incident/incident.types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteIncident } from "@/lib/incident/incident.api";
@@ -35,10 +29,10 @@ import IncidentContextDetails from "./IncidentContextDetails";
 import { useRouter } from "next/navigation";
 
 export const priColors: { [key: string]: string } = {
-  CRITICAL: "text-red-600 bg-red-50 border-red-100",
-  HIGH: "text-amber-600 bg-amber-50 border-amber-100",
-  MEDIUM: "text-blue-600 bg-blue-50 border-blue-100",
-  LOW: "text-zinc-500 bg-zinc-50 border-zinc-100",
+  P0: "text-red-600 bg-red-50 border-red-100",
+  P1: "text-amber-600 bg-amber-50 border-amber-100",
+  P2: "text-blue-600 bg-blue-50 border-blue-100",
+  P3: "text-zinc-500 bg-zinc-50 border-zinc-100",
 };
 export const priText: { [key: string]: string } = {
   CRITICAL: "P0",
@@ -75,7 +69,7 @@ export default function IncidentLibraryPage() {
   const [dateRange, setDateRange] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     status: new Set<string>(),
-    priority: new Set<string>(),
+    severity: new Set<string>(),
     environment: new Set<string>(),
     service: new Set<string>(),
     rootCause: new Set<string>(),
@@ -105,7 +99,7 @@ export default function IncidentLibraryPage() {
         const matchesStatus =
           filters.status.size === 0 || filters.status.has(i.status);
         const matchesPriority =
-          filters.priority.size === 0 || filters.priority.has(i.priority);
+          filters.severity.size === 0 || filters.severity.has(i.severity);
         const matchesEnv =
           filters.environment.size === 0 ||
           filters.environment.has(i.environment);
@@ -131,7 +125,7 @@ export default function IncidentLibraryPage() {
           );
         if (sort === "duration-desc") return b.MTTR - a.MTTR;
         if (sort === "priority-asc")
-          return a.priority.localeCompare(b.priority);
+          return a.severity.localeCompare(b.severity);
         return 0;
       });
   }, [incidents, search, sort, filters]);
@@ -164,7 +158,7 @@ export default function IncidentLibraryPage() {
   const clearAllFilters = () => {
     setFilters({
       status: new Set(),
-      priority: new Set(),
+      severity: new Set(),
       environment: new Set(),
       service: new Set(),
       rootCause: new Set(),
@@ -268,8 +262,15 @@ export default function IncidentLibraryPage() {
   const handleMerge = () => {};
   const handleArchive = () => {
     if (selectedIds.size === 0) return;
-    if (!confirm(`Archive ${selectedIds.size} incident(s)? This cannot be undone.`)) return;
-    Promise.all(Array.from(selectedIds).map((id) => archiveMutation.mutateAsync(id))).catch(() => {});
+    if (
+      !confirm(
+        `Archive ${selectedIds.size} incident(s)? This cannot be undone.`,
+      )
+    )
+      return;
+    Promise.all(
+      Array.from(selectedIds).map((id) => archiveMutation.mutateAsync(id)),
+    ).catch(() => {});
   };
   const handleArchiveSingle = (id: string) => {
     if (!confirm("Archive this incident? This cannot be undone.")) return;
@@ -302,7 +303,7 @@ export default function IncidentLibraryPage() {
       <KpiStrip
         incidents={incidents}
         onKpiFilter={(p) =>
-          setFilters((prev) => ({ ...prev, priority: new Set([p]) }))
+          setFilters((prev) => ({ ...prev, severity: new Set([p]) }))
         }
       />
 
@@ -481,9 +482,9 @@ export default function IncidentLibraryPage() {
                       </td>
                       <td className="p-3">
                         <span
-                          className={`px-2 py-0.5 border rounded-md text-[10.5px] font-bold ${priColors[i.priority]}`}
+                          className={`px-2 py-0.5 border rounded-md text-[10.5px] font-bold ${priColors[i.severity]}`}
                         >
-                          {priText[i.priority] || i.priority}
+                          {i.severity}
                         </span>
                       </td>
                       <td className="p-3 font-medium text-zinc-700">
@@ -665,7 +666,9 @@ export default function IncidentLibraryPage() {
         incidentIds={activeModal.payload}
         allData={incidents}
         onClose={() => setActiveModal({ type: null })}
-        onGenerateRca={(ids) => setActiveModal({ type: "doc", kind: "rca", payload: ids })}
+        onGenerateRca={(ids) =>
+          setActiveModal({ type: "doc", kind: "rca", payload: ids })
+        }
       />
       <TrendsModal
         isOpen={activeModal.type === "trends"}

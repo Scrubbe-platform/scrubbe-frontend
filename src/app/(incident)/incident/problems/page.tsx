@@ -1,44 +1,25 @@
 // app/developer/problems/page.tsx
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
-  Search,
   SlidersHorizontal,
   Layers,
-  Download,
-  BarChart3,
-  Sparkles,
-  RefreshCw,
   X,
-  FileText,
-  Check,
-  Trash2,
-  ShieldAlert,
-  ChevronDown,
-  HelpCircle,
-  Play,
-  Pause,
   Activity,
-  Clock,
   Plus,
   Bookmark,
-  Eye,
-  EyeOff,
   Lock,
-  MessageSquare,
-  Flame,
   CheckCircle2,
   AlertCircle,
-  ShieldCheck,
-  ArrowRight,
-  ExternalLink,
-  Calendar,
   User,
   List,
+  BookOpen,
+  FileText,
 } from "lucide-react";
 import StatsCard from "./_modules/components/StatsCard";
 import Dropdown, { DropdownItem } from "@/components/ui/Dropdown";
+import Button from "@/components/ui/Button1";
 
 // ─── INITIAL BASELINE REPOSITORY DATA MANIFESTS ───
 const INITIAL_RECORDS = [
@@ -52,7 +33,10 @@ const INITIAL_RECORDS = [
     category: "Database",
     status: "Known Error",
     owner: "pay",
-    assignee: "am",
+    assignee: {
+      name: "Paschal Ifediora",
+      role: "Problem Manager",
+    },
     watchers: 7,
     watching: true,
     opened: "May 11",
@@ -126,7 +110,10 @@ const INITIAL_RECORDS = [
     findings: [
       {
         type: "Evidence",
-        author: "ce",
+        author: {
+          name: "Paschal Ifediora",
+          role: "Problem Manager",
+        },
         ts: "May 11 · 09:50",
         body: "Connection-pool saturation precedes every gateway error spike by 40–70 seconds, consistent across all five correlated incident windows.",
         source: "Telemetry · 5 incident windows",
@@ -134,7 +121,10 @@ const INITIAL_RECORDS = [
       },
       {
         type: "Evidence",
-        author: "df",
+        author: {
+          name: "Paschal Ifediora",
+          role: "Problem Manager",
+        },
         ts: "May 11 · 10:03",
         body: "Database rejected 1,284 connection attempts at the 200-connection ceiling during the SI-003188 window, aligned with fleet scale-out to 12 replicas.",
         source: "pg_stat_activity + server logs",
@@ -142,7 +132,10 @@ const INITIAL_RECORDS = [
       },
       {
         type: "Evidence",
-        author: "ca",
+        author: {
+          name: "Paschal Ifediora",
+          role: "Problem Manager",
+        },
         ts: "May 11 · 10:08",
         body: "maximumPoolSize is hardcoded to 20 and unaware of replica count; no shared connection layer (PgBouncer) is present in the path.",
         source: "payments-api@v4.18.2 config",
@@ -150,7 +143,10 @@ const INITIAL_RECORDS = [
       },
       {
         type: "Observation",
-        author: "am",
+        author: {
+          name: "Paschal Ifediora",
+          role: "Problem Manager",
+        },
         ts: "May 11 · 10:15",
         body: "Confirmed the autoscaler reaches 12 replicas during the 18:00–20:00 checkout peak on every incident date. Connection demand at 12×20 exceeds the database ceiling — the maths is unambiguous.",
         source: null,
@@ -158,7 +154,10 @@ const INITIAL_RECORDS = [
       },
       {
         type: "Decision",
-        author: "pi",
+        author: {
+          name: "Paschal Ifediora",
+          role: "Problem Manager",
+        },
         ts: "May 11 · 10:21",
         body: "Root cause accepted as replica-unaware pool sizing with a secondary statement-timeout amplifier. Promoting record to Known Error and authorising the interim workaround while the permanent fix is designed.",
         source: null,
@@ -227,7 +226,10 @@ const INITIAL_RECORDS = [
     category: "Application",
     status: "Investigating",
     owner: "rel",
-    assignee: "jt",
+    assignee: {
+      name: "Paschal Ifediora",
+      role: "Problem Manager",
+    },
     watchers: 3,
     watching: false,
     opened: "May 22",
@@ -279,7 +281,10 @@ const INITIAL_RECORDS = [
     findings: [
       {
         type: "Evidence",
-        author: "ce",
+        author: {
+          name: "Paschal Ifediora",
+          role: "Problem Manager",
+        },
         ts: "May 30 · 08:20",
         body: "Heap grows approximately 80MB per hour between restarts under steady traffic, independent of message volume.",
         source: "Continuous heap sampling",
@@ -287,7 +292,10 @@ const INITIAL_RECORDS = [
       },
       {
         type: "Hypothesis",
-        author: "jt",
+        author: {
+          name: "Paschal Ifediora",
+          role: "Problem Manager",
+        },
         ts: "May 30 · 09:10",
         body: "Retained-heap analysis suggests the retry-tracking map is the dominant growth source. Capturing a confirming diff across two restart cycles before treating this as the root cause.",
         source: "Heap snapshot",
@@ -446,9 +454,11 @@ export default function ProblemRecordsDashboard() {
     owners: [] as string[],
     assignees: [] as string[],
     kb: "any",
-    dateField: "",
-    datePreset: "",
+    dateField: "opened",
+    datePreset: "any",
   });
+
+  const ezraLogRef = useRef<HTMLDivElement>(null);
 
   // Seed Timeline logs on state mount
   const computedRecords = useMemo(() => {
@@ -456,7 +466,7 @@ export default function ProblemRecordsDashboard() {
       const ev: any[] = [];
       ev.push({
         ts: r.opened + " · 00:00",
-        author: "ce",
+        author: { name: "Paschal Ifediora", role: "Problem Manager" },
         t: "Problem record opened",
         d: "Matching incident signatures clustered into a single record.",
         ok: false,
@@ -483,15 +493,21 @@ export default function ProblemRecordsDashboard() {
       if (r.status === "Resolved")
         ev.push({
           ts: r.kb.lastSynced || r.activity,
-          author: "pi",
+          author: { name: "Paschal Ifediora", role: "Problem Manager" },
           t: "Record resolved and closed",
           d: "All remediation steps verified.",
           ok: true,
         });
 
-      const timeline = ev
-        .reverse()
-        .map((e) => ({ ...e, hash: shortHash(e.ts + e.t + e.d + e.author) }));
+      const timeline = ev.reverse().map((e) => ({
+        ...e,
+        hash: shortHash(
+          e.ts +
+            e.t +
+            e.d +
+            (typeof e.author === "string" ? e.author : e.author.name),
+        ),
+      }));
       return { ...r, timeline };
     });
   }, [records]);
@@ -514,7 +530,7 @@ export default function ProblemRecordsDashboard() {
         if (af.pris.length && !af.pris.includes(r.priority)) return false;
         if (af.cats.length && !af.cats.includes(r.category)) return false;
         if (af.owners.length && !af.owners.includes(r.owner)) return false;
-        if (af.assignees.length && !af.assignees.includes(r.assignee))
+        if (af.assignees.length && !af.assignees.includes(r.assignee.name))
           return false;
         if (af.kb === "published" && !r.kb.published) return false;
         if (af.kb === "unpublished" && r.kb.published) return false;
@@ -568,33 +584,6 @@ export default function ProblemRecordsDashboard() {
   const handleAddNewFinding = (e: React.FormEvent) => {
     e.preventDefault();
     if (!fBody.trim() || !selectedId) return;
-
-    setRecords((prev) =>
-      prev.map((r) => {
-        if (r.id !== selectedId) return r;
-        const nextFindings = [
-          ...r.findings,
-          {
-            type: fType,
-            author: "pi",
-            ts: "Just now",
-            body: fBody.trim(),
-            source: fSource.trim() || null,
-            conf: fConf ? parseInt(fConf) : null,
-          },
-        ];
-        let nextStatus = r.status;
-        if (r.status === "Investigating" && fType === "Decision")
-          nextStatus = "Known Error";
-        return {
-          ...r,
-          findings: nextFindings,
-          status: nextStatus,
-          activity: "Just now",
-        };
-      }),
-    );
-
     setFBody("");
     setFSource("");
     setFConf("");
@@ -603,71 +592,15 @@ export default function ProblemRecordsDashboard() {
 
   const handleSignoffStep = (idx: number) => {
     if (!selectedId) return;
-    setRecords((prev) =>
-      prev.map((r) => {
-        if (r.id !== selectedId) return r;
-        const updated = [...r.steps];
-        if (updated[idx].done) {
-          updated[idx] = {
-            ...updated[idx],
-            done: false,
-            by: undefined,
-            at: undefined,
-            note: undefined,
-          };
-        } else {
-          setCompletingStepIdx(idx);
-          setCompletionNote("");
-          return r;
-        }
-        return { ...r, steps: updated, activity: "Just now" };
-      }),
-    );
   };
 
   const commitSignoffStep = (idx: number) => {
-    setRecords((prev) =>
-      prev.map((r) => {
-        if (r.id !== selectedId) return r;
-        const updated = [...r.steps];
-        updated[idx] = {
-          ...updated[idx],
-          done: true,
-          by: "pi",
-          at: "Just now",
-          note: completionNote.trim() || undefined,
-        };
-        return { ...r, steps: updated, activity: "Just now" };
-      }),
-    );
     setCompletingStepIdx(null);
   };
 
   const handleAddPlanStep = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newStepTitle.trim() || !selectedId) return;
-
-    setRecords((prev) =>
-      prev.map((r) => {
-        if (r.id !== selectedId) return r;
-        return {
-          ...r,
-          steps: [
-            ...r.steps,
-            {
-              t: newStepTitle.trim(),
-              d: newStepDetail.trim() || "No explicit description appended.",
-              tags: newStepTags
-                ? newStepTags.split(",").map((t) => t.trim())
-                : ["Manual"],
-              chg: newStepChg.trim() || null,
-              done: false,
-            },
-          ],
-          activity: "Just now",
-        };
-      }),
-    );
 
     setNewStepTitle("");
     setNewStepDetail("");
@@ -690,7 +623,7 @@ export default function ProblemRecordsDashboard() {
       category: newRecCat,
       status: "Investigating",
       owner: "rel",
-      assignee: "pi",
+      assignee: { name: "Paschal Ifediora", role: "Problem Manager" },
       watchers: 1,
       watching: true,
       opened: "Just now",
@@ -710,7 +643,10 @@ export default function ProblemRecordsDashboard() {
       findings: [
         {
           type: "Observation",
-          author: "pi",
+          author: {
+            name: "Paschal Ifediora",
+            role: "Problem Manager",
+          },
           ts: "Just now",
           body: "Problem workspace established.",
           source: null,
@@ -736,7 +672,7 @@ export default function ProblemRecordsDashboard() {
       timeline: [],
     };
 
-    setRecords([newRecordNode, ...records]);
+    setRecords([]);
     setSelectedId(nextId);
     setIsNewRecordModalOpen(false);
     setNewRecTitle("");
@@ -916,7 +852,7 @@ export default function ProblemRecordsDashboard() {
                 <div className="p-4 space-y-4 max-h-[440px] overflow-y-auto divide-y divide-zinc-100 scrollbar-thin">
                   {/* Section: Date & Time parameters */}
                   <div className="space-y-2 pb-2">
-                    <label className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 uppercase block">
+                    <label className="text-[10px]  font-bold tracking-wider text-zinc-400 uppercase block">
                       Date Constraints
                     </label>
                     <div className="flex gap-2">
@@ -956,7 +892,7 @@ export default function ProblemRecordsDashboard() {
 
                   {/* Section: Priority Code Options Grid */}
                   <div className="space-y-2 pt-3 pb-1">
-                    <span className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 uppercase block">
+                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 uppercase block">
                       Severity Scale
                     </span>
                     <div className="flex flex-wrap gap-1">
@@ -969,7 +905,7 @@ export default function ProblemRecordsDashboard() {
                             onClick={() =>
                               handleToggleAdvancedFilter("pris", p)
                             }
-                            className={`px-3 h-8 border rounded-lg flex items-center gap-2 font-mono text-[11px] font-bold transition-all ${active ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+                            className={`px-3 h-8 border rounded-lg flex items-center gap-2  text-[11px] font-bold transition-all ${active ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
                           >
                             <span
                               className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
@@ -985,8 +921,8 @@ export default function ProblemRecordsDashboard() {
 
                   {/* Section: Infrastructure Categories */}
                   <div className="space-y-2 pt-3 pb-1">
-                    <span className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 uppercase block">
-                      Distortion Category
+                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 uppercase block">
+                      Type Category
                     </span>
                     <div className="flex flex-wrap gap-1">
                       {[
@@ -1021,7 +957,7 @@ export default function ProblemRecordsDashboard() {
 
                   {/* Section: Owning team lists grids */}
                   <div className="space-y-2 pt-3 pb-1">
-                    <span className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 uppercase block">
+                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 uppercase block">
                       Owning Operational Team
                     </span>
                     <div className="flex flex-wrap gap-1">
@@ -1050,21 +986,25 @@ export default function ProblemRecordsDashboard() {
 
                   {/* Section: Assignees */}
                   <div className="space-y-2 pt-3">
-                    <span className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 uppercase block">
+                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 uppercase block">
                       Assigned Problem Manager
                     </span>
                     <div className="flex flex-wrap gap-1">
                       {Object.entries(PEOPLE)
                         .filter(([_, p]) => !p.sys)
                         .map(([key, value]) => {
-                          const active =
-                            advancedFilters.assignees.includes(key);
+                          const active = advancedFilters.assignees.includes(
+                            value.name,
+                          );
                           return (
                             <button
                               key={key}
                               type="button"
                               onClick={() =>
-                                handleToggleAdvancedFilter("assignees", key)
+                                handleToggleAdvancedFilter(
+                                  "assignees",
+                                  value.name,
+                                )
                               }
                               className={`px-3 h-8 border rounded-lg flex items-center gap-2 font-medium transition-all ${active ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
                             >
@@ -1099,41 +1039,41 @@ export default function ProblemRecordsDashboard() {
           </div>
           <div className="h-4 w-px bg-zinc-200 mx-1" />
 
-          <button
+          <Button
             onClick={() => setIsNewRecordModalOpen(true)}
-            className=" p-2 bg-IMSCyan text-white text-sm font-bold rounded-lg shadow-sm flex items-center gap-1.5"
+            size="sm"
+            leftIcon={<Plus size={14} />}
           >
-            <Plus size={14} /> New Record
-          </button>
+            New Record
+          </Button>
         </div>
       </div>
 
-      {/* ─── DUAL-COLUMN WORKSPACE STAGE CANVAS ─── */}
-      <div className="max-w-[1540px] mx-auto px-7 grid grid-cols-1 lg:grid-cols-12 gap-4 items-start mt-2">
-        {/* SIDE BAR 1: PROBLEM RECORDS LEFTHAND LIST CHANNELS */}
-        <div className="col-span-12 lg:col-span-4 xl:col-span-3 bg-white border border-zinc-200 rounded-xl shadow-2xs overflow-hidden flex flex-col max-h-[calc(100vh-140px)] sticky top-20">
-          <div className="px-4 py-3 bg-zinc-50/50 border-b flex items-center justify-between relative select-none">
-            <label className="flex items-center gap-2 text-xs font-bold text-zinc-800 cursor-pointer">
+      {/* ─── DUAL-COLUMN WORKSPACE ─── */}
+      <div className="max-w-[1540px] mx-auto px-7 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mt-2">
+        {/* LEFT RAIL */}
+        <div className="col-span-12 lg:col-span-4 xl:col-span-3 bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden flex flex-col max-h-[calc(100vh-140px)] sticky top-20">
+          <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between relative select-none">
+            <label className="flex items-center gap-2 text-sm font-bold text-zinc-900 cursor-pointer">
               <input
                 type="checkbox"
                 checked={isAllVisibleSelected}
                 onChange={handleToggleSelectAll}
-                className="accent-emerald-600 h-3.5 w-3.5 rounded"
+                className="accent-emerald-500 h-3.5 w-3.5 rounded"
               />
-              <span>Records Feed</span>
+              Records Feed
             </label>
-            <span className="font-mono text-[11px] font-bold text-zinc-400">
+            <span className=" text-[11px] text-zinc-400">
               ({processedRecords.length} items)
             </span>
 
-            {/* Inline Bulk Operations Dock row header injection */}
             {isAnyVisibleSelected && (
-              <div className="absolute inset-0 bg-zinc-950 text-white px-3 flex items-center justify-between text-xs font-bold animate-fadeIn">
-                <span>{selectedRowIds.size} Selected</span>
-                <div className="flex gap-1.5 text-[11px]">
+              <div className="absolute inset-0 bg-zinc-950 text-white px-3 flex items-center justify-between text-xs font-bold animate-fadeIn z-10">
+                <span>{selectedRowIds.size} selected</span>
+                <div className="flex gap-2 text-[11px]">
                   <button
                     onClick={() => {
-                      alert("Exporting JSON metadata mapping packet.");
+                      alert("Exporting selection.");
                       setSelectedRowIds(new Set());
                     }}
                     className="hover:text-emerald-400 transition-colors"
@@ -1151,7 +1091,7 @@ export default function ProblemRecordsDashboard() {
                       );
                       setSelectedRowIds(new Set());
                     }}
-                    className="text-emerald-400 font-bold hover:opacity-90"
+                    className="text-emerald-400 font-bold"
                   >
                     Resolve
                   </button>
@@ -1166,15 +1106,17 @@ export default function ProblemRecordsDashboard() {
             )}
           </div>
 
-          <div className="overflow-y-auto divide-y divide-zinc-100 flex-1 scrollbar-thin">
+          <div className="overflow-y-auto divide-y divide-zinc-100 flex-1">
             {processedRecords.map((r) => {
               const active = r.id === selectedId;
               const isChecked = selectedRowIds.has(r.id);
-              const totalSteps = r.steps.length;
-              const passedSteps = r.steps.filter((x) => x.done).length;
-              const pct = totalSteps
-                ? Math.round((passedSteps / totalSteps) * 100)
+              const pct = r.steps.length
+                ? Math.round(
+                    (r.steps.filter((x) => x.done).length / r.steps.length) *
+                      100,
+                  )
                 : 0;
+              const isDone = r.status === "Resolved";
 
               return (
                 <div
@@ -1183,75 +1125,136 @@ export default function ProblemRecordsDashboard() {
                     setSelectedId(r.id);
                     setActiveTab("overview");
                   }}
-                  className={`p-4 text-left cursor-pointer transition-all hover:bg-zinc-50/40 relative group ${active ? "bg-indigo-50/40 border-l-2 border-indigo-600" : isChecked ? "bg-zinc-50/70" : ""}`}
+                  className={`p-4 cursor-pointer transition-all hover:bg-zinc-50 relative group border-l-2 ${
+                    active
+                      ? "bg-blue-50/60 border-l-blue-600"
+                      : "border-l-transparent"
+                  } ${isChecked ? "bg-zinc-50" : ""}`}
                 >
-                  <div className="flex items-center gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 mb-2">
                     <input
                       type="checkbox"
                       checked={isChecked}
                       onClick={(e) => e.stopPropagation()}
                       onChange={(e) => handleToggleRowCheckbox(r.id, e as any)}
-                      className="accent-emerald-600 h-3 w-3 rounded opacity-0 group-hover:opacity-100 checked:opacity-100 transition-opacity"
+                      className="accent-emerald-500 h-3 w-3 rounded opacity-0 group-hover:opacity-100 checked:opacity-100 transition-opacity"
                     />
-                    <span className="font-mono font-bold text-[11px] text-zinc-400">
-                      {r.id}
-                    </span>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-100 border text-zinc-500 font-mono ml-auto">
-                      {r.priority}
+                    <div className="flex items-center gap-2">
+                      <span className=" text-[11px] text-zinc-400 font-medium">
+                        {r.id}
+                      </span>
+                      {/* Priority badge */}
+                      <span
+                        className={`  text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                          r.priority === "P0"
+                            ? "bg-red-50 text-red-700"
+                            : r.priority === "P1"
+                              ? "bg-amber-50 text-amber-700"
+                              : r.priority === "P2"
+                                ? "bg-blue-50 text-blue-700"
+                                : "bg-zinc-100 text-zinc-500"
+                        }`}
+                      >
+                        {r.priority}
+                      </span>
+                    </div>
+                    <span
+                      className={`ml-auto inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full ${
+                        r?.status === "Known Error"
+                          ? "bg-amber-50 text-amber-700"
+                          : r?.status === "Resolved"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-blue-50 text-blue-700"
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          r?.status === "Known Error"
+                            ? "bg-amber-500"
+                            : r?.status === "Resolved"
+                              ? "bg-emerald-500"
+                              : "bg-blue-500"
+                        }`}
+                      />
+                      {r?.status}
                     </span>
                   </div>
+
                   <h4
-                    className={`text-zinc-900 font-bold tracking-tight leading-snug ${density === "compact" ? "text-xs line-clamp-1" : "text-[13px] line-clamp-2"}`}
+                    className={`font-semibold text-zinc-900 leading-snug mb-2 ${
+                      density === "compact"
+                        ? "text-xs line-clamp-1"
+                        : "text-[13.5px] line-clamp-2"
+                    }`}
                   >
                     {r.title}
                   </h4>
 
-                  <div className="flex items-center justify-between text-[10.5px] font-medium text-zinc-400 mt-2.5 font-mono">
+                  <div className="flex items-center gap-4 text-[11px]  text-zinc-400 mb-2">
                     <span>{r.incidents.length} offenses</span>
+                    <span>{r.findings.length} findings</span>
                     <span>{r.activity}</span>
-                  </div>
-                  {/* Dynamic Resolution percentage bar */}
-                  <div className="h-1 w-full bg-zinc-100 rounded-full overflow-hidden mt-2">
-                    <div
-                      className="h-full bg-indigo-500 transition-all"
-                      style={{
-                        width: `${pct}%`,
-                        backgroundColor:
-                          r.status === "Resolved" ? "#1f9d5b" : "#4f46e5",
-                      }}
-                    />
                   </div>
                 </div>
               );
             })}
 
             {processedRecords.length === 0 && (
-              <div className="p-8 text-center text-xs text-zinc-400 italic">
-                No historical problem records match the filter spectrum
-                definitions.
+              <div className="p-10 text-center text-sm text-zinc-400 italic">
+                No records match the current filter.
               </div>
             )}
           </div>
         </div>
 
-        {/* SIDE BAR 2: DETAILED RECORD AUDIT CANVAS WORKSPACE */}
-        <div className="col-span-12 lg:col-span-8 xl:col-span-9 bg-white border border-zinc-200 rounded-xl shadow-2xs overflow-hidden min-h-[500px]">
+        {/* RIGHT DETAIL PANEL */}
+        <div className="col-span-12 lg:col-span-8 xl:col-span-9 bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden min-h-[500px]">
           {activeRecord ? (
             <div className="animate-fadeIn">
-              {/* Header profile matrix area */}
-              <div className="p-6 pb-4 space-y-4">
-                <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-zinc-400">
-                  <span className="font-mono text-zinc-900 bg-zinc-100 px-2 py-0.5 rounded border">
-                    {activeRecord.id}
+              {/* Detail header */}
+              <div className="px-7 pt-6 pb-0">
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <span
+                    className={`  text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                      activeRecord.priority === "P0"
+                        ? "bg-red-50 text-red-700"
+                        : activeRecord.priority === "P1"
+                          ? "bg-amber-50 text-amber-700"
+                          : activeRecord.priority === "P2"
+                            ? "bg-blue-50 text-blue-700"
+                            : "bg-zinc-100 text-zinc-500"
+                    }`}
+                  >
+                    {activeRecord?.priority}
                   </span>
-                  <span>&bull;</span>
-                  <span className="capitalize text-zinc-700 bg-zinc-50 px-2 py-0.5 rounded border font-mono text-[11px]">
-                    {activeRecord.category}
+                  <span className=" text-[10.5px] text-zinc-500 bg-zinc-50 px-2 py-0.5 rounded border border-zinc-100">
+                    {activeRecord?.id}
+                  </span>
+                  {/* Status badge */}
+                  <span
+                    className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full ${
+                      activeRecord.status === "Known Error"
+                        ? "bg-amber-50 text-amber-700"
+                        : activeRecord.status === "Resolved"
+                          ? "bg-emerald-50 text-emerald-700"
+                          : "bg-blue-50 text-blue-700"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        activeRecord.status === "Known Error"
+                          ? "bg-amber-500"
+                          : activeRecord.status === "Resolved"
+                            ? "bg-emerald-500"
+                            : "bg-blue-500"
+                      }`}
+                    />
+                    {activeRecord.status}
                   </span>
 
-                  <div className="flex gap-1.5 ml-auto">
+                  <div className="flex gap-2 ml-auto">
                     {activeRecord.status !== "Resolved" ? (
-                      <button
+                      <Button
                         onClick={() => {
                           setRecords((prev) =>
                             prev.map((x) =>
@@ -1260,170 +1263,307 @@ export default function ProblemRecordsDashboard() {
                                 : x,
                             ),
                           );
-                          alert(
-                            "Problem record closed. Downstream KBs synchronized successfully.",
-                          );
                         }}
-                        className="h-7 px-3.5 bg-zinc-950 text-white font-bold rounded-lg hover:bg-zinc-800 text-[11px] shadow-sm transition-all"
+                        size="sm"
                       >
-                        Resolve &amp; Close Record
-                      </button>
+                        Resolve &amp; close record
+                      </Button>
                     ) : (
-                      <span className="h-7 px-2.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-100 text-[11px] flex items-center">
-                        ✓ Resolution Verified
+                      <span className="h-8 px-3 rounded-lg bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100 text-xs flex items-center gap-1.5">
+                        <CheckCircle2 size={13} /> Resolution verified
                       </span>
                     )}
                   </div>
                 </div>
 
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 leading-snug">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 leading-snug mb-5">
                   {activeRecord.title}
                 </h2>
 
-                {/* Meta Matrix data block keys */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-zinc-100 pt-4 text-xs font-medium text-zinc-600 leading-none">
-                  <div>
-                    <span className="text-zinc-400 block mb-1 font-mono text-[9px] uppercase tracking-wider">
-                      Owning Team
-                    </span>{" "}
-                    {OWNERS[activeRecord.owner] || activeRecord.owner}
-                  </div>
-                  <div>
-                    <span className="text-zinc-400 block mb-1 font-mono text-[9px] uppercase tracking-wider">
-                      Assignee Profile
-                    </span>{" "}
-                    {PEOPLE[activeRecord.assignee as keyof typeof PEOPLE]
-                      ?.name || activeRecord.assignee}
-                  </div>
-                  <div>
-                    <span className="text-zinc-400 block mb-1 font-mono text-[9px] uppercase tracking-wider">
-                      Urgency Impact
-                    </span>{" "}
-                    {activeRecord.impact} / {activeRecord.urgency}
-                  </div>
-                  <div>
-                    <span className="text-zinc-400 block mb-1 font-mono text-[9px] uppercase tracking-wider">
-                      Corporate Watchers
-                    </span>{" "}
-                    {activeRecord.watchers} operators
-                  </div>
+                {/* Meta grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 py-4 border-t border-zinc-100">
+                  {[
+                    {
+                      label: "Owning team",
+                      value: OWNERS[activeRecord.owner] || activeRecord.owner,
+                    },
+                    {
+                      label: "Assignee",
+                      value: activeRecord.assignee.name,
+                    },
+                    {
+                      label: "Impact / Urgency",
+                      value: `${activeRecord.impact} / ${activeRecord.urgency}`,
+                    },
+                    {
+                      label: "Opened",
+                      value: activeRecord.opened,
+                    },
+                    {
+                      label: "Watchers",
+                      value: `${activeRecord.watchers} operators`,
+                    },
+                  ].map(({ label, value }) => (
+                    <div key={label}>
+                      <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-1">
+                        {label}
+                      </p>
+                      <p className="text-sm font-semibold text-zinc-700">
+                        {value}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Segmented layout Navigation Tabs panel strips */}
-              <div className="flex border-b border-zinc-100 bg-zinc-50/50 px-6 gap-6 text-xs font-bold text-zinc-500">
+              {/* Progress strip */}
+              {(() => {
+                const total = activeRecord.steps.length;
+                const done = activeRecord.steps.filter((x) => x.done).length;
+                const pct = total ? Math.round((done / total) * 100) : 0;
+                const full = pct === 100;
+                return (
+                  <div className="flex items-center gap-4 px-7 py-3 bg-zinc-50/60 border-y border-zinc-100">
+                    <span className=" text-xs font-bold text-zinc-400 whitespace-nowrap">
+                      Permanent resolution <strong>{pct}</strong>%
+                    </span>
+                    <div className="flex-1 h-1.5 bg-zinc-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${pct}%`,
+                          backgroundColor: full ? "#00C896" : "#1A4FA0",
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm text-zinc-500 whitespace-nowrap">
+                      <b className="text-zinc-900 font-bold">{done}</b> of{" "}
+                      <b className="text-zinc-900 font-bold">{total}</b> steps
+                      complete
+                    </span>
+                  </div>
+                );
+              })()}
+
+              {/* Tabs */}
+              <div className="flex gap-0 px-7 border-b border-zinc-100 bg-white overflow-x-auto">
                 {[
-                  { id: "overview", label: "Recap Overview" },
+                  { id: "overview", label: "Overview" },
                   {
                     id: "findings",
-                    label: `Investigation Findings Ledger (${activeRecord.findings.length})`,
+                    label: "Findings",
+                    count: activeRecord.findings.length,
                   },
                   {
                     id: "resolution",
-                    label: `Remediation Checkpoints (${activeRecord.steps.filter((x) => x.done).length}/${activeRecord.steps.length})`,
+                    label: "Resolution",
+                    count: `${activeRecord.steps.filter((x) => x.done).length}/${activeRecord.steps.length}`,
                   },
                   {
                     id: "kb",
-                    label: activeRecord.kb.published
-                      ? "KB Asset Synced"
-                      : "KB Generation Draft",
+                    label: "Knowledge Base",
+                    count: activeRecord.kb.published ? "synced" : "draft",
+                  },
+                  {
+                    id: "activity",
+                    label: "Activity",
+                    count: activeRecord.timeline.length,
                   },
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`py-3 border-b-2 transition-colors cursor-pointer ${activeTab === tab.id ? "border-zinc-950 text-zinc-950 font-black" : "border-transparent hover:text-zinc-800"}`}
+                    className={`py-3.5 mr-6 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
+                      activeTab === tab.id
+                        ? "border-emerald-500 text-zinc-900"
+                        : "border-transparent text-zinc-500 hover:text-zinc-700"
+                    }`}
                   >
                     {tab.label}
+                    {tab.count !== undefined && (
+                      <span className=" text-[10px] bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded-full">
+                        {tab.count}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
 
-              {/* TAB INNER CONTENT HUB BOX VIEW SPANS */}
-              <div className="p-6 min-h-[260px]">
-                {/* SUB TAB VALUE 1: OVERVIEW METRIC CHANNELS */}
+              {/* Tab content */}
+              <div className="p-7 min-h-[260px]">
+                {/* OVERVIEW TAB */}
                 {activeTab === "overview" && (
-                  <div className="space-y-6 animate-fadeIn text-xs leading-relaxed">
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 uppercase block">
-                        Executive Recurrence Summary
-                      </span>
-                      <p className="text-sm font-normal text-zinc-700 leading-relaxed bg-zinc-50/40 p-3.5 border rounded-xl">
+                  <div className="space-y-6 animate-fadeIn">
+                    {/* Summary */}
+                    <div>
+                      <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-2">
+                        Summary
+                      </p>
+                      <p className="text-sm text-zinc-700 leading-relaxed bg-zinc-50/50 p-4 border border-zinc-100 rounded-xl">
                         {activeRecord.summary}
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Root cause confirmation card */}
-                      <div className="p-4 border rounded-xl bg-zinc-50/50 space-y-2">
-                        <span className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 uppercase block">
-                          Root Cause Insight ({activeRecord.confidence}% match)
-                        </span>
-                        <h4 className="font-bold text-zinc-950 text-[13px]">
-                          {activeRecord.rootcause.title}
-                        </h4>
-                        <p className="text-zinc-600 font-medium leading-normal">
-                          {activeRecord.rootcause.body}
-                        </p>
+                      {/* Root cause card — two column with confidence ring */}
+                      <div className="p-4 border border-zinc-200 rounded-xl bg-zinc-50/40 flex gap-4 items-start">
+                        {/* Confidence ring */}
+                        <div className="shrink-0 flex flex-col items-center gap-1 pt-1">
+                          <svg width="64" height="64" viewBox="0 0 64 64">
+                            <circle
+                              cx="32"
+                              cy="32"
+                              r="26"
+                              fill="none"
+                              stroke="#E8EAEF"
+                              strokeWidth="6"
+                            />
+                            <circle
+                              cx="32"
+                              cy="32"
+                              r="26"
+                              fill="none"
+                              stroke="#067A5C"
+                              strokeWidth="6"
+                              strokeLinecap="round"
+                              strokeDasharray={`${(activeRecord.confidence / 100) * 163.4} 163.4`}
+                              transform="rotate(-90 32 32)"
+                            />
+                            <text
+                              x="32"
+                              y="32"
+                              dy="0.3em"
+                              textAnchor="middle"
+                              fontSize="13"
+                              fontWeight="800"
+                              fill="#067A5C"
+                              fontFamily="inherit"
+                            >
+                              {activeRecord.confidence}%
+                            </text>
+                          </svg>
+                          <span className=" text-[8.5px] uppercase tracking-widest text-zinc-400">
+                            match
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-2">
+                            Root cause
+                          </p>
+                          <h4 className="font-bold text-zinc-950 text-sm leading-snug mb-2">
+                            {activeRecord.rootcause.title}
+                          </h4>
+                          <p className="text-xs text-zinc-600 leading-relaxed">
+                            {activeRecord.rootcause.body}
+                          </p>
+                        </div>
                       </div>
 
-                      {/* Interim Workarounds modules logs */}
-                      {activeRecord.workaround && (
-                        <div className="p-4 border border-amber-200/80 bg-amber-50/30 rounded-xl space-y-2">
-                          <span className="text-[10px] font-mono font-bold tracking-wider text-amber-700 uppercase block">
-                            Active Interim Workaround Mitigation
-                          </span>
-                          <p className="text-amber-950 leading-relaxed font-medium">
-                            {activeRecord.workaround.text}
-                          </p>
+                      {/* Workaround */}
+                      {activeRecord.workaround?.text && (
+                        <div className="p-4 border border-amber-200 bg-amber-50/40 rounded-xl flex gap-3 items-start">
+                          <AlertCircle
+                            size={18}
+                            className="text-amber-500 shrink-0 mt-0.5"
+                          />
+                          <div>
+                            <p className="font-bold text-amber-800 text-sm mb-1">
+                              Active workaround
+                            </p>
+                            <p className="text-xs text-amber-900/80 leading-relaxed">
+                              {activeRecord.workaround.text}
+                            </p>
+                          </div>
                         </div>
                       )}
                     </div>
 
-                    {/* Correlated offenses instances loop records */}
-                    <div className="space-y-2">
-                      <span className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 uppercase block">
-                        Aggregated Telemetry Offenses
-                      </span>
-                      <div className="divide-y border rounded-xl overflow-hidden bg-white">
-                        {activeRecord.incidents.map((i, idx) => (
+                    {/* Correlated incidents */}
+                    <div>
+                      <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-3">
+                        Correlated incidents ({activeRecord.incidents.length})
+                      </p>
+                      <div className="border border-zinc-100 rounded-xl overflow-hidden divide-y divide-zinc-100">
+                        {activeRecord.incidents.map((inc, idx) => (
                           <div
                             key={idx}
-                            className="p-2.5 flex items-center justify-between font-mono text-[11px] text-zinc-600 font-medium"
+                            className="flex items-center gap-3 px-4 py-3"
                           >
-                            <span className="font-bold text-zinc-900">
-                              {i.id}
+                            <span
+                              className={` text-xs font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                                inc.sev === "P0"
+                                  ? "bg-red-50 text-red-700"
+                                  : inc.sev === "P1"
+                                    ? "bg-amber-50 text-amber-700"
+                                    : "bg-blue-50 text-blue-700"
+                              }`}
+                            >
+                              {inc.sev}
                             </span>
-                            <span className="font-sans truncate text-left flex-1 px-4 text-zinc-500">
-                              {i.desc}
+                            <span className=" text-sm font-semibold text-zinc-900 shrink-0">
+                              {inc.id}
                             </span>
-                            <span className="text-zinc-400 shrink-0">
-                              {i.date}
+                            <span className="text-sm text-zinc-500 flex-1 truncate">
+                              {inc.desc}
+                            </span>
+                            <span className=" text-xs text-zinc-400 shrink-0">
+                              {inc.date}
                             </span>
                           </div>
                         ))}
                       </div>
                     </div>
+
+                    {/* Affected services */}
+                    {activeRecord.services.length > 0 && (
+                      <div>
+                        <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-3">
+                          Affected services
+                        </p>
+                        <div className="border border-zinc-100 rounded-xl overflow-hidden divide-y divide-zinc-100">
+                          {activeRecord.services.map((svc, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-3 px-4 py-3"
+                            >
+                              <span className=" text-sm text-zinc-700 flex-1">
+                                {svc.n}
+                              </span>
+                              <span
+                                className={`text-xs font-semibold px-2.5 py-1 rounded-md border ${svc.cls}`}
+                              >
+                                {svc.i}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* SUB TAB VALUE 2: IMMUTABLE INVESTIGATION LEDGER */}
+                {/* FINDINGS TAB */}
                 {activeTab === "findings" && (
                   <div className="space-y-4 animate-fadeIn">
-                    {/* Add new appended finding form composer panel */}
+                    <div className="flex items-center gap-2 text-xs text-zinc-400 bg-zinc-50 border border-zinc-100 rounded-lg px-3 py-2">
+                      <Lock size={12} />
+                      Findings are immutable once appended. Authorship is
+                      stamped on sign-off.
+                    </div>
+
                     <form
                       onSubmit={handleAddNewFinding}
-                      className="border bg-zinc-50/40 p-4 rounded-xl space-y-3"
+                      className="border border-zinc-200 bg-zinc-50/40 p-4 rounded-xl space-y-3"
                     >
-                      <div className="text-xs font-bold text-zinc-700 flex items-center gap-1.5 uppercase">
+                      <div className="font-semibold text-sm text-zinc-800 flex items-center gap-1.5">
                         <Plus size={14} className="text-emerald-600" /> Log
-                        Diagnostic Observation Evidence
+                        diagnostic observation
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <select
                           value={fType}
                           onChange={(e) => setFType(e.target.value)}
-                          className="h-9 border px-2 text-xs font-bold bg-white rounded-md cursor-pointer outline-none"
+                          className="h-9 border px-2 text-sm font-semibold bg-white rounded-lg outline-none border-zinc-200 focus:border-emerald-500"
                         >
                           {[
                             "Observation",
@@ -1432,62 +1572,63 @@ export default function ProblemRecordsDashboard() {
                             "Test result",
                             "Decision",
                           ].map((x) => (
-                            <option key={x} value={x}>
-                              {x}
-                            </option>
+                            <option key={x}>{x}</option>
                           ))}
                         </select>
                         <input
                           type="text"
-                          placeholder="Source telemetry reference..."
+                          placeholder="Source / telemetry reference..."
                           value={fSource}
                           onChange={(e) => setFSource(e.target.value)}
-                          className="h-9 border px-3 text-xs bg-white rounded-md outline-none flex-1 col-span-2"
+                          className="h-9 border px-3 text-sm bg-white rounded-lg outline-none col-span-2 border-zinc-200 focus:border-emerald-500"
                         />
                       </div>
                       <textarea
                         rows={2}
-                        placeholder="Type absolute facts or transaction observations here. Once appended, logs cannot be modified."
+                        placeholder="Type observations here. Once appended, entries cannot be modified."
                         value={fBody}
                         onChange={(e) => setFBody(e.target.value)}
-                        className="w-full text-xs font-medium border p-2 rounded-md bg-white outline-none leading-relaxed resize-y"
+                        className="w-full text-sm border p-3 rounded-lg bg-white outline-none leading-relaxed resize-y border-zinc-200 focus:border-emerald-500"
                       />
-                      <div className="flex justify-between items-center pt-1">
-                        <span className="text-[10px] text-zinc-400 font-medium leading-tight max-w-sm">
-                          Findings entry layers remain permanent. Authorship is
-                          stamped on sign-off.
-                        </span>
-                        <button
-                          type="submit"
-                          className="h-8 px-3.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-lg shadow-sm"
-                        >
-                          Append Findings Node
-                        </button>
+                      <div className="flex justify-end">
+                        <Button type="submit" size="sm">
+                          Append finding
+                        </Button>
                       </div>
                     </form>
 
-                    {/* Render existing listings reverse chronologically */}
-                    <div className="space-y-2.5">
+                    <div className="space-y-3">
                       {[...activeRecord.findings].reverse().map((f, i) => (
                         <div
                           key={i}
-                          className="p-4 border rounded-xl bg-white shadow-3xs space-y-2 text-xs"
+                          className="p-4 border border-zinc-100 rounded-xl bg-white space-y-2"
                         >
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2 py-0.5 rounded border font-mono font-bold tracking-wider text-[10px] uppercase bg-zinc-100 text-zinc-700">
+                            <span className="px-2 py-0.5 rounded border  font-bold text-[10px] uppercase bg-zinc-100 text-zinc-600 border-zinc-200">
                               {f.type}
                             </span>
-                            <span className="font-mono text-zinc-400 text-[11px] ml-auto">
+                            <div className="flex items-center gap-2">
+                              <div className="bg-blue-900 text-white rounded-md size-7 text-sm justify-center items-center flex uppercase">
+                                {f?.author?.name?.slice(0, 2)}
+                              </div>
+                              <span className="text-sm">{f?.author.name}</span>
+                            </div>
+                            {f.conf && (
+                              <span className=" text-[10px] text-emerald-700 font-bold">
+                                {f.conf}% confidence
+                              </span>
+                            )}
+                            <span className=" text-[11px] text-zinc-400 ml-auto">
                               {f.ts}
                             </span>
                           </div>
-                          <p className="text-zinc-800 leading-relaxed font-medium">
+                          <p className="text-sm text-zinc-700 leading-relaxed">
                             {f.body}
                           </p>
                           {f.source && (
-                            <div className="text-[11px] font-mono text-indigo-700 font-semibold tracking-tight">
-                              Source Context: {f.source}
-                            </div>
+                            <p className=" text-[11px] text-blue-700 font-semibold">
+                              ↳ {f.source}
+                            </p>
                           )}
                         </div>
                       ))}
@@ -1495,213 +1636,249 @@ export default function ProblemRecordsDashboard() {
                   </div>
                 )}
 
-                {/* SUB TAB VALUE 3: REMEDIATION ACTION PLAN BLOCK */}
+                {/* RESOLUTION TAB */}
                 {activeTab === "resolution" && (
-                  <div className="space-y-4定位 animate-fadeIn">
-                    {/* Add action plan steps matrix loop */}
-                    <div className="space-y-3">
-                      {activeRecord.steps.map((step, idx) => {
-                        const isCompleting = completingStepIdx === idx;
-                        return (
-                          <div
-                            key={idx}
-                            className={`p-4 border rounded-xl space-y-2 text-xs font-medium relative transition-all ${step.done ? "border-emerald-200 bg-emerald-50/20 text-emerald-950" : "border-zinc-200 text-zinc-700"}`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <input
-                                type="checkbox"
-                                checked={step.done}
-                                onChange={() => handleSignoffStep(idx)}
-                                className="accent-emerald-600 h-4 w-4 rounded shrink-0 mt-0.5 cursor-pointer"
-                              />
-                              <div className="flex-1 space-y-1">
-                                <div className="font-mono text-[9.5px] font-bold text-zinc-400 uppercase tracking-wider">
-                                  Step {idx + 1}
+                  <div className="space-y-3 animate-fadeIn">
+                    {activeRecord.steps.map((step, idx) => {
+                      const isCompleting = completingStepIdx === idx;
+                      return (
+                        <div
+                          key={idx}
+                          className={`p-4 border rounded-xl space-y-2 text-sm transition-all ${
+                            step.done
+                              ? "border-emerald-200 bg-emerald-50/20"
+                              : "border-zinc-200"
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <input
+                              type="checkbox"
+                              checked={step.done}
+                              onChange={() => handleSignoffStep(idx)}
+                              className="accent-emerald-600 h-4 w-4 rounded shrink-0 mt-0.5 cursor-pointer"
+                            />
+                            <div className="flex-1 space-y-1">
+                              <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400">
+                                Step {idx + 1}
+                              </p>
+                              <h4 className="font-bold text-zinc-950 text-[13.5px] leading-tight">
+                                {step.t}
+                              </h4>
+                              <p className="text-xs text-zinc-500 leading-relaxed">
+                                {step.d}
+                              </p>
+                              {step.tags?.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {step.tags.map((tag) => (
+                                    <span
+                                      key={tag}
+                                      className=" text-[10px] bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded"
+                                    >
+                                      {tag}
+                                    </span>
+                                  ))}
                                 </div>
-                                <h4 className="font-bold text-zinc-950 text-[13.5px] leading-tight">
-                                  {step.t}
-                                </h4>
-                                <p className="text-zinc-500 font-normal leading-relaxed">
-                                  {step.d}
-                                </p>
-                              </div>
+                              )}
                             </div>
-
-                            {/* Sign-off completion justification box form */}
-                            {isCompleting && !step.done && (
-                              <div className="bg-zinc-50 border p-3 rounded-lg flex gap-2 items-center mt-2 animate-fadeIn">
-                                <input
-                                  type="text"
-                                  placeholder="Provide optional validation logs or change request hash..."
-                                  value={completionNote}
-                                  onChange={(e) =>
-                                    setCompletionNote(e.target.value)
-                                  }
-                                  className="h-8.5 text-xs px-2.5 border bg-white flex-1 rounded outline-none"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => commitSignoffStep(idx)}
-                                  className="h-8.5 px-3 bg-emerald-600 text-white rounded font-bold"
-                                >
-                                  Authorize Check
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setCompletingStepIdx(null)}
-                                  className="h-8.5 px-2.5 text-zinc-400 hover:text-zinc-600"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            )}
-
-                            {step.done && step.by && (
-                              <div className="text-[11px] font-mono text-emerald-800 font-bold bg-emerald-50/50 p-2 rounded-lg border border-emerald-100 mt-1 flex items-center gap-1.5">
-                                <CheckCircle2 size={12} /> Verified by
-                                supervisor // {step.at}{" "}
-                                {step.note ? `— "${step.note}"` : ""}
-                              </div>
-                            )}
                           </div>
-                        );
-                      })}
-                    </div>
 
-                    {/* Step creation drawer form trigger */}
+                          {isCompleting && !step.done && (
+                            <div className="bg-zinc-50 border border-zinc-200 p-3 rounded-lg flex gap-2 items-center animate-fadeIn">
+                              <input
+                                type="text"
+                                placeholder="Optional validation note or change request..."
+                                value={completionNote}
+                                onChange={(e) =>
+                                  setCompletionNote(e.target.value)
+                                }
+                                className="h-8 text-xs px-2.5 border border-zinc-200 bg-white flex-1 rounded-lg outline-none focus:border-emerald-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => commitSignoffStep(idx)}
+                                className="h-8 px-3 bg-emerald-600 text-white rounded-lg font-semibold text-xs"
+                              >
+                                Authorize
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setCompletingStepIdx(null)}
+                                className="h-8 px-2.5 text-zinc-400 hover:text-zinc-600 text-xs"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          )}
+
+                          {step.done && step.by && (
+                            <div className="text-[11px]  text-emerald-700 font-semibold bg-emerald-50 p-2 rounded-lg border border-emerald-100 flex items-center gap-1.5 mt-1">
+                              <CheckCircle2 size={12} /> Verified · {step.at}
+                              {step.note ? ` — "${step.note}"` : ""}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
                     {isAddingStep ? (
                       <form
                         onSubmit={handleAddPlanStep}
-                        className="border bg-zinc-50/40 p-4 rounded-xl space-y-3 text-xs animate-fadeIn"
+                        className="border border-zinc-200 bg-zinc-50/40 p-4 rounded-xl space-y-3 text-sm animate-fadeIn"
                       >
-                        <div className="font-bold text-zinc-700 uppercase tracking-wider">
-                          Add Permanent Resolution Plan Step
-                        </div>
+                        <p className="font-semibold text-zinc-800">
+                          Add resolution step
+                        </p>
                         <input
                           type="text"
-                          placeholder="Step title (e.g. Apply schema indices migrations)"
+                          placeholder="Step title..."
                           value={newStepTitle}
                           onChange={(e) => setNewStepTitle(e.target.value)}
-                          className="h-9 w-full border px-3 rounded-md outline-none bg-white font-medium"
+                          className="h-9 w-full border border-zinc-200 px-3 rounded-lg outline-none bg-white text-sm focus:border-emerald-500"
                         />
                         <textarea
-                          placeholder="How will this implementation path be explicitly validated?"
+                          placeholder="How will this be validated?"
                           value={newStepDetail}
                           onChange={(e) => setNewStepDetail(e.target.value)}
-                          className="w-full border p-2.5 rounded-md bg-white outline-none leading-relaxed"
+                          className="w-full border border-zinc-200 p-2.5 rounded-lg bg-white outline-none leading-relaxed text-sm resize-y focus:border-emerald-500"
                         />
                         <div className="flex gap-2 justify-end">
                           <button
                             type="button"
                             onClick={() => setIsAddingStep(false)}
-                            className="h-8.5 px-3 text-zinc-500"
+                            className="h-8 px-3 text-zinc-500 text-sm"
                           >
                             Cancel
                           </button>
                           <button
                             type="submit"
-                            className="h-8.5 px-4 bg-zinc-950 text-white font-bold rounded-lg shadow-sm"
+                            className="h-8 px-4 bg-zinc-950 text-white font-semibold rounded-lg text-sm"
                           >
-                            Append Plan Action
+                            Add step
                           </button>
                         </div>
                       </form>
                     ) : (
                       <button
                         onClick={() => setIsAddingStep(true)}
-                        className="w-full h-11 border border-dashed border-zinc-200 hover:border-zinc-400 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-700 transition-colors flex items-center justify-center gap-1.5 bg-zinc-50/20"
+                        className="w-full h-10 border border-dashed border-zinc-200 hover:border-zinc-400 rounded-xl text-sm font-semibold text-zinc-400 hover:text-zinc-600 transition-colors flex items-center justify-center gap-1.5"
                       >
-                        + Append New Resolution Step
+                        <Plus size={14} /> Add resolution step
                       </button>
                     )}
                   </div>
                 )}
 
-                {/* SUB TAB VALUE 4: KNOWLEDGE BASE INTEGRATION SYNCS */}
+                {/* KB TAB */}
                 {activeTab === "kb" && (
-                  <div className="space-y-4 animate-fadeIn text-xs leading-relaxed">
-                    <div className="p-4 border rounded-xl bg-zinc-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div>
-                        <h4 className="font-bold text-zinc-900 text-sm">
-                          {activeRecord.kb.published
-                            ? "Knowledge Base Article Active"
-                            : "Draft Asset Generation Available"}
-                        </h4>
-                        <p className="text-zinc-500 text-[11.5px] font-medium mt-0.5">
-                          {activeRecord.kb.published
-                            ? `Article reference ${activeRecord.kb.articleId} is distributed cluster-wide.`
-                            : "Publish this problem record structure directly into internal support documentation matrices."}
-                        </p>
-                      </div>
-
-                      <div className="shrink-0 flex items-center gap-3">
-                        <label className="flex items-center gap-1.5 font-semibold text-zinc-600 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={activeRecord.kb.autoSync}
-                            onChange={() => {}}
-                            className="accent-emerald-600 h-3.5 w-3.5"
-                          />{" "}
-                          Auto-sync amendments
-                        </label>
-                        {!activeRecord.kb.published && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setRecords((prev) =>
-                                prev.map((x) =>
-                                  x.id === activeRecord.id
-                                    ? {
-                                        ...x,
-                                        kb: {
-                                          ...x.kb,
-                                          published: true,
-                                          articleId: "KB-8912",
-                                          lastSynced: "Just now",
-                                        },
-                                      }
-                                    : x,
-                                ),
-                              );
-                              alert(
-                                "Knowledge Base summary published successfully.",
-                              );
-                            }}
-                            className="h-8.5 px-3.5 bg-emerald-600 text-white font-bold rounded-lg shadow-sm text-xs hover:bg-emerald-500"
-                          >
-                            Publish KB
-                          </button>
+                  <div className="space-y-5 animate-fadeIn">
+                    {/* Status card */}
+                    <div className="flex items-center gap-4 p-4 border border-zinc-200 rounded-xl bg-zinc-50/60 flex-wrap">
+                      {/* Icon */}
+                      <div
+                        className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                          activeRecord.kb.published
+                            ? "bg-emerald-50"
+                            : "bg-zinc-100"
+                        }`}
+                      >
+                        {activeRecord.kb.published ? (
+                          <BookOpen size={20} className="text-emerald-600" />
+                        ) : (
+                          <FileText size={20} className="text-zinc-400" />
                         )}
                       </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-zinc-900 text-sm">
+                          {activeRecord.kb.published
+                            ? "Published to knowledge base"
+                            : "Not yet published"}
+                        </p>
+                        <p className="text-xs text-zinc-500 margin-top:2px">
+                          {activeRecord.kb.published ? (
+                            <>
+                              Article{" "}
+                              <span className="text-emerald-700 font-semibold font-mono">
+                                {activeRecord.kb.articleId}
+                              </span>{" "}
+                              &middot; last synced {activeRecord.kb.lastSynced}
+                            </>
+                          ) : (
+                            "Publish this record to generate a searchable knowledge base article for support and on-call teams."
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ACTIVITY TAB */}
+                {activeTab === "activity" && (
+                  <div className="space-y-4 animate-fadeIn">
+                    <div className="flex items-center gap-2 text-xs text-zinc-400 bg-zinc-50 border border-zinc-100 rounded-lg px-3 py-2">
+                      <Lock size={12} />
+                      Complete audit trail &bull; every entry is attributed,
+                      timestamped and content-hashed. This log is append-only.
                     </div>
 
-                    {/* Article synthesized document frame review mockup */}
-                    <div className="border rounded-xl overflow-hidden bg-white">
-                      <div className="px-4 py-2.5 bg-zinc-50/50 border-b font-mono font-bold uppercase tracking-wider text-[10px] text-zinc-400">
-                        Synthesized Documentation Layout Blueprint
-                      </div>
-                      <div className="p-5 space-y-4 text-zinc-800">
-                        <h3 className="text-base font-bold text-zinc-950 leading-tight">
-                          {activeRecord.title}
-                        </h3>
-                        <div>
-                          <span className="text-[10px] font-mono font-bold tracking-wider text-emerald-700 uppercase block mb-1">
-                            Causal Investigation Diagnoses
-                          </span>
-                          <p className="text-zinc-600 font-medium leading-relaxed">
-                            {activeRecord.rootcause.body}
-                          </p>
-                        </div>
-                      </div>
+                    <div className="relative pl-6 border-l border-zinc-200 ml-3 space-y-6">
+                      {activeRecord.timeline.map((item: any, idx: number) => {
+                        const isStringAuthor = typeof item.author === "string";
+                        const authorName = isStringAuthor
+                          ? PEOPLE[item.author as keyof typeof PEOPLE]?.name ||
+                            item.author
+                          : item.author.name;
+                        const authorInitials = isStringAuthor
+                          ? PEOPLE[item.author as keyof typeof PEOPLE]?.init ||
+                            "??"
+                          : item.author.init ||
+                            item.author.name
+                              ?.split(" ")
+                              .map((n: string) => n[0])
+                              .join("") ||
+                            "??";
+
+                        return (
+                          <div key={item.hash || idx} className="relative">
+                            {/* Timeline Node Ring Marker */}
+                            <div
+                              className={`absolute -left-[30px] top-1.5 w-2 h-2 rounded-full border bg-white ${item.ok ? "border-emerald-500 ring-4 ring-emerald-50" : "border-blue-500 ring-4 ring-blue-50"}`}
+                            />
+
+                            <div className="space-y-1 text-xs">
+                              <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-400 ">
+                                <span className="bg-blue-50 border border-blue-100/50 text-blue-700 px-1.5 py-0.5 rounded font-sans font-medium flex items-center gap-1.5">
+                                  {/* <span className="w-6 h-6 rounded bg-blue-700 text-white text-[8px] flex items-center justify-center font-bold ">
+                                    {authorInitials}
+                                  </span> */}
+                                  {authorName}
+                                </span>
+                                <span>&bull;</span>
+                                <span>{item.ts}</span>
+                                <span className="ml-auto inline-flex items-center gap-1 text-[10.5px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100/30">
+                                  <Lock size={10} /> {item.hash}
+                                </span>
+                              </div>
+                              <h5 className="font-bold text-zinc-950 text-[13.5px] tracking-tight">
+                                {item.t}
+                              </h5>
+                              <p className="text-zinc-500 font-normal leading-relaxed text-xs">
+                                {item.d}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <div className="p-16 text-center text-xs text-zinc-400 italic">
-              Select an active repository list node from the lefthand rail
-              channel feed to load investigation vectors.
+            <div className="p-16 text-center text-sm text-zinc-400 italic">
+              Select a record from the left rail to load its investigation
+              workspace.
             </div>
           )}
         </div>

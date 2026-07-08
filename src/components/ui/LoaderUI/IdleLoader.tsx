@@ -18,7 +18,7 @@ const IdleLoader = () => {
             className="h-20 w-[160px] shrink-0 relative"
           >
             <Image
-              src="/blacklogo.png"
+              src="/IMS/blacklogo.png"
               alt="scrubbe"
               fill
               className="object-contain"
