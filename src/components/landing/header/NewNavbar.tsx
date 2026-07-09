@@ -874,11 +874,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
               <Link
                 href="/waitlist"
                 onClick={onClose}
-                className="block w-full text-center py-3 rounded-xl text-[14px] font-bold text-white border-none"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
-                }}
+                className="block w-full text-center py-3 rounded-xl text-[14px] font-bold border border-IMSDarkGreen text-IMSLightGreen "
               >
                 Join Waitlist
               </Link>
@@ -931,7 +927,7 @@ export default function Navbar() {
           <div className="hidden xl:flex items-center gap-3 ml-auto">
             <Link
               href="/waitlist"
-              className="px-5 bg-IMSDarkGreen py-2.5 rounded-lg text-[13.5px] font-bold text-white border-none hover:brightness-110 transition-all"
+              className="px-5 py-2.5 rounded-lg text-[13.5px] font-bold border border-IMSDarkGreen text-IMSLightGreen hover:brightness-110 transition-all"
             >
               Join Waitlist
             </Link>
@@ -949,13 +945,10 @@ export default function Navbar() {
 
           <div className="flex xl:hidden items-center gap-3 ml-auto">
             <Link
-              href="/auth/signin"
-              className="px-4 py-2 rounded-lg text-[13px] font-bold text-white border-none"
-              style={{
-                background: "linear-gradient(90deg, #1a2a1a 0%, #22c55e 100%)",
-              }}
+              href="/waitlist"
+              className="px-4 py-2 border border-IMSDarkGreen text-IMSLightGreen rounded-lg text-[13px] font-bold "
             >
-              Get Started
+              Join Waitlist
             </Link>
             <button
               onClick={() => setMobileOpen(true)}

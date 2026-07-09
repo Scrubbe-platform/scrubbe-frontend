@@ -702,18 +702,19 @@ export default function ScrubbeEarlyAccessPage() {
                         key={item.id}
                         type="button"
                         onClick={() => handleToggleChallenge(item.id)}
-                        className={`h-9 border px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${
-                          selected
-                            ? "bg-emerald-50 border-emerald-500 text-emerald-800 font-bold"
-                            : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50"
-                        }`}
+                        className={`h-9 border px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50`}
                       >
                         <span
                           className={
                             selected ? "text-emerald-600" : "text-zinc-400"
                           }
                         >
-                          {item.icon}
+                          <input
+                            type="checkbox"
+                            value={item.id}
+                            {...register("challenges")}
+                            className="accent-emerald-600 h-3.5 w-3.5 rounded bg-white border-zinc-300"
+                          />
                         </span>
                         <span className="truncate">{item.label}</span>
                       </button>
@@ -740,7 +741,7 @@ export default function ScrubbeEarlyAccessPage() {
                         type="checkbox"
                         value={item.id}
                         {...register("interests")}
-                        className="accent-emerald-600 h-3.5 w-3.5 rounded border-zinc-300"
+                        className="accent-emerald-600 h-3.5 w-3.5 rounded border-zinc-300 bg-white"
                       />
                       <span className="truncate">{item.label}</span>
                     </label>
@@ -830,7 +831,7 @@ export default function ScrubbeEarlyAccessPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full sm:w-auto h-11 px-8 rounded-xl bg-[#00C896] hover:bg-[#02b386] disabled:opacity-50 text-[#071311] font-bold text-sm flex items-center justify-center gap-2 mx-auto shadow-lg shadow-emerald-500/10 active:scale-98 transition-all"
+                className="w-full sm:w-auto h-11 px-8 rounded-xl bg-IMSDarkGreen text-white disabled:opacity-50  font-bold text-sm flex items-center justify-center gap-2 mx-auto shadow-lg shadow-emerald-500/10 active:scale-98 transition-all"
               >
                 {isSubmitting
                   ? "Submitting Request..."
