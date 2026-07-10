@@ -12,7 +12,7 @@ import {
   Trash2,
   ChevronRight,
 } from "lucide-react";
-import { ACTIONS, FIELDS, COND_GROUPS, ACT_GROUPS } from "./page";
+import { ACTIONS, FIELDS, COND_GROUPS, ACT_GROUPS } from "./rule-config";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
