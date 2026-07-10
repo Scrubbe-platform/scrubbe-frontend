@@ -5,7 +5,6 @@ import React, {
   useCallback,
   useRef,
   useEffect,
-  CSSProperties,
   ReactNode,
 } from "react";
 import {
@@ -31,20 +30,14 @@ import {
   Power,
   ArrowDown,
   VolumeX,
+  Send,
+  BookOpen,
 } from "lucide-react";
-import CButton from "@/components/ui/Button1"; // adjust path as needed
+import { RuleLibraryModal, type LibraryRule } from "./RuleLibraryModal";
+import { AddGuardPanel } from "./AddGuardPanel";
+import Button from "@/components/ui/Button1";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
-
-type ValueType =
-  | "select"
-  | "text"
-  | "num"
-  | "priority"
-  | "days"
-  | "timerange"
-  | "duration"
-  | "bool";
 
 type FieldVal =
   | { type: "select"; options: string[]; unit?: string; placeholder?: string }
@@ -83,6 +76,9 @@ type RepeatOption = "Once" | "Daily" | "Weekly" | "Monthly";
 type ScopeOption = "incident" | "service" | "service+priority";
 type MaxPerOption = "hour" | "day" | "incident";
 type RetryOption = "none" | "once" | "3x" | "5x";
+type BtnVariant = "default" | "primary" | "ghost" | "danger" | "good";
+type BtnSize = "sm" | "md";
+type DropKey = "match" | "cond" | "action" | "guard" | null;
 
 interface Condition {
   id: string;
@@ -95,7 +91,6 @@ interface Condition {
   t1: string;
   t2: string;
 }
-
 interface ConditionGroup {
   id: string;
   kind: "group";
@@ -103,7 +98,6 @@ interface ConditionGroup {
   matchType: MatchType;
   children: Condition[];
 }
-
 type AnyCondition = Condition | ConditionGroup;
 
 interface RuleAction {
@@ -120,7 +114,6 @@ interface GuardValDef {
   pre: string;
   suf: string;
 }
-
 interface GuardItem {
   key: string;
   label: string;
@@ -128,12 +121,10 @@ interface GuardItem {
   val?: GuardValDef;
   intel?: boolean;
 }
-
 interface GuardCatalogGroup {
   sec: string;
   items: GuardItem[];
 }
-
 interface Guard {
   id: string;
   key: string;
@@ -148,30 +139,32 @@ interface ControlsState {
   approval: string;
   timeout: number;
 }
-
 interface ScheduleState {
   mode: ScheduleMode;
   date: string;
   time: string;
   repeat: RepeatOption;
 }
-
 interface ToastItem {
   id: number;
   msg: string;
   kind: "good" | "info" | "error";
 }
-
 interface DropdownItem {
   type?: "sep" | "label";
   label?: string;
   onClick?: () => void;
 }
+interface ActionGroup {
+  sec: string;
+  keys: ActionKey[];
+}
+interface CondGroup {
+  sec: string;
+  fields: FieldKey[];
+}
 
-type BtnVariant = "default" | "primary" | "ghost" | "danger" | "good";
-type BtnSize = "sm" | "md";
-
-// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
 const VT = {
   SELECT: "select" as const,
@@ -184,7 +177,7 @@ const VT = {
   BOOL: "bool" as const,
 };
 
-const FIELDS = {
+export const FIELDS = {
   service: {
     label: "Service",
     ops: ["equals", "not equals", "is any of"],
@@ -500,7 +493,7 @@ const FIELDS = {
   },
 } satisfies Record<string, FieldDef>;
 
-const ACTIONS = {
+export const ACTIONS = {
   createIncident: {
     name: "Create Incident",
     detail: "Priority: Same as triggering event",
@@ -683,16 +676,7 @@ const ACTIONS = {
   },
 } satisfies Record<string, { name: string; detail: string; group: string }>;
 
-interface ActionGroup {
-  sec: string;
-  keys: ActionKey[];
-}
-interface CondGroup {
-  sec: string;
-  fields: FieldKey[];
-}
-
-const ACT_GROUPS: ActionGroup[] = [
+export const ACT_GROUPS: ActionGroup[] = [
   {
     sec: "Execution Governance",
     keys: [
@@ -752,7 +736,7 @@ const ACT_GROUPS: ActionGroup[] = [
   { sec: "Notification", keys: ["sendNotification"] },
 ];
 
-const COND_GROUPS: CondGroup[] = [
+export const COND_GROUPS: CondGroup[] = [
   {
     sec: "EXECUTION GOVERNANCE",
     fields: [
@@ -964,32 +948,6 @@ GUARD_CATALOG.forEach((g) =>
 );
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
-type Day = (typeof DAYS)[number];
-
-// ─── TOKENS ──────────────────────────────────────────────────────────────────
-
-const T = {
-  indigo: "#5b5ef0",
-  indigoSoft: "#eef0fe",
-  indigoLine: "#dfe1fb",
-  indigoInk: "#4a4dd6",
-  green: "#00c896",
-  greenSoft: "#e4faf2",
-  greenInk: "#089a76",
-  red: "#ef4444",
-  teal: "#0d9488",
-  amber: "#f59e0b",
-  amberSoft: "#fef3e2",
-  ink: "#15171c",
-  ink2: "#5a6072",
-  ink3: "#8b91a3",
-  border: "#e7e9ee",
-  borderStrong: "#d8dbe2",
-  surface: "#ffffff",
-  surface2: "#fbfcfd",
-  bg: "#f7f8fa",
-  lav: "#eef0f8",
-} as const;
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -1077,19 +1035,14 @@ const SEED_GUARDS: Guard[] = [
 
 // ─── BTN WRAPPER ─────────────────────────────────────────────────────────────
 
-const VARIANT_CLASSES: Record<BtnVariant, string> = {
+const VARIANT_CLS: Record<BtnVariant, string> = {
   default:
-    "!bg-white !text-[#15171c] !border !border-[#d8dbe2] shadow-sm hover:!bg-[#fbfcfd]",
-  primary: "!bg-[#5b5ef0] hover:!bg-[#4f52ea] !text-white !border-[#5b5ef0]",
+    "!bg-white !text-zinc-900 !border !border-zinc-300 shadow-sm hover:!bg-zinc-50",
+  primary: "",
   ghost:
-    "!bg-transparent !border-transparent !text-[#5b5ef0] !shadow-none hover:!bg-[#eef0fe]",
-  danger: "!bg-white !text-red-500 !border !border-[#d8dbe2] hover:!bg-red-50",
-  good: "!bg-white !text-[#089a76] !border !border-[#d8dbe2] hover:!bg-[#e4faf2]",
-};
-
-const SIZE_CLASSES: Record<BtnSize, string> = {
-  sm: "!h-auto !w-auto !py-1.5 !px-3 !text-[13px]",
-  md: "!h-auto !w-auto !py-2 !px-4 !text-[13.5px]",
+    "!bg-transparent !border-transparent !text-indigo-500 !shadow-none hover:!bg-indigo-50",
+  danger: "!bg-white !text-red-500 !border !border-zinc-300 hover:!bg-red-50",
+  good: "!bg-white !text-emerald-600 !border !border-zinc-300 hover:!bg-emerald-50",
 };
 
 interface BtnProps {
@@ -1112,65 +1065,38 @@ function Btn({
   className = "",
 }: BtnProps): React.JSX.Element {
   return (
-    <CButton
+    <Button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={[
-        "inline-flex items-center gap-2 font-semibold rounded-lg whitespace-nowrap transition-colors",
-        VARIANT_CLASSES[variant],
-        SIZE_CLASSES[size],
-        className,
-      ].join(" ")}
+      size="sm"
+      className={`inline-flex items-center gap-2 font-semibold rounded-sm whitespace-nowrap transition-colors ${VARIANT_CLS[variant]} ${className}`}
     >
       {children}
-    </CButton>
+    </Button>
   );
 }
 
+// ─── SHARED INPUT CLASS ───────────────────────────────────────────────────────
+
+const inputCls =
+  "w-full border border-zinc-300 rounded-lg px-3 py-2 text-sm text-zinc-900 bg-white font-medium outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors";
+const selectCls = `${inputCls} cursor-pointer`;
+
 // ─── TOAST ───────────────────────────────────────────────────────────────────
 
-interface ToastProps {
-  toasts: ToastItem[];
-}
-
-function Toast({ toasts }: ToastProps): React.JSX.Element {
+function Toast({ toasts }: { toasts: ToastItem[] }): React.JSX.Element {
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: 22,
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 300,
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-        alignItems: "center",
-        pointerEvents: "none",
-      }}
-    >
+    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[300] flex flex-col gap-2.5 items-center pointer-events-none">
       {toasts.map((t) => (
         <div
           key={t.id}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            background: "#1d2027",
-            color: "#fff",
-            padding: "12px 16px",
-            borderRadius: 10,
-            fontSize: 13.5,
-            fontWeight: 500,
-            minWidth: 260,
-            boxShadow: "0 12px 30px rgba(16,24,40,.3)",
-          }}
+          className="flex items-center gap-2.5 bg-[#1d2027] text-white px-4 py-3 rounded-xl text-[13.5px] font-medium min-w-[260px] shadow-2xl"
         >
           {t.kind === "good" ? (
-            <Check size={17} color={T.green} />
+            <Check size={17} className="text-emerald-400" />
           ) : (
-            <Info size={17} color="#8ab4ff" />
+            <Info size={17} className="text-blue-400" />
           )}
           {t.msg}
         </div>
@@ -1181,77 +1107,46 @@ function Toast({ toasts }: ToastProps): React.JSX.Element {
 
 // ─── STATUS BADGE ────────────────────────────────────────────────────────────
 
-interface StatusBadgeProps {
-  status: RuleStatus;
-}
-
-function StatusBadge({ status }: StatusBadgeProps): React.JSX.Element {
-  const map: Record<RuleStatus, { bg: string; color: string; label: string }> =
-    {
-      enabled: { bg: T.indigoSoft, color: T.indigoInk, label: "Enabled" },
-      draft: { bg: T.amberSoft, color: "#b9760a", label: "Draft" },
-      disabled: { bg: "#eef0f3", color: T.ink2, label: "Disabled" },
-    };
-  const s = map[status];
+function StatusBadge({ status }: { status: RuleStatus }): React.JSX.Element {
+  const cls: Record<RuleStatus, string> = {
+    enabled: "bg-indigo-50 text-indigo-600",
+    draft: "bg-amber-50 text-amber-700",
+    disabled: "bg-zinc-100 text-zinc-500",
+  };
+  const labels: Record<RuleStatus, string> = {
+    enabled: "Enabled",
+    draft: "Draft",
+    disabled: "Disabled",
+  };
   return (
     <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        fontSize: 12,
-        fontWeight: 600,
-        padding: "4px 10px",
-        borderRadius: 999,
-        background: s.bg,
-        color: s.color,
-      }}
+      className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${cls[status]}`}
     >
-      <Shield size={13} /> {s.label}
+      <Shield size={13} /> {labels[status]}
     </span>
   );
 }
 
 // ─── CONNECTOR CHIP ──────────────────────────────────────────────────────────
 
-interface ConnectorChipProps {
-  value: Connector;
-  onChange: (v: Connector) => void;
-}
-
 function ConnectorChip({
   value,
   onChange,
-}: ConnectorChipProps): React.JSX.Element {
-  const colors: Record<
-    Connector,
-    { bg: string; color: string; border: string }
-  > = {
-    AND: { bg: T.lav, color: "#6b7280", border: "#e1e4ee" },
-    OR: { bg: "#fff4ec", color: "#c2691f", border: "#f4ddc9" },
-    NOT: { bg: "#fdeef0", color: "#c43b4d", border: "#f6d6dc" },
+}: {
+  value: Connector;
+  onChange: (v: Connector) => void;
+}): React.JSX.Element {
+  const cls: Record<Connector, string> = {
+    AND: "bg-slate-100 text-slate-500 border-slate-200",
+    OR: "bg-orange-50 text-orange-700 border-orange-200",
+    NOT: "bg-red-50 text-red-600 border-red-200",
   };
-  const c = colors[value];
   const seq: Connector[] = ["AND", "OR", "NOT"];
-  const cycle = (): void => onChange(seq[(seq.indexOf(value) + 1) % 3]);
   return (
     <button
-      onClick={cycle}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-        fontSize: 11,
-        fontWeight: 700,
-        letterSpacing: ".04em",
-        color: c.color,
-        background: c.bg,
-        border: `1px solid ${c.border}`,
-        padding: "4px 8px",
-        borderRadius: 7,
-        minWidth: 48,
-        cursor: "pointer",
-      }}
+      type="button"
+      onClick={() => onChange(seq[(seq.indexOf(value) + 1) % 3])}
+      className={`inline-flex items-center gap-1 text-[11px] font-bold tracking-wider px-2 py-1 rounded-md border min-w-[48px] cursor-pointer ${cls[value]}`}
     >
       {value} <ChevronDown size={11} />
     </button>
@@ -1268,27 +1163,13 @@ interface ValueCellProps {
 function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
   const f = FIELDS[cond.field];
   const t = f.val.type;
-  const inp: CSSProperties = {
-    width: "100%",
-    height: "100%",
-    minHeight: 42,
-    border: `1px solid ${T.borderStrong}`,
-    borderRadius: 10,
-    padding: "9px 12px",
-    fontSize: 13.5,
-    fontWeight: 500,
-    background: T.surface,
-    fontFamily: "inherit",
-    outline: "none",
-    boxSizing: "border-box",
-  };
 
   if (t === VT.PRIORITY)
     return (
       <select
         value={cond.value}
         onChange={(e) => onChange({ value: e.target.value })}
-        style={{ ...inp, cursor: "pointer", appearance: "auto" }}
+        className={selectCls}
       >
         {["P0", "P1", "P2", "P3"].map((p) => (
           <option key={p}>{p}</option>
@@ -1300,7 +1181,7 @@ function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
       <select
         value={cond.value}
         onChange={(e) => onChange({ value: e.target.value })}
-        style={{ ...inp, cursor: "pointer", appearance: "auto" }}
+        className={selectCls}
       >
         {(f.val as { type: "select"; options: string[] }).options.map((o) => (
           <option key={o}>{o}</option>
@@ -1312,7 +1193,7 @@ function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
       <select
         value={cond.value}
         onChange={(e) => onChange({ value: e.target.value })}
-        style={{ ...inp, cursor: "pointer", appearance: "auto" }}
+        className={selectCls}
       >
         {[
           "5 minutes",
@@ -1326,20 +1207,20 @@ function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
       </select>
     );
   if (t === VT.BOOL) {
-    const boolVal = f.val as { type: "bool"; fixed?: boolean };
-    if (boolVal.fixed)
+    const bv = f.val as { type: "bool"; fixed?: boolean };
+    if (bv.fixed)
       return (
         <input
           readOnly
           value={cond.op === "exists" ? "Yes" : "No"}
-          style={{ ...inp, opacity: 0.7, cursor: "default" }}
+          className={`${inputCls} opacity-60 cursor-default`}
         />
       );
     return (
       <select
         value={cond.value}
         onChange={(e) => onChange({ value: e.target.value })}
-        style={{ ...inp, cursor: "pointer", appearance: "auto" }}
+        className={selectCls}
       >
         <option>Yes</option>
         <option>No</option>
@@ -1348,19 +1229,7 @@ function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
   }
   if (t === VT.DAYS)
     return (
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 5,
-          alignItems: "center",
-          border: `1px solid ${T.borderStrong}`,
-          borderRadius: 10,
-          padding: "6px 8px",
-          minHeight: 42,
-          background: T.surface,
-        }}
-      >
+      <div className="flex flex-wrap gap-1.5 items-center border border-zinc-300 rounded-lg px-2 py-1.5 min-h-[42px] bg-white">
         {DAYS.map((d) => (
           <button
             key={d}
@@ -1372,16 +1241,7 @@ function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
                   : [...cond.days, d],
               })
             }
-            style={{
-              fontSize: 11.5,
-              fontWeight: 600,
-              padding: "4px 9px",
-              borderRadius: 6,
-              cursor: "pointer",
-              border: `1px solid ${cond.days.includes(d) ? T.indigoLine : "transparent"}`,
-              background: cond.days.includes(d) ? T.indigoSoft : T.bg,
-              color: cond.days.includes(d) ? T.indigoInk : T.ink2,
-            }}
+            className={`text-[11.5px] font-semibold px-2 py-1 rounded-md border cursor-pointer transition-colors ${cond.days.includes(d) ? "bg-indigo-50 text-indigo-600 border-indigo-200" : "bg-zinc-50 text-zinc-400 border-transparent"}`}
           >
             {d}
           </button>
@@ -1390,56 +1250,30 @@ function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
     );
   if (t === VT.TIMERANGE)
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          border: `1px solid ${T.borderStrong}`,
-          borderRadius: 10,
-          padding: "6px 12px",
-          minHeight: 42,
-          background: T.surface,
-        }}
-      >
+      <div className="flex items-center gap-2 border border-zinc-300 rounded-lg px-3 py-1.5 min-h-[42px] bg-white">
         <input
           type="time"
           value={cond.t1}
           onChange={(e) => onChange({ t1: e.target.value })}
-          style={{
-            border: "none",
-            background: "none",
-            fontFamily: "inherit",
-            fontWeight: 600,
-            fontSize: 13,
-            outline: "none",
-          }}
+          className="border-none bg-transparent font-semibold text-sm outline-none"
         />
-        <span style={{ color: T.ink3 }}>–</span>
+        <span className="text-zinc-400">–</span>
         <input
           type="time"
           value={cond.t2}
           onChange={(e) => onChange({ t2: e.target.value })}
-          style={{
-            border: "none",
-            background: "none",
-            fontFamily: "inherit",
-            fontWeight: 600,
-            fontSize: 13,
-            outline: "none",
-          }}
+          className="border-none bg-transparent font-semibold text-sm outline-none"
         />
       </div>
     );
-  // NUM / TEXT
-  const numVal = f.val as { type: "num"; unit?: string; placeholder?: string };
+  const nv = f.val as { type: "num"; unit?: string; placeholder?: string };
   return (
     <input
       type={t === VT.NUM ? "number" : "text"}
       value={cond.value}
-      placeholder={numVal.placeholder ?? "Enter value"}
+      placeholder={nv.placeholder ?? "Enter value"}
       onChange={(e) => onChange({ value: e.target.value })}
-      style={inp}
+      className={inputCls}
     />
   );
 }
@@ -1449,7 +1283,7 @@ function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
 interface ConditionRowProps {
   cond: Condition;
   index: number;
-  onUpdate: (patch: Partial<Condition>) => void;
+  onUpdate: (p: Partial<Condition>) => void;
   onRemove: () => void;
 }
 
@@ -1460,46 +1294,11 @@ function ConditionRow({
   onRemove,
 }: ConditionRowProps): React.JSX.Element {
   const f = FIELDS[cond.field];
-  const sel: CSSProperties = {
-    height: 42,
-    border: `1px solid ${T.borderStrong}`,
-    borderRadius: 10,
-    padding: "9px 12px",
-    fontSize: 13.5,
-    fontWeight: 500,
-    background: T.surface,
-    fontFamily: "inherit",
-    outline: "none",
-    cursor: "pointer",
-    appearance: "auto",
-    boxSizing: "border-box",
-  };
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 10,
-        marginBottom: 9,
-      }}
-    >
-      <div
-        style={{
-          flex: "0 0 60px",
-          display: "flex",
-          justifyContent: "center",
-          paddingTop: 9,
-        }}
-      >
+    <div className="flex items-start gap-2.5 mb-2.5">
+      <div className="w-14 flex justify-center pt-2.5 shrink-0">
         {index === 0 ? (
-          <span
-            style={{
-              fontSize: 11,
-              color: T.ink3,
-              fontWeight: 600,
-              padding: "4px 8px",
-            }}
-          >
+          <span className="text-[11px] text-zinc-400 font-semibold px-2 py-1">
             IF
           </span>
         ) : (
@@ -1510,22 +1309,19 @@ function ConditionRow({
         )}
       </div>
       <div
+        className="flex-1 grid gap-2"
         style={{
-          flex: 1,
-          display: "grid",
           gridTemplateColumns:
             "minmax(150px,1.05fr) minmax(120px,.78fr) minmax(150px,1.25fr) auto",
-          gap: 9,
-          alignItems: "stretch",
         }}
       >
         <select
           value={cond.field}
           onChange={(e) => {
-            const key = e.target.value as FieldKey;
-            const nf = FIELDS[key];
+            const k = e.target.value as FieldKey;
+            const nf = FIELDS[k];
             onUpdate({
-              field: key,
+              field: k,
               op: nf.ops[0],
               value: defaultVal(nf),
               days: [],
@@ -1533,7 +1329,7 @@ function ConditionRow({
               t2: "18:00",
             });
           }}
-          style={sel}
+          className={selectCls}
         >
           {COND_GROUPS.map((g) => (
             <optgroup key={g.sec} label={g.sec}>
@@ -1548,59 +1344,21 @@ function ConditionRow({
         <select
           value={cond.op}
           onChange={(e) => onUpdate({ op: e.target.value })}
-          style={sel}
+          className={selectCls}
         >
           {f.ops.map((o) => (
             <option key={o}>{o}</option>
           ))}
         </select>
         <ValueCell cond={cond} onChange={onUpdate} />
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            paddingTop: 3,
-          }}
-        >
-          {/* {f?.hint && (
-            <button
-              type="button"
-              title={f.hint}
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: 7,
-                border: "none",
-                background: "none",
-                color: T.ink3,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Info size={15} />
-            </button>
-          )} */}
+        <div className="flex items-center gap-0.5 pt-0.5">
           <button
             type="button"
             onClick={onRemove}
-            title="Remove condition"
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 7,
-              border: "none",
-              background: "none",
-              color: T.ink3,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            title="Remove"
+            className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
           >
-            <Trash2 size={15} />
+            <Trash2 size={14} />
           </button>
         </div>
       </div>
@@ -1610,98 +1368,46 @@ function ConditionRow({
 
 // ─── ACTION ROW ──────────────────────────────────────────────────────────────
 
-interface ActionRowProps {
-  action: RuleAction;
-  onUpdateDetail: (d: string) => void;
-  onRemove: () => void;
-}
-
 function ActionRow({
   action,
   onUpdateDetail,
   onRemove,
-}: ActionRowProps): React.JSX.Element {
+}: {
+  action: RuleAction;
+  onUpdateDetail: (d: string) => void;
+  onRemove: () => void;
+}): React.JSX.Element {
   const meta = ACTIONS[action.key];
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        padding: "11px 12px",
-        border: `1px solid ${T.border}`,
-        borderRadius: 10,
-        background: T.surface,
-        marginBottom: 8,
-      }}
-    >
-      <div style={{ cursor: "grab", color: T.ink3, display: "flex" }}>
+    <div className="flex items-center gap-3 px-3 py-2.5 border border-zinc-200 rounded-xl bg-white mb-2">
+      <div className="text-zinc-300 cursor-grab">
         <GripVertical size={16} />
       </div>
-      <div
-        style={{
-          flex: "0 0 26px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: T.indigo,
-        }}
-      >
-        <Zap size={18} />
-      </div>
-      <div
-        style={{
-          flex: "0 0 200px",
-          fontWeight: 600,
-          fontSize: 13.5,
-          color: T.ink,
-        }}
-      >
+
+      <div className="w-48 font-semibold text-[13.5px] text-zinc-900 shrink-0 text-nowrap">
         {meta.name}
       </div>
-      <div style={{ flex: 1 }}>
+      <div className="flex-1">
         <input
           value={action.detail}
           onChange={(e) => onUpdateDetail(e.target.value)}
-          style={{
-            width: "100%",
-            border: "1px solid transparent",
-            borderRadius: 7,
-            padding: "6px 9px",
-            fontSize: 13,
-            color: T.ink2,
-            background: "transparent",
-            fontFamily: "inherit",
-            outline: "none",
-            boxSizing: "border-box",
-          }}
+          className="w-full border border-transparent rounded-lg px-2 py-1.5 text-sm text-zinc-500 bg-transparent outline-none focus:border-indigo-400 focus:bg-white transition-colors"
           onFocus={(e) => {
-            e.currentTarget.style.border = `1px solid ${T.indigo}`;
-            e.currentTarget.style.background = "#fff";
+            e.currentTarget.className =
+              "w-full border border-indigo-400 rounded-lg px-2 py-1.5 text-sm text-zinc-800 bg-white outline-none transition-colors";
           }}
           onBlur={(e) => {
-            e.currentTarget.style.border = "1px solid transparent";
-            e.currentTarget.style.background = "transparent";
+            e.currentTarget.className =
+              "w-full border border-transparent rounded-lg px-2 py-1.5 text-sm text-zinc-500 bg-transparent outline-none focus:border-indigo-400 focus:bg-white transition-colors";
           }}
         />
       </div>
       <button
         type="button"
         onClick={onRemove}
-        style={{
-          width: 30,
-          height: 30,
-          borderRadius: 7,
-          border: "none",
-          background: "none",
-          color: T.ink3,
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
       >
-        <Trash2 size={15} />
+        <Trash2 size={14} />
       </button>
     </div>
   );
@@ -1709,62 +1415,26 @@ function ActionRow({
 
 // ─── GUARD ROW ───────────────────────────────────────────────────────────────
 
-interface GuardRowProps {
-  guard: Guard;
-  onUpdateVal: (v: string) => void;
-  onRemove: () => void;
-}
-
 function GuardRow({
   guard,
   onUpdateVal,
   onRemove,
-}: GuardRowProps): React.JSX.Element | null {
+}: {
+  guard: Guard;
+  onUpdateVal: (v: string) => void;
+  onRemove: () => void;
+}): React.JSX.Element | null {
   const m = GUARD_FLAT[guard.key];
   if (!m) return null;
   return (
     <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 11,
-        border: `1px solid ${m.intel ? "#c7ebe6" : T.border}`,
-        background: m.intel
-          ? "linear-gradient(180deg,#f3fbfa 0%,#fbfdfd 100%)"
-          : T.surface,
-        borderRadius: 10,
-        padding: "9px 11px",
-        marginBottom: 8,
-      }}
+      className={`flex items-center gap-3 border rounded-xl px-3 py-2.5 mb-2 border-zinc-200 bg-white`}
     >
-      <div
-        style={{
-          flex: "0 0 28px",
-          height: 28,
-          borderRadius: 8,
-          background: "#ecf8f6",
-          border: "1px solid #d3ede8",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Shield size={15} color="#0c8478" />
-      </div>
-      <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600, color: T.ink }}>
+      <span className="flex-1 text-[13.5px] font-semibold text-zinc-900">
         {m.label}
       </span>
       {m.val && (
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 12.5,
-            color: T.ink2,
-            whiteSpace: "nowrap",
-          }}
-        >
+        <span className="inline-flex items-center gap-1.5 text-[12.5px] text-zinc-500 whitespace-nowrap">
           {m.val.pre}
           <input
             type="number"
@@ -1772,18 +1442,7 @@ function GuardRow({
             max={m.val.max}
             value={guard.value ?? m.val.def}
             onChange={(e) => onUpdateVal(e.target.value)}
-            style={{
-              width: 56,
-              border: `1px solid ${T.borderStrong}`,
-              borderRadius: 7,
-              padding: "5px 8px",
-              textAlign: "center",
-              fontFamily: "monospace",
-              fontWeight: 600,
-              fontSize: 13,
-              outline: "none",
-              background: T.surface,
-            }}
+            className="w-14 border border-zinc-300 rounded-md px-2 py-1 text-center font-mono font-semibold text-sm outline-none focus:border-indigo-500 bg-white"
           />
           {m.val.suf}
         </span>
@@ -1791,20 +1450,9 @@ function GuardRow({
       <button
         type="button"
         onClick={onRemove}
-        style={{
-          width: 26,
-          height: 26,
-          borderRadius: 7,
-          border: "none",
-          background: "none",
-          color: T.ink3,
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        className="w-6 h-6 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
       >
-        <X size={15} />
+        <X size={14} />
       </button>
     </div>
   );
@@ -1846,108 +1494,59 @@ function ExecControls({
     "Emergency CAB (eCAB)",
     "Executive approval",
   ];
-  const cell: CSSProperties = { background: T.surface, padding: "14px 15px" };
-  const lbl: CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: 7,
-    fontSize: 12,
-    fontWeight: 700,
-    color: T.ink,
-    marginBottom: 10,
-  };
-  const inp: CSSProperties = {
-    height: 36,
-    border: `1px solid ${T.borderStrong}`,
-    borderRadius: 7,
-    padding: "7px 9px",
-    fontSize: 13,
-    fontFamily: "inherit",
-    outline: "none",
-    background: T.surface,
-    boxSizing: "border-box",
-  };
-  const help: CSSProperties = {
-    fontSize: 11,
-    color: T.ink3,
-    marginTop: 8,
-    lineHeight: 1.4,
-  };
+
+  const Cell = ({
+    icon,
+    title,
+    help,
+    children,
+  }: {
+    icon: ReactNode;
+    title: string;
+    help: string;
+    children: ReactNode;
+  }) => (
+    <div className="bg-white p-4">
+      <div className="flex items-center gap-2 text-xs font-bold text-zinc-800 mb-2.5">
+        {title}
+      </div>
+      {children}
+      <p className="text-[11px] text-zinc-400 mt-2 leading-snug">{help}</p>
+    </div>
+  );
+
   return (
-    <div
-      style={{
-        marginTop: 22,
-        border: `1px solid ${T.border}`,
-        borderRadius: 14,
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "13px 16px",
-          background: T.surface2,
-          borderBottom: `1px solid ${T.border}`,
-        }}
-      >
-        <div
-          style={{
-            width: 29,
-            height: 29,
-            borderRadius: 8,
-            background: "#eef0f4",
-            border: `1px solid ${T.borderStrong}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Zap size={15} color="#64748b" />
-        </div>
+    <div className="mt-5 border border-zinc-200 rounded-2xl overflow-hidden">
+      <div className="flex items-center gap-2.5 px-4 py-3 border-b border-zinc-200">
         <div>
-          <div style={{ fontWeight: 800, fontSize: 14, color: T.ink }}>
+          <div className="font-bold text-sm text-zinc-900">
             Execution controls
           </div>
-          <div style={{ fontSize: 11.5, color: T.ink3, marginTop: 1 }}>
+          <div className="text-[11.5px] text-zinc-400">
             The run envelope applied once the rule clears its guards.
           </div>
         </div>
       </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3,1fr)",
-          gap: 1,
-          background: T.border,
-        }}
-      >
-        <div style={cell}>
-          <div style={lbl}>
-            <VolumeX size={14} color={T.ink3} /> Suppression window
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 7,
-              flexWrap: "wrap",
-            }}
-          >
+      <div className="grid grid-cols-3 gap-px bg-zinc-200">
+        <Cell
+          icon={<VolumeX size={13} className="text-zinc-400" />}
+          title="Suppression window"
+          help="Don't re-run for the same scope inside this window."
+        >
+          <div className="flex items-center gap-2 flex-wrap">
             <input
               type="number"
               min="1"
               max="1440"
               value={controls.window.minutes}
               onChange={(e) => onChange("win.min", e.target.value)}
-              style={{ ...inp, width: 56, textAlign: "center" }}
+              className="w-14 text-center border border-zinc-300 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
             />
-            <span style={{ fontSize: 12, color: T.ink2 }}>min ·</span>
+            <span className="text-xs text-zinc-400">min ·</span>
             <select
               value={controls.window.scope}
               onChange={(e) => onChange("win.scope", e.target.value)}
-              style={{ ...inp, flex: 1 }}
+              className={`${selectCls} flex-1`}
             >
               {SCOPES.map(([v, l]) => (
                 <option key={v} value={v}>
@@ -1956,27 +1555,25 @@ function ExecControls({
               ))}
             </select>
           </div>
-          <div style={help}>
-            Don't re-run for the same scope inside this window.
-          </div>
-        </div>
-        <div style={cell}>
-          <div style={lbl}>
-            <Zap size={14} color={T.ink3} /> Maximum executions
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        </Cell>
+        <Cell
+          icon={<Zap size={13} className="text-zinc-400" />}
+          title="Maximum executions"
+          help="Cap how often this rule can fire."
+        >
+          <div className="flex items-center gap-2">
             <input
               type="number"
               min="1"
               max="999"
               value={controls.maxExecutions.count}
               onChange={(e) => onChange("max.count", e.target.value)}
-              style={{ ...inp, width: 56, textAlign: "center" }}
+              className="w-14 text-center border border-zinc-300 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
             />
             <select
               value={controls.maxExecutions.per}
               onChange={(e) => onChange("max.per", e.target.value)}
-              style={{ ...inp, flex: 1 }}
+              className={`${selectCls} flex-1`}
             >
               {MAX_PER.map(([v, l]) => (
                 <option key={v} value={v}>
@@ -1985,16 +1582,16 @@ function ExecControls({
               ))}
             </select>
           </div>
-          <div style={help}>Cap how often this rule can fire.</div>
-        </div>
-        <div style={cell}>
-          <div style={lbl}>
-            <RefreshCw size={14} color={T.ink3} /> Retry policy
-          </div>
+        </Cell>
+        <Cell
+          icon={<RefreshCw size={13} className="text-zinc-400" />}
+          title="Retry policy"
+          help="What happens when an action fails."
+        >
           <select
             value={controls.retry}
             onChange={(e) => onChange("retry", e.target.value)}
-            style={{ ...inp, width: "100%" }}
+            className={selectCls}
           >
             {RETRIES.map(([v, l]) => (
               <option key={v} value={v}>
@@ -2002,65 +1599,62 @@ function ExecControls({
               </option>
             ))}
           </select>
-          <div style={help}>What happens when an action fails.</div>
-        </div>
-        <div style={cell}>
-          <div style={lbl}>
-            <Users size={14} color={T.ink3} /> Concurrency limit
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        </Cell>
+        <Cell
+          icon={<Users size={13} className="text-zinc-400" />}
+          title="Concurrency limit"
+          help="Parallel runs allowed."
+        >
+          <div className="flex items-center gap-2">
             <input
               type="number"
               min="1"
               max="99"
               value={controls.concurrency}
               onChange={(e) => onChange("conc", e.target.value)}
-              style={{ ...inp, width: 56, textAlign: "center" }}
+              className="w-14 text-center border border-zinc-300 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
             />
-            <span style={{ fontSize: 12, color: T.ink2 }}>at a time</span>
+            <span className="text-xs text-zinc-400">at a time</span>
           </div>
-          <div style={help}>Parallel runs allowed.</div>
-        </div>
-        <div style={cell}>
-          <div style={lbl}>
-            <Check size={14} color={T.ink3} /> Approval requirement
-          </div>
+        </Cell>
+        <Cell
+          icon={<Check size={13} className="text-zinc-400" />}
+          title="Approval requirement"
+          help="Gate the actions behind sign-off before they run."
+        >
           <select
             value={controls.approval}
             onChange={(e) => onChange("approval", e.target.value)}
-            style={{ ...inp, width: "100%" }}
+            className={selectCls}
           >
             {APPROVALS.map((a) => (
               <option key={a}>{a}</option>
             ))}
           </select>
-          <div style={help}>
-            Gate the actions behind sign-off before they run.
-          </div>
-        </div>
-        <div style={cell}>
-          <div style={lbl}>
-            <Clock size={14} color={T.ink3} /> Execution timeout
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        </Cell>
+        <Cell
+          icon={<Clock size={13} className="text-zinc-400" />}
+          title="Execution timeout"
+          help="Abort the run if it exceeds this."
+        >
+          <div className="flex items-center gap-2">
             <input
               type="number"
               min="1"
               max="1440"
               value={controls.timeout}
               onChange={(e) => onChange("timeout", e.target.value)}
-              style={{ ...inp, width: 56, textAlign: "center" }}
+              className="w-14 text-center border border-zinc-300 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
             />
-            <span style={{ fontSize: 12, color: T.ink2 }}>min</span>
+            <span className="text-xs text-zinc-400">min</span>
           </div>
-          <div style={help}>Abort the run if it exceeds this.</div>
-        </div>
+        </Cell>
       </div>
     </div>
   );
 }
 
-// ─── RULE SUMMARY ────────────────────────────────────────────────────────────
+// ─── RULE SUMMARY ─────────────────────────────────────────────────────────────
 
 function condPhrase(c: Condition): string {
   const f = FIELDS[c.field];
@@ -2072,10 +1666,7 @@ function condPhrase(c: Condition): string {
     (f.val as { type: "bool"; fixed?: boolean }).fixed
   )
     return `${f.label} ${c.op}`;
-  let v = c.value === "" || c.value == null ? "—" : String(c.value);
-  const hasUnit = "unit" in f.val && f.val.unit;
-  //   if (hasUnit && v !== "—")
-  //     v = f.val.unit === "%" ? `${v}%` : `${v} ${f.val.unit}`;
+  const v = c.value === "" || c.value == null ? "—" : String(c.value);
   return `${f.label} ${c.op} ${v}`;
 }
 
@@ -2115,16 +1706,9 @@ function RuleSummary({
   const unlessText = guardLabels.length
     ? `Skip when ${guardMatch} of these are active: ${guardLabels.slice(0, 3).join(", ")}${guardLabels.length > 3 ? ` +${guardLabels.length - 3} more` : ""}.`
     : "No suppression guards — actions always run when conditions match.";
-  const scopeLabel =
-    (["incident", "service", "service+priority"] as ScopeOption[]).find(
-      (s) => s === controls.window.scope,
-    ) ?? "incident";
-  const ctrlText = `Re-runs held ${controls.window.minutes} min (${scopeLabel}); max ${controls.maxExecutions.count}/${controls.maxExecutions.per}; timeout ${controls.timeout} min${controls.approval !== "None" ? `; ${controls.approval.toLowerCase()} required` : ""}.`;
-  const actText =
-    actions.map((a) => ACTIONS[a.key].name).join(", ") || "No actions defined.";
-  const ifText = parts.join(" ") || "No conditions defined.";
+  const ctrlText = `Re-runs held ${controls.window.minutes} min; max ${controls.maxExecutions.count}/${controls.maxExecutions.per}; timeout ${controls.timeout} min${controls.approval !== "None" ? `; ${controls.approval.toLowerCase()} required` : ""}.`;
 
-  const SummaryRow = ({
+  const Row = ({
     label,
     bg,
     text,
@@ -2132,35 +1716,34 @@ function RuleSummary({
     label: string;
     bg: string;
     text: string;
-  }): React.JSX.Element => (
-    <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
+  }) => (
+    <div className="flex gap-3 mb-3.5">
       <span
-        style={{
-          display: "inline-block",
-          fontWeight: 800,
-          fontSize: 10.5,
-          letterSpacing: ".05em",
-          color: "#fff",
-          padding: "3px 8px",
-          borderRadius: 6,
-          background: bg,
-          flexShrink: 0,
-          marginTop: 1,
-        }}
+        className={`inline-block h-fit min-w-12 text-xs text-center font-black tracking-wider text-white px-2 py-0.5 rounded-md shrink-0 mt-0.5 ${bg}`}
       >
         {label}
       </span>
-      <div style={{ fontSize: 13, lineHeight: 1.6, color: T.ink }}>{text}</div>
+      <span className="text-[13px] leading-relaxed text-zinc-800">{text}</span>
     </div>
   );
-
   return (
     <div>
-      <SummaryRow label="WHEN" bg="#8b5cf6" text={whenText} />
-      <SummaryRow label="IF" bg={T.indigo} text={ifText} />
-      <SummaryRow label="THEN" bg={T.green} text={actText} />
-      <SummaryRow label="UNLESS" bg={T.teal} text={unlessText} />
-      <SummaryRow label="RUN" bg="#64748b" text={ctrlText} />
+      <Row label="WHEN" bg="bg-violet-500" text={whenText} />
+      <Row
+        label="IF"
+        bg="bg-indigo-500"
+        text={parts.join(" ") || "No conditions defined."}
+      />
+      <Row
+        label="THEN"
+        bg="bg-emerald-500"
+        text={
+          actions.map((a) => ACTIONS[a.key].name).join(", ") ||
+          "No actions defined."
+        }
+      />
+      <Row label="UNLESS" bg="bg-teal-600" text={unlessText} />
+      <Row label="RUN" bg="bg-slate-500" text={ctrlText} />
     </div>
   );
 }
@@ -2168,24 +1751,21 @@ function RuleSummary({
 // ─── TEST PANEL ──────────────────────────────────────────────────────────────
 
 type TestCtx = Record<string, string | number | boolean>;
-
 interface TestResult {
   triggered: boolean;
   ctx: TestCtx;
   actNames: string[];
 }
 
-interface TestPanelProps {
-  conditions: AnyCondition[];
-  actions: RuleAction[];
-  matchType: MatchType;
-}
-
 function TestPanel({
   conditions,
   actions,
   matchType,
-}: TestPanelProps): React.JSX.Element {
+}: {
+  conditions: AnyCondition[];
+  actions: RuleAction[];
+  matchType: MatchType;
+}): React.JSX.Element {
   const [result, setResult] = useState<TestResult | { error: string } | null>(
     null,
   );
@@ -2200,7 +1780,6 @@ function TestPanel({
       setResult({ error: "Add at least one condition first." });
       return;
     }
-
     const ctx: TestCtx = {
       service: "Checkout Service",
       priority: "P1",
@@ -2217,7 +1796,6 @@ function TestPanel({
         ctx[c.field] = c.value;
       else if (f.val.type === VT.BOOL) ctx[c.field] = c.value === "Yes";
     });
-
     const evalC = (c: Condition): boolean => {
       const f = FIELDS[c.field];
       const v = ctx[c.field];
@@ -2240,7 +1818,6 @@ function TestPanel({
       if (f.val.type === VT.BOOL) return (v === true) === (c.value === "Yes");
       return true;
     };
-
     const results = conditions.map((c) =>
       c.kind === "group"
         ? c.matchType === "any"
@@ -2255,7 +1832,6 @@ function TestPanel({
         : matchType === "none"
           ? !results.some(Boolean)
           : results.every(Boolean);
-
     setResult({
       triggered,
       ctx,
@@ -2269,107 +1845,56 @@ function TestPanel({
         <Play size={14} fill="currentColor" /> Run test
       </Btn>
       {result && (
-        <div
-          style={{
-            marginTop: 16,
-            border: `1px solid ${T.border}`,
-            borderRadius: 10,
-            padding: 14,
-          }}
-        >
+        <div className="mt-4 border border-zinc-200 rounded-xl p-4">
           {"error" in result ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                color: T.red,
-                fontWeight: 600,
-                fontSize: 13,
-              }}
-            >
+            <div className="flex items-center gap-2 text-red-500 font-semibold text-[13px]">
               <Info size={15} /> {result.error}
             </div>
           ) : (
             <>
               <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 9,
-                  fontWeight: 700,
-                  fontSize: 14,
-                  marginBottom: 10,
-                  color: result.triggered ? T.greenInk : T.red,
-                }}
+                className={`flex items-center gap-2.5 font-bold text-sm mb-3 ${result.triggered ? "text-emerald-600" : "text-red-500"}`}
               >
                 {result.triggered ? <Check size={18} /> : <X size={18} />}
                 {result.triggered
                   ? "Rule will trigger"
                   : "Rule will not trigger"}
               </div>
-              <p style={{ fontSize: 12, color: T.ink3, margin: "10px 0 5px" }}>
+              <p className="text-xs text-zinc-400 mb-1.5">
                 Simulated event values:
               </p>
-              <div
-                style={{
-                  border: `1px solid ${T.border}`,
-                  borderRadius: 7,
-                  overflow: "hidden",
-                  background: T.surface2,
-                  marginBottom: 10,
-                }}
-              >
+              <div className="border border-zinc-100 rounded-lg overflow-hidden bg-zinc-50 mb-3">
                 {Object.entries(result.ctx)
                   .slice(0, 6)
                   .map(([k, v]) => (
                     <div
                       key={k}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        padding: "7px 12px",
-                        fontSize: 12.5,
-                        borderBottom: `1px solid ${T.border}`,
-                      }}
+                      className="flex justify-between px-3 py-1.5 text-[12.5px] border-b border-zinc-100 last:border-0"
                     >
-                      <span style={{ color: T.ink2 }}>
+                      <span className="text-zinc-500">
                         {FIELDS[k as FieldKey]?.label ?? k}
                       </span>
-                      <b style={{ color: T.ink }}>{String(v)}</b>
+                      <b className="text-zinc-800">{String(v)}</b>
                     </div>
                   ))}
               </div>
               {result.triggered && (
                 <>
-                  <p style={{ fontSize: 12, color: T.ink3, margin: "0 0 5px" }}>
+                  <p className="text-xs text-zinc-400 mb-1.5">
                     Actions that would run:
                   </p>
-                  <ul
-                    style={{
-                      listStyle: "none",
-                      fontSize: 13,
-                      padding: 0,
-                      margin: 0,
-                    }}
-                  >
+                  <ul className="space-y-1 text-[13px]">
                     {result.actNames.length ? (
                       result.actNames.map((a) => (
                         <li
                           key={a}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 8,
-                            padding: "3px 0",
-                            color: T.ink2,
-                          }}
+                          className="flex items-center gap-2 text-zinc-600"
                         >
-                          <Check size={15} color={T.green} /> {a}
+                          <Check size={14} className="text-emerald-500" /> {a}
                         </li>
                       ))
                     ) : (
-                      <li style={{ color: T.ink3 }}>No actions configured</li>
+                      <li className="text-zinc-400">No actions configured</li>
                     )}
                   </ul>
                 </>
@@ -2384,12 +1909,13 @@ function TestPanel({
 
 // ─── DROPDOWN ────────────────────────────────────────────────────────────────
 
-interface DropdownProps {
+function Dropdown({
+  items,
+  onClose,
+}: {
   items: DropdownItem[];
   onClose: () => void;
-}
-
-function Dropdown({ items, onClose }: DropdownProps): React.JSX.Element {
+}): React.JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const fn = (e: MouseEvent): void => {
@@ -2398,45 +1924,19 @@ function Dropdown({ items, onClose }: DropdownProps): React.JSX.Element {
     setTimeout(() => document.addEventListener("click", fn, true), 0);
     return () => document.removeEventListener("click", fn, true);
   }, [onClose]);
-
   return (
     <div
       ref={ref}
-      style={{
-        position: "absolute",
-        zIndex: 60,
-        background: T.surface,
-        border: `1px solid ${T.border}`,
-        borderRadius: 10,
-        boxShadow: "0 12px 40px rgba(20,23,33,.16)",
-        padding: 6,
-        minWidth: 240,
-        maxHeight: 340,
-        overflowY: "auto",
-        top: "calc(100% + 6px)",
-        left: 0,
-      }}
+      className="absolute z-50 bg-white border border-zinc-200 rounded-xl shadow-xl p-1.5 min-w-[240px] max-h-[340px] overflow-y-auto top-[calc(100%+6px)] left-0"
     >
       {items.map((item, i) => {
         if (item.type === "sep")
-          return (
-            <div
-              key={i}
-              style={{ height: 1, background: T.border, margin: "4px 0" }}
-            />
-          );
+          return <div key={i} className="h-px bg-zinc-100 my-1" />;
         if (item.type === "label")
           return (
             <div
               key={i}
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: ".07em",
-                color: T.ink3,
-                margin: "8px 8px 4px",
-                textTransform: "uppercase",
-              }}
+              className="text-[11px] font-bold tracking-widest text-zinc-400 uppercase px-2 py-1.5"
             >
               {item.label}
             </div>
@@ -2449,28 +1949,7 @@ function Dropdown({ items, onClose }: DropdownProps): React.JSX.Element {
               item.onClick?.();
               onClose();
             }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              width: "100%",
-              textAlign: "left",
-              padding: "9px 10px",
-              borderRadius: 8,
-              border: "none",
-              background: "none",
-              fontSize: 13.5,
-              color: T.ink,
-              fontWeight: 500,
-              cursor: "pointer",
-              fontFamily: "inherit",
-              gap: 10,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = T.bg;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "none";
-            }}
+            className="flex items-center w-full text-left px-2.5 py-2 rounded-lg text-[13.5px] text-zinc-800 font-medium cursor-pointer hover:bg-zinc-50 transition-colors gap-2.5"
           >
             {item.label}
           </button>
@@ -2481,8 +1960,6 @@ function Dropdown({ items, onClose }: DropdownProps): React.JSX.Element {
 }
 
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
-
-type DropKey = "match" | "cond" | "action" | "guard" | null;
 
 export default function OperationalRuleBuilder(): React.JSX.Element {
   const [ruleName, setRuleName] = useState<string>(
@@ -2497,6 +1974,8 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
   const [actions, setActions] = useState<RuleAction[]>(SEED_ACTIONS);
   const [guards, setGuards] = useState<Guard[]>(SEED_GUARDS);
   const [guardMatch, setGuardMatch] = useState<GuardMatch>("any");
+  const [showLibrary, setShowLibrary] = useState<boolean>(false);
+  const [showGuardPanel, setShowGuardPanel] = useState<boolean>(false);
   const [controls, setControls] = useState<ControlsState>({
     window: { minutes: 30, scope: "incident" },
     maxExecutions: { count: 10, per: "hour" },
@@ -2546,14 +2025,13 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
     );
   }, []);
 
-  // ── mutations ──
   const addCondition = (field: FieldKey = "ezraConfidence"): void => {
     setConditions((cs) => [...cs, mkCondition(field, { connector: "AND" })]);
     stamp();
   };
   const updateCond = (id: string, patch: Partial<Condition>): void => {
-    setConditions((cs) =>
-      cs.map((c: any) => (c.id === id ? { ...c, ...patch } : c)),
+    setConditions((cs: any) =>
+      cs.map((c: AnyCondition) => (c.id === id ? { ...c, ...patch } : c)),
     );
     stamp();
   };
@@ -2561,7 +2039,6 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
     setConditions((cs) => cs.filter((c) => c.id !== id));
     stamp();
   };
-
   const addAction = (key: ActionKey): void => {
     setActions((as) => [
       ...as,
@@ -2576,7 +2053,6 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
   const updateAction = (id: string, detail: string): void => {
     setActions((as) => as.map((a) => (a.id === id ? { ...a, detail } : a)));
   };
-
   const addGuard = (key: string): void => {
     if (guards.some((g) => g.key === key)) {
       toast("That guard is already added", "info");
@@ -2602,7 +2078,6 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
       ),
     );
   };
-
   const updateControl = (path: ControlPath, v: string): void => {
     setControls((prev) => {
       const nc: ControlsState = JSON.parse(JSON.stringify(prev));
@@ -2640,7 +2115,29 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
     stamp();
   };
 
-  // ── dropdown items ──
+  const loadLibraryRule = (rule: LibraryRule): void => {
+    if (rule.conditions?.length) {
+      setConditions(
+        (rule.conditions as AnyCondition[]).map((c) => ({ ...c, id: nid() })),
+      );
+    }
+    if (rule.actions?.length) {
+      setActions(
+        (rule.actions as { key: ActionKey; detail: string }[]).map((a) => ({
+          id: nid(),
+          key: a.key,
+          detail: a.detail ?? ACTIONS[a.key]?.detail ?? "",
+        })),
+      );
+    }
+    if (rule.matchType) setMatchType(rule.matchType);
+    if (rule.name) setRuleName(rule.name);
+    if (rule.description) setRuleDesc(rule.description);
+    setShowLibrary(false);
+    toast(`Loaded "${rule.name}"`);
+    stamp();
+  };
+
   const matchItems: DropdownItem[] = [
     {
       label: "All of the following conditions are true (AND)",
@@ -2694,25 +2191,6 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
       .map((it) => ({ label: it.label, onClick: () => addGuard(it.key) })),
   ]);
 
-  const card: CSSProperties = {
-    background: T.surface,
-    border: `1px solid ${T.border}`,
-    borderRadius: 14,
-    boxShadow: "0 1px 2px rgba(20,23,33,.04),0 1px 3px rgba(20,23,33,.06)",
-  };
-  const inp: CSSProperties = {
-    width: "100%",
-    border: `1px solid ${T.borderStrong}`,
-    borderRadius: 10,
-    padding: "10px 13px",
-    fontSize: 14,
-    background: T.surface,
-    fontFamily: "inherit",
-    outline: "none",
-    color: T.ink,
-    boxSizing: "border-box",
-  };
-
   const ruleJson = JSON.stringify(
     {
       $schema: "scrubbe.operational-rule/v1",
@@ -2720,9 +2198,9 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
       description: ruleDesc,
       status,
       matchType,
-      conditions: conditions.map(({ id: _id, ...r }) => r),
-      actions: actions.map(({ id: _id, ...r }) => r),
-      guards: guards.map(({ id: _id, ...r }) => r),
+      conditions: conditions.map(({ id: _, ...r }) => r),
+      actions: actions.map(({ id: _, ...r }) => r),
+      guards: guards.map(({ id: _, ...r }) => r),
       controls,
       schedule,
     },
@@ -2731,189 +2209,67 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
   );
 
   return (
-    <div
-      style={{
-        background: T.bg,
-        minHeight: "100vh",
-        fontFamily: "'DM Sans',system-ui,sans-serif",
-        color: T.ink,
-        fontSize: 14,
-        lineHeight: 1.5,
-        WebkitFontSmoothing: "antialiased",
-        paddingBottom: 80,
-      }}
-    >
-      <div style={{ maxWidth: 1480, margin: "0 auto", padding: "22px 28px" }}>
+    <div className="bg-zinc-50 min-h-screen font-ibm text-zinc-900 antialiased pb-20">
+      <div className="max-w-[1480px] mx-auto px-7 py-6">
         {/* Breadcrumb */}
 
         {/* Page header */}
-        <header
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            gap: 20,
-            flexWrap: "wrap",
-            marginBottom: 22,
-          }}
-        >
+        <header className="flex flex-col gap-5 flex-wrap mb-6">
           <div>
-            <h1
-              style={{
-                fontSize: 27,
-                fontWeight: 800,
-                letterSpacing: "-.02em",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                flexWrap: "wrap",
-                margin: 0,
-              }}
-            >
-              Create operational rule <StatusBadge status={status} />
+            <h1 className="text-[27px] font-medium tracking-tight flex items-center gap-3 flex-wrap">
+              Create operational rule
             </h1>
-            <p
-              style={{
-                color: T.ink2,
-                fontSize: 14,
-                marginTop: 5,
-                maxWidth: 560,
-              }}
-            >
+            <p className="text-zinc-500 text-sm mt-1 max-w-xl leading-relaxed">
               Govern how Scrubbe's autonomous agents investigate and remediate.
               Ezra evaluates every condition in real time and routes each event
-              between automated action, human approval, and hand-off.
+              between automated action, human approval, and hand-off
             </p>
           </div>
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
-            {/* Schedule */}
-            <div style={{ position: "relative" }}>
+          <div className="flex gap-2 flex-wrap items-center">
+            <Btn onClick={() => setShowLibrary(true)}>
+              <BookOpen size={16} /> Rule library
+            </Btn>
+            {/* Schedule button */}
+            <div className="relative">
               <Btn onClick={() => setShowSched((s) => !s)}>
                 <Calendar size={16} /> Schedule
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: T.indigoInk,
-                    background: T.indigoSoft,
-                    borderRadius: 5,
-                    padding: "1px 6px",
-                  }}
-                >
+                <span className="text-[11px] font-bold text-blue-600  rounded px-1.5 py-0.5">
                   {schedule.mode === "at" && schedule.date
                     ? schedule.date
                     : "Continuous"}
                 </span>
               </Btn>
               {showSched && (
-                <div
-                  style={{
-                    position: "absolute",
-                    right: 0,
-                    top: "calc(100% + 8px)",
-                    zIndex: 120,
-                    background: T.surface,
-                    border: `1px solid ${T.border}`,
-                    borderRadius: 14,
-                    boxShadow: "0 12px 40px rgba(20,23,33,.16)",
-                    padding: 16,
-                    width: 340,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      marginBottom: 12,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 30,
-                        height: 30,
-                        borderRadius: 8,
-                        background: T.indigoSoft,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Calendar size={16} color={T.indigo} />
+                <div className="absolute left-0 top-[calc(100%+8px)] z-[120] bg-white border border-zinc-200 rounded-2xl shadow-xl p-4 w-[340px]">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                      <Calendar size={15} className="text-indigo-500" />
                     </div>
                     <div>
-                      <div style={{ fontWeight: 800, fontSize: 14.5 }}>
-                        Schedule
-                      </div>
-                      <div style={{ fontSize: 11.5, color: T.ink3 }}>
+                      <div className="font-bold text-[14.5px]">Schedule</div>
+                      <div className="text-[11.5px] text-zinc-400">
                         {schedule.mode === "at"
                           ? "Activates at a scheduled time."
                           : "Evaluated continuously, in real time."}
                       </div>
                     </div>
                   </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      background: T.bg,
-                      border: `1px solid ${T.borderStrong}`,
-                      borderRadius: 9,
-                      padding: 3,
-                      gap: 3,
-                    }}
-                  >
+                  <div className="flex bg-zinc-100 border border-zinc-200 rounded-xl p-1 gap-1 mb-3">
                     {(["always", "at"] as ScheduleMode[]).map((m) => (
                       <button
                         key={m}
                         type="button"
                         onClick={() => setSchedule((s) => ({ ...s, mode: m }))}
-                        style={{
-                          flex: 1,
-                          fontSize: 12.5,
-                          fontWeight: 600,
-                          color: schedule.mode === m ? T.indigoInk : T.ink2,
-                          background: schedule.mode === m ? T.surface : "none",
-                          borderRadius: 7,
-                          padding: "7px 13px",
-                          border: "none",
-                          cursor: "pointer",
-                          boxShadow:
-                            schedule.mode === m
-                              ? "0 1px 2px rgba(20,23,33,.06)"
-                              : "none",
-                          fontFamily: "inherit",
-                        }}
+                        className={`flex-1 text-[12.5px] font-semibold py-1.5 rounded-lg border-none cursor-pointer transition-all ${schedule.mode === m ? "bg-white text-indigo-600 shadow-sm" : "text-zinc-400 bg-transparent"}`}
                       >
                         {m === "always" ? "Continuous" : "Scheduled"}
                       </button>
                     ))}
                   </div>
                   {schedule.mode === "at" && (
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: 10,
-                        marginTop: 12,
-                      }}
-                    >
+                    <div className="grid grid-cols-2 gap-2.5">
                       <div>
-                        <label
-                          style={{
-                            fontSize: 12.5,
-                            fontWeight: 600,
-                            color: T.ink2,
-                            display: "block",
-                            marginBottom: 7,
-                          }}
-                        >
+                        <label className="text-[12.5px] font-semibold text-zinc-500 block mb-1.5">
                           Date
                         </label>
                         <input
@@ -2922,19 +2278,11 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                           onChange={(e) =>
                             setSchedule((s) => ({ ...s, date: e.target.value }))
                           }
-                          style={inp}
+                          className={inputCls}
                         />
                       </div>
                       <div>
-                        <label
-                          style={{
-                            fontSize: 12.5,
-                            fontWeight: 600,
-                            color: T.ink2,
-                            display: "block",
-                            marginBottom: 7,
-                          }}
-                        >
+                        <label className="text-[12.5px] font-semibold text-zinc-500 block mb-1.5">
                           Time
                         </label>
                         <input
@@ -2943,19 +2291,11 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                           onChange={(e) =>
                             setSchedule((s) => ({ ...s, time: e.target.value }))
                           }
-                          style={inp}
+                          className={inputCls}
                         />
                       </div>
-                      <div style={{ gridColumn: "1/-1" }}>
-                        <label
-                          style={{
-                            fontSize: 12.5,
-                            fontWeight: 600,
-                            color: T.ink2,
-                            display: "block",
-                            marginBottom: 7,
-                          }}
-                        >
+                      <div className="col-span-2">
+                        <label className="text-[12.5px] font-semibold text-zinc-500 block mb-1.5">
                           Repeat
                         </label>
                         <select
@@ -2966,7 +2306,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                               repeat: e.target.value as RepeatOption,
                             }))
                           }
-                          style={inp}
+                          className={selectCls}
                         >
                           {(
                             [
@@ -3031,219 +2371,80 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                 toast("Rule saved and enabled");
               }}
             >
-              <Zap size={16} /> Save &amp; enable
+              <Send size={16} /> Save &amp; enable
             </Btn>
           </div>
         </header>
 
         {/* Ezra banner */}
-        <div
-          style={{
-            display: "flex",
-            gap: 16,
-            alignItems: "flex-start",
-            background: "linear-gradient(180deg,#f4f2ff 0%,#fbfaff 100%)",
-            border: `1px solid ${T.indigoLine}`,
-            borderRadius: 14,
-            padding: "16px 18px",
-            marginBottom: 18,
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: "0 auto 0 0",
-              width: 3,
-              background: "linear-gradient(180deg,#5b5ef0,#8b5cf6)",
-            }}
-          />
-          <div
-            style={{
-              flex: "0 0 auto",
-              width: 38,
-              height: 38,
-              borderRadius: 11,
-              background: "linear-gradient(135deg,#5b5ef0,#8b5cf6)",
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+        {/* <div className="relative flex gap-4 items-start bg-gradient-to-b from-violet-50 to-white border border-indigo-100 rounded-2xl p-4 mb-5 overflow-hidden">
+          <div className="absolute inset-y-0 left-0 w-0.5 bg-gradient-to-b from-indigo-500 to-violet-500 rounded-full" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex items-center justify-center shrink-0 shadow-md">
             <Activity size={20} />
           </div>
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 9,
-                flexWrap: "wrap",
-                marginBottom: 5,
-              }}
-            >
-              <span style={{ fontWeight: 800, fontSize: 14.5 }}>Ezra</span>
-              <span
-                style={{
-                  fontSize: 10.5,
-                  fontWeight: 700,
-                  letterSpacing: ".07em",
-                  textTransform: "uppercase",
-                  color: T.indigoInk,
-                  background: T.indigoSoft,
-                  padding: "3px 8px",
-                  borderRadius: 6,
-                }}
-              >
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1.5">
+              <span className="font-extrabold text-[14.5px]">Ezra</span>
+              <span className="text-[10.5px] font-bold tracking-widest uppercase text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
                 Autonomy Intelligence
               </span>
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  padding: "3px 9px",
-                  borderRadius: 999,
-                  background: "#e4faf2",
-                  border: "1px solid #a7e6d2",
-                  color: T.greenInk,
-                }}
-              >
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700">
                 Advisory
               </span>
             </div>
-            <p
-              style={{
-                fontSize: 13,
-                lineHeight: 1.55,
-                color: T.ink2,
-                margin: 0,
-              }}
-            >
+            <p className="text-[13px] leading-relaxed text-zinc-500 mb-2">
               This rule constrains autonomous action on Production / Tier-1
               services. Ezra will flag each trigger with a confidence assessment
               and queue hold actions before any remediation executes. You have{" "}
-              <b>{conditions.length} conditions</b> and{" "}
-              <b>{guards.length} suppression guards</b> active.
+              <b className="text-zinc-700">{conditions.length} conditions</b>{" "}
+              and{" "}
+              <b className="text-zinc-700">
+                {guards.length} suppression guards
+              </b>{" "}
+              active.
             </p>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 5,
-                marginTop: 9,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 7,
-                  fontSize: 12,
-                  color: T.ink2,
-                }}
-              >
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-start gap-2 text-[12px] text-zinc-500">
                 <AlertTriangle
                   size={13}
-                  color={T.amber}
-                  style={{ flexShrink: 0, marginTop: 1 }}
-                />
+                  className="text-amber-500 shrink-0 mt-0.5"
+                />{" "}
                 Blast-radius check uses the OR connector — a large radius alone
                 can trigger this rule.
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 7,
-                  fontSize: 12,
-                  color: T.ink2,
-                }}
-              >
-                <Info
-                  size={13}
-                  color={T.indigo}
-                  style={{ flexShrink: 0, marginTop: 1 }}
-                />
+              <div className="flex items-start gap-2 text-[12px] text-zinc-500">
+                <Info size={13} className="text-indigo-500 shrink-0 mt-0.5" />{" "}
                 Consider adding an <b>Evidence Quality</b> condition to filter
                 low-signal alerts.
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 7,
-                  fontSize: 12,
-                  color: T.ink2,
-                }}
-              >
-                <Check
-                  size={13}
-                  color={T.green}
-                  style={{ flexShrink: 0, marginTop: 1 }}
-                />
+              <div className="flex items-start gap-2 text-[12px] text-zinc-500">
+                <Check size={13} className="text-emerald-500 shrink-0 mt-0.5" />{" "}
                 Suppression guard coverage is strong — {guards.length} guards
                 reduce false-positive automation.
               </div>
             </div>
           </div>
-          <div
-            style={{
-              flex: "0 0 auto",
-              textAlign: "center",
-              alignSelf: "center",
-              paddingLeft: 16,
-              borderLeft: `1px solid ${T.indigoLine}`,
-              minWidth: 118,
-            }}
-          >
-            <div
-              style={{
-                fontWeight: 900,
-                fontSize: 28,
-                lineHeight: 1,
-                color: T.indigoInk,
-              }}
-            >
+          <div className="text-center self-center pl-4 border-l border-indigo-100 min-w-[110px] shrink-0">
+            <div className="text-[28px] font-black text-indigo-600 leading-none">
               91%
             </div>
-            <div
-              style={{
-                fontSize: 10.5,
-                color: T.ink3,
-                marginTop: 6,
-                lineHeight: 1.35,
-              }}
-            >
+            <div className="text-[10.5px] text-zinc-400 mt-1.5 leading-snug">
               Ezra diagnostic
               <br />
               confidence
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Main canvas */}
-        <div style={{ ...card, padding: "26px 28px", marginBottom: 20 }}>
+        <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-7 mb-5">
           {/* Rule details */}
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0,1fr) minmax(0,1.15fr)",
-              gap: 22,
-              marginBottom: 6,
-            }}
+            className="grid gap-5 mb-1"
+            style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1.15fr)" }}
           >
             <div>
-              <label
-                style={{
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  color: T.ink2,
-                  display: "block",
-                  marginBottom: 7,
-                }}
-              >
+              <label className="text-sm text-zinc-500 block mb-1.5">
                 Rule name
               </label>
               <input
@@ -3252,23 +2453,13 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                   setRuleName(e.target.value);
                   stamp();
                 }}
-                style={inp}
+                className={inputCls}
               />
             </div>
             <div>
-              <label
-                style={{
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  color: T.ink2,
-                  display: "block",
-                  marginBottom: 7,
-                }}
-              >
+              <label className="text-sm text-zinc-500 block mb-1.5">
                 Description{" "}
-                <span style={{ fontWeight: 400, color: T.ink3 }}>
-                  (optional)
-                </span>
+                <span className="font-normal text-zinc-400">(optional)</span>
               </label>
               <textarea
                 value={ruleDesc}
@@ -3277,59 +2468,27 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                   stamp();
                 }}
                 rows={3}
-                style={{ ...inp, resize: "vertical" }}
+                className={`${inputCls} resize-y`}
               />
             </div>
           </div>
 
-          <div style={{ height: 1, background: T.border, margin: "24px 0" }} />
+          <hr className="border-zinc-100 my-6" />
 
-          {/* IF block */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              marginBottom: 18,
-              flexWrap: "wrap",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 800,
-                fontSize: 12,
-                letterSpacing: ".06em",
-                color: "#fff",
-                padding: "5px 11px",
-                borderRadius: 8,
-                background: T.indigo,
-                lineHeight: 1,
-              }}
-            >
+          {/* IF */}
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            <span className="text-xs font-black tracking-wider text-white px-3 py-1 rounded-lg bg-indigo-500">
               IF
             </span>
-            <div style={{ position: "relative" }}>
+            <div className="relative">
               <button
                 type="button"
                 onClick={() =>
                   setOpenDrop((d) => (d === "match" ? null : "match"))
                 }
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 7,
-                  fontSize: 14.5,
-                  fontWeight: 600,
-                  color: T.ink,
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "4px 6px",
-                  borderRadius: 7,
-                  fontFamily: "inherit",
-                }}
+                className="inline-flex items-center gap-2 text-[14.5px] font-semibold text-zinc-800 bg-none border-none cursor-pointer px-1.5 py-1 rounded-sm hover:bg-zinc-50 transition-colors"
               >
-                <span style={{ color: T.indigo }}>
+                <span className="text-indigo-500">
                   {matchType === "all"
                     ? "All"
                     : matchType === "any"
@@ -3337,7 +2496,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                       : "None"}
                 </span>{" "}
                 of the following conditions are true{" "}
-                <ChevronDown size={15} color={T.ink3} />
+                <ChevronDown size={15} className="text-zinc-400" />
               </button>
               {openDrop === "match" && (
                 <Dropdown
@@ -3349,14 +2508,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
           </div>
 
           {conditions.length === 0 && (
-            <p
-              style={{
-                fontSize: 13,
-                color: T.ink3,
-                padding: "14px 4px",
-                fontStyle: "italic",
-              }}
-            >
+            <p className="text-[13px] text-zinc-400 italic py-3">
               No conditions yet. Add a condition below.
             </p>
           )}
@@ -3372,24 +2524,17 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             ) : null,
           )}
 
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              marginTop: 14,
-              flexWrap: "wrap",
-            }}
-          >
-            <div style={{ position: "relative" }}>
-              <Btn
+          <div className="flex gap-2 mt-3 flex-wrap">
+            <div className="relative">
+              <Button
                 size="sm"
-                variant="ghost"
+                variant="outline-green"
                 onClick={() =>
                   setOpenDrop((d) => (d === "cond" ? null : "cond"))
                 }
               >
                 <Plus size={14} /> Add condition
-              </Btn>
+              </Button>
               {openDrop === "cond" && (
                 <Dropdown
                   items={condFieldItems}
@@ -3399,54 +2544,22 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              color: T.ink3,
-              margin: "18px 0",
-            }}
-          >
+          <div className="flex justify-center text-zinc-300 my-5">
             <ArrowDown size={20} />
           </div>
 
-          {/* THEN block */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              marginBottom: 18,
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 800,
-                fontSize: 12,
-                letterSpacing: ".06em",
-                color: "#fff",
-                padding: "5px 11px",
-                borderRadius: 8,
-                background: T.green,
-                lineHeight: 1,
-              }}
-            >
+          {/* THEN */}
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs font-black tracking-wider text-white px-3 py-1 rounded-lg bg-emerald-500">
               THEN
             </span>
-            <span style={{ fontSize: 14.5, fontWeight: 600, color: T.ink }}>
+            <span className="text-[14.5px] font-semibold text-zinc-800">
               Perform the following actions
             </span>
           </div>
 
           {actions.length === 0 && (
-            <p
-              style={{
-                fontSize: 13,
-                color: T.ink3,
-                padding: "14px 4px",
-                fontStyle: "italic",
-              }}
-            >
+            <p className="text-[13px] text-zinc-400 italic py-3">
               No actions yet. Add an action below.
             </p>
           )}
@@ -3459,72 +2572,31 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             />
           ))}
 
-          <div
-            style={{
-              position: "relative",
-              display: "inline-block",
-              marginTop: 14,
-            }}
-          >
-            <Btn
+          <div className="relative inline-block mt-3">
+            <Button
               size="sm"
-              variant="ghost"
+              variant="outline-green"
               onClick={() =>
                 setOpenDrop((d) => (d === "action" ? null : "action"))
               }
             >
               <Plus size={14} /> Add action
-            </Btn>
+            </Button>
             {openDrop === "action" && (
               <Dropdown items={actionItems} onClose={() => setOpenDrop(null)} />
             )}
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              color: T.ink3,
-              margin: "18px 0",
-            }}
-          >
+          <div className="flex justify-center text-zinc-300 my-5">
             <ArrowDown size={20} />
           </div>
 
-          {/* UNLESS block */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              marginBottom: 18,
-              flexWrap: "wrap",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 800,
-                fontSize: 12,
-                letterSpacing: ".06em",
-                color: "#fff",
-                padding: "5px 11px",
-                borderRadius: 8,
-                background: T.teal,
-                lineHeight: 1,
-              }}
-            >
+          {/* UNLESS */}
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            <span className="text-xs font-black tracking-wider text-white px-3 py-1 rounded-lg bg-teal-600">
               UNLESS
             </span>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                flexWrap: "wrap",
-                fontSize: 13,
-                color: T.ink2,
-              }}
-            >
+            <div className="flex items-center gap-2 flex-wrap text-[13px] text-zinc-500">
               Skip the actions when
               <button
                 type="button"
@@ -3532,45 +2604,20 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                   setGuardMatch((m) => (m === "any" ? "all" : "any"));
                   stamp();
                 }}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontWeight: 800,
-                  fontSize: 12,
-                  color: "#0c8478",
-                  background: "#ecf8f6",
-                  border: "1px solid #c7ebe6",
-                  borderRadius: 7,
-                  padding: "3px 10px",
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                }}
+                className="inline-flex items-center gap-1.5 font-black text-xs text-teal-700 bg-teal-50 border border-teal-200 rounded-lg px-2.5 py-1 cursor-pointer hover:bg-teal-100 transition-colors"
               >
                 {guardMatch} <ChevronDown size={12} />
               </button>
               of these guards are active{" "}
-              {guards.length > 0 && <b>· {guards.length} set</b>}
+              {guards.length > 0 && (
+                <b className="text-zinc-700">· {guards.length} set</b>
+              )}
             </div>
           </div>
 
           {guards.length === 0 && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 11,
-                border: `1px dashed ${T.borderStrong}`,
-                borderRadius: 10,
-                padding: "13px 14px",
-                background: T.surface2,
-                color: T.ink2,
-                fontSize: 12.5,
-                lineHeight: 1.45,
-                marginBottom: 8,
-              }}
-            >
-              <VolumeX size={18} color="#0c8478" style={{ flexShrink: 0 }} />
+            <div className="flex items-center gap-3 border border-dashed border-zinc-300 rounded-xl p-3.5 bg-zinc-50 text-zinc-500 text-[12.5px] leading-snug mb-2">
+              <VolumeX size={18} className="text-teal-500 shrink-0" />
               No guards yet. Add one so this rule steps aside when a responder,
               war room, or Ezra is already handling the incident.
             </div>
@@ -3584,278 +2631,143 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             />
           ))}
 
-          <div
-            style={{
-              position: "relative",
-              display: "inline-block",
-              marginTop: 14,
-            }}
-          >
+          <div className="relative inline-block mt-3">
             <Btn
               size="sm"
               variant="ghost"
-              onClick={() =>
-                setOpenDrop((d) => (d === "guard" ? null : "guard"))
-              }
+              onClick={() => setShowGuardPanel((p) => !p)}
             >
               <Plus size={14} /> Add suppression guard
             </Btn>
-            {openDrop === "guard" && (
-              <Dropdown items={guardItems} onClose={() => setOpenDrop(null)} />
-            )}
+            <AddGuardPanel
+              isOpen={showGuardPanel}
+              addedKeys={new Set(guards.map((g) => g.key))}
+              onAdd={(key) => {
+                addGuard(key);
+                setShowGuardPanel(false);
+              }}
+              onClose={() => setShowGuardPanel(false)}
+            />
           </div>
 
           <ExecControls controls={controls} onChange={updateControl} />
         </div>
 
         {/* Bottom 3-col grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.15fr 1fr 1fr",
-            gap: 20,
-            marginTop: 20,
-          }}
-        >
-          <section style={card}>
-            <div style={{ padding: "20px 22px" }}>
-              <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 4px" }}>
-                Rule summary
-              </h3>
-              <p
-                style={{
-                  fontSize: 12.5,
-                  color: T.ink3,
-                  marginBottom: 16,
-                  marginTop: 0,
-                }}
-              >
-                Plain-language read of what this rule does.
-              </p>
-              <RuleSummary
-                conditions={conditions}
-                actions={actions}
-                matchType={matchType}
-                guards={guards}
-                guardMatch={guardMatch}
-                controls={controls}
-                schedule={schedule}
-              />
-            </div>
+        <div className="grid grid-cols-3 gap-5 mt-5">
+          {/* Summary */}
+          <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-5">
+            <h3 className="text-[15px] font-extrabold mb-1">Rule summary</h3>
+            <p className="text-[12.5px] text-zinc-400 mb-4">
+              Plain-language read of what this rule does.
+            </p>
+            <RuleSummary
+              conditions={conditions}
+              actions={actions}
+              matchType={matchType}
+              guards={guards}
+              guardMatch={guardMatch}
+              controls={controls}
+              schedule={schedule}
+            />
           </section>
 
-          <section style={card}>
-            <div style={{ padding: "20px 22px" }}>
-              <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 4px" }}>
-                Test rule
-              </h3>
-              <p
-                style={{
-                  fontSize: 12.5,
-                  color: T.ink3,
-                  marginBottom: 16,
-                  marginTop: 0,
-                }}
-              >
-                Run this rule against its own conditions to confirm it triggers.
-              </p>
-              <TestPanel
-                conditions={conditions}
-                actions={actions}
-                matchType={matchType}
-              />
-            </div>
+          {/* Test */}
+          <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-5">
+            <h3 className="text-[15px] font-extrabold mb-1">Test rule</h3>
+            <p className="text-[12.5px] text-zinc-400 mb-4">
+              Run this rule against its own conditions to confirm it triggers.
+            </p>
+            <TestPanel
+              conditions={conditions}
+              actions={actions}
+              matchType={matchType}
+            />
           </section>
 
-          <section style={card}>
-            <div style={{ padding: "20px 22px" }}>
-              <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 4px" }}>
-                Rule status
-              </h3>
-              <p
-                style={{
-                  fontSize: 12.5,
-                  color: T.ink3,
-                  marginBottom: 16,
-                  marginTop: 0,
-                }}
+          {/* Status */}
+          <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-5">
+            <h3 className="text-[15px] font-extrabold mb-1">Rule status</h3>
+            <p className="text-[12.5px] text-zinc-400 mb-4">
+              Lifecycle and recent activity.
+            </p>
+            {(
+              [
+                {
+                  k: "Status",
+                  v: (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStatus((s) =>
+                          s === "enabled" ? "disabled" : "enabled",
+                        );
+                        stamp();
+                      }}
+                      className={`relative w-9 h-[22px] rounded-full border-none cursor-pointer transition-colors ${status === "enabled" ? "bg-emerald-400" : "bg-zinc-300"}`}
+                    >
+                      <span
+                        className={`absolute top-0.5 w-[18px] h-[18px] rounded-full bg-white shadow transition-all ${status === "enabled" ? "left-[18px]" : "left-0.5"}`}
+                      />
+                    </button>
+                  ),
+                },
+                { k: "Last triggered", v: "2 hours ago" },
+                {
+                  k: "Times triggered",
+                  v: <span className="font-mono">12</span>,
+                },
+                {
+                  k: "Success rate",
+                  v: <span className="text-emerald-600">96%</span>,
+                },
+                { k: "Created by", v: "Alex Singh" },
+                {
+                  k: "Created on",
+                  v: <span className="font-mono">05 Jan 2026, 10:30</span>,
+                },
+                {
+                  k: "Last modified",
+                  v: <span className="font-mono">{lastMod}</span>,
+                },
+              ] satisfies { k: string; v: ReactNode }[]
+            ).map(({ k, v }) => (
+              <div
+                key={k}
+                className="flex items-center justify-between py-2.5 border-b border-zinc-100 text-[13px] last:border-0"
               >
-                Lifecycle and recent activity.
-              </p>
-              {(
-                [
-                  {
-                    k: "Status",
-                    v: (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setStatus((s) =>
-                            s === "enabled" ? "disabled" : "enabled",
-                          );
-                          stamp();
-                        }}
-                        style={{
-                          position: "relative",
-                          width: 38,
-                          height: 22,
-                          borderRadius: 999,
-                          background:
-                            status === "enabled" ? T.green : "#d4d7e0",
-                          border: "none",
-                          cursor: "pointer",
-                          transition: ".18s",
-                        }}
-                      >
-                        <span
-                          style={{
-                            position: "absolute",
-                            top: 2,
-                            left: status === "enabled" ? 18 : 2,
-                            width: 18,
-                            height: 18,
-                            borderRadius: "50%",
-                            background: "#fff",
-                            boxShadow: "0 1px 2px rgba(0,0,0,.25)",
-                            transition: ".18s",
-                            display: "block",
-                          }}
-                        />
-                      </button>
-                    ),
-                  },
-                  { k: "Last triggered", v: "2 hours ago" },
-                  {
-                    k: "Times triggered",
-                    v: <span style={{ fontFamily: "monospace" }}>12</span>,
-                  },
-                  {
-                    k: "Success rate",
-                    v: <span style={{ color: T.greenInk }}>96%</span>,
-                  },
-                  { k: "Created by", v: "Alex Singh" },
-                  {
-                    k: "Created on",
-                    v: (
-                      <span style={{ fontFamily: "monospace" }}>
-                        05 Jan 2026, 10:30
-                      </span>
-                    ),
-                  },
-                  {
-                    k: "Last modified",
-                    v: (
-                      <span style={{ fontFamily: "monospace" }}>{lastMod}</span>
-                    ),
-                  },
-                ] satisfies { k: string; v: ReactNode }[]
-              ).map(({ k, v }) => (
-                <div
-                  key={k}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "9px 0",
-                    borderBottom: `1px solid ${T.border}`,
-                    fontSize: 13,
-                  }}
-                >
-                  <span style={{ color: T.ink2 }}>{k}</span>
-                  <span style={{ fontWeight: 600 }}>{v}</span>
-                </div>
-              ))}
-            </div>
+                <span className="text-zinc-500">{k}</span>
+                <span className="font-semibold text-zinc-800">{v}</span>
+              </div>
+            ))}
           </section>
         </div>
 
         {/* Rule as code */}
-        <section style={{ ...card, marginTop: 20, overflow: "hidden" }}>
+        <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm mt-5 overflow-hidden">
           <details>
-            <summary
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "16px 20px",
-                cursor: "pointer",
-                listStyle: "none",
-                userSelect: "none",
-              }}
-            >
-              <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: 9,
-                    background: T.bg,
-                    border: `1px solid ${T.border}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <FileText size={17} color={T.ink2} />
+            <summary className="flex items-center justify-between px-5 py-4 cursor-pointer list-none select-none hover:bg-zinc-50 transition-colors">
+              <span className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center">
+                  <FileText size={16} className="text-zinc-500" />
                 </span>
                 <span>
-                  <span
-                    style={{ fontWeight: 800, fontSize: 15, display: "block" }}
-                  >
+                  <span className="font-extrabold text-[15px] block">
                     Rule as code
                   </span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: T.ink3,
-                      fontFamily: "monospace",
-                    }}
-                  >
+                  <span className="text-[11px] text-zinc-400 font-mono">
                     scrubbe.operational-rule/v1
                   </span>
                 </span>
               </span>
-              <span style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: T.ink3 }}>
-                  Expand
-                </span>
-                <ChevronDown size={18} color={T.ink3} />
+              <span className="flex items-center gap-2 text-[12px] font-semibold text-zinc-400">
+                Expand <ChevronDown size={17} />
               </span>
             </summary>
-            <div
-              style={{
-                borderTop: `1px solid ${T.border}`,
-                padding: "14px 18px 18px",
-              }}
-            >
-              <div
-                style={{
-                  border: "1px solid #1c2230",
-                  borderRadius: 10,
-                  background: "#0e1117",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "7px 10px 7px 12px",
-                    background: "#0b0e14",
-                    borderBottom: "1px solid #1c2230",
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 7,
-                      fontSize: 11.5,
-                      color: "#8b93a6",
-                      fontFamily: "monospace",
-                    }}
-                  >
+            <div className="border-t border-zinc-100 p-4">
+              <div className="border border-[#1c2230] rounded-xl bg-[#0e1117] overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-2 bg-[#0b0e14] border-b border-[#1c2230]">
+                  <span className="flex items-center gap-2 text-[11.5px] text-[#8b93a6] font-mono">
                     <FileText size={13} color="#5d6577" /> operational-rule.json
                   </span>
                   <button
@@ -3864,37 +2776,12 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                       navigator.clipboard?.writeText(ruleJson);
                       toast("Copied to clipboard");
                     }}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                      border: "none",
-                      background: "none",
-                      color: "#aeb6c6",
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      padding: "5px 7px",
-                      borderRadius: 6,
-                      fontFamily: "inherit",
-                    }}
+                    className="inline-flex items-center gap-1.5 border-none bg-none text-[#aeb6c6] text-xs font-semibold cursor-pointer px-2 py-1 rounded-md hover:bg-white/10 transition-colors"
                   >
-                    <Copy size={14} /> Copy
+                    <Copy size={13} /> Copy
                   </button>
                 </div>
-                <pre
-                  style={{
-                    margin: 0,
-                    padding: "14px 16px",
-                    maxHeight: 420,
-                    overflow: "auto",
-                    fontFamily: "'JetBrains Mono',monospace",
-                    fontSize: 12,
-                    lineHeight: 1.6,
-                    color: "#c2c9d6",
-                    whiteSpace: "pre",
-                  }}
-                >
+                <pre className="m-0 p-4 max-h-[420px] overflow-auto font-mono text-xs leading-relaxed text-[#c2c9d6] whitespace-pre">
                   {ruleJson}
                 </pre>
               </div>
@@ -3904,13 +2791,16 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
       </div>
 
       <Toast toasts={toasts} />
-
+      <RuleLibraryModal
+        isOpen={showLibrary}
+        onClose={() => setShowLibrary(false)}
+        onLoad={loadLibraryRule}
+        currentRuleJson={ruleJson}
+        currentRuleName={ruleName}
+      />
       <style>{`
-        @keyframes pop { from { opacity:0; transform:translateY(4px) } to { opacity:1; transform:none } }
         details > summary::-webkit-details-marker { display:none }
-        * { box-sizing:border-box }
-        input, select, textarea, button { font-family:inherit }
-        input:focus, select:focus, textarea:focus { border-color:#5b5ef0 !important; box-shadow:0 0 0 3px #eef0fe !important; outline:none !important; }
+        input:focus, select:focus, textarea:focus { outline:none; }
       `}</style>
     </div>
   );
