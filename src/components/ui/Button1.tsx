@@ -18,9 +18,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const variantStyles: Record<ButtonVariant, string> = {
   gradient:
     "bg-gradient-to-r from-[#0f2d24] via-[#1a5c3a] to-[#7dcf6e] text-white border-transparent hover:opacity-90",
-  solid: "bg-[#22a156] text-white border-transparent hover:bg-[#1a8a47]",
+  solid: "bg-IMSDarkGreen text-white border-transparent hover:bg-[#1a8a47]",
   "outline-green":
-    "bg-white dark:bg-transparent text-[#1a6b3c] dark:text-[#22a156] border-[#22a156] hover:bg-[#f0faf4] dark:hover:bg-[#22a156]/10",
+    "bg-white dark:bg-transparent text-[#1a6b3c] dark:text-IMSDarkGreen border-IMSDarkGreen hover:bg-[#f0faf4] dark:hover:bg-IMSDarkGreen/10",
   "outline-dark":
     "bg-white dark:bg-transparent text-neutral-900 dark:text-neutral-100 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800",
 };
@@ -50,7 +50,7 @@ export default function Button({
       className={[
         // base
         "inline-flex items-center justify-center font-semibold border transition-all duration-200",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#22a156]",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-IMSDarkGreen",
         "disabled:opacity-50 disabled:pointer-events-none",
         // variant + size
         variantStyles[variant],
@@ -59,7 +59,7 @@ export default function Button({
       ].join(" ")}
     >
       {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
-      <span>{children}</span>
+      <span className="flex gap-2 items-center">{children}</span>
       {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
     </button>
   );

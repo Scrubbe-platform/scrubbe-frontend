@@ -910,7 +910,7 @@ export default function Navbar() {
         <div className="max-w-[1400px] mx-auto px-5 h-[60px] flex items-center">
           <ScrubbeLogo />
 
-          <div className="hidden xl:flex items-center flex-1">
+          <div className="hidden 2xl:flex items-center flex-1">
             <div className="w-px h-8 bg-gray-200 mx-5 shrink-0" />
             <nav className="flex items-center">
               {NAV_LABELS.map((label, i) => (
@@ -924,7 +924,7 @@ export default function Navbar() {
             </nav>
           </div>
 
-          <div className="hidden xl:flex items-center gap-3 ml-auto">
+          <div className="hidden 2xl:flex items-center gap-3 ml-auto">
             <Link
               href="/waitlist"
               className="px-5 py-2.5 rounded-lg text-[13.5px] font-bold border border-IMSDarkGreen text-IMSLightGreen hover:brightness-110 transition-all"
@@ -943,12 +943,22 @@ export default function Navbar() {
             </Link>
           </div>
 
-          <div className="flex xl:hidden items-center gap-3 ml-auto">
+          <div className="flex 2xl:hidden items-center gap-3 ml-auto">
             <Link
               href="/waitlist"
               className="px-4 py-2 border border-IMSDarkGreen text-IMSLightGreen rounded-lg text-[13px] font-bold "
             >
               Join Waitlist
+            </Link>
+            <Link
+              href="/auth/signin"
+              className="px-5 py-2.5 hidden md:block rounded-lg text-[13.5px] font-bold text-white border-none hover:brightness-110 transition-all"
+              style={{
+                background:
+                  "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
+              }}
+            >
+              Get Started
             </Link>
             <button
               onClick={() => setMobileOpen(true)}

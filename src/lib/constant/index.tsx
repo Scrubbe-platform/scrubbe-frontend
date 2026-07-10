@@ -1144,9 +1144,9 @@ export const NewMenu: Record<string, NavItem[]> = {
   ],
   engineering_ecosystem: [
     {
-      name: "Services",
+      name: "Operational Rules",
       Icon: LuFolderClosed,
-      link: "/incident/services",
+      link: "/incident/operational-rule",
       isActive: false,
       isMenu: false,
     },
