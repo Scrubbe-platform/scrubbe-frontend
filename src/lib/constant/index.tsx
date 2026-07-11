@@ -1147,7 +1147,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Operational Rules",
       Icon: LuFolderClosed,
       link: "/incident/operational-rule",
-      isActive: false,
+      isActive: true,
       isMenu: false,
     },
     {
