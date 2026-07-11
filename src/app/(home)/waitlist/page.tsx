@@ -1,7 +1,7 @@
 // app/early-access/page.tsx
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -35,6 +35,8 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 
 // ─── ZOD VALIDATION SCHEMA DEFINITION ───────────────────────────────────────
 const earlyAccessSchema = z.object({
@@ -168,6 +170,10 @@ export default function ScrubbeEarlyAccessPage() {
     },
   });
 
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const { post } = useFetch();
+
   const activeChallenges = watch("challenges") || [];
 
   const handleToggleChallenge = (id: string) => {
@@ -181,10 +187,41 @@ export default function ScrubbeEarlyAccessPage() {
     }
   };
 
-  const onSubmitForm = (data: EarlyAccessFormValues) => {
-    console.log("Committed Early Access Dataset Context Matrix: ", data);
-    alert("Application data validated securely via Zod!");
+  const onSubmitForm = async (data: EarlyAccessFormValues) => {
+    setSubmitError(null);
+    try {
+      await post(endpoint.waitlist.register, data);
+      setSubmitted(true);
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong. Please try again.";
+      setSubmitError(message);
+    }
   };
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-[#071311] flex items-center justify-center px-6 font-ibm antialiased">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="max-w-md w-full text-center"
+        >
+          <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="text-emerald-400" size={32} />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-3 tracking-tight">You&apos;re on the list.</h2>
+          <p className="text-[#7fa99f] text-sm leading-relaxed mb-6">
+            We&apos;ve received your application and sent a confirmation to your email. We review applications in batches — you&apos;ll hear from us when your spot is ready.
+          </p>
+          <p className="text-[#3a6560] text-xs">© Scrubbe · Early Access Program</p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#071311] bg-radial-gradient text-white select-none pb-12 font-ibm antialiased">
@@ -828,6 +865,11 @@ export default function ScrubbeEarlyAccessPage() {
 
             {/* FULL LENGTH FOOTER SUBMISSION LAYOUT DECK ROW */}
             <div className="lg:col-span-2 pt-6 border-t text-center space-y-4">
+              {submitError && (
+                <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 max-w-md mx-auto">
+                  {submitError}
+                </div>
+              )}
               <button
                 type="submit"
                 disabled={isSubmitting}
