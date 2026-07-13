@@ -321,4 +321,13 @@ export const endpoint = {
   role_permissions: {
     matrix: "/role-permissions/matrix",      // GET/PUT /role-permissions/matrix
   },
+  waitlist: {
+    register: "/waitlist",                   // POST /waitlist
+    list: "/waitlist",                       // GET /waitlist
+    stats: "/waitlist/stats",                // GET /waitlist/stats
+    entry: "/waitlist",                      // GET/PATCH/DELETE /waitlist/:id
+    approve: "/waitlist",                    // POST /waitlist/:id/approve
+    invite: "/waitlist",                     // POST /waitlist/:id/invite
+    reject: "/waitlist",                     // POST /waitlist/:id/reject
+  },
 };

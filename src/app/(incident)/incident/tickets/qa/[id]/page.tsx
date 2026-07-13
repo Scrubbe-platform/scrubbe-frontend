@@ -436,13 +436,14 @@ export default function CompleteIncidentQualityAssurancePage() {
   const [playbookName, setPlaybookName] = useState<string | null>(null);
   const [playbookStep, setPlaybookStep] = useState(0);
   const [isPlaybookRunning, setIsPlaybookRunning] = useState(false);
+  const [isAnalysing, setIsAnalysing] = useState(false);
 
   const ezraLogRef = useRef<HTMLDivElement>(null);
 
   // ─── DATA FETCHING ───
   const params = useParams<{ id: string }>();
   const ticketId = params?.id;
-  const { get, post } = useFetch();
+  const { get, post, put } = useFetch();
 
   const { data: existingIncidentResp } = useQuery({
     queryKey: ["incident", ticketId],
@@ -481,6 +482,11 @@ export default function CompleteIncidentQualityAssurancePage() {
       post(`${endpoint.incident_ticket.qa}/${id}/qa`, body),
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, body }: { id: string; body: Record<string, any> }) =>
+      put(`${endpoint.incident_ticket.update}/${id}`, body),
+  });
+
   // Pre-fill form when loaded by existing incident ID
   useEffect(() => {
     const t = existingIncidentResp?.data;
@@ -493,6 +499,8 @@ export default function CompleteIncidentQualityAssurancePage() {
     setSource(t.sourceType ?? "");
     setDesc(t.description ?? t.techDescription ?? "");
     if (Array.isArray(t.labels) && t.labels.length) setTags(t.labels);
+    // Store the human-readable ticket ID (SI-XXXXXXX) for display
+    setSubmittedId(t.ticketId ?? t.id ?? "");
   }, [existingIncidentResp]);
 
   // ─── DEFINED EXPLICIT HELPERS ───
@@ -1074,7 +1082,52 @@ export default function CompleteIncidentQualityAssurancePage() {
   ]);
 
   // ─── ACTION DRIVERS ───
-  const handleAutoRaise = () => {
+  const handleAutoRaise = async () => {
+    const existingIncident = existingIncidentResp?.data;
+    const isExistingIncident = existingIncident && ticketId && ticketId !== "new";
+
+    if (isExistingIncident) {
+      // Real incident: call Ezra for actual AI analysis instead of demo data
+      setIsAnalysing(true);
+      try {
+        const result = await post(endpoint.ezra.analyse, { incidentId: ticketId });
+        const analysis = result?.data;
+        const rootCause = analysis?.rootCause;
+        const imp = analysis?.impact;
+        const rem = analysis?.remediation;
+
+        setAutoRaised(true);
+
+        let ezraMsg = `I’ve completed a full AI analysis of <b>${existingIncident.ticketId ?? ticketId}</b>. `;
+        if (rootCause?.hypothesis) {
+          ezraMsg += `<b>Root cause hypothesis:</b> ${rootCause.hypothesis}`;
+          if (rootCause.confidence) ezraMsg += ` (${Math.round(rootCause.confidence * 100)}% confidence)`;
+          ezraMsg += `. `;
+        }
+        if (imp?.severity) {
+          ezraMsg += `<b>Severity:</b> ${imp.severity}`;
+          if (imp.affectedUsers) ezraMsg += ` — ~${imp.affectedUsers.toLocaleString()} users affected`;
+          ezraMsg += `. `;
+        }
+        if (rem?.options?.length) {
+          const top = rem.options[0];
+          ezraMsg += `<b>Top remediation:</b> ${top?.title ?? top?.description ?? "See remediation options."}.`;
+        }
+        if (!rootCause?.hypothesis && !imp?.severity) {
+          ezraMsg += "Ask me about root cause, impact, or remediation steps.";
+        }
+
+        setChatLog((prev) => [...prev, { who: "ezra", html: ezraMsg }]);
+        addToast("Ezra analysis complete", "AI telemetry validation ready");
+      } catch {
+        addToast("Analysis failed", "Unable to reach Ezra — please try again");
+      } finally {
+        setIsAnalysing(false);
+      }
+      return;
+    }
+
+    // Demo flow for new/empty incidents
     setAutoRaised(true);
     setVerified({});
     setWarRoom(false);
@@ -1174,8 +1227,27 @@ export default function CompleteIncidentQualityAssurancePage() {
           labels: tags,
         };
         const result = await createMutation.mutateAsync(payload);
+        // Prefer human-readable ticketId (SI-XXXXXXX) over UUID
         finalId =
-          (result as any)?.data?.id ?? (result as any)?.data?.ticketId ?? null;
+          (result as any)?.data?.ticketId ?? (result as any)?.data?.id ?? null;
+      } else {
+        // Existing incident — update it with any changes made in the IQA form
+        await updateMutation.mutateAsync({
+          id: finalId,
+          body: {
+            summary: title,
+            priority: pToServerPriority(priority),
+            description: desc,
+            techDescription: desc,
+            affectedSystem: service,
+            environment: env,
+            source: mapSourceToEnum(source),
+            category: categoryDetected !== "Unknown" ? categoryDetected : undefined,
+            labels: tags,
+          },
+        });
+        // Use the human-readable ticketId for display
+        finalId = existingIncidentResp?.data?.ticketId ?? finalId;
       }
 
       if (finalId) {
@@ -1236,7 +1308,126 @@ export default function CompleteIncidentQualityAssurancePage() {
     }
   }, [isPlaybookRunning, playbookStep, playbookName]);
 
-  const handleAskEzraLog = (value: any) => {};
+  const handleAskEzraLog = async (value: any) => {
+    const trimmed = String(value ?? "").trim();
+    if (!trimmed) return;
+
+    setChatLog((prev) => [...prev, { who: "you", html: trimmed }]);
+    setChatInput("");
+
+    const incidentRef =
+      ticketId && ticketId !== "new" ? ticketId : submittedId;
+
+    if (!incidentRef) {
+      // No persisted incident yet — answer from live form state
+      const q = trimmed.toLowerCase();
+      let response = "";
+      if (q.includes("priority") || q.includes("severity")) {
+        response = `Based on current signals, IQA recommends <b>${policyRules.level}</b>${priority ? ` — your selection is <b>${priority}</b>${priority === policyRules.level ? " ✓" : " (conflict with policy)"}` : " — no priority selected yet"}.`;
+      } else if (q.includes("missing") || q.includes("complete") || q.includes("block")) {
+        response = missingMandatoryFields.length
+          ? `Missing fields blocking raise: <b>${missingMandatoryFields.join(", ")}</b>.`
+          : "All mandatory fields are satisfied — ready to raise.";
+      } else if (q.includes("sla")) {
+        response = priority
+          ? `SLA for <b>${priority}</b>: respond within <b>${SLA[priority].resp}</b>, resolve within <b>${SLA[priority].res}</b>.`
+          : "Select a priority first to see the applicable SLA.";
+      } else {
+        response = `IQA score is <b>${iqaVerdict.score}%</b> — ${iqaVerdict.msg} Save or submit the incident for a full AI analysis.`;
+      }
+      setChatLog((prev) => [...prev, { who: "ezra", html: response }]);
+      return;
+    }
+
+    // Incident exists — call Ezra for a real analysis
+    setChatLog((prev) => [
+      ...prev,
+      { who: "ezra", html: "<em>Analysing with Ezra…</em>" },
+    ]);
+
+    try {
+      const result = await post(endpoint.ezra.analyse, { incidentId: incidentRef });
+      const analysis = result?.data;
+      const rootCauseData = analysis?.rootCause;
+      const imp = analysis?.impact;
+      const rem = analysis?.remediation;
+
+      const q = trimmed.toLowerCase();
+      let ezraResponse = "";
+
+      if (q.includes("root cause") || q.includes("why") || q.includes("cause")) {
+        ezraResponse = rootCauseData?.hypothesis
+          ? `<b>Root cause hypothesis:</b> ${rootCauseData.hypothesis}${rootCauseData.confidence ? ` (${Math.round(rootCauseData.confidence * 100)}% confidence)` : ""}.`
+          : "No root cause hypothesis available yet — add more evidence to the incident description.";
+      } else if (q.includes("impact") || q.includes("affect") || q.includes("user")) {
+        const users = imp?.affectedUsers ?? 0;
+        const sev = imp?.severity ?? "unknown";
+        ezraResponse = `<b>Impact:</b> Severity <b>${sev}</b>${users ? `, ~${users.toLocaleString()} users affected` : ""}. Revenue risk: <b>${imp?.revenueRisk ?? "unknown"}</b>.`;
+      } else if (
+        q.includes("fix") ||
+        q.includes("remediat") ||
+        q.includes("resolve") ||
+        q.includes("next step") ||
+        q.includes("what to do") ||
+        q.includes("how to")
+      ) {
+        const opts: any[] = rem?.options ?? [];
+        if (opts.length) {
+          ezraResponse = `<b>Remediation options:</b><br>${opts
+            .slice(0, 3)
+            .map(
+              (o: any, i: number) =>
+                `${i + 1}. ${o.title ?? o.description ?? ""}${o.riskLevel ? ` [risk: ${o.riskLevel}]` : ""}`,
+            )
+            .join("<br>")}`;
+        } else {
+          ezraResponse =
+            "No specific remediation options found — investigate the root cause first.";
+        }
+      } else if (
+        q.includes("priority") ||
+        q.includes("sla") ||
+        q.includes("severity")
+      ) {
+        ezraResponse = `Policy evaluation recommends <b>${policyRules.level}</b>${priority ? ` — your selection is <b>${priority}</b>${priority === policyRules.level ? " ✓" : " (conflict)"}` : ""}.<br>SLA: respond in <b>${priority ? SLA[priority].resp : "—"}</b>, resolve by <b>${priority ? SLA[priority].res : "—"}</b>.`;
+      } else if (
+        q.includes("similar") ||
+        q.includes("previous") ||
+        q.includes("history") ||
+        q.includes("past")
+      ) {
+        ezraResponse = similarHistory.length
+          ? `<b>${similarHistory.length} similar incident(s):</b><br>${similarHistory.map((h) => `• ${h.id} — ${h.title} (${h.m}% match)`).join("<br>")}`
+          : "No similar incidents detected based on current service, category and tags.";
+      } else {
+        const hyp = rootCauseData?.hypothesis ?? "";
+        const sev = imp?.severity ?? "";
+        ezraResponse = `<b>AI analysis complete.</b><br>`;
+        if (hyp) ezraResponse += `Root cause: ${hyp}.<br>`;
+        if (sev) ezraResponse += `Severity: <b>${sev}</b> | Revenue risk: ${imp?.revenueRisk ?? "unknown"}.<br>`;
+        ezraResponse += `IQA score: <b>${iqaVerdict.score}%</b> — ${iqaVerdict.label}.`;
+        if (!hyp && !sev) {
+          ezraResponse +=
+            " Ask me about root cause, impact, priority or remediation steps.";
+        }
+      }
+
+      setChatLog((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = { who: "ezra", html: ezraResponse };
+        return updated;
+      });
+    } catch {
+      setChatLog((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          who: "ezra",
+          html: "Unable to reach Ezra — try again in a moment.",
+        };
+        return updated;
+      });
+    }
+  };
   const svgCircumference = 326.7;
   const strokeDashoffset = svgCircumference * (1 - iqaVerdict.score / 100);
   const activeGuide = GUIDE[focusField] || GUIDE.title;
@@ -1275,9 +1466,14 @@ export default function CompleteIncidentQualityAssurancePage() {
                       variant="outline-dark"
                       size="sm"
                       leftIcon={<TbBolt size={13} />}
-                      className=" font-light"
+                      className="font-light"
+                      disabled={isAnalysing}
                     >
-                      Simulate auto-raised
+                      {isAnalysing
+                        ? "Analysing…"
+                        : existingIncidentResp?.data
+                          ? "Analyse with Ezra"
+                          : "Simulate auto-raised"}
                     </Button>
                     <Button
                       type="button"
@@ -2334,16 +2530,47 @@ export default function CompleteIncidentQualityAssurancePage() {
 
                 <Button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
+                    const idForUpdate =
+                      ticketId && ticketId !== "new"
+                        ? ticketId
+                        : submittedId;
+                    if (idForUpdate) {
+                      try {
+                        await updateMutation.mutateAsync({
+                          id: idForUpdate,
+                          body: {
+                            summary: title,
+                            priority: pToServerPriority(priority),
+                            description: desc,
+                            techDescription: desc,
+                            affectedSystem: service,
+                            environment: env,
+                            source: mapSourceToEnum(source),
+                            category:
+                              categoryDetected !== "Unknown"
+                                ? categoryDetected
+                                : undefined,
+                            labels: tags,
+                          },
+                        });
+                      } catch {
+                        addToast(
+                          "Merge failed",
+                          "Unable to update incident — please try again",
+                        );
+                        return;
+                      }
+                    }
                     setIsSubmitted(false);
                     handleResetAll();
                     setIsLoading(true);
                   }}
                   size="sm"
-                  className="bg-red-500"
+                  className="bg-IMSDarkGreen"
                   rightIcon={<ArrowRight size={15} />}
                 >
-                  Merge
+                  Merge & Update
                 </Button>
               </div>
             </div>
