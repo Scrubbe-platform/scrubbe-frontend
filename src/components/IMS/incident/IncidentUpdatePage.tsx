@@ -143,7 +143,7 @@ export const incidentContextSchema = z.object({
 export type IncidentContextFormValues = z.infer<typeof incidentContextSchema>;
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <label className="text-[11px] font-semibold capitalize tracking-wider text-zinc-600 dark:text-zinc-500 mb-1.5 block">
+  <label className="text-[11px] font-semibold capitalize tracking-wider text-zinc-700 dark:text-zinc-500 mb-1.5 block">
     {children}
   </label>
 );
@@ -373,8 +373,8 @@ const AddContextForm = ({
           {/* ── ROW 1: CORE FIELDS SPLIT ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* PANEL A: INCIDENT INFORMATION */}
-            <div className="border border-neutral-400 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950">
-              <h3 className="text-base font-bold text-zinc-900  dark:text-white tracking-wider flex items-center gap-1.5 px-5 py-2 border-b border-zinc-400 dark:border-zinc-900">
+            <div className="border border-neutral-200 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950">
+              <h3 className="text-base font-bold text-zinc-900  dark:text-white tracking-wider flex items-center gap-1.5 px-5 py-2 border-b border-zinc-200 dark:border-zinc-900">
                 <InfoIcon size={17} /> Incident Information
               </h3>
 
@@ -458,8 +458,8 @@ const AddContextForm = ({
             </div>
 
             {/* PANEL B: INCIDENT CONTEXT */}
-            <div className="border border-neutral-400 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 px-5 py-2 border-b border-zinc-400 dark:border-zinc-900">
+            <div className="border border-neutral-200 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950">
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center gap-1.5 px-5 py-2 border-b border-zinc-200 dark:border-zinc-900">
                 <FaRegFileLines size={17} /> Incident Context
               </h3>
 
@@ -556,8 +556,8 @@ const AddContextForm = ({
           {/* ── ROW 2: DETAILS TEXT EDITOR CANVAS ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* PANEL C: DETAILED DESCRIPTION CANVAS WITH FORMATTING TOOLBAR */}
-            <div className=" border border-neutral-400 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider px-5 py-2 flex items-center gap-1.5 pb-2 border-b border-zinc-400 dark:border-zinc-900">
+            <div className=" border border-neutral-200 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950">
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider px-5 py-2 flex items-center gap-1.5 pb-2 border-b border-zinc-200 dark:border-zinc-900">
                 <FaRegFileLines size={17} /> Incident Details
               </h3>
 
@@ -608,9 +608,9 @@ const AddContextForm = ({
             </div>
 
             {/* PANEL D: ROUTING & ATTACHMENTS ASSIGNMENT */}
-            <div className=" border border-neutral-400 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950 flex flex-col">
+            <div className=" border border-neutral-200 dark:border-zinc-800 rounded-md space-y-4 bg-white dark:bg-zinc-950 flex flex-col">
               <div className="space-y-4">
-                <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center px-5 py-2 gap-1.5 border-b border-zinc-400 dark:border-zinc-900">
+                <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-wider flex items-center px-5 py-2 gap-1.5 border-b border-zinc-200 dark:border-zinc-900">
                   <User size={17} />
                   Assignment &amp; Routing
                 </h3>
@@ -648,10 +648,10 @@ const AddContextForm = ({
                         ]);
                       }}
                       onClick={() => fileRef.current?.click()}
-                      className={`rounded-md border-2 border-dashed p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                      className={`rounded-md border border-dashed p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
                         dragOver
                           ? "border-emerald-500 bg-emerald-50/20 dark:bg-emerald-500/5"
-                          : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 hover:border-zinc-300 dark:hover:border-zinc-700"
+                          : "border-zinc-400 dark:border-zinc-800 bg-zinc-50/30 hover:border-zinc-300 dark:hover:border-zinc-700"
                       }`}
                     >
                       <Upload size={18} className="text-zinc-400 mb-2" />

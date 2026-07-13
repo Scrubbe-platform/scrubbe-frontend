@@ -11,45 +11,39 @@ const FormatTimerDisplay = ({ totalSeconds = 0 }: { totalSeconds: number }) => {
 
   return (
     <div className="">
-      <div className="text-sm font-semibold text-slate-700 mb-2 tracking-wide">
+      <div className="text-sm font-semibold text-zinc-700 dark:text-zinc-500 mb-1.5">
         Time Worked
       </div>
 
       <div className="flex items-center gap-2 font-sans">
         {/* Hours Box */}
         <div className="flex flex-col items-center gap-1.5">
-          <div className="w-[50px] h-[30px] border dark:border-zinc-300 border-zinc-400 rounded-lg flex items-center justify-center text-sm font-medium text-slate-800 bg-white">
+          <div className="w-[40px] h-[30px] border dark:border-zinc-300 border-zinc-400 rounded-lg flex items-center justify-center text-sm font-medium text-slate-800 bg-white">
             {formatDigit(hours)}
           </div>
-          <span className="text-[10px] tracking-wider text-slate-400 uppercase">
-            HH
-          </span>
+          <span className="text-[7px] text-slate-400 uppercase">HH</span>
         </div>
 
         {/* Colon separator */}
-        <div className="text-xl font-bold text-slate-300 pb-[18px]">:</div>
+        <div className="text-xl  text-slate-300 pb-[18px]">:</div>
 
         {/* Minutes Box */}
         <div className="flex flex-col items-center gap-1.5">
-          <div className="w-[50px] h-[30px] border dark:border-zinc-500 border-zinc-400 rounded-lg flex items-center justify-center text-sm font-medium text-slate-800 bg-white">
+          <div className="w-[40px] h-[30px] border dark:border-zinc-500 border-zinc-400 rounded-lg flex items-center justify-center text-sm font-medium text-slate-800 bg-white">
             {formatDigit(minutes)}
           </div>
-          <span className="text-[10px] tracking-wider text-slate-400 uppercase">
-            MM
-          </span>
+          <span className="text-[7px] text-slate-400 uppercase">MM</span>
         </div>
 
         {/* Colon separator */}
-        <div className="text-xl font-bold text-slate-300 pb-[18px]">:</div>
+        <div className="text-xl  text-slate-300 pb-[18px]">:</div>
 
         {/* Seconds Box */}
         <div className="flex flex-col items-center gap-1.5">
-          <div className="w-[50px] h-[30px] border dark:border-zinc-300 border-zinc-400 rounded-lg flex items-center justify-center text-sm font-medium text-slate-800 bg-white">
+          <div className="w-[40px] h-[30px] border dark:border-zinc-300 border-zinc-400 rounded-lg flex items-center justify-center text-sm font-medium text-slate-800 bg-white">
             {formatDigit(seconds)}
           </div>
-          <span className="text-[10px] tracking-wider text-slate-400 uppercase">
-            SS
-          </span>
+          <span className="text-[7px] text-slate-400 uppercase">SS</span>
         </div>
       </div>
     </div>

@@ -86,9 +86,9 @@ const AISuggestionsCard: React.FC<AISuggestionsCardProps> = ({
 
   return (
     <div className="w-full mx-auto p-4 font-sans selection:bg-emerald-100">
-      <div className="bg-white dark:bg-zinc-950 rounded-md border border-zinc-400 dark:border-zinc-800 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-zinc-950 rounded-md border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
         {/* Header Section */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-400 dark:border-zinc-900">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200 dark:border-zinc-900">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <Sparkles size={15} fill="currentColor" className="opacity-90" />

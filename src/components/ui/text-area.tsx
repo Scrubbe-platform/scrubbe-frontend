@@ -4,8 +4,7 @@ import { Info } from "lucide-react";
 import React from "react";
 import { RiInformationLine } from "react-icons/ri";
 
-interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
   isLoading?: boolean;
@@ -33,7 +32,7 @@ const TextArea = ({
         <label
           htmlFor={props.id}
           className={`flex gap-2 items-center dark:text-white text-black mb-2 text-sm font-medium ${
-            isLoading ? "text-gray-500" : "text-black"
+            isLoading ? "text-gray-700" : "text-black"
           } ${labelClassName}`}
         >
           {icon && <div className="">{icon}</div>}

@@ -208,8 +208,8 @@ const ActivityAuditTrail: React.FC<{ history: IncidentHistoryRecord[] }> = ({
 
   return (
     <div className="w-full mx-auto p-4">
-      <div className="bg-white dark:bg-zinc-950 rounded-md border border-zinc-500 dark:border-zinc-800 shadow-sm ">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 p-5 border-b border-zinc-400 dark:border-zinc-900 flex items-center gap-2 mb-4">
+      <div className="bg-white dark:bg-zinc-950 rounded-md border border-zinc-200 dark:border-zinc-800 shadow-sm ">
+        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 p-5 border-b border-zinc-200 dark:border-zinc-900 flex items-center gap-2 mb-4">
           <MdOutlineChat size={18} /> Comments & Activity
         </h3>
 
@@ -241,7 +241,7 @@ const ActivityAuditTrail: React.FC<{ history: IncidentHistoryRecord[] }> = ({
 
         {/* Event List Container Area */}
         {visibleEvents.length > 0 ? (
-          <div className="flex flex-col gap-2 mt-4">
+          <div className="flex flex-col gap-2 p-4">
             {visibleEvents.map((event, idx) => (
               <EventRow
                 key={event.id}

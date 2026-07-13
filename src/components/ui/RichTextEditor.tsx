@@ -248,7 +248,7 @@ export default function RichTextEditor({
   `;
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-2xs mt-1.5 focus-within:border-zinc-400 dark:focus-within:border-zinc-600 transition-all bg-white dark:bg-zinc-950">
+    <div className="rounded-md border border-gray-400 dark:border-zinc-800 overflow-hidden shadow-2xs mt-1.5 focus-within:border-zinc-400 dark:focus-within:border-zinc-600 transition-all bg-white dark:bg-zinc-950">
       {/* Dynamic Action Toolbar Bar Layout Area */}
       <div className="flex items-center gap-1 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 px-3 py-1.5 select-none relative">
         {/* Custom Styled Isolated Dropdown Node Container */}

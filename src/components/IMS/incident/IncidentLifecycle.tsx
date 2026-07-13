@@ -188,7 +188,7 @@ export default function IncidentLifecycleManager({ incident }: Props) {
   };
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-[#030712] p-4 md:p-6 space-y-6 font-sans transition-colors duration-300">
+    <div className="w-full bg-slate-50 dark:bg-[#030712] p-4 md:p-6 space-y-6 font-ibm transition-colors duration-300">
       <Modal isOpen={isOpenResolve} onClose={() => setIsOpenResolve(false)}>
         <ResolveIncidentForm
           onClose={() => setIsOpenResolve(false)}
@@ -202,7 +202,7 @@ export default function IncidentLifecycleManager({ incident }: Props) {
       <div className="flex flex-row justify-between items-center gap-2">
         <div className="space-y-4 w-full">
           <div className="flex items-center gap-3">
-            <p className="text-[11px] font-mono font-bold tracking-[0.15em] text-black dark:text-slate-500 uppercase">
+            <p className="text-[11px] font-ibm font-bold text-black dark:text-slate-500 ">
               Incident Lifecycle
             </p>
             <div className="w-[70%] h-0.5 bg-zinc-200 " />

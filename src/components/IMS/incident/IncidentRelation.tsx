@@ -120,7 +120,7 @@ const IncidentRelationship: React.FC<Props> = ({
           </div>
         </div>
 
-        <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-2 ml-1">
+        <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-1 ml-1">
           This is the current incident.
         </p>
       </div>
@@ -140,7 +140,7 @@ const IncidentRelationship: React.FC<Props> = ({
         </div>
 
         {/* Search / select dropdown */}
-        <div ref={dropRef} className="relative mb-4">
+        <div ref={dropRef} className="relative mb-2">
           <div
             onClick={() => setDropOpen((v) => !v)}
             className={`flex items-center gap-2 border border-gray-400 h-[34px] rounded-md px-3 py-2.5 bg-white dark:bg-zinc-800/60 cursor-pointer transition-colors ${

@@ -132,9 +132,7 @@ export default function FilterRail({
   return (
     <div className="bg-white scroll-none shadow-sm shadow-light rounded-xl sticky top-20 max-h-[calc(100vh-120px)] overflow-y-auto">
       <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100">
-        <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-medium">
-          Filters
-        </span>
+        <span className="text-base font-medium">Filters</span>
         {totalActive > 0 && (
           <button
             onClick={onClear}

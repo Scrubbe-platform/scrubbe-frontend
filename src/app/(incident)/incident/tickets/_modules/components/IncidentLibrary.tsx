@@ -279,7 +279,6 @@ export default function IncidentLibraryPage() {
   };
   return (
     <>
-      <Header title="Incident Library" />
       <main className="p-4 sm:p-6 pb-24 max-w-[1600px] mx-auto space-y-6 font-ibm">
         {/* Page Title Context Header Row */}
         <div className="flex flex-wrap items-center justify-between gap-4 ">
@@ -336,7 +335,7 @@ export default function IncidentLibraryPage() {
                 onClick={() => setActiveModal({ type: "trends" })}
                 size="sm"
                 variant="outline-dark"
-                className="h-fit text-sm !rounded-sm"
+                className="h-fit text-sm !rounded-sm font-thin"
               >
                 Trends
               </Button>
@@ -345,7 +344,7 @@ export default function IncidentLibraryPage() {
                 onClick={() => handleDownloadCSV(incidents)}
                 size="sm"
                 variant="outline-dark"
-                className="h-fit text-sm !rounded-sm"
+                className="h-fit text-sm !rounded-sm font-thin"
               >
                 Export
               </Button>
@@ -467,7 +466,7 @@ export default function IncidentLibraryPage() {
                     return (
                       <tr
                         key={i.id}
-                        onClick={() => setActiveId(i.id)}
+                        onClick={() => router.push(`/incident/tickets/${i.id}`)}
                         className={`hover:bg-zinc-50/50 cursor-pointer text-sm font-ibm text-zinc-600 group transition-colors ${isChecked ? "bg-indigo-50/30" : ""}`}
                       >
                         <td
@@ -577,7 +576,7 @@ export default function IncidentLibraryPage() {
             )}
 
             {/* Pagination Toolbar Row controls */}
-            <div className="h-11 px-4 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-400 bg-zinc-50/50">
+            <div className="h-11 px-4 border-t border-zinc-100 flex items-center justify-between text-sm text-zinc-400 bg-zinc-50/50">
               <span className="font-medium font-ibm">
                 Showing{" "}
                 {Math.min(filteredIncidents.length, (page - 1) * pageSize + 1)}-
