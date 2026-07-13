@@ -130,7 +130,7 @@ const Sidebar = () => {
       </div>
 
       {/* ── User ── */}
-      <div className="pl-3 flex items-center gap-2 pt-3">
+      {/* <div className="pl-3 flex items-center gap-2 pt-3">
         <div className="size-8 min-w-8 rounded-full border-2 border-white/40 flex justify-center items-center bg-indigo-500 text-white font-semibold text-sm uppercase">
           {user?.firstName?.slice(0, 2)}
         </div>
@@ -146,10 +146,10 @@ const Sidebar = () => {
             {user?.roles[0]}
           </p>
         </motion.div>
-      </div>
+      </div> */}
 
       {/* ── Logout ── */}
-      <div
+      {/* <div
         className="pl-5 flex items-center gap-2 py-3 mt-4 hover:bg-[#02DD86]/10 dark:hover:bg-white/5 cursor-pointer"
         onClick={handleLogout}
       >
@@ -163,7 +163,7 @@ const Sidebar = () => {
             Logout
           </p>
         </motion.div>
-      </div>
+      </div> */}
     </motion.div>
   );
 };

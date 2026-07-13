@@ -1,6 +1,7 @@
 // app/incidents/library/components/FilterRail.tsx
 import React from "react";
 import { IncidentListItem } from "@/lib/incident/incident.types";
+import { ChevronRight } from "lucide-react";
 
 type FilterKey =
   | "status"
@@ -129,7 +130,7 @@ export default function FilterRail({
     (dateRange ? 1 : 0);
 
   return (
-    <div className="bg-white border border-zinc-200 rounded-xl shadow-sm sticky top-20 max-h-[calc(100vh-120px)] overflow-y-auto">
+    <div className="bg-white scroll-none shadow-sm shadow-light rounded-xl sticky top-20 max-h-[calc(100vh-120px)] overflow-y-auto">
       <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100">
         <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-medium">
           Filters
@@ -147,9 +148,9 @@ export default function FilterRail({
       <div className="divide-y divide-zinc-100">
         {/* Date range */}
         <details open className="group">
-          <summary className="flex items-center justify-between px-4 py-2.5 cursor-pointer list-none text-xs font-medium text-zinc-800">
+          <summary className="flex items-center gap-1 px-4 py-2.5 cursor-pointer list-none text-sm text-zinc-500">
+            <ChevronRight size={16} className="text-zinc-400" />
             <span>Date range</span>
-            <ChevronIcon />
           </summary>
           <div className="px-3 pb-3 grid grid-cols-2 gap-1.5">
             {DATE_OPTIONS.map((opt) => (
@@ -173,9 +174,9 @@ export default function FilterRail({
         {/* Dynamic groups */}
         {groupsConfig.map((g) => (
           <details key={g.key} open className="group">
-            <summary className="flex items-center justify-between px-4 py-2.5 cursor-pointer list-none text-xs font-medium text-zinc-800">
+            <summary className="flex items-center gap-1 px-4 py-2.5 cursor-pointer list-none text-sm  text-zinc-500">
+              <ChevronRight size={16} className="text-zinc-400" />
               <span>{g.label}</span>
-              <ChevronIcon />
             </summary>
             <div className="px-3 pb-3 flex flex-col gap-0.5">
               {g.options.map((opt) => {

@@ -907,7 +907,7 @@ export default function Navbar() {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-30 bg-white/95 border-b border-gray-200 backdrop-blur-md">
-        <div className="max-w-[1400px] mx-auto px-5 h-[60px] flex items-center">
+        <div className="max-w-[1480px] mx-auto px-5 h-[60px] flex items-center">
           <ScrubbeLogo />
 
           <div className="hidden 2xl:flex items-center flex-1">

@@ -586,7 +586,7 @@ export function RuleLibraryModal({
 
           {/* Tabs */}
           <div className="flex gap-1 px-5 border-b border-zinc-100">
-            {(["rules", "cats"] as LibView[]).map((v) => (
+            {(["rules"] as LibView[]).map((v) => (
               <button
                 key={v}
                 type="button"

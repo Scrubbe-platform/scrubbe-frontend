@@ -20,7 +20,7 @@ const variantStyles: Record<ButtonVariant, string> = {
     "bg-gradient-to-r from-[#0f2d24] via-[#1a5c3a] to-[#7dcf6e] text-white border-transparent hover:opacity-90",
   solid: "bg-IMSDarkGreen text-white border-transparent hover:bg-[#1a8a47]",
   "outline-green":
-    "bg-white dark:bg-transparent text-[#1a6b3c] dark:text-IMSDarkGreen border-IMSDarkGreen hover:bg-[#f0faf4] dark:hover:bg-IMSDarkGreen/10",
+    " dark:bg-transparent text-IMSDarkGreen dark:text-IMSCyan border-IMSCyan hover:bg-[#f0faf4] dark:hover:bg-IMSCyan",
   "outline-dark":
     "bg-white dark:bg-transparent text-neutral-900 dark:text-neutral-100 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800",
 };

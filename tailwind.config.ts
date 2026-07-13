@@ -45,6 +45,7 @@ const config: Config = {
         IMSLightGreen: "#28A745",
         IMSDarkGreen: "#28A745",
         IMSCyan: "#02DD86",
+        light: "#C8C8C840",
         green: {
           DEFAULT: "#28A745",
         },
