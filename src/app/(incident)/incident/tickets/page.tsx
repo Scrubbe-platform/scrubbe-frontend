@@ -9,7 +9,6 @@ const Page = () => {
   const { incidentId } = useIncidentWorkspace();
   return (
     <>
-      <Header title="Incident Library" />
       {incidentId ? (
         <NewIncidentList tabs="overview" />
       ) : (

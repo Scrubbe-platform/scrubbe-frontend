@@ -10,7 +10,14 @@ import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ActiveEscalationCard from "./_module/component/ActiveEscalation";
 import RosterView from "./_module/component/RosterView";
-
+import {
+  LuLayoutGrid,
+  LuCalendarDays,
+  LuUser,
+  LuTrendingUp,
+  LuRefreshCw,
+  LuFileText,
+} from "react-icons/lu";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 // Shape returned by useMember
@@ -306,17 +313,6 @@ function AssignModal({
                   ))}
                 </div>
               )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-                Rotation Type
-              </label>
-              <select className="w-full px-3 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none">
-                <option>Weekly Rotation</option>
-                <option>Bi-weekly Rotation</option>
-                <option>Custom</option>
-              </select>
             </div>
 
             <div>
@@ -975,6 +971,7 @@ export default function OnCallDashboard() {
             {menuOpen && (
               <div className="absolute right-0 top-full mt-2 z-40 w-[480px] bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xl p-4">
                 <div className="grid grid-cols-3 gap-4">
+                  {/* ON-CALL COLUMN */}
                   <div>
                     <div className="text-[10px] font-bold tracking-widest text-neutral-400 mb-2">
                       ON-CALL
@@ -988,14 +985,16 @@ export default function OnCallDashboard() {
                               setView(v);
                               setMenuOpen(false);
                             }}
-                            className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors text-left ${view === v ? "bg-neutral-100 dark:bg-neutral-800 font-medium text-neutral-900 dark:text-white" : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800"}`}
+                            className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors text-left ${
+                              view === v
+                                ? "bg-neutral-100 dark:bg-neutral-800 font-medium text-neutral-900 dark:text-white"
+                                : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                            }`}
                           >
-                            <span>
-                              {v === "overview"
-                                ? "⊞"
-                                : v === "schedule"
-                                  ? "📅"
-                                  : "👤"}
+                            <span className="text-base text-neutral-500 dark:text-neutral-400">
+                              {v === "overview" && <LuLayoutGrid size={16} />}
+                              {v === "schedule" && <LuCalendarDays size={16} />}
+                              {v === "roster" && <LuUser size={16} />}
                             </span>
                             {v.charAt(0).toUpperCase() + v.slice(1)}
                           </button>
@@ -1003,6 +1002,8 @@ export default function OnCallDashboard() {
                       )}
                     </nav>
                   </div>
+
+                  {/* POLICY COLUMN */}
                   <div>
                     <div className="text-[10px] font-bold tracking-widest text-neutral-400 mb-2">
                       POLICY
@@ -1011,20 +1012,29 @@ export default function OnCallDashboard() {
                       {["Escalation", "Auto-Escalation"].map((l) => (
                         <button
                           onClick={() => {
-                            if (l == "Escalation") {
+                            if (l === "Escalation") {
                               router.push("/incident/on-call/escalation");
-                            } else if (l == "Auto-Escalation") {
+                            } else if (l === "Auto-Escalation") {
                               router.push("/incident/on-call/auto-escalation");
                             }
                           }}
                           key={l}
                           className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors text-left"
                         >
-                          <span>{l === "Escalation" ? "↗" : "↺"}</span> {l}
+                          <span className="text-base text-neutral-500 dark:text-neutral-400">
+                            {l === "Escalation" ? (
+                              <LuTrendingUp size={16} />
+                            ) : (
+                              <LuRefreshCw size={15} />
+                            )}
+                          </span>{" "}
+                          {l}
                         </button>
                       ))}
                     </nav>
                   </div>
+
+                  {/* ACTIVITY COLUMN */}
                   <div>
                     <div className="text-[10px] font-bold tracking-widest text-neutral-400 mb-2">
                       ACTIVITY
@@ -1034,12 +1044,15 @@ export default function OnCallDashboard() {
                         <button
                           key={l}
                           onClick={() =>
-                            l == "Audit Log" &&
+                            l === "Audit Log" &&
                             router.push("/incident/on-call/audit-log")
                           }
                           className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors text-left"
                         >
-                          <span>{l === "Incidents" ? "🕐" : "📄"}</span> {l}
+                          <span className="text-base text-neutral-500 dark:text-neutral-400">
+                            <LuFileText size={16} />
+                          </span>{" "}
+                          {l}
                         </button>
                       ))}
                     </nav>

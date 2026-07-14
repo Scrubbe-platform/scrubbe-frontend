@@ -26,17 +26,10 @@ interface KpiCard {
 export default function KpiStrip({ incidents, onKpiFilter }: KpiStripProps) {
   const total = incidents.length;
   const openCount = incidents.filter((i) =>
-    [
-      "Investigating",
-      "Monitoring",
-      "OPEN",
-      "Open",
-      "Investigation",
-      "INVESTIGATION",
-    ].includes(i.status),
+    ["OPEN", "Open"].includes(i.status),
   ).length;
   const resolvedCount = incidents.filter((i) =>
-    ["Resolved", "RESOLVED", "Closed", "CLOSED"].includes(i.status),
+    ["Resolved", "RESOLVED"].includes(i.status),
   ).length;
   const majorCount = incidents.filter((i) =>
     ["CRITICAL", "P0", "P1", "HIGH"].includes(i.priority),
@@ -92,7 +85,7 @@ export default function KpiStrip({ incidents, onKpiFilter }: KpiStripProps) {
         <div
           key={idx}
           onClick={() => onKpiFilter?.(card.label)}
-          className="flex flex-col justify-between p-5 bg-white rounded-[8px] shadow-sm shadow-[#C8C8C840] border-zinc-100 hover:bg-zinc-50/60 transition-colors cursor-pointer"
+          className="flex flex-col justify-between p-5 bg-white rounded-[8px] shadow-sm shadow-[#C8C8C840] border-zinc-100  transition-colors  "
         >
           {/* Label + icon */}
           <div className="flex items-center justify-between mb-1 ">

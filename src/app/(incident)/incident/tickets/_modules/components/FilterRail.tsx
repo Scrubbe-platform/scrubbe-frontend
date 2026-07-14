@@ -145,7 +145,7 @@ export default function FilterRail({
 
       <div className="divide-y divide-zinc-100">
         {/* Date range */}
-        <details open className="group">
+        <details className="group">
           <summary className="flex items-center gap-1 px-4 py-2.5 cursor-pointer list-none text-sm text-zinc-500">
             <ChevronRight size={16} className="text-zinc-400" />
             <span>Date range</span>
@@ -171,7 +171,7 @@ export default function FilterRail({
 
         {/* Dynamic groups */}
         {groupsConfig.map((g) => (
-          <details key={g.key} open className="group">
+          <details key={g.key} className="group">
             <summary className="flex items-center gap-1 px-4 py-2.5 cursor-pointer list-none text-sm  text-zinc-500">
               <ChevronRight size={16} className="text-zinc-400" />
               <span>{g.label}</span>

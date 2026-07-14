@@ -3,27 +3,27 @@
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { IncidentListItem } from "@/lib/incident/incident.types";
 
-/**
- * IncidentListItem doesn't (yet) carry a few of the fields this card shows —
- * acknowledgedAt, SLA target, SLO attainment, and business-hours state.
- * Those are accepted as optional props with sane defaults below; swap the
- * defaults for real values from your API as soon as they exist.
- */
 interface IncidentDurationCardProps {
   incident: IncidentListItem;
   /** ISO timestamp the incident was acknowledged. */
   acknowledgedAt?: string | null;
   /** Overrides the label derived from incident.lifecycleStep / status. */
   currentStageLabel?: string;
-  /** SLA target in minutes. Defaults to a priority-based lookup below. */
+  /** SLA target in minutes. Defaults to a priority-based lookup. */
   slaTargetMinutes?: number;
-  /** Rolling SLO attainment, as a percentage. */
+  /** Rolling SLO attainment percentage. */
   sloPercentage?: number;
   /** Whether the org's business-hours clock is currently running. */
   businessHoursActive?: boolean;
+  /**
+   * Server timestamp (ISO string) — used as the reference for "Current Time".
+   * Pass this from your API response headers or a dedicated /time endpoint.
+   * Falls back to the client clock if not provided.
+   */
+  serverTime?: string | null;
 }
 
-// Placeholder SLA policy by priority — replace with the real thing once it's available.
+// Placeholder SLA policy by priority
 const SLA_TARGET_MINUTES: Record<string, number> = {
   P0: 4 * 60,
   P1: 24 * 60,
@@ -47,8 +47,6 @@ function formatUTC(date: Date) {
   return `${day} • ${time} UTC`;
 }
 
-// Shows at most two significant units, dropping zero ones in between
-// (22d 0h 37m -> "22d 37m", matching the reference design).
 function formatDuration(ms: number) {
   const totalMinutes = Math.floor(Math.max(ms, 0) / 60000);
   const days = Math.floor(totalMinutes / 1440);
@@ -85,19 +83,28 @@ export default function IncidentDurationCard({
   slaTargetMinutes,
   sloPercentage = 98.4,
   businessHoursActive = true,
+  serverTime = null,
 }: IncidentDurationCardProps) {
-  const [now, setNow] = useState(() => new Date());
+  // ── Server-synced clock ──
+  // Compute the offset between the server clock and the client clock once,
+  // then apply that offset on every tick so "Current Time" reflects the
+  // server's notion of time even if the client clock is wrong.
+  const serverOffset = useMemo(() => {
+    if (!serverTime) return 0;
+    return new Date(serverTime).getTime() - Date.now();
+  }, [serverTime]);
 
-  // Live clock — drives "Current Time", "Elapsed", and "Time in Current Stage".
+  const [now, setNow] = useState(() => new Date(Date.now() + serverOffset));
+
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
+    const id = setInterval(
+      () => setNow(new Date(Date.now() + serverOffset)),
+      1000,
+    );
     return () => clearInterval(id);
-  }, []);
+  }, [serverOffset]);
 
-  // Resets to "just now" whenever a fresh `incident` object arrives from the
-  // parent (e.g. a react-query refetch), rather than tracking incident.updatedAt
-  // directly — that field only changes when the ticket itself changes, not on
-  // every poll, so it wouldn't tick the way "Last Updated" does in the design.
+  // "Last Updated" resets on every fresh incident prop reference
   const [lastRefreshedAt, setLastRefreshedAt] = useState(() => new Date());
   useEffect(() => {
     setLastRefreshedAt(new Date());
@@ -116,8 +123,6 @@ export default function IncidentDurationCard({
   const timeToAcknowledgeMs = acknowledgedAt
     ? new Date(acknowledgedAt).getTime() - raisedAt.getTime()
     : null;
-  // No dedicated "stage entered at" timestamp on IncidentListItem yet —
-  // updatedAt is the closest proxy available today.
   const timeInStageMs = now.getTime() - updatedAt.getTime();
   const lastUpdatedMs = now.getTime() - lastRefreshedAt.getTime();
 
@@ -134,73 +139,89 @@ export default function IncidentDurationCard({
       : incident.status);
 
   return (
-    <div className="font-ibm text-zinc-800 divide-y divide-zinc-200">
-      <div className="px-4 pt-4 pb-3">
-        <h3 className="text-sm font-semibold text-zinc-900">
-          Incident Duration
-        </h3>
+    <div className=" font-ibm text-zinc-800 p-5 space-y-1.5">
+      {/* ── Header ── */}
+      <h3 className="text-base font-bold text-zinc-900 pb-2">
+        Incident Duration
+      </h3>
+
+      {/* ── Section 1: Raised / Current / Elapsed ── */}
+      <Divider />
+      <div className="grid grid-cols-2 gap-2.5 pt-1.5">
+        <Cell label="Incident Raised" value={formatUTC(raisedAt)} />
+        <Cell label="Current Time" value={formatUTC(now)} />
+      </div>
+      <div className="grid grid-cols-2 gap-2.5">
+        <Cell label="Elapsed" value={formatDuration(elapsedMs)} />
       </div>
 
-      <div className="px-4 py-3.5 space-y-3.5">
-        <Row label="Incident Raised" value={formatUTC(raisedAt)} />
-        <Row label="Current Time" value={formatUTC(now)} />
-        <Row label="Elapsed" value={formatDuration(elapsedMs)} />
-      </div>
-
-      <div className="px-4 py-3.5 space-y-3.5">
+      {/* ── Section 2: Acknowledged ── */}
+      <Divider />
+      <div className="grid grid-cols-2 gap-2.5 pt-1.5">
         {acknowledgedAt ? (
           <>
-            <Row
+            <Cell
               label="Acknowledged"
               value={formatUTC(new Date(acknowledgedAt))}
             />
-            <Row
+            <Cell
               label="Time to Acknowledge"
               value={formatDuration(timeToAcknowledgeMs!)}
             />
           </>
         ) : (
-          <Row label="Acknowledged" value="Pending" muted />
+          <>
+            <Cell label="Acknowledged" value="Pending" muted />
+            <Cell label="Time to Acknowledge" value="—" muted />
+          </>
         )}
       </div>
 
-      <div className="px-4 py-3.5 space-y-3.5">
-        <Row label="Current Stage" value={capitalize(stageLabel)} />
-        <Row
+      {/* ── Section 3: Stage ── */}
+      <Divider />
+      <div className="grid grid-cols-2 gap-2.5 pt-1.5">
+        <Cell label="Current Stage" value={capitalize(stageLabel)} />
+        <Cell
           label="Time in Current Stage"
           value={formatDuration(timeInStageMs)}
         />
       </div>
 
-      <div className="px-4 py-3.5 space-y-3.5">
-        <Row
+      {/* ── Section 4: SLA / SLO ── */}
+      <Divider />
+      <div className="grid grid-cols-2 gap-2.5 pt-1.5">
+        <Cell
           label="SLA"
           value={
             <span className="inline-flex items-center gap-1.5">
               {withinTarget ? "Within Target" : "Breached"}
               <span
-                className={withinTarget ? "text-[#22a156]" : "text-red-600"}
+                className={withinTarget ? "text-emerald-600" : "text-red-500"}
               >
                 {withinTarget ? "✓" : "✗"}
               </span>
             </span>
           }
         />
-        <Row label="SLO" value={`${sloPercentage.toFixed(1)}%`} />
+        <Cell label="SLO" value={`${sloPercentage.toFixed(1)}%`} />
       </div>
 
-      <div className="px-4 py-3.5 space-y-3.5 rounded-b-xl">
-        <Row
+      {/* ── Section 5: Business Hours / Last Updated ── */}
+      <Divider />
+      <div className="grid grid-cols-2 gap-2.5 pt-1.5">
+        <Cell
           label="Business Hours"
           value={businessHoursActive ? "Running" : "Paused"}
         />
-        <Row label="Last Updated" value={formatRelative(lastUpdatedMs)} />
+        <Cell label="Last Updated" value={formatRelative(lastUpdatedMs)} />
       </div>
     </div>
   );
 }
 
-function Row({
+// ─── Sub-components ───────────────────────────────────────
+
+function Cell({
   label,
   value,
   muted,
@@ -210,13 +231,19 @@ function Row({
   muted?: boolean;
 }) {
   return (
-    <div>
-      <div className="text-sm font-medium text-zinc-900">{label}</div>
+    <div className="bg-zinc-50 rounded-base px-4 py-3">
+      <div className="text-xs font-semibold text-zinc-800">{label}</div>
       <div
-        className={`text-sm mt-0.5 ${muted ? "text-zinc-400 italic" : "text-zinc-600"}`}
+        className={`text-sm mt-1 ${
+          muted ? "text-zinc-400 italic" : "text-zinc-500"
+        }`}
       >
         {value}
       </div>
     </div>
   );
+}
+
+function Divider() {
+  return <hr className="border-zinc-300/50" />;
 }

@@ -57,7 +57,7 @@ const IncidentRouteShell = ({
 
   // ── Content ──────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-black dark:text-zinc-200">
+    <div className="min-h-screen  dark:bg-zinc-950 text-black dark:text-zinc-200">
       {children(incident)}
     </div>
   );

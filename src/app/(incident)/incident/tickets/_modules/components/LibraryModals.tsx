@@ -148,12 +148,6 @@ export function TrendsModal({
               Patterns across the historical register
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-600 transition-colors mt-1"
-          >
-            <X size={18} />
-          </button>
         </div>
 
         {/* 2x2 grid */}
@@ -722,7 +716,10 @@ export function CompareModal({
         {/* Footer */}
         <div className="px-6 py-4 flex justify-end border-t border-zinc-100">
           <button
-            onClick={() => { onGenerateRca?.(incidentIds); onClose(); }}
+            onClick={() => {
+              onGenerateRca?.(incidentIds);
+              onClose();
+            }}
             className="h-9 px-5 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-700 transition-colors"
           >
             Generate comparative RCA

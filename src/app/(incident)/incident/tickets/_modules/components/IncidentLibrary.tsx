@@ -355,7 +355,11 @@ export default function IncidentLibraryPage() {
 
           <Dropdown
             trigger={
-              <Button variant="outline-green" size="sm">
+              <Button
+                size="sm"
+                variant="outline-dark"
+                className="h-fit text-sm !rounded-sm font-thin"
+              >
                 Ask Ezra
               </Button>
             }
