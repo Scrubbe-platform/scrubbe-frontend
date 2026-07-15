@@ -37,7 +37,7 @@ const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
             transition={{ type: "spring", stiffness: 280, damping: 22 }}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "relative w-full mx-4 sm:max-w-xl max-h-[90vh] overflow-y-auto no-scrollbar",
+              "relative w-full mx-4 sm:max-w-xl max-h-[90vh]",
               "rounded-xl border border-zinc-500 dark:border-zinc-700/60",
               "bg-white dark:bg-zinc-900 shadow-xl",
               "p-2",
@@ -51,8 +51,9 @@ const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
             >
               <X size={15} />
             </button>
-
-            {children}
+            <div className="overflow-y-auto max-h-[calc(90vh-16px)] no-scrollbar">
+              {children}
+            </div>
           </motion.div>
         </motion.div>
       )}

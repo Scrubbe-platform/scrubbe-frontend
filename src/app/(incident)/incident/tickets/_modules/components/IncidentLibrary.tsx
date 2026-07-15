@@ -28,6 +28,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import IncidentContextDetails from "./IncidentContextDetails";
 import { useRouter } from "next/navigation";
 import Header from "@/components/IMS/DashboardHeader";
+import AssignModal from "./AssignModal";
 
 export const priColors: { [key: string]: string } = {
   P0: "text-red-600 bg-red-50 border-red-100",
@@ -82,7 +83,14 @@ export default function IncidentLibraryPage() {
 
   // 3. Modals Visibility State Machine
   const [activeModal, setActiveModal] = useState<{
-    type: "replay" | "compare" | "trends" | "doc" | "playbook" | null;
+    type:
+      | "replay"
+      | "compare"
+      | "trends"
+      | "doc"
+      | "playbook"
+      | "assign"
+      | null;
     kind?: "rca" | "report" | "exec";
     payload?: any;
   }>({ type: null });
@@ -610,6 +618,12 @@ export default function IncidentLibraryPage() {
           <IncidentContextDetails incident={selectedIncident} />
         </div>
 
+        <AssignModal
+          isOpen={activeModal.type === "assign"}
+          incidents={activeModal.payload}
+          onClose={() => setActiveModal({ type: null })}
+        />
+
         {/* Floating Action toolbar bar dock row */}
         <BulkActionBar
           selectedIds={selectedIds}
@@ -628,6 +642,12 @@ export default function IncidentLibraryPage() {
             })
           }
           handleExportSelected={handleExportSelected}
+          handleAssign={() =>
+            setActiveModal({
+              type: "assign",
+              payload: Array.from(selectedIds),
+            })
+          }
         />
 
         {/* Modals Mounting Injection Registry hooks */}

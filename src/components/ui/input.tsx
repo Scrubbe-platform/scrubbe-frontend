@@ -37,7 +37,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={props.id}
-            className={`flex gap-2 items-center dark:text-white mb-2 text-sm font-medium ${
+            className={`flex gap-2 items-center dark:text-white font-ibm mb-2 text-sm font-medium  ${
               isLoading ? "text-gray-500" : "text-black"
             } ${labelClassName}`}
           >
@@ -59,8 +59,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={isPasswordType ? (showPassword ? "text" : "password") : type}
             className={`w-full read-only:opacity-70 dark:text-white bg-transparent h-[34px] px-3 text-sm py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               isLoading
-                ? "border-gray-300 bg-gray-50 opacity-70 cursor-not-allowed"
-                : "border-gray-400"
+                ? "border-[#DDDDDD] bg-gray-50 opacity-70 cursor-not-allowed"
+                : "border-[#DDDDDD]"
             } ${error ? "border-red-500" : ""} ${className}`}
             disabled={isLoading}
             {...props}

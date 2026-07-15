@@ -31,7 +31,7 @@ const TextArea = ({
       {label && (
         <label
           htmlFor={props.id}
-          className={`flex gap-2 items-center dark:text-white text-black mb-2 text-sm font-medium ${
+          className={`flex gap-2 items-center font-ibm dark:text-white text-black mb-2 text-sm font-medium ${
             isLoading ? "text-gray-700" : "text-black"
           } ${labelClassName}`}
         >
@@ -51,8 +51,8 @@ const TextArea = ({
         <textarea
           className={`w-full dark:text-white bg-transparent px-3 text-sm py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             isLoading
-              ? "border-gray-400 bg-gray-50 opacity-70 cursor-not-allowed"
-              : "border-gray-400"
+              ? "border-[#DDDDDD] bg-gray-50 opacity-70 cursor-not-allowed"
+              : "border-[#DDDDDD]"
           } ${error ? "border-red-500" : ""} ${className}`}
           disabled={isLoading}
           rows={rows || 4}

@@ -143,7 +143,7 @@ export const incidentContextSchema = z.object({
 export type IncidentContextFormValues = z.infer<typeof incidentContextSchema>;
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <label className="text-[11px] font-semibold capitalize tracking-wider text-zinc-700 dark:text-zinc-500 mb-1.5 block">
+  <label className="text-[11px] font-ibm font-medium capitalize tracking-wider text-zinc-700 dark:text-zinc-500 mb-1.5 block">
     {children}
   </label>
 );
@@ -359,7 +359,7 @@ const AddContextForm = ({
         : `${(b / (1024 * 1024)).toFixed(1)}MB`;
 
   return (
-    <div className="w-full">
+    <div className="w-full font-ibm">
       <form
         onSubmit={handleSubmit(async (data) => {
           setSaveNotice("");
@@ -384,8 +384,8 @@ const AddContextForm = ({
                   <input
                     type="text"
                     readOnly
-                    value={incident.id.slice(0, 12).toUpperCase()}
-                    className="h-9 w-full rounded-md border border-zinc-400 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40 px-3 text-sm font-mono  outline-none"
+                    value={incident.ticketId}
+                    className="h-9 w-full rounded-md border border-[#DDDDDD] dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40 px-3 text-sm font-mono  outline-none"
                   />
                 </div>
                 <FormatTimerDisplay totalSeconds={incident?.MTTR} />
@@ -419,7 +419,7 @@ const AddContextForm = ({
                         error={errors.state?.message}
                         options={TICKET_STATUS_CONFIG.map((item) => ({
                           value: item.label,
-                          label: item.label,
+                          label: item.display,
                         }))}
                       />
                     </div>
@@ -651,7 +651,7 @@ const AddContextForm = ({
                       className={`rounded-md border border-dashed p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
                         dragOver
                           ? "border-emerald-500 bg-emerald-50/20 dark:bg-emerald-500/5"
-                          : "border-zinc-400 dark:border-zinc-800 bg-zinc-50/30 hover:border-zinc-300 dark:hover:border-zinc-700"
+                          : "border-[#DDDDDD] dark:border-zinc-800 bg-zinc-50/30 hover:border-zinc-300 dark:hover:border-zinc-700"
                       }`}
                     >
                       <Upload size={18} className="text-zinc-400 mb-2" />

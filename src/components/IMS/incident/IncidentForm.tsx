@@ -208,14 +208,14 @@ function WarRoomToggle({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-black dark:text-zinc-500">
+      <label className="mb-2 block text-sm font-medium text-black dark:text-zinc-500">
         War room
       </label>
       <div className="grid grid-cols-2 gap-2.5">
         <button
           type="button"
           onClick={() => onChange("open-war-room")}
-          className={`flex flex-row gap-2 items-center rounded-base border border-zinc-400 px-4 py-2 text-left transition-color`}
+          className={`flex flex-row gap-2 items-center rounded-md border border-[#DDDDDD] px-4 py-2 text-left transition-color`}
         >
           {value == "open-war-room" ? (
             <MdRadioButtonChecked className="text-IMSCyan" size={16} />
@@ -227,7 +227,7 @@ function WarRoomToggle({
         <button
           type="button"
           onClick={() => onChange("not-required")}
-          className={`flex flex-row gap-2 items-center rounded-base border border-zinc-400 px-4 py-2 text-left transition-color`}
+          className={`flex flex-row gap-2 items-center rounded-md border border-[#DDDDDD] px-4 py-2 text-left transition-color`}
         >
           {value == "not-required" ? (
             <MdRadioButtonChecked className="text-IMSCyan" size={16} />
@@ -306,7 +306,7 @@ export function EvidenceSection({
         </p>
 
         <div
-          className={`flex flex-col items-center justify-center rounded-xl border border-dashed p-8 text-center cursor-pointer transition-colors ${
+          className={`flex flex-col items-center justify-center rounded-xl border border-[#DDDDDD] border-dashed p-8 text-center cursor-pointer transition-colors ${
             dragging
               ? "border-emerald-400 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/5"
               : "border-zinc-400 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
@@ -741,7 +741,7 @@ const RaiseIncidentModal = () => {
                         error={errors.state?.message}
                         options={TICKET_STATUS_CONFIG.map((item) => ({
                           value: item.label,
-                          label: item.label,
+                          label: item.display,
                         }))}
                       />
                     </div>

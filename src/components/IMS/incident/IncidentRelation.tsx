@@ -93,9 +93,9 @@ const IncidentRelationship: React.FC<Props> = ({
   return (
     <div className="w-full">
       {/* ── Mother incident (current) ── */}
-      <div className="mb-6 w-full">
+      <div className="mb-6 w-full font-ibm">
         <div className="flex items-center gap-2 mb-2">
-          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+          <p className="text-sm font-ibm text-zinc-700 dark:text-zinc-200">
             Mother Incident{" "}
             <span className="text-zinc-400 dark:text-zinc-500 font-normal">
               (Current Incident)
@@ -107,12 +107,12 @@ const IncidentRelationship: React.FC<Props> = ({
         {/* Mother card — read-only */}
         <div className="flex-1 bg-transparent outline-none text-[13px] text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 dark:placeholder:text-zinc-500">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5 border  border-gray-400 p-2 h-[34px] rounded-md">
-              <span className="text-[11px] font-mono font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+            <div className="flex items-center gap-2 mb-0.5 border  border-[#DDDDDD] p-2 h-[34px] rounded-md">
+              <span className="text-[11px] font-ibm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
                 {incident.ticketId}
               </span>
               <span
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${SEV[incident.severity] ?? SEV.P4}`}
+                className={`text-[10px] font-bold px-1.5 py-0.5 font-ibm rounded border ${SEV[incident.severity] ?? SEV.P4}`}
               >
                 {incident.severity}
               </span>
@@ -143,10 +143,10 @@ const IncidentRelationship: React.FC<Props> = ({
         <div ref={dropRef} className="relative mb-2">
           <div
             onClick={() => setDropOpen((v) => !v)}
-            className={`flex items-center gap-2 border border-gray-400 h-[34px] rounded-md px-3 py-2.5 bg-white dark:bg-zinc-800/60 cursor-pointer transition-colors ${
+            className={`flex items-center gap-2 border border-[#DDDDDD] h-[34px] rounded-md px-3 py-2.5 bg-white dark:bg-zinc-800/60 cursor-pointer transition-colors ${
               dropOpen
-                ? "border-gray-400 dark:border-zinc-500"
-                : "border-gray-400 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
+                ? "border-[#DDDDDD] dark:border-zinc-500"
+                : "border-[#DDDDDD] dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
             }`}
           >
             <Search size={14} className="text-zinc-400 shrink-0" />

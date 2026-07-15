@@ -39,99 +39,13 @@ import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 import IncidentOverview from "@/components/IMS/incident/NewIncidentList";
 import Header from "@/components/IMS/DashboardHeader";
 import Button from "@/components/ui/Button1";
+import toast from "react-hot-toast";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 // ── Modal shell ──────────────────────────────────────────────────
-
-function Modal({
-  open,
-  onClose,
-  title,
-  subtitle,
-  icon,
-  wide,
-  footer,
-  children,
-}: {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  subtitle?: string;
-  icon?: React.ReactNode;
-  wide?: boolean;
-  footer?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [open, onClose]);
-
-  if (!open) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex items-start justify-center bg-zinc-900/45 backdrop-blur-[2px] overflow-auto pt-12 pb-12 px-5"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div
-        className={cn(
-          "bg-white rounded-2xl shadow-sm shadow-light shadow-2xl w-full animate-in fade-in slide-in-from-bottom-3 duration-200",
-          wide ? "max-w-[920px]" : "max-w-[640px]",
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-100">
-          {icon && (
-            <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-              {icon}
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-[15px] font-bold text-zinc-900">{title}</h3>
-            {subtitle && (
-              <p className="text-xs text-zinc-400 mt-0.5">{subtitle}</p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M6 6l12 12M18 6L6 18"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="px-5 py-4 max-h-[64vh] overflow-auto">{children}</div>
-
-        {/* Footer */}
-        {footer && (
-          <div className="flex justify-end gap-2.5 px-5 py-3.5 border-t border-zinc-100 bg-slate-50 rounded-b-2xl">
-            {footer}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ── Reusable modal button ────────────────────────────────────────
 
@@ -583,6 +497,83 @@ function ContextCell({
 // MODAL SHELL
 // ══════════════════════════════════════════════════════════════════
 
+function Modal({
+  open,
+  onClose,
+  icon,
+  title,
+  subtitle,
+  wide,
+  footer,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  wide?: boolean;
+  footer?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  // close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-12 px-5 pb-8 overflow-auto bg-zinc-900/45 backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className={cn(
+          "bg-white rounded-2xl shadow-sm shadow-light shadow-2xl w-full animate-in fade-in slide-in-from-bottom-3 duration-200",
+          wide ? "max-w-[920px]" : "max-w-[640px]",
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-100">
+          <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            {icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-[15px] font-bold text-zinc-900">{title}</h3>
+            {subtitle && (
+              <p className="text-xs text-zinc-400 mt-0.5">{subtitle}</p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
+          >
+            <X size={15} />
+          </button>
+        </div>
+        {/* Body */}
+        <div className="px-5 py-4 max-h-[64vh] overflow-auto">{children}</div>
+        {/* Footer */}
+        {footer && (
+          <div className="px-5 py-3.5 border-t border-zinc-100 bg-zinc-50 rounded-b-2xl flex justify-end gap-2.5">
+            {footer}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ══════════════════════════════════════════════════════════════════
 // RECONSTRUCTION REPORT MODAL
 // ══════════════════════════════════════════════════════════════════
@@ -863,6 +854,470 @@ function RerunModal({
   );
 }
 
+// ══════════════════════════════════════════════════════════════════
+// REMEDIATION TYPES & HELPERS
+// ══════════════════════════════════════════════════════════════════
+
+interface RemediationAction {
+  title: string;
+  description: string;
+  playbook: string;
+  policy: string;
+  stage: number;
+  policyMax: number;
+  risk: number;
+  blast: {
+    level: "LOW" | "MEDIUM" | "UNKNOWN";
+    svc: number | null;
+    infra: number | null;
+    note: string;
+  };
+  done: boolean;
+}
+
+const EAL_NAME: Record<number, string> = {
+  0: "Manual",
+  1: "Suggest",
+  2: "Approval-gated",
+  3: "Auto-execute",
+};
+
+function computeEAL(a: RemediationAction) {
+  return Math.min(a.stage, a.policyMax, a.risk);
+}
+
+function routeFor(
+  a: RemediationAction,
+): "auto" | "approval" | "manual" | "blocked" {
+  if (a.blast.level === "UNKNOWN") return "blocked";
+  const eal = computeEAL(a);
+  if (eal >= 3) return "auto";
+  if (eal === 2) return "approval";
+  return "manual";
+}
+
+const ROUTE_LABEL: Record<string, string> = {
+  auto: "Auto-execute",
+  approval: "Approval-gated",
+  manual: "Manual",
+  blocked: "Blocked",
+};
+
+const ROUTE_COLORS: Record<string, string> = {
+  auto: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  approval: "bg-amber-50 text-amber-700 border-amber-200",
+  manual: "bg-blue-50 text-blue-700 border-blue-200",
+  blocked: "bg-red-50 text-red-700 border-red-200",
+};
+
+const EAL_COLORS: Record<number, string> = {
+  0: "bg-zinc-100 text-zinc-600",
+  1: "bg-blue-50 text-blue-700",
+  2: "bg-amber-50 text-amber-700",
+  3: "bg-emerald-50 text-emerald-700",
+};
+
+const BLAST_COLORS: Record<string, string> = {
+  LOW: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  MEDIUM: "bg-amber-50 text-amber-700 border-amber-200",
+  UNKNOWN: "bg-red-50 text-red-700 border-red-200",
+};
+
+function buildActions(incident: IncidentDetailRecord): RemediationAction[] {
+  const actions: RemediationAction[] = [];
+
+  if (incident.recommendedActions?.length) {
+    incident.recommendedActions.forEach((action, i) => {
+      actions.push({
+        title: action,
+        description: `Recommended remediation step for ${incident.service || "the affected service"}.`,
+        playbook: `PB-${incident.ticketId}-${String(i + 1).padStart(2, "0")}`,
+        policy: "POL-PROD-INFRA",
+        stage: i === 0 ? 3 : 2,
+        policyMax: 2,
+        risk: i === 0 ? 2 : i === 1 ? 1 : 3,
+        blast:
+          i < 2
+            ? {
+                level: "MEDIUM",
+                svc: 3,
+                infra: 1,
+                note: `${incident.service || "service"} tier`,
+              }
+            : { level: "LOW", svc: 1, infra: 0, note: "observability only" },
+        done: false,
+      });
+    });
+  }
+
+  if (actions.length === 0) {
+    actions.push({
+      title: "Investigate and triage manually",
+      description:
+        "No automated remediation actions available. Manual investigation required.",
+      playbook: `PB-MANUAL-${incident.ticketId}`,
+      policy: "POL-PROD-GENERAL",
+      stage: 1,
+      policyMax: 1,
+      risk: 1,
+      blast: {
+        level: "UNKNOWN",
+        svc: null,
+        infra: null,
+        note: "No dependency data available",
+      },
+      done: false,
+    });
+  }
+
+  return actions;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// REMEDIATION PLAN MODAL
+// ══════════════════════════════════════════════════════════════════
+
+function RemediationModal({
+  open,
+  onClose,
+  incident,
+  onOpenGate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  incident: IncidentDetailRecord;
+  onOpenGate: (index: number) => void;
+}) {
+  const actions = useMemo(() => buildActions(incident), [incident]);
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      wide
+      icon={<Lightbulb size={18} />}
+      title="Remediation plan"
+      subtitle="Ezra proposes · each step is individually governed"
+      footer={
+        <ModalBtn primary onClick={onClose}>
+          Got it
+        </ModalBtn>
+      }
+    >
+      <div className="space-y-2.5">
+        {actions.map((action, i) => {
+          const eal = computeEAL(action);
+          const route = routeFor(action);
+
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => {
+                onClose();
+                onOpenGate(i);
+              }}
+              className="w-full flex gap-3 items-start p-4 rounded-xl border border-zinc-100 bg-white hover:bg-slate-50 hover:border-zinc-200 transition-colors text-left"
+            >
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
+                <Sparkles size={15} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-semibold text-zinc-900">
+                  {action.title}
+                </p>
+                <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                  {action.description}
+                </p>
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
+                  <span
+                    className={cn(
+                      "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                      EAL_COLORS[eal],
+                    )}
+                  >
+                    EAL L{eal}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                      ROUTE_COLORS[route],
+                    )}
+                  >
+                    {ROUTE_LABEL[route]}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                      BLAST_COLORS[action.blast.level],
+                    )}
+                  >
+                    Blast {action.blast.level}
+                  </span>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-xs text-zinc-400 mt-3">
+        Nothing here executes without passing blast-radius and automation-level
+        checks at the gate.
+      </p>
+    </Modal>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
+// EXECUTION GATE MODAL
+// ══════════════════════════════════════════════════════════════════
+
+function ExecutionGateModal({
+  open,
+  onClose,
+  incident,
+  actionIndex,
+}: {
+  open: boolean;
+  onClose: () => void;
+  incident: IncidentDetailRecord;
+  actionIndex: number | null;
+}) {
+  const actions = useMemo(() => buildActions(incident), [incident]);
+  const action = actionIndex !== null ? actions[actionIndex] : null;
+
+  if (!action) return null;
+
+  const eal = computeEAL(action);
+  const route = routeFor(action);
+  const blast = action.blast;
+  const isUnknown = blast.level === "UNKNOWN";
+
+  const handleExecute = () => {
+    toast.success(
+      `Executed: ${action.title} — EAL L${eal}, blast ${blast.level}`,
+    );
+    onClose();
+  };
+
+  // Gate step component
+  const GateStep = ({
+    step,
+    title,
+    children,
+    highlight,
+  }: {
+    step: number;
+    title: string;
+    children: React.ReactNode;
+    highlight?: boolean;
+  }) => (
+    <div
+      className={cn(
+        "rounded-xl border p-4",
+        highlight ? "border-zinc-200 bg-white" : "border-zinc-100 bg-zinc-50",
+      )}
+    >
+      <h4 className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[.05em] text-zinc-400 mb-3">
+        <span className="w-5 h-5 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">
+          {step}
+        </span>
+        {title}
+      </h4>
+      {children}
+    </div>
+  );
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      wide
+      icon={
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <rect
+            x="5"
+            y="11"
+            width="14"
+            height="9"
+            rx="2"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
+          <path
+            d="M8 11V8a4 4 0 018 0v3"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
+        </svg>
+      }
+      title={`Execution gate · ${action.title}`}
+      subtitle="EAL computed once at match time · never recomputed"
+      footer={
+        <>
+          <ModalBtn onClick={onClose}>Cancel</ModalBtn>
+          {route === "blocked" ? (
+            <ModalBtn onClick={onClose}>Open in War Room</ModalBtn>
+          ) : route === "approval" ? (
+            <ModalBtn primary onClick={handleExecute}>
+              Approve & execute
+            </ModalBtn>
+          ) : route === "auto" ? (
+            <ModalBtn primary onClick={handleExecute}>
+              Execute now
+            </ModalBtn>
+          ) : (
+            <ModalBtn primary onClick={handleExecute}>
+              Acknowledge & assign
+            </ModalBtn>
+          )}
+        </>
+      }
+    >
+      <div className="space-y-3.5">
+        {/* Step 1 — EAL */}
+        <GateStep step={1} title="Effective Automation Level">
+          <div className="text-[12.5px] text-zinc-600 font-mono leading-relaxed">
+            EAL = <b className="text-zinc-900">min</b>( playbook.automationStage{" "}
+            <b className="text-zinc-900">L{action.stage}</b>,
+            policy.maxAutomationLevel{" "}
+            <b className="text-zinc-900">L{action.policyMax}</b>,
+            riskClassifier.computedLevel{" "}
+            <b className="text-zinc-900">L{action.risk}</b>) ={" "}
+            <span
+              className={cn(
+                "inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ml-1",
+                EAL_COLORS[eal],
+              )}
+            >
+              L{eal} · {EAL_NAME[eal]}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            <span className="inline-flex items-center text-[10px] font-semibold text-zinc-500 bg-white shadow-sm shadow-light rounded-full px-2.5 py-1">
+              <span className="text-zinc-400 mr-1.5">playbook</span>{" "}
+              {action.playbook}
+            </span>
+            <span className="inline-flex items-center text-[10px] font-semibold text-zinc-500 bg-white shadow-sm shadow-light rounded-full px-2.5 py-1">
+              <span className="text-zinc-400 mr-1.5">policy</span>{" "}
+              {action.policy}
+            </span>
+          </div>
+        </GateStep>
+
+        {/* Step 2 — Blast radius */}
+        <GateStep step={2} title="Blast radius — evaluated first">
+          <div
+            className={cn(
+              "flex items-start gap-3 rounded-lg p-3 text-xs",
+              isUnknown
+                ? "bg-red-50 border border-red-200 text-red-800"
+                : blast.level === "MEDIUM"
+                  ? "bg-amber-50 border border-amber-200 text-amber-800"
+                  : "bg-emerald-50 border border-emerald-200 text-emerald-800",
+            )}
+          >
+            <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+            <div>
+              {isUnknown ? (
+                <>
+                  Blast radius is <b>UNKNOWN</b> — {blast.note}. UNKNOWN never
+                  resolves to LOW, so the gate blocks execution regardless of
+                  automation level.
+                </>
+              ) : (
+                <>
+                  Blast radius <b>{blast.level}</b> — {blast.svc} service(s),{" "}
+                  {blast.infra} infra node(s). {blast.note}.
+                </>
+              )}
+            </div>
+          </div>
+        </GateStep>
+
+        {/* Step 3 — Guardrails */}
+        <GateStep step={3} title="Guardrails">
+          {isUnknown ? (
+            <div className="flex items-center gap-2.5 text-xs text-zinc-400">
+              <span className="w-5 h-5 rounded-md bg-zinc-100 flex items-center justify-center text-zinc-400">
+                –
+              </span>
+              Guardrail checks not run — blocked upstream by unknown blast
+              radius
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {[
+                "Change-freeze window: none active",
+                `Policy ceiling honoured: max L${action.policyMax}`,
+                route === "approval"
+                  ? "Approver present: you (on-call lead)"
+                  : "Idempotency & rollback path: verified",
+              ].map((guard, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2.5 text-xs text-zinc-700"
+                >
+                  <span className="w-5 h-5 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <Check size={12} />
+                  </span>
+                  {guard}
+                </div>
+              ))}
+            </div>
+          )}
+        </GateStep>
+
+        {/* Step 4 — Routing */}
+        <GateStep step={4} title={`Routing · ${ROUTE_LABEL[route]}`} highlight>
+          <div
+            className={cn(
+              "flex items-start gap-3 rounded-lg p-3 text-xs",
+              route === "blocked"
+                ? "bg-red-50 border border-red-200 text-red-800"
+                : route === "approval"
+                  ? "bg-amber-50 border border-amber-200 text-amber-800"
+                  : route === "auto"
+                    ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+                    : "bg-blue-50 border border-blue-200 text-blue-800",
+            )}
+          >
+            {route === "blocked" ? (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="shrink-0 mt-0.5"
+              >
+                <path
+                  d="M6 6l12 12M18 6L6 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            ) : route === "auto" ? (
+              <Check size={14} className="shrink-0 mt-0.5" />
+            ) : (
+              <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+            )}
+            <div>
+              {route === "blocked"
+                ? "Execution blocked. Resolve the dependency set, then re-evaluate."
+                : route === "approval"
+                  ? "EAL L2 — needs human approval before it runs."
+                  : route === "auto"
+                    ? "EAL L3 — eligible for auto-execution within policy."
+                    : "EAL L1 — Ezra can prepare it, but a human executes."}
+            </div>
+          </div>
+        </GateStep>
+      </div>
+    </Modal>
+  );
+}
+
 // ── Right panel tab ids ──────────────────────────────────────────
 
 type IntelTab = "narrative" | "details" | "evidence";
@@ -883,6 +1338,8 @@ function SignalGraphWorkspace({
   const [intelTab, setIntelTab] = useState<IntelTab>("narrative");
   const [showReport, setShowReport] = useState(false);
   const [showRerun, setShowRerun] = useState(false);
+  const [showRemediation, setShowRemediation] = useState(false);
+  const [gateActionIndex, setGateActionIndex] = useState<number | null>(null);
 
   const alertFeed = useMemo(() => buildAlertFeed(incident), [incident]);
   const auditTrail = useMemo(() => buildAuditTrail(incident), [incident]);
@@ -922,9 +1379,7 @@ function SignalGraphWorkspace({
         <div className="flex items-center gap-2">
           <Button
             type="button"
-            onClick={() =>
-              router.push(`/incident/incident-delivery?id=${incident.id}`)
-            }
+            onClick={() => setShowRemediation(true)}
             size="sm"
           >
             <Lightbulb size={14} />
@@ -1256,7 +1711,6 @@ function SignalGraphWorkspace({
           </div>
           <div className="border-t border-zinc-100 px-4 py-3.5">
             <h3 className="text-xs font-bold flex items-center gap-2 text-zinc-700 mb-3">
-              <AlertTriangle size={13} className="text-amber-500" />
               Contributing factors
             </h3>
             <div className="space-y-0">
@@ -1286,7 +1740,6 @@ function SignalGraphWorkspace({
           </div>
           <div className="border-t border-zinc-100 px-4 py-3.5">
             <h3 className="text-xs font-bold flex items-center gap-2 text-zinc-700 mb-3">
-              <BarChart3 size={13} className="text-pink-500" />
               Impact summary
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -1432,7 +1885,7 @@ function SignalGraphWorkspace({
             <FileText size={14} className="text-zinc-400" />
             Append-only audit
           </h2>
-          <span className="text-[1n1px] text-zinc-400 font-medium">
+          <span className="text-[11px] text-zinc-400 font-medium">
             {auditTrail.length} events
           </span>
         </div>
@@ -1495,6 +1948,18 @@ function SignalGraphWorkspace({
         open={showRerun}
         onClose={() => setShowRerun(false)}
         incident={incident}
+      />
+      <RemediationModal
+        open={showRemediation}
+        onClose={() => setShowRemediation(false)}
+        incident={incident}
+        onOpenGate={(i) => setGateActionIndex(i)}
+      />
+      <ExecutionGateModal
+        open={gateActionIndex !== null}
+        onClose={() => setGateActionIndex(null)}
+        incident={incident}
+        actionIndex={gateActionIndex}
       />
     </div>
   );
