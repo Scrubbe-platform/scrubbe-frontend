@@ -1,9 +1,11 @@
 // app/incidents/library/components/FilterRail.tsx
-import React from "react";
-import { IncidentListItem } from "@/lib/incident/incident.types";
-import { ChevronRight } from "lucide-react";
+"use client";
 
-type FilterKey =
+import React, { useMemo } from "react";
+import { IncidentListItem } from "@/lib/incident/incident.types";
+import { ChevronDown, X } from "lucide-react";
+
+export type FilterKey =
   | "status"
   | "severity"
   | "environment"
@@ -24,10 +26,20 @@ interface FilterRailProps {
 
 const DATE_OPTIONS = ["Today", "Yesterday", "Last 7 days", "Last 30 days"];
 
-const groupsConfig = [
+// Field mapping: filter key → IncidentListItem field for counting
+const FILTER_TO_FIELD: Partial<Record<FilterKey, keyof IncidentListItem>> = {
+  status: "status",
+  severity: "severity",
+  environment: "environment",
+  service: "service",
+  rootCause: "reason",
+  incidentType: "sourceType",
+};
+
+const STATIC_GROUPS: { label: string; key: FilterKey; options?: string[] }[] = [
   {
-    label: "Incident status",
-    key: "status" as FilterKey,
+    label: "Incident Status",
+    key: "status",
     options: [
       "Open",
       "Investigating",
@@ -41,35 +53,22 @@ const groupsConfig = [
   },
   {
     label: "Priority",
-    key: "priority" as FilterKey,
+    key: "severity", // maps to IncidentListItem.severity (P0–P3)
     options: ["P0", "P1", "P2", "P3"],
   },
   {
     label: "Environment",
-    key: "environment" as FilterKey,
+    key: "environment",
     options: ["Production", "Staging", "Development"],
   },
   {
     label: "Service",
-    key: "service" as FilterKey,
-    options: [
-      "Checkout",
-      "Payments",
-      "API Gateway",
-      "Authentication",
-      "Database",
-      "Search",
-      "Notifications",
-      "Cart",
-      "Inventory",
-      "User Profile",
-      "Recommendations",
-      "Billing",
-    ],
+    key: "service",
+    // options: derived dynamically from dataList below
   },
   {
-    label: "Root cause",
-    key: "rootCause" as FilterKey,
+    label: "Root Cause",
+    key: "rootCause",
     options: [
       "Code Regression",
       "Infrastructure",
@@ -82,25 +81,18 @@ const groupsConfig = [
     ],
   },
   {
-    label: "Incident type",
-    key: "incidentType" as FilterKey,
-    options: [
-      "Manual",
-      "Automatic",
-      "Major Incident",
-      "Child",
-      "Mother",
-      "Risk Incident",
-    ],
+    label: "Incident Type",
+    key: "incidentType",
+    options: ["Manual", "Automatic", "Major Incident", "Child", "Mother", "Risk Incident"],
   },
   {
-    label: "War room",
-    key: "warRoom" as FilterKey,
+    label: "War Room",
+    key: "warRoom",
     options: ["Has War Room", "No War Room"],
   },
   {
-    label: "Code engine",
-    key: "codeEngine" as FilterKey,
+    label: "Code Engine",
+    key: "codeEngine",
     options: ["Code Related", "Non Code Related"],
   },
 ];
@@ -113,13 +105,27 @@ export default function FilterRail({
   dateRange,
   onDateRangeChange,
 }: FilterRailProps) {
-  const countMetrics = (key: keyof IncidentListItem, val: string) =>
-    dataList.filter((i) => String(i[key]).toLowerCase() === val.toLowerCase())
-      .length;
+  // Derive unique services from live data (alphabetical)
+  const dynamicServices = useMemo(() => {
+    const seen = new Set<string>();
+    dataList.forEach((i) => {
+      if (i.service && i.service.trim()) seen.add(i.service.trim());
+    });
+    return Array.from(seen).sort();
+  }, [dataList]);
 
-  const handleCheckboxToggle = (group: FilterKey, val: string) => {
+  // Count incidents matching a given filter option
+  const countFor = (key: FilterKey, val: string): number => {
+    const field = FILTER_TO_FIELD[key];
+    if (!field) return 0;
+    return dataList.filter(
+      (i) => String(i[field] ?? "").toLowerCase() === val.toLowerCase()
+    ).length;
+  };
+
+  const handleToggle = (group: FilterKey, val: string) => {
     onFilterChange((prev: any) => {
-      const nextSet = new Set(prev[group]);
+      const nextSet = new Set<string>(prev[group]);
       nextSet.has(val) ? nextSet.delete(val) : nextSet.add(val);
       return { ...prev, [group]: nextSet };
     });
@@ -129,38 +135,47 @@ export default function FilterRail({
     Object.values(filters).reduce((acc, set) => acc + set.size, 0) +
     (dateRange ? 1 : 0);
 
+  const groups = STATIC_GROUPS.map((g) =>
+    g.key === "service"
+      ? { ...g, options: dynamicServices.length ? dynamicServices : ["No services found"] }
+      : g
+  );
+
   return (
-    <div className="bg-white scroll-none shadow-sm shadow-light rounded-xl sticky top-20 max-h-[calc(100vh-120px)] overflow-y-auto">
+    <div className="bg-white shadow-sm shadow-light rounded-xl sticky top-20 max-h-[calc(100vh-120px)] overflow-y-auto">
       <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100">
-        <span className="text-base font-medium">Filters</span>
+        <span className="text-sm font-semibold text-zinc-800">Filters</span>
         {totalActive > 0 && (
           <button
             onClick={onClear}
-            className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
+            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
           >
-            Clear all
+            <X size={11} />
+            Clear {totalActive}
           </button>
         )}
       </div>
 
       <div className="divide-y divide-zinc-100">
-        {/* Date range */}
-        <details className="group">
-          <summary className="flex items-center gap-1 px-4 py-2.5 cursor-pointer list-none text-sm text-zinc-500">
-            <ChevronRight size={16} className="text-zinc-400" />
-            <span>Date range</span>
+        {/* Date Range */}
+        <details open className="group">
+          <summary className="flex items-center justify-between px-4 py-2.5 cursor-pointer list-none text-xs font-medium text-zinc-600 select-none">
+            <span>Date Range</span>
+            <ChevronDown
+              size={13}
+              className="text-zinc-400 group-open:rotate-180 transition-transform"
+            />
           </summary>
           <div className="px-3 pb-3 grid grid-cols-2 gap-1.5">
             {DATE_OPTIONS.map((opt) => (
               <button
                 key={opt}
-                onClick={() =>
-                  onDateRangeChange(dateRange === opt ? null : opt)
-                }
-                className={`py-1.5 text-[10px] rounded-md border transition-colors ${
+                type="button"
+                onClick={() => onDateRangeChange(dateRange === opt ? null : opt)}
+                className={`py-1.5 text-[10px] rounded-md border font-medium transition-colors ${
                   dateRange === opt
-                    ? "bg-blue-50 border-blue-300 text-blue-700 font-medium"
-                    : "bg-zinc-50 border-zinc-200 text-zinc-700 hover:border-zinc-300"
+                    ? "bg-blue-50 border-blue-300 text-blue-700"
+                    : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:border-zinc-300"
                 }`}
               >
                 {opt}
@@ -169,64 +184,58 @@ export default function FilterRail({
           </div>
         </details>
 
-        {/* Dynamic groups */}
-        {groupsConfig.map((g) => (
-          <details key={g.key} className="group">
-            <summary className="flex items-center gap-1 px-4 py-2.5 cursor-pointer list-none text-sm  text-zinc-500">
-              <ChevronRight size={16} className="text-zinc-400" />
-              <span>{g.label}</span>
-            </summary>
-            <div className="px-3 pb-3 flex flex-col gap-0.5">
-              {g.options.map((opt) => {
-                const isChecked = filters[g.key]?.has(opt) ?? false;
-                const count = countMetrics(
-                  g.key as keyof IncidentListItem,
-                  opt,
-                );
-                return (
-                  <label
-                    key={opt}
-                    className="flex items-center gap-2 px-1 py-1 rounded cursor-pointer hover:bg-zinc-50"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => handleCheckboxToggle(g.key, opt)}
-                      className="accent-green-700 w-3.5 h-3.5 flex-shrink-0"
-                    />
-                    <span className="flex-1 text-xs text-zinc-700 truncate">
-                      {opt}
+        {/* Dynamic filter groups */}
+        {groups.map((g) => {
+          const activeCount = filters[g.key]?.size ?? 0;
+          return (
+            <details key={g.key} className="group">
+              <summary className="flex items-center justify-between px-4 py-2.5 cursor-pointer list-none text-xs font-medium text-zinc-600 select-none">
+                <span className="flex items-center gap-1.5">
+                  {g.label}
+                  {activeCount > 0 && (
+                    <span className="h-4 min-w-4 px-1 rounded-full bg-indigo-600 text-white text-[9px] font-bold flex items-center justify-center">
+                      {activeCount}
                     </span>
-                    <span className="text-[11px] text-zinc-400 tabular-nums">
-                      {count}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </details>
-        ))}
+                  )}
+                </span>
+                <ChevronDown
+                  size={13}
+                  className="text-zinc-400 group-open:rotate-180 transition-transform"
+                />
+              </summary>
+              <div className="px-3 pb-3 flex flex-col gap-0.5">
+                {(g.options ?? []).map((opt) => {
+                  const isChecked = filters[g.key]?.has(opt) ?? false;
+                  const count = countFor(g.key, opt);
+                  return (
+                    <label
+                      key={opt}
+                      className="flex items-center gap-2 px-1.5 py-1 rounded cursor-pointer hover:bg-zinc-50 group/item"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => handleToggle(g.key, opt)}
+                        className="accent-indigo-600 w-3.5 h-3.5 flex-shrink-0 cursor-pointer"
+                      />
+                      <span className="flex-1 text-xs text-zinc-700 truncate">
+                        {opt}
+                      </span>
+                      <span
+                        className={`text-[10px] tabular-nums ${
+                          count > 0 ? "text-zinc-500 font-medium" : "text-zinc-300"
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </details>
+          );
+        })}
       </div>
     </div>
-  );
-}
-
-function ChevronIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      className="text-zinc-400"
-    >
-      <path
-        d="M3 4.5L6 7.5L9 4.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
