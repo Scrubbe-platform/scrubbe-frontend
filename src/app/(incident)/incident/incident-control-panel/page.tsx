@@ -1,11 +1,51 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { Search, ChevronDown, Download } from "lucide-react";
 import Header from "@/components/IMS/DashboardHeader";
 import Button from "@/components/ui/Button1";
 import Modal from "@/components/ui/Modal";
 import SideModal from "@/components/ui/SideModal";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Filler,
+  Tooltip,
+  Legend,
+  ScatterController,
+} from "chart.js";
+import { Line, Doughnut, Bar, Scatter } from "react-chartjs-2";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Filler,
+  Tooltip,
+  Legend,
+  ScatterController,
+);
+
+// ══════════════════════════════════════════════════════════════════
+// CHART DEFAULTS
+// ══════════════════════════════════════════════════════════════════
+
+const NO_LEGEND = { display: false } as const;
+const GRID_OFF = { display: false } as const;
+const GRID_SOFT = { color: "#F1F5F9", drawBorder: false } as const;
+const FONT = {
+  family: "'IBM Plex Sans', system-ui, sans-serif",
+  size: 10,
+  color: "#94A3B8",
+};
 
 // ══════════════════════════════════════════════════════════════════
 // DUMMY DATA
@@ -18,6 +58,7 @@ const KPI_DATA = [
     delta: "vs 30 days ago",
     cls: "text-emerald-600",
     color: "#02DD82",
+    spark: [40, 33, 30, 28, 24, 22, 18, 15],
   },
   {
     label: "Autonomous Success Rate",
@@ -25,6 +66,7 @@ const KPI_DATA = [
     delta: "↑ 6.7%",
     cls: "text-emerald-600",
     color: "#02DD82",
+    spark: [78, 80, 82, 84, 86, 88, 89, 89.3],
   },
   {
     label: "Human Override Rate",
@@ -32,6 +74,7 @@ const KPI_DATA = [
     delta: "↓ 3.1%",
     cls: "text-purple-600",
     color: "#A855F7",
+    spark: [14, 13, 12, 11, 10.5, 10, 9, 8.7],
   },
   {
     label: "Incidents Resolved",
@@ -39,6 +82,7 @@ const KPI_DATA = [
     delta: "↑ 18.4%",
     cls: "text-emerald-600",
     color: "#3B82F6",
+    spark: [110, 118, 124, 130, 138, 145, 151, 156],
   },
   {
     label: "Knowledge Artifacts",
@@ -46,6 +90,7 @@ const KPI_DATA = [
     delta: "↑ 24.6%",
     cls: "text-emerald-600",
     color: "#3B82F6",
+    spark: [820, 900, 960, 1020, 1090, 1150, 1200, 1248],
   },
   {
     label: "Confidence Calibration",
@@ -53,6 +98,7 @@ const KPI_DATA = [
     delta: "↑ 0.05",
     cls: "text-amber-600",
     color: "#F59E0B",
+    spark: [0.84, 0.85, 0.86, 0.88, 0.89, 0.9, 0.91, 0.92],
   },
 ];
 
@@ -66,11 +112,11 @@ const CATEGORIES = [
 ];
 
 const REMEDIATIONS = [
-  { name: "Restart Service", rate: 92, attempts: 128 },
-  { name: "Rollback Deployment", rate: 91, attempts: 103 },
-  { name: "Scale Up", rate: 87, attempts: 98 },
-  { name: "Cache Clear", rate: 82, attempts: 74 },
-  { name: "DB Connection Reset", rate: 78, attempts: 62 },
+  { name: "Restart Service", rate: 92, attempts: 128, color: "#02DD82" },
+  { name: "Rollback Deployment", rate: 91, attempts: 103, color: "#3B82F6" },
+  { name: "Scale Up", rate: 87, attempts: 98, color: "#A855F7" },
+  { name: "Cache Clear", rate: 82, attempts: 74, color: "#22D3EE" },
+  { name: "DB Connection Reset", rate: 78, attempts: 62, color: "#F59E0B" },
 ];
 
 const RISKS = [
@@ -381,13 +427,658 @@ const IMPROVEMENTS = [
 ];
 
 const AGENTS = [
-  { name: "Incident Triage Agent", accuracy: 94, tasks: 312, color: "#02DD82" },
-  { name: "Root Cause Agent", accuracy: 92, tasks: 278, color: "#3B82F6" },
-  { name: "Log Analysis Agent", accuracy: 89, tasks: 245, color: "#A855F7" },
-  { name: "Infra Agent", accuracy: 91, tasks: 301, color: "#F59E0B" },
-  { name: "Code Analysis Agent", accuracy: 87, tasks: 189, color: "#22D3EE" },
-  { name: "Remediation Agent", accuracy: 93, tasks: 256, color: "#EF4444" },
+  {
+    name: "Incident Triage Agent",
+    accuracy: 94,
+    tasks: 312,
+    color: "#02DD82",
+    trend: [88, 90, 91, 92, 93, 94],
+  },
+  {
+    name: "Root Cause Agent",
+    accuracy: 92,
+    tasks: 278,
+    color: "#3B82F6",
+    trend: [85, 87, 88, 90, 91, 92],
+  },
+  {
+    name: "Log Analysis Agent",
+    accuracy: 89,
+    tasks: 245,
+    color: "#A855F7",
+    trend: [80, 82, 85, 86, 88, 89],
+  },
+  {
+    name: "Infra Agent",
+    accuracy: 91,
+    tasks: 301,
+    color: "#F59E0B",
+    trend: [84, 86, 88, 89, 90, 91],
+  },
+  {
+    name: "Code Analysis Agent",
+    accuracy: 87,
+    tasks: 189,
+    color: "#22D3EE",
+    trend: [78, 80, 82, 84, 86, 87],
+  },
+  {
+    name: "Remediation Agent",
+    accuracy: 93,
+    tasks: 256,
+    color: "#EF4444",
+    trend: [86, 88, 90, 91, 92, 93],
+  },
 ];
+
+// ── Chart AI analysis notes (from the blueprint) ──
+const CHART_NOTES: Record<
+  string,
+  { title: string; tag: string; note: string }
+> = {
+  mttr: {
+    title: "MTTR Trend",
+    tag: "Mean time to resolution · last 30 days",
+    note: "Mean time to resolution has trended steadily downward across the window, falling from roughly forty hours to about fifteen. The green trend line confirms the decline is structural rather than noise, with each dip being held rather than reverting. This tracks closely with the rise in autonomous remediation success. The occasional upward spikes correspond to novel incident types the playbooks have not yet learned, where the orchestrator falls back to slower, human-paced resolution.",
+  },
+  categories: {
+    title: "Top Recurring Incident Categories",
+    tag: "Share of incidents by category",
+    note: "Performance degradation is the single largest source of incidents at 28%, with deployment- and release-related issues close behind at 22%. Together these two categories account for half of all incidents, which is precisely where orchestration improvements and pre-deploy checks will return the most leverage. The shape of this distribution is a good sign: no single category dominates so heavily that it masks systemic problems elsewhere.",
+  },
+  effective: {
+    title: "Most Effective Remediations",
+    tag: "Success rate by remediation type",
+    note: "Restart Service and Rollback Deployment are the workhorses of the remediation library, succeeding 92% and 91% of the time. These rates feed directly into the confidence scores that gate autonomous execution. A remediation with a consistently high success rate earns a higher automation stage, which is how the system safely widens what it is allowed to do on its own.",
+  },
+  cluster: {
+    title: "Similar Incident Clusters",
+    tag: "Vector-embedded incident similarity",
+    note: "Each point is an incident embedded by similarity, so tight clusters represent recurring, well-understood failure patterns while scattered points are genuinely novel events. The dominant cluster is the recurring class the system has seen most — likely the performance-degradation incidents. The smaller, looser groupings are where human review still adds the most value.",
+  },
+  remDonut: {
+    title: "Remediation Success Rate",
+    tag: "Overall autonomous + assisted success",
+    note: "Overall remediation success sits at 87.6%, up 7.3 points over the prior thirty days. The remaining twelve percent is not all failure: a good portion is deliberately conservative blocks where guardrails halted on uncertainty rather than risked an unsafe action. The combination to watch is a rising success rate alongside a falling human override rate, and that is exactly what is happening here.",
+  },
+  compliance: {
+    title: "Policy Compliance",
+    tag: "Overall policy compliance rate",
+    note: "Policy compliance sits at 96.2%, up 2.4 points. Five policy violations were recorded this period, down 37.5% from the prior window. The remaining violations are concentrated in the Risk-Guardrail policy, where novel incident types occasionally trigger actions before coverage is complete.",
+  },
+  ealTrend: {
+    title: "EAL Transition Trend",
+    tag: "Effective Automation Level distribution over time",
+    note: "60.9% of incidents are now handled at EAL 3 or above — autonomously or conditionally automated — up from 48% thirty days ago. EAL 4 headcount grew 33% as the learning loop validated new playbook classes against the blast-radius model. EAL 0 and 1 are reserved for novel incident types where precedent is insufficient.",
+  },
+  sloBurn: {
+    title: "Error Budget Burn Rate",
+    tag: "SLO error budget consumption over 7 days",
+    note: "Payment API and Search Service are burning error budget fastest. Search Service has already breached its SLO, burning at 4.2x — well above the 2.5x alert threshold. Payment API is trending toward breach if the current trajectory holds. Checkout Service remains well within budget at 0.42x burn rate.",
+  },
+  costTrend: {
+    title: "Monthly Cost Avoidance Trend",
+    tag: "Autonomous savings and reduced escalations",
+    note: "Autonomous cost avoidance has grown from $62K to $198K over eight months — a 3.2x increase driven by the compounding effect of the learning loop. Reduced escalations contribute an additional $52K monthly, reflecting fewer incidents requiring senior engineering attention.",
+  },
+  orchTrend: {
+    title: "Workflow Evolution Over Time",
+    tag: "Orchestration improvement metrics",
+    note: "MTTR improvement and efficiency gain have both trended upward steadily, with MTTR improvement leading at 32% and efficiency gain at 28%. The gap between the two is narrowing, suggesting that workflow optimizations are becoming more broadly applicable across incident types.",
+  },
+  agentAcc: {
+    title: "Agent Accuracy Over Time",
+    tag: "Per-agent accuracy trends",
+    note: "All six agents show positive accuracy trajectories. Incident Triage Agent leads at 94%, having gained 6 points over the window. Code Analysis Agent trails at 87% but shows the steepest improvement curve, suggesting rapid learning from newly encountered code patterns.",
+  },
+  agentHealth: {
+    title: "Agent Health",
+    tag: "Fleet-wide agent health score",
+    note: "90.4% fleet health with all six agents in a healthy state. The 4.2% improvement reflects both accuracy gains and reduced latency drift. No agent currently requires intervention or retraining outside the normal learning cycle.",
+  },
+};
+
+// ══════════════════════════════════════════════════════════════════
+// CHART COMPONENTS
+// ══════════════════════════════════════════════════════════════════
+
+function Sparkline({
+  data,
+  color,
+  height = 30,
+}: {
+  data: number[];
+  color: string;
+  height?: number;
+}) {
+  return (
+    <div style={{ height }}>
+      <Line
+        data={{
+          labels: data.map((_, i) => i),
+          datasets: [
+            {
+              data,
+              borderColor: color,
+              borderWidth: 1.5,
+              fill: true,
+              backgroundColor: color + "18",
+              tension: 0.4,
+              pointRadius: 0,
+              pointHoverRadius: 0,
+            },
+          ],
+        }}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: NO_LEGEND, tooltip: { enabled: false } },
+          scales: { x: { display: false }, y: { display: false } },
+        }}
+      />
+    </div>
+  );
+}
+
+function MTTRChart({ big }: { big?: boolean }) {
+  const labels = [
+    "Apr 29",
+    "May 3",
+    "May 6",
+    "May 10",
+    "May 13",
+    "May 17",
+    "May 20",
+    "May 24",
+    "May 27",
+    "May 29",
+    "Jun 1",
+    "Jun 3",
+  ];
+  const data = [40, 33, 30, 38, 28, 24, 30, 22, 26, 18, 24, 15];
+  const trend = data.map((_, i) => 38 - i * 1.9);
+  return (
+    <Line
+      data={{
+        labels,
+        datasets: [
+          {
+            label: "MTTR (hrs)",
+            data,
+            borderColor: "#3B82F6",
+            borderWidth: 2,
+            tension: 0.35,
+            pointRadius: big ? 3 : 2,
+            pointBackgroundColor: "#3B82F6",
+            fill: false,
+          },
+          {
+            label: "Trend",
+            data: trend,
+            borderColor: "#02DD82",
+            borderWidth: 1.5,
+            borderDash: [4, 3],
+            tension: 0.3,
+            pointRadius: 0,
+            fill: false,
+          },
+        ],
+      }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: big
+            ? {
+                position: "bottom",
+                labels: { boxWidth: 12, font: { size: 11 } },
+              }
+            : NO_LEGEND,
+          tooltip: { mode: "index", intersect: false },
+        },
+        scales: {
+          x: {
+            grid: GRID_OFF,
+            ticks: { font: { size: 9 }, color: "#94A3B8", maxRotation: 0 },
+          },
+          y: {
+            grid: GRID_SOFT,
+            ticks: { font: { size: 9 }, color: "#94A3B8" },
+            beginAtZero: true,
+          },
+        },
+      }}
+    />
+  );
+}
+
+function CategoryDonut({ big }: { big?: boolean }) {
+  return (
+    <Doughnut
+      data={{
+        labels: CATEGORIES.map((c) => c.name),
+        datasets: [
+          {
+            data: CATEGORIES.map((c) => c.pct),
+            backgroundColor: CATEGORIES.map((c) => c.color),
+            borderWidth: 0,
+            cutout: big ? "68%" : "72%",
+          },
+        ],
+      }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: NO_LEGEND,
+          tooltip: {
+            callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed}%` },
+          },
+        },
+      }}
+    />
+  );
+}
+
+function EffectivenessChart({ big }: { big?: boolean }) {
+  return (
+    <Bar
+      data={{
+        labels: REMEDIATIONS.map((r) => r.name),
+        datasets: [
+          {
+            data: REMEDIATIONS.map((r) => r.rate),
+            backgroundColor: REMEDIATIONS.map((r) => r.color),
+            borderRadius: 4,
+            barThickness: big ? 18 : 12,
+          },
+        ],
+      }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: "y",
+        plugins: {
+          legend: NO_LEGEND,
+          tooltip: {
+            callbacks: { label: (ctx) => `${ctx.parsed.x}% success rate` },
+          },
+        },
+        scales: {
+          x: {
+            grid: GRID_SOFT,
+            min: 60,
+            max: 100,
+            ticks: {
+              font: { size: 9 },
+              color: "#94A3B8",
+              callback: (v) => v + "%",
+            },
+          },
+          y: {
+            grid: GRID_OFF,
+            ticks: { font: { size: 10 }, color: "#475569" },
+          },
+        },
+      }}
+    />
+  );
+}
+
+function ClusterScatter({ big }: { big?: boolean }) {
+  const clusters = [
+    { cx: 65, cy: 55, r: 30, n: 35, color: "#A855F7" },
+    { cx: 30, cy: 50, r: 24, n: 22, color: "#3B82F6" },
+    { cx: 28, cy: 82, r: 22, n: 20, color: "#F59E0B" },
+    { cx: 62, cy: 85, r: 22, n: 20, color: "#02DD82" },
+  ];
+  const datasets = clusters.map((c, i) => ({
+    label: `Cluster ${i + 1}`,
+    data: Array.from({ length: c.n }, () => ({
+      x: c.cx + (Math.random() - 0.5) * c.r * 2,
+      y: c.cy + (Math.random() - 0.5) * c.r * 1.6,
+    })),
+    backgroundColor: c.color + "AA",
+    pointRadius: big ? 4.5 : 3,
+    pointHoverRadius: big ? 6 : 4,
+  }));
+  return (
+    <Scatter
+      data={{ datasets }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: NO_LEGEND },
+        scales: {
+          x: { display: false, min: 0, max: 100 },
+          y: { display: false, min: 20, max: 110 },
+        },
+      }}
+    />
+  );
+}
+
+function SuccessDonut({
+  rate = 87.6,
+  label = "Overall Success",
+  big,
+}: {
+  rate?: number;
+  label?: string;
+  big?: boolean;
+}) {
+  return (
+    <Doughnut
+      data={{
+        labels: ["Success", "Remaining"],
+        datasets: [
+          {
+            data: [rate, 100 - rate],
+            backgroundColor: ["#02DD82", "#E8EDF3"],
+            borderWidth: 0,
+            cutout: big ? "72%" : "76%",
+          },
+        ],
+      }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: NO_LEGEND,
+          tooltip: {
+            callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed}%` },
+          },
+        },
+      }}
+    />
+  );
+}
+
+function EALTrendChart({ big }: { big?: boolean }) {
+  const labels = ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9", "W10"];
+  return (
+    <Line
+      data={{
+        labels,
+        datasets: [
+          {
+            label: "EAL 3",
+            data: [28, 31, 34, 38, 41, 45, 50, 55, 60, 67],
+            borderColor: "#02DD82",
+            borderWidth: 2,
+            tension: 0.35,
+            pointRadius: big ? 3 : 0,
+            fill: false,
+          },
+          {
+            label: "EAL 4",
+            data: [8, 9, 10, 12, 14, 17, 19, 22, 25, 28],
+            borderColor: "#A855F7",
+            borderWidth: 2,
+            tension: 0.35,
+            pointRadius: big ? 3 : 0,
+            fill: false,
+          },
+          {
+            label: "EAL 2",
+            data: [55, 54, 52, 50, 48, 46, 44, 43, 42, 41],
+            borderColor: "#3B82F6",
+            borderWidth: 2,
+            tension: 0.35,
+            pointRadius: big ? 3 : 0,
+            fill: false,
+          },
+        ],
+      }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: big
+            ? {
+                position: "bottom",
+                labels: { boxWidth: 12, font: { size: 11 } },
+              }
+            : NO_LEGEND,
+        },
+        scales: {
+          x: { grid: GRID_OFF, ticks: { font: { size: 9 }, color: "#94A3B8" } },
+          y: {
+            grid: GRID_SOFT,
+            beginAtZero: true,
+            ticks: { font: { size: 9 }, color: "#94A3B8" },
+          },
+        },
+      }}
+    />
+  );
+}
+
+function BurnRateChart({ big }: { big?: boolean }) {
+  const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  return (
+    <Line
+      data={{
+        labels,
+        datasets: [
+          {
+            label: "Search Svc",
+            data: [1.2, 1.8, 2.4, 3.0, 3.6, 4.0, 4.2],
+            borderColor: "#EF4444",
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true,
+            backgroundColor: "#EF444412",
+            pointRadius: big ? 3 : 0,
+          },
+          {
+            label: "Payment API",
+            data: [0.8, 1.1, 1.9, 2.4, 2.8, 3.0, 3.1],
+            borderColor: "#F59E0B",
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true,
+            backgroundColor: "#F59E0B12",
+            pointRadius: big ? 3 : 0,
+          },
+          {
+            label: "Checkout",
+            data: [0.3, 0.4, 0.3, 0.4, 0.4, 0.4, 0.42],
+            borderColor: "#02DD82",
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true,
+            backgroundColor: "#02DD8212",
+            pointRadius: big ? 3 : 0,
+          },
+        ],
+      }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: big
+            ? {
+                position: "bottom",
+                labels: { boxWidth: 12, font: { size: 11 } },
+              }
+            : NO_LEGEND,
+          annotation: undefined,
+        },
+        scales: {
+          x: { grid: GRID_OFF, ticks: { font: { size: 9 }, color: "#94A3B8" } },
+          y: {
+            grid: GRID_SOFT,
+            min: 0,
+            max: 5,
+            ticks: { font: { size: 9 }, color: "#94A3B8" },
+          },
+        },
+      }}
+    />
+  );
+}
+
+function CostTrendChart({ big }: { big?: boolean }) {
+  const labels = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb"];
+  return (
+    <Line
+      data={{
+        labels,
+        datasets: [
+          {
+            label: "Autonomous savings",
+            data: [62, 74, 88, 104, 121, 140, 165, 198],
+            borderColor: "#02DD82",
+            borderWidth: 2,
+            tension: 0.35,
+            fill: true,
+            backgroundColor: "#02DD8215",
+            pointRadius: big ? 3 : 2,
+            pointBackgroundColor: "#02DD82",
+          },
+          {
+            label: "Reduced escalations",
+            data: [18, 22, 26, 30, 34, 39, 45, 52],
+            borderColor: "#3B82F6",
+            borderWidth: 2,
+            tension: 0.35,
+            fill: true,
+            backgroundColor: "#3B82F615",
+            pointRadius: big ? 3 : 2,
+            pointBackgroundColor: "#3B82F6",
+          },
+        ],
+      }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: big
+            ? {
+                position: "bottom",
+                labels: { boxWidth: 12, font: { size: 11 } },
+              }
+            : NO_LEGEND,
+        },
+        scales: {
+          x: { grid: GRID_OFF, ticks: { font: { size: 9 }, color: "#94A3B8" } },
+          y: {
+            grid: GRID_SOFT,
+            beginAtZero: true,
+            ticks: {
+              font: { size: 9 },
+              color: "#94A3B8",
+              callback: (v) => "$" + v + "K",
+            },
+          },
+        },
+      }}
+    />
+  );
+}
+
+function OrchTrendChart({ big }: { big?: boolean }) {
+  const labels = ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8"];
+  return (
+    <Line
+      data={{
+        labels,
+        datasets: [
+          {
+            label: "MTTR Improvement",
+            data: [12, 15, 18, 21, 24, 27, 30, 32],
+            borderColor: "#02DD82",
+            borderWidth: 2,
+            tension: 0.35,
+            fill: false,
+            pointRadius: big ? 3 : 2,
+            pointBackgroundColor: "#02DD82",
+          },
+          {
+            label: "Efficiency Gain",
+            data: [8, 11, 14, 17, 19, 22, 25, 28],
+            borderColor: "#3B82F6",
+            borderWidth: 2,
+            tension: 0.35,
+            fill: false,
+            pointRadius: big ? 3 : 2,
+            pointBackgroundColor: "#3B82F6",
+          },
+        ],
+      }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: big
+            ? {
+                position: "bottom",
+                labels: { boxWidth: 12, font: { size: 11 } },
+              }
+            : NO_LEGEND,
+        },
+        scales: {
+          x: { grid: GRID_OFF, ticks: { font: { size: 9 }, color: "#94A3B8" } },
+          y: {
+            grid: GRID_SOFT,
+            beginAtZero: true,
+            ticks: {
+              font: { size: 9 },
+              color: "#94A3B8",
+              callback: (v) => v + "%",
+            },
+          },
+        },
+      }}
+    />
+  );
+}
+
+function AgentAccuracyChart({ big }: { big?: boolean }) {
+  const labels = ["W1", "W2", "W3", "W4", "W5", "W6"];
+  return (
+    <Line
+      data={{
+        labels,
+        datasets: AGENTS.map((a) => ({
+          label: a.name.replace(" Agent", ""),
+          data: a.trend,
+          borderColor: a.color,
+          borderWidth: 1.8,
+          tension: 0.35,
+          pointRadius: big ? 3 : 0,
+          fill: false,
+        })),
+      }}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: big
+            ? {
+                position: "bottom",
+                labels: { boxWidth: 12, font: { size: 10 } },
+              }
+            : NO_LEGEND,
+        },
+        scales: {
+          x: { grid: GRID_OFF, ticks: { font: { size: 9 }, color: "#94A3B8" } },
+          y: {
+            grid: GRID_SOFT,
+            min: 75,
+            max: 100,
+            ticks: {
+              font: { size: 9 },
+              color: "#94A3B8",
+              callback: (v) => v + "%",
+            },
+          },
+        },
+      }}
+    />
+  );
+}
 
 // ══════════════════════════════════════════════════════════════════
 // HELPERS
@@ -411,39 +1102,11 @@ const govEventDot: Record<string, string> = {
   ok: "bg-emerald-400",
   info: "bg-blue-400",
 };
-
 const feedDot: Record<string, string> = {
   remediation: "bg-emerald-400",
   governance: "bg-amber-400",
   agent: "bg-blue-400",
 };
-
-function HBar({
-  label,
-  value,
-  max,
-  color,
-}: {
-  label: string;
-  value: number;
-  max: number;
-  color: string;
-}) {
-  return (
-    <div className="mb-2.5">
-      <div className="flex justify-between text-xs mb-1">
-        <span className="text-zinc-500">{label}</span>
-        <span className="font-mono font-semibold text-zinc-700">{value}%</span>
-      </div>
-      <div className="h-1.5 rounded-full bg-zinc-100 overflow-hidden">
-        <div
-          className="h-full rounded-full"
-          style={{ width: `${(value / max) * 100}%`, background: color }}
-        />
-      </div>
-    </div>
-  );
-}
 
 function MiniBar({ pct }: { pct: number }) {
   return (
@@ -456,7 +1119,6 @@ function MiniBar({ pct }: { pct: number }) {
   );
 }
 
-// ── Panel wrapper ──
 function Panel({
   number,
   title,
@@ -514,21 +1176,118 @@ function Pill({
   );
 }
 
-// ── Chart placeholder ──
-function ChartPlaceholder({
-  height = "h-[140px]",
-  label,
+/** Clickable chart wrapper that opens the side modal on click */
+function ChartCard({
+  chartKey,
+  onClick,
+  children,
+  className,
 }: {
-  height?: string;
-  label?: string;
+  chartKey: string;
+  onClick: (key: string) => void;
+  children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <div
-      className={`${height} rounded-lg bg-zinc-50 border border-dashed border-zinc-200 flex items-center justify-center`}
+      onClick={() => onClick(chartKey)}
+      className={`cursor-pointer transition-all hover:ring-1 hover:ring-emerald-200 rounded-lg ${className || ""}`}
     >
-      <span className="text-[11px] text-zinc-400">
-        {label || "Chart placeholder"}
-      </span>
+      {children}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CHART MODAL CONTENT BUILDER
+// ══════════════════════════════════════════════════════════════════
+
+function ChartModalContent({ chartKey }: { chartKey: string }) {
+  const note = CHART_NOTES[chartKey];
+  if (!note)
+    return <p className="text-sm text-zinc-400">No analysis available.</p>;
+
+  const chartMap: Record<string, React.ReactNode> = {
+    mttr: (
+      <div className="h-[280px]">
+        <MTTRChart big />
+      </div>
+    ),
+    categories: (
+      <div className="max-w-[260px] mx-auto">
+        <CategoryDonut big />
+      </div>
+    ),
+    effective: (
+      <div className="h-[260px]">
+        <EffectivenessChart big />
+      </div>
+    ),
+    cluster: (
+      <div className="h-[300px]">
+        <ClusterScatter big />
+      </div>
+    ),
+    remDonut: (
+      <div className="max-w-[220px] mx-auto">
+        <SuccessDonut big />
+      </div>
+    ),
+    compliance: (
+      <div className="max-w-[220px] mx-auto">
+        <SuccessDonut rate={96.2} label="Compliant" big />
+      </div>
+    ),
+    ealTrend: (
+      <div className="h-[240px]">
+        <EALTrendChart big />
+      </div>
+    ),
+    sloBurn: (
+      <div className="h-[240px]">
+        <BurnRateChart big />
+      </div>
+    ),
+    costTrend: (
+      <div className="h-[280px]">
+        <CostTrendChart big />
+      </div>
+    ),
+    orchTrend: (
+      <div className="h-[240px]">
+        <OrchTrendChart big />
+      </div>
+    ),
+    agentAcc: (
+      <div className="h-[260px]">
+        <AgentAccuracyChart big />
+      </div>
+    ),
+    agentHealth: (
+      <div className="max-w-[220px] mx-auto">
+        <SuccessDonut rate={90.4} label="Healthy" big />
+      </div>
+    ),
+  };
+
+  return (
+    <div className="space-y-5">
+      {chartMap[chartKey] && (
+        <div className="bg-zinc-50 rounded-xl border border-zinc-100 p-5">
+          {chartMap[chartKey]}
+        </div>
+      )}
+      <div>
+        <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-zinc-100">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+            Ezra Analysis
+          </span>
+          <span className="text-[11px] text-zinc-400 italic ml-auto">
+            Pre-computed
+          </span>
+        </div>
+        <p className="text-[13px] text-zinc-600 leading-[1.72]">{note.note}</p>
+      </div>
     </div>
   );
 }
@@ -556,6 +1315,7 @@ export default function IntelligenceControlPlanePage() {
   const [exportOpen, setExportOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTitle, setDrawerTitle] = useState("");
+  const [drawerSubTitle, setDrawerSubTitle] = useState("");
   const [drawerContent, setDrawerContent] = useState<React.ReactNode>(null);
 
   const filteredFeed =
@@ -563,40 +1323,107 @@ export default function IntelligenceControlPlanePage() {
       ? FEED_EVENTS
       : FEED_EVENTS.filter((e) => e.type === feedFilter);
 
-  const openDrawer = (title: string, content: React.ReactNode) => {
-    setDrawerTitle(title);
-    setDrawerContent(content);
+  const openChartDrawer = useCallback((key: string) => {
+    const note = CHART_NOTES[key];
+    if (!note) return;
+    setDrawerTitle(note.title);
+    setDrawerSubTitle(note.tag);
+    setDrawerContent(<ChartModalContent chartKey={key} />);
     setDrawerOpen(true);
-  };
+  }, []);
+
+  const openKpiDrawer = useCallback((kpi: (typeof KPI_DATA)[0]) => {
+    setDrawerTitle(kpi.label);
+    setDrawerSubTitle("Learning Overview KPI · last 30 days");
+    setDrawerContent(
+      <div className="space-y-5">
+        <div className="bg-zinc-50 rounded-xl border border-zinc-100 p-5">
+          <div className="text-center mb-4">
+            <div
+              className="text-4xl font-bold font-ibm"
+              style={{ color: kpi.color }}
+            >
+              {kpi.value}
+            </div>
+            <div className={`text-sm font-semibold mt-1 ${kpi.cls}`}>
+              {kpi.delta}
+            </div>
+          </div>
+          <div className="h-[180px]">
+            <Line
+              data={{
+                labels: kpi.spark.map((_, i) => `W${i + 1}`),
+                datasets: [
+                  {
+                    data: kpi.spark,
+                    borderColor: kpi.color,
+                    borderWidth: 2.5,
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: kpi.color + "18",
+                    pointRadius: 3,
+                    pointBackgroundColor: kpi.color,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: NO_LEGEND },
+                scales: {
+                  x: {
+                    grid: GRID_OFF,
+                    ticks: { font: { size: 9 }, color: "#94A3B8" },
+                  },
+                  y: {
+                    grid: GRID_SOFT,
+                    ticks: { font: { size: 9 }, color: "#94A3B8" },
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
+        <div>
+          <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-zinc-100">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+              Ezra Analysis
+            </span>
+          </div>
+          <p className="text-[13px] text-zinc-600 leading-[1.72]">
+            Detailed trend for {kpi.label} over the selected window. Full
+            analysis will be connected to the backend Ezra reasoning engine.
+          </p>
+        </div>
+      </div>,
+    );
+    setDrawerOpen(true);
+  }, []);
 
   return (
     <>
       <Header title="Intelligence Control Plane" />
       <main className="p-4 sm:p-6 pb-24 max-w-[1600px] mx-auto space-y-5 font-ibm">
-        {/* ── Header Row ── */}
+        {/* ── Header ── */}
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm text-zinc-500 max-w-2xl">
-              Closed-loop learning. Continuous improvement.
-            </p>
-          </div>
+          <p className="text-sm text-zinc-500 max-w-2xl">
+            Closed-loop learning. Continuous improvement.
+          </p>
           <div className="flex items-center gap-2.5">
             <Button variant="outline-dark" size="sm">
-              <ChevronDown size={14} />
-              Last 30 Days
+              <ChevronDown size={14} /> Last 30 Days
             </Button>
             <Button
               variant="outline-dark"
               size="sm"
               onClick={() => setExportOpen(true)}
             >
-              <Download size={14} />
-              Export
+              <Download size={14} /> Export
             </Button>
           </div>
         </div>
 
-        {/* ═══════ ROW 1: Learning + Incident Memory ═══════ */}
+        {/* ═══════ ROW 1 ═══════ */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.62fr_1fr] gap-5">
           {/* 1. Learning Overview */}
           <Panel number="1." title="Learning Overview Dashboard">
@@ -605,34 +1432,7 @@ export default function IntelligenceControlPlanePage() {
                 <button
                   key={kpi.label}
                   type="button"
-                  onClick={() =>
-                    openDrawer(
-                      kpi.label,
-                      <div>
-                        <div className="text-center mb-6">
-                          <div
-                            className="text-4xl font-bold font-ibm"
-                            style={{ color: kpi.color }}
-                          >
-                            {kpi.value}
-                          </div>
-                          <div
-                            className={`text-sm font-semibold mt-1 ${kpi.cls}`}
-                          >
-                            {kpi.delta}
-                          </div>
-                        </div>
-                        <ChartPlaceholder
-                          height="h-[200px]"
-                          label={`${kpi.label} trend chart`}
-                        />
-                        <p className="text-sm text-zinc-500 mt-4 leading-relaxed">
-                          Detailed analysis for {kpi.label} will be populated
-                          once the backend is connected.
-                        </p>
-                      </div>,
-                    )
-                  }
+                  onClick={() => openKpiDrawer(kpi)}
                   className="text-left bg-zinc-50 border border-zinc-100 rounded-lg p-3 hover:border-zinc-300 hover:bg-white transition-all cursor-pointer"
                 >
                   <div className="text-[11px] text-zinc-500 leading-snug h-7">
@@ -646,20 +1446,32 @@ export default function IntelligenceControlPlanePage() {
                   >
                     {kpi.delta}
                   </div>
+                  <Sparkline data={kpi.spark} color={kpi.color} />
                 </button>
               ))}
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-zinc-50 border border-zinc-100 rounded-lg p-3.5">
+              <ChartCard
+                chartKey="mttr"
+                onClick={openChartDrawer}
+                className="bg-zinc-50 border border-zinc-100 rounded-lg p-3.5"
+              >
                 <SubH>MTTR Trend</SubH>
-                <ChartPlaceholder height="h-[120px]" label="MTTR line chart" />
-              </div>
-              <div className="bg-zinc-50 border border-zinc-100 rounded-lg p-3.5">
+                <div className="h-[130px]">
+                  <MTTRChart />
+                </div>
+              </ChartCard>
+              <ChartCard
+                chartKey="categories"
+                onClick={openChartDrawer}
+                className="bg-zinc-50 border border-zinc-100 rounded-lg p-3.5"
+              >
                 <SubH>Top Recurring Categories</SubH>
-                <div className="flex items-center gap-3.5">
-                  <ChartPlaceholder height="h-[100px]" label="Donut" />
-                  <div className="space-y-1.5 flex-1">
+                <div className="flex items-center gap-3">
+                  <div className="w-[90px] shrink-0">
+                    <CategoryDonut />
+                  </div>
+                  <div className="space-y-1 flex-1 min-w-0">
                     {CATEGORIES.map((c) => (
                       <div
                         key={c.name}
@@ -677,19 +1489,17 @@ export default function IntelligenceControlPlanePage() {
                     ))}
                   </div>
                 </div>
-              </div>
-              <div className="bg-zinc-50 border border-zinc-100 rounded-lg p-3.5">
+              </ChartCard>
+              <ChartCard
+                chartKey="effective"
+                onClick={openChartDrawer}
+                className="bg-zinc-50 border border-zinc-100 rounded-lg p-3.5"
+              >
                 <SubH>Most Effective Remediations</SubH>
-                {REMEDIATIONS.slice(0, 5).map((r) => (
-                  <HBar
-                    key={r.name}
-                    label={r.name}
-                    value={r.rate}
-                    max={100}
-                    color="#02DD82"
-                  />
-                ))}
-              </div>
+                <div className="h-[140px]">
+                  <EffectivenessChart />
+                </div>
+              </ChartCard>
             </div>
           </Panel>
 
@@ -710,7 +1520,6 @@ export default function IntelligenceControlPlanePage() {
                 />
               </div>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-[1.35fr_1fr] gap-4">
               <div>
                 <SubH>Recent & Similar Incidents</SubH>
@@ -745,26 +1554,25 @@ export default function IntelligenceControlPlanePage() {
                   </span>
                 </div>
               </div>
-              <div>
+              <ChartCard chartKey="cluster" onClick={openChartDrawer}>
                 <SubH>Similar Incident Clusters</SubH>
                 <div className="text-[10.5px] text-zinc-400 mb-2">
                   Vector-embedded incidents grouped by similarity
                 </div>
-                <ChartPlaceholder
-                  height="h-[180px]"
-                  label="Scatter cluster chart"
-                />
+                <div className="h-[180px]">
+                  <ClusterScatter />
+                </div>
                 <div className="text-center mt-3">
                   <span className="text-xs font-semibold text-emerald-600 cursor-pointer hover:text-emerald-700">
                     View in Knowledge Graph →
                   </span>
                 </div>
-              </div>
+              </ChartCard>
             </div>
           </Panel>
         </div>
 
-        {/* ═══════ ROW 2: Remediation + Knowledge Graph + Governance ═══════ */}
+        {/* ═══════ ROW 2 ═══════ */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* 3. Remediation Intelligence */}
           <Panel number="3." title="Remediation Intelligence">
@@ -774,24 +1582,26 @@ export default function IntelligenceControlPlanePage() {
                   key={tab}
                   type="button"
                   onClick={() => setRemTab(tab)}
-                  className={`py-2 px-3 text-xs font-semibold border-b-2 -mb-px transition-colors ${
-                    remTab === tab
-                      ? "border-emerald-500 text-emerald-700"
-                      : "border-transparent text-zinc-400 hover:text-zinc-600"
-                  }`}
+                  className={`py-2 px-3 text-xs font-semibold border-b-2 -mb-px transition-colors ${remTab === tab ? "border-emerald-500 text-emerald-700" : "border-transparent text-zinc-400 hover:text-zinc-600"}`}
                 >
                   {tab}
                 </button>
               ))}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-[0.85fr_1.25fr_1fr] gap-4">
-              <div className="flex flex-col items-center gap-2">
+              <ChartCard
+                chartKey="remDonut"
+                onClick={openChartDrawer}
+                className="flex flex-col items-center gap-2"
+              >
                 <SubH>Success Rate</SubH>
-                <ChartPlaceholder height="h-[100px]" label="87.6%" />
+                <div className="w-[100px]">
+                  <SuccessDonut />
+                </div>
                 <span className="text-[11px] font-mono font-semibold text-emerald-600">
-                  ↑ 7.3% vs 30 days ago
+                  ↑ 7.3% vs 30d ago
                 </span>
-              </div>
+              </ChartCard>
               <div>
                 <SubH>Top Remediations by Success Rate</SubH>
                 <table className="w-full text-[11.5px]">
@@ -821,9 +1631,6 @@ export default function IntelligenceControlPlanePage() {
               </div>
               <div>
                 <SubH>Remediation Risks</SubH>
-                <div className="text-[10.5px] text-zinc-400 mb-2">
-                  High Risk Remediations
-                </div>
                 {RISKS.map((r) => (
                   <div
                     key={r.name}
@@ -836,14 +1643,11 @@ export default function IntelligenceControlPlanePage() {
                   </div>
                 ))}
                 <div className="mt-3">
-                  <span className="text-xs font-semibold text-emerald-600 cursor-pointer hover:text-emerald-700">
+                  <span className="text-xs font-semibold text-emerald-600 cursor-pointer">
                     View all risk analysis →
                   </span>
                 </div>
               </div>
-            </div>
-            <div className="text-[11px] text-zinc-400 italic mt-3">
-              Showing aggregated metrics across all services and environments.
             </div>
           </Panel>
 
@@ -861,20 +1665,17 @@ export default function IntelligenceControlPlanePage() {
                   key={f}
                   type="button"
                   onClick={() => setKgFilter(f)}
-                  className={`text-[11px] px-2 py-1 rounded-md transition-colors ${
-                    kgFilter === f
-                      ? "bg-zinc-200 text-zinc-800 font-semibold"
-                      : "text-zinc-500 hover:bg-zinc-100"
-                  }`}
+                  className={`text-[11px] px-2 py-1 rounded-md transition-colors ${kgFilter === f ? "bg-zinc-200 text-zinc-800 font-semibold" : "text-zinc-500 hover:bg-zinc-100"}`}
                 >
                   {f}
                 </button>
               ))}
             </div>
-            <ChartPlaceholder
-              height="h-[220px]"
-              label="Knowledge graph visualization"
-            />
+            <ChartCard chartKey="cluster" onClick={openChartDrawer}>
+              <div className="h-[220px]">
+                <ClusterScatter />
+              </div>
+            </ChartCard>
             <div className="flex flex-wrap gap-3 mt-3">
               {[
                 { color: "#02DD82", label: "Healthy" },
@@ -895,13 +1696,13 @@ export default function IntelligenceControlPlanePage() {
               ))}
             </div>
             <div className="text-center mt-3">
-              <span className="text-xs font-semibold text-emerald-600 cursor-pointer hover:text-emerald-700">
+              <span className="text-xs font-semibold text-emerald-600 cursor-pointer">
                 Explore full graph →
               </span>
             </div>
           </Panel>
 
-          {/* 5. Governance Dashboard */}
+          {/* 5. Governance */}
           <Panel number="5." title="Governance Dashboard">
             <div className="grid grid-cols-2 gap-2.5 mb-4">
               {GOV_KPIS.map((k) => (
@@ -920,20 +1721,22 @@ export default function IntelligenceControlPlanePage() {
               ))}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-[0.78fr_1.22fr] gap-4">
-              <div>
+              <ChartCard
+                chartKey="compliance"
+                onClick={openChartDrawer}
+                className="flex flex-col items-center gap-2"
+              >
                 <SubH>Policy Compliance</SubH>
-                <div className="flex flex-col items-center gap-2">
-                  <ChartPlaceholder height="h-[100px]" label="96.2%" />
-                  <span className="text-[11px] font-mono font-semibold text-emerald-600">
-                    ↑ 2.4%
-                  </span>
+                <div className="w-[100px]">
+                  <SuccessDonut rate={96.2} label="Compliant" />
                 </div>
-                <div className="mt-3">
-                  <span className="text-xs font-semibold text-emerald-600 cursor-pointer hover:text-emerald-700">
-                    View compliance report →
-                  </span>
-                </div>
-              </div>
+                <span className="text-[11px] font-mono font-semibold text-emerald-600">
+                  ↑ 2.4%
+                </span>
+                <span className="text-xs font-semibold text-emerald-600 cursor-pointer mt-2">
+                  View compliance report →
+                </span>
+              </ChartCard>
               <div>
                 <SubH>Recent Governance Events</SubH>
                 {GOV_EVENTS.map((ev, i) => (
@@ -960,11 +1763,6 @@ export default function IntelligenceControlPlanePage() {
                     </span>
                   </div>
                 ))}
-                <div className="mt-2">
-                  <span className="text-xs font-semibold text-emerald-600 cursor-pointer hover:text-emerald-700">
-                    View all events →
-                  </span>
-                </div>
               </div>
             </div>
           </Panel>
@@ -972,17 +1770,12 @@ export default function IntelligenceControlPlanePage() {
 
         {/* ═══════ ROW 3: EAL + SLO ═══════ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* EAL Distribution */}
           <Panel number="★" title="EAL Distribution & Autonomy Posture">
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-5">
               {EAL_LEVELS.map((e) => (
                 <div
                   key={e.num}
-                  className={`rounded-lg border p-3 transition-all cursor-default ${
-                    e.active
-                      ? "border-emerald-400 bg-emerald-50/50"
-                      : "border-zinc-100 bg-zinc-50"
-                  }`}
+                  className={`rounded-lg border p-3 cursor-default ${e.active ? "border-emerald-400 bg-emerald-50/50" : "border-zinc-100 bg-zinc-50"}`}
                 >
                   <div className="text-[9px] font-mono font-bold tracking-wider text-zinc-400 uppercase">
                     {e.num}
@@ -1009,10 +1802,30 @@ export default function IntelligenceControlPlanePage() {
               ))}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
+              <ChartCard chartKey="ealTrend" onClick={openChartDrawer}>
                 <SubH>EAL Transition Trend</SubH>
-                <ChartPlaceholder height="h-[90px]" label="EAL trend lines" />
-              </div>
+                <div className="h-[90px]">
+                  <EALTrendChart />
+                </div>
+                <div className="flex justify-center gap-3 mt-2">
+                  {[
+                    { color: "#02DD82", label: "EAL 3" },
+                    { color: "#A855F7", label: "EAL 4" },
+                    { color: "#3B82F6", label: "EAL 2" },
+                  ].map((l) => (
+                    <span
+                      key={l.label}
+                      className="flex items-center gap-1.5 text-[11px] text-zinc-500"
+                    >
+                      <span
+                        className="w-3 h-[3px] rounded"
+                        style={{ background: l.color }}
+                      />
+                      {l.label}
+                    </span>
+                  ))}
+                </div>
+              </ChartCard>
               <div>
                 <SubH>Autonomy Posture Summary</SubH>
                 <div className="text-[12.5px] text-zinc-600 leading-relaxed space-y-2">
@@ -1029,14 +1842,13 @@ export default function IntelligenceControlPlanePage() {
                     Policy guardrails remain active across all EAL levels.
                   </p>
                 </div>
-                <span className="text-xs font-semibold text-emerald-600 cursor-pointer hover:text-emerald-700 mt-3 inline-block">
+                <span className="text-xs font-semibold text-emerald-600 cursor-pointer mt-3 inline-block">
                   View EAL policy settings →
                 </span>
               </div>
             </div>
           </Panel>
 
-          {/* SLO Health */}
           <Panel number="★" title="SLO Health & Error Budget">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
               {SLO_DATA.map((s) => {
@@ -1101,9 +1913,31 @@ export default function IntelligenceControlPlanePage() {
                 );
               })}
             </div>
-            <SubH>Error Budget Burn Rate — Last 7 Days</SubH>
-            <ChartPlaceholder height="h-[80px]" label="Burn rate area chart" />
-            <span className="text-xs font-semibold text-emerald-600 cursor-pointer hover:text-emerald-700 mt-3 inline-block">
+            <ChartCard chartKey="sloBurn" onClick={openChartDrawer}>
+              <SubH>Error Budget Burn Rate — Last 7 Days</SubH>
+              <div className="h-[80px]">
+                <BurnRateChart />
+              </div>
+              <div className="flex justify-center gap-3 mt-2">
+                {[
+                  { color: "#EF4444", label: "Search Svc" },
+                  { color: "#F59E0B", label: "Payment API" },
+                  { color: "#02DD82", label: "Checkout" },
+                ].map((l) => (
+                  <span
+                    key={l.label}
+                    className="flex items-center gap-1.5 text-[11px] text-zinc-500"
+                  >
+                    <span
+                      className="w-3 h-[3px] rounded"
+                      style={{ background: l.color }}
+                    />
+                    {l.label}
+                  </span>
+                ))}
+              </div>
+            </ChartCard>
+            <span className="text-xs font-semibold text-emerald-600 cursor-pointer mt-3 inline-block">
               View all SLO reports →
             </span>
           </Panel>
@@ -1111,7 +1945,6 @@ export default function IntelligenceControlPlanePage() {
 
         {/* ═══════ ROW 4: Cost + Live Feed ═══════ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* Cost & Efficiency */}
           <Panel number="★" title="Cost & Engineering Efficiency">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
               {COST_KPIS.map((k) => (
@@ -1157,14 +1990,32 @@ export default function IntelligenceControlPlanePage() {
                   </div>
                 ))}
               </div>
-              <div>
+              <ChartCard chartKey="costTrend" onClick={openChartDrawer}>
                 <SubH>Monthly Cost Avoidance Trend</SubH>
-                <ChartPlaceholder height="h-[120px]" label="Cost trend chart" />
-              </div>
+                <div className="h-[120px]">
+                  <CostTrendChart />
+                </div>
+                <div className="flex justify-center gap-3 mt-2">
+                  {[
+                    { color: "#02DD82", label: "Autonomous savings" },
+                    { color: "#3B82F6", label: "Reduced escalations" },
+                  ].map((l) => (
+                    <span
+                      key={l.label}
+                      className="flex items-center gap-1.5 text-[11px] text-zinc-500"
+                    >
+                      <span
+                        className="w-3 h-[3px] rounded"
+                        style={{ background: l.color }}
+                      />
+                      {l.label}
+                    </span>
+                  ))}
+                </div>
+              </ChartCard>
             </div>
           </Panel>
 
-          {/* Live Activity Feed */}
           <Panel number="★" title="Live Activity Feed">
             <div className="flex items-center justify-between mb-3">
               <div className="text-[11px] text-zinc-400">
@@ -1176,42 +2027,36 @@ export default function IntelligenceControlPlanePage() {
                     key={f}
                     type="button"
                     onClick={() => setFeedFilter(f)}
-                    className={`text-[11px] px-2 py-1 rounded-md capitalize transition-colors ${
-                      feedFilter === f
-                        ? "bg-zinc-200 text-zinc-800 font-semibold"
-                        : "text-zinc-500 hover:bg-zinc-100"
-                    }`}
+                    className={`text-[11px] px-2 py-1 rounded-md capitalize transition-colors ${feedFilter === f ? "bg-zinc-200 text-zinc-800 font-semibold" : "text-zinc-500 hover:bg-zinc-100"}`}
                   >
                     {f}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="space-y-0">
-              {filteredFeed.map((ev, i) => (
-                <div
-                  key={i}
-                  className="flex gap-2.5 py-2.5 border-t border-zinc-100 first:border-t-0 items-start"
-                >
-                  <span
-                    className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${feedDot[ev.type]}`}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-zinc-800">
-                      {ev.title}
-                    </div>
-                    <div className="text-[11px] text-zinc-500 mt-0.5">
-                      {ev.detail}
-                    </div>
+            {filteredFeed.map((ev, i) => (
+              <div
+                key={i}
+                className="flex gap-2.5 py-2.5 border-t border-zinc-100 first:border-t-0 items-start"
+              >
+                <span
+                  className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${feedDot[ev.type]}`}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold text-zinc-800">
+                    {ev.title}
                   </div>
-                  <span className="text-[10.5px] text-zinc-400 shrink-0">
-                    {ev.time}
-                  </span>
+                  <div className="text-[11px] text-zinc-500 mt-0.5">
+                    {ev.detail}
+                  </div>
                 </div>
-              ))}
-            </div>
+                <span className="text-[10.5px] text-zinc-400 shrink-0">
+                  {ev.time}
+                </span>
+              </div>
+            ))}
             <div className="mt-3">
-              <span className="text-xs font-semibold text-emerald-600 cursor-pointer hover:text-emerald-700">
+              <span className="text-xs font-semibold text-emerald-600 cursor-pointer">
                 View full audit trail →
               </span>
             </div>
@@ -1220,16 +2065,31 @@ export default function IntelligenceControlPlanePage() {
 
         {/* ═══════ ROW 5: Orchestration + Agents ═══════ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* 6. Orchestration Evolution */}
           <Panel number="6." title="Orchestration Evolution">
             <div className="grid grid-cols-1 sm:grid-cols-[1.1fr_1fr_0.92fr] gap-4">
-              <div>
+              <ChartCard chartKey="orchTrend" onClick={openChartDrawer}>
                 <SubH>Workflow Evolution Over Time</SubH>
-                <ChartPlaceholder
-                  height="h-[120px]"
-                  label="Improvement trend"
-                />
-              </div>
+                <div className="h-[120px]">
+                  <OrchTrendChart />
+                </div>
+                <div className="flex justify-center gap-3 mt-2">
+                  {[
+                    { color: "#02DD82", label: "MTTR Improvement" },
+                    { color: "#3B82F6", label: "Efficiency Gain" },
+                  ].map((l) => (
+                    <span
+                      key={l.label}
+                      className="flex items-center gap-1.5 text-[11px] text-zinc-500"
+                    >
+                      <span
+                        className="w-3 h-[3px] rounded"
+                        style={{ background: l.color }}
+                      />
+                      {l.label}
+                    </span>
+                  ))}
+                </div>
+              </ChartCard>
               <div>
                 <SubH>Top Improvements</SubH>
                 {IMPROVEMENTS.map((imp) => (
@@ -1256,14 +2116,8 @@ export default function IntelligenceControlPlanePage() {
                 </div>
               </div>
             </div>
-            <div className="text-center mt-3">
-              <span className="text-xs font-semibold text-emerald-600 cursor-pointer hover:text-emerald-700">
-                View all improvements →
-              </span>
-            </div>
           </Panel>
 
-          {/* 7. Agent Intelligence */}
           <Panel number="7." title="Agent Intelligence">
             <div className="grid grid-cols-1 sm:grid-cols-[1.05fr_1.25fr_0.7fr] gap-4">
               <div>
@@ -1291,32 +2145,33 @@ export default function IntelligenceControlPlanePage() {
                   </tbody>
                 </table>
                 <div className="mt-3">
-                  <span className="text-xs font-semibold text-emerald-600 cursor-pointer hover:text-emerald-700">
+                  <span className="text-xs font-semibold text-emerald-600 cursor-pointer">
                     View all agents →
                   </span>
                 </div>
               </div>
-              <div>
+              <ChartCard chartKey="agentAcc" onClick={openChartDrawer}>
                 <SubH>Accuracy Over Time</SubH>
-                <ChartPlaceholder
-                  height="h-[140px]"
-                  label="Agent accuracy trend"
-                />
-              </div>
-              <div>
+                <div className="h-[140px]">
+                  <AgentAccuracyChart />
+                </div>
+              </ChartCard>
+              <ChartCard
+                chartKey="agentHealth"
+                onClick={openChartDrawer}
+                className="flex flex-col items-center gap-2"
+              >
                 <SubH>Agent Health</SubH>
-                <div className="flex flex-col items-center gap-2">
-                  <ChartPlaceholder height="h-[100px]" label="90.4%" />
-                  <span className="text-[11px] font-mono font-semibold text-emerald-600">
-                    ↑ 4.2%
-                  </span>
+                <div className="w-[90px]">
+                  <SuccessDonut rate={90.4} label="Healthy" />
                 </div>
-                <div className="text-center mt-3">
-                  <span className="text-xs font-semibold text-emerald-600 cursor-pointer hover:text-emerald-700">
-                    View agent health →
-                  </span>
-                </div>
-              </div>
+                <span className="text-[11px] font-mono font-semibold text-emerald-600">
+                  ↑ 4.2%
+                </span>
+                <span className="text-xs font-semibold text-emerald-600 cursor-pointer mt-2">
+                  View agent health →
+                </span>
+              </ChartCard>
             </div>
           </Panel>
         </div>
@@ -1325,11 +2180,9 @@ export default function IntelligenceControlPlanePage() {
       {/* ═══════ EXPORT MODAL ═══════ */}
       <Modal isOpen={exportOpen} onClose={() => setExportOpen(false)}>
         <div className="p-4 space-y-5">
-          <div>
-            <h2 className="text-base font-bold text-zinc-900">
-              Export Intelligence Report
-            </h2>
-          </div>
+          <h2 className="text-base font-bold text-zinc-900">
+            Export Intelligence Report
+          </h2>
           <div className="grid grid-cols-3 gap-2.5">
             {[
               { label: "PDF Report", sub: "Board-ready format", emoji: "📄" },
@@ -1355,29 +2208,27 @@ export default function IntelligenceControlPlanePage() {
             <div className="text-xs font-semibold text-zinc-600 mb-2">
               Include Sections
             </div>
-            <div className="space-y-2">
-              {[
-                "Learning Overview Dashboard",
-                "Incident Memory & Clustering",
-                "Remediation Intelligence",
-                "Governance & Compliance Audit Trail",
-                "EAL Distribution & Autonomy Trends",
-                "Cost & Engineering Hours Saved",
-                "Agent Intelligence Detail",
-              ].map((s) => (
-                <label
-                  key={s}
-                  className="flex items-center gap-2.5 text-xs text-zinc-600 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    defaultChecked
-                    className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
-                  />
-                  {s}
-                </label>
-              ))}
-            </div>
+            {[
+              "Learning Overview Dashboard",
+              "Incident Memory & Clustering",
+              "Remediation Intelligence",
+              "Governance & Compliance",
+              "EAL Distribution & Autonomy",
+              "Cost & Engineering Hours Saved",
+              "Agent Intelligence Detail",
+            ].map((s) => (
+              <label
+                key={s}
+                className="flex items-center gap-2.5 text-xs text-zinc-600 cursor-pointer py-1"
+              >
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                {s}
+              </label>
+            ))}
           </div>
           <div className="flex justify-end gap-2.5">
             <Button
@@ -1394,13 +2245,13 @@ export default function IntelligenceControlPlanePage() {
         </div>
       </Modal>
 
-      {/* ═══════ SIDE DRAWER (Expand & Explain) ═══════ */}
+      {/* ═══════ SIDE DRAWER ═══════ */}
       {drawerOpen && (
         <SideModal
           isOpen={drawerOpen}
           onClose={() => setDrawerOpen(false)}
           title={drawerTitle}
-          subTitle="Expand & explain"
+          subTitle={drawerSubTitle}
         >
           {drawerContent}
         </SideModal>

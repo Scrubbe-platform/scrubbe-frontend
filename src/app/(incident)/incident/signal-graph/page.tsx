@@ -26,11 +26,8 @@ import {
   Lightbulb,
   Lock,
   RefreshCcw,
-  ShieldCheck,
   Sparkles,
-  UserRound,
   X,
-  Zap,
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -44,8 +41,6 @@ import toast from "react-hot-toast";
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-// ── Modal shell ──────────────────────────────────────────────────
 
 // ── Reusable modal button ────────────────────────────────────────
 
@@ -74,17 +69,6 @@ function ModalBtn({
   );
 }
 
-type NodeStatus = "HEALTHY" | "WARNING" | "CRITICAL" | "DEGRADED" | "STRESSED";
-
-interface ServiceNodeData {
-  label: string;
-  kind: string;
-  status: NodeStatus;
-  incidentId?: string;
-  metrics: { label: string; value: string; color: string }[];
-  icon: React.ReactNode;
-}
-
 const shortText = (value: string, max = 120) =>
   value.length > max ? `${value.slice(0, max).trim()}...` : value;
 
@@ -92,16 +76,6 @@ const severityColor = (severity?: string) => {
   if (severity === "P0" || severity === "P1") return "text-rose-500";
   if (severity === "P2") return "text-amber-500";
   return "text-emerald-500";
-};
-
-const resolveNodeStatus = (incident: IncidentDetailRecord): NodeStatus => {
-  if (incident.status === "RESOLVED" || incident.status === "CLOSED")
-    return "HEALTHY";
-  if (incident.status === "INVESTIGATION") return "STRESSED";
-  if (incident.status === "MITIGATED") return "DEGRADED";
-  if (incident.severity === "P0" || incident.severity === "P1")
-    return "CRITICAL";
-  return "WARNING";
 };
 
 const fmtTime = (iso: string) => {
@@ -131,241 +105,532 @@ const fmtDate = (iso: string) => {
   }
 };
 
-// ── Node status styles ───────────────────────────────────────────
+// ── Node types (from blueprint) ───────────────────────────────────
 
-const nodeStatus: Record<
-  NodeStatus,
-  { ring: string; dot: string; label: string }
+type GraphNodeType = "root" | "service" | "infra" | "user" | "event" | "change";
+
+interface GraphNodeData {
+  label: string;
+  sub: string;
+  kind: string;
+  nodeType: GraphNodeType;
+  sev: string;
+  metrics: { label: string; value: string; pct: number; color: string }[];
+}
+
+const typeStyles: Record<
+  GraphNodeType,
+  { stripe: string; badge: string; badgeText: string }
 > = {
-  HEALTHY: {
-    ring: "border-emerald-200 bg-white",
-    dot: "bg-emerald-400",
-    label: "text-emerald-600",
+  root: {
+    stripe: "bg-rose-500",
+    badge: "bg-rose-50",
+    badgeText: "text-rose-600",
   },
-  WARNING: {
-    ring: "border-amber-200 bg-white",
-    dot: "bg-amber-400",
-    label: "text-amber-600",
+  service: {
+    stripe: "bg-purple-500",
+    badge: "bg-purple-50",
+    badgeText: "text-purple-600",
   },
-  CRITICAL: {
-    ring: "border-rose-200 bg-white",
-    dot: "bg-rose-400",
-    label: "text-rose-600",
+  infra: {
+    stripe: "bg-blue-500",
+    badge: "bg-blue-50",
+    badgeText: "text-blue-600",
   },
-  DEGRADED: {
-    ring: "border-orange-200 bg-white",
-    dot: "bg-orange-400",
-    label: "text-orange-600",
+  user: {
+    stripe: "bg-pink-500",
+    badge: "bg-pink-50",
+    badgeText: "text-pink-600",
   },
-  STRESSED: {
-    ring: "border-purple-200 bg-white",
-    dot: "bg-purple-400",
-    label: "text-purple-600",
+  event: {
+    stripe: "bg-zinc-400",
+    badge: "bg-zinc-100",
+    badgeText: "text-zinc-600",
+  },
+  change: {
+    stripe: "bg-amber-500",
+    badge: "bg-amber-50",
+    badgeText: "text-amber-700",
   },
 };
 
-// ── Flow node ────────────────────────────────────────────────────
+const sevBadgeStyle: Record<string, string> = {
+  Critical: "bg-rose-50 text-rose-600",
+  Warning: "bg-amber-50 text-amber-600",
+  Info: "bg-zinc-100 text-zinc-500",
+};
 
-const SignalNode = ({ data }: { data: ServiceNodeData }) => {
-  const s = nodeStatus[data.status];
+// ── Flow node (matching the blueprint design) ────────────────────
+
+const SignalNode = ({ data }: { data: GraphNodeData }) => {
+  const t = typeStyles[data.nodeType];
   return (
     <div
-      className={cn(
-        "min-w-[200px] rounded-xl border shadow-sm transition-shadow hover:shadow-md",
-        s.ring,
-      )}
+      className="relative bg-white rounded-xl shadow-sm shadow-light shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden"
+      style={{ minWidth: 160 }}
     >
-      <Handle type="target" position={Position.Top} />
-      <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-zinc-100">
-        <div className="w-7 h-7 rounded-lg bg-zinc-50 flex items-center justify-center shrink-0 text-zinc-700">
-          {data.icon}
-        </div>
-        <div className="min-w-0">
-          <p className="text-[12px] font-semibold text-zinc-900 leading-tight truncate">
-            {data.label}
-          </p>
-          <p className="text-[9px] font-mono uppercase tracking-wider text-zinc-500">
-            {data.kind}
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center justify-between px-3 py-2">
-        <div className="flex items-center gap-1.5">
-          <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", s.dot)} />
-          <span
-            className={cn("text-[10px] font-semibold tracking-wide", s.label)}
-          >
-            {data.status}
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="!w-2 !h-2 !bg-zinc-300 !border-white"
+      />
+
+      {/* Left color stripe */}
+      <div
+        className={cn(
+          "absolute left-0 top-0 bottom-0 w-1 rounded-l-xl",
+          t.stripe,
+        )}
+      />
+
+      {/* Header */}
+      <div className="flex items-center gap-2 px-3 pt-2.5 pb-1.5 pl-4">
+        <div
+          className={cn(
+            "w-[18px] h-[18px] rounded-md flex items-center justify-center shrink-0",
+            t.badge,
+            t.badgeText,
+          )}
+        >
+          <span className="text-[9px] font-bold">
+            {data.nodeType === "root"
+              ? "RC"
+              : data.nodeType === "service"
+                ? "SV"
+                : data.nodeType === "infra"
+                  ? "IN"
+                  : data.nodeType === "user"
+                    ? "US"
+                    : data.nodeType === "event"
+                      ? "EV"
+                      : "CF"}
           </span>
         </div>
-        {data.incidentId && (
-          <span className="text-[9px] font-mono text-zinc-500">
-            {data.incidentId}
+        <span className="text-[12px] font-bold text-zinc-900 leading-tight truncate">
+          {data.label}
+        </span>
+      </div>
+
+      {/* Sub + severity */}
+      <div className="px-3 pb-2 pl-4">
+        <p className="text-[11px] text-zinc-500 font-medium leading-snug">
+          {data.sub}
+        </p>
+        {data.sev && (
+          <span
+            className={cn(
+              "inline-block mt-1 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded",
+              sevBadgeStyle[data.sev] || "bg-zinc-100 text-zinc-500",
+            )}
+          >
+            {data.sev}
           </span>
         )}
       </div>
-      <div className="grid grid-cols-2 divide-x divide-zinc-100 border-t border-zinc-100">
-        {data.metrics.map((m) => (
-          <div key={m.label} className="flex flex-col items-center py-2 px-1">
-            <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-500 mb-0.5">
-              {m.label}
-            </span>
-            <span className={cn("text-[11px] font-bold", m.color)}>
-              {m.value}
-            </span>
-          </div>
-        ))}
-      </div>
-      <Handle type="source" position={Position.Bottom} id="bottom" />
+
+      {/* Metrics */}
+      {data.metrics.length > 0 && (
+        <div className="border-t border-zinc-100 px-3 py-2 pl-4 space-y-1.5">
+          {data.metrics.slice(0, 3).map((m) => (
+            <div key={m.label}>
+              <div className="flex justify-between text-[9px] mb-0.5">
+                <span className="font-mono uppercase tracking-wider text-zinc-400">
+                  {m.label}
+                </span>
+                <span className="font-bold text-zinc-700">{m.value}</span>
+              </div>
+              <div className="h-[3px] rounded-full bg-zinc-100 overflow-hidden">
+                <div
+                  className="h-full rounded-full"
+                  style={{ width: `${m.pct}%`, background: m.color }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="right"
+        className="!w-2 !h-2 !bg-zinc-300 !border-white"
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="bottom"
+        className="!w-2 !h-2 !bg-zinc-300 !border-white"
+      />
     </div>
   );
 };
 
-// ── Graph data builders ──────────────────────────────────────────
+// ── Graph data builders (full 10-node blueprint graph) ───────────
 
 const buildSignalNodes = (incident: IncidentDetailRecord): Node[] => {
-  const serviceStatus = resolveNodeStatus(incident);
+  const svc = incident.service || "Primary Service";
+  const sev = incident.severity;
+  const isCrit = sev === "P0" || sev === "P1";
+
   return [
     {
-      id: "source",
+      id: "deploy",
       type: "signalNode",
-      position: { x: 40, y: 190 },
+      position: { x: 0, y: 226 },
       data: {
-        label: incident.sourceType || "Manual raise",
-        kind: "SIGNAL SOURCE",
-        status:
-          incident.status === "RESOLVED" || incident.status === "CLOSED"
-            ? "HEALTHY"
-            : "WARNING",
-        incidentId: incident.ticketId,
+        label: "Deployment",
+        sub: `${incident.ticketId} · service rollout`,
+        kind: "Deployment / CI-CD",
+        nodeType: "event",
+        sev: "Info",
         metrics: [
           {
-            label: "DETECTED",
+            label: "Build",
+            value: incident.ticketId,
+            pct: 0,
+            color: "#94A3B8",
+          },
+          { label: "Rollout", value: "100%", pct: 100, color: "#02DD82" },
+        ],
+      },
+    },
+    {
+      id: "config",
+      type: "signalNode",
+      position: { x: 210, y: 226 },
+      data: {
+        label: "Config change",
+        sub: incident.reason || "Configuration modified",
+        kind: "Configuration",
+        nodeType: "change",
+        sev: "Warning",
+        metrics: [
+          { label: "Applied to", value: "6 pods", pct: 60, color: "#F59E0B" },
+          { label: "Reverted", value: "Yes", pct: 100, color: "#02DD82" },
+        ],
+      },
+    },
+    {
+      id: "root",
+      type: "signalNode",
+      position: { x: 430, y: 218 },
+      data: {
+        label: incident.category || "Root Cause",
+        sub:
+          incident.impactSummary || incident.description || "Signal saturated",
+        kind: "Infrastructure",
+        nodeType: "root",
+        sev: "Critical",
+        metrics: [
+          {
+            label: "Confidence",
+            value: `${incident.score || 92}%`,
+            pct: incident.score || 92,
+            color: "#EF4444",
+          },
+          { label: "Errors", value: "1,287", pct: 82, color: "#EF4444" },
+          {
+            label: "Duration",
             value: incident.elapsedLabel,
-            color: "text-emerald-500",
+            pct: 70,
+            color: "#F59E0B",
           },
-          { label: "STATUS", value: incident.status, color: "text-blue-500" },
         ],
-        icon: <ShieldCheck size={14} />,
       },
     },
     {
-      id: "service",
+      id: "checkout",
       type: "signalNode",
-      position: { x: 330, y: 80 },
+      position: { x: 680, y: 60 },
       data: {
-        label: incident.service || "Primary Service",
-        kind: "SERVICE",
-        status: serviceStatus,
-        incidentId: incident.ticketId,
+        label: svc,
+        sub: `Error rate ↑ ${isCrit ? "68" : "34"}%`,
+        kind: "Service",
+        nodeType: "service",
+        sev: isCrit ? "Critical" : "Warning",
         metrics: [
           {
-            label: "SEVERITY",
-            value: incident.severity,
-            color: severityColor(incident.severity),
+            label: "Error rate",
+            value: isCrit ? "68%" : "34%",
+            pct: isCrit ? 68 : 34,
+            color: "#A855F7",
           },
           {
-            label: "REGION",
-            value: incident.region || "GLOBAL",
-            color: "text-amber-500",
+            label: "p95 latency",
+            value: isCrit ? "2.1s" : "1.2s",
+            pct: isCrit ? 84 : 48,
+            color: "#A855F7",
           },
         ],
-        icon: <Zap size={14} />,
       },
     },
     {
-      id: "response",
+      id: "payment",
       type: "signalNode",
-      position: { x: 620, y: 200 },
+      position: { x: 920, y: 60 },
       data: {
-        label:
-          incident.assignedToName ||
-          incident.incidentCommander ||
-          incident.assignedToEmail ||
-          "Response owner",
-        kind: "OWNERSHIP",
-        status:
-          incident.assignedToName ||
-          incident.assignedToEmail ||
-          incident.incidentCommander
-            ? "HEALTHY"
-            : "WARNING",
-        incidentId: incident.environment || incident.ticketId,
+        label: "Payment-service",
+        sub: `Failure spike ↑ 52%`,
+        kind: "Service",
+        nodeType: "service",
+        sev: "Critical",
+        metrics: [
+          { label: "Failure rate", value: "52%", pct: 52, color: "#A855F7" },
+          { label: "Retry loops", value: "2,113", pct: 64, color: "#F59E0B" },
+        ],
+      },
+    },
+    {
+      id: "auth",
+      type: "signalNode",
+      position: { x: 680, y: 220 },
+      data: {
+        label: "Auth-service",
+        sub: "Latency ↑ 1200ms",
+        kind: "Service",
+        nodeType: "service",
+        sev: "Warning",
         metrics: [
           {
-            label: "ENV",
-            value: incident.environment || "N/A",
-            color: "text-blue-500",
+            label: "Added latency",
+            value: "1200ms",
+            pct: 80,
+            color: "#F59E0B",
           },
-          {
-            label: "COMMENTS",
-            value: String(incident.commentsCount),
-            color: "text-purple-500",
-          },
+          { label: "Token timeouts", value: "688", pct: 55, color: "#F59E0B" },
         ],
-        icon: <UserRound size={14} />,
+      },
+    },
+    {
+      id: "session",
+      type: "signalNode",
+      position: { x: 920, y: 220 },
+      data: {
+        label: "Session-service",
+        sub: "Latency ↑ 950ms",
+        kind: "Service",
+        nodeType: "service",
+        sev: "Warning",
+        metrics: [
+          { label: "Added latency", value: "950ms", pct: 63, color: "#F59E0B" },
+          { label: "Dropped", value: "214", pct: 30, color: "#F59E0B" },
+        ],
+      },
+    },
+    {
+      id: "dbserver",
+      type: "signalNode",
+      position: { x: 650, y: 400 },
+      data: {
+        label: "Database server",
+        sub: "Connections 95%",
+        kind: "Infrastructure / Host",
+        nodeType: "infra",
+        sev: "Critical",
+        metrics: [
+          { label: "Conn usage", value: "95%", pct: 95, color: "#3B82F6" },
+          { label: "Active queries", value: "612", pct: 78, color: "#3B82F6" },
+        ],
+      },
+    },
+    {
+      id: "cpu",
+      type: "signalNode",
+      position: { x: 860, y: 400 },
+      data: {
+        label: "CPU",
+        sub: "Utilisation 87%",
+        kind: "Infrastructure / Compute",
+        nodeType: "infra",
+        sev: "Warning",
+        metrics: [
+          { label: "CPU", value: "87%", pct: 87, color: "#3B82F6" },
+          { label: "Run queue", value: "6.4", pct: 64, color: "#3B82F6" },
+        ],
+      },
+    },
+    {
+      id: "users",
+      type: "signalNode",
+      position: { x: 1120, y: 180 },
+      data: {
+        label: "Customers impacted",
+        sub: "5,243 users",
+        kind: "Business / User impact",
+        nodeType: "user",
+        sev: "Critical",
+        metrics: [
+          { label: "Users", value: "5,243", pct: 90, color: "#EC4899" },
+          { label: "Failed txns", value: "3,118", pct: 70, color: "#EC4899" },
+        ],
       },
     },
   ];
 };
 
-const buildSignalEdges = (incident: IncidentDetailRecord): Edge[] => [
+const buildSignalEdges = (_incident: IncidentDetailRecord): Edge[] => [
   {
-    id: `${incident.id}-source-service`,
-    source: "source",
-    target: "service",
-    label: "TRIGGERED",
+    id: "e-deploy-config",
+    source: "deploy",
+    target: "config",
+    sourceHandle: "right",
+    label: "triggers",
     animated: true,
-    style: { stroke: "#0ea5e9", strokeWidth: 1.5 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: "#0ea5e9" },
+    style: { stroke: "#EF4444", strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#EF4444" },
   },
   {
-    id: `${incident.id}-service-response`,
-    source: "service",
-    target: "response",
-    label: "OWNED BY",
+    id: "e-config-root",
+    source: "config",
+    target: "root",
+    sourceHandle: "right",
+    label: "causes",
     animated: true,
-    style: {
-      stroke:
-        incident.status === "RESOLVED" || incident.status === "CLOSED"
-          ? "#10b981"
-          : "#f59e0b",
-      strokeWidth: 1.5,
-    },
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-      color:
-        incident.status === "RESOLVED" || incident.status === "CLOSED"
-          ? "#10b981"
-          : "#f59e0b",
-    },
+    style: { stroke: "#EF4444", strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#EF4444" },
+  },
+  {
+    id: "e-root-checkout",
+    source: "root",
+    target: "checkout",
+    sourceHandle: "right",
+    label: "r .98",
+    animated: true,
+    style: { stroke: "#EF4444", strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#EF4444" },
+  },
+  {
+    id: "e-checkout-payment",
+    source: "checkout",
+    target: "payment",
+    sourceHandle: "right",
+    label: "r .94",
+    animated: true,
+    style: { stroke: "#EF4444", strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#EF4444" },
+  },
+  {
+    id: "e-root-auth",
+    source: "root",
+    target: "auth",
+    sourceHandle: "right",
+    label: "r .91",
+    animated: true,
+    style: { stroke: "#EF4444", strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#EF4444" },
+  },
+  {
+    id: "e-auth-session",
+    source: "auth",
+    target: "session",
+    sourceHandle: "right",
+    label: "r .86",
+    style: { stroke: "#F59E0B", strokeWidth: 2, strokeDasharray: "7 6" },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#F59E0B" },
+  },
+  {
+    id: "e-root-db",
+    source: "root",
+    target: "dbserver",
+    sourceHandle: "bottom",
+    label: "r .97",
+    style: { stroke: "#F59E0B", strokeWidth: 2, strokeDasharray: "7 6" },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#F59E0B" },
+  },
+  {
+    id: "e-db-cpu",
+    source: "dbserver",
+    target: "cpu",
+    sourceHandle: "right",
+    style: { stroke: "#94A3B8", strokeWidth: 1.5, strokeDasharray: "2 7" },
+  },
+  {
+    id: "e-payment-users",
+    source: "payment",
+    target: "users",
+    sourceHandle: "right",
+    label: "impact",
+    animated: true,
+    style: { stroke: "#EF4444", strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#EF4444" },
+  },
+  {
+    id: "e-session-users",
+    source: "session",
+    target: "users",
+    sourceHandle: "right",
+    style: { stroke: "#F59E0B", strokeWidth: 1.5, strokeDasharray: "7 6" },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#F59E0B" },
   },
 ];
 
-const buildAlertFeed = (incident: IncidentDetailRecord) => [
+// ── Timeline events (from blueprint) ─────────────────────────────
+
+interface TimelineEvent {
+  time: string;
+  nodeId: string;
+  label: string;
+  tag: string;
+  tagColor: string;
+}
+
+const buildTimeline = (incident: IncidentDetailRecord): TimelineEvent[] => [
   {
-    id: "identity",
-    level: `${incident.severity} ${incident.status}`,
-    title: incident.title || incident.ticketId,
-    timestamp: incident.elapsedLabel,
+    time: "20:25",
+    nodeId: "deploy",
+    label: `Deployment started (${incident.ticketId})`,
+    tag: "Deployment",
+    tagColor: "#64748b",
   },
   {
-    id: "impact",
-    level: incident.service || "Impact",
-    title:
-      incident.impactSummary ||
-      incident.description ||
-      "Impact details are still being collected.",
-    timestamp: incident.region || "live",
+    time: "20:30",
+    nodeId: "config",
+    label: incident.reason || "Config change applied",
+    tag: "Change",
+    tagColor: "#D97706",
   },
   {
-    id: "response",
-    level: incident.sourceType || "Response",
-    title:
-      incident.recommendedActions[0] ||
-      incident.aiAnalysis?.suggestion ||
-      "No automated remediation recommendation yet.",
-    timestamp: incident.environment || "runtime",
+    time: "20:32",
+    nodeId: "root",
+    label: incident.category || "Root cause signal detected",
+    tag: "Infra",
+    tagColor: "#EF4444",
+  },
+  {
+    time: "20:34",
+    nodeId: "checkout",
+    label: `${incident.service || "Service"} errors begin`,
+    tag: "Service",
+    tagColor: "#A855F7",
+  },
+  {
+    time: "20:36",
+    nodeId: "payment",
+    label: "Cascade across payment & auth services",
+    tag: "Service",
+    tagColor: "#A855F7",
+  },
+  {
+    time: "20:41",
+    nodeId: "users",
+    label: "Customer impact detected (5,243 users)",
+    tag: "Impact",
+    tagColor: "#EC4899",
+  },
+  {
+    time: "20:42",
+    nodeId: "root",
+    label: "Mitigation triggered — config reverted",
+    tag: "Action",
+    tagColor: "#3B82F6",
+  },
+  {
+    time: "20:45",
+    nodeId: "users",
+    label: "System stabilised",
+    tag: "Recovery",
+    tagColor: "#02DD82",
   },
 ];
 
@@ -1341,7 +1606,7 @@ function SignalGraphWorkspace({
   const [showRemediation, setShowRemediation] = useState(false);
   const [gateActionIndex, setGateActionIndex] = useState<number | null>(null);
 
-  const alertFeed = useMemo(() => buildAlertFeed(incident), [incident]);
+  const timeline = useMemo(() => buildTimeline(incident), [incident]);
   const auditTrail = useMemo(() => buildAuditTrail(incident), [incident]);
   const nodeTypes = useMemo(() => ({ signalNode: SignalNode }), []);
 
@@ -1352,7 +1617,7 @@ function SignalGraphWorkspace({
   }, [incident, setEdges, setNodes]);
 
   const selectedNodeData = (nodes.find((n) => n.id === selectedNodeId)?.data ??
-    null) as ServiceNodeData | null;
+    null) as GraphNodeData | null;
 
   const engineSteps = [
     "Correlates logs, metrics, deployments & events",
@@ -1471,34 +1736,46 @@ function SignalGraphWorkspace({
               Reconstruction timeline
             </h2>
             <span className="text-[11px] text-zinc-400 font-medium">
-              {alertFeed.length} events
+              {timeline.length} events
             </span>
           </div>
           <div className="py-2 px-1.5">
-            {alertFeed.map((alert, i) => (
+            {timeline.map((ev, i) => (
               <button
-                key={alert.id}
+                key={`${ev.nodeId}-${i}`}
                 type="button"
-                className="w-full grid grid-cols-[54px_1fr] gap-2 px-2.5 py-2.5 rounded-lg text-left hover:bg-slate-50 transition-colors"
+                onClick={() => setSelectedNodeId(ev.nodeId)}
+                className={cn(
+                  "w-full grid grid-cols-[46px_1fr] gap-2 px-2.5 py-2.5 rounded-lg text-left transition-colors",
+                  selectedNodeId === ev.nodeId
+                    ? "bg-indigo-50"
+                    : "hover:bg-slate-50",
+                )}
               >
-                <div className="flex justify-center relative">
-                  {i < alertFeed.length - 1 && (
-                    <div className="absolute top-4 bottom-[-18px] w-[2px] bg-zinc-200 left-1/2 -translate-x-1/2" />
+                <div className="flex flex-col items-center relative">
+                  {i < timeline.length - 1 && (
+                    <div className="absolute top-5 bottom-[-14px] w-[2px] bg-zinc-200 left-1/2 -translate-x-1/2" />
                   )}
-                  <div className="relative z-10 w-3 h-3 rounded-full bg-white border-[2.5px] border-zinc-300 mt-1" />
+                  <span className="text-[10px] font-mono font-bold text-zinc-500">
+                    {ev.time}
+                  </span>
+                  <div
+                    className="relative z-10 w-2.5 h-2.5 rounded-full bg-white border-[2.5px] mt-1"
+                    style={{ borderColor: ev.tagColor }}
+                  />
                 </div>
                 <div>
                   <p className="text-[12px] text-zinc-600 font-medium leading-snug">
-                    {shortText(alert.title, 80)}
+                    {ev.label}
                   </p>
                   <span
-                    className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md"
+                    className="inline-block mt-1 text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md"
                     style={{
-                      background: "rgba(239,68,68,.1)",
-                      color: "#dc2626",
+                      background: ev.tagColor + "18",
+                      color: ev.tagColor,
                     }}
                   >
-                    {alert.level}
+                    {ev.tag}
                   </span>
                 </div>
               </button>
@@ -1629,10 +1906,7 @@ function SignalGraphWorkspace({
             {intelTab === "details" && selectedNodeData && (
               <div>
                 <KV label="Type" value={selectedNodeData.kind} />
-                <KV label="Status" value={selectedNodeData.status} />
-                {selectedNodeData.incidentId && (
-                  <KV label="Reference" value={selectedNodeData.incidentId} />
-                )}
+                <KV label="Severity" value={selectedNodeData.sev} />
                 <Eyebrow>Key metrics</Eyebrow>
                 <div className="space-y-3 mt-1">
                   {selectedNodeData.metrics.map((m) => (
@@ -1641,19 +1915,14 @@ function SignalGraphWorkspace({
                         <span className="text-zinc-500 font-medium">
                           {m.label}
                         </span>
-                        <span className={cn("font-bold font-mono", m.color)}>
+                        <span className="font-bold font-mono text-zinc-800">
                           {m.value}
                         </span>
                       </div>
                       <div className="h-1.5 rounded-full bg-zinc-100 mt-1.5 overflow-hidden">
                         <div
-                          className={cn(
-                            "h-full rounded-full",
-                            m.color
-                              .replace("text-", "bg-")
-                              .replace("-500", "-400"),
-                          )}
-                          style={{ width: "60%" }}
+                          className="h-full rounded-full"
+                          style={{ width: `${m.pct}%`, background: m.color }}
                         />
                       </div>
                     </div>
@@ -1711,6 +1980,7 @@ function SignalGraphWorkspace({
           </div>
           <div className="border-t border-zinc-100 px-4 py-3.5">
             <h3 className="text-xs font-bold flex items-center gap-2 text-zinc-700 mb-3">
+              <AlertTriangle size={13} className="text-amber-500" />
               Contributing factors
             </h3>
             <div className="space-y-0">
@@ -1740,6 +2010,7 @@ function SignalGraphWorkspace({
           </div>
           <div className="border-t border-zinc-100 px-4 py-3.5">
             <h3 className="text-xs font-bold flex items-center gap-2 text-zinc-700 mb-3">
+              <BarChart3 size={13} className="text-pink-500" />
               Impact summary
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -1751,7 +2022,7 @@ function SignalGraphWorkspace({
                 },
                 {
                   label: "Signals",
-                  value: alertFeed.length,
+                  value: timeline.length,
                   color: "text-blue-600",
                 },
                 {
