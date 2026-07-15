@@ -19,13 +19,12 @@ export const apiClient = axios.create({
 // Request interceptor to dynamically add token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Get token dynamically for each request
     const token = getCookie(COOKIE_KEYS.TOKEN);
-    
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error: AxiosError) => {
@@ -47,6 +46,24 @@ function redirectToSignIn() {
   window.location.href = `/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 }
 
+// Global state variables to handle queueing and locks
+let isRefreshing = false;
+let failedRequestsQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (err: any) => void;
+}> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedRequestsQueue.forEach((promise) => {
+    if (error) {
+      promise.reject(error);
+    } else if (token) {
+      promise.resolve(token);
+    }
+  });
+  failedRequestsQueue = [];
+};
+
 // Response interceptor to handle errors
 apiClient.interceptors.response.use(
   (response) => response,
@@ -57,18 +74,36 @@ apiClient.interceptors.response.use(
 
     // Handle 401 errors - Token expired or invalid
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+
+      // If a refresh is already in progress, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedRequestsQueue.push({
+            resolve: (token: string) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              resolve(apiClient(originalRequest));
+            },
+            reject: (err: any) => {
+              reject(err);
+            },
+          });
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       const refreshToken = getCookie(COOKIE_KEYS.REFRESH_TOKEN);
 
       if (!refreshToken) {
         deleteCookie(COOKIE_KEYS.TOKEN);
         redirectToSignIn();
+        isRefreshing = false;
         return Promise.reject(error);
       }
 
       try {
-        // Attempt to refresh the token
+        // Attempt to refresh the token using a clean, isolated Axios instance
         const response = await axios.post(`${baseURL}/auth/refresh-token`, {
           refreshToken,
         });
@@ -77,21 +112,36 @@ apiClient.interceptors.response.use(
           response.data?.data ?? {};
 
         if (accessToken && newRefreshToken) {
-          setCookie(COOKIE_KEYS.TOKEN, accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, newRefreshToken);
+          // Update cookies (using secure/path defaults)
+          setCookie(COOKIE_KEYS.TOKEN, accessToken, { path: "/" });
+          setCookie(COOKIE_KEYS.REFRESH_TOKEN, newRefreshToken, { path: "/" });
+
+          // Update the original failed request header
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+          // Resolve all other queued requests with the fresh token
+          processQueue(null, accessToken);
+          isRefreshing = false;
+
+          // Retry the original request
           return apiClient(originalRequest);
         }
 
         // Refresh endpoint responded but without usable tokens — treat as expired session.
-        deleteCookie(COOKIE_KEYS.TOKEN);
-        deleteCookie(COOKIE_KEYS.REFRESH_TOKEN);
-        redirectToSignIn();
+        throw new Error("Invalid token payload received from refresh endpoint.");
       } catch (refreshError) {
         console.error("Token refresh failed:", refreshError);
+
+        // Clean up store and cookies
         deleteCookie(COOKIE_KEYS.TOKEN);
         deleteCookie(COOKIE_KEYS.REFRESH_TOKEN);
+
+        // Fail any pending queued items
+        processQueue(refreshError, null);
+        isRefreshing = false;
+
         redirectToSignIn();
+        return Promise.reject(refreshError);
       }
     }
 

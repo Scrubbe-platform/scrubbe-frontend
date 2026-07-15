@@ -80,7 +80,13 @@ const RESERVED_SUBDOMAINS = new Set([
 
 const isTokenExpired = (payload: JwtPayload | null): boolean => {
   if (!payload?.exp) return false;
-  return Date.now() >= payload.exp * 1000;
+
+  // Convert 10-digit epoch seconds to milliseconds
+  const expInMs = payload.exp * 1000;
+
+  // Add a 60-second buffer. 
+  // If the token is within 1 minute of expiring, treat it as already expired.
+  return Date.now() >= (expInMs - 60000);
 };
 
 const decodeJwtPayload = (token: string | undefined): JwtPayload | null => {
