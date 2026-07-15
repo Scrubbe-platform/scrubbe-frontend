@@ -662,7 +662,7 @@ function CategoryDonut({ big }: { big?: boolean }) {
             data: CATEGORIES.map((c) => c.pct),
             backgroundColor: CATEGORIES.map((c) => c.color),
             borderWidth: 0,
-            cutout: big ? "68%" : "72%",
+            // cutout: big ? "68%" : "72%",
           },
         ],
       }}
@@ -776,7 +776,7 @@ function SuccessDonut({
             data: [rate, 100 - rate],
             backgroundColor: ["#02DD82", "#E8EDF3"],
             borderWidth: 0,
-            cutout: big ? "72%" : "76%",
+            // cutout: big ? "72%" : "76%",
           },
         ],
       }}
@@ -903,7 +903,7 @@ function BurnRateChart({ big }: { big?: boolean }) {
                 labels: { boxWidth: 12, font: { size: 11 } },
               }
             : NO_LEGEND,
-          annotation: undefined,
+          // annotation: undefined,
         },
         scales: {
           x: { grid: GRID_OFF, ticks: { font: { size: 9 }, color: "#94A3B8" } },
