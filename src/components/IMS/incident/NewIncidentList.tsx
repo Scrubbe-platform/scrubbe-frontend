@@ -96,7 +96,13 @@ const IncidentOverview = ({ children, tabs }: Props) => {
                         incident={selectedIncident}
                         context={context}
                       />
-                      <ActivityAuditTrail history={history} />
+                      <ActivityAuditTrail
+                        ticket={{
+                          id: selectedIncident?.id,
+                          comments: selectedIncident?.comments,
+                          history,
+                        }}
+                      />
                     </>
                   ) : (
                     <>{children}</>

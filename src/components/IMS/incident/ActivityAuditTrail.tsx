@@ -1,279 +1,404 @@
 "use client";
 
-import React, { useState } from "react";
-import { cn } from "@/lib/utils";
-import { IncidentHistoryRecord } from "@/lib/incident/incident.types";
-import { MdOutlineChat } from "react-icons/md";
-import { Paperclip, MoreVertical, ChevronDown, ChevronUp } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 
-type AuditEventType =
-  | "Signal"
-  | "Policy"
-  | "Playbook"
-  | "Guardrail"
-  | "Notification"
-  | "Enrichment"
-  | "Comment";
+// 1. ── DIRECT IMPORTS (Adjust these paths to match your project) ──
+import {
+  IncidentHistoryRecord,
+  IncidentCommentRecord,
+} from "@/lib/incident/incident.types";
+import useAuthStore from "@/lib/stores/auth.store";
+import { querykeys } from "@/lib/constant";
+import { fetchIncidentComments } from "@/lib/incident/incident.api";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 
-interface AuditEvent {
+// ── Types ────────────────────────────────────────────────────────
+
+interface AuditTrailEntry {
   id: string;
-  type: AuditEventType;
-  label: string;
-  content: string;
-  timestamp: string;
-  initial: string;
   actor: string;
-  isLocalComment?: boolean;
+  initial: string;
+  color: string;
+  sortTime: number; // Normalized timestamp for unified chronological sorting
+  formattedTime: string;
+  action: string;
+  content: string;
+  isOwn: boolean;
+  isComment: boolean;
 }
 
-// Fixed Theme color configurations using static utilities Tailwind can read reliably
-const typeConfig: Record<
-  AuditEventType,
-  { dot: string; text: string; badge: string }
-> = {
-  Signal: {
-    dot: "bg-amber-500 border-amber-400",
-    text: "text-amber-500",
-    badge:
-      "text-amber-600 bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
-  },
-  Policy: {
-    dot: "bg-purple-500 border-purple-400",
-    text: "text-purple-500",
-    badge:
-      "text-purple-600 bg-purple-50 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20",
-  },
-  Playbook: {
-    dot: "bg-emerald-500 border-emerald-400",
-    text: "text-emerald-500",
-    badge:
-      "text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
-  },
-  Guardrail: {
-    dot: "bg-orange-500 border-orange-400",
-    text: "text-orange-500",
-    badge:
-      "text-orange-600 bg-orange-50 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20",
-  },
-  Notification: {
-    dot: "bg-teal-500 border-teal-400",
-    text: "text-teal-500",
-    badge:
-      "text-teal-600 bg-teal-50 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20",
-  },
-  Enrichment: {
-    dot: "bg-indigo-500 border-indigo-400",
-    text: "text-indigo-500",
-    badge:
-      "text-indigo-600 bg-indigo-50 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20",
-  },
-  Comment: {
-    dot: "bg-blue-500 border-blue-400",
-    text: "text-blue-500",
-    badge:
-      "text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
-  },
+const ACTION_LABELS: Record<string, string> = {
+  created: "created this incident",
+  status_changed: "changed the status",
+  updated: "updated the incident",
+  resolved: "resolved this incident",
+  comment_added: "added a comment",
+  assigned: "assigned the incident",
+  severity_changed: "changed the severity",
+  priority_changed: "changed the priority",
+  acknowledged: "acknowledged the incident",
+  escalated: "escalated the incident",
 };
 
-const EventRow = ({
-  event,
-  isLast,
-}: {
-  event: AuditEvent;
-  isLast: boolean;
-}) => {
-  const cfg = typeConfig[event.type] || typeConfig.Enrichment;
+// ── Helpers ──────────────────────────────────────────────────────
 
-  return (
-    <div className="flex items-start gap-4 relative group">
-      {/* Visual Vertical Timeline Line Indicator */}
-      {!isLast && (
-        <div className="absolute left-[14px] top-8 w-[2px] h-[calc(100%-20px)] bg-zinc-200 dark:bg-zinc-800 z-0" />
-      )}
+const PALETTE = [
+  "#059669",
+  "#9333ea",
+  "#2563eb",
+  "#d97706",
+  "#e11d48",
+  "#0d9488",
+  "#4f46e5",
+  "#db2777",
+];
 
-      {/* Main Avatar Element Row */}
-      <div
-        className={cn(
-          "w-[30px] h-[30px] rounded-full flex items-center justify-center shrink-0 z-10 text-white border-2 text-[10px] font-bold uppercase",
-          cfg.dot,
-        )}
-      >
-        {event.initial}
-      </div>
+function getColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++)
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return PALETTE[Math.abs(hash) % PALETTE.length];
+}
 
-      {/* Content Metadata Display Block */}
-      <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-zinc-100 dark:border-zinc-900 pb-3 text-[13px]">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <span className="font-bold text-zinc-800 dark:text-zinc-200">
-            {event.actor}
-          </span>
-          <span
-            className={cn(
-              "inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border capitalize",
-              cfg.badge,
-            )}
-          >
-            {event.label}
-          </span>
-          <span className="text-zinc-600 dark:text-zinc-300">
-            {event.content}
-          </span>
-        </div>
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
 
-        <div className="flex items-center gap-2 self-end md:self-center shrink-0">
-          <span className="text-[11px] text-zinc-400 dark:text-zinc-600 font-mono">
-            {event.timestamp}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-};
+function formatTimestamp(ts: string): string {
+  try {
+    const date = new Date(ts);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
 
-const actionTypeMap: Record<string, AuditEventType> = {
-  created: "Signal",
-  status_changed: "Policy",
-  updated: "Enrichment",
-  resolved: "Playbook",
-  comment_added: "Comment",
-};
-
-const buildAuditEvents = (history: IncidentHistoryRecord[]): AuditEvent[] =>
-  history.map((event) => {
-    const type = actionTypeMap[event.action] ?? "Enrichment";
-    const changeSummary =
-      event.oldValue || event.newValue
-        ? [event.oldValue, event.newValue].filter(Boolean).join(" → ")
-        : event.comment;
-
-    return {
-      id: event.id,
-      type,
-      label: event.action.includes("_")
-        ? event.action.split("_")[0]
-        : "Comment",
-      initial: event.actor.slice(0, 2).toUpperCase() || "SY",
-      actor: event.actor,
-      timestamp: event.timestamp,
-      content: changeSummary || "No details recorded",
-    };
-  });
-
-const formatNow = () => {
-  const now = new Date();
-  return now
-    .toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
+    const isToday = date.toDateString() === now.toDateString();
+    const time = date.toLocaleTimeString("en-GB", {
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
       hour12: false,
-    })
-    .replace(",", "");
-};
+    });
 
-const CURRENT_USER = { name: "Daniel Appleby", initial: "DA" };
+    let relative = "";
+    if (diffMin < 1) relative = "just now";
+    else if (diffMin < 60) relative = `${diffMin}m ago`;
+    else if (diffMin < 1440) relative = `${Math.floor(diffMin / 60)}h ago`;
+    else relative = `${Math.floor(diffMin / 1440)}d ago`;
 
-const ActivityAuditTrail: React.FC<{ history: IncidentHistoryRecord[] }> = ({
-  history,
-}) => {
-  const [events, setEvents] = useState<AuditEvent[]>(buildAuditEvents(history));
+    const prefix = isToday
+      ? "Today"
+      : date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+
+    return `${prefix} at ${time} · ${relative}`;
+  } catch {
+    return ts;
+  }
+}
+
+// ── Comment Card Component ───────────────────────────────────────
+
+function CommentCard({
+  entry,
+  onDelete,
+}: {
+  entry: AuditTrailEntry;
+  onDelete?: (id: string) => void;
+}) {
+  return (
+    <div
+      className="border border-zinc-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-950 px-4 py-3.5"
+      style={{ borderLeftWidth: 3, borderLeftColor: entry.color }}
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <div
+          className="w-[30px] h-[30px] rounded-full flex items-center justify-center shrink-0 text-white text-[10px] font-bold"
+          style={{ backgroundColor: entry.color }}
+        >
+          {entry.initial}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100">
+              {entry.actor}
+            </span>
+            {entry.isOwn && (
+              <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400 px-1.5 py-0.5 rounded">
+                you
+              </span>
+            )}
+            {!entry.isComment && (
+              <span className="text-[12px] text-zinc-500 dark:text-zinc-400">
+                {entry.action}
+              </span>
+            )}
+          </div>
+          <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+            {entry.formattedTime}
+          </p>
+        </div>
+
+        {entry.isComment && entry.isOwn && onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(entry.id)}
+            className="p-1.5 rounded-md text-zinc-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+          >
+            <Trash2 size={14} />
+          </button>
+        )}
+      </div>
+
+      {entry.content && (
+        <p className="text-[13px] text-zinc-700 dark:text-zinc-300 leading-[1.7] whitespace-pre-wrap">
+          {entry.content}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Main Component ───────────────────────────────────────────────
+
+interface ActivityAuditTrailProps {
+  ticket: {
+    id: string;
+    comments?: IncidentCommentRecord[];
+    history?: IncidentHistoryRecord[]; // 👈 Extracted from here instead of separate prop
+  };
+}
+
+const ActivityAuditTrail: React.FC<ActivityAuditTrailProps> = ({ ticket }) => {
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
   const [comment, setComment] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const { post } = useFetch();
 
-  const handleAddComment = () => {
+  // Fallbacks for current user information
+  const currentUserFullName =
+    `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "Local User";
+  const currentUserInitials = getInitials(currentUserFullName) || "LU";
+
+  const queryKey = [querykeys.COMMENTS, ticket.id];
+
+  // 1. Fetch Comments Query Hook
+  const { data: comments = [] } = useQuery<IncidentCommentRecord[]>({
+    queryKey,
+    queryFn: async () => fetchIncidentComments(ticket.id),
+    initialData: ticket.comments ?? [],
+    refetchOnWindowFocus: false,
+    refetchIntervalInBackground: true,
+    enabled: !!ticket.id,
+  });
+
+  // 2. Submit Comments Mutation Hook (Optimistic Updates)
+  const { mutateAsync: sendCommentMutation, isPending } = useMutation({
+    mutationFn: async (content: string) => {
+      const res = await post(endpoint.incident_ticket.send_comment, {
+        ticketId: ticket.id,
+        content,
+      });
+      return res.data;
+    },
+    onMutate: async (newCommentContent) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousComments =
+        queryClient.getQueryData<IncidentCommentRecord[]>(queryKey);
+
+      queryClient.setQueryData<IncidentCommentRecord[]>(queryKey, (oldData) => [
+        ...(oldData ?? []),
+        {
+          id: `local-${Date.now()}`,
+          content: newCommentContent,
+          createdAt: new Date().toISOString(),
+          isInternal: false,
+          author: {
+            id: user?.id ?? "local-user",
+            firstName: user?.firstName ?? "",
+            lastName: user?.lastName ?? "",
+            profileImage: user?.profileImage ?? null,
+          },
+        },
+      ]);
+
+      setComment(""); // Optimistically clear input immediately
+      return { previousComments };
+    },
+    onError: (_err, __, context) => {
+      if (context?.previousComments) {
+        queryClient.setQueryData(queryKey, context.previousComments);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  // 3. Merges and Chronologically Sorts History Logs + Live Comments
+  const blendedEntries = useMemo(() => {
+    const historyList = ticket.history ?? [];
+
+    const parsedHistory: AuditTrailEntry[] = historyList.map((event) => {
+      const name = event.actor || "System";
+      const actionLabel =
+        ACTION_LABELS[event.action] || event.action.replace(/_/g, " ");
+
+      let content = "";
+      if (event.action === "comment_added") {
+        content = event.comment || "";
+      } else if (event.oldValue && event.newValue) {
+        content = `${event?.action || "Field"}: ${event.oldValue} → ${event.newValue}`;
+      } else if (event.newValue) {
+        content = `${event?.action || "Value"}: ${event.newValue}`;
+      } else if (event.comment) {
+        content = event.comment;
+      }
+
+      return {
+        id: event.id,
+        actor: name,
+        initial: getInitials(name) || "SYS",
+        color: getColor(name),
+        sortTime: new Date(event.timestamp).getTime() || 0,
+        formattedTime: formatTimestamp(event.timestamp),
+        action: actionLabel,
+        content,
+        isOwn: name === currentUserFullName,
+        isComment: event.action === "comment_added",
+      };
+    });
+
+    const parsedComments: AuditTrailEntry[] = comments.map((comm) => {
+      const name =
+        `${comm.author.firstName} ${comm.author.lastName}`.trim() ||
+        "Unknown Author";
+      return {
+        id: comm.id,
+        actor: name,
+        initial: getInitials(name) || "UN",
+        color: getColor(name),
+        sortTime: new Date(comm.createdAt).getTime() || 0,
+        formattedTime: formatTimestamp(comm.createdAt),
+        action: "added a comment",
+        content: comm.content,
+        isOwn: comm.author.id === user?.id || name === currentUserFullName,
+        isComment: true,
+      };
+    });
+
+    // Merge both streams & sort by descending timestamp (newest first)
+    return [...parsedHistory, ...parsedComments].sort(
+      (a, b) => b.sortTime - a.sortTime,
+    );
+  }, [ticket.history, comments, currentUserFullName, user?.id]);
+
+  const handleAddComment = async () => {
     const text = comment.trim();
-    if (!text) return;
-
-    const newEvent: AuditEvent = {
-      id: `local-${Date.now()}`,
-      type: "Comment",
-      label: "Comment",
-      actor: CURRENT_USER.name,
-      initial: CURRENT_USER.initial,
-      timestamp: formatNow(),
-      content: text,
-      isLocalComment: true,
-    };
-
-    setEvents((prev) => [newEvent, ...prev]);
-    setComment("");
+    if (!text || isPending) return;
+    try {
+      await sendCommentMutation(text);
+    } catch (err) {
+      console.error("Mutation failed:", err);
+    }
   };
 
-  // Determine pagination visible slices
-  const hasMoreThanFour = events.length > 4;
-  const visibleEvents = isExpanded ? events : events.slice(0, 4);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleAddComment();
+    }
+  };
+
+  const hasMore = blendedEntries.length > 4;
+  const visibleEntries = isExpanded
+    ? blendedEntries
+    : blendedEntries.slice(0, 4);
 
   return (
     <div className="w-full mx-auto p-4">
-      <div className="bg-white dark:bg-zinc-950 rounded-md border border-zinc-200 dark:border-zinc-800 shadow-sm ">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 p-5 border-b border-zinc-200 dark:border-zinc-900 flex items-center gap-2 mb-4">
-          <MdOutlineChat size={18} /> Comments & Activity
-        </h3>
-
-        {/* Comment Input Form Area */}
-        <div className="flex items-start gap-3 p-5">
-          <div className="min-w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center shrink-0 text-white text-[11px] font-bold">
-            {CURRENT_USER.initial}
+      <div className="space-y-3">
+        {/* Input area */}
+        <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-950 overflow-hidden">
+          <div className="flex items-start gap-3 p-4 pb-0">
+            <div
+              className="w-[30px] h-[30px] rounded-full flex items-center justify-center shrink-0 text-white text-[10px] font-bold mt-0.5"
+              style={{ backgroundColor: getColor(currentUserFullName) }}
+            >
+              {currentUserInitials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100">
+                  {currentUserFullName}
+                </span>
+                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400 px-1.5 py-0.5 rounded">
+                  you
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex-1 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-900 overflow-hidden focus-within:ring-1 focus-within:ring-zinc-400 transition-shadow">
+          <div className="px-4 pb-3 pt-2">
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Add a comment..."
+              onKeyDown={handleKeyDown}
+              placeholder="Write a comment..."
               rows={3}
-              className="w-full px-3 py-2 text-[13px] text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 bg-transparent resize-none outline-none"
+              disabled={isPending}
+              className="w-full text-[13px] text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 bg-transparent resize-none outline-none leading-[1.7] disabled:opacity-50"
             />
-            <div className="flex items-center justify-end px-3 py-2 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/50">
+            <div className="flex items-center justify-end pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <button
                 type="button"
                 onClick={handleAddComment}
-                disabled={!comment.trim()}
-                className="rounded border border-emerald-600 px-4 py-1 text-[12px] font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={!comment.trim() || isPending}
+                className="rounded-md border border-emerald-600 px-4 py-1.5 text-[12px] font-semibold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Add Comment
+                {isPending ? "Adding..." : "Add Comment"}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Event List Container Area */}
-        {visibleEvents.length > 0 ? (
-          <div className="flex flex-col gap-2 p-4">
-            {visibleEvents.map((event, idx) => (
-              <EventRow
-                key={event.id}
-                event={event}
-                isLast={idx === visibleEvents.length - 1}
-              />
+        {/* Trail Feed List */}
+        {visibleEntries.length > 0 ? (
+          <>
+            {visibleEntries.map((entry) => (
+              <CommentCard key={entry.id} entry={entry} />
             ))}
 
-            {/* Load More/Less Conditional Control Button */}
-            {hasMoreThanFour && (
-              <div className="flex justify-center pt-3 border-t border-zinc-100 dark:border-zinc-900">
+            {hasMore && (
+              <div className="flex justify-center">
                 <button
                   type="button"
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="flex items-center gap-1 text-[13px] font-semibold text-emerald-600 hover:text-emerald-700 transition-colors py-1 px-3 rounded hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                  className="flex items-center gap-1.5 text-[13px] font-semibold text-emerald-600 hover:text-emerald-700 py-2 px-4 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
                 >
                   {isExpanded ? (
                     <>
-                      Show less <ChevronUp size={16} />
+                      Show less <ChevronUp size={15} />
                     </>
                   ) : (
                     <>
-                      Load more <ChevronDown size={16} />
+                      Load more ({blendedEntries.length - 4}){" "}
+                      <ChevronDown size={15} />
                     </>
                   )}
                 </button>
               </div>
             )}
-          </div>
+          </>
         ) : (
-          <div className="text-center py-6 text-zinc-400 text-sm border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg">
-            No activity records found.
+          <div className="border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg py-8 text-center text-sm text-zinc-400">
+            No activity yet. Add a comment to start.
           </div>
         )}
       </div>
