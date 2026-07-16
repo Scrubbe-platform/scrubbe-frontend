@@ -12,8 +12,10 @@ import {
   Node,
   Position,
   ReactFlow,
+  ReactFlowProvider,
   useEdgesState,
   useNodesState,
+  useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import {
@@ -41,6 +43,8 @@ import toast from "react-hot-toast";
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// ── Modal shell ──────────────────────────────────────────────────
 
 // ── Reusable modal button ────────────────────────────────────────
 
@@ -116,6 +120,8 @@ interface GraphNodeData {
   nodeType: GraphNodeType;
   sev: string;
   metrics: { label: string; value: string; pct: number; color: string }[];
+  showLabels?: boolean;
+  dimmed?: boolean;
 }
 
 const typeStyles: Record<
@@ -164,10 +170,14 @@ const sevBadgeStyle: Record<string, string> = {
 
 const SignalNode = ({ data }: { data: GraphNodeData }) => {
   const t = typeStyles[data.nodeType];
+  const labels = data.showLabels !== false;
   return (
     <div
-      className="relative bg-white rounded-xl shadow-sm shadow-light shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden"
-      style={{ minWidth: 160 }}
+      className={cn(
+        "relative bg-white rounded-xl shadow-sm shadow-light shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden",
+        data.dimmed && "opacity-30 saturate-50",
+      )}
+      style={{ minWidth: labels ? 160 : 120 }}
     >
       <Handle
         type="target"
@@ -211,25 +221,27 @@ const SignalNode = ({ data }: { data: GraphNodeData }) => {
         </span>
       </div>
 
-      {/* Sub + severity */}
-      <div className="px-3 pb-2 pl-4">
-        <p className="text-[11px] text-zinc-500 font-medium leading-snug">
-          {data.sub}
-        </p>
-        {data.sev && (
-          <span
-            className={cn(
-              "inline-block mt-1 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded",
-              sevBadgeStyle[data.sev] || "bg-zinc-100 text-zinc-500",
-            )}
-          >
-            {data.sev}
-          </span>
-        )}
-      </div>
+      {/* Sub + severity (hidden when labels off) */}
+      {labels && (
+        <div className="px-3 pb-2 pl-4">
+          <p className="text-[11px] text-zinc-500 font-medium leading-snug">
+            {data.sub}
+          </p>
+          {data.sev && (
+            <span
+              className={cn(
+                "inline-block mt-1 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded",
+                sevBadgeStyle[data.sev] || "bg-zinc-100 text-zinc-500",
+              )}
+            >
+              {data.sev}
+            </span>
+          )}
+        </div>
+      )}
 
-      {/* Metrics */}
-      {data.metrics.length > 0 && (
+      {/* Metrics (hidden when labels off) */}
+      {labels && data.metrics.length > 0 && (
         <div className="border-t border-zinc-100 px-3 py-2 pl-4 space-y-1.5">
           {data.metrics.slice(0, 3).map((m) => (
             <div key={m.label}>
@@ -633,6 +645,52 @@ const buildTimeline = (incident: IncidentDetailRecord): TimelineEvent[] => [
     tagColor: "#02DD82",
   },
 ];
+
+// ── Per-node narrative stories (from blueprint STORIES) ──────────
+
+const NODE_STORIES: Record<string, string[]> = {
+  deploy: [
+    "This deployment is where the incident actually begins. A routine service rollout went out at 100% with no canary stage, and bundled into it was a change to the database connection pool. Nothing here failed on its own; the deploy was clean and its pipeline passed.",
+    "What makes it the origin is what it carried. Because the pool-size change shipped alongside ordinary application code with no separate infrastructure review, the constraint that would starve the database seven minutes later entered production unnoticed. Every node downstream in this graph traces back to this single release.",
+  ],
+  config: [
+    "This is the proximate cause. The deployment set DB_POOL_SIZE from 50 down to 10 across six pods — a five-fold reduction below the baseline the checkout path normally needs. The value went live without a load test, so the gap between supply and demand only became visible under real traffic.",
+    "Ten connections simply cannot serve normal checkout load. Within two minutes the pool was effectively full, and from that point the failure stopped being a configuration question and became a capacity one. The change was reverted at 20:42 — which lines up exactly with the start of recovery.",
+  ],
+  root: [
+    "This is the root cause identified at 92% confidence, and it is the hinge the whole graph turns on. By 20:32 the pool was holding 198 of 200 connections, average wait time had climbed to 1,250 ms, and requests were timing out — 342 of them — producing 1,287 errors in nine minutes.",
+    "Everything to the left explains how the pool got here; everything to the right is a consequence of it. Because so many services share this database tier, starvation didn't stay contained — it propagated outward as latency and errors into checkout, payment, auth and sessions.",
+    "This is also why the fix was to restore the pool rather than restart any single service. The individual services were never broken; they were starved. Remove the constraint here and the entire downstream pattern resolves at once.",
+  ],
+  checkout: [
+    "Checkout was the first service to break, one second after the pool saturated. It calls the database synchronously in its hot path and had no connection-timeout fallback, so when connections stopped being available, requests simply failed — a 68% error rate, p95 latency at 2.1 seconds, and 4,910 5xx responses.",
+    "Its position matters as much as its failure. Checkout sits directly in front of payment, so its errors didn't end here — they became the input to the next failure. This is the point where an infrastructure problem turned into a customer-facing outage.",
+  ],
+  payment: [
+    "Payment is the amplification point of the incident. It inherited checkout's failures and responded with an aggressive retry policy that had no backoff — 2,113 retry loops aimed at a database that was already starved. Each retry consumed another scarce connection, so the service meant to recover from the failure was instead feeding it.",
+    "That feedback loop is why things got worse before they got better. Payment's 52% failure rate and 1,402 declines are real customer harm, but its retries also prolonged the saturation at the root. This is exactly why a circuit breaker on this path is one of the proposed fixes.",
+  ],
+  auth: [
+    "Auth shows how wide the blast radius reached. It doesn't depend on checkout at all, but it shares the same database tier — so when connections became contended, token validation slowed by roughly 1,200 ms and 688 lookups timed out.",
+    "Auth degraded rather than failed outright, which is why it reads as a warning and not critical. Caching session lookups would have softened the blow; without it, the shared-tier coupling let a checkout-area problem quietly slow the entire signed-in experience.",
+  ],
+  session: [
+    "Session sits one step downstream of auth, and its slowdown is a second-order effect. As auth lagged, session reads slowed by about 950 ms and 214 sessions were dropped, pushing users into repeated re-authentication.",
+    "That re-authentication is the quiet part of the cascade: each retry generated more auth and session traffic, adding load back into an already-strained system.",
+  ],
+  dbserver: [
+    "The database host is the physical confirmation of the root cause. Its connection usage sat at 95% with 612 active queries, while lock waits stayed low at 89 — and that combination is the telling detail. It says the constraint was connection capacity, not slow or badly-written queries.",
+    "This is what let the analysis rule out a query regression. The host was healthy in every respect except the one resource the configuration change had just cut: connections, capped at 200 with no read-replica to offload them.",
+  ],
+  cpu: [
+    "CPU is a symptom, not a cause. Utilisation rose to 87% with a run queue of 6.4, but that came from connection churn and the retry storm — the system working harder to fail — rather than from any genuine compute-bound work.",
+    "It matters mainly for recovery time: high CPU made everything else a little slower while the incident was live. Adding compute here would not have helped, because compute was never the bottleneck.",
+  ],
+  users: [
+    "This node is the incident's bottom line: 5,243 customers affected, 3,118 checkouts that failed, and 2,113 payment retries. It carries no technical cause of its own — it's the business outcome of everything to its left.",
+    "It sits in the graph to keep the reconstruction honest about why this mattered. The chain that started with a one-line configuration change ended here, with real people unable to complete a purchase.",
+  ],
+};
 
 // ── Build audit trail from incident data ─────────────────────────
 
@@ -1605,6 +1663,10 @@ function SignalGraphWorkspace({
   const [showRerun, setShowRerun] = useState(false);
   const [showRemediation, setShowRemediation] = useState(false);
   const [gateActionIndex, setGateActionIndex] = useState<number | null>(null);
+  const [showLabels, setShowLabels] = useState(true);
+  const [focusCausal, setFocusCausal] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const reactFlowInstance = useReactFlow();
 
   const timeline = useMemo(() => buildTimeline(incident), [incident]);
   const auditTrail = useMemo(() => buildAuditTrail(incident), [incident]);
@@ -1615,6 +1677,26 @@ function SignalGraphWorkspace({
     setEdges(buildSignalEdges(incident));
     setSelectedNodeId("service");
   }, [incident, setEdges, setNodes]);
+
+  // Causal path node IDs — the main chain from deploy → root → service → user
+  const causalIds = useMemo(
+    () => new Set(["deploy", "config", "root", "checkout", "payment", "users"]),
+    [],
+  );
+
+  // Update nodes when toolbar toggles change
+  useEffect(() => {
+    setNodes((prev) =>
+      prev.map((n) => ({
+        ...n,
+        data: {
+          ...n.data,
+          showLabels,
+          dimmed: focusCausal && !causalIds.has(n.id),
+        },
+      })),
+    );
+  }, [showLabels, focusCausal, setNodes, causalIds]);
 
   const selectedNodeData = (nodes.find((n) => n.id === selectedNodeId)?.data ??
     null) as GraphNodeData | null;
@@ -1744,7 +1826,10 @@ function SignalGraphWorkspace({
               <button
                 key={`${ev.nodeId}-${i}`}
                 type="button"
-                onClick={() => setSelectedNodeId(ev.nodeId)}
+                onClick={() => {
+                  setSelectedNodeId(ev.nodeId);
+                  setIntelTab("narrative");
+                }}
                 className={cn(
                   "w-full grid grid-cols-[46px_1fr] gap-2 px-2.5 py-2.5 rounded-lg text-left transition-colors",
                   selectedNodeId === ev.nodeId
@@ -1783,8 +1868,21 @@ function SignalGraphWorkspace({
           </div>
         </div>
 
+        {/* Expanded backdrop */}
+        {expanded && (
+          <div
+            className="fixed inset-0 bg-black/40 z-40"
+            onClick={() => setExpanded(false)}
+          />
+        )}
+
         {/* CENTER: Graph canvas */}
-        <div className="bg-white rounded-xl shadow-sm shadow-light overflow-hidden flex flex-col">
+        <div
+          className={cn(
+            "bg-white rounded-xl shadow-sm shadow-light overflow-hidden flex flex-col transition-all duration-300",
+            expanded && "fixed inset-4 z-50 shadow-2xl",
+          )}
+        >
           <div className="px-4 py-3 border-b border-zinc-100">
             <h2 className="text-sm font-bold text-zinc-800">
               System signal flow & causal chain
@@ -1799,29 +1897,112 @@ function SignalGraphWorkspace({
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-2.5 border-b border-zinc-100 bg-slate-50/80">
             {[
-              { color: "bg-rose-500", label: "Root cause" },
-              { color: "bg-amber-400", label: "Contributing" },
-              { color: "bg-purple-500", label: "Service" },
-              { color: "bg-blue-500", label: "Infrastructure" },
-              { color: "bg-pink-500", label: "User impact" },
+              { color: "#EF4444", label: "Root cause", border: "solid" },
+              { color: "#F59E0B", label: "Contributing", border: "dashed" },
+              { color: "#A855F7", label: "Service", border: "solid" },
+              { color: "#3B82F6", label: "Infrastructure", border: "solid" },
+              { color: "#EC4899", label: "User impact", border: "solid" },
             ].map((l) => (
               <span
                 key={l.label}
                 className="inline-flex items-center gap-2 text-[11px] font-semibold text-zinc-500"
               >
-                <span className={cn("w-3 h-3 rounded", l.color)} />
+                <span
+                  className="w-3 h-3 rounded"
+                  style={{ background: l.color }}
+                />
                 {l.label}
               </span>
             ))}
+            <span className="ml-auto text-[10.5px] text-zinc-400 font-semibold">
+              Edge value = temporal-correlation strength (0–1)
+            </span>
           </div>
-          <div className="relative h-[480px]">
+
+          {/* Graph toolbar */}
+          <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 border-b border-zinc-100">
+            <button
+              type="button"
+              onClick={() => setShowLabels((v) => !v)}
+              className={cn(
+                "text-[11.5px] font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
+                showLabels
+                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
+                  : "bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-50",
+              )}
+            >
+              Labels
+            </button>
+            <button
+              type="button"
+              onClick={() => setFocusCausal((v) => !v)}
+              className={cn(
+                "text-[11.5px] font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
+                focusCausal
+                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
+                  : "bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-50",
+              )}
+            >
+              Focus causal path
+            </button>
+            <div className="flex-1" />
+            <div className="flex items-center shadow-sm shadow-light rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={() => reactFlowInstance.zoomOut({ duration: 200 })}
+                className="px-2.5 py-1.5 text-xs font-bold text-zinc-500 hover:bg-zinc-50 transition-colors border-r border-zinc-200"
+              >
+                –
+              </button>
+              <button
+                type="button"
+                onClick={() => reactFlowInstance.zoomIn({ duration: 200 })}
+                className="px-2.5 py-1.5 text-xs font-bold text-zinc-500 hover:bg-zinc-50 transition-colors"
+              >
+                +
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                reactFlowInstance.fitView({ padding: 0.15, duration: 300 })
+              }
+              className="text-[11.5px] font-semibold px-2.5 py-1.5 rounded-lg shadow-sm shadow-light text-zinc-500 hover:bg-zinc-50 transition-colors"
+            >
+              Fit
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setExpanded((v) => !v);
+                setTimeout(
+                  () =>
+                    reactFlowInstance.fitView({ padding: 0.15, duration: 300 }),
+                  100,
+                );
+              }}
+              className={cn(
+                "text-[11.5px] font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
+                expanded
+                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
+                  : "border-zinc-200 text-zinc-500 hover:bg-zinc-50",
+              )}
+            >
+              {expanded ? "Collapse" : "Expand"}
+            </button>
+          </div>
+
+          <div className={cn("relative", expanded ? "flex-1" : "h-[480px]")}>
             <ReactFlow
               nodes={nodes}
               edges={edges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               nodeTypes={nodeTypes}
-              onNodeClick={(_, node) => setSelectedNodeId(node.id)}
+              onNodeClick={(_, node) => {
+                setSelectedNodeId(node.id);
+                setIntelTab("narrative");
+              }}
               fitView
             >
               <Background
@@ -1887,20 +2068,30 @@ function SignalGraphWorkspace({
                   <Sparkles size={11} />
                   Ezra's read · {selectedNodeData?.label || "—"}
                 </span>
-                <p className="text-sm text-zinc-800 font-medium">
-                  {incident.impactSummary ||
-                    incident.description ||
-                    "Narrative is being computed by the analysis engine."}
-                </p>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      incident.techDescription ||
-                      incident.description ||
-                      "Technical context has not been captured yet.",
-                  }}
-                  className="text-sm text-zinc-500"
-                />
+                {NODE_STORIES[selectedNodeId] ? (
+                  NODE_STORIES[selectedNodeId].map((paragraph, pi) => (
+                    <p key={pi} className="text-[13px] text-zinc-600">
+                      {paragraph}
+                    </p>
+                  ))
+                ) : (
+                  <>
+                    <p className="text-sm text-zinc-800 font-medium">
+                      {incident.impactSummary ||
+                        incident.description ||
+                        "Narrative is being computed by the analysis engine."}
+                    </p>
+                    <p
+                      className="text-sm text-zinc-500"
+                      dangerouslySetInnerHTML={{
+                        __html:
+                          incident.techDescription ||
+                          incident.reason ||
+                          "Technical context has not been captured yet.",
+                      }}
+                    ></p>
+                  </>
+                )}
               </div>
             )}
             {intelTab === "details" && selectedNodeData && (
@@ -2242,7 +2433,11 @@ export default function SignalGraphPage() {
       <Header title="Signal graph" />
       <IncidentOverview tabs="signal-graph">
         <IncidentRouteShell title="Signal Graph">
-          {(incident) => <SignalGraphWorkspace incident={incident} />}
+          {(incident) => (
+            <ReactFlowProvider>
+              <SignalGraphWorkspace incident={incident} />
+            </ReactFlowProvider>
+          )}
         </IncidentRouteShell>
       </IncidentOverview>
     </>

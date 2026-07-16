@@ -5,7 +5,7 @@ import React from "react";
 import { ChevronRight, Layers, ArrowUpRight } from "lucide-react";
 import { IncidentListItem } from "@/lib/incident/incident.types";
 import Button from "@/components/ui/Button1";
-import { priColors, priText } from "./IncidentLibrary";
+import { priColors } from "./IncidentLibrary";
 import { TICKET_STATUS_CONFIG } from "@/components/IMS/incident/IncidentLifecycle";
 import { useRouter } from "next/navigation";
 

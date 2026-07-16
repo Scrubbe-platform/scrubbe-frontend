@@ -16,7 +16,6 @@ import {
   IncidentListItem,
 } from "@/lib/incident/incident.types";
 import Modal from "@/components/ui/Modal";
-import { priText } from "./IncidentLibrary";
 import { useQuery } from "@tanstack/react-query";
 import { querykeys } from "@/lib/constant";
 import { fetchIncidentHistory } from "@/lib/incident/incident.api";
@@ -597,8 +596,8 @@ export function CompareModal({
     { attr: "Title", a: recordA.title, b: recordB.title },
     {
       attr: "Priority",
-      a: priText[recordA.priority],
-      b: priText[recordB.priority],
+      a: recordA.priority,
+      b: recordB.priority,
     },
     { attr: "Status", a: recordA.status, b: recordB.status },
     { attr: "Service", a: recordA.service, b: recordB.service },
