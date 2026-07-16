@@ -222,45 +222,23 @@ const SignalNode = ({ data }: { data: GraphNodeData }) => {
       </div>
 
       {/* Sub + severity (hidden when labels off) */}
-      {labels && (
-        <div className="px-3 pb-2 pl-4">
+      <div className="px-3 pb-2 pl-4">
+        {labels && (
           <p className="text-[11px] text-zinc-500 font-medium leading-snug">
             {data.sub}
           </p>
-          {data.sev && (
-            <span
-              className={cn(
-                "inline-block mt-1 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded",
-                sevBadgeStyle[data.sev] || "bg-zinc-100 text-zinc-500",
-              )}
-            >
-              {data.sev}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Metrics (hidden when labels off) */}
-      {labels && data.metrics.length > 0 && (
-        <div className="border-t border-zinc-100 px-3 py-2 pl-4 space-y-1.5">
-          {data.metrics.slice(0, 3).map((m) => (
-            <div key={m.label}>
-              <div className="flex justify-between text-[9px] mb-0.5">
-                <span className="font-mono uppercase tracking-wider text-zinc-400">
-                  {m.label}
-                </span>
-                <span className="font-bold text-zinc-700">{m.value}</span>
-              </div>
-              <div className="h-[3px] rounded-full bg-zinc-100 overflow-hidden">
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${m.pct}%`, background: m.color }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+        )}
+        {data.sev && (
+          <span
+            className={cn(
+              "inline-block mt-1 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded",
+              sevBadgeStyle[data.sev] || "bg-zinc-100 text-zinc-500",
+            )}
+          >
+            {data.sev}
+          </span>
+        )}
+      </div>
 
       <Handle
         type="source"
