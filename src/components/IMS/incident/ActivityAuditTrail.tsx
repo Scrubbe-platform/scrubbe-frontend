@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 
@@ -14,6 +14,7 @@ import { querykeys } from "@/lib/constant";
 import { fetchIncidentComments } from "@/lib/incident/incident.api";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
+import useMember, { Member } from "@/hooks/useMember";
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -56,7 +57,13 @@ const PALETTE = [
   "#db2777",
 ];
 
+// Automated/system events aren't a person, so they get a fixed neutral
+// color instead of one from the hash-based palette — keeps them visually
+// distinct from real teammates and never collides with a person's color.
+const SYSTEM_COLOR = "#71717a";
+
 function getColor(name: string): string {
+  if (name === "System") return SYSTEM_COLOR;
   let hash = 0;
   for (let i = 0; i < name.length; i++)
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -101,6 +108,27 @@ function formatTimestamp(ts: string): string {
   } catch {
     return ts;
   }
+}
+
+const MENTION_PATTERN = /(@[A-Z][\w'-]*(?:\s[A-Z][\w'-]*)?)/g;
+
+function renderContentWithMentions(content: string) {
+  // MENTION_PATTERN has a single capturing group, so split() interleaves
+  // the captured "@Name" chunks at odd indices — no need to re-run the
+  // (stateful, global) regex per-part.
+  const parts = content.split(MENTION_PATTERN);
+  return parts.map((part, i) =>
+    i % 2 === 1 ? (
+      <span
+        key={i}
+        className="font-semibold text-emerald-600 dark:text-emerald-400"
+      >
+        {part}
+      </span>
+    ) : (
+      <React.Fragment key={i}>{part}</React.Fragment>
+    ),
+  );
 }
 
 // ── Comment Card Component ───────────────────────────────────────
@@ -158,7 +186,7 @@ function CommentCard({
 
       {entry.content && (
         <p className="text-[13px] text-zinc-700 dark:text-zinc-300 leading-[1.7] whitespace-pre-wrap">
-          {entry.content?.split("_")?.join(" ")}
+          {renderContentWithMentions(entry.content?.split("_")?.join(" "))}
         </p>
       )}
     </div>
@@ -181,6 +209,27 @@ const ActivityAuditTrail: React.FC<ActivityAuditTrailProps> = ({ ticket }) => {
   const [comment, setComment] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const { post } = useFetch();
+  const { data: members = [] } = useMember();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // @mention typeahead state: tracks the "@query" being typed and where it
+  // starts in `comment`, so a selected member can replace just that span.
+  const [mention, setMention] = useState<{
+    query: string;
+    triggerIndex: number;
+  } | null>(null);
+  const [activeMentionIdx, setActiveMentionIdx] = useState(0);
+
+  const filteredMembers = useMemo(() => {
+    if (!mention) return [];
+    const q = mention.query.toLowerCase();
+    return members
+      .filter((m) => {
+        const name = `${m.firstname ?? ""} ${m.lastname ?? ""}`.toLowerCase();
+        return name.includes(q) || (m.email ?? "").toLowerCase().includes(q);
+      })
+      .slice(0, 6);
+  }, [members, mention]);
 
   // Fallbacks for current user information
   const currentUserFullName =
@@ -230,6 +279,7 @@ const ActivityAuditTrail: React.FC<ActivityAuditTrailProps> = ({ ticket }) => {
       ]);
 
       setComment(""); // Optimistically clear input immediately
+      setMention(null);
       return { previousComments };
     },
     onError: (_err, __, context) => {
@@ -310,7 +360,74 @@ const ActivityAuditTrail: React.FC<ActivityAuditTrailProps> = ({ ticket }) => {
     }
   };
 
+  // Detects an in-progress "@query" right before the cursor so the mention
+  // dropdown can open/update/close as the user types.
+  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setComment(value);
+
+    const cursorPos = e.target.selectionStart ?? value.length;
+    const textBeforeCursor = value.slice(0, cursorPos);
+    const atMatch = textBeforeCursor.match(/(?:^|\s)@([\w'-]*)$/);
+
+    if (atMatch) {
+      setMention({
+        query: atMatch[1],
+        triggerIndex: cursorPos - atMatch[1].length - 1,
+      });
+      setActiveMentionIdx(0);
+    } else {
+      setMention(null);
+    }
+  };
+
+  const handleSelectMention = (member: Member) => {
+    if (!mention) return;
+    const name = `${member.firstname ?? ""} ${member.lastname ?? ""}`.trim();
+    const before = comment.slice(0, mention.triggerIndex);
+    const after = comment.slice(
+      mention.triggerIndex + 1 + mention.query.length,
+    );
+    const insertion = `@${name} `;
+    const newValue = `${before}${insertion}${after}`;
+
+    setComment(newValue);
+    setMention(null);
+
+    requestAnimationFrame(() => {
+      const el = textareaRef.current;
+      if (!el) return;
+      const cursor = before.length + insertion.length;
+      el.focus();
+      el.setSelectionRange(cursor, cursor);
+    });
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (mention && filteredMembers.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActiveMentionIdx((i) => (i + 1) % filteredMembers.length);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActiveMentionIdx(
+          (i) => (i - 1 + filteredMembers.length) % filteredMembers.length,
+        );
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        handleSelectMention(filteredMembers[activeMentionIdx]);
+        return;
+      }
+      if (e.key === "Escape") {
+        setMention(null);
+        return;
+      }
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleAddComment();
@@ -326,7 +443,7 @@ const ActivityAuditTrail: React.FC<ActivityAuditTrailProps> = ({ ticket }) => {
     <div className="w-full mx-auto p-4 font-ibm ">
       <div className="space-y-3">
         {/* Input area */}
-        <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-950 overflow-hidden">
+        <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-950 ">
           <div className="flex items-start gap-3 p-4 pb-0">
             <div
               className="w-[30px] h-[30px] rounded-full flex items-center justify-center shrink-0 text-white text-[10px] font-bold mt-0.5"
@@ -345,16 +462,60 @@ const ActivityAuditTrail: React.FC<ActivityAuditTrailProps> = ({ ticket }) => {
               </div>
             </div>
           </div>
-          <div className="px-4 pb-3 pt-2">
+          <div className="px-4 pb-3 pt-2 relative">
             <textarea
+              ref={textareaRef}
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={handleCommentChange}
               onKeyDown={handleKeyDown}
-              placeholder="Write a comment..."
+              onBlur={() => {
+                // Delay so a click on a dropdown item registers before it unmounts
+                setTimeout(() => setMention(null), 150);
+              }}
+              placeholder="Write a comment... (type @ to mention someone)"
               rows={3}
               disabled={isPending}
               className="w-full text-[13px] text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 bg-transparent resize-none outline-none leading-[1.7] disabled:opacity-50"
             />
+
+            {mention && filteredMembers.length > 0 && (
+              <div className="absolute z-20 left-4 bottom-14 w-64 max-h-56 overflow-y-auto rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg py-1">
+                {filteredMembers.map((member, idx) => {
+                  const name =
+                    `${member.firstname ?? ""} ${member.lastname ?? ""}`.trim();
+                  return (
+                    <button
+                      key={member.id}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => handleSelectMention(member)}
+                      onMouseEnter={() => setActiveMentionIdx(idx)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors ${
+                        idx === activeMentionIdx
+                          ? "bg-emerald-50 dark:bg-emerald-500/10"
+                          : "hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                      }`}
+                    >
+                      <div
+                        className="w-[24px] h-[24px] rounded-full flex items-center justify-center shrink-0 text-white text-[9px] font-bold"
+                        style={{ backgroundColor: getColor(name) }}
+                      >
+                        {getInitials(name) || "?"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                          {name || member.email}
+                        </p>
+                        <p className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">
+                          {member.email}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             <div className="flex items-center justify-end pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <button
                 type="button"
