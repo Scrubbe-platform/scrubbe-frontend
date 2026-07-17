@@ -95,6 +95,7 @@ import { VscSymbolInterface } from "react-icons/vsc";
 import { RxBarChart, RxDisc } from "react-icons/rx";
 import { PiInfinityBold } from "react-icons/pi";
 import { IoSettingsOutline, IoWalletOutline } from "react-icons/io5";
+import { GrAnalytics } from "react-icons/gr";
 
 export type LifecycleStage =
   | "OPEN"
@@ -1138,6 +1139,13 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Mother ↔ Child",
       Icon: RxDisc,
       link: "/incident/mother-child",
+      isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Incident Control Panel",
+      Icon: GrAnalytics,
+      link: "/incident/incident-control-panel",
       isActive: false,
       isMenu: false,
     },
