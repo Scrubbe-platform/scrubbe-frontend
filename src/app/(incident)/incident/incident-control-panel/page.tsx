@@ -145,7 +145,7 @@ export default function IntelligenceControlPlanePage() {
   return (
     <>
       <Header title="Intelligence Control Plane" />
-      <main className="p-4 sm:p-6 pb-24 max-w-[1600px] mx-auto space-y-5 font-ibm">
+      <main className="p-4 sm:p-6 pb-24 max-w-[2000px] mx-auto space-y-5 font-ibm">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <p className="text-sm text-zinc-500 max-w-2xl">
             Closed-loop learning. Continuous improvement.
