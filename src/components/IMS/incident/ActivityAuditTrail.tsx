@@ -145,7 +145,7 @@ function CommentCard({
           </p>
         </div>
 
-        {entry.isComment && entry.isOwn && onDelete && (
+        {/* {entry.isComment && entry.isOwn && onDelete && (
           <button
             type="button"
             onClick={() => onDelete(entry.id)}
@@ -153,12 +153,12 @@ function CommentCard({
           >
             <Trash2 size={14} />
           </button>
-        )}
+        )} */}
       </div>
 
       {entry.content && (
         <p className="text-[13px] text-zinc-700 dark:text-zinc-300 leading-[1.7] whitespace-pre-wrap">
-          {entry.content}
+          {entry.content?.split("_")?.join(" ")}
         </p>
       )}
     </div>
@@ -323,7 +323,7 @@ const ActivityAuditTrail: React.FC<ActivityAuditTrailProps> = ({ ticket }) => {
     : blendedEntries.slice(0, 4);
 
   return (
-    <div className="w-full mx-auto p-4">
+    <div className="w-full mx-auto p-4 font-ibm ">
       <div className="space-y-3">
         {/* Input area */}
         <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-950 overflow-hidden">

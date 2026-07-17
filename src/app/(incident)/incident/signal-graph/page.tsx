@@ -762,7 +762,7 @@ function KV({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 py-2 border-b border-dashed border-zinc-100 last:border-b-0">
       <span className="text-xs text-zinc-400">{label}</span>
-      <span className="text-xs font-semibold text-zinc-800 text-right font-mono">
+      <span className="text-xs font-semibold text-zinc-800 text-right font-ibm">
         {value}
       </span>
     </div>
@@ -980,7 +980,7 @@ function ReconstructionModal({
             className="flex justify-between gap-3 py-2 border-b border-dashed border-zinc-200 last:border-b-0 text-xs"
           >
             <span className="text-zinc-400">{row.k}</span>
-            <span className="font-semibold text-zinc-700 font-mono text-right">
+            <span className="font-semibold text-zinc-700 font-ibm text-right">
               {row.v}
             </span>
           </div>
@@ -1015,7 +1015,7 @@ function ReconstructionModal({
           <tbody>
             {timeline.map((row, i) => (
               <tr key={i} className="border-b border-zinc-100 last:border-b-0">
-                <td className="px-3 py-2.5 font-mono text-zinc-500">
+                <td className="px-3 py-2.5 font-ibm text-zinc-500">
                   {row.time}
                 </td>
                 <td className="px-3 py-2.5 text-zinc-700">{row.signal}</td>
@@ -1033,7 +1033,7 @@ function ReconstructionModal({
           <div key={m.label}>
             <div className="flex justify-between text-xs mb-1.5">
               <span className="text-zinc-500 font-medium">{m.label}</span>
-              <span className="font-bold font-mono text-zinc-700">
+              <span className="font-bold font-ibm text-zinc-700">
                 {m.value}
               </span>
             </div>
@@ -1129,7 +1129,7 @@ function RerunModal({
           <div
             key={i}
             className={cn(
-              "flex gap-3 items-start px-3 py-2 rounded-lg font-mono text-[11.5px]",
+              "flex gap-3 items-start px-3 py-2 rounded-lg font-ibm text-[11.5px]",
               logColors[line.type] || logColors.info,
             )}
           >
@@ -1478,7 +1478,7 @@ function ExecutionGateModal({
       <div className="space-y-3.5">
         {/* Step 1 — EAL */}
         <GateStep step={1} title="Effective Automation Level">
-          <div className="text-[12.5px] text-zinc-600 font-mono leading-relaxed">
+          <div className="text-[12.5px] text-zinc-600 font-ibm leading-relaxed">
             EAL = <b className="text-zinc-900">min</b>( playbook.automationStage{" "}
             <b className="text-zinc-900">L{action.stage}</b>,
             policy.maxAutomationLevel{" "}
@@ -1718,7 +1718,7 @@ function SignalGraphWorkspace({
         <ContextCell
           label="Incident"
           value={
-            <span className="font-mono text-[13px]">{incident.ticketId}</span>
+            <span className="font-ibm text-[13px]">{incident.ticketId}</span>
           }
         />
         <ContextCell label="Service" value={incident.service || "—"} />
@@ -1819,7 +1819,7 @@ function SignalGraphWorkspace({
                   {i < timeline.length - 1 && (
                     <div className="absolute top-5 bottom-[-14px] w-[2px] bg-zinc-200 left-1/2 -translate-x-1/2" />
                   )}
-                  <span className="text-[10px] font-mono font-bold text-zinc-500">
+                  <span className="text-[10px] font-ibm font-bold text-zinc-500">
                     {ev.time}
                   </span>
                   <div
@@ -2084,7 +2084,7 @@ function SignalGraphWorkspace({
                         <span className="text-zinc-500 font-medium">
                           {m.label}
                         </span>
-                        <span className="font-bold font-mono text-zinc-800">
+                        <span className="font-bold font-ibm text-zinc-800">
                           {m.value}
                         </span>
                       </div>
@@ -2138,7 +2138,7 @@ function SignalGraphWorkspace({
                       <p className="text-xs font-semibold text-zinc-800">
                         {ev.title}
                       </p>
-                      <p className="text-[11px] font-mono text-zinc-400 mt-0.5">
+                      <p className="text-[11px] font-ibm text-zinc-400 mt-0.5">
                         {ev.meta}
                       </p>
                     </div>
@@ -2149,7 +2149,6 @@ function SignalGraphWorkspace({
           </div>
           <div className="border-t border-zinc-100 px-4 py-3.5">
             <h3 className="text-xs font-bold flex items-center gap-2 text-zinc-700 mb-3">
-              <AlertTriangle size={13} className="text-amber-500" />
               Contributing factors
             </h3>
             <div className="space-y-0">
@@ -2179,7 +2178,6 @@ function SignalGraphWorkspace({
           </div>
           <div className="border-t border-zinc-100 px-4 py-3.5">
             <h3 className="text-xs font-bold flex items-center gap-2 text-zinc-700 mb-3">
-              <BarChart3 size={13} className="text-pink-500" />
               Impact summary
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -2211,7 +2209,7 @@ function SignalGraphWorkspace({
                 >
                   <p
                     className={cn(
-                      "text-xl font-bold font-mono tracking-tight",
+                      "text-xl font-bold font-ibm tracking-tight",
                       stat.color,
                     )}
                   >
@@ -2335,7 +2333,7 @@ function SignalGraphWorkspace({
               key={i}
               className="grid grid-cols-[74px_1fr] gap-3 px-3 py-2.5 rounded-lg border-b border-dashed border-zinc-100 last:border-b-0 hover:bg-slate-50 transition-colors"
             >
-              <span className="font-mono text-[10.5px] text-zinc-400 pt-0.5">
+              <span className="font-ibm text-[10.5px] text-zinc-400 pt-0.5">
                 {entry.time}
               </span>
               <div>
@@ -2348,21 +2346,21 @@ function SignalGraphWorkspace({
                   {entry.actor}
                 </span>
                 <p className="text-xs text-zinc-600 mt-0.5">{entry.event}</p>
-                <p className="font-mono text-[10px] text-zinc-400 mt-1">
+                <p className="font-ibm text-[10px] text-zinc-400 mt-1">
                   {entry.ref}
                 </p>
               </div>
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-2 px-4 py-2.5 border-t border-zinc-100 bg-zinc-50 rounded-b-xl text-[10.5px] text-zinc-400 font-mono">
+        <div className="flex items-center gap-2 px-4 py-2.5 border-t border-zinc-100 bg-zinc-50 rounded-b-xl text-[10.5px] text-zinc-400 font-ibm">
           <Lock size={12} className="text-emerald-600" />
           Immutable · every state transition and execution is recorded here
         </div>
       </div>
 
       {/* ── Footer bar ── */}
-      <footer className="flex items-center justify-between h-9 mt-4 mx-5 mb-5 px-4 rounded-lg bg-slate-50 border border-zinc-100 text-[10px] font-mono text-zinc-400">
+      <footer className="flex items-center justify-between h-9 mt-4 mx-5 mb-5 px-4 rounded-lg bg-slate-50 border border-zinc-100 text-[10px] font-ibm text-zinc-400">
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />

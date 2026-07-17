@@ -213,11 +213,17 @@ export default function ScrubbeEarlyAccessPage() {
           <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="text-emerald-400" size={32} />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-3 tracking-tight">You&apos;re on the list.</h2>
+          <h2 className="text-2xl font-bold text-white mb-3 tracking-tight">
+            You&apos;re on the list.
+          </h2>
           <p className="text-[#7fa99f] text-sm leading-relaxed mb-6">
-            We&apos;ve received your application and sent a confirmation to your email. We review applications in batches — you&apos;ll hear from us when your spot is ready.
+            We&apos;ve received your application and sent a confirmation to your
+            email. We review applications in batches — you&apos;ll hear from us
+            when your spot is ready.
           </p>
-          <p className="text-[#3a6560] text-xs">© Scrubbe · Early Access Program</p>
+          <p className="text-[#3a6560] text-xs">
+            © Scrubbe · Early Access Program
+          </p>
         </motion.div>
       </div>
     );
@@ -227,25 +233,6 @@ export default function ScrubbeEarlyAccessPage() {
     <div className="min-h-screen bg-[#071311] bg-radial-gradient text-white select-none pb-12 font-ibm antialiased">
       {/* ─── MAIN HERO BRAND OVERVIEW STRIP ─── */}
       <div className="max-w-6xl mx-auto px-6 pt-16 pb-12 text-center relative space-y-6">
-        {/* Logo element branding */}
-        <div className="flex items-center justify-center gap-2 select-none">
-          <motion.div
-            key="logo-full"
-            initial={{ opacity: 0, x: -6 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -6 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            className="h-20 w-[160px] shrink-0 relative"
-          >
-            <Image
-              src="/IMS/whitelogo.png"
-              alt="scrubbe"
-              fill
-              className="object-contain"
-            />
-          </motion.div>
-        </div>
-
         {/* Headings aligned to original asset proportions */}
         <div className="space-y-3 max-w-3xl mx-auto">
           <h1 className="text-4xl sm:text-5xl tracking-tight text-white leading-tight">
