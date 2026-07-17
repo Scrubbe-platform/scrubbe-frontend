@@ -16,9 +16,10 @@ import SideModal from "@/components/ui/SideModal";
 
 interface Props {
   onChartClick: (key: string) => void;
+  onExpand: () => void;
 }
 
-export default function SLOHealth({ onChartClick }: Props) {
+export default function SLOHealth({ onChartClick, onExpand }: Props) {
   const [showAllSLO, setShowAllSLO] = useState(false);
 
   const healthy = SLO_DATA.filter((s) => s.status === "healthy").length;
@@ -31,7 +32,7 @@ export default function SLOHealth({ onChartClick }: Props) {
 
   return (
     <>
-      <Panel number="★" title="SLO Health & Error Budget">
+      <Panel number="★" title="SLO Health & Error Budget" onExpand={onExpand}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
           {SLO_DATA.map((s) => {
             const st = sloStatusStyles[s.status];

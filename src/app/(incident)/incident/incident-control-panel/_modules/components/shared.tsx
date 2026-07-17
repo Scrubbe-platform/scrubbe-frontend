@@ -3,27 +3,52 @@
 
 import React from "react";
 
+// ── Panel with optional Expand & explain button ──
+
 export function Panel({
   number,
   title,
   children,
   className,
+  onExpand,
 }: {
   number?: string;
   title: string;
   children: React.ReactNode;
   className?: string;
+  onExpand?: () => void;
 }) {
   return (
     <div
       className={`bg-white rounded-xl shadow-sm shadow-light p-5 ${className || ""}`}
     >
-      <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-800 mb-4 flex items-center gap-2">
-        {number && (
-          <span className="text-emerald-600 font-mono text-xs">{number}</span>
+      <div className="flex items-center gap-2 mb-4">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center gap-2 flex-1">
+          {number && (
+            <span className="text-emerald-600 font-mono text-xs">{number}</span>
+          )}
+          {title}
+        </h2>
+        {onExpand && (
+          <button
+            type="button"
+            onClick={onExpand}
+            className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-zinc-400 bg-zinc-50 border border-zinc-200 px-2.5 py-1.5 rounded-lg hover:text-emerald-600 hover:border-emerald-400 hover:bg-emerald-50 transition-colors shrink-0"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+            </svg>
+            Expand & explain
+          </button>
         )}
-        {title}
-      </h2>
+      </div>
       {children}
     </div>
   );

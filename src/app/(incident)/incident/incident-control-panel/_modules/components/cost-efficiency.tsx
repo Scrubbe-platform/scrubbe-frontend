@@ -8,11 +8,16 @@ import { CostTrendChart, ChartLegend } from "./charts";
 
 interface Props {
   onChartClick: (key: string) => void;
+  onExpand: () => void;
 }
 
-export default function CostEfficiency({ onChartClick }: Props) {
+export default function CostEfficiency({ onChartClick, onExpand }: Props) {
   return (
-    <Panel number="★" title="Cost & Engineering Efficiency">
+    <Panel
+      number="★"
+      title="Cost & Engineering Efficiency"
+      onExpand={onExpand}
+    >
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
         {COST_KPIS.map((k) => (
           <div

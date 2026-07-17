@@ -15,15 +15,16 @@ const TABS = [
 
 interface Props {
   onChartClick: (key: string) => void;
+  onExpand: () => void;
 }
 
-export default function RemediationIntel({ onChartClick }: Props) {
+export default function RemediationIntel({ onChartClick, onExpand }: Props) {
   const [tab, setTab] = useState<string>("Overview");
 
   const view = REMEDIATION_TABS[tab] || REMEDIATION_TABS.Overview;
 
   return (
-    <Panel number="3." title="Remediation Intelligence">
+    <Panel number="3." title="Remediation Intelligence" onExpand={onExpand}>
       <div className="flex gap-1 border-b border-zinc-100 mb-4">
         {TABS.map((t) => (
           <button

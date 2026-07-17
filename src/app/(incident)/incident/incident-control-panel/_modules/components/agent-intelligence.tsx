@@ -9,15 +9,16 @@ import SideModal from "@/components/ui/SideModal";
 
 interface Props {
   onChartClick: (key: string) => void;
+  onExpand: () => void;
 }
 
-export default function AgentIntelligence({ onChartClick }: Props) {
+export default function AgentIntelligence({ onChartClick, onExpand }: Props) {
   const [showAllAgents, setShowAllAgents] = useState(false);
   const [showAgentHealth, setShowAgentHealth] = useState(false);
 
   return (
     <>
-      <Panel number="7." title="Agent Intelligence">
+      <Panel number="7." title="Agent Intelligence" onExpand={onExpand}>
         <div className="grid grid-cols-1 sm:grid-cols-[1.05fr_1.25fr_0.7fr] xl:grid-cols-2 gap-4">
           {/* Agent table with sparkline trends */}
           <div>

@@ -17,15 +17,16 @@ const POLICY_COMPLIANCE = [
 
 interface Props {
   onChartClick: (key: string) => void;
+  onExpand: () => void;
 }
 
-export default function GovernanceDash({ onChartClick }: Props) {
+export default function GovernanceDash({ onChartClick, onExpand }: Props) {
   const [showCompliance, setShowCompliance] = useState(false);
   const [showAllEvents, setShowAllEvents] = useState(false);
 
   return (
     <>
-      <Panel number="5." title="Governance Dashboard">
+      <Panel number="5." title="Governance Dashboard" onExpand={onExpand}>
         <div className="grid grid-cols-2 gap-2.5 mb-4">
           {GOV_KPIS.map((k) => (
             <div

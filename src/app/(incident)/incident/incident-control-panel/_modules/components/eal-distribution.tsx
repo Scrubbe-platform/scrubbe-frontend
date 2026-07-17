@@ -9,14 +9,19 @@ import SideModal from "@/components/ui/SideModal";
 
 interface Props {
   onChartClick: (key: string) => void;
+  onExpand: () => void;
 }
 
-export default function EALDistribution({ onChartClick }: Props) {
+export default function EALDistribution({ onChartClick, onExpand }: Props) {
   const [showEALPolicy, setShowEALPolicy] = useState(false);
 
   return (
     <>
-      <Panel number="★" title="EAL Distribution & Autonomy Posture">
+      <Panel
+        number="★"
+        title="EAL Distribution & Autonomy Posture"
+        onExpand={onExpand}
+      >
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-5">
           {EAL_LEVELS.map((e) => (
             <div

@@ -14,11 +14,20 @@ import {
 interface Props {
   onChartClick: (key: string) => void;
   onKpiClick: (kpi: (typeof KPI_DATA)[number]) => void;
+  onExpand: () => void;
 }
 
-export default function LearningOverview({ onChartClick, onKpiClick }: Props) {
+export default function LearningOverview({
+  onChartClick,
+  onKpiClick,
+  onExpand,
+}: Props) {
   return (
-    <Panel number="1." title="Learning Overview Dashboard">
+    <Panel
+      number="1."
+      title="Learning Overview Dashboard"
+      onExpand={onExpand}
+    >
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 mb-5">
         {KPI_DATA.map((kpi) => (
           <button

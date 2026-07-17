@@ -55,14 +55,18 @@ function FlowLine({ steps }: { steps: { color: string; label: string }[] }) {
 
 interface Props {
   onChartClick: (key: string) => void;
+  onExpand: () => void;
 }
 
-export default function OrchestrationEvolution({ onChartClick }: Props) {
+export default function OrchestrationEvolution({
+  onChartClick,
+  onExpand,
+}: Props) {
   const [showAllImprovements, setShowAllImprovements] = useState(false);
 
   return (
     <>
-      <Panel number="6." title="Orchestration Evolution">
+      <Panel number="6." title="Orchestration Evolution" onExpand={onExpand}>
         <div className="grid grid-cols-1 sm:grid-cols-[1.1fr_1fr_0.92fr] gap-4">
           {/* Chart */}
           <ChartCard chartKey="orchTrend" onClick={onChartClick}>

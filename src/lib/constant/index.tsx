@@ -1146,7 +1146,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Incident Control Panel",
       Icon: GrAnalytics,
       link: "/incident/incident-control-panel",
-      isActive: false,
+      isActive: true,
       isMenu: false,
     },
   ],
