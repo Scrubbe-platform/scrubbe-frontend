@@ -1,7 +1,7 @@
 // components/ICP/GovernanceDash.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { GOV_KPIS, GOV_EVENTS } from "../libs/data";
 import { Panel, SubH, ChartCard, LinkAction, govEventDot } from "./shared";
 import { SuccessDonut } from "./charts";
@@ -18,17 +18,32 @@ const POLICY_COMPLIANCE = [
 interface Props {
   onChartClick: (key: string) => void;
   onExpand: () => void;
+  policyViolations?: number;
+  totalAutonomousActions?: number;
 }
 
-export default function GovernanceDash({ onChartClick, onExpand }: Props) {
+export default function GovernanceDash({ onChartClick, onExpand, policyViolations, totalAutonomousActions }: Props) {
   const [showCompliance, setShowCompliance] = useState(false);
   const [showAllEvents, setShowAllEvents] = useState(false);
+
+  const displayKpis = useMemo(() => {
+    if (policyViolations === undefined && totalAutonomousActions === undefined) return GOV_KPIS;
+    return GOV_KPIS.map((k) => {
+      if (k.label === "Policy Violations" && policyViolations !== undefined) {
+        return { ...k, value: String(policyViolations) };
+      }
+      if (k.label === "Autonomous Actions" && totalAutonomousActions !== undefined) {
+        return { ...k, value: String(totalAutonomousActions) };
+      }
+      return k;
+    });
+  }, [policyViolations, totalAutonomousActions]);
 
   return (
     <>
       <Panel number="5." title="Governance Dashboard" onExpand={onExpand}>
         <div className="grid grid-cols-2 gap-2.5 mb-4">
-          {GOV_KPIS.map((k) => (
+          {displayKpis.map((k) => (
             <div
               key={k.label}
               className="bg-zinc-50 border border-zinc-100 rounded-lg p-3"

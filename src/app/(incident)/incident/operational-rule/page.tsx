@@ -38,6 +38,10 @@ import { AddGuardPanel } from "./AddGuardPanel";
 import Button from "@/components/ui/Button1";
 import { ActionKey, FieldDef, FieldKey } from "./type";
 import { ACT_GROUPS, ACTIONS, COND_GROUPS, FIELDS, VT } from "./rule-config";
+import { useFetch } from "@/hooks/useFetch";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { endpoint } from "@/lib/api/endpoint";
+import { querykeys } from "@/lib/constant";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -1333,6 +1337,53 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
   const [openDrop, setOpenDrop] = useState<DropKey>(null);
   const [showSched, setShowSched] = useState<boolean>(false);
   const [lastMod, setLastMod] = useState<string>("05 Jan 2026, 14:15");
+  const [savedRuleId, setSavedRuleId] = useState<string | null>(null);
+
+  const { get, post, patch } = useFetch();
+  const queryClient = useQueryClient();
+
+  // Load existing guardrails list
+  const { data: guardrailsData } = useQuery({
+    queryKey: [querykeys.PLAYBOOKS, "guardrails"],
+    queryFn: () => get(endpoint.guardrails.list),
+  });
+  const savedRules: any[] = guardrailsData?.data?.data ?? guardrailsData?.data ?? [];
+
+  const saveMutation = useMutation({
+    mutationFn: async (isActive: boolean) => {
+      const payload = {
+        name: ruleName,
+        description: ruleDesc,
+        type: "CUSTOM",
+        config: {
+          ruleType: "CUSTOM",
+          matchType,
+          conditions: conditions.map(({ id: _, ...r }) => r),
+          actions: actions.map(({ id: _, ...r }) => r),
+          guards: guards.map(({ id: _, ...r }) => r),
+          guardMatch,
+          controls,
+          schedule,
+        },
+        isActive,
+      };
+      if (savedRuleId) {
+        return patch(`${endpoint.guardrails.update}/${savedRuleId}`, payload);
+      }
+      return post(endpoint.guardrails.create, payload);
+    },
+    onSuccess: (res: any, isActive: boolean) => {
+      const id = res?.data?.data?.id ?? res?.data?.id;
+      if (id) setSavedRuleId(id);
+      queryClient.invalidateQueries({ queryKey: [querykeys.PLAYBOOKS, "guardrails"] });
+      setStatus(isActive ? "enabled" : "draft");
+      stamp();
+      toast(isActive ? "Rule saved and enabled" : "Saved as draft");
+    },
+    onError: () => {
+      toast("Failed to save rule", "error");
+    },
+  });
 
   const toast = useCallback(
     (msg: string, kind: ToastItem["kind"] = "good"): void => {
@@ -1668,13 +1719,23 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
               <ArrowDown size={16} /> Export
             </Btn>
             <Btn
-              onClick={() => {
-                setStatus((s) => (s === "disabled" ? "enabled" : "disabled"));
-                stamp();
-                toast(
-                  status === "disabled" ? "Rule enabled" : "Rule disabled",
-                  status === "disabled" ? "good" : "info",
-                );
+              onClick={async () => {
+                const newActive = status === "disabled";
+                if (savedRuleId) {
+                  const res = await patch(`${endpoint.guardrails.update}/${savedRuleId}`, { isActive: newActive });
+                  if (res.success) {
+                    queryClient.invalidateQueries({ queryKey: [querykeys.PLAYBOOKS, "guardrails"] });
+                    setStatus(newActive ? "enabled" : "disabled");
+                    stamp();
+                    toast(newActive ? "Rule enabled" : "Rule disabled", newActive ? "good" : "info");
+                  } else {
+                    toast("Failed to update rule status", "error");
+                  }
+                } else {
+                  setStatus((s) => (s === "disabled" ? "enabled" : "disabled"));
+                  stamp();
+                  toast(status === "disabled" ? "Rule enabled" : "Rule disabled", status === "disabled" ? "good" : "info");
+                }
               }}
               variant={status === "disabled" ? "good" : "danger"}
             >
@@ -1683,12 +1744,14 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             </Btn>
             <Btn
               onClick={() => {
-                setStatus("draft");
-                stamp();
-                toast("Saved as draft");
+                if (!ruleName.trim()) {
+                  toast("Add a rule name first", "info");
+                  return;
+                }
+                saveMutation.mutate(false);
               }}
             >
-              <Clock size={16} /> Save as draft
+              <Clock size={16} /> {saveMutation.isPending && !saveMutation.variables ? "Saving…" : "Save as draft"}
             </Btn>
             <Btn
               variant="primary"
@@ -1705,12 +1768,10 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                   toast("Add at least one action", "info");
                   return;
                 }
-                setStatus("enabled");
-                stamp();
-                toast("Rule saved and enabled");
+                saveMutation.mutate(true);
               }}
             >
-              <Send size={16} /> Save &amp; enable
+              <Send size={16} /> {saveMutation.isPending ? "Saving…" : "Save & enable"}
             </Btn>
           </div>
         </header>
@@ -2127,6 +2188,61 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             </div>
           </details>
         </section>
+
+        {/* Saved rules list */}
+        {savedRules.length > 0 && (
+          <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm mt-5 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+              <span className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center">
+                  <Shield size={16} className="text-zinc-500" />
+                </span>
+                <span>
+                  <span className="font-extrabold text-[15px] block">Saved Guardrails</span>
+                  <span className="text-[11px] text-zinc-400">{savedRules.length} rule{savedRules.length !== 1 ? "s" : ""} saved</span>
+                </span>
+              </span>
+            </div>
+            <div className="divide-y divide-zinc-100">
+              {savedRules.map((rule: any) => (
+                <div key={rule.id} className="flex items-center gap-4 px-5 py-3 hover:bg-zinc-50 transition-colors">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${rule.isActive ? "bg-emerald-500" : "bg-zinc-300"}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13.5px] font-semibold text-zinc-800 truncate">{rule.name}</div>
+                    {rule.description && (
+                      <div className="text-[11.5px] text-zinc-400 truncate">{rule.description}</div>
+                    )}
+                  </div>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${rule.isActive ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-500"}`}>
+                    {rule.isActive ? "Enabled" : "Draft"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRuleName(rule.name);
+                      setRuleDesc(rule.description ?? "");
+                      const cfg = rule.config ?? {};
+                      if (cfg.conditions) setConditions(cfg.conditions.map((c: any) => ({ ...c, id: nid() })));
+                      if (cfg.actions) setActions(cfg.actions.map((a: any) => ({ ...a, id: nid() })));
+                      if (cfg.guards) setGuards(cfg.guards.map((g: any) => ({ ...g, id: nid() })));
+                      if (cfg.matchType) setMatchType(cfg.matchType);
+                      if (cfg.guardMatch) setGuardMatch(cfg.guardMatch);
+                      if (cfg.controls) setControls(cfg.controls);
+                      if (cfg.schedule) setSchedule(cfg.schedule);
+                      setStatus(rule.isActive ? "enabled" : "draft");
+                      setSavedRuleId(rule.id);
+                      toast(`Loaded "${rule.name}"`, "good");
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
+                  >
+                    Edit
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       <Toast toasts={toasts} />

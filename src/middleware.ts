@@ -80,13 +80,7 @@ const RESERVED_SUBDOMAINS = new Set([
 
 const isTokenExpired = (payload: JwtPayload | null): boolean => {
   if (!payload?.exp) return false;
-
-  // Convert 10-digit epoch seconds to milliseconds
-  const expInMs = payload.exp * 1000;
-
-  // Add a 60-second buffer. 
-  // If the token is within 1 minute of expiring, treat it as already expired.
-  return Date.now() >= (expInMs - 60000);
+  return Date.now() >= payload.exp * 1000;
 };
 
 const decodeJwtPayload = (token: string | undefined): JwtPayload | null => {
@@ -205,8 +199,12 @@ export default function middleware(req: NextRequest) {
   }
 
   const token = req.cookies.get(AUTH_COOKIE)?.value;
+  const refreshToken = req.cookies.get(COOKIE_KEYS.REFRESH_TOKEN)?.value;
   const payload = decodeJwtPayload(token);
-  const isLoggedIn = !!token && !!payload && !isTokenExpired(payload);
+  const isTokenValid = !!token && !!payload && !isTokenExpired(payload);
+  // Allow pass-through when the access token is expired but a refresh token exists —
+  // the client-side axios interceptor handles the 401 → refresh flow.
+  const isLoggedIn = isTokenValid || !!refreshToken;
   const userRoles = payload?.roles;
 
   // Check if route is public

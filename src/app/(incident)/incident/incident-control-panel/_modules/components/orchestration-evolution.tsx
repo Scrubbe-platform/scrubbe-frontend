@@ -56,11 +56,14 @@ function FlowLine({ steps }: { steps: { color: string; label: string }[] }) {
 interface Props {
   onChartClick: (key: string) => void;
   onExpand: () => void;
+  teamWorkload?: { member: string; activeIncidents: number }[];
+  incidentTrends?: { date: string; count: number }[];
 }
 
 export default function OrchestrationEvolution({
   onChartClick,
   onExpand,
+  teamWorkload,
 }: Props) {
   const [showAllImprovements, setShowAllImprovements] = useState(false);
 
@@ -85,25 +88,31 @@ export default function OrchestrationEvolution({
             />
           </ChartCard>
 
-          {/* Improvements list */}
+          {/* Improvements list / team workload when real data available */}
           <div>
-            <SubH>Top Orchestration Improvements</SubH>
-            <div className="flex justify-end text-[10px] text-zinc-400 mb-1">
-              Impact
-            </div>
-            {IMPROVEMENTS.map((imp) => (
-              <div
-                key={imp.name}
-                className="flex items-center gap-2.5 py-2 border-t border-zinc-100 first:border-t-0 text-xs"
-              >
-                <span className="flex-1 text-zinc-600 min-w-0 truncate">
-                  {imp.name}
-                </span>
-                <span className="font-mono font-semibold text-emerald-600 shrink-0">
-                  {imp.impact}
-                </span>
-              </div>
-            ))}
+            {teamWorkload?.length ? (
+              <>
+                <SubH>Team Workload (Active)</SubH>
+                <div className="flex justify-end text-[10px] text-zinc-400 mb-1">Incidents</div>
+                {teamWorkload.slice(0, 5).map((t) => (
+                  <div key={t.member} className="flex items-center gap-2.5 py-2 border-t border-zinc-100 first:border-t-0 text-xs">
+                    <span className="flex-1 text-zinc-600 min-w-0 truncate">{t.member.split("@")[0]}</span>
+                    <span className="font-mono font-semibold text-blue-600 shrink-0">{t.activeIncidents}</span>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+                <SubH>Top Orchestration Improvements</SubH>
+                <div className="flex justify-end text-[10px] text-zinc-400 mb-1">Impact</div>
+                {IMPROVEMENTS.map((imp) => (
+                  <div key={imp.name} className="flex items-center gap-2.5 py-2 border-t border-zinc-100 first:border-t-0 text-xs">
+                    <span className="flex-1 text-zinc-600 min-w-0 truncate">{imp.name}</span>
+                    <span className="font-mono font-semibold text-emerald-600 shrink-0">{imp.impact}</span>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
 
           {/* Current vs Optimized Flow */}

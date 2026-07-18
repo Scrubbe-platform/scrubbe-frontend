@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { KPI_DATA, CATEGORIES } from "../libs/data";
+import { KPI_DATA, CATEGORIES, KPIItem } from "../libs/data";
 import { Panel, SubH, ChartCard } from "./shared";
 import {
   Sparkline,
@@ -13,15 +13,22 @@ import {
 
 interface Props {
   onChartClick: (key: string) => void;
-  onKpiClick: (kpi: (typeof KPI_DATA)[number]) => void;
+  onKpiClick: (kpi: KPIItem) => void;
   onExpand: () => void;
+  kpis?: KPIItem[];
+  categories?: { name: string; pct: number; color: string }[];
 }
 
 export default function LearningOverview({
   onChartClick,
   onKpiClick,
   onExpand,
+  kpis,
+  categories,
 }: Props) {
+  const displayKpis = kpis ?? KPI_DATA;
+  const displayCategories = categories ?? CATEGORIES;
+
   return (
     <Panel
       number="1."
@@ -29,7 +36,7 @@ export default function LearningOverview({
       onExpand={onExpand}
     >
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 mb-5">
-        {KPI_DATA.map((kpi) => (
+        {displayKpis.map((kpi) => (
           <button
             key={kpi.label}
             type="button"
@@ -73,7 +80,7 @@ export default function LearningOverview({
               <CategoryDonut />
             </div>
             <div className="space-y-1 flex-1 min-w-0">
-              {CATEGORIES.map((c) => (
+              {displayCategories.map((c) => (
                 <div
                   key={c.name}
                   className="flex items-center gap-2 text-[11px] text-zinc-600"

@@ -18,6 +18,7 @@ import Button from "@/components/ui/Button1";
 
 interface Props {
   onChartClick: (key: string) => void;
+  incidents?: IncidentItem[];
 }
 
 // ── Advanced Filter chip ──
@@ -45,11 +46,13 @@ function FilterChip({
   );
 }
 
-export default function IncidentMemory({ onChartClick }: Props) {
+export default function IncidentMemory({ onChartClick, incidents }: Props) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showAllIncidents, setShowAllIncidents] = useState(false);
+
+  const sourceIncidents = incidents ?? INCIDENTS;
 
   // Advanced filter state
   const [filterSvc, setFilterSvc] = useState("");
@@ -78,7 +81,7 @@ export default function IncidentMemory({ onChartClick }: Props) {
 
   // ── Filter logic ──
   const filtered = useMemo(() => {
-    return INCIDENTS.filter((i) => {
+    return sourceIncidents.filter((i) => {
       const kw = search.toLowerCase();
       const matchesSearch =
         !kw ||
@@ -233,7 +236,7 @@ export default function IncidentMemory({ onChartClick }: Props) {
           <div>
             <SubH>Recent & Similar Incidents</SubH>
             <div className="space-y-0.5">
-              {(filtered.length > 0 ? filtered : INCIDENTS)
+              {(filtered.length > 0 ? filtered : sourceIncidents)
                 .slice(0, 5)
                 .map((inc) => (
                   <div
@@ -301,7 +304,7 @@ export default function IncidentMemory({ onChartClick }: Props) {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold bg-zinc-100 text-zinc-500 rounded-full px-2.5 py-1">
-                {INCIDENTS.length} of 1,248 shown
+                {sourceIncidents.length} incidents
               </span>
             </div>
 
@@ -319,7 +322,7 @@ export default function IncidentMemory({ onChartClick }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {INCIDENTS.map((inc) => (
+                  {sourceIncidents.map((inc) => (
                     <tr
                       key={inc.id}
                       onClick={() => {

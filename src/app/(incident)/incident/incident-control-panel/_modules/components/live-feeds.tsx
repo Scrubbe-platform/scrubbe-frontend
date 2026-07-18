@@ -8,14 +8,21 @@ import SideModal from "@/components/ui/SideModal";
 
 const FILTERS = ["all", "remediation", "governance", "agent"] as const;
 
-export default function LiveFeed() {
+type FeedEvent = { type: string; title: string; detail: string; time: string };
+
+interface Props {
+  events?: FeedEvent[];
+}
+
+export default function LiveFeed({ events }: Props) {
   const [filter, setFilter] = useState<string>("all");
   const [showAuditTrail, setShowAuditTrail] = useState(false);
 
+  const source = events ?? FEED_EVENTS;
   const filtered =
     filter === "all"
-      ? FEED_EVENTS
-      : FEED_EVENTS.filter((e) => e.type === filter);
+      ? source
+      : source.filter((e) => e.type === filter);
 
   return (
     <>
