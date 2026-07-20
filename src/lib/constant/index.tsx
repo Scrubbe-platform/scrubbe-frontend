@@ -1108,10 +1108,10 @@ export const NewMenu: Record<string, NavItem[]> = {
   ],
   intelligence: [
     {
-      name: "Intelligence Control Plane",
+      name: "Intelligence Control panel",
       Icon: VscSymbolInterface,
-      link: "/incident/control-plane",
-      isActive: false,
+      link: "/incident/control-panel",
+      isActive: true,
       isMenu: false,
     },
     {
@@ -1125,7 +1125,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Signal Graph",
       Icon: RxBarChart,
       link: "/incident/signal-graph",
-      isActive: false,
+      isActive: true,
       isMenu: false,
     },
     {
@@ -1140,13 +1140,6 @@ export const NewMenu: Record<string, NavItem[]> = {
       Icon: RxDisc,
       link: "/incident/mother-child",
       isActive: false,
-      isMenu: false,
-    },
-    {
-      name: "Incident Control Panel",
-      Icon: GrAnalytics,
-      link: "/incident/incident-control-panel",
-      isActive: true,
       isMenu: false,
     },
   ],

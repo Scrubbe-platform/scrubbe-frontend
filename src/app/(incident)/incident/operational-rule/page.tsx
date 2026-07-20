@@ -3,6 +3,7 @@
 import React, {
   useState,
   useCallback,
+  useMemo,
   useRef,
   useEffect,
   ReactNode,
@@ -32,10 +33,12 @@ import {
   VolumeX,
   Send,
   BookOpen,
+  Pencil,
 } from "lucide-react";
 import { RuleLibraryModal, type LibraryRule } from "./RuleLibraryModal";
 import { AddGuardPanel } from "./AddGuardPanel";
 import Button from "@/components/ui/Button1";
+import Modal from "@/components/ui/Modal";
 import { ActionKey, FieldDef, FieldKey } from "./type";
 import { ACT_GROUPS, ACTIONS, COND_GROUPS, FIELDS, VT } from "./rule-config";
 import { useFetch } from "@/hooks/useFetch";
@@ -376,6 +379,140 @@ const SEED_GUARDS: Guard[] = [
   { id: nid(), key: "opConfidence", value: 80 },
 ];
 
+// ─── RULE AS CODE ────────────────────────────────────────────────────────────
+
+function slug(s: string): string {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function fmtBytes(n: number): string {
+  return n < 1024 ? `${n} B` : `${(n / 1024).toFixed(1)} KB`;
+}
+
+const JSON_TOKEN_RE =
+  /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\btrue\b|\bfalse\b|\bnull\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g;
+
+/* tokenize JSON text into colored spans (keys / strings / numbers / booleans / null) */
+function highlightJson(text: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+  JSON_TOKEN_RE.lastIndex = 0;
+  while ((match = JSON_TOKEN_RE.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    const m = match[0];
+    let cls = "text-[#f2b779]"; // number
+    if (m.startsWith('"')) cls = /:$/.test(m) ? "text-[#93b4ff]" : "text-[#7ee0b8]";
+    else if (m === "true" || m === "false") cls = "text-[#84c5ff]";
+    else if (m === "null") cls = "text-[#6b7280]";
+    nodes.push(
+      <span key={key++} className={cls}>
+        {m}
+      </span>,
+    );
+    lastIndex = match.index + m.length;
+  }
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return nodes;
+}
+
+/* reusable, self-documenting starter a user can edit then Apply */
+const REUSABLE_TEMPLATE = {
+  $schema: "scrubbe.operational-rule/v1",
+  _about:
+    "Reusable rule-as-code template. Edit the values below, then click Apply. Keys starting with _ are helper notes only — Scrubbe ignores them on Apply.",
+  name: "New governance rule",
+  description:
+    "Describe what this rule governs and when Scrubbe should act, require approval, or hand off to a human.",
+  status: "draft",
+  schedule: { mode: "always", date: "", time: "", repeat: "Once" },
+  matchType: "all",
+  conditions: [
+    {
+      kind: "cond",
+      connector: "AND",
+      field: "environment",
+      op: "equals",
+      value: "Production",
+    },
+    {
+      kind: "cond",
+      connector: "AND",
+      field: "remediationRisk",
+      op: "equals",
+      value: "High",
+    },
+  ],
+  actions: [
+    {
+      key: "requireApproval",
+      detail:
+        ACTIONS.requireApproval?.detail ?? "Hold actions for human approval",
+    },
+    {
+      key: "sendNotification",
+      detail: ACTIONS.sendNotification?.detail ?? "Notify the on-call team",
+    },
+  ],
+  guardMatch: "any",
+  guards: [{ key: "ack" }],
+  controls: {
+    window: { minutes: 30, scope: "incident" },
+    maxExecutions: { count: 10, per: "hour" },
+    retry: "once",
+    concurrency: 1,
+    approval: "None",
+    timeout: 15,
+  },
+  _fields: `Condition fields — ${Object.keys(FIELDS).join(", ")}.`,
+  _actions: `Action keys — ${Object.keys(ACTIONS).join(", ")}.`,
+};
+
+function isConnector(v: unknown): v is Connector {
+  return v === "AND" || v === "OR" || v === "NOT";
+}
+
+/* normalize hand-authored / round-tripped JSON into a valid Condition */
+function reviveCondition(c: any): Condition {
+  const rawField = c?.field;
+  const field: FieldKey =
+    typeof rawField === "string" && rawField in FIELDS
+      ? (rawField as FieldKey)
+      : "priority";
+  const f = FIELDS[field];
+  return {
+    id: nid(),
+    kind: "cond",
+    connector: isConnector(c?.connector) ? c.connector : "AND",
+    field,
+    op: f.ops.includes(c?.op) ? c.op : f.ops[0],
+    value: c?.value !== undefined ? c.value : defaultVal(f),
+    days: Array.isArray(c?.days) ? c.days : [],
+    t1: typeof c?.t1 === "string" ? c.t1 : "09:00",
+    t2: typeof c?.t2 === "string" ? c.t2 : "18:00",
+  };
+}
+function reviveAnyCondition(c: any): AnyCondition {
+  if (c && c.kind === "group") {
+    return {
+      id: nid(),
+      kind: "group",
+      connector: isConnector(c.connector) ? c.connector : "AND",
+      matchType: c.matchType === "all" ? "all" : "any",
+      children: Array.isArray(c.children)
+        ? c.children.map(reviveCondition)
+        : [],
+    };
+  }
+  return reviveCondition(c);
+}
+
 // ─── BTN WRAPPER ─────────────────────────────────────────────────────────────
 
 const VARIANT_CLS: Record<BtnVariant, string> = {
@@ -625,32 +762,21 @@ function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
 
 interface ConditionRowProps {
   cond: Condition;
-  index: number;
+  leading: ReactNode;
   onUpdate: (p: Partial<Condition>) => void;
   onRemove: () => void;
 }
 
 function ConditionRow({
   cond,
-  index,
+  leading,
   onUpdate,
   onRemove,
 }: ConditionRowProps): React.JSX.Element {
   const f = FIELDS[cond.field];
   return (
     <div className="flex items-start gap-2.5 mb-2.5">
-      <div className="w-14 flex justify-center pt-2.5 shrink-0">
-        {index === 0 ? (
-          <span className="text-[11px] text-zinc-400 font-semibold px-2 py-1">
-            IF
-          </span>
-        ) : (
-          <ConnectorChip
-            value={cond.connector}
-            onChange={(v) => onUpdate({ connector: v })}
-          />
-        )}
-      </div>
+      <div className="w-14 flex justify-center pt-2.5 shrink-0">{leading}</div>
       <div
         className="flex-1 grid gap-2"
         style={{
@@ -704,6 +830,87 @@ function ConditionRow({
             <Trash2 size={14} />
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── GROUP ROW ───────────────────────────────────────────────────────────────
+
+interface GroupRowProps {
+  group: ConditionGroup;
+  leading: ReactNode;
+  onUpdateGroup: (patch: Partial<ConditionGroup>) => void;
+  onRemoveGroup: () => void;
+  onAddChild: () => void;
+  onUpdateChild: (childId: string, patch: Partial<Condition>) => void;
+  onRemoveChild: (childId: string) => void;
+}
+
+function GroupRow({
+  group,
+  leading,
+  onUpdateGroup,
+  onRemoveGroup,
+  onAddChild,
+  onUpdateChild,
+  onRemoveChild,
+}: GroupRowProps): React.JSX.Element {
+  return (
+    <div className="flex items-start gap-2.5 mb-2.5">
+      <div className="w-14 flex justify-center pt-2.5 shrink-0">{leading}</div>
+      <div className="flex-1 border border-dashed border-indigo-200 bg-indigo-50/40 rounded-2xl p-3.5 pb-2.5">
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center gap-2.5 text-[12.5px] font-semibold text-zinc-600">
+            <span className="text-[10.5px] font-bold tracking-wider text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-md">
+              GROUP
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                onUpdateGroup({
+                  matchType: group.matchType === "all" ? "any" : "all",
+                })
+              }
+              className="inline-flex items-center gap-1 text-zinc-600 cursor-pointer"
+            >
+              Match{" "}
+              <span className="text-indigo-500">
+                {group.matchType === "all" ? "all" : "any"}
+              </span>{" "}
+              <ChevronDown size={12} />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={onRemoveGroup}
+            title="Remove group"
+            className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+
+        {(group.children ?? []).map((cc, j) => (
+          <ConditionRow
+            key={cc.id}
+            cond={cc}
+            leading={
+              j > 0 ? (
+                <ConnectorChip
+                  value={cc.connector}
+                  onChange={(v) => onUpdateChild(cc.id, { connector: v })}
+                />
+              ) : null
+            }
+            onUpdate={(p) => onUpdateChild(cc.id, p)}
+            onRemove={() => onRemoveChild(cc.id)}
+          />
+        ))}
+
+        <Btn size="sm" variant="ghost" onClick={onAddChild}>
+          <Plus size={14} /> Add to group
+        </Btn>
       </div>
     </div>
   );
@@ -1338,8 +1545,12 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
   const [showSched, setShowSched] = useState<boolean>(false);
   const [lastMod, setLastMod] = useState<string>("05 Jan 2026, 14:15");
   const [savedRuleId, setSavedRuleId] = useState<string | null>(null);
+  const [jsonEditing, setJsonEditing] = useState<boolean>(false);
+  const [jsonDraft, setJsonDraft] = useState<string>("");
+  const [jsonError, setJsonError] = useState<string | null>(null);
+  const codeDetailsRef = useRef<HTMLDetailsElement>(null);
 
-  const { get, post, patch } = useFetch();
+  const { get, post, patch, remove } = useFetch();
   const queryClient = useQueryClient();
 
   // Load existing guardrails list
@@ -1385,6 +1596,28 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
     },
   });
 
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => remove(endpoint.guardrails.delete, id),
+    onSuccess: (res: any, id: string) => {
+      if (!res?.success) {
+        toast("Failed to delete draft", "error");
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: [querykeys.PLAYBOOKS, "guardrails"] });
+      if (savedRuleId === id) setSavedRuleId(null);
+      toast("Draft deleted");
+      setDeleteTarget(null);
+    },
+    onError: () => {
+      toast("Failed to delete draft", "error");
+    },
+  });
+
   const toast = useCallback(
     (msg: string, kind: ToastItem["kind"] = "good"): void => {
       const id = Date.now();
@@ -1415,6 +1648,88 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
     );
   }, []);
 
+  /* hydrate the whole builder from a rule-shaped object — used by rule-as-code Apply */
+  const applyRuleData = useCallback(
+    (d: any): void => {
+      if (typeof d?.name === "string") setRuleName(d.name);
+      if (typeof d?.description === "string") setRuleDesc(d.description);
+      setStatus(
+        ["enabled", "draft", "disabled"].includes(d?.status)
+          ? d.status
+          : "enabled",
+      );
+      setMatchType(
+        ["all", "any", "none"].includes(d?.matchType) ? d.matchType : "all",
+      );
+      setConditions(
+        Array.isArray(d?.conditions) ? d.conditions.map(reviveAnyCondition) : [],
+      );
+      setActions(
+        Array.isArray(d?.actions)
+          ? d.actions
+              .filter((a: any) => a && ACTIONS[a.key as ActionKey])
+              .map((a: any) => ({
+                id: nid(),
+                key: a.key,
+                detail: a.detail || ACTIONS[a.key as ActionKey].detail,
+              }))
+          : [],
+      );
+      const seenGuards = new Set<string>();
+      setGuards(
+        Array.isArray(d?.guards)
+          ? d.guards
+              .filter((g: any) => {
+                if (!g || !GUARD_FLAT[g.key] || seenGuards.has(g.key))
+                  return false;
+                seenGuards.add(g.key);
+                return true;
+              })
+              .map((g: any) => {
+                const m = GUARD_FLAT[g.key];
+                const gg: Guard = { id: nid(), key: g.key };
+                if (m.val) gg.value = typeof g.value === "number" ? g.value : m.val.def;
+                return gg;
+              })
+          : [],
+      );
+      setGuardMatch(d?.guardMatch === "all" ? "all" : "any");
+      if (d?.controls && typeof d.controls === "object") {
+        setControls((prev) => ({
+          window: {
+            minutes: Number(d.controls.window?.minutes) || prev.window.minutes,
+            scope: d.controls.window?.scope ?? prev.window.scope,
+          },
+          maxExecutions: {
+            count:
+              Number(d.controls.maxExecutions?.count) ||
+              prev.maxExecutions.count,
+            per: d.controls.maxExecutions?.per ?? prev.maxExecutions.per,
+          },
+          retry: d.controls.retry ?? prev.retry,
+          concurrency: Number(d.controls.concurrency) || prev.concurrency,
+          approval: d.controls.approval ?? prev.approval,
+          timeout: Number(d.controls.timeout) || prev.timeout,
+        }));
+      }
+      if (d?.schedule && typeof d.schedule === "object") {
+        setSchedule((prev) => ({
+          mode: d.schedule.mode === "at" ? "at" : "always",
+          date: typeof d.schedule.date === "string" ? d.schedule.date : prev.date,
+          time: typeof d.schedule.time === "string" ? d.schedule.time : prev.time,
+          repeat: ["Once", "Daily", "Weekly", "Monthly"].includes(
+            d.schedule.repeat,
+          )
+            ? d.schedule.repeat
+            : prev.repeat,
+        }));
+      }
+      stamp();
+    },
+    [stamp],
+  );
+
+
   const addCondition = (field: FieldKey = "ezraConfidence"): void => {
     setConditions((cs) => [...cs, mkCondition(field, { connector: "AND" })]);
     stamp();
@@ -1427,6 +1742,86 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
   };
   const removeCond = (id: string): void => {
     setConditions((cs) => cs.filter((c) => c.id !== id));
+    stamp();
+  };
+  const addGroup = (): void => {
+    setConditions((cs) => [
+      ...cs,
+      {
+        id: nid(),
+        kind: "group",
+        connector: "AND",
+        matchType: "any",
+        children: [
+          mkCondition("environment", { op: "equals", value: "Production" }),
+          mkCondition("serviceTier", {
+            connector: "OR",
+            op: "is any of",
+            value: "Tier-1",
+          }),
+        ],
+      },
+    ]);
+    toast("Condition group added");
+    stamp();
+  };
+  const updateGroup = (id: string, patch: Partial<ConditionGroup>): void => {
+    setConditions((cs) =>
+      cs.map((c) =>
+        c.id === id && c.kind === "group" ? { ...c, ...patch } : c,
+      ),
+    );
+    stamp();
+  };
+  const removeGroup = (id: string): void => {
+    setConditions((cs) => cs.filter((c) => c.id !== id));
+    stamp();
+  };
+  const addGroupChild = (groupId: string): void => {
+    setConditions((cs) =>
+      cs.map((c) =>
+        c.id === groupId && c.kind === "group"
+          ? {
+              ...c,
+              children: [
+                ...c.children,
+                mkCondition("priority", { connector: "AND" }),
+              ],
+            }
+          : c,
+      ),
+    );
+    stamp();
+  };
+  const updateGroupChild = (
+    groupId: string,
+    childId: string,
+    patch: Partial<Condition>,
+  ): void => {
+    setConditions((cs) =>
+      cs.map((c) =>
+        c.id === groupId && c.kind === "group"
+          ? {
+              ...c,
+              children: c.children.map((cc) =>
+                cc.id === childId ? { ...cc, ...patch } : cc,
+              ),
+            }
+          : c,
+      ),
+    );
+    stamp();
+  };
+  const removeGroupChild = (groupId: string, childId: string): void => {
+    setConditions((cs) =>
+      cs
+        .map((c) =>
+          c.id === groupId && c.kind === "group"
+            ? { ...c, children: c.children.filter((cc) => cc.id !== childId) }
+            : c,
+        )
+        .filter((c) => !(c.kind === "group" && c.children.length === 0)),
+    );
     stamp();
   };
   const addAction = (key: ActionKey): void => {
@@ -1506,26 +1901,9 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
   };
 
   const loadLibraryRule = (rule: LibraryRule): void => {
-    if (rule.conditions?.length) {
-      setConditions(
-        (rule.conditions as AnyCondition[]).map((c) => ({ ...c, id: nid() })),
-      );
-    }
-    if (rule.actions?.length) {
-      setActions(
-        (rule.actions as { key: ActionKey; detail: string }[]).map((a) => ({
-          id: nid(),
-          key: a.key,
-          detail: a.detail ?? ACTIONS[a.key]?.detail ?? "",
-        })),
-      );
-    }
-    if (rule.matchType) setMatchType(rule.matchType);
-    if (rule.name) setRuleName(rule.name);
-    if (rule.description) setRuleDesc(rule.description);
+    applyRuleData(rule);
     setShowLibrary(false);
     toast(`Loaded "${rule.name}"`);
-    stamp();
   };
 
   const matchItems: DropdownItem[] = [
@@ -1596,6 +1974,69 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
     },
     null,
     2,
+  );
+
+  const toggleJsonEdit = useCallback((): void => {
+    setJsonEditing((editing) => {
+      const next = !editing;
+      if (next) setJsonDraft(ruleJson);
+      return next;
+    });
+    setJsonError(null);
+  }, [ruleJson]);
+
+  const applyJsonEdit = useCallback((): void => {
+    let data: any;
+    try {
+      data = JSON.parse(jsonDraft);
+    } catch {
+      setJsonError(
+        "That isn't valid JSON — check for a missing comma, bracket or quote.",
+      );
+      return;
+    }
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      setJsonError(
+        "This should be a single rule object with name, conditions and actions.",
+      );
+      return;
+    }
+    applyRuleData(data);
+    setJsonEditing(false);
+    setJsonError(null);
+    toast("Applied changes from JSON");
+  }, [jsonDraft, applyRuleData, toast]);
+
+  const insertJsonTemplate = useCallback((): void => {
+    setJsonEditing(true);
+    setJsonDraft(JSON.stringify(REUSABLE_TEMPLATE, null, 2));
+    setJsonError(null);
+    if (codeDetailsRef.current) codeDetailsRef.current.open = true;
+    toast("Reusable template inserted — edit it, then Apply");
+  }, [toast]);
+
+  const downloadRuleJson = useCallback((): void => {
+    const blob = new Blob([ruleJson], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slug(ruleName) || "operational-rule"}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast("Rule exported as JSON");
+  }, [ruleJson, ruleName, toast]);
+
+  const jsonMetaText = useMemo(() => {
+    const txt = jsonEditing ? jsonDraft : ruleJson;
+    const bytes = new TextEncoder().encode(txt).length;
+    return `${txt.split("\n").length} lines · ${fmtBytes(bytes)}`;
+  }, [jsonEditing, jsonDraft, ruleJson]);
+
+  const highlightedRuleJson = useMemo(
+    () => highlightJson(ruleJson),
+    [ruleJson],
   );
 
   return (
@@ -1715,7 +2156,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                 </div>
               )}
             </div>
-            <Btn onClick={() => toast("Exporting rule JSON", "info")}>
+            <Btn onClick={downloadRuleJson}>
               <ArrowDown size={16} /> Export
             </Btn>
             <Btn
@@ -1912,17 +2353,45 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
               No conditions yet. Add a condition below.
             </p>
           )}
-          {conditions.map((c, i) =>
-            c.kind === "cond" ? (
+          {conditions.map((c, i) => {
+            const leading =
+              i === 0 ? (
+                <span className="text-[11px] text-zinc-400 font-semibold px-2 py-1">
+                  IF
+                </span>
+              ) : (
+                <ConnectorChip
+                  value={c.connector}
+                  onChange={(v) =>
+                    c.kind === "group"
+                      ? updateGroup(c.id, { connector: v })
+                      : updateCond(c.id, { connector: v })
+                  }
+                />
+              );
+            return c.kind === "cond" ? (
               <ConditionRow
                 key={c.id}
                 cond={c}
-                index={i}
+                leading={leading}
                 onUpdate={(p) => updateCond(c.id, p)}
                 onRemove={() => removeCond(c.id)}
               />
-            ) : null,
-          )}
+            ) : (
+              <GroupRow
+                key={c.id}
+                group={c}
+                leading={leading}
+                onUpdateGroup={(p) => updateGroup(c.id, p)}
+                onRemoveGroup={() => removeGroup(c.id)}
+                onAddChild={() => addGroupChild(c.id)}
+                onUpdateChild={(childId, p) =>
+                  updateGroupChild(c.id, childId, p)
+                }
+                onRemoveChild={(childId) => removeGroupChild(c.id, childId)}
+              />
+            );
+          })}
 
           <div className="flex gap-2 mt-3 flex-wrap">
             <div className="relative">
@@ -1942,6 +2411,9 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                 />
               )}
             </div>
+            <Button size="sm" variant="outline-dark" onClick={addGroup}>
+              <Plus size={14} /> Add condition group
+            </Button>
           </div>
 
           <div className="flex justify-center text-zinc-300 my-5">
@@ -2145,7 +2617,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
 
         {/* Rule as code */}
         <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm mt-5 overflow-hidden">
-          <details>
+          <details ref={codeDetailsRef}>
             <summary className="flex items-center justify-between px-5 py-4 cursor-pointer list-none select-none hover:bg-zinc-50 transition-colors">
               <span className="flex items-center gap-3">
                 <span className="w-8 h-8 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center">
@@ -2156,7 +2628,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                     Rule as code
                   </span>
                   <span className="text-[11px] text-zinc-400 font-mono">
-                    scrubbe.operational-rule/v1
+                    scrubbe.operational-rule/v1 · {jsonMetaText}
                   </span>
                 </span>
               </span>
@@ -2170,21 +2642,89 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                   <span className="flex items-center gap-2 text-[11.5px] text-[#8b93a6] font-mono">
                     <FileText size={13} color="#5d6577" /> operational-rule.json
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard?.writeText(ruleJson);
-                      toast("Copied to clipboard");
-                    }}
-                    className="inline-flex items-center gap-1.5 border-none bg-none text-[#aeb6c6] text-xs font-semibold cursor-pointer px-2 py-1 rounded-md hover:bg-white/10 transition-colors"
-                  >
-                    <Copy size={13} /> Copy
-                  </button>
+                  <div className="flex items-center gap-0.5">
+                    <button
+                      type="button"
+                      onClick={insertJsonTemplate}
+                      title="Insert a reusable rule-as-code template"
+                      className="inline-flex items-center gap-1.5 border-none bg-none text-[#aeb6c6] text-xs font-semibold cursor-pointer px-2 py-1 rounded-md hover:bg-white/10 transition-colors"
+                    >
+                      <FileText size={13} /> Template
+                    </button>
+                    <span className="w-px h-4 bg-[#262d3b] mx-1" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(ruleJson);
+                        toast("JSON copied");
+                      }}
+                      title="Copy JSON"
+                      className="inline-flex items-center gap-1.5 border-none bg-none text-[#aeb6c6] text-xs font-semibold cursor-pointer px-2 py-1 rounded-md hover:bg-white/10 transition-colors"
+                    >
+                      <Copy size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={downloadRuleJson}
+                      title="Download JSON"
+                      className="inline-flex items-center gap-1.5 border-none bg-none text-[#aeb6c6] text-xs font-semibold cursor-pointer px-2 py-1 rounded-md hover:bg-white/10 transition-colors"
+                    >
+                      <ArrowDown size={13} />
+                    </button>
+                    <span className="w-px h-4 bg-[#262d3b] mx-1" />
+                    <button
+                      type="button"
+                      onClick={toggleJsonEdit}
+                      title={jsonEditing ? "Cancel editing" : "Edit JSON"}
+                      className="inline-flex items-center gap-1.5 border-none bg-none text-[#aeb6c6] text-xs font-semibold cursor-pointer px-2 py-1 rounded-md hover:bg-white/10 transition-colors"
+                    >
+                      {jsonEditing ? (
+                        <>
+                          <X size={13} /> Cancel
+                        </>
+                      ) : (
+                        <>
+                          <Pencil size={13} /> Edit
+                        </>
+                      )}
+                    </button>
+                    {jsonEditing && (
+                      <button
+                        type="button"
+                        onClick={applyJsonEdit}
+                        className="inline-flex items-center gap-1.5 border-none bg-indigo-500 text-white text-xs font-semibold cursor-pointer px-2.5 py-1 rounded-md hover:bg-indigo-600 transition-colors"
+                      >
+                        <Check size={13} /> Apply
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <pre className="m-0 p-4 max-h-[420px] overflow-auto font-mono text-xs leading-relaxed text-[#c2c9d6] whitespace-pre">
-                  {ruleJson}
-                </pre>
+                {jsonEditing ? (
+                  <textarea
+                    value={jsonDraft}
+                    onChange={(e) => setJsonDraft(e.target.value)}
+                    spellCheck={false}
+                    className="w-full min-h-[300px] max-h-[460px] border-none outline-none p-4 bg-[#0e1117] text-[#e6e9f2] font-mono text-xs leading-relaxed resize-y"
+                  />
+                ) : (
+                  <pre className="m-0 p-4 max-h-[420px] overflow-auto font-mono text-xs leading-relaxed text-[#c2c9d6] whitespace-pre">
+                    <code>{highlightedRuleJson}</code>
+                  </pre>
+                )}
               </div>
+              {jsonError ? (
+                <div className="flex items-center gap-2 mt-2.5 text-[12.5px] text-red-500 font-medium">
+                  <Info size={15} /> {jsonError}
+                </div>
+              ) : (
+                <p className="flex items-start gap-2 mt-2.5 text-xs text-zinc-400 leading-relaxed">
+                  <Info size={14} className="text-indigo-400 shrink-0 mt-0.5" />
+                  New to rule-as-code? Hit{" "}
+                  <b className="text-zinc-500 font-semibold">Template</b> for a
+                  reusable, self-documenting starter you can edit and{" "}
+                  <b className="text-zinc-500 font-semibold">Apply</b>.
+                </p>
+              )}
             </div>
           </details>
         </section>
@@ -2219,17 +2759,19 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={() => {
-                      setRuleName(rule.name);
-                      setRuleDesc(rule.description ?? "");
                       const cfg = rule.config ?? {};
-                      if (cfg.conditions) setConditions(cfg.conditions.map((c: any) => ({ ...c, id: nid() })));
-                      if (cfg.actions) setActions(cfg.actions.map((a: any) => ({ ...a, id: nid() })));
-                      if (cfg.guards) setGuards(cfg.guards.map((g: any) => ({ ...g, id: nid() })));
-                      if (cfg.matchType) setMatchType(cfg.matchType);
-                      if (cfg.guardMatch) setGuardMatch(cfg.guardMatch);
-                      if (cfg.controls) setControls(cfg.controls);
-                      if (cfg.schedule) setSchedule(cfg.schedule);
-                      setStatus(rule.isActive ? "enabled" : "draft");
+                      applyRuleData({
+                        name: rule.name,
+                        description: rule.description,
+                        status: rule.isActive ? "enabled" : "draft",
+                        matchType: cfg.matchType,
+                        conditions: cfg.conditions,
+                        actions: cfg.actions,
+                        guards: cfg.guards,
+                        guardMatch: cfg.guardMatch,
+                        controls: cfg.controls,
+                        schedule: cfg.schedule,
+                      });
                       setSavedRuleId(rule.id);
                       toast(`Loaded "${rule.name}"`, "good");
                       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -2237,6 +2779,14 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                     className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
                   >
                     Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget({ id: rule.id, name: rule.name })}
+                    title="Delete draft"
+                    className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={14} />
                   </button>
                 </div>
               ))}
@@ -2253,6 +2803,47 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
         currentRuleJson={ruleJson}
         currentRuleName={ruleName}
       />
+      <Modal
+        isOpen={!!deleteTarget}
+        onClose={() => {
+          if (!deleteMutation.isPending) setDeleteTarget(null);
+        }}
+        className="sm:max-w-sm"
+      >
+        <div className="p-5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+              <Trash2 size={18} className="text-red-500" />
+            </div>
+            <h3 className="font-bold text-[15px] text-zinc-900">
+              Delete this draft?
+            </h3>
+          </div>
+          <p className="text-sm text-zinc-500 mb-5 leading-relaxed">
+            This will permanently delete{" "}
+            <b className="text-zinc-800 font-semibold">
+              &ldquo;{deleteTarget?.name}&rdquo;
+            </b>
+            . This action cannot be undone.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Btn
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleteMutation.isPending}
+            >
+              Cancel
+            </Btn>
+            <Btn
+              variant="danger"
+              disabled={deleteMutation.isPending}
+              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+            >
+              <Trash2 size={14} />
+              {deleteMutation.isPending ? "Deleting…" : "Delete draft"}
+            </Btn>
+          </div>
+        </div>
+      </Modal>
       <style>{`
         details > summary::-webkit-details-marker { display:none }
         input:focus, select:focus, textarea:focus { outline:none; }

@@ -6,29 +6,32 @@ import { ChevronDown, Download } from "lucide-react";
 import Header from "@/components/IMS/DashboardHeader";
 import Button from "@/components/ui/Button1";
 import SideModal from "@/components/ui/SideModal";
-import { KPIItem } from "./_modules/libs/data";
-import { getChartMeta } from "./_modules/components/chart-drawer";
+import { KPIItem } from "../incident-control-panel/_modules/libs/data";
+import { getChartMeta } from "../incident-control-panel/_modules/components/chart-drawer";
 import { useQuery } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { querykeys } from "@/lib/constant";
 
 // Section components
-import LearningOverview from "./_modules/components/learning-overview";
-import IncidentMemory from "./_modules/components/incident-memory";
-import RemediationIntel from "./_modules/components/remediation-intel";
-import KnowledgeGraph from "./_modules/components/knowledge-graph";
-import GovernanceDash from "./_modules/components/government-dash";
-import EALDistribution from "./_modules/components/eal-distribution";
-import SLOHealth from "./_modules/components/slo-health";
-import CostEfficiency from "./_modules/components/cost-efficiency";
-import LiveFeed from "./_modules/components/live-feeds";
-import OrchestrationEvolution from "./_modules/components/orchestration-evolution";
-import AgentIntelligence from "./_modules/components/agent-intelligence";
-import ExportModal from "./_modules/components/export-modal";
-import ChartDrawerContent from "./_modules/components/chart-drawer";
-import { KPIDetailChart } from "./_modules/components/charts";
-import { PANEL_NOTES, PanelNote } from "./_modules/libs/panel-notes";
+import LearningOverview from "../incident-control-panel/_modules/components/learning-overview";
+import IncidentMemory from "../incident-control-panel/_modules/components/incident-memory";
+import RemediationIntel from "../incident-control-panel/_modules/components/remediation-intel";
+import KnowledgeGraph from "../incident-control-panel/_modules/components/knowledge-graph";
+import GovernanceDash from "../incident-control-panel/_modules/components/government-dash";
+import EALDistribution from "../incident-control-panel/_modules/components/eal-distribution";
+import SLOHealth from "../incident-control-panel/_modules/components/slo-health";
+import CostEfficiency from "../incident-control-panel/_modules/components/cost-efficiency";
+import LiveFeed from "../incident-control-panel/_modules/components/live-feeds";
+import OrchestrationEvolution from "../incident-control-panel/_modules/components/orchestration-evolution";
+import AgentIntelligence from "../incident-control-panel/_modules/components/agent-intelligence";
+import ExportModal from "../incident-control-panel/_modules/components/export-modal";
+import ChartDrawerContent from "../incident-control-panel/_modules/components/chart-drawer";
+import { KPIDetailChart } from "../incident-control-panel/_modules/components/charts";
+import {
+  PANEL_NOTES,
+  PanelNote,
+} from "../incident-control-panel/_modules/libs/panel-notes";
 
 // ── Panel digest drawer content ──
 function PanelExpandContent({ panel }: { panel: PanelNote }) {
@@ -110,22 +113,75 @@ export default function IntelligenceControlPlanePage() {
   // KPI cards — derived from real metrics when available
   const liveKpis: KPIItem[] | null = useMemo(() => {
     if (!m) return null;
-    const humanOverride = m.automationRate > 0 ? +(100 - m.automationRate).toFixed(1) : 0;
+    const humanOverride =
+      m.automationRate > 0 ? +(100 - m.automationRate).toFixed(1) : 0;
     return [
-      { label: "MTTR Improvement", value: m.avgMTTR ? `${m.avgMTTR}m` : "—", delta: "last 30 days", cls: "text-emerald-600", color: "#02DD82", spark: [m.avgMTTR ?? 0] },
-      { label: "Autonomous Success Rate", value: `${m.automationRate ?? 0}%`, delta: `${m.autoRemediated ?? 0} auto-remediated`, cls: "text-emerald-600", color: "#02DD82", spark: [m.automationRate ?? 0] },
-      { label: "Human Override Rate", value: `${humanOverride}%`, delta: "vs autonomous", cls: "text-purple-600", color: "#A855F7", spark: [humanOverride] },
-      { label: "Incidents Resolved", value: `${m.resolvedIncidents ?? m.metrics?.resolvedThisMonth ?? 0}`, delta: "last 30 days", cls: "text-emerald-600", color: "#3B82F6", spark: [m.resolvedIncidents ?? 0] },
-      { label: "Open Incidents", value: `${m.openIncidents ?? 0}`, delta: `${m.criticalIncidents ?? 0} critical`, cls: m.criticalIncidents > 0 ? "text-red-500" : "text-zinc-500", color: "#F59E0B", spark: [m.openIncidents ?? 0] },
-      { label: "SLA Compliance", value: `${m.slaCompliance ?? 0}%`, delta: `${m.policyViolations ?? 0} violations`, cls: m.slaCompliance >= 95 ? "text-emerald-600" : "text-amber-600", color: "#22D3EE", spark: [m.slaCompliance ?? 0] },
+      {
+        label: "MTTR Improvement",
+        value: m.avgMTTR ? `${m.avgMTTR}m` : "—",
+        delta: "last 30 days",
+        cls: "text-emerald-600",
+        color: "#02DD82",
+        spark: [m.avgMTTR ?? 0],
+      },
+      {
+        label: "Autonomous Success Rate",
+        value: `${m.automationRate ?? 0}%`,
+        delta: `${m.autoRemediated ?? 0} auto-remediated`,
+        cls: "text-emerald-600",
+        color: "#02DD82",
+        spark: [m.automationRate ?? 0],
+      },
+      {
+        label: "Human Override Rate",
+        value: `${humanOverride}%`,
+        delta: "vs autonomous",
+        cls: "text-purple-600",
+        color: "#A855F7",
+        spark: [humanOverride],
+      },
+      {
+        label: "Incidents Resolved",
+        value: `${m.resolvedIncidents ?? m.metrics?.resolvedThisMonth ?? 0}`,
+        delta: "last 30 days",
+        cls: "text-emerald-600",
+        color: "#3B82F6",
+        spark: [m.resolvedIncidents ?? 0],
+      },
+      {
+        label: "Open Incidents",
+        value: `${m.openIncidents ?? 0}`,
+        delta: `${m.criticalIncidents ?? 0} critical`,
+        cls: m.criticalIncidents > 0 ? "text-red-500" : "text-zinc-500",
+        color: "#F59E0B",
+        spark: [m.openIncidents ?? 0],
+      },
+      {
+        label: "SLA Compliance",
+        value: `${m.slaCompliance ?? 0}%`,
+        delta: `${m.policyViolations ?? 0} violations`,
+        cls: m.slaCompliance >= 95 ? "text-emerald-600" : "text-amber-600",
+        color: "#22D3EE",
+        spark: [m.slaCompliance ?? 0],
+      },
     ];
   }, [m]);
 
   // Categories from recurring issues in analytics
-  const CATEGORY_COLORS = ["#3B82F6", "#F59E0B", "#02DD82", "#A855F7", "#22D3EE", "#94A3B8"];
+  const CATEGORY_COLORS = [
+    "#3B82F6",
+    "#F59E0B",
+    "#02DD82",
+    "#A855F7",
+    "#22D3EE",
+    "#94A3B8",
+  ];
   const liveCategories = useMemo(() => {
     if (!a?.recurringIssues?.length) return null;
-    const total = a.recurringIssues.reduce((s: number, r: any) => s + r.count, 0);
+    const total = a.recurringIssues.reduce(
+      (s: number, r: any) => s + r.count,
+      0,
+    );
     return a.recurringIssues.slice(0, 6).map((r: any, i: number) => ({
       name: r.category,
       pct: total > 0 ? Math.round((r.count / total) * 100) : 0,
@@ -139,8 +195,17 @@ export default function IntelligenceControlPlanePage() {
     return a.recentExecutions.map((e: any) => ({
       type: e.automationLevel === "AUTOMATIC" ? "remediation" : "governance",
       title: e.title ?? `${e.ticketId} — ${e.status}`,
-      detail: `${e.service ?? ""} · ${e.priority ?? ""} · ${e.assignedTo ?? "Unassigned"}`.replace(/^[\s·]+|[\s·]+$/g, ""),
-      time: e.createdAt ? new Date(e.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "",
+      detail:
+        `${e.service ?? ""} · ${e.priority ?? ""} · ${e.assignedTo ?? "Unassigned"}`.replace(
+          /^[\s·]+|[\s·]+$/g,
+          "",
+        ),
+      time: e.createdAt
+        ? new Date(e.createdAt).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "",
     }));
   }, [a]);
 
@@ -148,9 +213,19 @@ export default function IntelligenceControlPlanePage() {
   const liveIncidents = useMemo(() => {
     if (!a?.activeIncidents?.length) return null;
     return a.activeIncidents.map((i: any) => ({
-      sev: i.priority === "CRITICAL" ? "P0" : i.priority === "HIGH" ? "P1" : i.priority === "MEDIUM" ? "P2" : "P3",
+      sev:
+        i.priority === "CRITICAL"
+          ? "P0"
+          : i.priority === "HIGH"
+            ? "P1"
+            : i.priority === "MEDIUM"
+              ? "P2"
+              : "P3",
       name: i.title ?? "Untitled",
-      meta: `${i.service ?? ""} · ${i.environment ?? ""}`.replace(/^·\s|[\s·]+$/g, ""),
+      meta: `${i.service ?? ""} · ${i.environment ?? ""}`.replace(
+        /^·\s|[\s·]+$/g,
+        "",
+      ),
       similar: "",
       id: i.ticketId ?? i.id,
       uuid: i.id,

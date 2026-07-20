@@ -1457,9 +1457,7 @@ function ExecutionGateModal({
       footer={
         <>
           <ModalBtn onClick={onClose}>Cancel</ModalBtn>
-          {route === "blocked" ? (
-            <ModalBtn onClick={onClose}>Open in War Room</ModalBtn>
-          ) : route === "approval" ? (
+          { route === "approval" ? (
             <ModalBtn primary onClick={handleExecute}>
               Approve & execute
             </ModalBtn>
