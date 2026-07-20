@@ -67,8 +67,13 @@ import {
 } from "react-icons/fa";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { SiAccuweather } from "react-icons/si";
-import { GiScrollUnfurled } from "react-icons/gi";
-import { PiBookFill, PiStarFourFill, PiEngineFill } from "react-icons/pi";
+import { GiOpenBook, GiScrollUnfurled } from "react-icons/gi";
+import {
+  PiBookFill,
+  PiStarFourFill,
+  PiEngineFill,
+  PiBookOpenText,
+} from "react-icons/pi";
 import { RiPencilFill } from "react-icons/ri";
 import { TbTimelineEventFilled } from "react-icons/tb";
 import { HiOutlineLink } from "react-icons/hi";
@@ -1132,6 +1137,13 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Playbooks",
       Icon: LuLayers,
       link: "/incident/playbooks",
+      isActive: true,
+      isMenu: false,
+    },
+    {
+      name: "Playbook Library",
+      Icon: PiBookOpenText,
+      link: "/incident/playbook-library",
       isActive: true,
       isMenu: false,
     },

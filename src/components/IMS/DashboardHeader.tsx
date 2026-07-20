@@ -68,7 +68,7 @@ export default function Header({ title = "Dashboard" }: HeaderProps) {
           </div>
 
           {/* Name + role */}
-          <div className="text-left">
+          <div className="text-left hidden sm:block">
             <p className="text-sm font-semibold capitalize text-zinc-900 leading-tight">
               {user?.firstName}
             </p>
