@@ -108,7 +108,7 @@ const EvidenceOverview: React.FC<{
   const [histSel, setHistSel] = useState<string | null>(null);
   const sevRank = (e: (typeof EVIDENCE)[number]) => (e.sev === "crit" ? 3 : e.sev === "warn" ? 2 : 1);
   const sevColor = (r: number) => (r === 3 ? COLORS.crit : r === 2 ? COLORS.warn : COLORS.accent);
-  const histBuckets = useMemo(() => {
+  const histBuckets = useMemo<{ id: SourceKey | number; label: string; count: number; sev: number }[]>(() => {
     if (histMode === "source") {
       return SRC_OPTS.slice(1).map(([lab, key]) => {
         const items = EVIDENCE.filter((e) => e.source === key);
@@ -122,7 +122,7 @@ const EvidenceOverview: React.FC<{
       const m = Math.floor(t(e.ts) / 60);
       if (m >= startMin && m <= nowMin) (map[m] = map[m] || []).push(e);
     });
-    const out: { id: number; label: string; count: number; sev: number }[] = [];
+    const out: { id: SourceKey | number; label: string; count: number; sev: number }[] = [];
     for (let m = startMin; m <= nowMin; m++) {
       const items = map[m] || [];
       out.push({ id: m, label: secToHMS(m * 60), count: items.length, sev: items.reduce((a, e) => Math.max(a, sevRank(e)), 1) });
