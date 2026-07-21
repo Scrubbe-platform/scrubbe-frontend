@@ -1,120 +1,57 @@
 "use client";
 import React from "react";
-import { ShieldCheck, Lightbulb, Activity } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { useFetch } from "@/hooks/useFetch";
-import { endpoint } from "@/lib/api/endpoint";
+import { Zap, Circle } from "lucide-react";
+import { DECISION_LOG } from "./incidentDelivery.data";
 
-interface LogEntryProps {
-  icon: React.ReactNode;
-  title: string;
-  desc: string;
-  time: string;
-  payload?: Record<string, any>;
-}
-
-// ── Icon resolver ─────────────────────────────────────────────────
-
-const iconForType = (type: string) => {
-  if (type?.includes("policy"))                        return <ShieldCheck size={14} className="text-emerald-500 dark:text-emerald-400" />;
-  if (type?.includes("insight") || type?.includes("hypothesis")) return <Lightbulb size={14} className="text-amber-500 dark:text-amber-400"  />;
-  return <Activity size={14} className="text-sky-500 dark:text-sky-400" />;
+const iconForKind = (kind: string) => {
+  if (kind.includes("hypothesis"))
+    return <Circle size={18} className="text-amber-500" strokeWidth={2.5} />;
+  if (kind.includes("remediation"))
+    return <Zap size={18} className="text-emerald-500 fill-emerald-500" />;
+  return <Zap size={18} className="text-blue-500 fill-blue-500" />;
 };
 
-// ── Component ─────────────────────────────────────────────────────
-
-const DecisionLog: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
-  const { get } = useFetch();
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["decisions-log", incidentId],
-    queryFn: async () => {
-      const url = incidentId
-        ? `${endpoint.decisions.log}?incidentId=${incidentId}`
-        : endpoint.decisions.log;
-      const res = await get(url);
-      if (res.success) return (res.data?.data?.decisions ?? res.data?.data ?? []) as any[];
-      return [] as any[];
-    },
-  });
-
-  const entries = data ?? [];
-
-  const displayEntries: LogEntryProps[] = entries.map((e: any) => ({
-    icon: iconForType(e.type ?? e.action ?? ""),
-    title: e.type ?? e.action ?? "event",
-    desc: e.summary ?? e.reason ?? e.description ?? "Decision recorded.",
-    time: e.createdAt ? new Date(e.createdAt).toLocaleTimeString() : "—",
-    payload: e.context ?? e.metadata ?? undefined,
-  }));
-
-  return (
-    <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
-
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="space-y-0.5">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
-            Decision Log
-          </p>
-          <p className="text-[14px] font-semibold text-black dark:text-zinc-100">
-            What happened and why
-          </p>
-          <p className="text-[12px] text-black dark:text-zinc-500">
-            Timeline is derived from this log, including human notes.
-          </p>
-        </div>
-        <span className="px-2.5 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[11px] font-mono text-black dark:text-zinc-500 shrink-0">
-          {isLoading ? "…" : `${entries.length} events`}
-        </span>
+const DecisionLog = () => (
+  <div className="rounded-xl border border-[#DDDDDD] bg-white dark:bg-zinc-900/40 p-6">
+    {/* Header */}
+    <div className="flex items-start justify-between gap-4 pb-4 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="space-y-1">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          Decision Log
+        </p>
+        <p className=" font-bold text-black dark:text-zinc-100 leading-tight">
+          What happened and why
+        </p>
       </div>
-
-      {/* Entries */}
-      <div className="p-4 space-y-2">
-        {isLoading && (
-          <p className="text-[12px] text-black animate-pulse px-1">Loading decisions…</p>
-        )}
-        {!isLoading && displayEntries.length === 0 && (
-          <p className="text-[12px] text-black dark:text-zinc-500 px-1">
-            No decisions have been logged for this incident yet.
-          </p>
-        )}
-        {displayEntries.map((entry, i) => (
-          <LogEntry key={i} {...entry} />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// ── Log entry ─────────────────────────────────────────────────────
-
-const LogEntry: React.FC<LogEntryProps> = ({ icon, title, desc, time, payload }) => (
-  <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
-    <div className="flex items-start justify-between gap-3">
-      <div className="flex items-start gap-2.5">
-        <div className="mt-0.5 shrink-0">{icon}</div>
-        <div className="min-w-0">
-          <p className="text-[12px] font-semibold font-mono text-black dark:text-zinc-200 leading-tight">
-            {title}
-          </p>
-          <p className="text-[12px] text-black dark:text-zinc-500 mt-0.5 leading-snug">
-            {desc}
-          </p>
-        </div>
-      </div>
-      <span className="text-[11px] font-mono text-black dark:text-zinc-600 shrink-0 tabular-nums">
-        {time}
+      <span className="px-3 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-[13px] font-medium text-zinc-600 dark:text-zinc-400 shrink-0">
+        {DECISION_LOG.length} events
       </span>
     </div>
 
-    {payload && (
-      <div className="mt-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950/60 p-3 overflow-x-auto">
-        <pre className="text-[11px] font-mono text-black dark:text-zinc-400 leading-relaxed">
-          <code>{JSON.stringify(payload, null, 2)}</code>
-        </pre>
-      </div>
-    )}
+    {/* Entries */}
+    <div className="pt-5 space-y-6">
+      {DECISION_LOG.map((entry, i) => (
+        <div key={i} className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="mt-0.5 shrink-0">{iconForKind(entry.kind)}</div>
+            <div className="min-w-0">
+              <p className="text-[15px] font-semibold text-black dark:text-zinc-100 leading-tight">
+                {entry.kind}
+              </p>
+              <p className="text-[13px] text-zinc-700 dark:text-zinc-400 mt-1 leading-snug">
+                {entry.desc}
+              </p>
+              <p className="text-[12px] italic text-zinc-400 dark:text-zinc-500 mt-1">
+                {entry.who}
+              </p>
+            </div>
+          </div>
+          <span className="text-[13px] text-zinc-400 dark:text-zinc-600 shrink-0 tabular-nums">
+            {entry.time}
+          </span>
+        </div>
+      ))}
+    </div>
   </div>
 );
 

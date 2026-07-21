@@ -1,14 +1,14 @@
 "use client";
 import React from "react";
-import IncidentDelivery from "./_modules/components/IncidentDelivery";
+import EvidenceExplorer from "./_modules/components/EvidenceExplorer";
 import IncidentRouteShell from "@/components/IMS/incident/IncidentRouteShell";
 import NewIncidentList from "@/components/IMS/incident/NewIncidentList";
 
 const page = () => {
   return (
     <NewIncidentList tabs="delivery">
-      <IncidentRouteShell title="Incident Delivery">
-        {(incident) => <IncidentDelivery incident={incident} />}
+      <IncidentRouteShell title="Evidence Explorer">
+        {(incident) => <EvidenceExplorer incident={incident} />}
       </IncidentRouteShell>
     </NewIncidentList>
   );

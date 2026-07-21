@@ -2,32 +2,27 @@
 import React, { useState } from "react";
 import SideModal from "@/components/ui/SideModal";
 import AnalystNote from "./Modal/AnalystNote";
-import {
-  IncidentCommentRecord,
-  IncidentDetailRecord,
-} from "@/lib/incident/incident.types";
+import { NOTES } from "./incidentDelivery.data";
 
-interface AnalystNoteItem {
-  id: string;
+interface Note {
   author: string;
   timestamp: string;
   content: string;
 }
 
-interface AnalystNotesProps {
-  incident: IncidentDetailRecord;
-  notes?: IncidentCommentRecord[];
-}
-
-const AnalystNotes: React.FC<AnalystNotesProps> = ({
-  incident,
-  notes = [],
-}) => {
+const AnalystNotes = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [notes, setNotes] = useState<Note[]>(NOTES);
+
+  const addNote = (content: string) => {
+    const now = new Date();
+    const timestamp = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")} · today`;
+    setNotes((prev) => [...prev, { author: "You", timestamp, content }]);
+  };
 
   return (
     <>
-      <div className="rounded-xl border border-zinc-500 dark:border-zinc-700/60 bg-white dark:bg-zinc-900/40 overflow-hidden">
+      <div className="rounded-xl border border-[#DDDDDD] bg-white dark:bg-zinc-900/40 overflow-hidden">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
           <div className="space-y-0.5">
@@ -38,8 +33,7 @@ const AnalystNotes: React.FC<AnalystNotesProps> = ({
               Notes & observations
             </p>
             <p className="text-[12px] text-black dark:text-zinc-500">
-              Notes include author + timestamp and become part of the evidence
-              pack.
+              Notes include author + timestamp and become part of the evidence pack.
             </p>
           </div>
           <button
@@ -54,28 +48,17 @@ const AnalystNotes: React.FC<AnalystNotesProps> = ({
         <div className="p-4">
           {notes.length === 0 ? (
             <div className="rounded-xl border border-dashed border-zinc-500 dark:border-zinc-700 px-5 py-6 text-center">
-              <p className="text-[13px] text-black dark:text-zinc-500">
-                No analyst notes yet.
-              </p>
+              <p className="text-[13px] text-black dark:text-zinc-500">No analyst notes yet.</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {notes?.map((note) => (
-                <div
-                  key={note?.id}
-                  className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4"
-                >
+              {notes.map((note, i) => (
+                <div key={i} className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-semibold text-black dark:text-zinc-400 capitalize">
-                      {note?.author?.firstName}
-                    </span>
-                    <span className="text-[11px] font-mono text-black dark:text-zinc-600 tabular-nums">
-                      {note?.createdAt}
-                    </span>
+                    <span className="text-[11px] font-semibold text-black dark:text-zinc-400">{note.author}</span>
+                    <span className="text-[11px] font-mono text-black dark:text-zinc-600 tabular-nums">{note.timestamp}</span>
                   </div>
-                  <p className="text-[13px] text-zinc-600 dark:text-zinc-300 leading-relaxed">
-                    {note?.content}
-                  </p>
+                  <p className="text-[13px] text-zinc-600 dark:text-zinc-300 leading-relaxed">{note.content}</p>
                 </div>
               ))}
             </div>
@@ -84,13 +67,8 @@ const AnalystNotes: React.FC<AnalystNotesProps> = ({
       </div>
 
       {isOpen && (
-        <SideModal
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          title="Analyst Note"
-          subTitle="Add note (author + timestamp)"
-        >
-          <AnalystNote incident={incident} onClose={() => setIsOpen(false)} />
+        <SideModal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Analyst Note" subTitle="Add note (author + timestamp)">
+          <AnalystNote onSave={addNote} onClose={() => setIsOpen(false)} />
         </SideModal>
       )}
     </>
