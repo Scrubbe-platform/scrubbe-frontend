@@ -1148,9 +1148,9 @@ export const NewMenu: Record<string, NavItem[]> = {
       isMenu: false,
     },
     {
-      name: "Mother ↔ Child",
+      name: "Incident relationship",
       Icon: RxDisc,
-      link: "/incident/mother-child",
+      link: "/incident/relationship",
       isActive: false,
       isMenu: false,
     },

@@ -34,6 +34,7 @@ import {
   Send,
   BookOpen,
   Pencil,
+  Upload,
 } from "lucide-react";
 import { RuleLibraryModal, type LibraryRule } from "./RuleLibraryModal";
 import { AddGuardPanel } from "./AddGuardPanel";
@@ -1549,6 +1550,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
   const [jsonDraft, setJsonDraft] = useState<string>("");
   const [jsonError, setJsonError] = useState<string | null>(null);
   const codeDetailsRef = useRef<HTMLDetailsElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const { get, post, patch, remove } = useFetch();
   const queryClient = useQueryClient();
@@ -1729,6 +1731,26 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
     [stamp],
   );
 
+  const handleImportFile = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (): void => {
+        try {
+          const data = JSON.parse(String(reader.result));
+          applyRuleData(data);
+          toast("Rule imported");
+        } catch {
+          toast("That file isn't a valid rule", "info");
+        }
+      };
+      reader.onerror = (): void => toast("Could not read that file", "info");
+      reader.readAsText(file);
+    },
+    [applyRuleData, toast],
+  );
 
   const addCondition = (field: FieldKey = "ezraConfidence"): void => {
     setConditions((cs) => [...cs, mkCondition(field, { connector: "AND" })]);
@@ -2156,6 +2178,16 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                 </div>
               )}
             </div>
+            <Btn onClick={() => importInputRef.current?.click()}>
+              <Upload size={16} /> Import
+            </Btn>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept="application/json,.json"
+              hidden
+              onChange={handleImportFile}
+            />
             <Btn onClick={downloadRuleJson}>
               <ArrowDown size={16} /> Export
             </Btn>
