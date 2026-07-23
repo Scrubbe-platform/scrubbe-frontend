@@ -205,10 +205,15 @@ export default function CommandStudio() {
     })();
   }, []);
 
-  const currentUserName = [currentUser?.firstName, currentUser?.lastName].filter(Boolean).join(" ").trim() || USER;
-  const currentUserInitials = (
-    (currentUser?.firstName?.[0] ?? "") + (currentUser?.lastName?.[0] ?? "")
-  ).toUpperCase() || "U";
+  const currentUserName =
+    [currentUser?.firstName, currentUser?.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .trim() || USER;
+  const currentUserInitials =
+    (
+      (currentUser?.firstName?.[0] ?? "") + (currentUser?.lastName?.[0] ?? "")
+    ).toUpperCase() || "U";
 
   const activeConv = conversations.find((c) => c.id === activeId);
 
@@ -569,10 +574,10 @@ export default function CommandStudio() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-white dark:bg-zinc-950">
+    <div className="flex h-screen flex-col font-ibm dark:bg-zinc-950">
       <Header title="Command Studio" />
 
-      <div className="flex items-center gap-2 bg-white px-4 py-2.5 shadow-sm shadow-light dark:bg-zinc-950 sm:px-6">
+      <div className="flex items-center justify-end border-t border-zinc-200 gap-2 bg-white px-4 py-2.5 shadow-sm shadow-light dark:bg-zinc-950 sm:px-6">
         <button
           onClick={() => setModal({ kind: "palette" })}
           className="flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-[12.5px] text-black transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:bg-transparent dark:text-zinc-300 dark:hover:border-emerald-500/50 dark:hover:text-emerald-400"
@@ -596,10 +601,6 @@ export default function CommandStudio() {
         >
           <ShieldCheck size={15} />
         </button>
-        <span className="ml-auto hidden items-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11.5px] text-black dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400 sm:inline-flex">
-          <b className="text-black dark:text-zinc-200">Your tenant</b> ·
-          isolated
-        </span>
       </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden p-4 sm:p-5 lg:grid-cols-[360px_1fr]">
@@ -698,11 +699,6 @@ export default function CommandStudio() {
           <div className="flex-1 overflow-y-auto px-5 py-2 sm:px-8">
             {showHero ? (
               <div className="mx-auto max-w-2xl py-8">
-                <span className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3.5 py-1.5 font-mono text-[11px] text-black dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-                  Your tenant · Production · {openIncidentIds().length}{" "}
-                  incidents open · SLA 18 min
-                </span>
                 <h1 className="mb-2.5 mt-5 text-[30px] font-semibold leading-tight tracking-tight text-black dark:text-zinc-100">
                   {greeting()}, {currentUser?.firstName || "there"}.
                 </h1>

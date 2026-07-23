@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import { motion, useMotionValue } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "@/lib/stores/useSidebar";
 import { useCommands } from "@/lib/stores/command.store";
 import { useThemeStore } from "@/store/themeStore";
@@ -22,7 +22,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
   const [isDragging, setIsDragging] = useState(false);
-
+  const router = useRouter();
   useEffect(() => {
     setWidth(window.innerWidth);
   }, []);
@@ -123,7 +123,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
             >
               <button
                 onClick={() => {
-                  if (!isDragging) setOpenCommandPalette(true);
+                  router.push("/incident/command-studio");
                 }}
                 className={clsx(
                   "flex items-center gap-2 px-4 py-2.5 rounded-full md:rounded-lg text-xs font-medium shadow-2xl transition-all",
@@ -132,7 +132,7 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
                 )}
               >
                 <Terminal size={14} />
-                <span className="hidden sm:inline">Command Palette</span>
+                <span className="hidden sm:inline">Command Studio</span>
                 <kbd
                   className={clsx(
                     "hidden md:block ml-1 px-1.5 py-0.5 rounded font-mono text-[10px]",
