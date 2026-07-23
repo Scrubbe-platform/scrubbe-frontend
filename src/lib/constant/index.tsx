@@ -1157,6 +1157,13 @@ export const NewMenu: Record<string, NavItem[]> = {
   ],
   engineering_ecosystem: [
     {
+      name: "Command Studio",
+      Icon: SquareCode,
+      link: "/incident/command-studio",
+      isActive: true,
+      isMenu: false,
+    },
+    {
       name: "Operational Rules",
       Icon: LuFolderClosed,
       link: "/incident/operational-rule",
