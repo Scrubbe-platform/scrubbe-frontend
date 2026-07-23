@@ -358,7 +358,7 @@ export default function CommandStudio() {
     if (resp.success && resp.data) {
       const data = resp.data as {
         text: string;
-        actions: { type: string; label: string; data: Record<string, unknown> }[];
+        actions: { type: string; label: string; id: string | null; url: string | null; extra: string | null }[];
         suggestedFollowUps: string[];
       };
       updateConv(convId, (c) => ({
