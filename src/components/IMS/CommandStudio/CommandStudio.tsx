@@ -82,7 +82,7 @@ type ApiTurn = {
   kind: "api";
   status: "thinking" | "done";
   text: string;
-  actions: { type: string; label: string; data: Record<string, unknown> }[];
+  actions: { type: string; label: string; id: string | null; url: string | null; extra: string | null }[];
   suggestedFollowUps: string[];
 };
 type Turn =
