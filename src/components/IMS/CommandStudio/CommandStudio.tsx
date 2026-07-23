@@ -182,9 +182,13 @@ function buildSeedConversation(def: ConversationSeed): Conversation {
 // ── component ─────────────────────────────────────────────────────────
 
 export default function CommandStudio() {
-  const [conversations, setConversations] = useState<Conversation[]>(() =>
-    CONVERSATION_SEEDS.map(buildSeedConversation),
-  );
+  const [conversations, setConversations] = useState<Conversation[]>(() => {
+    try {
+      const saved = localStorage.getItem("cs:conversations");
+      if (saved) return JSON.parse(saved) as Conversation[];
+    } catch {}
+    return [];
+  });
   const [activeId, setActiveId] = useState<string | null>(null);
   const [convFilter, setConvFilter] = useState("");
   const [audit, setAudit] = useState<AuditEntry[]>(INITIAL_AUDIT);
@@ -216,6 +220,10 @@ export default function CommandStudio() {
       setCurrentUser(resp as User);
     })();
   }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem("cs:conversations", JSON.stringify(conversations)); } catch {}
+  }, [conversations]);
 
   const currentUserName =
     [currentUser?.firstName, currentUser?.lastName]
