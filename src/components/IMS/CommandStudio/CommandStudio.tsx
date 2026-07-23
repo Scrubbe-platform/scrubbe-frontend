@@ -21,6 +21,8 @@ import {
   MessageSquare,
   LucideIcon,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
 import Header from "@/components/IMS/DashboardHeader";
 import Modal from "@/components/ui/Modal";
@@ -768,8 +770,9 @@ export default function CommandStudio() {
               </div>
             ) : (
               <div className="mx-auto max-w-2xl">
-                {activeConv?.turns.map((turn) => {
+                {activeConv?.turns.map((turn, _turnIdx, allTurns) => {
                   const convId = activeConv.id;
+                  const lastApiTurnId = [...allTurns].reverse().find((t) => t.kind === "api" && t.status === "done")?.id;
                   if (turn.kind === "user") {
                     return (
                       <div
@@ -872,9 +875,11 @@ export default function CommandStudio() {
                             </div>
                           ) : (
                             <>
-                              <p className="mb-2 max-w-xl whitespace-pre-wrap text-[14px] text-black dark:text-zinc-200">
-                                {turn.text}
-                              </p>
+                              <div className="mb-2 max-w-2xl text-[14px] text-black dark:text-zinc-200 [&>h1]:mb-2 [&>h1]:text-[16px] [&>h1]:font-bold [&>h2]:mb-1.5 [&>h2]:text-[15px] [&>h2]:font-semibold [&>h3]:mb-1 [&>h3]:text-[14px] [&>h3]:font-semibold [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:mb-2 [&>ul]:ml-4 [&>ul]:list-disc [&>ol]:mb-2 [&>ol]:ml-4 [&>ol]:list-decimal [&>li]:mb-0.5 [&>blockquote]:border-l-2 [&>blockquote]:border-zinc-300 [&>blockquote]:pl-3 [&>blockquote]:italic [&>blockquote]:text-zinc-500 [&>pre]:mb-2 [&>pre]:overflow-x-auto [&>pre]:rounded-lg [&>pre]:bg-zinc-900 [&>pre]:p-3 [&>pre]:text-[12.5px] [&>pre]:text-zinc-100 [&>code]:rounded [&>code]:bg-zinc-100 [&>code]:px-1 [&>code]:py-0.5 [&>code]:font-mono [&>code]:text-[12px] [&>code]:dark:bg-zinc-800 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-semibold [&_a]:text-emerald-600 [&_a]:underline [&_hr]:my-3 [&_hr]:border-zinc-200 [&_hr]:dark:border-zinc-700">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                  {turn.text}
+                                </ReactMarkdown>
+                              </div>
                               {turn.actions.length > 0 && (
                                 <div className="mb-3 space-y-1.5">
                                   {turn.actions.map((a, i) => (
@@ -888,7 +893,7 @@ export default function CommandStudio() {
                                   ))}
                                 </div>
                               )}
-                              {turn.suggestedFollowUps.length > 0 && (
+                              {turn.id === lastApiTurnId && turn.suggestedFollowUps.length > 0 && (
                                 <NextBest
                                   items={turn.suggestedFollowUps.map((s) => ({ label: s, send: s }))}
                                   onSend={send}
