@@ -25,6 +25,8 @@ import { cn } from "@/lib/utils";
 import Header from "@/components/IMS/DashboardHeader";
 import Modal from "@/components/ui/Modal";
 import { useCurrentUser, User } from "@/lib/api";
+import { useFetch } from "@/hooks/useFetch";
+import { endpoint } from "@/lib/api/endpoint";
 import {
   AuditEntry,
   BASE_SUGGESTIONS,
@@ -75,12 +77,21 @@ type EzraTurn = {
   status: "thinking" | "done";
   revealed: number;
 };
+type ApiTurn = {
+  id: string;
+  kind: "api";
+  status: "thinking" | "done";
+  text: string;
+  actions: { type: string; label: string; data: Record<string, unknown> }[];
+  suggestedFollowUps: string[];
+};
 type Turn =
   | UserTurn
   | AckTurn
   | ClarifyEntityTurn
   | ClarifyRestartTurn
-  | EzraTurn;
+  | EzraTurn
+  | ApiTurn;
 
 interface Conversation {
   id: string;
@@ -194,6 +205,7 @@ export default function CommandStudio() {
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const threadEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { post } = useFetch();
 
   const { execute: getUser } = useCurrentUser();
   const [currentUser, setCurrentUser] = useState<User | null>();
@@ -307,52 +319,66 @@ export default function CommandStudio() {
   }
 
   function dispatch(convId: string, text: string) {
-    const id = matchIntent(text);
-    if (id === "restart") {
-      const conv = conversations.find((c) => c.id === convId);
-      const svc = serviceFromText(text) || conv?.focus.service || null;
-      if (!svc) {
-        appendTurn(convId, {
-          id: newId("t"),
-          kind: "clarifyEntity",
-          intentId: "restart",
-          entityType: "service",
-        });
-        return;
-      }
-      setFocus(convId, "service", svc);
-      appendTurn(convId, {
-        id: newId("t"),
-        kind: "clarifyRestart",
-        target: svc,
-      });
-      return;
+    void runApiIntent(convId, text);
+  }
+
+  async function runApiIntent(convId: string, text: string) {
+    const turnId = newId("t");
+    const conv = conversations.find((c) => c.id === convId);
+
+    // Build conversation history from existing turns (last 10)
+    const historyTurns = (conv?.turns ?? []).slice(-20);
+    const conversationHistory: { role: "user" | "assistant"; content: string }[] = [];
+    for (const t of historyTurns) {
+      if (t.kind === "user") conversationHistory.push({ role: "user", content: t.text });
+      else if (t.kind === "api" && t.status === "done") conversationHistory.push({ role: "assistant", content: t.text });
+      else if (t.kind === "ack") conversationHistory.push({ role: "assistant", content: t.text });
     }
-    const intent = INTENTS[id];
-    if (intent.entity) {
-      const conv = conversations.find((c) => c.id === convId);
-      let entId =
-        intent.entity === "incident"
-          ? incidentFromText(text)
-          : serviceFromText(text);
-      if (!entId)
-        entId =
-          intent.entity === "incident"
-            ? (conv?.focus.incident ?? null)
-            : (conv?.focus.service ?? null);
-      if (!entId) {
-        appendTurn(convId, {
-          id: newId("t"),
-          kind: "clarifyEntity",
-          intentId: id,
-          entityType: intent.entity,
-        });
-        return;
-      }
-      setFocus(convId, intent.entity, entId);
-      void runIntent(convId, id, intent.entity, entId);
+
+    appendTurn(convId, {
+      id: turnId,
+      kind: "api",
+      status: "thinking",
+      text: "",
+      actions: [],
+      suggestedFollowUps: [],
+    });
+
+    const context = {
+      incidentId: conv?.focus.incident ?? undefined,
+      serviceId: conv?.focus.service ?? undefined,
+    };
+
+    const resp = await post(endpoint.command_studio.chat, {
+      message: text,
+      conversationHistory: conversationHistory.slice(-10),
+      context,
+    });
+
+    if (resp.success && resp.data) {
+      const data = resp.data as {
+        text: string;
+        actions: { type: string; label: string; data: Record<string, unknown> }[];
+        suggestedFollowUps: string[];
+      };
+      updateConv(convId, (c) => ({
+        ...c,
+        turns: c.turns.map((t) =>
+          t.id === turnId && t.kind === "api"
+            ? { ...t, status: "done" as const, text: data.text, actions: data.actions ?? [], suggestedFollowUps: data.suggestedFollowUps ?? [] }
+            : t,
+        ),
+      }));
     } else {
-      void runIntent(convId, id, null, null);
+      const errMsg = typeof resp.data === "string" ? resp.data : "Ezra encountered an error. Please try again.";
+      updateConv(convId, (c) => ({
+        ...c,
+        turns: c.turns.map((t) =>
+          t.id === turnId && t.kind === "api"
+            ? { ...t, status: "done" as const, text: errMsg, actions: [], suggestedFollowUps: [] }
+            : t,
+        ),
+      }));
     }
   }
 
@@ -544,6 +570,9 @@ export default function CommandStudio() {
       return BASE_SUGGESTIONS.map((s) => ({ label: s, send: s }));
     for (let i = activeConv.turns.length - 1; i >= 0; i--) {
       const t = activeConv.turns[i];
+      if (t.kind === "api" && t.status === "done" && t.suggestedFollowUps.length > 0) {
+        return t.suggestedFollowUps.map((s) => ({ label: s, send: s }));
+      }
       if (t.kind === "clarifyEntity" || t.kind === "clarifyRestart")
         return BASE_SUGGESTIONS.map((s) => ({ label: s, send: s }));
       if (t.kind === "ezra" && t.status === "done") {
@@ -703,16 +732,9 @@ export default function CommandStudio() {
                   {greeting()}, {currentUser?.firstName || "there"}.
                 </h1>
                 <p className="mb-6 max-w-md text-[15px] text-black dark:text-zinc-400">
-                  Ezra is watching your production estate —{" "}
-                  <b className="text-black dark:text-zinc-200">
-                    {openIncidentIds().length} incidents open
-                  </b>
-                  , led by{" "}
-                  <b className="text-black dark:text-zinc-200">
-                    SI-92837 (Checkout, P0)
-                  </b>{" "}
-                  with 18 minutes of SLA remaining. Ask about any of them and
-                  I'll check which one you mean.
+                  Ask me to create incidents, set up integrations, run analysis,
+                  or get any information about your production estate — I have
+                  access to everything in your tenant.
                 </p>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {BASE_SUGGESTIONS.map((p) => (
@@ -824,7 +846,54 @@ export default function CommandStudio() {
                       </div>
                     );
                   }
-                  // ezra
+                  // api turn — real backend response
+                  if (turn.kind === "api") {
+                    return (
+                      <div key={turn.id} className="flex gap-3 py-4">
+                        <EzraAvatar />
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                            Ezra
+                          </div>
+                          {turn.status === "thinking" ? (
+                            <div className="mb-2.5 max-w-sm rounded-lg bg-zinc-50 px-3.5 py-2.5 dark:bg-zinc-900/60">
+                              <div className="flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                                Thinking…
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="mb-2 max-w-xl whitespace-pre-wrap text-[14px] text-black dark:text-zinc-200">
+                                {turn.text}
+                              </p>
+                              {turn.actions.length > 0 && (
+                                <div className="mb-3 space-y-1.5">
+                                  {turn.actions.map((a, i) => (
+                                    <div key={i} className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-[12.5px] dark:border-emerald-500/20 dark:bg-emerald-500/5">
+                                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                      <span className="font-medium text-emerald-700 dark:text-emerald-400">{a.label}</span>
+                                      {(a.data as any)?.ticketId && (
+                                        <span className="ml-auto font-mono text-[11px] text-black dark:text-zinc-500">{String((a.data as any).ticketId)}</span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {turn.suggestedFollowUps.length > 0 && (
+                                <NextBest
+                                  items={turn.suggestedFollowUps.map((s) => ({ label: s, send: s }))}
+                                  onSend={send}
+                                />
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // ezra (local intent fallback — unused in production but kept for dev)
                   const intent = INTENTS[turn.intentId];
                   const ent = entOf(turn);
                   const steps = callable(intent.reason, ent) ?? [];

@@ -330,4 +330,7 @@ export const endpoint = {
     invite: "/waitlist",                     // POST /waitlist/:id/invite
     reject: "/waitlist",                     // POST /waitlist/:id/reject
   },
+  command_studio: {
+    chat: "/command-studio/chat",            // POST — EZRA Command Studio
+  },
 };
