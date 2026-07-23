@@ -873,8 +873,8 @@ export default function CommandStudio() {
                                     <div key={i} className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-[12.5px] dark:border-emerald-500/20 dark:bg-emerald-500/5">
                                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                                       <span className="font-medium text-emerald-700 dark:text-emerald-400">{a.label}</span>
-                                      {(a.data as any)?.ticketId && (
-                                        <span className="ml-auto font-mono text-[11px] text-black dark:text-zinc-500">{String((a.data as any).ticketId)}</span>
+                                      {a.id && (
+                                        <span className="ml-auto font-mono text-[11px] text-black dark:text-zinc-500">{a.id}</span>
                                       )}
                                     </div>
                                   ))}
