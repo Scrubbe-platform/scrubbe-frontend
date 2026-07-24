@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { Copy, ShieldCheck, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Select from "@/components/ui/select";
+import Switch from "@/components/ui/Switch";
 import { Availability, EZRA, Group, ITEM_MODULE, Member, RULE_DESC, deriveUser, initialsOf } from "./data";
 import { AvailabilityLabel, KVGrid } from "./sections";
 
@@ -76,11 +78,7 @@ export function TransferManagerForm({ group, onSave, onCancel }: { group: Group;
       <p className="mt-1 text-[12px] text-black dark:text-zinc-400">Choose a team member to become the new manager of {group.name}.</p>
       <div className="mt-4">
         <Field label="New manager">
-          <select value={name} onChange={(e) => setName(e.target.value)} className={inputCls}>
-            {group.members.map((m) => (
-              <option key={m.name}>{m.name}</option>
-            ))}
-          </select>
+          <Select value={name} onChange={(e) => setName(e.target.value)} options={group.members.map((m) => ({ value: m.name, label: m.name }))} />
         </Field>
       </div>
       <ModalFoot>
@@ -105,25 +103,29 @@ export function AddMemberForm({ onSave, onCancel }: { onSave: (m: Member) => voi
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Role">
-            <select value={role} onChange={(e) => setRole(e.target.value)} className={inputCls}>
-              {ROLE_OPTIONS.map((r) => (
-                <option key={r}>{r}</option>
-              ))}
-            </select>
+            <Select value={role} onChange={(e) => setRole(e.target.value)} options={ROLE_OPTIONS.map((r) => ({ value: r, label: r }))} />
           </Field>
           <Field label="Availability">
-            <select value={availability} onChange={(e) => setAvailability(e.target.value as Availability)} className={inputCls}>
-              <option>Online</option>
-              <option>Away</option>
-              <option>Offline</option>
-            </select>
+            <Select
+              value={availability}
+              onChange={(e) => setAvailability(e.target.value as Availability)}
+              options={[
+                { value: "Online", label: "Online" },
+                { value: "Away", label: "Away" },
+                { value: "Offline", label: "Offline" },
+              ]}
+            />
           </Field>
         </div>
         <Field label="On-call">
-          <select value={oncall ? "yes" : "no"} onChange={(e) => setOncall(e.target.value === "yes")} className={inputCls}>
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-          </select>
+          <Select
+            value={oncall ? "yes" : "no"}
+            onChange={(e) => setOncall(e.target.value === "yes")}
+            options={[
+              { value: "no", label: "No" },
+              { value: "yes", label: "Yes" },
+            ]}
+          />
         </Field>
       </div>
       <ModalFoot>
@@ -142,13 +144,7 @@ export function MergeForm({ group, others, onSave, onCancel }: { group: Group; o
       <p className="mt-1 text-[12px] text-black dark:text-zinc-400">Members of the selected group move into {group.name}; the source group is archived.</p>
       <div className="mt-4">
         <Field label="Merge from">
-          <select value={sourceId} onChange={(e) => setSourceId(e.target.value)} className={inputCls}>
-            {others.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.name} · {o.members.length} members
-              </option>
-            ))}
-          </select>
+          <Select value={sourceId} onChange={(e) => setSourceId(e.target.value)} options={others.map((o) => ({ value: o.id, label: `${o.name} · ${o.members.length} members` }))} />
         </Field>
       </div>
       <ModalFoot>
@@ -223,17 +219,25 @@ export function CreateGroupForm({ defaultManager, onCreate, onCancel }: { defaul
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Environment">
-            <select value={env} onChange={(e) => setEnv(e.target.value)} className={inputCls}>
-              <option>Production</option>
-              <option>Staging</option>
-            </select>
+            <Select
+              value={env}
+              onChange={(e) => setEnv(e.target.value)}
+              options={[
+                { value: "Production", label: "Production" },
+                { value: "Staging", label: "Staging" },
+              ]}
+            />
           </Field>
           <Field label="Default incident role">
-            <select value={role} onChange={(e) => setRole(e.target.value)} className={inputCls}>
-              <option>Platform Engineer</option>
-              <option>Incident Commander</option>
-              <option>Site Reliability Engineer</option>
-            </select>
+            <Select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              options={[
+                { value: "Platform Engineer", label: "Platform Engineer" },
+                { value: "Incident Commander", label: "Incident Commander" },
+                { value: "Site Reliability Engineer", label: "Site Reliability Engineer" },
+              ]}
+            />
           </Field>
         </div>
         <p className="text-[11.5px] text-black dark:text-zinc-500">You&apos;ll be added as the first member. Add the rest, escalation, rules and playbooks from the profile.</p>
@@ -267,7 +271,7 @@ export function EscalationEditor({ levels: initial, onSave, onCancel }: { levels
   return (
     <div className="p-4">
       <ModalTitle>Edit escalation path</ModalTitle>
-      <p className="mt-1 text-[12px] text-black dark:text-zinc-400">Ordered escalation — this feeds Incident Delivery.</p>
+      <p className="mt-1 text-[12px] text-black dark:text-zinc-400">Ordered escalation, feeds Incident Delivery.</p>
       <div className="mt-4 space-y-2">
         {levels.map((lv, i) => (
           <div key={i} className="flex items-center gap-2.5">
@@ -298,14 +302,11 @@ export function OnCallManagerForm({ group, onSave, onCancel }: { group: Group; o
       <ModalTitle>Manage on-call rotation</ModalTitle>
       <div className="mt-4 space-y-3.5">
         <Field label="Current on-call">
-          <select value={name} onChange={(e) => setName(e.target.value)} className={inputCls}>
-            <option value="">— None (coverage gap) —</option>
-            {group.members.map((m) => (
-              <option key={m.name} value={m.name}>
-                {m.name} · {m.role}
-              </option>
-            ))}
-          </select>
+          <Select
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            options={[{ value: "", label: "None (coverage gap)" }, ...group.members.map((m) => ({ value: m.name, label: `${m.name} · ${m.role}` }))]}
+          />
         </Field>
         <Field label="Shift ends">
           <input value={ends} onChange={(e) => setEnds(e.target.value)} placeholder="e.g. Tomorrow · 09:00 UTC" className={inputCls} />
@@ -314,7 +315,7 @@ export function OnCallManagerForm({ group, onSave, onCancel }: { group: Group; o
       </div>
       <ModalFoot>
         <GhostBtn onClick={onCancel}>Cancel</GhostBtn>
-        <PrimaryBtn onClick={() => onSave(name || null, ends.trim() || "—")}>Save rotation</PrimaryBtn>
+        <PrimaryBtn onClick={() => onSave(name || null, ends.trim() || "---")}>Save rotation</PrimaryBtn>
       </ModalFoot>
     </div>
   );
@@ -358,16 +359,24 @@ export function EditGeneralForm({ group, onSave, onCancel }: { group: Group; onS
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Environment">
-            <select value={env} onChange={(e) => setEnv(e.target.value)} className={inputCls}>
-              <option>Production</option>
-              <option>Staging</option>
-            </select>
+            <Select
+              value={env}
+              onChange={(e) => setEnv(e.target.value)}
+              options={[
+                { value: "Production", label: "Production" },
+                { value: "Staging", label: "Staging" },
+              ]}
+            />
           </Field>
           <Field label="Status">
-            <select value={status} onChange={(e) => setStatus(e.target.value as Group["status"])} className={inputCls}>
-              <option>Active</option>
-              <option>Archived</option>
-            </select>
+            <Select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as Group["status"])}
+              options={[
+                { value: "Active", label: "Active" },
+                { value: "Archived", label: "Archived" },
+              ]}
+            />
           </Field>
         </div>
       </div>
@@ -453,7 +462,7 @@ export function UserProfileModal({
   return (
     <div className="p-4">
       <div className="mb-4 flex items-center gap-3.5">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[16px] font-semibold text-white">{initialsOf(member.name)}</span>
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-emerald-600 text-[16px] font-semibold text-white">{initialsOf(member.name)}</span>
         <div>
           <div className="text-[18px] font-semibold text-black dark:text-zinc-100">{member.name}</div>
           <div className="mt-0.5">
@@ -471,8 +480,8 @@ export function UserProfileModal({
           ["Location", u.loc],
           ["Reports to", group.manager],
           ["Primary team", group.name],
-          ["Member of", <div key="m" className="mt-1 flex flex-wrap gap-1.5">{u.teams.map((t) => (<span key={t} className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[12px] text-black dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300">{t}</span>))}</div>, true],
-          ["Focus areas", <div key="f" className="mt-1 flex flex-wrap gap-1.5">{focus.map((f) => (<span key={f} className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[12px] text-black dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300">{f}</span>))}</div>, true],
+          ["Member of", <div key="m" className="mt-1 flex flex-wrap gap-1.5">{u.teams.map((t) => (<span key={t} className="rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[12px] text-black dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300">{t}</span>))}</div>, true],
+          ["Focus areas", <div key="f" className="mt-1 flex flex-wrap gap-1.5">{focus.map((f) => (<span key={f} className="rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[12px] text-black dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300">{f}</span>))}</div>, true],
         ]}
       />
       <button
@@ -508,7 +517,7 @@ export function EzraProfileModal({ group, isManager, onToggle }: { group: Group;
         </span>
       </div>
       <div className="mb-4 mt-3 flex items-center gap-3.5">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[16px] font-semibold text-white">E</span>
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-emerald-600 text-[16px] font-semibold text-white">E</span>
         <div>
           <div className="text-[18px] font-semibold text-black dark:text-zinc-100">Ezra</div>
           <div className="mt-0.5 inline-flex items-center gap-1.5 text-[12.5px] text-black dark:text-zinc-300">
@@ -532,9 +541,10 @@ export function EzraProfileModal({ group, isManager, onToggle }: { group: Group;
       />
       <p className="mt-3 text-[11.5px] text-black dark:text-zinc-500">Ezra can be assigned incidents like a responder, but never fills human on-call or Incident Commander requirements.</p>
       {isManager && (
-        <ModalFoot>
-          <GhostBtn onClick={onToggle}>{e.enabled ? "Pause assignment" : "Enable assignment"}</GhostBtn>
-        </ModalFoot>
+        <div className="mt-4 flex items-center justify-between gap-4 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+          <span className="text-[14px] font-semibold text-black dark:text-zinc-100">Assignable to this team</span>
+          <Switch checked={e.enabled} onChange={onToggle} />
+        </div>
       )}
     </div>
   );

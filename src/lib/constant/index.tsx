@@ -1103,13 +1103,13 @@ export const NewMenu: Record<string, NavItem[]> = {
       isActive: true,
       isMenu: false,
     },
-    // {
-    //   name: "Assignment Groups",
-    //   Icon: FaUserGroup,
-    //   link: "/incident/assignment-groups",
-    //   isActive: true,
-    //   isMenu: false,
-    // },
+    {
+      name: "Assignment Groups",
+      Icon: FaUserGroup,
+      link: "/incident/assignment-groups",
+      isActive: true,
+      isMenu: false,
+    },
     {
       name: "Handover",
       Icon: LuShieldAlert,
