@@ -1103,6 +1103,13 @@ export const NewMenu: Record<string, NavItem[]> = {
       isActive: true,
       isMenu: false,
     },
+    // {
+    //   name: "Assignment Groups",
+    //   Icon: FaUserGroup,
+    //   link: "/incident/assignment-groups",
+    //   isActive: true,
+    //   isMenu: false,
+    // },
     {
       name: "Handover",
       Icon: LuShieldAlert,
@@ -1211,6 +1218,13 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Connectors",
       Icon: PiInfinityBold,
       link: "/incident/connections",
+      isActive: true,
+      isMenu: false,
+    },
+    {
+      name: "People",
+      Icon: UsersRound,
+      link: "/incident/people",
       isActive: true,
       isMenu: false,
     },

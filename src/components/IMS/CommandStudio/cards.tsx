@@ -248,7 +248,7 @@ export function WarroomCard({ i, h }: { i: Incident; h: CardHandlers }) {
     return (
       <CardFrame eyebrow={`War room · ${i.id}`}>
         <CardTitle>{i.service}</CardTitle>
-        <CardNote>No active war room for {i.id} — it's at the {i.stage} stage.</CardNote>
+        <CardNote>No active war room for {i.id} — it&apos;s at the {i.stage} stage.</CardNote>
         <CardActions>
           <CardButton
             onClick={() => {
