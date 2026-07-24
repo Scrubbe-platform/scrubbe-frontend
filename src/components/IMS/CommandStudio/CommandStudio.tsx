@@ -8,7 +8,6 @@ import {
   BookOpen,
   ShieldCheck,
   Send,
-  X,
   MoreVertical,
   Pin,
   PencilLine,
