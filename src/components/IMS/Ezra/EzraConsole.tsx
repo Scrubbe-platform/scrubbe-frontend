@@ -15,6 +15,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { useIncidentSelection } from "@/hooks/useIncidentSelection";
 import { useIncidentDetail } from "@/hooks/useIncidentWorkspace";
+import { useSharedAI } from "@/hooks/useSharedAI";
 import { endpoint } from "@/lib/api/endpoint";
 import moment from "moment";
 import Link from "next/link";
@@ -49,6 +50,9 @@ export default function EzraConsole() {
   const [messages, setMessages]   = useState<ChatMessage[]>([]);
   const messagesEndRef            = useRef<HTMLDivElement>(null);
   const autoAnalysisKeyRef        = useRef<string | null>(null);
+
+  const { whoIsThinking } = useSharedAI(selectedIncident?.id ?? null);
+  const teamThinking = whoIsThinking();
 
   const { data: analysesData, isLoading: loadingAnalyses, refetch: refetchAnalyses } = useQuery({
     queryKey: ["ezra-analyses"],
@@ -165,6 +169,12 @@ export default function EzraConsole() {
             Ask Ezra about incidents, MTTR, risk, and fraud impact — it answers differently for leadership and for hands-on analysts.
             {selectedIncident ? ` Focused on ${selectedIncident.ticketId}.` : ""}
           </p>
+          {teamThinking && (
+            <p className="text-[11px] text-indigo-500 flex items-center gap-1.5 mt-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+              {teamThinking.triggeredBy.name} is running an AI analysis…
+            </p>
+          )}
         </div>
         <div className="flex gap-2">
           <NavBadge icon={<GoGitBranch size={13} />}        label="Code Engine" route="/incident/code-engine" />

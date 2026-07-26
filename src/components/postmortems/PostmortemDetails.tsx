@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState } from "react";
+import { useSharedAI } from "@/hooks/useSharedAI";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
@@ -235,9 +236,41 @@ const TabRootCause = () => {
   const trigger: string | null = body?.trigger ?? rca?.trigger ?? null;
   const factors: string[] = body?.factors ?? rca?.factors ?? rca?.contributingFactors ?? [];
 
+  const ticketId = (pm as any)?.ticket?.id as string | undefined;
+  const { triggerAI, getResult, isThinking, whoIsThinking } = useSharedAI(ticketId ?? null);
+  const fiveWhysResult = getResult("five_whys");
+  const teamThinking = whoIsThinking();
+
   return (
     <Section icon={<Search size={16} />} title="Root Cause Analysis">
-      {!cause && !trigger && factors.length === 0 ? (
+      {ticketId && (
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={() => triggerAI("five_whys")}
+            disabled={isThinking("five_whys") || !ticketId}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          >
+            {isThinking("five_whys") ? "Generating…" : "Generate Five Whys"}
+          </button>
+          {teamThinking && !isThinking("five_whys") && (
+            <span className="text-[11px] text-indigo-500 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+              {teamThinking.triggeredBy.name} is running analysis…
+            </span>
+          )}
+        </div>
+      )}
+      {fiveWhysResult ? (
+        <div className="rounded-xl border border-indigo-100 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30 p-4 mb-4 space-y-2">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-500 mb-1">Ezra Five Whys</p>
+          <p className="text-[13px] text-indigo-800 dark:text-indigo-200 leading-relaxed whitespace-pre-wrap">
+            {typeof fiveWhysResult.result === "string"
+              ? fiveWhysResult.result
+              : (fiveWhysResult.result as any)?.fiveWhys ?? (fiveWhysResult.result as any)?.analysis ?? JSON.stringify(fiveWhysResult.result, null, 2)}
+          </p>
+        </div>
+      ) : null}
+      {!cause && !trigger && factors.length === 0 && !fiveWhysResult ? (
         <Empty label="Root cause analysis not yet completed for this postmortem." />
       ) : (
         <div className="space-y-5">

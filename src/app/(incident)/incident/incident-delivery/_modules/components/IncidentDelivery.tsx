@@ -30,7 +30,7 @@ const IncidentDelivery = ({ incident }: { incident: IncidentDetailRecord }) => {
             <AnalystNotes />
           </div>
           <div className="flex-1 space-y-4">
-            <EzraAssessment />
+            <EzraAssessment ticketId={incident.id} />
             <LinksThatOpen />
             <PlaybookSection />
             <PolicySection />

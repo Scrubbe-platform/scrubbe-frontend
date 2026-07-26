@@ -299,7 +299,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({ incide
           )}
         </div>
 
-        <EzraPanel ref={ezraRef} confidence={confidence} onOpenRemediation={() => setRemediationOpen(true)} />
+        <EzraPanel ref={ezraRef} confidence={confidence} onOpenRemediation={() => setRemediationOpen(true)} ticketId={incident.id} />
       </div>
 
       {/* Status bar */}

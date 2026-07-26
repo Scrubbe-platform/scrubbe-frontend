@@ -7,17 +7,22 @@ import {
   SUGGESTED_QUESTIONS,
   classifyQuestion,
 } from "./incidentDelivery.data";
+import { useSharedAI } from "@/hooks/useSharedAI";
 
 interface ChatTurn {
   role: "user" | "ezra";
   content: string;
 }
 
-const EzraAssessment = () => {
+const EzraAssessment = ({ ticketId }: { ticketId?: string | null }) => {
   const [question, setQuestion] = useState("");
   const [thread, setThread] = useState<ChatTurn[]>([]);
   const [thinking, setThinking] = useState(false);
   const threadEndRef = useRef<HTMLDivElement>(null);
+
+  const { triggerAI, getResult, whoIsThinking } = useSharedAI(ticketId);
+  const teamThinking = whoIsThinking();
+  const suggestionResult = getResult("ai_suggestion");
 
   const ask = (override?: string) => {
     const q = (override ?? question).trim();
@@ -28,17 +33,35 @@ const EzraAssessment = () => {
     requestAnimationFrame(() =>
       threadEndRef.current?.scrollIntoView({ behavior: "smooth" }),
     );
-    setTimeout(() => {
-      const key = classifyQuestion(q);
-      setThread((t) => [
-        ...t,
-        { role: "ezra", content: ANSWERS[key] ?? ANSWERS._fallback },
-      ]);
-      setThinking(false);
-      requestAnimationFrame(() =>
-        threadEndRef.current?.scrollIntoView({ behavior: "smooth" }),
-      );
-    }, 550);
+    if (ticketId) {
+      triggerAI("ai_suggestion");
+      const poll = () => {
+        const res = getResult("ai_suggestion");
+        if (res) {
+          const text = typeof res.result === "string"
+            ? res.result
+            : (res.result as any)?.suggestion ?? (res.result as any)?.content ?? JSON.stringify(res.result, null, 2);
+          setThread((t) => [...t, { role: "ezra", content: text ?? ANSWERS[classifyQuestion(q)] ?? ANSWERS._fallback }]);
+          setThinking(false);
+          requestAnimationFrame(() => threadEndRef.current?.scrollIntoView({ behavior: "smooth" }));
+          return;
+        }
+        requestAnimationFrame(poll);
+      };
+      setTimeout(poll, 800);
+    } else {
+      setTimeout(() => {
+        const key = classifyQuestion(q);
+        setThread((t) => [
+          ...t,
+          { role: "ezra", content: ANSWERS[key] ?? ANSWERS._fallback },
+        ]);
+        setThinking(false);
+        requestAnimationFrame(() =>
+          threadEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+        );
+      }, 550);
+    }
   };
 
   return (
@@ -52,9 +75,16 @@ const EzraAssessment = () => {
           <p className="text-[14px] font-semibold text-black dark:text-white">
             Ezra
           </p>
-          <p className="text-[11px] text-black dark:text-zinc-500">
-            {EZRA.sub}
-          </p>
+          {teamThinking && !thinking ? (
+            <p className="text-[11px] text-indigo-500 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+              {teamThinking.triggeredBy.name} is querying…
+            </p>
+          ) : (
+            <p className="text-[11px] text-black dark:text-zinc-500">
+              {EZRA.sub}
+            </p>
+          )}
         </div>
       </div>
 
@@ -77,9 +107,18 @@ const EzraAssessment = () => {
           </div>
         </div>
 
-        <p className="text-[12.5px] text-black dark:text-zinc-300 leading-relaxed">
-          {EZRA.finding}
-        </p>
+        {/* Live AI suggestion result (replaces mock text when available) */}
+        {suggestionResult ? (
+          <p className="text-[12.5px] text-indigo-700 dark:text-indigo-400 leading-relaxed bg-indigo-50 dark:bg-indigo-500/10 rounded-lg px-3 py-2">
+            {typeof suggestionResult.result === "string"
+              ? suggestionResult.result
+              : (suggestionResult.result as any)?.suggestion ?? (suggestionResult.result as any)?.content ?? EZRA.finding}
+          </p>
+        ) : (
+          <p className="text-[12.5px] text-black dark:text-zinc-300 leading-relaxed">
+            {EZRA.finding}
+          </p>
+        )}
 
         {/* Thread */}
         {thread.length > 0 && (

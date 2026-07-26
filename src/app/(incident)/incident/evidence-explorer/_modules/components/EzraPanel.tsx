@@ -2,18 +2,23 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { ANSWERS, CAUSES, FINDINGS, SUGGEST, TIMELINE, classify } from "./evidenceExplorer.data";
 import { displayFont, monoFont } from "./fonts";
+import { useSharedAI } from "@/hooks/useSharedAI";
 
 interface ChatTurn { role: "user" | "ezra"; content: string }
 
 export interface EzraPanelHandle { ask: (q: string) => void }
 
-const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemediation: () => void }>(({ confidence, onOpenRemediation }, ref) => {
+const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemediation: () => void; ticketId?: string | null }>(({ confidence, onOpenRemediation, ticketId }, ref) => {
   const [question, setQuestion] = useState("");
   const [thread, setThread] = useState<ChatTurn[]>([
     { role: "ezra", content: "I've correlated 18 findings across 24 sources. Current read: a deployment-induced retry storm saturating the database. Ask me anything, or open <b>Review remediation</b> for the rollback plan." },
   ]);
   const [thinking, setThinking] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+
+  const { triggerAI, getResult, isThinking, whoIsThinking } = useSharedAI(ticketId);
+  const teamThinking = whoIsThinking();
+  const liveResult = getResult("investigation");
 
   useImperativeHandle(ref, () => ({ ask: (q: string) => ask(q) }));
 
@@ -22,13 +27,32 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
     if (!q || thinking) return;
     setThread((t) => [...t, { role: "user", content: q.replace(/</g, "&lt;") }]);
     setQuestion("");
-    setThinking(true);
-    requestAnimationFrame(() => endRef.current?.scrollIntoView({ behavior: "smooth" }));
-    setTimeout(() => {
-      setThread((t) => [...t, { role: "ezra", content: ANSWERS[classify(q)] ?? ANSWERS._fallback }]);
-      setThinking(false);
+    if (ticketId) {
+      triggerAI("investigation");
+      setThinking(true);
+      const waitForResult = () => {
+        const result = getResult("investigation");
+        if (result) {
+          const text = typeof result.result === "string"
+            ? result.result
+            : (result.result as any)?.summary ?? (result.result as any)?.analysis ?? JSON.stringify(result.result, null, 2);
+          setThread((t) => [...t, { role: "ezra", content: text ?? ANSWERS[classify(q)] ?? ANSWERS._fallback }]);
+          setThinking(false);
+          requestAnimationFrame(() => endRef.current?.scrollIntoView({ behavior: "smooth" }));
+          return;
+        }
+        requestAnimationFrame(waitForResult);
+      };
+      setTimeout(waitForResult, 800);
+    } else {
+      setThinking(true);
       requestAnimationFrame(() => endRef.current?.scrollIntoView({ behavior: "smooth" }));
-    }, 560);
+      setTimeout(() => {
+        setThread((t) => [...t, { role: "ezra", content: ANSWERS[classify(q)] ?? ANSWERS._fallback }]);
+        setThinking(false);
+        requestAnimationFrame(() => endRef.current?.scrollIntoView({ behavior: "smooth" }));
+      }, 560);
+    }
   };
 
   return (
@@ -42,7 +66,14 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
         </div>
         <div>
           <b className={`${displayFont.className} text-[15px] font-semibold block`}>Ezra</b>
-          <span className="text-[11px] text-[#8A8A93]">Investigating · SI-7A42K91</span>
+          {teamThinking && !thinking ? (
+            <span className="text-[11px] text-[#2540F2] flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#2540F2] animate-pulse" />
+              {teamThinking.triggeredBy.name} is querying…
+            </span>
+          ) : (
+            <span className="text-[11px] text-[#8A8A93]">Investigating · SI-7A42K91</span>
+          )}
         </div>
       </div>
 
@@ -136,16 +167,26 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
         <div>
           <SectionTitle label="Recommended action" />
           <div className="rounded-[10px] border border-[#DCE0FF] bg-[#EEF0FF] p-[13px]">
-            <span className="text-[9.5px] font-bold uppercase tracking-wide text-[#1B30C4] bg-white border border-[#DCE0FF] px-2 py-0.5 rounded-full inline-block mb-2">Priority 1</span>
-            <h4 className={`${displayFont.className} font-semibold text-[14px] mb-2`}>Roll back deployment</h4>
-            <div className="flex justify-between text-[12px] py-[3px]">
-              <span className="text-[#52525B]">Expected outcome</span>
-              <span className={`${monoFont.className} font-semibold`}>−80% failures</span>
-            </div>
-            <div className="flex justify-between text-[12px] py-[3px]">
-              <span className="text-[#52525B]">Confidence</span>
-              <span className={`${monoFont.className} font-semibold`}>84%</span>
-            </div>
+            {liveResult ? (
+              <div className="text-[12.5px] text-[#1B30C4] leading-relaxed mb-2 whitespace-pre-wrap">
+                {typeof liveResult.result === "string"
+                  ? liveResult.result
+                  : (liveResult.result as any)?.summary ?? (liveResult.result as any)?.analysis ?? "Analysis complete."}
+              </div>
+            ) : (
+              <>
+                <span className="text-[9.5px] font-bold uppercase tracking-wide text-[#1B30C4] bg-white border border-[#DCE0FF] px-2 py-0.5 rounded-full inline-block mb-2">Priority 1</span>
+                <h4 className={`${displayFont.className} font-semibold text-[14px] mb-2`}>Roll back deployment</h4>
+                <div className="flex justify-between text-[12px] py-[3px]">
+                  <span className="text-[#52525B]">Expected outcome</span>
+                  <span className={`${monoFont.className} font-semibold`}>−80% failures</span>
+                </div>
+                <div className="flex justify-between text-[12px] py-[3px]">
+                  <span className="text-[#52525B]">Confidence</span>
+                  <span className={`${monoFont.className} font-semibold`}>84%</span>
+                </div>
+              </>
+            )}
             <button
               onClick={onOpenRemediation}
               className="w-full mt-2.5 flex items-center justify-center gap-1.5 h-9 rounded-[8px] bg-[#2540F2] text-white text-[12px] font-semibold hover:bg-[#1B30C4] transition-colors"

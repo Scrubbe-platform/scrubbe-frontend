@@ -40,6 +40,7 @@ import {
 } from "@/lib/incident/incident.api";
 import { HandoverTaskRecord } from "../types/index";
 import LiveCollaborationSection from "./LiveCollaboration";
+import { useHandoverSharedAI } from "@/hooks/useHandoverSharedAI";
 
 // ── Shared bits ───────────────────────────────────────────────────
 
@@ -138,6 +139,8 @@ export default function HandoverDetailPage() {
     addHandoverNote: false,
   });
 
+  const { triggerCatchMeUp, latestResult: handoverAIResult, thinking: handoverAIThinking } = useHandoverSharedAI(handoverId);
+
   const { data: handover, refetch } = useQuery({
     queryKey: ["handover", handoverId],
     queryFn: () => fetchHandoverById(handoverId),
@@ -205,6 +208,9 @@ export default function HandoverDetailPage() {
 
   const handleCatchMeUp = async () => {
     try {
+      // Emit via socket first — broadcasts result to all participants in real-time
+      triggerCatchMeUp();
+      // Also call REST so the current user's view refreshes even if socket lags
       await refreshEzraBrief(handoverId);
       invalidate();
     } catch (err) {
@@ -561,14 +567,21 @@ export default function HandoverDetailPage() {
                     primary incident — root cause, confidence, and
                     recommendation — distilled for the incoming team.
                   </p>
+                  {handoverAIThinking && handoverAIThinking.name !== "You" && (
+                    <p className="text-[12px] text-emerald-400 mb-3 flex items-center justify-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      {handoverAIThinking.name} is running Catch Me Up…
+                    </p>
+                  )}
                   <button
                     onClick={handleCatchMeUp}
-                    className="w-full max-w-md mx-auto block py-3 rounded-xl font-bold text-[14px] text-zinc-900"
+                    disabled={!!handoverAIThinking}
+                    className="w-full max-w-md mx-auto block py-3 rounded-xl font-bold text-[14px] text-zinc-900 disabled:opacity-60"
                     style={{
                       background: "linear-gradient(90deg, #34d399, #bef264)",
                     }}
                   >
-                    Catch Me Up
+                    {handoverAIThinking?.name === "You" ? "Running…" : "Catch Me Up"}
                   </button>
                 </>
               )}
