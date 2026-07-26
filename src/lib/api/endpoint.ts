@@ -333,4 +333,11 @@ export const endpoint = {
   command_studio: {
     chat: "/command-studio/chat",            // POST — EZRA Command Studio
   },
+  studio_sessions: {
+    create: "/studio-sessions",              // POST   — create a shared session
+    list: "/studio-sessions",               // GET    — list sessions for this tenant
+    get: "/studio-sessions",                // GET    /studio-sessions/:id
+    invite: "/studio-sessions",             // POST   /studio-sessions/:id/invite
+    archive: "/studio-sessions",            // DELETE /studio-sessions/:id
+  },
 };

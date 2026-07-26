@@ -18,6 +18,8 @@ import {
   Sparkles,
   ChevronRight,
   MessageSquare,
+  Users,
+  UserPlus,
   LucideIcon,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -28,6 +30,8 @@ import Modal from "@/components/ui/Modal";
 import { useCurrentUser, User } from "@/lib/api";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
+import { useStudioSession } from "@/hooks/useStudioSession";
+import type { SessionMessage, SessionParticipant } from "@/hooks/useStudioSession";
 import {
   AuditEntry,
   BASE_SUGGESTIONS,
@@ -180,6 +184,30 @@ function buildSeedConversation(def: ConversationSeed): Conversation {
   };
 }
 
+// ── shared session summary (returned by GET /studio-sessions) ─────────
+
+interface SessionSummary {
+  id: string;
+  title: string;
+  participantCount?: number;
+  participants?: SessionParticipant[];
+  lastMessage?: string;
+  updatedAt?: string;
+}
+
+// ── shared-mode avatar helpers ────────────────────────────────────────
+
+function avatarColor(id: string): string {
+  const colors = ["#6366f1","#ec4899","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ef4444"];
+  let h = 0;
+  for (const c of id) h = (h * 31 + c.charCodeAt(0)) & 0xfffffff;
+  return colors[h % colors.length];
+}
+
+function initials(name: string): string {
+  return name.split(" ").map((w) => w[0] ?? "").join("").slice(0, 2).toUpperCase() || "?";
+}
+
 // ── component ─────────────────────────────────────────────────────────
 
 export default function CommandStudio() {
@@ -205,12 +233,36 @@ export default function CommandStudio() {
     | { kind: "share"; id: string }
     | { kind: "exportConv"; id: string }
     | { kind: "delete"; id: string }
+    | { kind: "newSession" }
+    | { kind: "inviteUser"; sessionId: string }
   >({ kind: "none" });
 
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const threadEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { post } = useFetch();
+  const { get, post } = useFetch();
+
+  // ── shared mode state ───────────────────────────────────────────────
+  const [mode, setMode] = useState<"personal" | "shared">("personal");
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<SessionSummary[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [sharedInput, setSharedInput] = useState("");
+  const [newSessionTitle, setNewSessionTitle] = useState("");
+  const sharedTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const sharedThreadEndRef = useRef<HTMLDivElement>(null);
+  const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const {
+    messages: sessionMessages,
+    participants: sessionParticipants,
+    typingUsers: sessionTypingUsers,
+    agentThinking,
+    agentThinkingBy,
+    connected: sessionConnected,
+    sendMessage: sendSessionMessage,
+    sendTyping: sendSessionTyping,
+  } = useStudioSession(mode === "shared" ? activeSessionId : null);
 
   const { execute: getUser } = useCurrentUser();
   const [currentUser, setCurrentUser] = useState<User | null>();
@@ -254,6 +306,29 @@ export default function CommandStudio() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  // Fetch shared sessions whenever the user switches to Shared mode
+  useEffect(() => {
+    if (mode !== "shared") return;
+    let cancelled = false;
+    setSessionsLoading(true);
+    get(endpoint.studio_sessions.list).then((res) => {
+      if (cancelled) return;
+      if (res.success) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const raw = (res.data as any)?.data ?? res.data ?? [];
+        setSessions(Array.isArray(raw) ? raw : []);
+      }
+      setSessionsLoading(false);
+    });
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
+
+  // Scroll to bottom when new shared messages arrive
+  useEffect(() => {
+    sharedThreadEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [sessionMessages]);
 
   function showToast(msg: string) {
     setToast(msg);
@@ -595,6 +670,44 @@ export default function CommandStudio() {
     return BASE_SUGGESTIONS.map((s) => ({ label: s, send: s }));
   }, [activeConv]);
 
+  // ── shared session CRUD ───────────────────────────────────────────
+
+  async function createSession() {
+    const title = newSessionTitle.trim() || "Shared session";
+    const res = await post(endpoint.studio_sessions.create, { title });
+    if (res.success && res.data) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const created = ((res.data as any)?.data ?? res.data) as SessionSummary;
+      setSessions((prev) => [created, ...prev]);
+      setActiveSessionId(created.id);
+      setNewSessionTitle("");
+      setModal({ kind: "none" });
+      showToast("Session created");
+    }
+  }
+
+  async function inviteToSession(sId: string, targetUserId: string) {
+    await post(`${endpoint.studio_sessions.invite}/${sId}/invite`, { targetUserId });
+    setModal({ kind: "none" });
+    showToast("Invite sent");
+  }
+
+  function sendShared() {
+    const text = sharedInput.trim();
+    if (!text || !activeSessionId) return;
+    setSharedInput("");
+    if (sharedTextareaRef.current) {
+      sharedTextareaRef.current.style.height = "auto";
+    }
+    sendSessionMessage(text);
+  }
+
+  function handleSharedTyping() {
+    sendSessionTyping(true);
+    if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+    typingTimerRef.current = setTimeout(() => sendSessionTyping(false), 2000);
+  }
+
   // ── render ─────────────────────────────────────────────────────────
 
   const showHero = !activeConv || activeConv.turns.length === 0;
@@ -643,97 +756,414 @@ export default function CommandStudio() {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden p-4 sm:p-5 lg:grid-cols-[360px_1fr]">
         {/* Conversations sidebar */}
-        <aside className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-sm shadow-light dark:bg-zinc-900/40">
-          <div className="space-y-2.5 p-3">
-            <button
-              onClick={newConversation}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700"
-            >
-              <Plus size={15} /> New conversation
-            </button>
-            <div className="relative">
-              <Search
-                size={13}
-                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-black dark:text-zinc-500"
-              />
-              <input
-                value={convFilter}
-                onChange={(e) => setConvFilter(e.target.value)}
-                placeholder="Search conversations…"
-                className="w-full rounded-lg border border-zinc-200 bg-zinc-50 py-1.5 pl-8 pr-2.5 text-[12.5px] text-black placeholder:text-zinc-400 focus:border-emerald-400 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-200"
-              />
+        <aside className=”flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-sm shadow-light dark:bg-zinc-900/40”>
+
+          {/* ── Mode toggle ──────────────────────────────────────────── */}
+          <div className=”p-3 pb-2”>
+            <div className=”flex rounded-lg border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-800 dark:bg-zinc-900/60”>
+              <button
+                onClick={() => setMode(“personal”)}
+                className={cn(
+                  “flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors”,
+                  mode === “personal”
+                    ? “bg-white text-black shadow-sm dark:bg-zinc-800 dark:text-zinc-100”
+                    : “text-zinc-500 hover:text-black dark:hover:text-zinc-300”,
+                )}
+              >
+                <MessageSquare size={12} /> Personal
+              </button>
+              <button
+                onClick={() => setMode(“shared”)}
+                className={cn(
+                  “flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors”,
+                  mode === “shared”
+                    ? “bg-white text-black shadow-sm dark:bg-zinc-800 dark:text-zinc-100”
+                    : “text-zinc-500 hover:text-black dark:hover:text-zinc-300”,
+                )}
+              >
+                <Users size={12} /> Shared
+              </button>
             </div>
           </div>
-          <div className="flex-1 space-y-4 overflow-y-auto px-2 pb-4">
-            {!filteredConvs.length && (
-              <p className="px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500">
-                No conversations match <b>“{convFilter}”</b>.
-              </p>
-            )}
-            {GROUP_ORDER.map((group) => {
-              const items = filteredConvs.filter((c) => c.group === group);
-              if (!items.length) return null;
-              return (
-                <div key={group}>
-                  <div className="px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
-                    {group}
-                  </div>
-                  {items.map((c) => (
+
+          {/* ── Personal mode sidebar ────────────────────────────────── */}
+          {mode === “personal” && (
+            <>
+              <div className=”space-y-2.5 px-3 pb-2”>
+                <button
+                  onClick={newConversation}
+                  className=”flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700”
+                >
+                  <Plus size={15} /> New conversation
+                </button>
+                <div className=”relative”>
+                  <Search
+                    size={13}
+                    className=”pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-black dark:text-zinc-500”
+                  />
+                  <input
+                    value={convFilter}
+                    onChange={(e) => setConvFilter(e.target.value)}
+                    placeholder=”Search conversations…”
+                    className=”w-full rounded-lg border border-zinc-200 bg-zinc-50 py-1.5 pl-8 pr-2.5 text-[12.5px] text-black placeholder:text-zinc-400 focus:border-emerald-400 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-200”
+                  />
+                </div>
+              </div>
+              <div className=”flex-1 space-y-4 overflow-y-auto px-2 pb-4”>
+                {!filteredConvs.length && (
+                  <p className=”px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500”>
+                    No conversations match <b>”{convFilter}”</b>.
+                  </p>
+                )}
+                {GROUP_ORDER.map((group) => {
+                  const items = filteredConvs.filter((c) => c.group === group);
+                  if (!items.length) return null;
+                  return (
+                    <div key={group}>
+                      <div className=”px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500”>
+                        {group}
+                      </div>
+                      {items.map((c) => (
+                        <div
+                          key={c.id}
+                          onClick={() => setActiveId(c.id)}
+                          role=”button”
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === “Enter” || e.key === “ “)
+                              setActiveId(c.id);
+                          }}
+                          className={cn(
+                            “group relative cursor-pointer rounded-lg px-2.5 py-2 pr-7”,
+                            c.id === activeId
+                              ? “bg-emerald-50 dark:bg-emerald-500/10”
+                              : “hover:bg-zinc-100 dark:hover:bg-zinc-800/60”,
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              “truncate text-[13px] text-black dark:text-zinc-200”,
+                              c.id === activeId && “font-semibold”,
+                            )}
+                          >
+                            {c.title}
+                          </div>
+                          <div className=”mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500”>
+                            {c.pin && (
+                              <Pin
+                                size={9}
+                                className=”text-emerald-600 dark:text-emerald-400”
+                              />
+                            )}
+                            {c.live && (
+                              <span className=”h-1.5 w-1.5 rounded-full bg-emerald-500” />
+                            )}
+                            {c.pin ? “pinned” : c.live ? “live” : c.meta}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setModal({ kind: “convMenu”, id: c.id });
+                            }}
+                            className=”absolute right-1 top-1.5 flex h-6 w-6 items-center justify-center rounded text-black opacity-0 transition-opacity hover:bg-zinc-200 group-hover:opacity-100 dark:text-zinc-500 dark:hover:bg-zinc-700”
+                          >
+                            <MoreVertical size={13} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* ── Shared mode sidebar ──────────────────────────────────── */}
+          {mode === “shared” && (
+            <>
+              <div className=”px-3 pb-2”>
+                <button
+                  onClick={() => setModal({ kind: “newSession” })}
+                  className=”flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700”
+                >
+                  <Plus size={15} /> New Shared Session
+                </button>
+              </div>
+              <div className=”flex-1 overflow-y-auto px-2 pb-4”>
+                {sessionsLoading && (
+                  <p className=”px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500”>
+                    Loading sessions…
+                  </p>
+                )}
+                {!sessionsLoading && !sessions.length && (
+                  <p className=”px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500”>
+                    No shared sessions yet. Create one to collaborate with your team.
+                  </p>
+                )}
+                {sessions.map((s) => {
+                  const pCount = s.participantCount ?? s.participants?.length ?? 0;
+                  return (
                     <div
-                      key={c.id}
-                      onClick={() => setActiveId(c.id)}
-                      role="button"
+                      key={s.id}
+                      onClick={() => setActiveSessionId(s.id)}
+                      role=”button”
                       tabIndex={0}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ")
-                          setActiveId(c.id);
+                        if (e.key === “Enter” || e.key === “ “) setActiveSessionId(s.id);
                       }}
                       className={cn(
-                        "group relative cursor-pointer rounded-lg px-2.5 py-2 pr-7",
-                        c.id === activeId
-                          ? "bg-emerald-50 dark:bg-emerald-500/10"
-                          : "hover:bg-zinc-100 dark:hover:bg-zinc-800/60",
+                        “group cursor-pointer rounded-lg px-2.5 py-2.5”,
+                        s.id === activeSessionId
+                          ? “bg-emerald-50 dark:bg-emerald-500/10”
+                          : “hover:bg-zinc-100 dark:hover:bg-zinc-800/60”,
                       )}
                     >
                       <div
                         className={cn(
-                          "truncate text-[13px] text-black dark:text-zinc-200",
-                          c.id === activeId && "font-semibold",
+                          “truncate text-[13px] text-black dark:text-zinc-200”,
+                          s.id === activeSessionId && “font-semibold”,
                         )}
                       >
-                        {c.title}
+                        {s.title}
                       </div>
-                      <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500">
-                        {c.pin && (
-                          <Pin
-                            size={9}
-                            className="text-emerald-600 dark:text-emerald-400"
-                          />
+                      <div className=”mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500”>
+                        <Users size={9} />
+                        {pCount} participant{pCount !== 1 ? “s” : “”}
+                        {s.lastMessage && (
+                          <span className=”ml-1 max-w-[120px] truncate”>
+                            · {s.lastMessage}
+                          </span>
                         )}
-                        {c.live && (
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        )}
-                        {c.pin ? "pinned" : c.live ? "live" : c.meta}
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setModal({ kind: "convMenu", id: c.id });
-                        }}
-                        className="absolute right-1 top-1.5 flex h-6 w-6 items-center justify-center rounded text-black opacity-0 transition-opacity hover:bg-zinc-200 group-hover:opacity-100 dark:text-zinc-500 dark:hover:bg-zinc-700"
-                      >
-                        <MoreVertical size={13} />
-                      </button>
                     </div>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </aside>
 
         {/* Thread + composer */}
         <section className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-sm shadow-light dark:bg-zinc-900/40">
+
+          {/* ── Shared session panel ──────────────────────────────── */}
+          {mode === "shared" && (
+            <>
+              {!activeSessionId ? (
+                <div className="flex flex-1 items-center justify-center px-8">
+                  <div className="max-w-sm text-center">
+                    <Users size={32} className="mx-auto mb-3 text-zinc-300 dark:text-zinc-700" />
+                    <h3 className="mb-1 text-[16px] font-semibold text-black dark:text-zinc-100">
+                      No session selected
+                    </h3>
+                    <p className="text-[13px] text-black dark:text-zinc-400">
+                      Pick a shared session from the sidebar or create a new one. All participants see the same conversation in real-time.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Presence bar */}
+                  <div className="flex items-center gap-3 border-b border-zinc-200 px-5 py-2.5 dark:border-zinc-800">
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={cn(
+                          "h-2 w-2 rounded-full",
+                          sessionConnected ? "bg-emerald-500" : "bg-zinc-400",
+                        )}
+                      />
+                      <span className="text-[11.5px] font-medium text-black dark:text-zinc-400">
+                        {sessionConnected ? "Live" : "Reconnecting…"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {sessionParticipants.slice(0, 6).map((p) => (
+                        <div
+                          key={p.id}
+                          title={p.userId}
+                          className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white"
+                          style={{ backgroundColor: avatarColor(p.userId) }}
+                        >
+                          {initials(p.userId)}
+                        </div>
+                      ))}
+                      {sessionParticipants.length > 6 && (
+                        <span className="text-[11px] text-black dark:text-zinc-500">
+                          +{sessionParticipants.length - 6}
+                        </span>
+                      )}
+                      {sessionParticipants.length > 0 && (
+                        <span className="ml-1 text-[11px] text-black dark:text-zinc-500">
+                          {sessionParticipants.length} online
+                        </span>
+                      )}
+                    </div>
+                    <div className="ml-auto">
+                      <button
+                        onClick={() => setModal({ kind: "inviteUser", sessionId: activeSessionId })}
+                        className="flex items-center gap-1.5 rounded-lg border border-zinc-300 px-2.5 py-1 text-[12px] text-black transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-emerald-500/50 dark:hover:text-emerald-400"
+                      >
+                        <UserPlus size={13} /> Invite
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Shared message thread */}
+                  <div className="flex-1 overflow-y-auto px-5 py-2 sm:px-8">
+                    <div className="mx-auto max-w-2xl">
+                      {sessionMessages.length === 0 && !agentThinking && (
+                        <p className="py-8 text-center text-[13px] text-black dark:text-zinc-500">
+                          Session started. Send a message to begin collaborating.
+                        </p>
+                      )}
+                      {sessionMessages.map((msg) => {
+                        const isAgent = msg.senderType === "AGENT" || msg.role === "assistant";
+                        const isOwn =
+                          !isAgent &&
+                          currentUser != null &&
+                          (msg.senderId === currentUser?.id);
+                        if (isAgent) {
+                          return (
+                            <div key={msg.id} className="flex gap-3 py-4">
+                              <EzraAvatar />
+                              <div className="min-w-0 flex-1">
+                                <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                                  Ezra
+                                </div>
+                                <div className="mb-2 max-w-2xl text-[14px] text-black dark:text-zinc-200 [&>h1]:mb-2 [&>h1]:text-[16px] [&>h1]:font-bold [&>h2]:mb-1.5 [&>h2]:text-[15px] [&>h2]:font-semibold [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:mb-2 [&>ul]:ml-4 [&>ul]:list-disc [&>ol]:mb-2 [&>ol]:ml-4 [&>ol]:list-decimal [&>li]:mb-0.5 [&_strong]:font-semibold [&_a]:text-emerald-600 [&_a]:underline">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {msg.content}
+                                  </ReactMarkdown>
+                                </div>
+                                {msg.actions?.length > 0 && (
+                                  <div className="mb-3 space-y-1.5">
+                                    {msg.actions.map((a, i) => (
+                                      <div key={i} className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-[12.5px] dark:border-emerald-500/20 dark:bg-emerald-500/5">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                        <span className="font-medium text-emerald-700 dark:text-emerald-400">{a.label}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        }
+                        if (isOwn) {
+                          return (
+                            <div key={msg.id} className="flex justify-end gap-3 py-3">
+                              <div className="max-w-[78%] rounded-2xl rounded-br-sm border border-zinc-200 bg-zinc-100 px-4 py-2.5 text-[14px] text-black dark:border-zinc-800 dark:bg-zinc-800/60 dark:text-zinc-100">
+                                {msg.content}
+                              </div>
+                              <div
+                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-semibold text-white"
+                                style={{ backgroundColor: avatarColor(msg.senderId ?? "u") }}
+                              >
+                                {initials(msg.senderName ?? currentUserInitials)}
+                              </div>
+                            </div>
+                          );
+                        }
+                        // Another user's message
+                        return (
+                          <div key={msg.id} className="flex gap-3 py-3">
+                            <div
+                              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-semibold text-white"
+                              style={{ backgroundColor: avatarColor(msg.senderId ?? "x") }}
+                            >
+                              {initials(msg.senderName ?? msg.senderId?.slice(0, 2) ?? "?")}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              {msg.senderName && (
+                                <div className="mb-0.5 text-[11px] font-semibold text-black dark:text-zinc-400">
+                                  {msg.senderName}
+                                </div>
+                              )}
+                              <div className="max-w-[78%] rounded-2xl rounded-tl-sm border border-zinc-200 bg-white px-4 py-2.5 text-[14px] text-black dark:border-zinc-800 dark:bg-zinc-800/30 dark:text-zinc-100">
+                                {msg.content}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* Ezra thinking indicator */}
+                      {agentThinking && (
+                        <div className="flex gap-3 py-3">
+                          <EzraAvatar />
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                              Ezra
+                            </div>
+                            <div className="max-w-sm rounded-lg bg-zinc-50 px-3.5 py-2.5 dark:bg-zinc-900/60">
+                              <div className="flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                                {agentThinkingBy
+                                  ? `Thinking… (triggered by ${agentThinkingBy})`
+                                  : "Thinking…"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Typing indicator for other users */}
+                      {sessionTypingUsers.size > 0 && (
+                        <div className="py-1.5 text-[12px] italic text-black dark:text-zinc-500">
+                          {[...sessionTypingUsers]
+                            .filter((uid) => uid !== currentUser?.id)
+                            .map((uid) => uid)
+                            .join(", ")}{" "}
+                          {sessionTypingUsers.size === 1 ? "is" : "are"} typing…
+                        </div>
+                      )}
+
+                      <div ref={sharedThreadEndRef} />
+                    </div>
+                  </div>
+
+                  {/* Shared composer */}
+                  <div className="border-t border-zinc-200 px-5 py-3 dark:border-zinc-800 sm:px-8">
+                    <div className="mx-auto max-w-2xl">
+                      <div className="flex items-end gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-2 focus-within:border-emerald-400 dark:border-zinc-700 dark:bg-transparent">
+                        <textarea
+                          ref={sharedTextareaRef}
+                          rows={1}
+                          value={sharedInput}
+                          onChange={(e) => {
+                            setSharedInput(e.target.value);
+                            const el = sharedTextareaRef.current;
+                            if (el) { el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 140) + "px"; }
+                            handleSharedTyping();
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault();
+                              sendShared();
+                            }
+                          }}
+                          placeholder="Message the team and Ezra…"
+                          className="max-h-[140px] flex-1 resize-none bg-transparent py-1 text-[14.5px] text-black placeholder:text-zinc-400 focus:outline-none dark:text-zinc-100"
+                        />
+                        <button
+                          onClick={sendShared}
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white transition-colors hover:bg-emerald-700"
+                        >
+                          <Send size={15} />
+                        </button>
+                      </div>
+                      <p className="mt-2 text-center text-[10.5px] text-black dark:text-zinc-500">
+                        All participants in this session see every message in real-time.
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {/* ── Personal mode thread ──────────────────────────────── */}
+          {mode === "personal" && (
           <div className="flex-1 overflow-y-auto px-5 py-2 sm:px-8">
             {showHero ? (
               <div className="mx-auto max-w-2xl py-8">
@@ -1018,6 +1448,7 @@ export default function CommandStudio() {
               </p>
             </div>
           </div>
+          )}
         </section>
       </div>
 
@@ -1100,6 +1531,21 @@ export default function CommandStudio() {
             title={conversations.find((c) => c.id === modal.id)?.title ?? ""}
             onCancel={() => setModal({ kind: "none" })}
             onConfirm={() => deleteConversation(modal.id)}
+          />
+        )}
+        {modal.kind === "newSession" && (
+          <NewSessionForm
+            value={newSessionTitle}
+            onChange={setNewSessionTitle}
+            onSave={createSession}
+            onCancel={() => setModal({ kind: "none" })}
+          />
+        )}
+        {modal.kind === "inviteUser" && (
+          <InviteUserForm
+            sessionId={modal.sessionId}
+            onInvite={(uid) => inviteToSession(modal.sessionId, uid)}
+            onCancel={() => setModal({ kind: "none" })}
           />
         )}
       </Modal>
@@ -1389,6 +1835,97 @@ function ExportSheet({
           {it.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+// ── Shared-mode modals ────────────────────────────────────────────────
+
+function NewSessionForm({
+  value,
+  onChange,
+  onSave,
+  onCancel,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="p-4">
+      <h3 className="mb-3 text-[16px] font-semibold text-black dark:text-zinc-100">
+        New Shared Session
+      </h3>
+      <p className="mb-3 text-[13px] text-black dark:text-zinc-400">
+        Give your session a title so team members know what it&apos;s about.
+      </p>
+      <input
+        autoFocus
+        value={value}
+        maxLength={80}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && onSave()}
+        placeholder="e.g. Payments outage investigation"
+        className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-[14px] text-black focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+      />
+      <div className="mt-4 flex justify-end gap-2">
+        <button
+          onClick={onCancel}
+          className="rounded-lg border border-zinc-300 px-3.5 py-2 text-[12.5px] text-black hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={onSave}
+          className="rounded-lg bg-emerald-600 px-3.5 py-2 text-[12.5px] font-medium text-white hover:bg-emerald-700"
+        >
+          Create session
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function InviteUserForm({
+  sessionId,
+  onInvite,
+  onCancel,
+}: {
+  sessionId: string;
+  onInvite: (userId: string) => void;
+  onCancel: () => void;
+}) {
+  const [userId, setUserId] = useState("");
+  return (
+    <div className="p-4">
+      <h3 className="mb-3 text-[16px] font-semibold text-black dark:text-zinc-100">
+        Invite to session
+      </h3>
+      <p className="mb-3 text-[12.5px] text-black dark:text-zinc-500">
+        Session: <span className="font-mono text-[11.5px]">{sessionId}</span>
+      </p>
+      <input
+        autoFocus
+        value={userId}
+        onChange={(e) => setUserId(e.target.value)}
+        placeholder="Team member user ID or email"
+        className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-[14px] text-black focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+      />
+      <div className="mt-4 flex justify-end gap-2">
+        <button
+          onClick={onCancel}
+          className="rounded-lg border border-zinc-300 px-3.5 py-2 text-[12.5px] text-black hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => userId.trim() && onInvite(userId.trim())}
+          className="rounded-lg bg-emerald-600 px-3.5 py-2 text-[12.5px] font-medium text-white hover:bg-emerald-700"
+        >
+          Send invite
+        </button>
+      </div>
     </div>
   );
 }
