@@ -58,7 +58,7 @@ export const PAYLOAD = {
 export const INCIDENT_ROWS = [
   { title: "Incident ID", value: "SI-9F3K2L" },
   { title: "Correlation key", value: "checkout-service · db-pool-exhaustion · prod" },
-  { title: "Repo / PR / commit", value: "scrubbe/checkout-api · #4821 · a1f9c3e" },
+  { title: "Repo / PR / commit", value: "scrubbe/checkout-api · #4821 · a1f9c3e", link: true },
   { title: "Type / subtype", value: "Delivery incident · Resource exhaustion", chips: true },
   { title: "Incident title", value: "Checkout latency spike & failed payments", full: true },
 ];
@@ -169,9 +169,18 @@ export const NOTES = [
 export const EZRA = {
   pct: 91,
   hi: true,
-  sub: "Lead cause identified · checkout-service",
+  sub: "Lead cause Identified",
   finding:
     "The database connection pool is saturated at 100%, driving a 68% error rate on checkout. A service restart has resolved this exact pattern 17 times previously. Recommended action is Low risk and auto-eligible.",
+  findingParts: [
+    { text: "The database connection pool is " },
+    { text: "saturated at 100%", bold: true },
+    { text: ", driving a 68% error rate on checkout. A service restart has resolved this exact pattern " },
+    { text: "17 times", bold: true },
+    { text: " previously. Recommended action is " },
+    { text: "Low risk", bold: true },
+    { text: " and auto-eligible." },
+  ] as { text: string; bold?: boolean }[],
 };
 
 export const SUGGESTED_QUESTIONS: { q: string; key: "cause" | "db" | "impact" | "change" }[] = [
@@ -206,6 +215,7 @@ export const classifyQuestion = (q: string): string => {
 export const HYPOTHESES = [
   {
     id: "HYP-1",
+    ref: "connector:7b2e9a14-checkout:restart",
     top: true,
     title: "Restart checkout-service",
     why: "Database pool exhausted",
@@ -217,6 +227,7 @@ export const HYPOTHESES = [
   },
   {
     id: "HYP-2",
+    ref: "connector:7b2e9a14-checkout:pr",
     top: false,
     title: "Connection pool exhaustion from retry storm",
     why: "Retry budget exceeded after deploy #4821",
@@ -228,6 +239,7 @@ export const HYPOTHESES = [
   },
   {
     id: "HYP-3",
+    ref: "connector:7b2e9a14-checkout:verify",
     top: false,
     title: "Downstream DB failover lag",
     why: "Replica promotion added latency",

@@ -16,25 +16,21 @@ import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 
 const IncidentDelivery = ({ incident }: { incident: IncidentDetailRecord }) => {
   return (
-    <div className="min-h-screen  text-black dark:text-zinc-200">
+    <div className="min-h-screen font-ibm text-black dark:text-zinc-200">
       <div className="px-6 md:px-10 py-8 space-y-5">
         <Header incident={incident} />
         <DeliverySignal />
 
         {/* ── Two-column layout ── */}
-        <div className="flex flex-col md:flex-row gap-5 pt-2">
-          <div className="flex-1 space-y-4">
-            <Evidence />
-            <IncidentDetails />
-            <DecisionLog />
-            <AnalystNotes />
-          </div>
-          <div className="flex-1 space-y-4">
-            <EzraAssessment ticketId={incident.id} />
-            <LinksThatOpen />
-            <PlaybookSection />
-            <PolicySection />
-          </div>
+        <div className="grid xl:grid-cols-2 gap-5 pt-2">
+          <Evidence />
+          <EzraAssessment ticketId={incident.id} />
+          <IncidentDetails />
+          <LinksThatOpen />
+          <DecisionLog />
+          <PlaybookSection />
+          <AnalystNotes />
+          <PolicySection />
         </div>
         <Remediation incidentId={incident.id} />
         <HypothesisLedger incidentId={incident.id} />

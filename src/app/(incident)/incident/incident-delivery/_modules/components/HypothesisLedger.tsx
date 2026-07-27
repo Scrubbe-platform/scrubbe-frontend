@@ -1,139 +1,262 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BadgeCheck, CheckCircle2, Link } from "lucide-react";
+import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { HYPOTHESES } from "./incidentDelivery.data";
 
-const riskClass: Record<string, string> = {
-  low: "text-emerald-600 dark:text-emerald-400",
-  medium: "text-amber-600 dark:text-amber-400",
-  high: "text-red-600 dark:text-red-400",
-};
+const tierBar = (confidence: number) =>
+  confidence >= 90
+    ? "bg-emerald-500"
+    : confidence >= 70
+      ? "bg-blue-500"
+      : "bg-amber-500";
 
-const HypothesisLedger: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
+const RefPills = ({
+  runUrl,
+  diffUrl,
+}: {
+  runUrl?: string;
+  diffUrl?: string;
+}) => (
+  <div className="flex gap-2 shrink-0">
+    <a
+      href={runUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="px-3 py-1.5 rounded-md bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[12.5px] font-mono font-semibold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+    >
+      runUrl
+    </a>
+    <a
+      href={diffUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="px-3 py-1.5 rounded-md bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[12.5px] font-mono font-semibold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+    >
+      diffUrl
+    </a>
+  </div>
+);
+
+const HypothesisLedger: React.FC<{ incidentId?: string }> = ({
+  incidentId,
+}) => {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="rounded-xl border border-[#DDDDDD] bg-white dark:bg-zinc-900/40 overflow-hidden">
-      <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
         <div className="space-y-0.5">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-black/40 dark:text-zinc-500 font-mono">
             Root-cause Hypothesis Panel
           </p>
-          <p className="text-[14px] font-semibold text-black dark:text-zinc-100">
+          <p className="text-lg font-bold text-black dark:text-zinc-100">
             Ranked by confidence
           </p>
-          <p className="text-[12px] text-black dark:text-zinc-500">
-            Highest-confidence hypothesis leads. Each carries its evidence and a recommended action.
+          <p className="text-[13.5px] text-black/50 dark:text-zinc-500">
+            Highest-confidence hypothesis leads. Each carries its evidence and a
+            recommended action.
           </p>
         </div>
         <button
           onClick={() => setExpanded((x) => !x)}
-          className="px-3 py-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800/40 text-[12px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors shrink-0"
+          className="text-[12px] font-semibold uppercase tracking-widest text-black/40 dark:text-zinc-500 hover:text-black dark:hover:text-zinc-200 transition-colors shrink-0"
         >
           {expanded ? "Collapse" : "Expand"}
         </button>
       </div>
 
-      <div className="p-4 space-y-2.5">
+      {/* Cards */}
+      <div className="space-y-4">
         {HYPOTHESES.map((hyp, i) => {
           const showEvidence = expanded || hyp.top;
-          return (
-            <div
-              key={hyp.id}
-              className={`relative rounded-xl border p-3.5 pl-4 transition-colors ${
-                hyp.top
-                  ? "border-emerald-200 dark:border-emerald-500/25 bg-emerald-50/40 dark:bg-emerald-500/5"
-                  : "border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-800/40 hover:border-zinc-200 dark:hover:border-zinc-700"
-              }`}
-            >
-              {hyp.top && <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl bg-emerald-500" />}
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-mono text-black dark:text-zinc-600 shrink-0">
-                      {String(i + 1).padStart(2, "0")}
+          const num = String(i + 1).padStart(2, "0");
+
+          if (hyp.top) {
+            return (
+              <div
+                key={hyp.id}
+                className="rounded-2xl border-2 border-emerald-500 bg-white dark:bg-zinc-900/40 p-6"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-[13px] font-mono text-black/30 dark:text-zinc-600">
+                      {num}
                     </span>
-                    {hyp.top && (
-                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 text-[9.5px] font-bold uppercase tracking-wider">
-                        <BadgeCheck size={10} /> Lead
-                      </span>
-                    )}
-                    <p className="text-[13px] font-semibold text-black dark:text-zinc-100 leading-snug">{hyp.title}</p>
-                  </div>
-                  {hyp.why && (
-                    <p className="text-[11.5px] text-black dark:text-zinc-400 mt-1">
-                      <span className="font-medium text-black dark:text-zinc-300">Why:</span> {hyp.why}
+                    <p className="text-lg font-bold text-black dark:text-zinc-100 leading-tight">
+                      {hyp.title}
                     </p>
-                  )}
+                  </div>
+                  <RefPills runUrl={hyp.runUrl} diffUrl={hyp.diffUrl} />
+                </div>
 
-                  {showEvidence && hyp.evidence.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      <p className="text-[9px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
-                        Evidence
-                      </p>
-                      <ul className="space-y-0.5">
-                        {hyp.evidence.map((e, ei) => (
-                          <li key={ei} className="flex items-start gap-1.5 text-[11.5px] text-black dark:text-zinc-400">
-                            <CheckCircle2 size={11} className="text-emerald-500 mt-0.5 shrink-0" />
+                {hyp.why && (
+                  <div className="mt-4">
+                    <span className="text-[11px] font-semibold uppercase tracking-widest text-black/40 dark:text-zinc-500">
+                      Why:
+                    </span>
+                    <span className="text-base text-black dark:text-zinc-200 mt-1">
+                      {hyp.why}
+                    </span>
+                  </div>
+                )}
+
+                {showEvidence && hyp.evidence.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-black/40 dark:text-zinc-500 mb-2">
+                      Evidence:
+                    </p>
+                    <div className="space-y-1.5">
+                      {hyp.evidence.map((e, ei) => (
+                        <div key={ei} className="flex items-center gap-2">
+                          <Check
+                            size={15}
+                            className="text-emerald-500 shrink-0"
+                          />
+                          <span className="text-base text-black dark:text-zinc-200">
                             {e}
-                          </li>
-                        ))}
-                      </ul>
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  <div className="flex items-center gap-3 mt-2.5 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 flex-wrap">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[9px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
-                        Confidence
-                      </span>
-                      <span className="text-[13px] font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                <div className="flex items-center gap-10 mt-5 flex-wrap">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-black/40 dark:text-zinc-500 mb-1">
+                      Confidence
+                    </p>
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base font-bold text-black dark:text-zinc-100">
                         {hyp.confidence}%
                       </span>
-                    </div>
-                    {hyp.risk && (
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[9px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
-                          Risk
-                        </span>
-                        <span className={`text-[13px] font-mono font-semibold ${riskClass[hyp.risk.toLowerCase()] ?? "text-black dark:text-zinc-300"}`}>
-                          {hyp.risk}
-                        </span>
+                      <div className="h-1.5 w-32 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${tierBar(hyp.confidence)}`}
+                          style={{ width: `${hyp.confidence}%` }}
+                        />
                       </div>
-                    )}
-                    <div className="flex gap-1.5 ml-auto">
-                      <a href={hyp.runUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 text-[10px] font-mono text-sky-600 dark:text-sky-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-                        <Link size={9} /> runUrl
-                      </a>
-                      <a href={hyp.diffUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 text-[10px] font-mono text-sky-600 dark:text-sky-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-                        <Link size={9} /> diffUrl
-                      </a>
                     </div>
                   </div>
-
-                  {hyp.top && (
-                    <div className="flex gap-2 mt-3">
-                      <button
-                        onClick={() => toast.success("Rollback started (simulated)", { description: "Reverting to last-known-good release" })}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black dark:bg-white text-white dark:text-black text-[11.5px] font-medium hover:opacity-85 transition-opacity"
-                      >
-                        <CheckCircle2 size={13} /> Apply remediation
-                      </button>
-                      <button
-                        onClick={() => router.push(`/incident/evidence-explorer?id=${incidentId}`)}
-                        className="px-3 py-1.5 rounded-lg border border-zinc-500 dark:border-zinc-700 text-[11.5px] font-medium text-black dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-                      >
-                        Investigate in Explorer
-                      </button>
+                  {hyp.risk && (
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-widest text-black/40 dark:text-zinc-500 mb-1">
+                        Risk
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-bold text-black dark:text-zinc-100">
+                          {hyp.risk}
+                        </span>
+                        <span className="text-[12px] font-mono text-black/40 dark:text-zinc-500">
+                          {hyp.ref}
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
-                <span className="text-[10px] font-mono px-2 py-1 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-zinc-400 shrink-0">
-                  {hyp.id}
-                </span>
+
+                <div className="flex gap-2.5 mt-5">
+                  <button
+                    onClick={() =>
+                      toast.success("Rollback started (simulated)", {
+                        description: "Reverting to last-known-good release",
+                      })
+                    }
+                    className="px-5 py-2.5 rounded-lg bg-emerald-600 text-white text-[13.5px] font-bold hover:bg-emerald-700 transition-colors"
+                  >
+                    Apply remediation
+                  </button>
+                  <button
+                    onClick={() =>
+                      router.push(
+                        `/incident/evidence-explorer?id=${incidentId}`,
+                      )
+                    }
+                    className="px-5 py-2.5 rounded-lg border border-[#DDDDDD] dark:border-zinc-700 text-[13.5px] font-bold text-black dark:text-zinc-300 hover:border-emerald-300 dark:hover:border-emerald-500/40 transition-colors"
+                  >
+                    Investigate in Explorer
+                  </button>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div
+              key={hyp.id}
+              className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-5"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-[12px] font-mono text-black/30 dark:text-zinc-600">
+                    {num}
+                  </span>
+                  <p className="text-[16px] font-bold text-black dark:text-zinc-100 leading-tight">
+                    {hyp.title}
+                  </p>
+                </div>
+                <RefPills runUrl={hyp.runUrl} diffUrl={hyp.diffUrl} />
+              </div>
+
+              {hyp.why && (
+                <p className="text-[13.5px] text-black dark:text-zinc-300 mt-1.5">
+                  <span className="text-[11px] font-semibold uppercase tracking-widest text-black/40 dark:text-zinc-500">
+                    Why:{" "}
+                  </span>
+                  <span className="font-semibold">{hyp.why}</span>
+                </p>
+              )}
+
+              {showEvidence && hyp.evidence.length > 0 && (
+                <div className="mt-3">
+                  <div className="space-y-1.5">
+                    {hyp.evidence.map((e, ei) => (
+                      <div key={ei} className="flex items-center gap-2">
+                        <Check
+                          size={13}
+                          className="text-emerald-500 shrink-0"
+                        />
+                        <span className="text-[13px] text-black dark:text-zinc-300">
+                          {e}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-6 mt-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40 dark:text-zinc-500">
+                    Confidence
+                  </span>
+                  <span className="text-[14px] font-bold text-black dark:text-zinc-100">
+                    {hyp.confidence}%
+                  </span>
+                  <div className="h-1.5 w-24 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${tierBar(hyp.confidence)}`}
+                      style={{ width: `${hyp.confidence}%` }}
+                    />
+                  </div>
+                </div>
+                {hyp.risk && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40 dark:text-zinc-500">
+                      Risk
+                    </span>
+                    <span className="text-[14px] font-bold text-black dark:text-zinc-100">
+                      {hyp.risk}
+                    </span>
+                    <span className="text-[11px] font-mono text-black/40 dark:text-zinc-500">
+                      {hyp.ref}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           );

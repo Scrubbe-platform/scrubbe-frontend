@@ -3,6 +3,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
 import { LEAD } from "./incidentDelivery.data";
+import Button from "@/components/ui/Button1";
 
 const Header = ({ incident }: { incident: IncidentDetailRecord }) => {
   const router = useRouter();
@@ -27,14 +28,24 @@ const Header = ({ incident }: { incident: IncidentDetailRecord }) => {
         </p>
       </div>
 
-      {/* Right — Evidence Explorer */}
-      <button
-        type="button"
-        onClick={() => router.push(`/incident/evidence-explorer?id=${incident.id}`)}
-        className="shrink-0 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-[13px] font-semibold text-white transition-colors"
-      >
-        Evidence Explorer
-      </button>
+      <div className="flex items-center gap-3">
+        <Button
+          onClick={() =>
+            router.push(`/incident/evidence-explorer?id=${incident.id}`)
+          }
+          size="sm"
+        >
+          Evidence Explorer
+        </Button>
+        <Button
+          className=""
+          variant="outline-dark"
+          onClick={() => {}}
+          size="sm"
+        >
+          Repull Signals
+        </Button>
+      </div>
     </div>
   );
 };

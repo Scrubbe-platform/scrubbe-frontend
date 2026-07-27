@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useState } from "react";
-import { Sparkles, Send } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import {
   ANSWERS,
   EZRA,
@@ -38,12 +38,24 @@ const EzraAssessment = ({ ticketId }: { ticketId?: string | null }) => {
       const poll = () => {
         const res = getResult("ai_suggestion");
         if (res) {
-          const text = typeof res.result === "string"
-            ? res.result
-            : (res.result as any)?.suggestion ?? (res.result as any)?.content ?? JSON.stringify(res.result, null, 2);
-          setThread((t) => [...t, { role: "ezra", content: text ?? ANSWERS[classifyQuestion(q)] ?? ANSWERS._fallback }]);
+          const text =
+            typeof res.result === "string"
+              ? res.result
+              : ((res.result as any)?.suggestion ??
+                (res.result as any)?.content ??
+                JSON.stringify(res.result, null, 2));
+          setThread((t) => [
+            ...t,
+            {
+              role: "ezra",
+              content:
+                text ?? ANSWERS[classifyQuestion(q)] ?? ANSWERS._fallback,
+            },
+          ]);
           setThinking(false);
-          requestAnimationFrame(() => threadEndRef.current?.scrollIntoView({ behavior: "smooth" }));
+          requestAnimationFrame(() =>
+            threadEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+          );
           return;
         }
         requestAnimationFrame(poll);
@@ -65,120 +77,107 @@ const EzraAssessment = ({ ticketId }: { ticketId?: string | null }) => {
   };
 
   return (
-    <div className="rounded-xl border border-[#DDDDDD] bg-white dark:bg-zinc-900/40 overflow-hidden">
+    <div className="rounded-2xl border border-[#DDDDDD] bg-white dark:bg-zinc-900/40 px-6 py-4 space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-2.5 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shrink-0">
-          <Sparkles size={16} className="text-white" />
-        </div>
-        <div>
-          <p className="text-[14px] font-semibold text-black dark:text-white">
-            Ezra
+      <div>
+        <h2 className="text-base font-bold text-black dark:text-white">Ezra</h2>
+        {teamThinking && !thinking ? (
+          <p className="text-sm text-emerald-600 flex items-center gap-1 mt-0.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {teamThinking.triggeredBy.name} is querying…
           </p>
-          {teamThinking && !thinking ? (
-            <p className="text-[11px] text-indigo-500 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-              {teamThinking.triggeredBy.name} is querying…
-            </p>
-          ) : (
-            <p className="text-[11px] text-black dark:text-zinc-500">
-              {EZRA.sub}
-            </p>
-          )}
+        ) : (
+          <p className="text-[13.5px] text-black/50 dark:text-zinc-500 mt-0.5">
+            {EZRA.sub}
+          </p>
+        )}
+      </div>
+
+      {/* Confidence gauge */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[15px] font-bold text-black dark:text-white">
+            Delivery assessment
+          </span>
+          <span className="text-[17px] font-bold text-black dark:text-white">
+            {EZRA.pct}%
+          </span>
+        </div>
+        <div className="h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-emerald-500 transition-all duration-700"
+            style={{ width: `${EZRA.pct}%` }}
+          />
         </div>
       </div>
 
-      <div className="p-5 space-y-4">
-        {/* Confidence gauge */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
-              Delivery assessment
-            </span>
-            <span className="text-[19px] font-mono font-semibold text-black dark:text-white">
-              {EZRA.pct}%
-            </span>
-          </div>
-          <div className="h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+      {/* Live AI suggestion result (replaces mock text when available) */}
+      {suggestionResult ? (
+        <p className="text-[13.5px] text-emerald-700 dark:text-emerald-400 leading-relaxed bg-emerald-50 dark:bg-emerald-500/10 rounded-lg px-3 py-2">
+          {typeof suggestionResult.result === "string"
+            ? suggestionResult.result
+            : ((suggestionResult.result as any)?.suggestion ??
+              (suggestionResult.result as any)?.content ??
+              EZRA.finding)}
+        </p>
+      ) : (
+        <p className="text-[13.5px] text-black/60 dark:text-zinc-300 leading-relaxed">
+          {EZRA.findingParts.map((part, i) =>
+            part.bold ? (
+              <b key={i} className="font-bold text-black dark:text-white">
+                {part.text}
+              </b>
+            ) : (
+              <React.Fragment key={i}>{part.text}</React.Fragment>
+            ),
+          )}
+        </p>
+      )}
+
+      {/* Thread */}
+      {thread.length > 0 && (
+        <div className="space-y-2 border-t border-zinc-100 dark:border-zinc-800 pt-3">
+          {thread.map((m, i) => (
             <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700"
-              style={{ width: `${EZRA.pct}%` }}
-            />
-          </div>
+              key={i}
+              className={`text-[12.5px] leading-relaxed rounded-lg px-3 py-2 ${
+                m.role === "user"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-black dark:text-zinc-200 ml-6"
+                  : "bg-emerald-50 dark:bg-emerald-500/10 text-black dark:text-zinc-200 mr-6"
+              }`}
+            >
+              {m.content}
+            </div>
+          ))}
+          {thinking && (
+            <div className="mr-6 text-[12.5px] text-black/50 dark:text-zinc-500">
+              Ezra is thinking…
+            </div>
+          )}
+          <div ref={threadEndRef} />
         </div>
+      )}
 
-        {/* Live AI suggestion result (replaces mock text when available) */}
-        {suggestionResult ? (
-          <p className="text-[12.5px] text-indigo-700 dark:text-indigo-400 leading-relaxed bg-indigo-50 dark:bg-indigo-500/10 rounded-lg px-3 py-2">
-            {typeof suggestionResult.result === "string"
-              ? suggestionResult.result
-              : (suggestionResult.result as any)?.suggestion ?? (suggestionResult.result as any)?.content ?? EZRA.finding}
-          </p>
-        ) : (
-          <p className="text-[12.5px] text-black dark:text-zinc-300 leading-relaxed">
-            {EZRA.finding}
-          </p>
-        )}
+      {/* Suggested questions */}
 
-        {/* Thread */}
-        {thread.length > 0 && (
-          <div className="space-y-2 border-t border-zinc-100 dark:border-zinc-800 pt-3">
-            {thread.map((m, i) => (
-              <div
-                key={i}
-                className={`text-[12px] leading-relaxed rounded-lg px-3 py-2 ${
-                  m.role === "user"
-                    ? "bg-zinc-100 dark:bg-zinc-800 text-black dark:text-zinc-200 ml-6"
-                    : "bg-indigo-50 dark:bg-indigo-500/10 text-black dark:text-zinc-200 mr-6"
-                }`}
-              >
-                {m.content}
-              </div>
-            ))}
-            {thinking && (
-              <div className="mr-6 text-[12px] text-black dark:text-zinc-500">
-                Ezra is thinking…
-              </div>
-            )}
-            <div ref={threadEndRef} />
-          </div>
-        )}
-
-        {/* Suggested questions */}
-        {thread.length === 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {SUGGESTED_QUESTIONS.map(({ q, key }) => (
-              <button
-                key={q}
-                type="button"
-                onClick={() => ask(q)}
-                className="text-[11.5px] text-left rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800/40 px-2.5 py-1.5 text-black dark:text-zinc-300 hover:border-indigo-300 dark:hover:border-indigo-500/40 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors"
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Ask box */}
-        <div className="flex gap-2">
-          <input
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") ask();
-            }}
-            placeholder="Ask Ezra about this incident…"
-            className="flex-1 rounded-lg border border-zinc-500 dark:border-zinc-700 bg-white dark:bg-zinc-800/40 px-3 py-2 text-[12.5px] outline-none focus:border-indigo-500 transition-colors"
-          />
-          <button
-            onClick={() => ask()}
-            disabled={!question.trim() || thinking}
-            className="px-3 rounded-lg bg-black dark:bg-white text-white dark:text-black disabled:opacity-40 flex items-center justify-center"
-          >
-            <Send size={14} />
-          </button>
-        </div>
+      {/* Ask box */}
+      <div className="flex items-center gap-2 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 p-2 pl-4">
+        <input
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") ask();
+          }}
+          placeholder="Ask Ezra about this incident…"
+          className="flex-1 bg-transparent text-[13.5px] text-black dark:text-zinc-200 placeholder:text-black/40 dark:placeholder:text-zinc-500 outline-none"
+        />
+        <button
+          onClick={() => ask()}
+          disabled={!question.trim() || thinking}
+          className="w-9 h-9 shrink-0 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-40 flex items-center justify-center transition-colors"
+        >
+          <ArrowUp size={16} />
+        </button>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { EVIDENCE, SourceKey, minsAgo, t } from "./evidenceExplorer.data";
-import { TAG_CLASS, RAIL_CLASS } from "./colors";
+import { TAG_CLASS } from "./colors";
 import { monoFont } from "./fonts";
 import { FilterChip } from "./FilterBar";
 
@@ -51,20 +51,19 @@ const EvidenceFeed: React.FC<{
   }
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-3">
       {items.map((e) => {
         const open = openId === e.id;
         return (
-          <article key={e.id} className="rounded-[10px] border border-[#DDDDDD] bg-white overflow-hidden">
+          <article key={e.id} className="rounded-xl border border-[#E5E5E7] bg-white overflow-hidden">
             <button
               type="button"
               onClick={() => setOpenId(open ? null : e.id)}
-              className="flex items-center gap-[11px] w-full py-[11px] pr-[13px] text-left"
+              className="flex items-center gap-3 w-full px-5 pt-4 pb-1 text-left"
             >
-              <span className={`w-1 self-stretch shrink-0 rounded-r-[3px] ${RAIL_CLASS[e.rail]}`} />
-              <span className={`${monoFont.className} text-[11.5px] text-[#8A8A93] shrink-0 w-[58px] pl-3`}>{e.ts}</span>
-              <span className={`text-[9.5px] font-bold uppercase tracking-wider px-2 py-[3px] rounded-[5px] shrink-0 ${TAG_CLASS[e.tag]}`}>{e.kind}</span>
-              <span className="font-semibold text-[13px] flex-1 min-w-0 truncate text-[#15151A]">{e.title}</span>
+              <span className="text-[13px] text-[#8A8A93] shrink-0">{e.ts}</span>
+              <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-[6px] shrink-0 ${TAG_CLASS["t-neu"]}`}>{e.kind}</span>
+              <span className="flex-1" />
               <svg
                 viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
                 className={`w-[15px] h-[15px] shrink-0 transition-transform text-[#B5B5BC] ${open ? "rotate-90 !text-[#52525B]" : ""}`}
@@ -74,12 +73,12 @@ const EvidenceFeed: React.FC<{
             </button>
 
             {/* meta row */}
-            <div className="grid gap-y-px gap-x-4 px-4 pb-3 pl-[19px]" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
+            <div className="grid gap-y-3 gap-x-4 px-5 pt-3 pb-5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
               {e.meta.map(([label, value, mono, dir]) => (
-                <div key={label} className="flex flex-col gap-px py-1">
-                  <span className="text-[10px] tracking-wide uppercase text-[#8A8A93]">{label}</span>
+                <div key={label} className="flex flex-col gap-1">
+                  <span className="text-[11px] font-semibold tracking-wide uppercase text-[#8A8A93]">{label}</span>
                   <span
-                    className={`text-[12.5px] font-medium ${mono ? monoFont.className : ""} ${
+                    className={`text-[15px] font-bold ${mono ? monoFont.className : ""} ${
                       dir === "up" ? "text-[#B42A30]" : dir === "dn" ? "text-[#0a7a5e]" : "text-[#15151A]"
                     }`}
                   >

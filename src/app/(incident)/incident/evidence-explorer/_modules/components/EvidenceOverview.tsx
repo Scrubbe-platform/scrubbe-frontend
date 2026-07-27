@@ -71,6 +71,7 @@ const EvidenceOverview: React.FC<{
   live: Record<string, number>;
   tick: number;
   onOpenRemediation: () => void;
+  onOpenEzra: () => void;
   onScopeSource: (key: SourceKey) => void;
   onScopeMinute: (min: number | null) => void;
   windowMinutes: number;
@@ -78,6 +79,7 @@ const EvidenceOverview: React.FC<{
   live,
   tick,
   onOpenRemediation,
+  onOpenEzra,
   onScopeSource,
   onScopeMinute,
   windowMinutes,
@@ -112,18 +114,27 @@ const EvidenceOverview: React.FC<{
   }, [tick]);
 
   const pool = poolUsed(live.pgConn);
-  const kpis = [
+  const kpis: {
+    k: string;
+    sv: string;
+    unit: string;
+    sd: string;
+    sp: string;
+    col: string;
+    thr: string;
+    progress?: number;
+  }[] = [
     {
-      k: "Error rate",
+      k: "Error Rate",
       sv: live.errRate.toLocaleString("en-US"),
       unit: "/min",
-      sd: "▲ 54× over baseline",
+      sd: "54x over baseline",
       sp: "err",
       col: COLORS.crit,
       thr: COLORS.crit,
     },
     {
-      k: "DB latency",
+      k: "DB Latency",
       sv: String(live.latency),
       unit: "ms",
       sd: "▲ from 18ms baseline",
@@ -132,16 +143,17 @@ const EvidenceOverview: React.FC<{
       thr: COLORS.warn,
     },
     {
-      k: "Pool usage",
+      k: "Pool Usage",
       sv: `${pool}/200`,
       unit: "",
       sd: "pgbouncer clients",
       sp: "pool",
       col: COLORS.warn,
       thr: COLORS.warn,
+      progress: (pool / 200) * 100,
     },
     {
-      k: "Users impacted",
+      k: "Users Impacted",
       sv: live.affected.toLocaleString("en-US"),
       unit: "",
       sd: "checkout + portal",
@@ -273,6 +285,7 @@ const EvidenceOverview: React.FC<{
 
   // ── War room ────────────────────────────────────────────────────
   const [wrLog, setWrLog] = useState(WRLOG);
+  const [wrActionsOpen, setWrActionsOpen] = useState(false);
   const pageStartRef = useRef(Date.now());
   const [elapsed, setElapsed] = useState(14 * 60 + 22);
   useEffect(() => {
@@ -301,11 +314,7 @@ const EvidenceOverview: React.FC<{
   };
   const wrActions = [
     {
-      icon: (
-        <path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
-      ),
       t: "Declare major incident",
-      s: "Escalate to company-wide major",
       run: () =>
         logAct(
           "act",
@@ -314,21 +323,12 @@ const EvidenceOverview: React.FC<{
         ),
     },
     {
-      icon: (
-        <>
-          <path d="M15.6 3.2A2 2 0 0 0 12 4.5 2 2 0 0 0 8.4 3.2 2.5 2.5 0 0 0 5 6.7c0 4.6 7 9.3 7 9.3s7-4.7 7-9.3a2.5 2.5 0 0 0-3.4-3.5z" />
-          <path d="M3 21h6" />
-        </>
-      ),
       t: "Page on-call",
-      s: "Notify secondary responder",
       run: () =>
         logAct("", "PagerDuty", "Paged <b>secondary on-call</b> · ack pending"),
     },
     {
-      icon: <path d="M4 4h16v12H5.2L4 17.2z" />,
       t: "Post status update",
-      s: "Publish to statuspage",
       run: () =>
         logAct(
           "",
@@ -337,17 +337,11 @@ const EvidenceOverview: React.FC<{
         ),
     },
     {
-      icon: (
-        <path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-      ),
       t: "Review remediation",
-      s: "Open the rollback plan",
       run: onOpenRemediation,
     },
     {
-      icon: <path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.4 2.6L3 8M3 4v4h4" />,
       t: "Start rollback",
-      s: "payments-api v4.3.8 → v4.3.7",
       run: onOpenRemediation,
       danger: true,
     },
@@ -355,24 +349,24 @@ const EvidenceOverview: React.FC<{
 
   return (
     <div className="flex flex-col gap-3.5">
+      <div className="flex justify-end">
+        <button
+          onClick={onOpenEzra}
+          className="h-9 px-4 rounded-[9px] border border-[#E7E6E0] bg-white text-[13px] font-medium text-[#15151A] hover:bg-[#F6F6F3] transition-colors"
+        >
+          More details
+        </button>
+      </div>
+
       {/* KPI tiles */}
-      <div className="grid grid-cols-2  gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
         {kpis.map((k) => (
           <div
             key={k.k}
-            className="relative rounded-[10px] border border-[#DDDDDD] bg-white px-[13px] pt-[11px] pb-2.5 min-h-[78px] overflow-hidden"
+            className="relative rounded-[10px] shadow-sm shadow-light bg-white px-4 pt-3.5 pb-3.5 min-h-[112px] overflow-hidden"
           >
-            <span
-              className="absolute left-0 top-0 bottom-0 w-[3px]"
-              style={{ background: k.thr }}
-            />
-            <div className="text-[10px] tracking-wide uppercase text-[#8A8A93]">
-              {k.k}
-            </div>
-            <div
-              className={`${monoFont.className} text-[25px] font-semibold tracking-tight leading-none mt-1`}
-              style={{ color: k.col }}
-            >
+            <div className="text-[13px] text-[#8A8A93]">{k.k}</div>
+            <div className="text-2xl tracking-tight leading-none text-[#15151A] mt-2">
               {k.sv}
               {k.unit && (
                 <span className="text-[13px] text-[#8A8A93] font-medium ml-0.5">
@@ -380,12 +374,17 @@ const EvidenceOverview: React.FC<{
                 </span>
               )}
             </div>
-            <div
-              className={`${monoFont.className} text-[11px] mt-1.5 text-[#8A8A93]`}
-            >
-              {k.sd}
-            </div>
-            <Sparkline data={kspark[k.sp] ?? []} color={k.col} />
+            <div className="text-[12.5px] mt-2 text-[#8A8A93]">{k.sd}</div>
+            {k.progress != null ? (
+              <div className="h-1.5 rounded-full bg-amber-100 overflow-hidden mt-2.5">
+                <div
+                  className="h-full rounded-full"
+                  style={{ width: `${k.progress}%`, background: k.thr }}
+                />
+              </div>
+            ) : (
+              <Sparkline data={kspark[k.sp] ?? []} color={k.col} />
+            )}
           </div>
         ))}
       </div>
@@ -492,7 +491,7 @@ const EvidenceOverview: React.FC<{
             >
               Signal volume
             </span>
-            <div className="ml-auto inline-flex border border-[#E7E6E0] rounded-[7px] overflow-hidden">
+            <div className="ml-auto inline-flex items-center gap-0.5 p-[3px] bg-[#F1F0EB] rounded-[9px]">
               {(["minute", "source"] as const).map((m) => (
                 <button
                   key={m}
@@ -500,10 +499,10 @@ const EvidenceOverview: React.FC<{
                     setHistMode(m);
                     setHistSel(null);
                   }}
-                  className={`text-[11.5px] font-medium px-2.5 py-[5px] border-r last:border-r-0 border-[#F0EFEA] ${
+                  className={`text-[12px] font-medium px-3 py-[5px] rounded-[7px] transition-colors ${
                     histMode === m
-                      ? "bg-[#EEF0FF] text-[#1B30C4]"
-                      : "text-[#52525B] hover:bg-[#F6F6F3]"
+                      ? "bg-white text-[#16A34A] shadow-sm"
+                      : "text-[#52525B] hover:text-[#15151A]"
                   }`}
                 >
                   {m === "minute" ? "By minute" : "By source"}
@@ -596,15 +595,15 @@ const EvidenceOverview: React.FC<{
             >
               Alerts
             </span>
-            <div className="ml-auto inline-flex border border-[#E7E6E0] rounded-[7px] overflow-hidden">
+            <div className="ml-auto inline-flex items-center gap-0.5 p-[3px] bg-[#F1F0EB] rounded-[9px]">
               {(["all", "firing", "silenced"] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setAlFilter(f)}
-                  className={`text-[11.5px] font-medium px-2.5 py-[5px] border-r last:border-r-0 border-[#F0EFEA] capitalize ${
+                  className={`text-[12px] font-medium px-3 py-[5px] rounded-[7px] capitalize transition-colors ${
                     alFilter === f
-                      ? "bg-[#EEF0FF] text-[#1B30C4]"
-                      : "text-[#52525B] hover:bg-[#F6F6F3]"
+                      ? "bg-white text-[#16A34A] shadow-sm"
+                      : "text-[#52525B] hover:text-[#15151A]"
                   }`}
                 >
                   {f}
@@ -612,7 +611,7 @@ const EvidenceOverview: React.FC<{
               ))}
             </div>
           </div>
-          <div className="p-[13px] flex flex-col gap-2 max-h-[280px] overflow-y-auto">
+          <div className="p-[13px] flex flex-col gap-3 max-h-[320px] overflow-y-auto">
             {visibleAlerts.length === 0 ? (
               <div className="py-4 text-center text-[12.5px] text-[#8A8A93]">
                 No alerts in this view.
@@ -621,102 +620,80 @@ const EvidenceOverview: React.FC<{
               visibleAlerts.map((a) => (
                 <div
                   key={a.id}
-                  className={`rounded-[9px] border border-[#E7E6E0] bg-white px-[11px] py-2.5 flex gap-2.5 items-start transition-opacity ${a.state !== "firing" ? "opacity-60" : ""}`}
+                  className={`rounded-[12px] border border-[#E7E6E0] bg-white px-5 py-4 flex items-center justify-between gap-4 transition-opacity ${a.state !== "firing" ? "opacity-60" : ""}`}
                 >
-                  <span
-                    className={`w-2 h-2 rounded-full mt-1 shrink-0 ${a.sev === "crit" ? "bg-[#E5484D]" : "bg-[#E0890B]"}`}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-[12.5px] text-[#15151A]">
-                        {a.name}
-                      </span>
-                      <span
-                        className={`ml-auto text-[9px] font-bold uppercase tracking-wide px-[7px] py-0.5 rounded-[5px] shrink-0 ${
-                          a.state === "firing"
-                            ? "bg-[#FDECEC] text-[#B42A30]"
-                            : a.state === "acked"
-                              ? "bg-[#FBF1DF] text-[#9a6206]"
-                              : "bg-[#F1F0EB] text-[#52525B]"
-                        }`}
-                      >
-                        {a.state === "firing"
-                          ? "Firing"
-                          : a.state === "acked"
-                            ? "Acknowledged"
-                            : "Silenced"}
-                      </span>
+                  <div className="min-w-0">
+                    <div className="font-bold text-[14px] text-[#15151A]">
+                      {a.name}
                     </div>
-                    <div
-                      className={`${monoFont.className} text-[11px] text-[#8A8A93] mt-0.5`}
-                    >
+                    <div className="text-[12.5px] text-[#8A8A93] mt-1">
                       {a.meta}
                     </div>
-                    <div className="flex gap-1.5 mt-2">
-                      {a.state === "firing" && (
-                        <>
-                          <button
-                            onClick={() => {
-                              setAlertState(a.id, "acked");
-                              toast.success("Alert acknowledged", {
-                                description: a.name,
-                              });
-                            }}
-                            className="mini-btn h-[26px] px-2.5 rounded-[6px] border border-[#E7E6E0] bg-white text-[11.5px] font-medium hover:bg-[#F6F6F3]"
-                          >
-                            Acknowledge
-                          </button>
-                          <button
-                            onClick={() => {
-                              setAlertState(a.id, "silenced");
-                              toast.info("Alert silenced", {
-                                description: a.name,
-                              });
-                            }}
-                            className="h-[26px] px-2.5 rounded-[6px] border border-[#E7E6E0] bg-white text-[11.5px] font-medium hover:bg-[#F6F6F3]"
-                          >
-                            Silence
-                          </button>
-                        </>
-                      )}
-                      {a.state === "acked" && (
-                        <>
-                          <button
-                            onClick={() => {
-                              setAlertState(a.id, "silenced");
-                              toast.info("Alert silenced", {
-                                description: a.name,
-                              });
-                            }}
-                            className="h-[26px] px-2.5 rounded-[6px] border border-[#E7E6E0] bg-white text-[11.5px] font-medium hover:bg-[#F6F6F3]"
-                          >
-                            Silence
-                          </button>
-                          <button
-                            onClick={() => {
-                              setAlertState(a.id, "firing");
-                              toast.info("Alert active", {
-                                description: a.name,
-                              });
-                            }}
-                            className="h-[26px] px-2.5 rounded-[6px] border border-[#E7E6E0] bg-white text-[11.5px] font-medium hover:bg-[#F6F6F3]"
-                          >
-                            Reset
-                          </button>
-                        </>
-                      )}
-                      {a.state === "silenced" && (
+                  </div>
+                  <div className="flex gap-2.5 shrink-0">
+                    {a.state === "firing" && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setAlertState(a.id, "acked");
+                            toast.success("Alert acknowledged", {
+                              description: a.name,
+                            });
+                          }}
+                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] bg-white text-[13px] font-semibold text-[#15151A] hover:bg-[#F6F6F3]"
+                        >
+                          Acknowledge
+                        </button>
+                        <button
+                          onClick={() => {
+                            setAlertState(a.id, "silenced");
+                            toast.info("Alert silenced", {
+                              description: a.name,
+                            });
+                          }}
+                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] bg-white text-[13px] font-semibold text-[#15151A] hover:bg-[#F6F6F3]"
+                        >
+                          Silence
+                        </button>
+                      </>
+                    )}
+                    {a.state === "acked" && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setAlertState(a.id, "silenced");
+                            toast.info("Alert silenced", {
+                              description: a.name,
+                            });
+                          }}
+                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] bg-white text-[13px] font-semibold text-[#15151A] hover:bg-[#F6F6F3]"
+                        >
+                          Silence
+                        </button>
                         <button
                           onClick={() => {
                             setAlertState(a.id, "firing");
-                            toast.info("Alert active", { description: a.name });
+                            toast.info("Alert active", {
+                              description: a.name,
+                            });
                           }}
-                          className="h-[26px] px-2.5 rounded-[6px] border border-[#E7E6E0] bg-white text-[11.5px] font-medium hover:bg-[#F6F6F3]"
+                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] bg-white text-[13px] font-semibold text-[#15151A] hover:bg-[#F6F6F3]"
                         >
-                          Activate
+                          Reset
                         </button>
-                      )}
-                    </div>
+                      </>
+                    )}
+                    {a.state === "silenced" && (
+                      <button
+                        onClick={() => {
+                          setAlertState(a.id, "firing");
+                          toast.info("Alert active", { description: a.name });
+                        }}
+                        className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] bg-white text-[13px] font-semibold text-[#15151A] hover:bg-[#F6F6F3]"
+                      >
+                        Activate
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
@@ -727,98 +704,96 @@ const EvidenceOverview: React.FC<{
 
       {/* War room */}
       <div className="rounded-[10px] border border-[#DDDDDD] bg-white overflow-hidden">
-        <div className="flex items-center gap-2 px-[13px] py-2.5 border-b border-[#F0EFEA]">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.9}
-            className="w-3.5 h-3.5 opacity-60"
-          >
-            <path d="M3 12h4l2-7 4 14 2-5h6" />
-          </svg>
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-[#F0EFEA]">
           <span
-            className={`${displayFont.className} font-semibold text-[12.5px]`}
+            className={`${displayFont.className} font-bold text-[15px] text-[#15151A]`}
           >
             War room
           </span>
-          <span className="text-[11px] text-[#8A8A93]">
+          <span className="text-[13px] text-[#8A8A93]">
             coordinated response · SI-7A42K91
           </span>
         </div>
-        <div className="p-[13px]">
-          <div className="flex items-center gap-2 px-[11px] py-2 rounded-[8px] border border-[#DCE0FF] bg-[#EEF0FF] mb-3 text-[12px]">
-            <span className="relative w-[7px] h-[7px] rounded-full bg-[#E5484D]">
-              <span className="absolute inset-[-4px] rounded-full border-[1.5px] border-[#E5484D] opacity-50 animate-ping" />
+        <div className="p-5">
+          <div className="flex items-center gap-3 mb-4 text-[13px]">
+            <span className="flex items-center gap-2 px-3 py-1.5 rounded-[8px] border border-[#E7E6E0] bg-white shrink-0">
+              <span className="relative w-[7px] h-[7px] rounded-full bg-[#E5484D]">
+                <span className="absolute inset-[-4px] rounded-full border-[1.5px] border-[#E5484D] opacity-50 animate-ping" />
+              </span>
+              <b className="text-[#15151A]">War room live</b>
             </span>
-            <b>War room live</b>
-            <span className="text-[#8A8A93]">· 4 responders + 3 agents</span>
-            <span className={`${monoFont.className} ml-auto text-[#52525B]`}>
-              elapsed {String(Math.floor(elapsed / 60)).padStart(2, "0")}:
-              {String(elapsed % 60).padStart(2, "0")}
+            <span className="text-[#8A8A93]">4 responders + 3 agents</span>
+            <span className="ml-auto text-[#8A8A93] shrink-0">
+              elapsed{" "}
+              <b className={`${monoFont.className} text-[15px] text-[#15151A]`}>
+                {String(Math.floor(elapsed / 60)).padStart(2, "0")}:
+                {String(elapsed % 60).padStart(2, "0")}
+              </b>
             </span>
           </div>
-          <div className="grid grid-cols-1 gap-4">
-            <div className="flex flex-col max-h-[288px] overflow-y-auto pr-1">
-              {wrLog.map((e, i) => (
-                <div
-                  key={i}
-                  className="grid grid-cols-[46px_1fr] gap-2.5 py-2 border-b last:border-0 border-[#F0EFEA] text-[12px]"
-                >
-                  <span
-                    className={`${monoFont.className} text-[10.5px] text-[#8A8A93] pt-0.5`}
+
+          <div className="flex justify-end relative mb-2">
+            <button
+              onClick={() => setWrActionsOpen((o) => !o)}
+              aria-label="War room actions"
+              className="flex items-center justify-center w-9 h-9 rounded-[8px] border border-[#E7E6E0] bg-[#F6F6F3] hover:bg-[#EFEEE8] transition-colors"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#52525B]">
+                <circle cx="12" cy="5" r="1.6" />
+                <circle cx="12" cy="12" r="1.6" />
+                <circle cx="12" cy="19" r="1.6" />
+              </svg>
+            </button>
+            {wrActionsOpen && (
+              <div className="absolute z-20 top-[calc(100%+6px)] right-0 min-w-[220px] bg-white border border-[#E7E6E0] rounded-[10px] shadow-lg p-[5px]">
+                {wrActions.map((a, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      a.run();
+                      setWrActionsOpen(false);
+                    }}
+                    className={`w-full text-left px-[11px] py-[9px] text-[13px] font-medium rounded-[6px] transition-colors ${
+                      a.danger
+                        ? "text-[#B42A30] hover:bg-[#FDECEC]"
+                        : "text-[#15151A] hover:bg-[#F6F6F3]"
+                    }`}
                   >
-                    {e.t}
-                  </span>
-                  <div>
-                    <div
-                      className={
-                        e.cls === "gate"
-                          ? "[&_b]:text-[#1B30C4]"
-                          : e.cls === "appr"
-                            ? "[&_b]:text-[#0a7a5e]"
-                            : e.cls === "act"
-                              ? "[&_b]:text-[#B42A30]"
-                              : ""
-                      }
-                      dangerouslySetInnerHTML={{ __html: e.html }}
-                    />
-                    <div className="text-[10.5px] text-[#8A8A93] mt-0.5">
-                      {e.who}
-                    </div>
+                    {a.t}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col max-h-[320px] overflow-y-auto pr-1">
+            {wrLog.map((e, i) => (
+              <div
+                key={i}
+                className="grid grid-cols-[64px_1fr] gap-3 py-3 border-b last:border-0 border-[#F0EFEA] text-[13px]"
+              >
+                <span className="text-[12px] text-[#8A8A93] pt-0.5">
+                  {e.t}
+                </span>
+                <div>
+                  <div
+                    className={`text-[14px] text-[#15151A] ${
+                      e.cls === "gate"
+                        ? "[&_b]:text-[#1B30C4]"
+                        : e.cls === "appr"
+                          ? "[&_b]:text-[#0a7a5e]"
+                          : e.cls === "act"
+                            ? "[&_b]:text-[#B42A30]"
+                            : ""
+                    }`}
+                    dangerouslySetInnerHTML={{ __html: e.html }}
+                  />
+                  <div className="text-[12.5px] text-[#8A8A93] mt-1">
+                    {e.who}
                   </div>
                 </div>
-              ))}
-            </div>
-            <div className="flex flex-col gap-[7px]">
-              {wrActions.map((a, i) => (
-                <button
-                  key={i}
-                  onClick={a.run}
-                  className={`flex items-center gap-2.5 w-full text-left border rounded-[8px] px-[11px] py-2.5 text-[12.5px] font-medium transition-colors ${
-                    a.danger
-                      ? "border-[#E7E6E0] bg-white hover:border-[#E5484D] hover:bg-[#FDECEC] hover:text-[#B42A30]"
-                      : "border-[#E7E6E0] bg-white hover:border-[#2540F2] hover:bg-[#EEF0FF] hover:text-[#1B30C4]"
-                  }`}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={1.8}
-                    className="w-4 h-4 opacity-70 shrink-0"
-                  >
-                    {a.icon}
-                  </svg>
-                  <span className="flex-1">
-                    {a.t}
-                    <small className="block font-normal text-[11px] text-[#8A8A93] mt-0.5">
-                      {a.s}
-                    </small>
-                  </span>
-                </button>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

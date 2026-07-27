@@ -1111,6 +1111,13 @@ export const NewMenu: Record<string, NavItem[]> = {
       isMenu: false,
     },
     {
+      name: "Incident Relationships",
+      Icon: HiOutlineLink,
+      link: "/incident/incident-relationships",
+      isActive: true,
+      isMenu: false,
+    },
+    {
       name: "Handover",
       Icon: LuShieldAlert,
       link: "/incident/handover",

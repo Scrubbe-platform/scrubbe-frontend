@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -914,7 +914,7 @@ export default function CommandStudio() {
                           >
                             {c.title}
                           </div>
-                          <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500">
+                          <div className="mt-0.5 flex items-center gap-1.5 text-[10.5px] text-black dark:text-zinc-500">
                             {c.pin && (
                               <Pin
                                 size={9}
@@ -1213,9 +1213,8 @@ export default function CommandStudio() {
                       {/* Typing indicator for other users */}
                       {sessionTypingUsers.size > 0 && (
                         <div className="py-1.5 text-[12px] italic text-black dark:text-zinc-500">
-                          {[...sessionTypingUsers]
+                          {Array.from(sessionTypingUsers)
                             .filter((uid) => uid !== currentUser?.id)
-                            .map((uid) => uid)
                             .join(", ")}{" "}
                           {sessionTypingUsers.size === 1 ? "is" : "are"} typing…
                         </div>
@@ -1270,16 +1269,16 @@ export default function CommandStudio() {
             </>
           )}
 
-          {/* ── Personal mode thread ──────────────────────────────── */}
+          {/* ── Personal mode thread + composer ──────────────────── */}
           {mode === "personal" && (
             <>
               <div className="flex-1 overflow-y-auto px-5 py-2 sm:px-8">
                 {showHero ? (
                   <div className="mx-auto max-w-2xl py-8">
-                    <h1 className="mb-2.5 mt-5 text-[25px] font-semibold leading-tight tracking-tight text-black dark:text-zinc-100">
+                    <h1 className="mb-2.5 mt-5 text-[30px] font-semibold leading-tight tracking-tight text-black dark:text-zinc-100">
                       {greeting()}, {currentUser?.firstName || "there"}.
                     </h1>
-                    <p className="mb-6 max-w-md text-base text-black dark:text-zinc-400">
+                    <p className="mb-6 max-w-md text-[15px] text-black dark:text-zinc-400">
                       Ask me to create incidents, set up integrations, run
                       analysis, or get any information about your production
                       estate — I have access to everything in your tenant.
@@ -2069,7 +2068,7 @@ function DeleteConfirm({
         Delete conversation
       </h3>
       <p className="text-[13px] text-black dark:text-zinc-300">
-        Delete <b>“{title}”</b>?
+        Delete <b>"{title}"</b>?
       </p>
       <p className="mt-1 text-[12.5px] text-black dark:text-zinc-500">
         This removes it from the archive. It can't be undone.
