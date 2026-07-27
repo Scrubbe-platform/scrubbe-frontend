@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -756,29 +756,29 @@ export default function CommandStudio() {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden p-4 sm:p-5 lg:grid-cols-[360px_1fr]">
         {/* Conversations sidebar */}
-        <aside className=”flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-sm shadow-light dark:bg-zinc-900/40”>
+        <aside className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-sm shadow-light dark:bg-zinc-900/40">
 
           {/* ── Mode toggle ──────────────────────────────────────────── */}
-          <div className=”p-3 pb-2”>
-            <div className=”flex rounded-lg border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-800 dark:bg-zinc-900/60”>
+          <div className="p-3 pb-2">
+            <div className="flex rounded-lg border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-800 dark:bg-zinc-900/60">
               <button
-                onClick={() => setMode(“personal”)}
+                onClick={() => setMode("personal")}
                 className={cn(
-                  “flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors”,
-                  mode === “personal”
-                    ? “bg-white text-black shadow-sm dark:bg-zinc-800 dark:text-zinc-100”
-                    : “text-zinc-500 hover:text-black dark:hover:text-zinc-300”,
+                  "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors",
+                  mode === "personal"
+                    ? "bg-white text-black shadow-sm dark:bg-zinc-800 dark:text-zinc-100"
+                    : "text-zinc-500 hover:text-black dark:hover:text-zinc-300",
                 )}
               >
                 <MessageSquare size={12} /> Personal
               </button>
               <button
-                onClick={() => setMode(“shared”)}
+                onClick={() => setMode("shared")}
                 className={cn(
-                  “flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors”,
-                  mode === “shared”
-                    ? “bg-white text-black shadow-sm dark:bg-zinc-800 dark:text-zinc-100”
-                    : “text-zinc-500 hover:text-black dark:hover:text-zinc-300”,
+                  "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors",
+                  mode === "shared"
+                    ? "bg-white text-black shadow-sm dark:bg-zinc-800 dark:text-zinc-100"
+                    : "text-zinc-500 hover:text-black dark:hover:text-zinc-300",
                 )}
               >
                 <Users size={12} /> Shared
@@ -787,32 +787,32 @@ export default function CommandStudio() {
           </div>
 
           {/* ── Personal mode sidebar ────────────────────────────────── */}
-          {mode === “personal” && (
+          {mode === "personal" && (
             <>
-              <div className=”space-y-2.5 px-3 pb-2”>
+              <div className="space-y-2.5 px-3 pb-2">
                 <button
                   onClick={newConversation}
-                  className=”flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700”
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700"
                 >
                   <Plus size={15} /> New conversation
                 </button>
-                <div className=”relative”>
+                <div className="relative">
                   <Search
                     size={13}
-                    className=”pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-black dark:text-zinc-500”
+                    className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-black dark:text-zinc-500"
                   />
                   <input
                     value={convFilter}
                     onChange={(e) => setConvFilter(e.target.value)}
-                    placeholder=”Search conversations…”
-                    className=”w-full rounded-lg border border-zinc-200 bg-zinc-50 py-1.5 pl-8 pr-2.5 text-[12.5px] text-black placeholder:text-zinc-400 focus:border-emerald-400 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-200”
+                    placeholder="Search conversations…"
+                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 py-1.5 pl-8 pr-2.5 text-[12.5px] text-black placeholder:text-zinc-400 focus:border-emerald-400 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-200"
                   />
                 </div>
               </div>
-              <div className=”flex-1 space-y-4 overflow-y-auto px-2 pb-4”>
+              <div className="flex-1 space-y-4 overflow-y-auto px-2 pb-4">
                 {!filteredConvs.length && (
-                  <p className=”px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500”>
-                    No conversations match <b>”{convFilter}”</b>.
+                  <p className="px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500">
+                    No conversations match <b>"{convFilter}"</b>.
                   </p>
                 )}
                 {GROUP_ORDER.map((group) => {
@@ -820,52 +820,52 @@ export default function CommandStudio() {
                   if (!items.length) return null;
                   return (
                     <div key={group}>
-                      <div className=”px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500”>
+                      <div className="px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
                         {group}
                       </div>
                       {items.map((c) => (
                         <div
                           key={c.id}
                           onClick={() => setActiveId(c.id)}
-                          role=”button”
+                          role="button"
                           tabIndex={0}
                           onKeyDown={(e) => {
-                            if (e.key === “Enter” || e.key === “ “)
+                            if (e.key === "Enter" || e.key === " ")
                               setActiveId(c.id);
                           }}
                           className={cn(
-                            “group relative cursor-pointer rounded-lg px-2.5 py-2 pr-7”,
+                            "group relative cursor-pointer rounded-lg px-2.5 py-2 pr-7",
                             c.id === activeId
-                              ? “bg-emerald-50 dark:bg-emerald-500/10”
-                              : “hover:bg-zinc-100 dark:hover:bg-zinc-800/60”,
+                              ? "bg-emerald-50 dark:bg-emerald-500/10"
+                              : "hover:bg-zinc-100 dark:hover:bg-zinc-800/60",
                           )}
                         >
                           <div
                             className={cn(
-                              “truncate text-[13px] text-black dark:text-zinc-200”,
-                              c.id === activeId && “font-semibold”,
+                              "truncate text-[13px] text-black dark:text-zinc-200",
+                              c.id === activeId && "font-semibold",
                             )}
                           >
                             {c.title}
                           </div>
-                          <div className=”mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500”>
+                          <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500">
                             {c.pin && (
                               <Pin
                                 size={9}
-                                className=”text-emerald-600 dark:text-emerald-400”
+                                className="text-emerald-600 dark:text-emerald-400"
                               />
                             )}
                             {c.live && (
-                              <span className=”h-1.5 w-1.5 rounded-full bg-emerald-500” />
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                             )}
-                            {c.pin ? “pinned” : c.live ? “live” : c.meta}
+                            {c.pin ? "pinned" : c.live ? "live" : c.meta}
                           </div>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setModal({ kind: “convMenu”, id: c.id });
+                              setModal({ kind: "convMenu", id: c.id });
                             }}
-                            className=”absolute right-1 top-1.5 flex h-6 w-6 items-center justify-center rounded text-black opacity-0 transition-opacity hover:bg-zinc-200 group-hover:opacity-100 dark:text-zinc-500 dark:hover:bg-zinc-700”
+                            className="absolute right-1 top-1.5 flex h-6 w-6 items-center justify-center rounded text-black opacity-0 transition-opacity hover:bg-zinc-200 group-hover:opacity-100 dark:text-zinc-500 dark:hover:bg-zinc-700"
                           >
                             <MoreVertical size={13} />
                           </button>
@@ -879,24 +879,24 @@ export default function CommandStudio() {
           )}
 
           {/* ── Shared mode sidebar ──────────────────────────────────── */}
-          {mode === “shared” && (
+          {mode === "shared" && (
             <>
-              <div className=”px-3 pb-2”>
+              <div className="px-3 pb-2">
                 <button
-                  onClick={() => setModal({ kind: “newSession” })}
-                  className=”flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700”
+                  onClick={() => setModal({ kind: "newSession" })}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700"
                 >
                   <Plus size={15} /> New Shared Session
                 </button>
               </div>
-              <div className=”flex-1 overflow-y-auto px-2 pb-4”>
+              <div className="flex-1 overflow-y-auto px-2 pb-4">
                 {sessionsLoading && (
-                  <p className=”px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500”>
+                  <p className="px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500">
                     Loading sessions…
                   </p>
                 )}
                 {!sessionsLoading && !sessions.length && (
-                  <p className=”px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500”>
+                  <p className="px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500">
                     No shared sessions yet. Create one to collaborate with your team.
                   </p>
                 )}
@@ -906,31 +906,31 @@ export default function CommandStudio() {
                     <div
                       key={s.id}
                       onClick={() => setActiveSessionId(s.id)}
-                      role=”button”
+                      role="button"
                       tabIndex={0}
                       onKeyDown={(e) => {
-                        if (e.key === “Enter” || e.key === “ “) setActiveSessionId(s.id);
+                        if (e.key === "Enter" || e.key === " ") setActiveSessionId(s.id);
                       }}
                       className={cn(
-                        “group cursor-pointer rounded-lg px-2.5 py-2.5”,
+                        "group cursor-pointer rounded-lg px-2.5 py-2.5",
                         s.id === activeSessionId
-                          ? “bg-emerald-50 dark:bg-emerald-500/10”
-                          : “hover:bg-zinc-100 dark:hover:bg-zinc-800/60”,
+                          ? "bg-emerald-50 dark:bg-emerald-500/10"
+                          : "hover:bg-zinc-100 dark:hover:bg-zinc-800/60",
                       )}
                     >
                       <div
                         className={cn(
-                          “truncate text-[13px] text-black dark:text-zinc-200”,
-                          s.id === activeSessionId && “font-semibold”,
+                          "truncate text-[13px] text-black dark:text-zinc-200",
+                          s.id === activeSessionId && "font-semibold",
                         )}
                       >
                         {s.title}
                       </div>
-                      <div className=”mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500”>
+                      <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500">
                         <Users size={9} />
-                        {pCount} participant{pCount !== 1 ? “s” : “”}
+                        {pCount} participant{pCount !== 1 ? "s" : ""}
                         {s.lastMessage && (
-                          <span className=”ml-1 max-w-[120px] truncate”>
+                          <span className="ml-1 max-w-[120px] truncate">
                             · {s.lastMessage}
                           </span>
                         )}
@@ -1110,9 +1110,8 @@ export default function CommandStudio() {
                       {/* Typing indicator for other users */}
                       {sessionTypingUsers.size > 0 && (
                         <div className="py-1.5 text-[12px] italic text-black dark:text-zinc-500">
-                          {[...sessionTypingUsers]
+                          {Array.from(sessionTypingUsers)
                             .filter((uid) => uid !== currentUser?.id)
-                            .map((uid) => uid)
                             .join(", ")}{" "}
                           {sessionTypingUsers.size === 1 ? "is" : "are"} typing…
                         </div>
@@ -1162,8 +1161,9 @@ export default function CommandStudio() {
             </>
           )}
 
-          {/* ── Personal mode thread ──────────────────────────────── */}
+          {/* ── Personal mode thread + composer ──────────────────── */}
           {mode === "personal" && (
+          <>
           <div className="flex-1 overflow-y-auto px-5 py-2 sm:px-8">
             {showHero ? (
               <div className="mx-auto max-w-2xl py-8">
@@ -1448,6 +1448,7 @@ export default function CommandStudio() {
               </p>
             </div>
           </div>
+          </>
           )}
         </section>
       </div>
@@ -1945,7 +1946,7 @@ function DeleteConfirm({
         Delete conversation
       </h3>
       <p className="text-[13px] text-black dark:text-zinc-300">
-        Delete <b>“{title}”</b>?
+        Delete <b>"{title}"</b>?
       </p>
       <p className="mt-1 text-[12.5px] text-black dark:text-zinc-500">
         This removes it from the archive. It can't be undone.
