@@ -31,7 +31,10 @@ import { useCurrentUser, User } from "@/lib/api";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { useStudioSession } from "@/hooks/useStudioSession";
-import type { SessionMessage, SessionParticipant } from "@/hooks/useStudioSession";
+import type {
+  SessionMessage,
+  SessionParticipant,
+} from "@/hooks/useStudioSession";
 import {
   AuditEntry,
   BASE_SUGGESTIONS,
@@ -56,6 +59,7 @@ import {
   matchIntent,
 } from "./intents";
 import { CardHandlers, EntityPickCard, RestartClarifyCard } from "./cards";
+import useCurrentUserProfile from "@/hooks/useCurrentUserProfile";
 
 // ── turn model ────────────────────────────────────────────────────────
 
@@ -87,7 +91,13 @@ type ApiTurn = {
   kind: "api";
   status: "thinking" | "done";
   text: string;
-  actions: { type: string; label: string; id: string | null; url: string | null; extra: string | null }[];
+  actions: {
+    type: string;
+    label: string;
+    id: string | null;
+    url: string | null;
+    extra: string | null;
+  }[];
   suggestedFollowUps: string[];
 };
 type Turn =
@@ -198,14 +208,29 @@ interface SessionSummary {
 // ── shared-mode avatar helpers ────────────────────────────────────────
 
 function avatarColor(id: string): string {
-  const colors = ["#6366f1","#ec4899","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ef4444"];
+  const colors = [
+    "#6366f1",
+    "#ec4899",
+    "#f59e0b",
+    "#10b981",
+    "#3b82f6",
+    "#8b5cf6",
+    "#ef4444",
+  ];
   let h = 0;
   for (const c of id) h = (h * 31 + c.charCodeAt(0)) & 0xfffffff;
   return colors[h % colors.length];
 }
 
 function initials(name: string): string {
-  return name.split(" ").map((w) => w[0] ?? "").join("").slice(0, 2).toUpperCase() || "?";
+  return (
+    name
+      .split(" ")
+      .map((w) => w[0] ?? "")
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?"
+  );
 }
 
 // ── component ─────────────────────────────────────────────────────────
@@ -253,6 +278,8 @@ export default function CommandStudio() {
   const sharedThreadEndRef = useRef<HTMLDivElement>(null);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const user = useCurrentUserProfile();
+
   const {
     messages: sessionMessages,
     participants: sessionParticipants,
@@ -275,7 +302,9 @@ export default function CommandStudio() {
   }, []);
 
   useEffect(() => {
-    try { localStorage.setItem("cs:conversations", JSON.stringify(conversations)); } catch {}
+    try {
+      localStorage.setItem("cs:conversations", JSON.stringify(conversations));
+    } catch {}
   }, [conversations]);
 
   const currentUserName =
@@ -321,13 +350,18 @@ export default function CommandStudio() {
       }
       setSessionsLoading(false);
     });
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
   // Scroll to bottom when new shared messages arrive
   useEffect(() => {
-    sharedThreadEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    sharedThreadEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
   }, [sessionMessages]);
 
   function showToast(msg: string) {
@@ -412,11 +446,17 @@ export default function CommandStudio() {
 
     // Build conversation history from existing turns (last 10)
     const historyTurns = (conv?.turns ?? []).slice(-20);
-    const conversationHistory: { role: "user" | "assistant"; content: string }[] = [];
+    const conversationHistory: {
+      role: "user" | "assistant";
+      content: string;
+    }[] = [];
     for (const t of historyTurns) {
-      if (t.kind === "user") conversationHistory.push({ role: "user", content: t.text });
-      else if (t.kind === "api" && t.status === "done") conversationHistory.push({ role: "assistant", content: t.text });
-      else if (t.kind === "ack") conversationHistory.push({ role: "assistant", content: t.text });
+      if (t.kind === "user")
+        conversationHistory.push({ role: "user", content: t.text });
+      else if (t.kind === "api" && t.status === "done")
+        conversationHistory.push({ role: "assistant", content: t.text });
+      else if (t.kind === "ack")
+        conversationHistory.push({ role: "assistant", content: t.text });
     }
 
     appendTurn(convId, {
@@ -442,24 +482,45 @@ export default function CommandStudio() {
     if (resp.success && resp.data) {
       const data = resp.data as {
         text: string;
-        actions: { type: string; label: string; id: string | null; url: string | null; extra: string | null }[];
+        actions: {
+          type: string;
+          label: string;
+          id: string | null;
+          url: string | null;
+          extra: string | null;
+        }[];
         suggestedFollowUps: string[];
       };
       updateConv(convId, (c) => ({
         ...c,
         turns: c.turns.map((t) =>
           t.id === turnId && t.kind === "api"
-            ? { ...t, status: "done" as const, text: data.text, actions: data.actions ?? [], suggestedFollowUps: data.suggestedFollowUps ?? [] }
+            ? {
+                ...t,
+                status: "done" as const,
+                text: data.text,
+                actions: data.actions ?? [],
+                suggestedFollowUps: data.suggestedFollowUps ?? [],
+              }
             : t,
         ),
       }));
     } else {
-      const errMsg = typeof resp.data === "string" ? resp.data : "Ezra encountered an error. Please try again.";
+      const errMsg =
+        typeof resp.data === "string"
+          ? resp.data
+          : "Ezra encountered an error. Please try again.";
       updateConv(convId, (c) => ({
         ...c,
         turns: c.turns.map((t) =>
           t.id === turnId && t.kind === "api"
-            ? { ...t, status: "done" as const, text: errMsg, actions: [], suggestedFollowUps: [] }
+            ? {
+                ...t,
+                status: "done" as const,
+                text: errMsg,
+                actions: [],
+                suggestedFollowUps: [],
+              }
             : t,
         ),
       }));
@@ -654,7 +715,11 @@ export default function CommandStudio() {
       return BASE_SUGGESTIONS.map((s) => ({ label: s, send: s }));
     for (let i = activeConv.turns.length - 1; i >= 0; i--) {
       const t = activeConv.turns[i];
-      if (t.kind === "api" && t.status === "done" && t.suggestedFollowUps.length > 0) {
+      if (
+        t.kind === "api" &&
+        t.status === "done" &&
+        t.suggestedFollowUps.length > 0
+      ) {
         return t.suggestedFollowUps.map((s) => ({ label: s, send: s }));
       }
       if (t.kind === "clarifyEntity" || t.kind === "clarifyRestart")
@@ -687,7 +752,9 @@ export default function CommandStudio() {
   }
 
   async function inviteToSession(sId: string, targetUserId: string) {
-    await post(`${endpoint.studio_sessions.invite}/${sId}/invite`, { targetUserId });
+    await post(`${endpoint.studio_sessions.invite}/${sId}/invite`, {
+      targetUserId,
+    });
     setModal({ kind: "none" });
     showToast("Invite sent");
   }
@@ -754,31 +821,30 @@ export default function CommandStudio() {
         </button>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden p-4 sm:p-5 lg:grid-cols-[360px_1fr]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden p-4 sm:p-5 lg:grid-cols-[270px_1fr]">
         {/* Conversations sidebar */}
-        <aside className=”flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-sm shadow-light dark:bg-zinc-900/40”>
-
+        <aside className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-sm shadow-light dark:bg-zinc-900/40">
           {/* ── Mode toggle ──────────────────────────────────────────── */}
-          <div className=”p-3 pb-2”>
-            <div className=”flex rounded-lg border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-800 dark:bg-zinc-900/60”>
+          <div className="p-3 pb-2">
+            <div className="flex rounded-lg border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-800 dark:bg-zinc-900/60">
               <button
-                onClick={() => setMode(“personal”)}
+                onClick={() => setMode("personal")}
                 className={cn(
-                  “flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors”,
-                  mode === “personal”
-                    ? “bg-white text-black shadow-sm dark:bg-zinc-800 dark:text-zinc-100”
-                    : “text-zinc-500 hover:text-black dark:hover:text-zinc-300”,
+                  "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors",
+                  mode === "personal"
+                    ? "bg-white text-black shadow-sm dark:bg-zinc-800 dark:text-zinc-100"
+                    : "text-zinc-500 hover:text-black dark:hover:text-zinc-300",
                 )}
               >
                 <MessageSquare size={12} /> Personal
               </button>
               <button
-                onClick={() => setMode(“shared”)}
+                onClick={() => setMode("shared")}
                 className={cn(
-                  “flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors”,
-                  mode === “shared”
-                    ? “bg-white text-black shadow-sm dark:bg-zinc-800 dark:text-zinc-100”
-                    : “text-zinc-500 hover:text-black dark:hover:text-zinc-300”,
+                  "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors",
+                  mode === "shared"
+                    ? "bg-white text-black shadow-sm dark:bg-zinc-800 dark:text-zinc-100"
+                    : "text-zinc-500 hover:text-black dark:hover:text-zinc-300",
                 )}
               >
                 <Users size={12} /> Shared
@@ -787,32 +853,32 @@ export default function CommandStudio() {
           </div>
 
           {/* ── Personal mode sidebar ────────────────────────────────── */}
-          {mode === “personal” && (
+          {mode === "personal" && (
             <>
-              <div className=”space-y-2.5 px-3 pb-2”>
+              <div className="space-y-2.5 px-3 pb-2">
                 <button
                   onClick={newConversation}
-                  className=”flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700”
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700"
                 >
                   <Plus size={15} /> New conversation
                 </button>
-                <div className=”relative”>
+                <div className="relative">
                   <Search
                     size={13}
-                    className=”pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-black dark:text-zinc-500”
+                    className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-black dark:text-zinc-500"
                   />
                   <input
                     value={convFilter}
                     onChange={(e) => setConvFilter(e.target.value)}
-                    placeholder=”Search conversations…”
-                    className=”w-full rounded-lg border border-zinc-200 bg-zinc-50 py-1.5 pl-8 pr-2.5 text-[12.5px] text-black placeholder:text-zinc-400 focus:border-emerald-400 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-200”
+                    placeholder="Search conversations…"
+                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 py-1.5 pl-8 pr-2.5 text-[12.5px] text-black placeholder:text-zinc-400 focus:border-emerald-400 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-200"
                   />
                 </div>
               </div>
-              <div className=”flex-1 space-y-4 overflow-y-auto px-2 pb-4”>
+              <div className="flex-1 space-y-4 overflow-y-auto px-2 pb-4">
                 {!filteredConvs.length && (
-                  <p className=”px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500”>
-                    No conversations match <b>”{convFilter}”</b>.
+                  <p className="px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500">
+                    No conversations match <b>"{convFilter}"</b>.
                   </p>
                 )}
                 {GROUP_ORDER.map((group) => {
@@ -820,52 +886,52 @@ export default function CommandStudio() {
                   if (!items.length) return null;
                   return (
                     <div key={group}>
-                      <div className=”px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500”>
+                      <div className="px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
                         {group}
                       </div>
                       {items.map((c) => (
                         <div
                           key={c.id}
                           onClick={() => setActiveId(c.id)}
-                          role=”button”
+                          role="button"
                           tabIndex={0}
                           onKeyDown={(e) => {
-                            if (e.key === “Enter” || e.key === “ “)
+                            if (e.key === "Enter" || e.key === " ")
                               setActiveId(c.id);
                           }}
                           className={cn(
-                            “group relative cursor-pointer rounded-lg px-2.5 py-2 pr-7”,
+                            "group relative cursor-pointer rounded-lg px-2.5 py-2 pr-7",
                             c.id === activeId
-                              ? “bg-emerald-50 dark:bg-emerald-500/10”
-                              : “hover:bg-zinc-100 dark:hover:bg-zinc-800/60”,
+                              ? "bg-emerald-50 dark:bg-emerald-500/10"
+                              : "hover:bg-zinc-100 dark:hover:bg-zinc-800/60",
                           )}
                         >
                           <div
                             className={cn(
-                              “truncate text-[13px] text-black dark:text-zinc-200”,
-                              c.id === activeId && “font-semibold”,
+                              "truncate text-[13px] text-black dark:text-zinc-200",
+                              c.id === activeId && "font-semibold",
                             )}
                           >
                             {c.title}
                           </div>
-                          <div className=”mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500”>
+                          <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500">
                             {c.pin && (
                               <Pin
                                 size={9}
-                                className=”text-emerald-600 dark:text-emerald-400”
+                                className="text-emerald-600 dark:text-emerald-400"
                               />
                             )}
                             {c.live && (
-                              <span className=”h-1.5 w-1.5 rounded-full bg-emerald-500” />
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                             )}
-                            {c.pin ? “pinned” : c.live ? “live” : c.meta}
+                            {c.pin ? "pinned" : c.live ? "live" : c.meta}
                           </div>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setModal({ kind: “convMenu”, id: c.id });
+                              setModal({ kind: "convMenu", id: c.id });
                             }}
-                            className=”absolute right-1 top-1.5 flex h-6 w-6 items-center justify-center rounded text-black opacity-0 transition-opacity hover:bg-zinc-200 group-hover:opacity-100 dark:text-zinc-500 dark:hover:bg-zinc-700”
+                            className="absolute right-1 top-1.5 flex h-6 w-6 items-center justify-center rounded text-black opacity-0 transition-opacity hover:bg-zinc-200 group-hover:opacity-100 dark:text-zinc-500 dark:hover:bg-zinc-700"
                           >
                             <MoreVertical size={13} />
                           </button>
@@ -879,58 +945,61 @@ export default function CommandStudio() {
           )}
 
           {/* ── Shared mode sidebar ──────────────────────────────────── */}
-          {mode === “shared” && (
+          {mode === "shared" && (
             <>
-              <div className=”px-3 pb-2”>
+              <div className="px-3 pb-2">
                 <button
-                  onClick={() => setModal({ kind: “newSession” })}
-                  className=”flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700”
+                  onClick={() => setModal({ kind: "newSession" })}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700"
                 >
                   <Plus size={15} /> New Shared Session
                 </button>
               </div>
-              <div className=”flex-1 overflow-y-auto px-2 pb-4”>
+              <div className="flex-1 overflow-y-auto px-2 pb-4">
                 {sessionsLoading && (
-                  <p className=”px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500”>
+                  <p className="px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500">
                     Loading sessions…
                   </p>
                 )}
                 {!sessionsLoading && !sessions.length && (
-                  <p className=”px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500”>
-                    No shared sessions yet. Create one to collaborate with your team.
+                  <p className="px-2.5 py-4 text-[12.5px] text-black dark:text-zinc-500">
+                    No shared sessions yet. Create one to collaborate with your
+                    team.
                   </p>
                 )}
                 {sessions.map((s) => {
-                  const pCount = s.participantCount ?? s.participants?.length ?? 0;
+                  const pCount =
+                    s.participantCount ?? s.participants?.length ?? 0;
                   return (
                     <div
                       key={s.id}
                       onClick={() => setActiveSessionId(s.id)}
-                      role=”button”
+                      role="button"
                       tabIndex={0}
                       onKeyDown={(e) => {
-                        if (e.key === “Enter” || e.key === “ “) setActiveSessionId(s.id);
+                        if (e.key === "Enter" || e.key === " ")
+                          setActiveSessionId(s.id);
                       }}
                       className={cn(
-                        “group cursor-pointer rounded-lg px-2.5 py-2.5”,
+                        "group cursor-pointer rounded-lg px-2.5 py-2.5",
                         s.id === activeSessionId
-                          ? “bg-emerald-50 dark:bg-emerald-500/10”
-                          : “hover:bg-zinc-100 dark:hover:bg-zinc-800/60”,
+                          ? "bg-emerald-50 dark:bg-emerald-500/10"
+                          : "hover:bg-zinc-100 dark:hover:bg-zinc-800/60",
                       )}
                     >
                       <div
                         className={cn(
-                          “truncate text-[13px] text-black dark:text-zinc-200”,
-                          s.id === activeSessionId && “font-semibold”,
+                          "truncate text-[13px] text-black dark:text-zinc-200",
+                          s.id === activeSessionId && "font-semibold",
                         )}
                       >
                         {s.title}
                       </div>
-                      <div className=”mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500”>
+                      <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500">
                         <Users size={9} />
-                        {pCount} participant{pCount !== 1 ? “s” : “”}
+                        {pCount} participant{pCount !== 1 ? "s" : ""}
                         {s.lastMessage && (
-                          <span className=”ml-1 max-w-[120px] truncate”>
+                          <span className="ml-1 max-w-[120px] truncate">
                             · {s.lastMessage}
                           </span>
                         )}
@@ -945,19 +1014,23 @@ export default function CommandStudio() {
 
         {/* Thread + composer */}
         <section className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-sm shadow-light dark:bg-zinc-900/40">
-
           {/* ── Shared session panel ──────────────────────────────── */}
           {mode === "shared" && (
             <>
               {!activeSessionId ? (
                 <div className="flex flex-1 items-center justify-center px-8">
                   <div className="max-w-sm text-center">
-                    <Users size={32} className="mx-auto mb-3 text-zinc-300 dark:text-zinc-700" />
+                    <Users
+                      size={32}
+                      className="mx-auto mb-3 text-zinc-300 dark:text-zinc-700"
+                    />
                     <h3 className="mb-1 text-[16px] font-semibold text-black dark:text-zinc-100">
                       No session selected
                     </h3>
                     <p className="text-[13px] text-black dark:text-zinc-400">
-                      Pick a shared session from the sidebar or create a new one. All participants see the same conversation in real-time.
+                      Pick a shared session from the sidebar or create a new
+                      one. All participants see the same conversation in
+                      real-time.
                     </p>
                   </div>
                 </div>
@@ -1000,7 +1073,12 @@ export default function CommandStudio() {
                     </div>
                     <div className="ml-auto">
                       <button
-                        onClick={() => setModal({ kind: "inviteUser", sessionId: activeSessionId })}
+                        onClick={() =>
+                          setModal({
+                            kind: "inviteUser",
+                            sessionId: activeSessionId,
+                          })
+                        }
                         className="flex items-center gap-1.5 rounded-lg border border-zinc-300 px-2.5 py-1 text-[12px] text-black transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-emerald-500/50 dark:hover:text-emerald-400"
                       >
                         <UserPlus size={13} /> Invite
@@ -1013,15 +1091,18 @@ export default function CommandStudio() {
                     <div className="mx-auto max-w-2xl">
                       {sessionMessages.length === 0 && !agentThinking && (
                         <p className="py-8 text-center text-[13px] text-black dark:text-zinc-500">
-                          Session started. Send a message to begin collaborating.
+                          Session started. Send a message to begin
+                          collaborating.
                         </p>
                       )}
                       {sessionMessages.map((msg) => {
-                        const isAgent = msg.senderType === "AGENT" || msg.role === "assistant";
+                        const isAgent =
+                          msg.senderType === "AGENT" ||
+                          msg.role === "assistant";
                         const isOwn =
                           !isAgent &&
                           currentUser != null &&
-                          (msg.senderId === currentUser?.id);
+                          msg.senderId === currentUser?.id;
                         if (isAgent) {
                           return (
                             <div key={msg.id} className="flex gap-3 py-4">
@@ -1038,9 +1119,14 @@ export default function CommandStudio() {
                                 {msg.actions?.length > 0 && (
                                   <div className="mb-3 space-y-1.5">
                                     {msg.actions.map((a, i) => (
-                                      <div key={i} className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-[12.5px] dark:border-emerald-500/20 dark:bg-emerald-500/5">
+                                      <div
+                                        key={i}
+                                        className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-[12.5px] dark:border-emerald-500/20 dark:bg-emerald-500/5"
+                                      >
                                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                        <span className="font-medium text-emerald-700 dark:text-emerald-400">{a.label}</span>
+                                        <span className="font-medium text-emerald-700 dark:text-emerald-400">
+                                          {a.label}
+                                        </span>
                                       </div>
                                     ))}
                                   </div>
@@ -1051,15 +1137,24 @@ export default function CommandStudio() {
                         }
                         if (isOwn) {
                           return (
-                            <div key={msg.id} className="flex justify-end gap-3 py-3">
+                            <div
+                              key={msg.id}
+                              className="flex justify-end gap-3 py-3"
+                            >
                               <div className="max-w-[78%] rounded-2xl rounded-br-sm border border-zinc-200 bg-zinc-100 px-4 py-2.5 text-[14px] text-black dark:border-zinc-800 dark:bg-zinc-800/60 dark:text-zinc-100">
                                 {msg.content}
                               </div>
                               <div
                                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-semibold text-white"
-                                style={{ backgroundColor: avatarColor(msg.senderId ?? "u") }}
+                                style={{
+                                  backgroundColor: avatarColor(
+                                    msg.senderId ?? "u",
+                                  ),
+                                }}
                               >
-                                {initials(msg.senderName ?? currentUserInitials)}
+                                {initials(
+                                  msg.senderName ?? currentUserInitials,
+                                )}
                               </div>
                             </div>
                           );
@@ -1069,9 +1164,17 @@ export default function CommandStudio() {
                           <div key={msg.id} className="flex gap-3 py-3">
                             <div
                               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-semibold text-white"
-                              style={{ backgroundColor: avatarColor(msg.senderId ?? "x") }}
+                              style={{
+                                backgroundColor: avatarColor(
+                                  msg.senderId ?? "x",
+                                ),
+                              }}
                             >
-                              {initials(msg.senderName ?? msg.senderId?.slice(0, 2) ?? "?")}
+                              {initials(
+                                msg.senderName ??
+                                  msg.senderId?.slice(0, 2) ??
+                                  "?",
+                              )}
                             </div>
                             <div className="min-w-0 flex-1">
                               {msg.senderName && (
@@ -1133,7 +1236,11 @@ export default function CommandStudio() {
                           onChange={(e) => {
                             setSharedInput(e.target.value);
                             const el = sharedTextareaRef.current;
-                            if (el) { el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 140) + "px"; }
+                            if (el) {
+                              el.style.height = "auto";
+                              el.style.height =
+                                Math.min(el.scrollHeight, 140) + "px";
+                            }
                             handleSharedTyping();
                           }}
                           onKeyDown={(e) => {
@@ -1153,7 +1260,8 @@ export default function CommandStudio() {
                         </button>
                       </div>
                       <p className="mt-2 text-center text-[10.5px] text-black dark:text-zinc-500">
-                        All participants in this session see every message in real-time.
+                        All participants in this session see every message in
+                        real-time.
                       </p>
                     </div>
                   </div>
@@ -1164,290 +1272,306 @@ export default function CommandStudio() {
 
           {/* ── Personal mode thread ──────────────────────────────── */}
           {mode === "personal" && (
-          <div className="flex-1 overflow-y-auto px-5 py-2 sm:px-8">
-            {showHero ? (
-              <div className="mx-auto max-w-2xl py-8">
-                <h1 className="mb-2.5 mt-5 text-[30px] font-semibold leading-tight tracking-tight text-black dark:text-zinc-100">
-                  {greeting()}, {currentUser?.firstName || "there"}.
-                </h1>
-                <p className="mb-6 max-w-md text-[15px] text-black dark:text-zinc-400">
-                  Ask me to create incidents, set up integrations, run analysis,
-                  or get any information about your production estate — I have
-                  access to everything in your tenant.
-                </p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {BASE_SUGGESTIONS.map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => send(p)}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-left text-[13.5px] text-black transition-colors hover:border-emerald-400 hover:bg-emerald-50/50 dark:border-zinc-800 dark:bg-transparent dark:text-zinc-200 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-500/5"
-                    >
-                      {p}
-                      <ChevronRight
-                        size={14}
-                        className="shrink-0 text-black dark:text-zinc-500"
-                      />
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setModal({ kind: "library" })}
-                  className="mt-4 flex items-center gap-1.5 text-[12.5px] font-medium text-emerald-600 hover:underline dark:text-emerald-400"
-                >
-                  <BookOpen size={13} /> Browse the team prompt library →
-                </button>
-              </div>
-            ) : (
-              <div className="mx-auto max-w-2xl">
-                {activeConv?.turns.map((turn, _turnIdx, allTurns) => {
-                  const convId = activeConv.id;
-                  const lastApiTurnId = [...allTurns].reverse().find((t) => t.kind === "api" && t.status === "done")?.id;
-                  if (turn.kind === "user") {
-                    return (
-                      <div
-                        key={turn.id}
-                        className="flex justify-end gap-3 py-3"
-                      >
-                        <div className="max-w-[78%] rounded-2xl rounded-br-sm border border-zinc-200 bg-zinc-100 px-4 py-2.5 text-[14px] text-black dark:border-zinc-800 dark:bg-zinc-800/60 dark:text-zinc-100">
-                          {turn.text}
-                        </div>
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-zinc-300 font-mono text-[11px] font-semibold text-black dark:border-zinc-700 dark:text-zinc-300">
-                          DO
-                        </div>
-                      </div>
-                    );
-                  }
-                  if (turn.kind === "ack") {
-                    return (
-                      <div key={turn.id} className="flex gap-3 py-3">
-                        <EzraAvatar />
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
-                            Ezra
-                          </div>
-                          <p className="max-w-md text-[14px] text-black dark:text-zinc-200">
-                            {turn.text}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  }
-                  if (turn.kind === "clarifyEntity") {
-                    const label =
-                      turn.entityType === "incident"
-                        ? `Which incident do you mean? ${openIncidentIds().length} are open right now.`
-                        : "Which service do you mean?";
-                    return (
-                      <div key={turn.id} className="flex gap-3 py-3">
-                        <EzraAvatar />
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
-                            Ezra
-                          </div>
-                          <p className="max-w-md text-[14px] text-black dark:text-zinc-200">
-                            {label}
-                          </p>
-                          <EntityPickCard
-                            entityType={turn.entityType}
-                            onPick={(id, lbl) =>
-                              handlePickEntity(
-                                convId,
-                                turn.intentId,
-                                turn.entityType,
-                                id,
-                                lbl,
-                              )
-                            }
+            <>
+              <div className="flex-1 overflow-y-auto px-5 py-2 sm:px-8">
+                {showHero ? (
+                  <div className="mx-auto max-w-2xl py-8">
+                    <h1 className="mb-2.5 mt-5 text-[25px] font-semibold leading-tight tracking-tight text-black dark:text-zinc-100">
+                      {greeting()}, {currentUser?.firstName || "there"}.
+                    </h1>
+                    <p className="mb-6 max-w-md text-base text-black dark:text-zinc-400">
+                      Ask me to create incidents, set up integrations, run
+                      analysis, or get any information about your production
+                      estate — I have access to everything in your tenant.
+                    </p>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {BASE_SUGGESTIONS.map((p) => (
+                        <button
+                          key={p}
+                          onClick={() => send(p)}
+                          className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-left text-[13.5px] text-black transition-colors hover:border-emerald-400 hover:bg-emerald-50/50 dark:border-zinc-800 dark:bg-transparent dark:text-zinc-200 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-500/5"
+                        >
+                          {p}
+                          <ChevronRight
+                            size={14}
+                            className="shrink-0 text-black dark:text-zinc-500"
                           />
-                        </div>
-                      </div>
-                    );
-                  }
-                  if (turn.kind === "clarifyRestart") {
-                    return (
-                      <div key={turn.id} className="flex gap-3 py-3">
-                        <EzraAvatar />
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
-                            Ezra
-                          </div>
-                          <RestartClarifyCard
-                            target={turn.target}
-                            onConfirm={(env, cluster) =>
-                              handleConfirmRestart(
-                                convId,
-                                turn.target,
-                                env,
-                                cluster,
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
-                    );
-                  }
-                  // api turn — real backend response
-                  if (turn.kind === "api") {
-                    return (
-                      <div key={turn.id} className="flex gap-3 py-4">
-                        <EzraAvatar />
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
-                            Ezra
-                          </div>
-                          {turn.status === "thinking" ? (
-                            <div className="mb-2.5 max-w-sm rounded-lg bg-zinc-50 px-3.5 py-2.5 dark:bg-zinc-900/60">
-                              <div className="flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
-                                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                                Thinking…
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="mb-2 max-w-2xl text-[14px] text-black dark:text-zinc-200 [&>h1]:mb-2 [&>h1]:text-[16px] [&>h1]:font-bold [&>h2]:mb-1.5 [&>h2]:text-[15px] [&>h2]:font-semibold [&>h3]:mb-1 [&>h3]:text-[14px] [&>h3]:font-semibold [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:mb-2 [&>ul]:ml-4 [&>ul]:list-disc [&>ol]:mb-2 [&>ol]:ml-4 [&>ol]:list-decimal [&>li]:mb-0.5 [&>blockquote]:border-l-2 [&>blockquote]:border-zinc-300 [&>blockquote]:pl-3 [&>blockquote]:italic [&>blockquote]:text-zinc-500 [&>pre]:mb-2 [&>pre]:overflow-x-auto [&>pre]:rounded-lg [&>pre]:bg-zinc-900 [&>pre]:p-3 [&>pre]:text-[12.5px] [&>pre]:text-zinc-100 [&>code]:rounded [&>code]:bg-zinc-100 [&>code]:px-1 [&>code]:py-0.5 [&>code]:font-mono [&>code]:text-[12px] [&>code]:dark:bg-zinc-800 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-semibold [&_a]:text-emerald-600 [&_a]:underline [&_hr]:my-3 [&_hr]:border-zinc-200 [&_hr]:dark:border-zinc-700">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                  {turn.text}
-                                </ReactMarkdown>
-                              </div>
-                              {turn.actions.length > 0 && (
-                                <div className="mb-3 space-y-1.5">
-                                  {turn.actions.map((a, i) => (
-                                    <div key={i} className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-[12.5px] dark:border-emerald-500/20 dark:bg-emerald-500/5">
-                                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                      <span className="font-medium text-emerald-700 dark:text-emerald-400">{a.label}</span>
-                                      {a.id && (
-                                        <span className="ml-auto font-mono text-[11px] text-black dark:text-zinc-500">{a.id}</span>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              {turn.id === lastApiTurnId && turn.suggestedFollowUps.length > 0 && (
-                                <NextBest
-                                  items={turn.suggestedFollowUps.map((s) => ({ label: s, send: s }))}
-                                  onSend={send}
-                                />
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  // ezra (local intent fallback — unused in production but kept for dev)
-                  const intent = INTENTS[turn.intentId];
-                  const ent = entOf(turn);
-                  const steps = callable(intent.reason, ent) ?? [];
-                  const prose =
-                    turn.status === "done"
-                      ? callable(intent.prose, ent)
-                      : undefined;
-                  const handlers = makeHandlers(convId);
-                  const next =
-                    turn.status === "done"
-                      ? (callable(intent.next, ent) ?? [])
-                      : [];
-                  return (
-                    <div key={turn.id} className="flex gap-3 py-4">
-                      <EzraAvatar />
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
-                          Ezra
-                        </div>
-                        <ReasoningBlock
-                          steps={steps}
-                          revealed={
-                            turn.status === "done"
-                              ? steps.length
-                              : turn.revealed
-                          }
-                          done={turn.status === "done"}
-                        />
-                        {turn.status === "done" && (
-                          <>
-                            {prose && (
-                              <p className="mb-1 max-w-md text-[14px] text-black dark:text-zinc-200">
-                                {prose}
-                              </p>
-                            )}
-                            {intent.build(ent, handlers, audit)}
-                            <NextBest items={next} onSend={send} />
-                          </>
-                        )}
-                      </div>
+                        </button>
+                      ))}
                     </div>
-                  );
-                })}
-                <div ref={threadEndRef} />
-              </div>
-            )}
-          </div>
+                    <button
+                      onClick={() => setModal({ kind: "library" })}
+                      className="mt-4 flex items-center gap-1.5 text-[12.5px] font-medium text-emerald-600 hover:underline dark:text-emerald-400"
+                    >
+                      <BookOpen size={13} /> Browse the team prompt library →
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mx-auto max-w-2xl">
+                    {activeConv?.turns.map((turn, _turnIdx, allTurns) => {
+                      const convId = activeConv.id;
+                      const lastApiTurnId = [...allTurns]
+                        .reverse()
+                        .find(
+                          (t) => t.kind === "api" && t.status === "done",
+                        )?.id;
+                      if (turn.kind === "user") {
+                        return (
+                          <div
+                            key={turn.id}
+                            className="flex justify-end gap-3 py-3"
+                          >
+                            <div className="max-w-[78%] rounded-2xl rounded-br-sm border border-zinc-200 bg-zinc-100 px-4 py-2.5 text-[14px] text-black dark:border-zinc-800 dark:bg-zinc-800/60 dark:text-zinc-100">
+                              {turn.text}
+                            </div>
+                            <div className="flex h-7 w-7 uppercase shrink-0 items-center justify-center rounded-lg border border-zinc-300 font-mono text-[11px] font-semibold text-black dark:border-zinc-700 dark:text-zinc-300">
+                              {user?.firstName?.slice(0, 2)}
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (turn.kind === "ack") {
+                        return (
+                          <div key={turn.id} className="flex gap-3 py-3">
+                            <EzraAvatar />
+                            <div className="min-w-0 flex-1">
+                              <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                                Ezra
+                              </div>
+                              <p className="max-w-md text-[14px] text-black dark:text-zinc-200">
+                                {turn.text}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (turn.kind === "clarifyEntity") {
+                        const label =
+                          turn.entityType === "incident"
+                            ? `Which incident do you mean? ${openIncidentIds().length} are open right now.`
+                            : "Which service do you mean?";
+                        return (
+                          <div key={turn.id} className="flex gap-3 py-3">
+                            <EzraAvatar />
+                            <div className="min-w-0 flex-1">
+                              <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                                Ezra
+                              </div>
+                              <p className="max-w-md text-[14px] text-black dark:text-zinc-200">
+                                {label}
+                              </p>
+                              <EntityPickCard
+                                entityType={turn.entityType}
+                                onPick={(id, lbl) =>
+                                  handlePickEntity(
+                                    convId,
+                                    turn.intentId,
+                                    turn.entityType,
+                                    id,
+                                    lbl,
+                                  )
+                                }
+                              />
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (turn.kind === "clarifyRestart") {
+                        return (
+                          <div key={turn.id} className="flex gap-3 py-3">
+                            <EzraAvatar />
+                            <div className="min-w-0 flex-1">
+                              <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                                Ezra
+                              </div>
+                              <RestartClarifyCard
+                                target={turn.target}
+                                onConfirm={(env, cluster) =>
+                                  handleConfirmRestart(
+                                    convId,
+                                    turn.target,
+                                    env,
+                                    cluster,
+                                  )
+                                }
+                              />
+                            </div>
+                          </div>
+                        );
+                      }
+                      // api turn — real backend response
+                      if (turn.kind === "api") {
+                        return (
+                          <div key={turn.id} className="flex gap-3 py-4">
+                            <EzraAvatar />
+                            <div className="min-w-0 flex-1">
+                              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                                Ezra
+                              </div>
+                              {turn.status === "thinking" ? (
+                                <div className="mb-2.5 max-w-sm rounded-lg bg-zinc-50 px-3.5 py-2.5 dark:bg-zinc-900/60">
+                                  <div className="flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                                    Thinking…
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="mb-2 max-w-2xl text-[14px] text-black dark:text-zinc-200 [&>h1]:mb-2 [&>h1]:text-[16px] [&>h1]:font-bold [&>h2]:mb-1.5 [&>h2]:text-[15px] [&>h2]:font-semibold [&>h3]:mb-1 [&>h3]:text-[14px] [&>h3]:font-semibold [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:mb-2 [&>ul]:ml-4 [&>ul]:list-disc [&>ol]:mb-2 [&>ol]:ml-4 [&>ol]:list-decimal [&>li]:mb-0.5 [&>blockquote]:border-l-2 [&>blockquote]:border-zinc-300 [&>blockquote]:pl-3 [&>blockquote]:italic [&>blockquote]:text-zinc-500 [&>pre]:mb-2 [&>pre]:overflow-x-auto [&>pre]:rounded-lg [&>pre]:bg-zinc-900 [&>pre]:p-3 [&>pre]:text-[12.5px] [&>pre]:text-zinc-100 [&>code]:rounded [&>code]:bg-zinc-100 [&>code]:px-1 [&>code]:py-0.5 [&>code]:font-mono [&>code]:text-[12px] [&>code]:dark:bg-zinc-800 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-semibold [&_a]:text-emerald-600 [&_a]:underline [&_hr]:my-3 [&_hr]:border-zinc-200 [&_hr]:dark:border-zinc-700">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                      {turn.text}
+                                    </ReactMarkdown>
+                                  </div>
+                                  {turn.actions.length > 0 && (
+                                    <div className="mb-3 space-y-1.5">
+                                      {turn.actions.map((a, i) => (
+                                        <div
+                                          key={i}
+                                          className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-[12.5px] dark:border-emerald-500/20 dark:bg-emerald-500/5"
+                                        >
+                                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                          <span className="font-medium text-emerald-700 dark:text-emerald-400">
+                                            {a.label}
+                                          </span>
+                                          {a.id && (
+                                            <span className="ml-auto font-mono text-[11px] text-black dark:text-zinc-500">
+                                              {a.id}
+                                            </span>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {turn.id === lastApiTurnId &&
+                                    turn.suggestedFollowUps.length > 0 && (
+                                      <NextBest
+                                        items={turn.suggestedFollowUps.map(
+                                          (s) => ({ label: s, send: s }),
+                                        )}
+                                        onSend={send}
+                                      />
+                                    )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
 
-          {/* Composer */}
-          <div className="border-t border-zinc-200 px-5 py-3 dark:border-zinc-800 sm:px-8">
-            <div className="mx-auto max-w-2xl">
-              <div
-                className="mb-2 flex gap-1.5 overflow-x-auto pb-0.5"
-                style={{ scrollbarWidth: "none" }}
-              >
-                <button
-                  onClick={() => setModal({ kind: "library" })}
-                  className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-dashed border-emerald-300 px-3 py-1.5 text-[12px] text-emerald-600 transition-colors hover:bg-emerald-50 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
-                >
-                  <BookOpen size={12} /> Prompt library
-                </button>
-                {suggestions.slice(0, 6).map((s, i) => (
-                  <button
-                    key={i}
-                    onClick={() => send(s.send)}
-                    className="shrink-0 whitespace-nowrap rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-[12px] text-black transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400 dark:hover:border-emerald-500/50 dark:hover:text-emerald-400"
+                      // ezra (local intent fallback — unused in production but kept for dev)
+                      const intent = INTENTS[turn.intentId];
+                      const ent = entOf(turn);
+                      const steps = callable(intent.reason, ent) ?? [];
+                      const prose =
+                        turn.status === "done"
+                          ? callable(intent.prose, ent)
+                          : undefined;
+                      const handlers = makeHandlers(convId);
+                      const next =
+                        turn.status === "done"
+                          ? (callable(intent.next, ent) ?? [])
+                          : [];
+                      return (
+                        <div key={turn.id} className="flex gap-3 py-4">
+                          <EzraAvatar />
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                              Ezra
+                            </div>
+                            <ReasoningBlock
+                              steps={steps}
+                              revealed={
+                                turn.status === "done"
+                                  ? steps.length
+                                  : turn.revealed
+                              }
+                              done={turn.status === "done"}
+                            />
+                            {turn.status === "done" && (
+                              <>
+                                {prose && (
+                                  <p className="mb-1 max-w-md text-[14px] text-black dark:text-zinc-200">
+                                    {prose}
+                                  </p>
+                                )}
+                                {intent.build(ent, handlers, audit)}
+                                <NextBest items={next} onSend={send} />
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div ref={threadEndRef} />
+                  </div>
+                )}
+              </div>
+
+              {/* Composer */}
+              <div className="border-t border-zinc-200 px-5 py-3 dark:border-zinc-800 sm:px-8">
+                <div className="mx-auto max-w-2xl">
+                  <div
+                    className="mb-2 flex gap-1.5 overflow-x-auto pb-0.5"
+                    style={{ scrollbarWidth: "none" }}
                   >
-                    {s.label}
-                  </button>
-                ))}
+                    <button
+                      onClick={() => setModal({ kind: "library" })}
+                      className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-dashed border-emerald-300 px-3 py-1.5 text-[12px] text-emerald-600 transition-colors hover:bg-emerald-50 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                    >
+                      <BookOpen size={12} /> Prompt library
+                    </button>
+                    {suggestions.slice(0, 6).map((s, i) => (
+                      <button
+                        key={i}
+                        onClick={() => send(s.send)}
+                        className="shrink-0 whitespace-nowrap rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-[12px] text-black transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400 dark:hover:border-emerald-500/50 dark:hover:text-emerald-400"
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-end gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-2 focus-within:border-emerald-400 dark:border-zinc-700 dark:bg-transparent">
+                    <textarea
+                      ref={textareaRef}
+                      rows={1}
+                      value={input}
+                      onChange={(e) => {
+                        setInput(e.target.value);
+                        autosize();
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          const v = input;
+                          setInput("");
+                          requestAnimationFrame(autosize);
+                          send(v);
+                        }
+                      }}
+                      placeholder="Ask Ezra about your incidents, services, deployments…"
+                      className="max-h-[140px] flex-1 resize-none bg-transparent py-1 text-[14.5px] text-black placeholder:text-zinc-400 focus:outline-none dark:text-zinc-100"
+                    />
+                    <button
+                      onClick={() => {
+                        const v = input;
+                        setInput("");
+                        requestAnimationFrame(autosize);
+                        send(v);
+                      }}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white transition-colors hover:bg-emerald-700"
+                    >
+                      <Send size={15} />
+                    </button>
+                  </div>
+                  <p className="mt-2 text-center text-[10.5px] text-black dark:text-zinc-500">
+                    Ezra answers only within{" "}
+                    <b className="text-black dark:text-zinc-400">your tenant</b>
+                    's boundary and your permissions. Actions require approval
+                    where operational rules apply.
+                  </p>
+                </div>
               </div>
-              <div className="flex items-end gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-2 focus-within:border-emerald-400 dark:border-zinc-700 dark:bg-transparent">
-                <textarea
-                  ref={textareaRef}
-                  rows={1}
-                  value={input}
-                  onChange={(e) => {
-                    setInput(e.target.value);
-                    autosize();
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      const v = input;
-                      setInput("");
-                      requestAnimationFrame(autosize);
-                      send(v);
-                    }
-                  }}
-                  placeholder="Ask Ezra about your incidents, services, deployments…"
-                  className="max-h-[140px] flex-1 resize-none bg-transparent py-1 text-[14.5px] text-black placeholder:text-zinc-400 focus:outline-none dark:text-zinc-100"
-                />
-                <button
-                  onClick={() => {
-                    const v = input;
-                    setInput("");
-                    requestAnimationFrame(autosize);
-                    send(v);
-                  }}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white transition-colors hover:bg-emerald-700"
-                >
-                  <Send size={15} />
-                </button>
-              </div>
-              <p className="mt-2 text-center text-[10.5px] text-black dark:text-zinc-500">
-                Ezra answers only within{" "}
-                <b className="text-black dark:text-zinc-400">your tenant</b>'s
-                boundary and your permissions. Actions require approval where
-                operational rules apply.
-              </p>
-            </div>
-          </div>
+            </>
           )}
         </section>
       </div>

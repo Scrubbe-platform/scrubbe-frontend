@@ -34,10 +34,10 @@ const IncidentDelivery = ({ incident }: { incident: IncidentDetailRecord }) => {
             <LinksThatOpen />
             <PlaybookSection />
             <PolicySection />
-            <Remediation incidentId={incident.id} />
-            <HypothesisLedger incidentId={incident.id} />
           </div>
         </div>
+        <Remediation incidentId={incident.id} />
+        <HypothesisLedger incidentId={incident.id} />
 
         {/* ── Full-width: ranked root-cause hypotheses ── */}
       </div>

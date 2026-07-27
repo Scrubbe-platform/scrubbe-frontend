@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Settings, LogOut } from "lucide-react";
 import Image from "next/image";
 import useLogout from "@/hooks/useLogout";
-import { useCurrentUser, User } from "@/lib/api";
+import useCurrentUserProfile from "@/hooks/useCurrentUserProfile";
 import { useRouter } from "next/navigation";
 
 interface HeaderProps {
@@ -15,16 +15,9 @@ export default function Header({ title = "Dashboard" }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { handleLogout } = useLogout();
-  const { execute: getUser } = useCurrentUser();
-  const [user, setUser] = useState<User | null>();
+  const user = useCurrentUserProfile();
   const router = useRouter();
 
-  useEffect(() => {
-    (async () => {
-      const resp = await getUser();
-      setUser(resp as User);
-    })();
-  }, []);
   useEffect(() => {
     const fn = (e: MouseEvent) => {
       if (

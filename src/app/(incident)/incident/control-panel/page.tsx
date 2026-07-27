@@ -313,7 +313,7 @@ export default function IntelligenceControlPlanePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1.62fr_1fr] gap-5">
+        <div className="grid grid-cols-1 gap-5">
           <LearningOverview
             onChartClick={openChartDrawer}
             onKpiClick={openKpiDrawer}
@@ -327,7 +327,7 @@ export default function IntelligenceControlPlanePage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-5">
           <RemediationIntel
             onChartClick={openChartDrawer}
             onExpand={() => openPanelDrawer("remediation")}
@@ -360,7 +360,7 @@ export default function IntelligenceControlPlanePage() {
           <LiveFeed events={liveFeedEvents ?? undefined} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1  gap-5">
           <OrchestrationEvolution
             onChartClick={openChartDrawer}
             onExpand={() => openPanelDrawer("orch")}
