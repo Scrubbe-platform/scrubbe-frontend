@@ -44,11 +44,15 @@ export default function Detail({
   template,
   templates,
   onOpenTemplate,
+  onEditTemplate,
+  onDuplicate,
   onBackToOverview,
 }: {
   template: TemplateRecord;
   templates: TemplateRecord[];
   onOpenTemplate: (name: string) => void;
+  onEditTemplate: (template: TemplateRecord) => void;
+  onDuplicate: (template: TemplateRecord) => void;
   onBackToOverview: () => void;
 }) {
   const [tab, setTab] = useState<TabKey>("overview");
@@ -102,10 +106,16 @@ export default function Detail({
             </div>
           </div>
           <div className="flex shrink-0 gap-2">
-            <button className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-[13px] font-semibold text-black hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">
+            <button
+              onClick={() => onDuplicate(template)}
+              className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-[13px] font-semibold text-black hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            >
               Duplicate
             </button>
-            <button className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-[13px] font-semibold text-black hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">
+            <button
+              onClick={() => onEditTemplate(template)}
+              className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-[13px] font-semibold text-black hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            >
               Edit
             </button>
             <button className="rounded-md bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white hover:bg-emerald-700">

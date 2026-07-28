@@ -41,21 +41,23 @@ function toMap(items: string[], defaults: Set<string>): Record<string, boolean> 
 
 export default function CreateTemplateWizard({
   templates,
+  editing,
   onCancel,
-  onPublish,
+  onSubmit,
 }: {
   templates: TemplateRecord[];
+  editing?: TemplateRecord | null;
   onCancel: () => void;
-  onPublish: (record: TemplateRecord) => void;
+  onSubmit: (record: TemplateRecord) => void;
 }) {
   const [step, setStep] = useState(1);
 
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState(CATEGORIES[1]?.name ?? "Deployment");
+  const [name, setName] = useState(editing?.name ?? "");
+  const [category, setCategory] = useState(editing?.cat ?? CATEGORIES[1]?.name ?? "Deployment");
   const [description, setDescription] = useState("");
   const [owner, setOwner] = useState("");
   const [version, setVersion] = useState("1.0");
-  const [status, setStatus] = useState("Draft");
+  const [status, setStatus] = useState<string>(editing?.status ?? "Draft");
   const [environment, setEnvironment] = useState("Sandbox");
 
   const [triggers, setTriggers] = useState(() => toMap(WIZARD_TRIGGERS, WIZARD_TRIGGER_DEFAULTS));
@@ -114,7 +116,8 @@ export default function CreateTemplateWizard({
 
   function publish() {
     const finalName = name.trim() || "Untitled Template";
-    if (templates.some((t) => t.name === finalName)) {
+    const conflict = templates.some((t) => t.name === finalName && t.name !== editing?.name);
+    if (conflict) {
       toast.error(`A template named "${finalName}" already exists`);
       return;
     }
@@ -124,12 +127,14 @@ export default function CreateTemplateWizard({
       agents: Object.values(agents).filter(Boolean).length || 1,
       playbooks: Object.values(playbooks).filter(Boolean).length || 1,
       rules: Object.values(rules).filter(Boolean).length + Object.values(verification).filter(Boolean).length,
-      usage: 0,
+      usage: editing?.usage ?? 0,
       status: status === "Active" ? "Active" : "Draft",
       updated: "just now",
     };
-    onPublish(record);
-    toast.success(`"${finalName}" published to ${environment}`);
+    onSubmit(record);
+    toast.success(
+      editing ? `Saved changes to "${finalName}"` : `"${finalName}" published to ${environment}`,
+    );
   }
 
   function handleNext() {
@@ -147,18 +152,21 @@ export default function CreateTemplateWizard({
           Overview
         </button>
         <ChevronRight size={13} />
-        <span className="font-semibold text-black dark:text-zinc-200">Create Template</span>
+        <span className="font-semibold text-black dark:text-zinc-200">
+          {editing ? "Edit Template" : "Create Template"}
+        </span>
       </div>
 
       <div className="rounded-lg bg-white p-6 shadow-sm shadow-light dark:bg-zinc-900/60 sm:p-7">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-[24px] font-bold text-black dark:text-zinc-100">
-              Create Incident Template
+              {editing ? `Edit ${editing.name}` : "Create Incident Template"}
             </h1>
             <p className="mt-1 text-[13.5px] text-black/60 dark:text-zinc-400">
-              Define how Scrubbe should detect, investigate, and remediate the next
-              recurring incident type.
+              {editing
+                ? "Update how Scrubbe should detect, investigate, and remediate this incident type."
+                : "Define how Scrubbe should detect, investigate, and remediate the next recurring incident type."}
             </p>
           </div>
           <button
@@ -468,7 +476,7 @@ export default function CreateTemplateWizard({
             onClick={handleNext}
             className="rounded-md bg-zinc-900 px-5 py-2 text-[13px] font-semibold text-white hover:bg-black dark:bg-zinc-100 dark:text-zinc-900"
           >
-            {step === STEPS.length ? "Publish Template →" : "Next →"}
+            {step === STEPS.length ? (editing ? "Save Changes" : "Publish Template →") : "Next →"}
           </button>
         </div>
       </div>
