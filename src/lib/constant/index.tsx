@@ -1162,6 +1162,13 @@ export const NewMenu: Record<string, NavItem[]> = {
       isMenu: false,
     },
     {
+      name: "Incident Templates",
+      Icon: PiBookFill,
+      link: "/incident/incident-templates",
+      isActive: true,
+      isMenu: false,
+    },
+    {
       name: "Incident relationship",
       Icon: RxDisc,
       link: "/incident/relationship",
