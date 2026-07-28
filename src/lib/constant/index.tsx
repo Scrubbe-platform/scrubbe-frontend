@@ -1239,7 +1239,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Settings",
       Icon: IoSettingsOutline,
       link: "/incident/settings",
-      isActive: true,
+      isActive: false,
       isMenu: false,
     },
     {
