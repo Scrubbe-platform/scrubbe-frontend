@@ -336,17 +336,21 @@ export default function CommandStudio() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Fetch shared sessions whenever the user switches to Shared mode
+  // Auto-join the tenant-wide workspace when switching to Shared mode
   useEffect(() => {
     if (mode !== "shared") return;
     let cancelled = false;
     setSessionsLoading(true);
-    get(endpoint.studio_sessions.list).then((res) => {
+    // get-or-create the tenant workspace and auto-join it
+    get(endpoint.studio_sessions.tenant_default).then((res) => {
       if (cancelled) return;
-      if (res.success) {
+      if (res.success && res.data) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const raw = (res.data as any)?.data ?? res.data ?? [];
-        setSessions(Array.isArray(raw) ? raw : []);
+        const session = (res.data as any)?.data ?? res.data;
+        if (session?.id) {
+          setActiveSessionId(session.id);
+          setSessions([session]);
+        }
       }
       setSessionsLoading(false);
     });
@@ -948,12 +952,15 @@ export default function CommandStudio() {
           {mode === "shared" && (
             <>
               <div className="px-3 pb-2">
-                <button
-                  onClick={() => setModal({ kind: "newSession" })}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-emerald-700"
-                >
-                  <Plus size={15} /> New Shared Session
-                </button>
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 px-3 py-2 dark:border-emerald-500/20 dark:bg-emerald-500/5">
+                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Multiplayer AI
+                  </div>
+                  <p className="mt-0.5 text-[10.5px] text-black dark:text-zinc-400">
+                    All teammates share one live workspace.
+                  </p>
+                </div>
               </div>
               <div className="flex-1 overflow-y-auto px-2 pb-4">
                 {sessionsLoading && (
@@ -970,6 +977,10 @@ export default function CommandStudio() {
                 {sessions.map((s) => {
                   const pCount =
                     s.participantCount ?? s.participants?.length ?? 0;
+                  const displayTitle =
+                    s.title === "__tenant_workspace__"
+                      ? "Team Workspace"
+                      : s.title;
                   return (
                     <div
                       key={s.id}
@@ -993,7 +1004,7 @@ export default function CommandStudio() {
                           s.id === activeSessionId && "font-semibold",
                         )}
                       >
-                        {s.title}
+                        {displayTitle}
                       </div>
                       <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-black dark:text-zinc-500">
                         <Users size={9} />
@@ -1025,12 +1036,12 @@ export default function CommandStudio() {
                       className="mx-auto mb-3 text-zinc-300 dark:text-zinc-700"
                     />
                     <h3 className="mb-1 text-[16px] font-semibold text-black dark:text-zinc-100">
-                      No session selected
+                      {sessionsLoading ? "Joining workspace…" : "Team Workspace"}
                     </h3>
                     <p className="text-[13px] text-black dark:text-zinc-400">
-                      Pick a shared session from the sidebar or create a new
-                      one. All participants see the same conversation in
-                      real-time.
+                      {sessionsLoading
+                        ? "Setting up your shared AI workspace…"
+                        : "Every member of your tenant shares this AI workspace. Any agent working here is visible to all teammates in real-time."}
                     </p>
                   </div>
                 </div>

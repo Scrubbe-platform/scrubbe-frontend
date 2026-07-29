@@ -339,5 +339,6 @@ export const endpoint = {
     get: "/studio-sessions",                // GET    /studio-sessions/:id
     invite: "/studio-sessions",             // POST   /studio-sessions/:id/invite
     archive: "/studio-sessions",            // DELETE /studio-sessions/:id
+    tenant_default: "/studio-sessions/tenant-default", // GET — get-or-create the tenant-wide shared workspace
   },
 };
