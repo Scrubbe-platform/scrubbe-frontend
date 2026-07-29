@@ -11,9 +11,7 @@ const DeliverySignal = () => (
       <p className="text-[11px] font-semibold uppercase tracking-widest text-black dark:text-zinc-500">
         Delivery Signals
       </p>
-      <h2 className="text-[19px] font-bold text-black dark:text-white">
-        Incoming delivery signals
-      </h2>
+
       <p className="text-[13.5px] text-black/60 dark:text-zinc-400 max-w-2xl leading-relaxed">
         In production these arrive automatically. Each stage updates from the
         decision log and incident state — select one to inspect it.

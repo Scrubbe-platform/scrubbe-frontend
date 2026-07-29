@@ -836,7 +836,7 @@ export default function CommandStudio() {
                     : "text-zinc-500 hover:text-black dark:hover:text-zinc-300",
                 )}
               >
-                <MessageSquare size={12} /> Personal
+                Personal
               </button>
               <button
                 onClick={() => setMode("shared")}
@@ -847,7 +847,7 @@ export default function CommandStudio() {
                     : "text-zinc-500 hover:text-black dark:hover:text-zinc-300",
                 )}
               >
-                <Users size={12} /> Shared
+                Shared
               </button>
             </div>
           </div>

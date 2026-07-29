@@ -1457,7 +1457,7 @@ function ExecutionGateModal({
       footer={
         <>
           <ModalBtn onClick={onClose}>Cancel</ModalBtn>
-          { route === "approval" ? (
+          {route === "approval" ? (
             <ModalBtn primary onClick={handleExecute}>
               Approve & execute
             </ModalBtn>
@@ -1705,7 +1705,6 @@ function SignalGraphWorkspace({
             onClick={() => setShowRemediation(true)}
             size="sm"
           >
-            <Lightbulb size={14} />
             Remediation plan
           </Button>
         </div>
@@ -1822,7 +1821,7 @@ function SignalGraphWorkspace({
                   </span>
                   <div
                     className="relative z-10 w-2.5 h-2.5 rounded-full bg-white border-[2.5px] mt-1"
-                    style={{ borderColor: ev.tagColor }}
+                    // style={{ borderColor: ev.tagColor }}
                   />
                 </div>
                 <div>
@@ -2040,10 +2039,6 @@ function SignalGraphWorkspace({
           <div className="p-4">
             {intelTab === "narrative" && (
               <div className="text-[13px] text-zinc-600 leading-[1.74] space-y-3">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-zinc-600 bg-indigo-50 border border-indigo-200 rounded-full px-2.5 py-1 mb-2">
-                  <Sparkles size={11} />
-                  Ezra's read · {selectedNodeData?.label || "—"}
-                </span>
                 {NODE_STORIES[selectedNodeId] ? (
                   NODE_STORIES[selectedNodeId].map((paragraph, pi) => (
                     <p key={pi} className="text-[13px] text-zinc-600">
@@ -2227,9 +2222,6 @@ function SignalGraphWorkspace({
       <div className="mx-5 mt-4 bg-white rounded-xl shadow-sm shadow-light overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
           <h2 className="text-[13px] font-bold flex items-center gap-2 text-zinc-800">
-            <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
-              <Sparkles size={12} />
-            </span>
             Ezra · Causal Reconstruction
           </h2>
           <span className="text-[11px] text-zinc-400 font-medium">

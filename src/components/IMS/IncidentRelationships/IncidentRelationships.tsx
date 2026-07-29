@@ -93,7 +93,10 @@ export default function IncidentRelationships() {
   }
 
   const serviceOptions = useMemo(
-    () => Array.from(new Set(records.flatMap((r) => r.operational.services))).sort(),
+    () =>
+      Array.from(
+        new Set(records.flatMap((r) => r.operational.services)),
+      ).sort(),
     [records],
   );
 
@@ -153,7 +156,8 @@ export default function IncidentRelationships() {
 
   function openRecord(id: string) {
     setOpenRecordId(id);
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    if (typeof window !== "undefined")
+      window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function addAudit(actor: string, text: string) {
@@ -182,16 +186,27 @@ export default function IncidentRelationships() {
                     kb: false,
                   },
                 ],
-                operational: { ...r.operational, totalChildren: r.operational.totalChildren + 1 },
+                operational: {
+                  ...r.operational,
+                  totalChildren: r.operational.totalChildren + 1,
+                },
                 history: [
                   ...r.history,
-                  { date: "Today", event: `Child ${p.incident.id} linked via correlation`, who: "You", done: true },
+                  {
+                    date: "Today",
+                    event: `Child ${p.incident.id} linked via correlation`,
+                    who: "You",
+                    done: true,
+                  },
                 ],
               }
             : r,
         ),
       );
-      addAudit("You", `linked ${p.incident.id} into ${target.id} (${p.confidence}% match)`);
+      addAudit(
+        "You",
+        `linked ${p.incident.id} into ${target.id} (${p.confidence}% match)`,
+      );
       toast(`${p.incident.id} linked into ${target.id} · audit logged`);
     }
     setProposals((prev) => prev.filter((x) => x.id !== id));
@@ -209,26 +224,37 @@ export default function IncidentRelationships() {
     setModal({ kind: "child", parentId, childId });
   }
 
-  const openRecordObj = openRecordId ? records.find((r) => r.id === openRecordId) : null;
-  const modalParent = modal.kind === "child" ? records.find((r) => r.id === modal.parentId) : undefined;
+  const openRecordObj = openRecordId
+    ? records.find((r) => r.id === openRecordId)
+    : null;
+  const modalParent =
+    modal.kind === "child"
+      ? records.find((r) => r.id === modal.parentId)
+      : undefined;
   const modalChild: ChildIncident | undefined =
-    modal.kind === "child" ? modalParent?.children.find((c) => c.id === modal.childId) : undefined;
+    modal.kind === "child"
+      ? modalParent?.children.find((c) => c.id === modal.childId)
+      : undefined;
 
   return (
-    <div className="flex h-screen flex-col bg-white font-ibm dark:bg-zinc-950">
+    <div className="flex h-screen flex-col font-ibm dark:bg-zinc-950">
       <Header title="Incident Relationships" />
 
-      <div className="bg-white px-4 py-4 shadow-sm shadow-light dark:bg-zinc-950 sm:px-6">
+      <div className="  px-4 py-4 shadow-sm shadow-light dark:bg-zinc-950 sm:px-6">
         <p className="text-[14px] text-black/60 dark:text-zinc-400">
-          Operational memory — what belonged together, how it was resolved, and what knowledge came out of it.
+          Operational memory — what belonged together, how it was resolved, and
+          what knowledge came out of it.
         </p>
         <div className="relative mt-3 w-full max-w-[420px]">
-          <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-black/40 dark:text-zinc-500" />
+          <Search
+            size={15}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-black/40 dark:text-zinc-500"
+          />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search incident, problem record, root cause, service…"
-            className="h-[36px] w-full rounded-md border border-zinc-300 bg-white pl-9 pr-3 text-[13.5px] text-black placeholder:text-black/40 focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200"
+            className="h-[36px] w-full rounded-md border border-zinc-300 pl-9 pr-3 text-[13.5px] text-black placeholder:text-black/40 focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200"
           />
         </div>
       </div>
@@ -237,23 +263,49 @@ export default function IncidentRelationships() {
         {/* Filters rail */}
         <aside className="min-h-0 overflow-y-auto rounded-lg bg-white p-5 shadow-sm shadow-light dark:bg-zinc-900/40">
           <div className="mb-5">
-            <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-black/40 dark:text-zinc-500">Status</div>
+            <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-black/40 dark:text-zinc-500">
+              Status
+            </div>
             {STATUS_ORDER.map((s) => (
-              <FilterCheckbox key={s} label={s} checked={statusSet.has(s)} onChange={() => toggleStatus(s)} />
+              <FilterCheckbox
+                key={s}
+                label={s}
+                checked={statusSet.has(s)}
+                onChange={() => toggleStatus(s)}
+              />
             ))}
           </div>
           <div className="mb-5 border-t border-zinc-100 pt-4 dark:border-zinc-800">
-            <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-black/40 dark:text-zinc-500">Record</div>
-            <FilterCheckbox label="Known error only" checked={knownOnly} onChange={() => setKnownOnly((v) => !v)} />
-            <FilterCheckbox label="Has problem record" checked={hasPR} onChange={() => setHasPR((v) => !v)} />
-            <FilterCheckbox label="Has knowledge article" checked={hasKB} onChange={() => setHasKB((v) => !v)} />
+            <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-black/40 dark:text-zinc-500">
+              Record
+            </div>
+            <FilterCheckbox
+              label="Known error only"
+              checked={knownOnly}
+              onChange={() => setKnownOnly((v) => !v)}
+            />
+            <FilterCheckbox
+              label="Has problem record"
+              checked={hasPR}
+              onChange={() => setHasPR((v) => !v)}
+            />
+            <FilterCheckbox
+              label="Has knowledge article"
+              checked={hasKB}
+              onChange={() => setHasKB((v) => !v)}
+            />
           </div>
           <div className="mb-5 space-y-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-black/40 dark:text-zinc-500">Scope</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-black/40 dark:text-zinc-500">
+              Scope
+            </div>
             <Select
               value={service}
               onChange={(e) => setService(e.target.value)}
-              options={[{ value: "", label: "Any service" }, ...serviceOptions.map((s) => ({ value: s, label: s }))]}
+              options={[
+                { value: "", label: "Any service" },
+                ...serviceOptions.map((s) => ({ value: s, label: s })),
+              ]}
               placeholder="Any service"
             />
             <Select
@@ -275,7 +327,9 @@ export default function IncidentRelationships() {
             Reset filters
           </button>
           <p className="mt-4 text-[11.5px] leading-relaxed text-black/40 dark:text-zinc-500">
-            Each record is a parent incident and the child incidents that cascaded from the same root cause — plus how it was resolved and the knowledge it produced.
+            Each record is a parent incident and the child incidents that
+            cascaded from the same root cause — plus how it was resolved and the
+            knowledge it produced.
           </p>
         </aside>
 
@@ -329,16 +383,26 @@ export default function IncidentRelationships() {
                 {view === "list" ? (
                   <>
                     <div className="mb-1 flex items-baseline gap-2">
-                      <h2 className="text-[22px] font-bold text-black dark:text-zinc-100">Related incidents</h2>
+                      <h2 className="text-[22px] font-bold text-black dark:text-zinc-100">
+                        Related incidents
+                      </h2>
                       <span className="font-mono text-[12px] text-black/40 dark:text-zinc-500">
                         {filtered.length} of {records.length}
                       </span>
                     </div>
                     <p className="mb-4 max-w-2xl text-[13px] leading-relaxed text-black/60 dark:text-zinc-400">
-                      Every entry is a parent incident and the child incidents that cascaded from the same root cause — with how it was resolved and the knowledge it produced. Expand a row to see its children, or open the full operational record.
+                      Every entry is a parent incident and the child incidents
+                      that cascaded from the same root cause — with how it was
+                      resolved and the knowledge it produced. Expand a row to
+                      see its children, or open the full operational record.
                     </p>
                     <div className="mb-5 flex flex-wrap gap-x-6 gap-y-2 rounded-lg border border-zinc-200 bg-white px-4 py-3 text-[12px] text-black/60 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400">
-                      {["What belonged together?", "How was it resolved?", "What knowledge was created?", "What should we reuse?"].map((q, i) => (
+                      {[
+                        "What belonged together?",
+                        "How was it resolved?",
+                        "What knowledge was created?",
+                        "What should we reuse?",
+                      ].map((q, i) => (
                         <span key={q} className="flex items-center gap-2">
                           <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border border-emerald-200 font-mono text-[10px] font-semibold text-emerald-600 dark:border-emerald-500/30 dark:text-emerald-400">
                             {i + 1}
@@ -367,11 +431,18 @@ export default function IncidentRelationships() {
                   </>
                 ) : (
                   <>
-                    <h2 className="mb-4 text-[22px] font-bold text-black dark:text-zinc-100">Suggested links</h2>
+                    <h2 className="mb-4 text-[22px] font-bold text-black dark:text-zinc-100">
+                      Suggested links
+                    </h2>
                     <div className="mb-5 flex items-start gap-3 rounded-lg border border-emerald-100 bg-emerald-50/60 p-4 text-[13px] leading-relaxed text-black/70 dark:border-emerald-500/20 dark:bg-emerald-500/5 dark:text-zinc-300">
-                      <ShieldCheck size={17} className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
                       <p>
-                        <b className="font-semibold text-black dark:text-zinc-100">Governed correlation.</b> The correlation engine proposes new incidents to attach to an existing relationship from shared signals. Nothing links automatically — a human confirms or rejects each one, and the decision is written to the audit trail.
+                        <b className="font-semibold text-black dark:text-zinc-100">
+                          Governed correlation.
+                        </b>{" "}
+                        The correlation engine proposes new incidents to attach
+                        to an existing relationship from shared signals. Nothing
+                        links automatically — a human confirms or rejects each
+                        one, and the decision is written to the audit trail.
                       </p>
                     </div>
 
@@ -380,7 +451,9 @@ export default function IncidentRelationships() {
                         <ProposalCard
                           key={p.id}
                           proposal={p}
-                          targetTitle={records.find((r) => r.id === p.target)?.title}
+                          targetTitle={
+                            records.find((r) => r.id === p.target)?.title
+                          }
                           onConfirm={() => confirmProposal(p.id)}
                           onReject={() => rejectProposal(p.id)}
                           onOpenRecord={() => openRecord(p.target)}
@@ -401,7 +474,10 @@ export default function IncidentRelationships() {
         </main>
       </div>
 
-      <Modal isOpen={modal.kind !== "none"} onClose={() => setModal({ kind: "none" })}>
+      <Modal
+        isOpen={modal.kind !== "none"}
+        onClose={() => setModal({ kind: "none" })}
+      >
         {modal.kind === "child" && modalParent && modalChild && (
           <ChildIncidentModal parent={modalParent} child={modalChild} />
         )}
@@ -444,24 +520,39 @@ function RecordDetail({
 
       <div className="rounded-lg bg-white p-7 shadow-sm shadow-light dark:bg-zinc-900/60">
         <div className="mb-2.5 flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[11px] text-black/40 dark:text-zinc-500">{record.id}</span>
+          <span className="font-mono text-[11px] text-black/40 dark:text-zinc-500">
+            {record.id}
+          </span>
           <Pill label="Parent" tone="neutral" dot={false} />
         </div>
-        <h2 className="text-[24px] font-bold leading-tight text-black dark:text-zinc-100">{record.title}</h2>
+        <h2 className="text-[24px] font-bold leading-tight text-black dark:text-zinc-100">
+          {record.title}
+        </h2>
         <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-black dark:text-zinc-300">
           <b className="font-semibold">Root cause.</b> {record.rootCause}
         </p>
         <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-zinc-100 pt-5 dark:border-zinc-800 sm:grid-cols-5">
           <StatCell label="Child incidents" value={record.children.length} />
           <StatCell label="Avg resolution" value={o.avgResolution} />
-          <StatCell label="Problem record" value={record.problemRecord ?? "---"} small />
-          <StatCell label="Knowledge" value={record.knowledgeArticle ?? "---"} small />
+          <StatCell
+            label="Problem record"
+            value={record.problemRecord ?? "---"}
+            small
+          />
+          <StatCell
+            label="Knowledge"
+            value={record.knowledgeArticle ?? "---"}
+            small
+          />
           <StatCell label="Occurred" value={record.occurred} small />
         </div>
       </div>
 
       <div className="mt-4">
-        <DetailSection eyebrow="Child incidents" note={`${record.children.length} linked`}>
+        <DetailSection
+          eyebrow="Child incidents"
+          note={`${record.children.length} linked`}
+        >
           {record.children.map((c) => (
             <ChildRow key={c.id} child={c} onClick={() => onOpenChild(c.id)} />
           ))}
@@ -480,10 +571,22 @@ function RecordDetail({
         <DetailSection eyebrow="Operational summary">
           <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-5">
             <StatCell label="Total child incidents" value={o.totalChildren} />
-            <StatCell label="Average resolution" value={o.avgResolution} small />
+            <StatCell
+              label="Average resolution"
+              value={o.avgResolution}
+              small
+            />
             <StatCell label="Problem record" value={o.problemRecord} small />
-            <StatCell label="Knowledge article" value={o.knowledgeArticle} small />
-            <StatCell label="Known error" value={o.knownError ? "Yes" : "No"} small />
+            <StatCell
+              label="Knowledge article"
+              value={o.knowledgeArticle}
+              small
+            />
+            <StatCell
+              label="Known error"
+              value={o.knownError ? "Yes" : "No"}
+              small
+            />
           </div>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
@@ -492,7 +595,10 @@ function RecordDetail({
               </div>
               <div className="flex flex-wrap gap-2">
                 {o.services.map((s) => (
-                  <span key={s} className="rounded-full border border-zinc-200 px-2.5 py-1 text-[11.5px] text-black/70 dark:border-zinc-700 dark:text-zinc-400">
+                  <span
+                    key={s}
+                    className="rounded-full border border-zinc-200 px-2.5 py-1 text-[11.5px] text-black/70 dark:border-zinc-700 dark:text-zinc-400"
+                  >
                     {s}
                   </span>
                 ))}
@@ -504,7 +610,10 @@ function RecordDetail({
               </div>
               <div className="flex flex-wrap gap-2">
                 {o.teams.map((s) => (
-                  <span key={s} className="rounded-full border border-zinc-200 px-2.5 py-1 text-[11.5px] text-black/70 dark:border-zinc-700 dark:text-zinc-400">
+                  <span
+                    key={s}
+                    className="rounded-full border border-zinc-200 px-2.5 py-1 text-[11.5px] text-black/70 dark:border-zinc-700 dark:text-zinc-400"
+                  >
                     {s}
                   </span>
                 ))}
@@ -513,20 +622,31 @@ function RecordDetail({
           </div>
         </DetailSection>
 
-        <DetailSection eyebrow="Relationship evidence" note="why these were related">
+        <DetailSection
+          eyebrow="Relationship evidence"
+          note="why these were related"
+        >
           <ConfidenceBar evidence={record.evidence} />
         </DetailSection>
 
         <DetailSection eyebrow="Relationship analysis" note="Ezra">
           <div className="rounded-lg bg-indigo-50 p-4 dark:bg-indigo-500/10">
             <div className="mb-2.5 flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
-              <span className="flex h-[19px] w-[19px] items-center justify-center rounded-md bg-indigo-600 text-[11px] font-semibold text-white">E</span>
+              <span className="flex h-[19px] w-[19px] items-center justify-center rounded-md bg-indigo-600 text-[11px] font-semibold text-white">
+                E
+              </span>
               Ezra · governed analysis
             </div>
-            <p className="text-[13.5px] leading-relaxed text-black dark:text-zinc-200">{record.ai.paragraph}</p>
+            <p className="text-[13.5px] leading-relaxed text-black dark:text-zinc-200">
+              {record.ai.paragraph}
+            </p>
             <div className="mt-3 border-t border-dashed border-indigo-200 pt-3 dark:border-indigo-500/20">
-              <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-500 dark:text-indigo-400">Recommendation</div>
-              <div className="text-[13.5px] font-semibold text-black dark:text-zinc-100">{record.ai.recommendation}</div>
+              <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-500 dark:text-indigo-400">
+                Recommendation
+              </div>
+              <div className="text-[13.5px] font-semibold text-black dark:text-zinc-100">
+                {record.ai.recommendation}
+              </div>
             </div>
           </div>
         </DetailSection>
@@ -539,11 +659,28 @@ function RecordDetail({
   );
 }
 
-function StatCell({ label, value, small }: { label: string; value: React.ReactNode; small?: boolean }) {
+function StatCell({
+  label,
+  value,
+  small,
+}: {
+  label: string;
+  value: React.ReactNode;
+  small?: boolean;
+}) {
   return (
     <div>
-      <div className="text-[11px] font-semibold uppercase tracking-wide text-black/40 dark:text-zinc-500">{label}</div>
-      <div className={cn("mt-1 font-bold text-black dark:text-zinc-100", small ? "text-[14px]" : "text-[19px]")}>{value}</div>
+      <div className="text-[11px] font-semibold uppercase tracking-wide text-black/40 dark:text-zinc-500">
+        {label}
+      </div>
+      <div
+        className={cn(
+          "mt-1 font-bold text-black dark:text-zinc-100",
+          small ? "text-[14px]" : "text-[19px]",
+        )}
+      >
+        {value}
+      </div>
     </div>
   );
 }

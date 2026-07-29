@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Search,
-  SlidersHorizontal,
-  Plus,
-  RefreshCw,
-} from "lucide-react";
+import { Search, SlidersHorizontal, Plus, RefreshCw } from "lucide-react";
 
 import { ApiKey, ToastMessage } from "./_modules/types/apiKeys";
 import {
@@ -60,7 +55,10 @@ export default function ApiKeysPage() {
   const showToast = (msg: string, type: ToastMessage["type"] = "success") => {
     const id = Date.now().toString();
     setToasts((prev) => [...prev, { id, msg, type }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
+    setTimeout(
+      () => setToasts((prev) => prev.filter((t) => t.id !== id)),
+      3500,
+    );
   };
 
   const activeKey = keys.find((k) => k.id === activeKeyId) ?? null;
@@ -96,10 +94,11 @@ export default function ApiKeysPage() {
             <h1 className="text-[22px] font-bold tracking-tight text-zinc-950">
               API Keys
             </h1>
-            <p className="text-[13px] text-zinc-500 max-w-4xl mt-1 leading-relaxed">
-              Manage trusted operational identities across incidents, intelligence,
-              automation, MCP, remediation, and infrastructure. Every key carries
-              a bounded scope, an audit trail, and explicit human approval gates.
+            <p className="text-[13px] text-zinc-500 max-w-2xl mt-1 leading-relaxed">
+              Manage trusted operational identities across incidents,
+              intelligence, automation, MCP, remediation, and infrastructure.
+              Every key carries a bounded scope, an audit trail, and explicit
+              human approval gates.
             </p>
           </div>
 
@@ -160,7 +159,14 @@ export default function ApiKeysPage() {
                 onChange={(e) => setTypeFilter(e.target.value)}
                 className="h-8 rounded border border-zinc-200 bg-white px-2.5 text-xs text-zinc-700 outline-none cursor-pointer"
               >
-                {["All Types", "SDK", "MCP", "Integration", "Automation", "Agent"].map((t) => (
+                {[
+                  "All Types",
+                  "SDK",
+                  "MCP",
+                  "Integration",
+                  "Automation",
+                  "Agent",
+                ].map((t) => (
                   <option key={t}>{t}</option>
                 ))}
               </select>
@@ -188,7 +194,8 @@ export default function ApiKeysPage() {
           <div className="border border-zinc-200 rounded-lg overflow-hidden shadow-2xs bg-white">
             {isLoading ? (
               <div className="flex items-center justify-center h-40 text-sm text-zinc-400 gap-2">
-                <RefreshCw size={14} className="animate-spin" /> Loading API keys…
+                <RefreshCw size={14} className="animate-spin" /> Loading API
+                keys…
               </div>
             ) : isError ? (
               <div className="flex flex-col items-center justify-center h-40 text-sm text-zinc-400 gap-3">
@@ -204,7 +211,9 @@ export default function ApiKeysPage() {
               <div className="flex flex-col items-center justify-center h-40 text-sm text-zinc-400 gap-3">
                 <span>No API keys found.</span>
                 <button
-                  onClick={() => setModals((prev) => ({ ...prev, create: true }))}
+                  onClick={() =>
+                    setModals((prev) => ({ ...prev, create: true }))
+                  }
                   className="h-8 px-4 rounded bg-zinc-950 text-white text-xs font-semibold"
                 >
                   Create your first key
@@ -247,13 +256,17 @@ export default function ApiKeysPage() {
                         className="hover:bg-zinc-50/60 cursor-pointer group transition-colors"
                       >
                         <td className="p-3">
-                          <div className="font-semibold text-zinc-950">{k.name}</div>
+                          <div className="font-semibold text-zinc-950">
+                            {k.name}
+                          </div>
                           <div className="font-mono text-[11px] text-zinc-400 mt-0.5 truncate max-w-[200px]">
                             {k.id}
                           </div>
                         </td>
                         <td className="p-3">
-                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${badgeStyles}`}>
+                          <span
+                            className={`px-2 py-0.5 rounded text-[11px] font-bold ${badgeStyles}`}
+                          >
                             {k.type}
                           </span>
                         </td>
@@ -281,20 +294,29 @@ export default function ApiKeysPage() {
                           </div>
                         </td>
                         <td className="p-3">
-                          <span className={`font-mono text-[10.5px] px-1.5 py-0.5 rounded border ${k.environment === "PRODUCTION" ? "border-blue-200 text-blue-700 bg-blue-50" : "border-zinc-200 text-zinc-500 bg-zinc-50"}`}>
+                          <span
+                            className={`font-mono text-[10.5px] px-1.5 py-0.5 rounded border ${k.environment === "PRODUCTION" ? "border-blue-200 text-blue-700 bg-blue-50" : "border-zinc-200 text-zinc-500 bg-zinc-50"}`}
+                          >
                             {k.environment === "PRODUCTION" ? "PROD" : "DEV"}
                           </span>
                         </td>
                         <td className="p-3 text-zinc-500">{k.used}</td>
                         <td className="p-3 font-medium capitalize">
                           <span className="inline-flex items-center gap-1.5">
-                            <span className={`h-1.5 w-1.5 rounded-full ${statusDots}`} />
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${statusDots}`}
+                            />
                             {k.status}
                           </span>
                         </td>
-                        <td className="p-3 relative" onClick={(e) => e.stopPropagation()}>
+                        <td
+                          className="p-3 relative"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button
-                            onClick={() => setOpenMenuId(openMenuId === k.id ? null : k.id)}
+                            onClick={() =>
+                              setOpenMenuId(openMenuId === k.id ? null : k.id)
+                            }
                             className="h-7 w-7 rounded flex items-center justify-center text-zinc-400 hover:bg-zinc-100 font-bold"
                           >
                             &bull;&bull;&bull;
@@ -325,7 +347,9 @@ export default function ApiKeysPage() {
                                 onClick={() => triggerModal("suspend", k.id)}
                                 className="w-full text-left px-3 py-1.5 hover:bg-zinc-50 text-xs"
                               >
-                                {k.status === "suspended" ? "Reactivate" : "Suspend"}
+                                {k.status === "suspended"
+                                  ? "Reactivate"
+                                  : "Suspend"}
                               </button>
                               <button
                                 onClick={() => triggerModal("audit", k.id)}
@@ -368,7 +392,10 @@ export default function ApiKeysPage() {
         isOpen={modals.create}
         onClose={() => setModals((prev) => ({ ...prev, create: false }))}
         onSuccess={(keyName) => {
-          showToast(`"${keyName}" created — store the key now, it won't be shown again.`, "success");
+          showToast(
+            `"${keyName}" created — store the key now, it won't be shown again.`,
+            "success",
+          );
         }}
       />
 
@@ -380,7 +407,10 @@ export default function ApiKeysPage() {
         onSave={async (updatedName) => {
           if (!activeKey) return;
           try {
-            await updateKey.mutateAsync({ id: activeKey.id, data: { name: updatedName } });
+            await updateKey.mutateAsync({
+              id: activeKey.id,
+              data: { name: updatedName },
+            });
             showToast(`Renamed to "${updatedName}"`);
           } catch (e) {
             showToast("Failed to rename key", "error");
@@ -407,11 +437,17 @@ export default function ApiKeysPage() {
           if (!activeKey) return;
           try {
             if (activeKey.status === "suspended") {
-              await updateKey.mutateAsync({ id: activeKey.id, data: { isActive: true } });
+              await updateKey.mutateAsync({
+                id: activeKey.id,
+                data: { isActive: true },
+              });
               showToast(`"${activeKey.name}" reactivated.`);
             } else {
               await revokeKey.mutateAsync(activeKey.id);
-              showToast(`"${activeKey.name}" suspended — all auth blocked.`, "warning");
+              showToast(
+                `"${activeKey.name}" suspended — all auth blocked.`,
+                "warning",
+              );
             }
           } catch (e) {
             showToast("Action failed", "error");
@@ -465,7 +501,9 @@ export default function ApiKeysPage() {
               key={t.id}
               className={`pointer-events-auto flex items-center gap-3 border-l-2 p-3.5 rounded shadow-lg text-white font-medium text-xs min-w-[280px] animate-toastIn ${borderStyle}`}
             >
-              <span className={`font-mono text-sm shrink-0 ${textStyle}`}>&bull;</span>
+              <span className={`font-mono text-sm shrink-0 ${textStyle}`}>
+                &bull;
+              </span>
               <span>{t.msg}</span>
             </div>
           );
