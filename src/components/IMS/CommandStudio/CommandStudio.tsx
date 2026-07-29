@@ -21,9 +21,6 @@ import {
   Users,
   UserPlus,
   LucideIcon,
-  ExternalLink,
-  CheckCircle2,
-  ArrowRight,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -1120,29 +1117,17 @@ export default function CommandStudio() {
                                   </ReactMarkdown>
                                 </div>
                                 {msg.actions?.length > 0 && (
-                                  <div className="mb-3 flex flex-wrap gap-2">
-                                    {msg.actions.map((a: any, i: number) => (
-                                      a.url ? (
-                                        <a
-                                          key={i}
-                                          href={a.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3.5 py-2 text-[12.5px] font-medium text-emerald-700 transition-all hover:bg-emerald-100 hover:shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/5 dark:text-emerald-400"
-                                        >
-                                          <CheckCircle2 size={13} className="shrink-0" />
+                                  <div className="mb-3 space-y-1.5">
+                                    {msg.actions.map((a, i) => (
+                                      <div
+                                        key={i}
+                                        className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-[12.5px] dark:border-emerald-500/20 dark:bg-emerald-500/5"
+                                      >
+                                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                        <span className="font-medium text-emerald-700 dark:text-emerald-400">
                                           {a.label}
-                                          <ExternalLink size={11} className="ml-0.5 shrink-0 opacity-60" />
-                                        </a>
-                                      ) : (
-                                        <div
-                                          key={i}
-                                          className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3.5 py-2 text-[12.5px] font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/5 dark:text-emerald-400"
-                                        >
-                                          <CheckCircle2 size={13} className="shrink-0" />
-                                          {a.label}
-                                        </div>
-                                      )
+                                        </span>
+                                      </div>
                                     ))}
                                   </div>
                                 )}
@@ -1333,16 +1318,13 @@ export default function CommandStudio() {
                         return (
                           <div
                             key={turn.id}
-                            className="flex justify-end gap-2.5 py-3"
+                            className="flex justify-end gap-3 py-3"
                           >
-                            <div className="max-w-[78%] rounded-2xl rounded-br-sm bg-zinc-100 px-4 py-2.5 text-[14px] text-zinc-900 dark:bg-zinc-800/80 dark:text-zinc-100">
+                            <div className="max-w-[78%] rounded-2xl rounded-br-sm border border-zinc-200 bg-zinc-100 px-4 py-2.5 text-[14px] text-black dark:border-zinc-800 dark:bg-zinc-800/60 dark:text-zinc-100">
                               {turn.text}
                             </div>
-                            <div
-                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold uppercase text-white shadow-sm"
-                              style={{ background: avatarColor(currentUser?.id ?? "u") }}
-                            >
-                              {currentUserInitials}
+                            <div className="flex h-7 w-7 uppercase shrink-0 items-center justify-center rounded-lg border border-zinc-300 font-mono text-[11px] font-semibold text-black dark:border-zinc-700 dark:text-zinc-300">
+                              {user?.firstName?.slice(0, 2)}
                             </div>
                           </div>
                         );
@@ -1419,29 +1401,18 @@ export default function CommandStudio() {
                       // api turn — real backend response
                       if (turn.kind === "api") {
                         return (
-                          <div key={turn.id} className="flex gap-3 py-4 animate-in fade-in duration-300">
+                          <div key={turn.id} className="flex gap-3 py-4">
                             <EzraAvatar />
                             <div className="min-w-0 flex-1">
-                              <div className="mb-2 flex items-center gap-2">
-                                <span className="text-[12px] font-semibold text-zinc-800 dark:text-zinc-200">Ezra</span>
-                                {turn.status === "done" && turn.text && (
-                                  <span className="h-1 w-1 rounded-full bg-emerald-500 opacity-70" />
-                                )}
+                              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                                Ezra
                               </div>
                               {turn.status === "thinking" ? (
-                                <div className="mb-2.5 flex items-center gap-2.5 py-1">
-                                  <span
-                                    className="h-2 w-2 rounded-full bg-emerald-500"
-                                    style={{ animation: "ezraBounce 1.2s ease-in-out infinite", animationDelay: "0ms" }}
-                                  />
-                                  <span
-                                    className="h-2 w-2 rounded-full bg-emerald-400"
-                                    style={{ animation: "ezraBounce 1.2s ease-in-out infinite", animationDelay: "200ms" }}
-                                  />
-                                  <span
-                                    className="h-2 w-2 rounded-full bg-emerald-300"
-                                    style={{ animation: "ezraBounce 1.2s ease-in-out infinite", animationDelay: "400ms" }}
-                                  />
+                                <div className="mb-2.5 max-w-sm rounded-lg bg-zinc-50 px-3.5 py-2.5 dark:bg-zinc-900/60">
+                                  <div className="flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-wider text-black dark:text-zinc-500">
+                                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                                    Thinking…
+                                  </div>
                                 </div>
                               ) : (
                                 <>
@@ -1451,47 +1422,23 @@ export default function CommandStudio() {
                                     </ReactMarkdown>
                                   </div>
                                   {turn.actions.length > 0 && (
-                                    <div className="mb-3 flex flex-wrap gap-2">
-                                      {turn.actions.map((a, i) => {
-                                        const isLink = !!a.url;
-                                        const isError = a.type === "error" || a.label?.toLowerCase().includes("fail");
-                                        return isLink ? (
-                                          <a
-                                            key={i}
-                                            href={a.url ?? "#"}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className={cn(
-                                              "inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 text-[12.5px] font-medium transition-all hover:shadow-sm",
-                                              isError
-                                                ? "border-rose-200 bg-rose-50/80 text-rose-700 hover:bg-rose-100 dark:border-rose-500/20 dark:bg-rose-500/5 dark:text-rose-400"
-                                                : "border-emerald-200 bg-emerald-50/80 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/5 dark:text-emerald-400",
-                                            )}
-                                          >
-                                            <CheckCircle2 size={13} className="shrink-0" />
+                                    <div className="mb-3 space-y-1.5">
+                                      {turn.actions.map((a, i) => (
+                                        <div
+                                          key={i}
+                                          className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-[12.5px] dark:border-emerald-500/20 dark:bg-emerald-500/5"
+                                        >
+                                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                          <span className="font-medium text-emerald-700 dark:text-emerald-400">
                                             {a.label}
-                                            <ExternalLink size={11} className="ml-0.5 shrink-0 opacity-60" />
-                                          </a>
-                                        ) : (
-                                          <div
-                                            key={i}
-                                            className={cn(
-                                              "inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 text-[12.5px] font-medium",
-                                              isError
-                                                ? "border-rose-200 bg-rose-50/80 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/5 dark:text-rose-400"
-                                                : "border-emerald-200 bg-emerald-50/80 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/5 dark:text-emerald-400",
-                                            )}
-                                          >
-                                            <CheckCircle2 size={13} className="shrink-0" />
-                                            {a.label}
-                                            {a.id && (
-                                              <span className="ml-1 font-mono text-[10.5px] opacity-50">
-                                                {a.id}
-                                              </span>
-                                            )}
-                                          </div>
-                                        );
-                                      })}
+                                          </span>
+                                          {a.id && (
+                                            <span className="ml-auto font-mono text-[11px] text-black dark:text-zinc-500">
+                                              {a.id}
+                                            </span>
+                                          )}
+                                        </div>
+                                      ))}
                                     </div>
                                   )}
                                   {turn.id === lastApiTurnId &&
@@ -1742,7 +1689,7 @@ export default function CommandStudio() {
 // ── sub-components ────────────────────────────────────────────────────
 
 const EzraAvatar = () => (
-  <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-700 text-[12px] font-bold text-white shadow-sm ring-2 ring-emerald-100 dark:ring-emerald-900/60">
+  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-[13px] font-semibold text-white">
     E
   </div>
 );
@@ -1797,30 +1744,37 @@ function NextBest({
 }) {
   if (!items.length) return null;
   return (
-    <div className="mt-3">
-      <div className="mb-2 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">
-        <Sparkles size={11} className="text-emerald-500" /> Suggested follow-ups
+    <div className="mt-3 max-w-md rounded-xl border-l-4 border-l-emerald-500 bg-gradient-to-b from-white to-zinc-50 p-3.5 shadow-sm shadow-light dark:border-l-emerald-500/70 dark:from-zinc-900/40 dark:to-zinc-900/60">
+      <div className="mb-1.5 flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+        <Sparkles size={13} /> Next best actions
       </div>
-      <div className="flex flex-wrap gap-2">
-        {items.map((a, i) => (
-          <button
-            key={i}
-            onClick={() => onSend(a.send)}
-            className={cn(
-              "flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[12.5px] text-left transition-all hover:shadow-sm",
-              a.urgent
-                ? "border-rose-200 bg-rose-50/60 text-rose-700 hover:bg-rose-100 dark:border-rose-500/20 dark:bg-rose-500/5 dark:text-rose-400"
-                : "border-zinc-200 bg-white text-black hover:border-emerald-400 hover:bg-emerald-50/60 hover:text-emerald-700 dark:border-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-300 dark:hover:border-emerald-500/50 dark:hover:text-emerald-400",
-            )}
-          >
+      {items.map((a, i) => (
+        <button
+          key={i}
+          onClick={() => onSend(a.send)}
+          className="flex w-full items-center gap-3 rounded-lg border-b border-zinc-100 px-1.5 py-2 text-left last:border-b-0 hover:bg-zinc-100/70 dark:border-zinc-800 dark:hover:bg-zinc-800/60"
+        >
+          <span className="flex-1 text-[13px] text-black dark:text-zinc-200">
             {a.label}
-            {a.meta && (
-              <span className="ml-1 font-mono text-[10px] opacity-60">{a.meta}</span>
-            )}
-            <ArrowRight size={12} className="ml-0.5 shrink-0 opacity-50" />
-          </button>
-        ))}
-      </div>
+          </span>
+          {a.meta && (
+            <span
+              className={cn(
+                "whitespace-nowrap rounded-full border px-2 py-0.5 font-mono text-[10.5px]",
+                a.urgent
+                  ? "border-rose-200 text-rose-600 dark:border-rose-500/30 dark:text-rose-400"
+                  : "border-zinc-300 text-black dark:border-zinc-700 dark:text-zinc-400",
+              )}
+            >
+              {a.meta}
+            </span>
+          )}
+          <ChevronRight
+            size={14}
+            className="shrink-0 text-black dark:text-zinc-500"
+          />
+        </button>
+      ))}
     </div>
   );
 }
