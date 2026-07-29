@@ -354,10 +354,10 @@ export default function AssignmentGroups() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-white font-ibm dark:bg-zinc-950">
+    <div className="flex h-screen flex-col   font-ibm dark:bg-zinc-950">
       <Header title="Assignment Groups" />
 
-      <div className="bg-white px-4 py-4 shadow-sm shadow-light dark:bg-zinc-950 sm:px-6">
+      <div className="  px-4 py-4 shadow-sm shadow-light dark:bg-zinc-950 sm:px-6">
         <div className="flex flex-wrap items-center gap-3">
           <div>
             <h1 className="flex items-center gap-2.5 text-[22px] font-semibold leading-tight text-black dark:text-zinc-100">
@@ -393,7 +393,7 @@ export default function AssignmentGroups() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search assignment groups…"
-              className="w-full h-[36px] rounded-md border border-zinc-300 bg-white pl-9 pr-3 text-[13.5px] text-black placeholder:text-black/40 focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200"
+              className="w-full h-[36px] rounded-md border border-zinc-300  pl-9 pr-3 text-[13.5px] text-black placeholder:text-black/40 focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200"
             />
           </div>
           <div className="w-[160px] shrink-0">

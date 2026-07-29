@@ -16,7 +16,7 @@ const Header = ({ incident }: { incident: IncidentDetailRecord }) => {
           Scrubbe - Analyst Investigation
         </p>
         <p className="text-[22px] font-bold text-black dark:text-white leading-snug">
-          {incident.ticketId || LEAD.ticketId} · {incident.title || LEAD.title}
+          {incident.ticketId || LEAD.ticketId}
         </p>
         <p className="text-[13px] leading-relaxed text-black dark:text-zinc-400">
           Analyst view for what went wrong across delivery signals, evidence,

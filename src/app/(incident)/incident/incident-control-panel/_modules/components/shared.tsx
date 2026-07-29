@@ -1,9 +1,10 @@
 // components/ICP/shared.tsx
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
-// ── Panel with optional Expand & explain button ──
+// ── Panel with optional Expand & explain button, and a collapsible body ──
 
 export function Panel({
   number,
@@ -11,45 +12,65 @@ export function Panel({
   children,
   className,
   onExpand,
+  defaultOpen = true,
 }: {
   number?: string;
   title: string;
   children: React.ReactNode;
   className?: string;
   onExpand?: () => void;
+  defaultOpen?: boolean;
 }) {
+  const [open, setOpen] = useState(defaultOpen);
+
   return (
     <div
       className={`bg-white rounded-xl shadow-sm shadow-light p-5 ${className || ""}`}
     >
-      <div className="flex items-center gap-2 mb-4">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className={`flex w-full items-center gap-2 text-left ${open ? "mb-4" : ""}`}
+      >
         <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center gap-2 flex-1">
           {number && (
             <span className="text-emerald-600 font-mono text-xs">{number}</span>
           )}
           {title}
         </h2>
-        {onExpand && (
-          <button
-            type="button"
-            onClick={onExpand}
-            className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-zinc-400 bg-zinc-50 border border-zinc-200 px-2.5 py-1.5 rounded-lg hover:text-emerald-600 hover:border-emerald-400 hover:bg-emerald-50 transition-colors shrink-0"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="12"
-              height="12"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-            </svg>
-            Expand & explain
-          </button>
-        )}
-      </div>
-      {children}
+        <ChevronDown
+          size={16}
+          className={`shrink-0 text-zinc-400 transition-transform ${open ? "" : "-rotate-90"}`}
+        />
+      </button>
+
+      {open && (
+        <>
+          {onExpand && (
+            <div className="flex justify-end mb-4">
+              <button
+                type="button"
+                onClick={onExpand}
+                className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-zinc-400 bg-zinc-50 border border-zinc-200 px-2.5 py-1.5 rounded-lg hover:text-emerald-600 hover:border-emerald-400 hover:bg-emerald-50 transition-colors shrink-0"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="12"
+                  height="12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                </svg>
+                Expand & explain
+              </button>
+            </div>
+          )}
+          {children}
+        </>
+      )}
     </div>
   );
 }

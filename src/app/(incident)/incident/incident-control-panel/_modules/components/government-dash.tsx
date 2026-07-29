@@ -22,17 +22,26 @@ interface Props {
   totalAutonomousActions?: number;
 }
 
-export default function GovernanceDash({ onChartClick, onExpand, policyViolations, totalAutonomousActions }: Props) {
+export default function GovernanceDash({
+  onChartClick,
+  onExpand,
+  policyViolations,
+  totalAutonomousActions,
+}: Props) {
   const [showCompliance, setShowCompliance] = useState(false);
   const [showAllEvents, setShowAllEvents] = useState(false);
 
   const displayKpis = useMemo(() => {
-    if (policyViolations === undefined && totalAutonomousActions === undefined) return GOV_KPIS;
+    if (policyViolations === undefined && totalAutonomousActions === undefined)
+      return GOV_KPIS;
     return GOV_KPIS.map((k) => {
       if (k.label === "Policy Violations" && policyViolations !== undefined) {
         return { ...k, value: String(policyViolations) };
       }
-      if (k.label === "Autonomous Actions" && totalAutonomousActions !== undefined) {
+      if (
+        k.label === "Autonomous Actions" &&
+        totalAutonomousActions !== undefined
+      ) {
         return { ...k, value: String(totalAutonomousActions) };
       }
       return k;
@@ -42,7 +51,7 @@ export default function GovernanceDash({ onChartClick, onExpand, policyViolation
   return (
     <>
       <Panel number="5." title="Governance Dashboard" onExpand={onExpand}>
-        <div className="grid grid-cols-2 gap-2.5 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
           {displayKpis.map((k) => (
             <div
               key={k.label}

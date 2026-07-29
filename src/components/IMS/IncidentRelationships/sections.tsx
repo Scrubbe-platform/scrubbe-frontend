@@ -371,18 +371,13 @@ export function ProposalCard({
             key={s}
             className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 px-2.5 py-1 text-[11.5px] text-black/70 dark:border-zinc-700 dark:text-zinc-400"
           >
-            <Sparkles
-              size={11}
-              className="text-emerald-600 dark:text-emerald-400"
-            />
             {s}
           </span>
         ))}
       </div>
 
       <p className="mt-3.5 flex items-center gap-1.5 font-mono text-[11px] text-black/40 dark:text-zinc-500">
-        <Cpu size={12} /> Proposed by {proposal.by} · a human decision is
-        required
+        Proposed by {proposal.by} · a human decision is required
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-3.5 dark:border-zinc-800">
@@ -390,7 +385,7 @@ export function ProposalCard({
           onClick={onConfirm}
           className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white hover:bg-emerald-700"
         >
-          <Check size={14} /> Confirm link
+          Confirm link
         </button>
         <button
           onClick={onReject}

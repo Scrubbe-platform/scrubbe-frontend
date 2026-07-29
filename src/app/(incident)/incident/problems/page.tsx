@@ -756,18 +756,12 @@ export default function ProblemRecordsDashboard() {
             <StatsCard
               value={records.filter((r) => r.status !== "Known Error").length}
               label="Know Error"
-              valueColor="text-red-500"
             />
             <StatsCard
               value={records.filter((r) => r.status !== "Resolved").length}
               label="Resolved"
-              valueColor="text-orange-500"
             />
-            <StatsCard
-              value={0}
-              label="KB Articles"
-              valueColor="text-red-500"
-            />
+            <StatsCard value={0} label="KB Articles" />
           </div>
         </div>
       </div>
@@ -775,7 +769,7 @@ export default function ProblemRecordsDashboard() {
       {/* ─── WORKSPACE CONTROLS TOOLBAR ─── */}
       <div className="max-w-[1540px] mx-auto px-7 py-3 flex flex-wrap items-center gap-3">
         {/* Status Segments bar */}
-        <div className="flex rounded-lg bg-slate-200/70 p-1 shadow-2xs gap-1">
+        <div className="flex rounded-lg bg-gray-100/70 p-1 shadow-2xs gap-1">
           {["all", "Investigating", "Known Error", "Resolved"].map((st) => (
             <button
               key={st}
@@ -1126,9 +1120,7 @@ export default function ProblemRecordsDashboard() {
                     setActiveTab("overview");
                   }}
                   className={`p-4 cursor-pointer transition-all hover:bg-zinc-50 relative group border-l-2 ${
-                    active
-                      ? "bg-blue-50/60 border-l-blue-600"
-                      : "border-l-transparent"
+                    active ? "bg-blue-50/60" : "border-l-transparent"
                   } ${isChecked ? "bg-zinc-50" : ""}`}
                 >
                   <div className="flex items-center gap-2 mb-2">
@@ -1158,26 +1150,6 @@ export default function ProblemRecordsDashboard() {
                         {r.priority}
                       </span>
                     </div>
-                    <span
-                      className={`ml-auto inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full ${
-                        r?.status === "Known Error"
-                          ? "bg-amber-50 text-amber-700"
-                          : r?.status === "Resolved"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-blue-50 text-blue-700"
-                      }`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          r?.status === "Known Error"
-                            ? "bg-amber-500"
-                            : r?.status === "Resolved"
-                              ? "bg-emerald-500"
-                              : "bg-blue-500"
-                        }`}
-                      />
-                      {r?.status}
-                    </span>
                   </div>
 
                   <h4
@@ -1214,42 +1186,8 @@ export default function ProblemRecordsDashboard() {
               {/* Detail header */}
               <div className="px-7 pt-6 pb-0">
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span
-                    className={`  text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                      activeRecord.priority === "P0"
-                        ? "bg-red-50 text-red-700"
-                        : activeRecord.priority === "P1"
-                          ? "bg-amber-50 text-amber-700"
-                          : activeRecord.priority === "P2"
-                            ? "bg-blue-50 text-blue-700"
-                            : "bg-zinc-100 text-zinc-500"
-                    }`}
-                  >
-                    {activeRecord?.priority}
-                  </span>
                   <span className=" text-[10.5px] text-zinc-500 bg-zinc-50 px-2 py-0.5 rounded border border-zinc-100">
                     {activeRecord?.id}
-                  </span>
-                  {/* Status badge */}
-                  <span
-                    className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full ${
-                      activeRecord.status === "Known Error"
-                        ? "bg-amber-50 text-amber-700"
-                        : activeRecord.status === "Resolved"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-blue-50 text-blue-700"
-                    }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        activeRecord.status === "Known Error"
-                          ? "bg-amber-500"
-                          : activeRecord.status === "Resolved"
-                            ? "bg-emerald-500"
-                            : "bg-blue-500"
-                      }`}
-                    />
-                    {activeRecord.status}
                   </span>
 
                   <div className="flex gap-2 ml-auto">
@@ -1461,16 +1399,16 @@ export default function ProblemRecordsDashboard() {
 
                       {/* Workaround */}
                       {activeRecord.workaround?.text && (
-                        <div className="p-4 border border-amber-200 bg-amber-50/40 rounded-xl flex gap-3 items-start">
+                        <div className="p-4 border border-zinc-200 rounded-xl bg-zinc-50/40 flex gap-3 items-start">
                           <AlertCircle
                             size={18}
                             className="text-amber-500 shrink-0 mt-0.5"
                           />
                           <div>
-                            <p className="font-bold text-amber-800 text-sm mb-1">
+                            <p className="font-bold text-black text-sm mb-1">
                               Active workaround
                             </p>
-                            <p className="text-xs text-amber-900/80 leading-relaxed">
+                            <p className="text-xs text-gray-900/80 leading-relaxed">
                               {activeRecord.workaround.text}
                             </p>
                           </div>
