@@ -5,6 +5,15 @@ import { BiMessageRoundedDetail } from "react-icons/bi";
 import { useIncidentPresence } from "@/hooks/useIncidentPresence";
 import useMember from "@/hooks/useMember";
 import useAuthStore from "@/lib/stores/auth.store";
+import { useSharedAI, type AIQueryType } from "@/hooks/useSharedAI";
+
+const AGENT_LABELS: Record<AIQueryType, { abbr: string; name: string }> = {
+  ezra_analysis:   { abbr: "EZ", name: "Ezra (Analysis)" },
+  five_whys:       { abbr: "5W", name: "5-Whys Agent" },
+  ai_suggestion:   { abbr: "AI", name: "AI Suggestion" },
+  stakeholder_msg: { abbr: "CM", name: "Comms Agent" },
+  investigation:   { abbr: "IN", name: "Investigation Agent" },
+};
 
 const AVATAR_COLORS = [
   "bg-zinc-900 text-white font-mono",
@@ -33,6 +42,8 @@ const LiveViewers = ({ title, ticketId }: Props) => {
   const { user } = useAuthStore();
   const { data: members = [] } = useMember();
   const presenceRows = useIncidentPresence(ticketId);
+  const { whoIsThinking } = useSharedAI(ticketId);
+  const agentThinking = whoIsThinking();
 
   const memberMap = useMemo(
     () => new Map(members.map((m) => [m.id, m])),
@@ -64,7 +75,7 @@ const LiveViewers = ({ title, ticketId }: Props) => {
     setOpenChatModal(true);
   };
 
-  if (viewers.length < 1) {
+  if (viewers.length < 1 && !agentThinking) {
     return null;
   }
 
@@ -75,6 +86,15 @@ const LiveViewers = ({ title, ticketId }: Props) => {
         trigger={
           <div className=" border items-center flex gap-2 p-1 px-2 rounded-md bg-gray-50">
             <div className="flex items-center -space-x-2 select-none">
+              {agentThinking && (
+                <div
+                  className="relative h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold shadow-2xs dark:border-zinc-950 bg-emerald-500 text-white z-20"
+                  title={`${AGENT_LABELS[agentThinking.queryType].name} is working on this incident…`}
+                >
+                  <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-50" />
+                  <span className="relative z-10">{AGENT_LABELS[agentThinking.queryType].abbr}</span>
+                </div>
+              )}
               {viewers.slice(0, 4).map((viewer) => (
                 <div
                   key={viewer.userId}
@@ -84,7 +104,7 @@ const LiveViewers = ({ title, ticketId }: Props) => {
                   {viewer.name?.slice(0, 2).toUpperCase()}
                 </div>
               ))}
-              {viewers.length === 0 && (
+              {viewers.length === 0 && !agentThinking && (
                 <div className="h-8 w-8 rounded-full border-2 border-white bg-stone-100 text-stone-400 flex items-center justify-center text-[10px] dark:border-zinc-950" />
               )}
               {viewers.length - 4 > 0 && (
@@ -101,13 +121,24 @@ const LiveViewers = ({ title, ticketId }: Props) => {
           <div>
             <p className="text-base font-bold">{title}</p>
             <p className="text-xs text-zinc-400 dark:text-zinc-500">
-              {viewers.length} team member{viewers.length === 1 ? "" : "s"} ·
-              live
+              {viewers.length} team member{viewers.length === 1 ? "" : "s"}{agentThinking ? " · 1 AI agent" : ""} · live
             </p>
           </div>
 
           <div className="mt-3">
-            {viewers.length === 0 && (
+            {agentThinking && (
+              <div className="flex items-center gap-3 py-2 border-b border-zinc-100 dark:border-zinc-800 mb-1">
+                <div className="relative h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold bg-emerald-500 text-white shrink-0 dark:border-zinc-950">
+                  <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-40" />
+                  <span className="relative z-10">{AGENT_LABELS[agentThinking.queryType].abbr}</span>
+                </div>
+                <div>
+                  <p className="text-sm font-bold">{AGENT_LABELS[agentThinking.queryType].name}</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">Working on this incident…</p>
+                </div>
+              </div>
+            )}
+            {viewers.length === 0 && !agentThinking && (
               <p className="py-3 text-xs text-zinc-400 dark:text-zinc-500">
                 No one else is viewing this incident right now.
               </p>
