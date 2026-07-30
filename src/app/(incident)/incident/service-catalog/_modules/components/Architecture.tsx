@@ -142,7 +142,7 @@ export default function Architecture({ onBackToOverview }: { onBackToOverview: (
       const total = score + boost;
       if (total > bestScore) { bestScore = total; best = nid; }
     });
-    return best ?? [...visible][0] ?? null;
+    return best ?? Array.from(visible)[0] ?? null;
   }
 
   function handleNodeClick(nid: string) {
@@ -171,7 +171,7 @@ export default function Architecture({ onBackToOverview }: { onBackToOverview: (
     if (!origin) return null;
     if (!graphUp) return "Blast radius UNKNOWN — the graph service cannot answer, so the execution gate blocks rather than assume a low radius.";
     if (!blast) return null;
-    const hit = [...blast.keys()].filter((k) => k !== origin);
+    const hit = Array.from(blast.keys()).filter((k) => k !== origin);
     const direct = hit.filter((k) => blast.get(k) === 1).length;
     const name = nodeMap.get(origin)?.label ?? origin;
     return `Blast radius from "${name}" — ${direct} directly connected, ${hit.length} reachable within ${hops} hop${hops === 1 ? "" : "s"}.`;
