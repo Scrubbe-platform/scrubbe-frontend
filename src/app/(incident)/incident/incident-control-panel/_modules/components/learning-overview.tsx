@@ -34,6 +34,7 @@ export default function LearningOverview({
       number="1."
       title="Learning Overview Dashboard"
       onExpand={onExpand}
+      defaultOpen
     >
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 mb-5">
         {displayKpis.map((kpi) => (

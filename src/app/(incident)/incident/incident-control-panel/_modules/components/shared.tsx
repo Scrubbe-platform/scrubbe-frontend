@@ -12,7 +12,7 @@ export function Panel({
   children,
   className,
   onExpand,
-  defaultOpen = true,
+  defaultOpen = false,
 }: {
   number?: string;
   title: string;

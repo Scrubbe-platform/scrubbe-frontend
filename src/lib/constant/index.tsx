@@ -1118,6 +1118,13 @@ export const NewMenu: Record<string, NavItem[]> = {
       isMenu: false,
     },
     {
+      name: "Service Catalog",
+      Icon: GiOpenBook,
+      link: "/incident/service-catalog",
+      isActive: false,
+      isMenu: false,
+    },
+    {
       name: "Handover",
       Icon: LuShieldAlert,
       link: "/incident/handover",
