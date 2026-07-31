@@ -4,11 +4,13 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Header from "@/components/IMS/DashboardHeader";
+import Modal from "@/components/ui/Modal";
 import Overview from "./Overview";
 import ServicesTable, { ServicesFilterPreset } from "./ServicesTable";
 import Architecture from "./Architecture";
 import ServiceDetail from "./ServiceDetail";
-import { SERVICES, ServiceRecord } from "./serviceCatalog.data";
+import { CreateServiceForm, ServicePatch } from "./EditServiceForm";
+import { SERVICES, ServiceRecord, createService } from "./serviceCatalog.data";
 
 type Tab = "overview" | "services" | "architecture" | "detail";
 const TABS: { key: Tab; label: string }[] = [
@@ -21,6 +23,7 @@ export default function ServiceCatalog() {
   const [tab, setTab] = useState<Tab>("overview");
   const [preset, setPreset] = useState<ServicesFilterPreset | undefined>(undefined);
   const [selected, setSelected] = useState<ServiceRecord | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   function goToServices(p?: ServicesFilterPreset) {
     setPreset(p);
@@ -34,6 +37,14 @@ export default function ServiceCatalog() {
       return;
     }
     setSelected(match);
+    setTab("detail");
+  }
+
+  function handleCreateService(patch: ServicePatch) {
+    const record = createService(patch);
+    setAddOpen(false);
+    toast.success(`"${record.name}" added to the catalog`);
+    setSelected(record);
     setTab("detail");
   }
 
@@ -67,12 +78,13 @@ export default function ServiceCatalog() {
             onOpenTopology={() => setTab("architecture")}
             onOpenServices={goToServices}
             onOpenServiceDetail={openServiceDetail}
+            onNewService={() => setAddOpen(true)}
           />
         )}
         {tab === "services" && (
           <ServicesTable
             initialPreset={preset}
-            onNewService={() => toast.info("Add service form is coming in a later update")}
+            onNewService={() => setAddOpen(true)}
             onOpenServiceDetail={openServiceDetail}
             onBackToOverview={() => setTab("overview")}
           />
@@ -87,6 +99,10 @@ export default function ServiceCatalog() {
           />
         )}
       </div>
+
+      <Modal isOpen={addOpen} onClose={() => setAddOpen(false)}>
+        <CreateServiceForm onCreate={handleCreateService} onCancel={() => setAddOpen(false)} />
+      </Modal>
     </div>
   );
 }

@@ -1,31 +1,40 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MoreVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Modal from "@/components/ui/Modal";
 import { Card, ReadinessRing, TierBadge } from "./ServiceCatalogPrimitives";
+import { ExportModal } from "./ExportModal";
 import {
   AUTOMATION_LEVELS,
   LEVEL,
   SERVICES,
   ServiceRecord,
+  createService,
   ealOf,
   readiness,
 } from "./serviceCatalog.data";
+import { parseServicesCsv } from "./csv";
 import { ServicesFilterPreset } from "./ServicesTable";
 
 export default function Overview({
   onOpenTopology,
   onOpenServices,
   onOpenServiceDetail,
+  onNewService,
 }: {
   onOpenTopology: () => void;
   onOpenServices: (preset?: ServicesFilterPreset) => void;
   onOpenServiceDetail: (name: string) => void;
+  onNewService: () => void;
 }) {
   const [violScope, setViolScope] = useState<"tier01" | "all">("tier01");
   const [moreOpen, setMoreOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [dataVersion, setDataVersion] = useState(0);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!moreOpen) return;
@@ -33,6 +42,41 @@ export default function Overview({
     document.addEventListener("click", close);
     return () => document.removeEventListener("click", close);
   }, [moreOpen]);
+
+  function handleImportFile(file: File) {
+    file.text().then((text) => {
+      const rows = parseServicesCsv(text);
+      let created = 0;
+      let skipped = 0;
+      rows.forEach((row) => {
+        const name = row["Name"]?.trim();
+        if (!name || SERVICES.some((s) => s.name.toLowerCase() === name.toLowerCase())) {
+          skipped++;
+          return;
+        }
+        const tierRaw = row["Tier"]?.trim();
+        const tierNum = tierRaw ? Number(tierRaw) : NaN;
+        createService({
+          name,
+          owner: row["Owner"]?.trim() || "Unassigned",
+          tier: Number.isFinite(tierNum) ? Math.min(3, Math.max(0, Math.round(tierNum))) : 2,
+          env: row["Environment"]?.trim() || "Production",
+          runtime: row["Runtime"]?.trim() || "Kubernetes",
+          cloud: row["Cloud"]?.trim() || "AWS",
+          region: row["Region"]?.trim() || "eu-west-2",
+          lang: row["Language"]?.trim() || "TypeScript",
+          version: row["Version"]?.trim() || "1.0.0",
+        });
+        created++;
+      });
+      if (!created && !skipped) {
+        toast.error("No rows found in that file");
+      } else {
+        toast.success(`Imported ${created} service${created === 1 ? "" : "s"}${skipped ? ` · ${skipped} skipped (duplicate or missing name)` : ""}`);
+        if (created) setDataVersion((v) => v + 1);
+      }
+    });
+  }
 
   const stats = useMemo(() => {
     const total = SERVICES.length;
@@ -56,7 +100,7 @@ export default function Overview({
     const band = avgReadiness >= 85 ? "Ready" : avgReadiness >= 60 ? "Conditional" : "Not ready";
 
     return { total, healthy, warning, critical, tier0, production, orphaned, ready, conditional, notReady, avgReadiness, blocked, levelCounts, handsOff, band };
-  }, []);
+  }, [dataVersion]);
 
   const violRows = useMemo(() => {
     const pool = SERVICES.filter((s) => (violScope === "all" ? true : s.tier <= 1));
@@ -66,7 +110,7 @@ export default function Overview({
     });
     rows.sort((a, b) => a.s.tier - b.s.tier || b.weight - a.weight || a.s.name.localeCompare(b.s.name));
     return rows;
-  }, [violScope]);
+  }, [violScope, dataVersion]);
   const shownViolations = violRows.slice(0, 12);
 
   return (
@@ -103,26 +147,37 @@ export default function Overview({
                 className="absolute right-0 top-10 z-20 w-36 rounded-md border border-zinc-200 bg-white p-1 shadow-md dark:border-zinc-700 dark:bg-zinc-900"
               >
                 {[
-                  ["Import", "Import is coming in a later update"],
-                  ["Export", "Export is coming in a later update"],
-                  ["Sync", "Sync started — Kubernetes, AWS, GitHub, Datadog"],
-                ].map(([label, msg]) => (
+                  { label: "Import", onClick: () => importInputRef.current?.click() },
+                  { label: "Export", onClick: () => setExportOpen(true) },
+                  { label: "Sync", onClick: () => toast.info("Sync started — Kubernetes, AWS, GitHub, Datadog") },
+                ].map((item) => (
                   <button
-                    key={label}
+                    key={item.label}
                     onClick={() => {
                       setMoreOpen(false);
-                      toast.info(msg);
+                      item.onClick();
                     }}
                     className="block w-full rounded px-2.5 py-1.5 text-left text-[12.5px] text-black hover:bg-zinc-50 dark:text-zinc-200 dark:hover:bg-zinc-800"
                   >
-                    {label}
+                    {item.label}
                   </button>
                 ))}
               </div>
             )}
           </div>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleImportFile(file);
+              e.target.value = "";
+            }}
+          />
           <button
-            onClick={() => toast.info("Add service form is coming in a later update")}
+            onClick={onNewService}
             className="rounded-md bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white hover:bg-emerald-700"
           >
             + Add service
@@ -320,6 +375,10 @@ export default function Overview({
           </div>
         )}
       </Card>
+
+      <Modal isOpen={exportOpen} onClose={() => setExportOpen(false)}>
+        <ExportModal services={SERVICES} onClose={() => setExportOpen(false)} />
+      </Modal>
     </div>
   );
 }

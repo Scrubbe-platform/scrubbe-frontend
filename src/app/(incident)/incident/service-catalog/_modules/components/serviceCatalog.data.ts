@@ -431,3 +431,78 @@ export function bandInk(band: string) {
 // Evaluate every service once at module load so the automation level is
 // stored, not recomputed on the fly each time a component reads it.
 SERVICES.forEach((s) => computeEAL(s));
+
+/* ───────────────────── create service ───────────────────── */
+
+export interface NewServiceInput {
+  name: string;
+  owner: string;
+  tier: number;
+  env: string;
+  runtime: string;
+  cloud: string;
+  region: string;
+  lang: string;
+  version: string;
+}
+export function createService(input: NewServiceInput): ServiceRecord {
+  const record: ServiceRecord = {
+    id: "SRV-" + String(101 + SERVICES.length).padStart(5, "0"),
+    name: input.name,
+    owner: input.owner,
+    tier: input.tier,
+    health: "Healthy",
+    env: input.env,
+    runtime: input.runtime,
+    cloud: input.cloud,
+    region: input.region,
+    lang: input.lang,
+    incidents: 0,
+    deps: 2,
+    healthScore: 96,
+    slo: 99.9,
+    version: input.version || "1.0.0",
+    pods: input.tier <= 1 ? 6 : 3,
+    repoCount: 1,
+    createdYearsAgo: 0,
+    availability: "99.95",
+    latency: 32,
+    errorRate: "0.05",
+    traffic: 500,
+    cpu: 28,
+    mem: 32,
+    riskScore: "Low",
+    deploymentConfidence: 96,
+    lastIncidentWeeksAgo: 12,
+  };
+  SERVICES.push(record);
+  computeEAL(record);
+  return record;
+}
+
+export function updateService(id: string, patch: NewServiceInput): ServiceRecord | null {
+  const record = SERVICES.find((s) => s.id === id);
+  if (!record) return null;
+  record.name = patch.name;
+  record.owner = patch.owner;
+  record.tier = patch.tier;
+  record.env = patch.env;
+  record.runtime = patch.runtime;
+  record.cloud = patch.cloud;
+  record.region = patch.region;
+  record.lang = patch.lang;
+  record.version = patch.version;
+  record._dep = undefined;
+  computeEAL(record);
+  return record;
+}
+
+/* ───────────────────── governance evaluation ID ───────────────────── */
+
+export function evaluationId(s: ServiceRecord): string {
+  const e = ealOf(s);
+  const seed = s.id + e.binding + e.level;
+  let h = 0;
+  for (let k = 0; k < seed.length; k++) h = (h * 31 + seed.charCodeAt(k)) >>> 0;
+  return "EVAL-" + String(100000 + (h % 899999)).slice(0, 6);
+}

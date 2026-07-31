@@ -84,10 +84,12 @@ function nextDuplicateId(): string {
 
 interface PlaybookDetailPageProps {
   playbookId: string;
+  isIncident?: boolean;
 }
 
 export default function PlaybookDetailPage({
   playbookId,
+  isIncident,
 }: PlaybookDetailPageProps): React.JSX.Element {
   const router = useRouter();
 
@@ -183,18 +185,20 @@ export default function PlaybookDetailPage({
   return (
     <main className="max-w-[1200px] mx-auto p-4 sm:p-6 pb-24 font-ibm">
       {/* breadcrumb + actions */}
-      <div className="flex items-center gap-3 flex-wrap mb-6 sticky top-0  backdrop-blur z-30 py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 border-b border-zinc-100">
-        <button
-          onClick={() => router.push("/incident/playbook-library")}
-          className="text-sm text-zinc-500 hover:text-zinc-800 font-medium transition-colors"
-        >
-          Playbook library
-        </button>
-        <ChevronRight size={13} className="text-zinc-300 shrink-0" />
-        <span className="text-sm font-semibold text-zinc-900 truncate">
-          {playbook.name}
-        </span>
-      </div>
+      {!isIncident && (
+        <div className="flex items-center gap-3 flex-wrap mb-6 sticky top-0  backdrop-blur z-30 py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 border-b border-zinc-100">
+          <button
+            onClick={() => router.push("/incident/playbook-library")}
+            className="text-sm text-zinc-500 hover:text-zinc-800 font-medium transition-colors"
+          >
+            Playbook library
+          </button>
+          <ChevronRight size={13} className="text-zinc-300 shrink-0" />
+          <span className="text-sm font-semibold text-zinc-900 truncate">
+            {playbook.name}
+          </span>
+        </div>
+      )}
 
       {/* hero */}
       <div className="mb-7 flex justify-between items-center">
