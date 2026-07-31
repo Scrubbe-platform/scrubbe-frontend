@@ -1121,7 +1121,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Service Catalog",
       Icon: GiOpenBook,
       link: "/incident/service-catalog",
-      isActive: false,
+      isActive: true,
       isMenu: false,
     },
     {
