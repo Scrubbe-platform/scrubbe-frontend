@@ -87,20 +87,6 @@ export default function Header({ title = "Dashboard" }: HeaderProps) {
               <Settings size={15} className="text-zinc-400" />
               Settings
             </button>
-
-            <div className="h-px bg-zinc-100 my-1" />
-
-            <button
-              type="button"
-              onClick={() => {
-                handleLogout();
-                setOpen(false);
-              }}
-              className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 font-medium hover:bg-red-50 transition-colors"
-            >
-              <LogOut size={15} />
-              Logout
-            </button>
           </div>
         )}
       </div>

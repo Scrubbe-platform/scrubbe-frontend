@@ -375,7 +375,7 @@ export default function AssignmentGroups() {
             {isManager && (
               <button
                 onClick={() => setModal({ kind: "create" })}
-                className="flex items-center gap-2 rounded-md bg-emerald-600 px-5 py-2.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-emerald-700"
+                className="flex items-center gap-2 rounded-md bg-IMSLightGreen px-5 py-2.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-IMSLightGreen"
               >
                 <Plus size={14} /> New assignment group
               </button>
@@ -524,7 +524,6 @@ export default function AssignmentGroups() {
                         label={group.status}
                         tone={group.status === "Active" ? "ok" : "neutral"}
                       />
-                      <Tag label={group.env} tone="neutral" dot={false} />
                       <Tag
                         label={`${group.members.length} members`}
                         tone="neutral"
@@ -543,8 +542,8 @@ export default function AssignmentGroups() {
                 </div>
 
                 {!isManager && MEMBER_OF.has(group.id) && (
-                  <div className="mt-4 flex items-center gap-2.5 rounded-md bg-emerald-50 px-3.5 py-2.5 text-[13px] text-black dark:bg-emerald-500/10 dark:text-zinc-200">
-                    <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />{" "}
+                  <div className="mt-4 flex items-center gap-2.5 rounded-md bg-emerald-50 px-3.5 py-2.5 text-[13px] text-black dark:bg-IMSLightGreen/10 dark:text-zinc-200">
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-IMSLightGreen" />{" "}
                     You are a member of this team.
                   </div>
                 )}
@@ -597,7 +596,7 @@ export default function AssignmentGroups() {
                     <div className="mt-3.5 flex gap-2">
                       <button
                         onClick={() => setModal({ kind: "addMember" })}
-                        className="rounded-md bg-emerald-600 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-emerald-700"
+                        className="rounded-md bg-emerald-600 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-IMSLightGreen"
                       >
                         Add member
                       </button>
@@ -691,7 +690,7 @@ export default function AssignmentGroups() {
                             "shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-[12px] font-medium",
                             group.oncall.name
                               ? "border border-zinc-300 text-black hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-200"
-                              : "bg-emerald-600 text-white hover:bg-emerald-700",
+                              : "bg-emerald-600 text-white hover:bg-IMSLightGreen",
                           )}
                         >
                           {group.oncall.name

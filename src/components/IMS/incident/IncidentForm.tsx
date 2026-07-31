@@ -50,6 +50,7 @@ export const raiseIncidentSchema = z.object({
   customerImpact: z.string().min(1, "Impact status required"),
   businessImpact: z.string().optional(),
   assignTo: z.string().min(1, "Please assign a lead"),
+  assignmentGroup: z.string().optional(),
   notifyChannels: z.string().min(1, "Select at least one channel"),
   warRoom: z.enum(["not-required", "open-war-room"]),
 });
@@ -571,6 +572,7 @@ const RaiseIncidentModal = () => {
       recentChange: "",
       businessImpact: "",
       assignTo: "",
+      assignmentGroup: "",
       notifyChannels: "sre-oncall-pagerduty",
       warRoom: "not-required",
       state: "OPEN",
@@ -589,6 +591,10 @@ const RaiseIncidentModal = () => {
     ],
     [members],
   );
+
+  // Assignment group isn't wired to the backend yet — this just captures the
+  // selection locally so the field exists ahead of the API being ready.
+  const assignmentGroupOptions = [{ value: "", label: "Select assignment group..." }];
 
   const createMutation = useMutation({
     mutationFn: async (data: RaiseIncidentFormValues) => {
@@ -935,6 +941,17 @@ const RaiseIncidentModal = () => {
             <div className="space-y-5">
               <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
                 <Controller
+                  name="assignmentGroup"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      label="Assignment Group"
+                      options={assignmentGroupOptions}
+                    />
+                  )}
+                />
+                <Controller
                   name="assignTo"
                   control={control}
                   render={({ field }) => (
@@ -950,22 +967,24 @@ const RaiseIncidentModal = () => {
                   name="notifyChannels"
                   control={control}
                   render={({ field }) => (
-                    <Select
-                      {...field}
-                      label="Notify Channels *"
-                      error={errors.notifyChannels?.message}
-                      options={[
-                        {
-                          value: "sre-oncall-pagerduty",
-                          label: "#sre-oncall + PagerDuty",
-                        },
-                        {
-                          value: "incident-room-only",
-                          label: "Incident room only",
-                        },
-                        { value: "no-notification", label: "No notification" },
-                      ]}
-                    />
+                    <div className="lg:col-span-2">
+                      <Select
+                        {...field}
+                        label="Notify Channels *"
+                        error={errors.notifyChannels?.message}
+                        options={[
+                          {
+                            value: "sre-oncall-pagerduty",
+                            label: "#sre-oncall + PagerDuty",
+                          },
+                          {
+                            value: "incident-room-only",
+                            label: "Incident room only",
+                          },
+                          { value: "no-notification", label: "No notification" },
+                        ]}
+                      />
+                    </div>
                   )}
                 />
               </div>
