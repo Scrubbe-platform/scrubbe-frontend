@@ -1199,13 +1199,6 @@ export const NewMenu: Record<string, NavItem[]> = {
       isMenu: false,
     },
     {
-      name: "Repositories",
-      Icon: LuGitPullRequest,
-      link: "/incident/repositories",
-      isActive: false,
-      isMenu: false,
-    },
-    {
       name: "Deployments",
       Icon: LuLayers,
       link: "/incident/deployments",
