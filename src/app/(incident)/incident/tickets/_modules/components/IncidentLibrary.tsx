@@ -122,7 +122,8 @@ export default function IncidentLibraryPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [activeId, setActiveId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Record<FilterKey, Set<string>>>(EMPTY_FILTERS());
+  const [filters, setFilters] =
+    useState<Record<FilterKey, Set<string>>>(EMPTY_FILTERS());
   const router = useRouter();
 
   const [activeModal, setActiveModal] = useState<{
@@ -156,7 +157,8 @@ export default function IncidentLibraryPage() {
 
         // Environment
         const matchesEnv =
-          filters.environment.size === 0 || filters.environment.has(i.environment);
+          filters.environment.size === 0 ||
+          filters.environment.has(i.environment);
 
         // Service
         const matchesService =
@@ -168,7 +170,8 @@ export default function IncidentLibraryPage() {
 
         // Incident Type → maps to i.sourceType
         const matchesIncidentType =
-          filters.incidentType.size === 0 || filters.incidentType.has(i.sourceType);
+          filters.incidentType.size === 0 ||
+          filters.incidentType.has(i.sourceType);
 
         // warRoom / codeEngine — no direct field yet; skip filtering to avoid false exclusions
         // (counts show 0 in FilterRail which is accurate)
@@ -189,16 +192,24 @@ export default function IncidentLibraryPage() {
       })
       .sort((a, b) => {
         if (sort === "opened-desc")
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         if (sort === "opened-asc")
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
         if (sort === "duration-desc") return b.MTTR - a.MTTR;
-        if (sort === "priority-asc") return a.severity.localeCompare(b.severity);
+        if (sort === "priority-asc")
+          return a.severity.localeCompare(b.severity);
         return 0;
       });
   }, [incidents, search, sort, filters, dateRange]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredIncidents.length / pageSize));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredIncidents.length / pageSize),
+  );
   const paginatedIncidents = filteredIncidents.slice(
     (page - 1) * pageSize,
     page * pageSize,
@@ -217,7 +228,9 @@ export default function IncidentLibraryPage() {
   };
 
   const handleSelectAllRows = (checked: boolean) => {
-    setSelectedIds(checked ? new Set(paginatedIncidents.map((i) => i.id)) : new Set());
+    setSelectedIds(
+      checked ? new Set(paginatedIncidents.map((i) => i.id)) : new Set(),
+    );
   };
 
   const clearAllFilters = () => {
@@ -234,27 +247,69 @@ export default function IncidentLibraryPage() {
   // ── CSV EXPORT ─────────────────────────────────────────────────────────────
   const handleDownloadCSV = (records: IncidentListItem[]) => {
     const headers = [
-      "ID","Ticket ID","Title","Summary","Reason","Description","Service","Region",
-      "Environment","Severity","Priority","Status","State","Source","Source Type",
-      "Assigned To (Email)","Assigned To (Name)","Incident Commander","Owning Squad",
-      "Created At","Updated At","Elapsed Label","Elapsed Minutes","MTTR",
-      "Comments Count","Recommended Actions",
+      "ID",
+      "Ticket ID",
+      "Title",
+      "Summary",
+      "Reason",
+      "Description",
+      "Service",
+      "Region",
+      "Environment",
+      "Severity",
+      "Priority",
+      "Status",
+      "State",
+      "Source",
+      "Source Type",
+      "Assigned To (Email)",
+      "Assigned To (Name)",
+      "Incident Commander",
+      "Owning Squad",
+      "Created At",
+      "Updated At",
+      "Elapsed Label",
+      "Elapsed Minutes",
+      "MTTR",
+      "Comments Count",
+      "Recommended Actions",
     ];
     const escape = (val: unknown) => {
       const str = val == null ? "" : String(val);
       return `"${str.replace(/"/g, '""')}"`;
     };
     const rows = records.map((i) => [
-      escape(i.id), escape(i.ticketId), escape(i.title), escape(i.summary),
-      escape(i.reason), escape(i.description), escape(i.service), escape(i.region),
-      escape(i.environment), escape(i.severity), escape(i.priority), escape(i.status),
-      escape(i.state), escape(i.source), escape(i.sourceType), escape(i.assignedToEmail),
-      escape(i.assignedToName), escape(i.incidentCommander), escape(i.owningSquad),
-      escape(i.createdAt), escape(i.updatedAt), escape(i.elapsedLabel),
-      escape(i.elapsedMinutes), escape(i.MTTR), escape(i.commentsCount),
+      escape(i.id),
+      escape(i.ticketId),
+      escape(i.title),
+      escape(i.summary),
+      escape(i.reason),
+      escape(i.description),
+      escape(i.service),
+      escape(i.region),
+      escape(i.environment),
+      escape(i.severity),
+      escape(i.priority),
+      escape(i.status),
+      escape(i.state),
+      escape(i.source),
+      escape(i.sourceType),
+      escape(i.assignedToEmail),
+      escape(i.assignedToName),
+      escape(i.incidentCommander),
+      escape(i.owningSquad),
+      escape(i.createdAt),
+      escape(i.updatedAt),
+      escape(i.elapsedLabel),
+      escape(i.elapsedMinutes),
+      escape(i.MTTR),
+      escape(i.commentsCount),
       escape(i.recommendedActions?.join("; ")),
     ]);
-    const csv = [headers.map(escape).join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const csv = [
+      headers.map(escape).join(","),
+      ...rows.map((r) => r.join(",")),
+    ].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -271,10 +326,15 @@ export default function IncidentLibraryPage() {
   // ── BULK ACTIONS ───────────────────────────────────────────────────────────
   const handleArchive = () => {
     if (selectedIds.size === 0) return;
-    if (!confirm(`Archive ${selectedIds.size} incident(s)? This cannot be undone.`)) return;
-    Promise.all(Array.from(selectedIds).map((id) => archiveMutation.mutateAsync(id))).catch(
-      () => {},
-    );
+    if (
+      !confirm(
+        `Archive ${selectedIds.size} incident(s)? This cannot be undone.`,
+      )
+    )
+      return;
+    Promise.all(
+      Array.from(selectedIds).map((id) => archiveMutation.mutateAsync(id)),
+    ).catch(() => {});
   };
 
   const handleArchiveSingle = (id: string) => {
@@ -288,8 +348,8 @@ export default function IncidentLibraryPage() {
         {/* Page header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-zinc-500 max-w-2xl">
-            Your organization's searchable operational memory for every incident,
-            investigation, and resolution.
+            Your organization's searchable operational memory for every
+            incident, investigation, and resolution.
           </p>
           <Button
             size="sm"
@@ -341,7 +401,8 @@ export default function IncidentLibraryPage() {
             {activeFilterCount > 0 && (
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-zinc-500">
-                  {activeFilterCount} filter{activeFilterCount > 1 ? "s" : ""} active
+                  {activeFilterCount} filter{activeFilterCount > 1 ? "s" : ""}{" "}
+                  active
                 </span>
                 <button
                   onClick={clearAllFilters}
@@ -388,13 +449,16 @@ export default function IncidentLibraryPage() {
                   <span className="flex items-center text-indigo-600 gap-1.5">
                     <Sparkles size={13} /> Ask Ezra AI
                   </span>
-                  <span className="font-ibm text-[7px] text-indigo-400">Semantic</span>
+                  <span className="font-ibm text-[7px] text-indigo-400">
+                    Semantic
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-1.5 text-[9px] text-zinc-600">
                   <button
                     type="button"
                     onClick={() => {
-                      if (selectedIds.size === 0) return alert("Select a row item first.");
+                      if (selectedIds.size === 0)
+                        return alert("Select a row item first.");
                       setActiveModal({
                         type: "compare",
                         payload: Array.from(selectedIds).slice(0, 2),
@@ -458,8 +522,8 @@ export default function IncidentLibraryPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse min-w-[900px]">
-                <thead className="border-b bg-zinc-50 border-zinc-100 text-xs font-medium text-zinc-600">
+              <table className="w-full text-left text-sm border-collapse min-w-[900px]">
+                <thead className="border-b bg-zinc-50 border-zinc-100 text-sm font-medium text-zinc-600">
                   <tr>
                     <th className="p-3 w-10">
                       <input
@@ -486,29 +550,54 @@ export default function IncidentLibraryPage() {
                   {isLoading &&
                     Array.from({ length: 6 }).map((_, idx) => (
                       <tr key={idx} className="animate-pulse">
-                        <td className="p-3"><div className="h-3 w-3 bg-zinc-100 rounded" /></td>
-                        <td className="p-3"><div className="h-3 w-20 bg-zinc-100 rounded" /></td>
-                        <td className="p-3"><div className="h-3 w-48 bg-zinc-100 rounded" /></td>
-                        <td className="p-3"><div className="h-3 w-10 bg-zinc-100 rounded" /></td>
-                        <td className="p-3"><div className="h-3 w-20 bg-zinc-100 rounded" /></td>
-                        <td className="p-3"><div className="h-3 w-24 bg-zinc-100 rounded" /></td>
-                        <td className="p-3"><div className="h-3 w-28 bg-zinc-100 rounded" /></td>
-                        <td className="p-3"><div className="h-3 w-20 bg-zinc-100 rounded" /></td>
-                        <td className="p-3"><div className="h-3 w-4 bg-zinc-100 rounded" /></td>
+                        <td className="p-3">
+                          <div className="h-3 w-3 bg-zinc-100 rounded" />
+                        </td>
+                        <td className="p-3">
+                          <div className="h-3 w-20 bg-zinc-100 rounded" />
+                        </td>
+                        <td className="p-3">
+                          <div className="h-3 w-48 bg-zinc-100 rounded" />
+                        </td>
+                        <td className="p-3">
+                          <div className="h-3 w-10 bg-zinc-100 rounded" />
+                        </td>
+                        <td className="p-3">
+                          <div className="h-3 w-20 bg-zinc-100 rounded" />
+                        </td>
+                        <td className="p-3">
+                          <div className="h-3 w-24 bg-zinc-100 rounded" />
+                        </td>
+                        <td className="p-3">
+                          <div className="h-3 w-28 bg-zinc-100 rounded" />
+                        </td>
+                        <td className="p-3">
+                          <div className="h-3 w-20 bg-zinc-100 rounded" />
+                        </td>
+                        <td className="p-3">
+                          <div className="h-3 w-4 bg-zinc-100 rounded" />
+                        </td>
                       </tr>
                     ))}
 
                   {!isLoading &&
                     paginatedIncidents.map((i) => {
                       const isChecked = selectedIds.has(i.id);
-                      const status = TICKET_STATUS_CONFIG.find((s) => s.label === i.status);
+                      const status = TICKET_STATUS_CONFIG.find(
+                        (s) => s.label === i.status,
+                      );
                       return (
                         <tr
                           key={i.id}
-                          onClick={() => router.push(`/incident/tickets/${i.id}`)}
+                          onClick={() =>
+                            router.push(`/incident/tickets/${i.id}`)
+                          }
                           className={`hover:bg-zinc-50/50 cursor-pointer text-sm font-ibm text-zinc-600 transition-colors ${isChecked ? "bg-indigo-50/30" : ""}`}
                         >
-                          <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                          <td
+                            className="p-3"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <input
                               type="checkbox"
                               checked={isChecked}
@@ -519,8 +608,10 @@ export default function IncidentLibraryPage() {
                           <td className="p-3 font-mono text-xs font-semibold text-zinc-700">
                             {i.ticketId ?? i.id}
                           </td>
-                          <td className={`p-3 max-w-xs ${density === "compact" ? "py-1.5" : "py-3.5"}`}>
-                            <div className="truncate text-xs">{i.title}</div>
+                          <td
+                            className={`p-3 max-w-xs ${density === "compact" ? "py-1.5" : "py-3.5"}`}
+                          >
+                            <div className="truncate text-sm">{i.title}</div>
                           </td>
                           <td className="p-3">
                             <span
@@ -531,23 +622,28 @@ export default function IncidentLibraryPage() {
                           </td>
                           <td className="p-3">
                             <span
-                              className={`text-xs px-2 py-0.5 capitalize ${status?.ribbonDone ?? ""}`}
+                              className={`text-sm px-2 py-0.5 capitalize ${status?.ribbonDone ?? ""}`}
                             >
                               {i.status.toLowerCase()}
                             </span>
                           </td>
-                          <td className="p-3 text-xs">{i.service}</td>
-                          <td className="p-3 text-xs truncate max-w-[120px]">
+                          <td className="p-3 text-sm">{i.service}</td>
+                          <td className="p-3 text-sm truncate max-w-[120px]">
                             {i.assignedToName || i.assignedToEmail || (
-                              <span className="text-zinc-300 italic">Unassigned</span>
+                              <span className="text-zinc-300 italic">
+                                Unassigned
+                              </span>
                             )}
                           </td>
-                          <td className="p-3 text-xs text-nowrap">
-                            {new Date(i.createdAt).toLocaleDateString(undefined, {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
+                          <td className="p-3 text-sm text-nowrap">
+                            {new Date(i.createdAt).toLocaleDateString(
+                              undefined,
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              },
+                            )}
                           </td>
                           <td
                             className="p-3 text-center relative z-10"
@@ -568,25 +664,36 @@ export default function IncidentLibraryPage() {
                                 {
                                   label: "Open incident",
                                   value: "open",
-                                  onClick: () => router.push(`/incident/tickets?id=${i.id}`),
+                                  onClick: () =>
+                                    router.push(`/incident/tickets?id=${i.id}`),
                                 },
                                 {
                                   label: "Replay",
                                   value: "replay",
                                   onClick: () =>
-                                    setActiveModal({ type: "replay", payload: i }),
+                                    setActiveModal({
+                                      type: "replay",
+                                      payload: i,
+                                    }),
                                 },
                                 {
                                   label: "Assign",
                                   value: "assign",
                                   onClick: () =>
-                                    setActiveModal({ type: "assign", payload: [i.id] }),
+                                    setActiveModal({
+                                      type: "assign",
+                                      payload: [i.id],
+                                    }),
                                 },
                                 {
                                   label: "Generate RCA",
                                   value: "rca",
                                   onClick: () =>
-                                    setActiveModal({ type: "doc", kind: "rca", payload: [i.id] }),
+                                    setActiveModal({
+                                      type: "doc",
+                                      kind: "rca",
+                                      payload: [i.id],
+                                    }),
                                 },
                                 {
                                   label: "Archive",
@@ -624,7 +731,10 @@ export default function IncidentLibraryPage() {
                 Showing{" "}
                 {filteredIncidents.length === 0
                   ? 0
-                  : Math.min(filteredIncidents.length, (page - 1) * pageSize + 1)}
+                  : Math.min(
+                      filteredIncidents.length,
+                      (page - 1) * pageSize + 1,
+                    )}
                 –{Math.min(filteredIncidents.length, page * pageSize)} of{" "}
                 {filteredIncidents.length} entries
               </span>
@@ -678,7 +788,11 @@ export default function IncidentLibraryPage() {
           selectedIds={selectedIds}
           onClear={() => setSelectedIds(new Set())}
           onTriggerDoc={(kind) =>
-            setActiveModal({ type: "doc", kind, payload: Array.from(selectedIds) })
+            setActiveModal({
+              type: "doc",
+              kind,
+              payload: Array.from(selectedIds),
+            })
           }
           onTriggerCompare={() =>
             setActiveModal({
@@ -701,7 +815,9 @@ export default function IncidentLibraryPage() {
           isOpen={activeModal.type === "replay"}
           incident={activeModal.payload}
           onClose={() => setActiveModal({ type: null })}
-          onOpenPlaybook={(i: any) => setActiveModal({ type: "playbook", payload: i })}
+          onOpenPlaybook={(i: any) =>
+            setActiveModal({ type: "playbook", payload: i })
+          }
         />
         <CompareModal
           isOpen={activeModal.type === "compare"}

@@ -83,7 +83,14 @@ const STATIC_GROUPS: { label: string; key: FilterKey; options?: string[] }[] = [
   {
     label: "Incident Type",
     key: "incidentType",
-    options: ["Manual", "Automatic", "Major Incident", "Child", "Mother", "Risk Incident"],
+    options: [
+      "Manual",
+      "Automatic",
+      "Major Incident",
+      "Child",
+      "Mother",
+      "Risk Incident",
+    ],
   },
   {
     label: "War Room",
@@ -119,7 +126,7 @@ export default function FilterRail({
     const field = FILTER_TO_FIELD[key];
     if (!field) return 0;
     return dataList.filter(
-      (i) => String(i[field] ?? "").toLowerCase() === val.toLowerCase()
+      (i) => String(i[field] ?? "").toLowerCase() === val.toLowerCase(),
     ).length;
   };
 
@@ -137,8 +144,13 @@ export default function FilterRail({
 
   const groups = STATIC_GROUPS.map((g) =>
     g.key === "service"
-      ? { ...g, options: dynamicServices.length ? dynamicServices : ["No services found"] }
-      : g
+      ? {
+          ...g,
+          options: dynamicServices.length
+            ? dynamicServices
+            : ["No services found"],
+        }
+      : g,
   );
 
   return (
@@ -171,7 +183,9 @@ export default function FilterRail({
               <button
                 key={opt}
                 type="button"
-                onClick={() => onDateRangeChange(dateRange === opt ? null : opt)}
+                onClick={() =>
+                  onDateRangeChange(dateRange === opt ? null : opt)
+                }
                 className={`py-1.5 text-[10px] rounded-md border font-medium transition-colors ${
                   dateRange === opt
                     ? "bg-blue-50 border-blue-300 text-blue-700"
@@ -189,7 +203,7 @@ export default function FilterRail({
           const activeCount = filters[g.key]?.size ?? 0;
           return (
             <details key={g.key} className="group">
-              <summary className="flex items-center justify-between px-4 py-2.5 cursor-pointer list-none text-xs font-medium text-zinc-600 select-none">
+              <summary className="flex items-center justify-between px-4 py-2.5 cursor-pointer list-none text-sm font-medium text-zinc-600 select-none">
                 <span className="flex items-center gap-1.5">
                   {g.label}
                   {activeCount > 0 && (
@@ -218,12 +232,14 @@ export default function FilterRail({
                         onChange={() => handleToggle(g.key, opt)}
                         className="accent-indigo-600 w-3.5 h-3.5 flex-shrink-0 cursor-pointer"
                       />
-                      <span className="flex-1 text-xs text-zinc-700 truncate">
+                      <span className="flex-1 text-sm text-zinc-700 truncate">
                         {opt}
                       </span>
                       <span
                         className={`text-[10px] tabular-nums ${
-                          count > 0 ? "text-zinc-500 font-medium" : "text-zinc-300"
+                          count > 0
+                            ? "text-zinc-500 font-medium"
+                            : "text-zinc-300"
                         }`}
                       >
                         {count}
