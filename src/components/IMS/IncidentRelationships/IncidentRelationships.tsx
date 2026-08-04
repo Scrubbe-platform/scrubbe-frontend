@@ -240,26 +240,28 @@ export default function IncidentRelationships() {
     <div className="flex h-screen flex-col font-ibm dark:bg-zinc-950">
       <Header title="Incident Relationships" />
 
-      <div className="  px-4 py-4 shadow-sm shadow-light dark:bg-zinc-950 sm:px-6">
-        <p className="text-[14px] text-black/60 dark:text-zinc-400">
-          Operational memory — what belonged together, how it was resolved, and
-          what knowledge came out of it.
-        </p>
-        <div className="relative mt-3 w-full max-w-[420px]">
-          <Search
-            size={15}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-black/40 dark:text-zinc-500"
-          />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search incident, problem record, root cause, service…"
-            className="h-[36px] w-full rounded-md border border-zinc-300 pl-9 pr-3 text-[13.5px] text-black placeholder:text-black/40 focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200"
-          />
+      <div className="w-full shadow-sm shadow-light dark:bg-zinc-950">
+        <div className="mx-auto max-w-[1540px] px-4 py-4 sm:px-6">
+          <p className="text-[14px] text-black/60 dark:text-zinc-400">
+            Operational memory — what belonged together, how it was resolved,
+            and what knowledge came out of it.
+          </p>
+          <div className="relative mt-3 w-full max-w-[420px]">
+            <Search
+              size={15}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-black/40 dark:text-zinc-500"
+            />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search incident, problem record, root cause, service…"
+              className="h-[36px] w-full rounded-md border border-zinc-300 pl-9 pr-3 text-[13.5px] text-black placeholder:text-black/40 focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden p-4 sm:p-5 lg:grid-cols-[260px_1fr]">
+      <div className="mx-auto grid min-h-0 w-full max-w-[1540px] flex-1 grid-cols-1 gap-4 overflow-hidden p-4 sm:p-5 lg:grid-cols-[260px_1fr]">
         {/* Filters rail */}
         <aside className="min-h-0 overflow-y-auto rounded-lg bg-white p-5 shadow-sm shadow-light dark:bg-zinc-900/40">
           <div className="mb-5">
@@ -335,7 +337,7 @@ export default function IncidentRelationships() {
 
         {/* Main */}
         <main className="min-h-0 overflow-y-auto rounded-lg bg-zinc-50 dark:bg-zinc-900/20">
-          <div className="mx-auto max-w-4xl px-1 py-1 pb-14">
+          <div className="mr-auto max-w-6xl px-1 py-1 pb-14">
             {openRecordObj ? (
               <RecordDetail
                 record={openRecordObj}

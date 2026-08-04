@@ -298,6 +298,64 @@ export function RangeField({
   );
 }
 
+/* ───────────────────── segmented control ───────────────────── */
+
+export function Segmented({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
+  return (
+    <div className="inline-flex flex-wrap gap-0.5 rounded-lg border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700 dark:bg-zinc-800/60">
+      {options.map((o) => (
+        <button
+          key={o}
+          type="button"
+          onClick={() => onChange(o)}
+          className={cn(
+            "rounded-md px-3 py-1.5 text-[12.5px] font-semibold transition-all",
+            o === value
+              ? "bg-white text-IMSDarkGreen shadow-sm dark:bg-IMSDarkGreen dark:text-white"
+              : "text-black/50 hover:text-black dark:text-zinc-500 dark:hover:text-zinc-300",
+          )}
+        >
+          {o}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function SegmentedField({
+  label,
+  help,
+  value,
+  onChange,
+  options,
+}: {
+  label?: string;
+  help?: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
+  return (
+    <div className="mb-4 last:mb-0">
+      {label && (
+        <label className="mb-1.5 block text-[13px] font-semibold text-black dark:text-zinc-200">
+          {label}
+        </label>
+      )}
+      <Segmented value={value} onChange={onChange} options={options} />
+      {fieldHelp(help)}
+    </div>
+  );
+}
+
 /* ───────────────────── toggle ───────────────────── */
 
 export function Toggle({

@@ -15,6 +15,7 @@ import {
   Tone,
   confidenceTone,
 } from "./data";
+import Link from "next/link";
 
 const toneText: Record<Tone, string> = {
   ok: "text-emerald-700 bg-emerald-50 border-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20",
@@ -204,6 +205,11 @@ export function RecordCard({
         <RecordStat label="Child incidents" value={record.children.length} />
         <RecordStat
           label="Problem record"
+          route={
+            record.problemRecord
+              ? `/incident/problems?id=${record.problemRecord}`
+              : undefined
+          }
           value={
             record.problemRecord ? (
               <span className="text-blue-600 underline dark:text-blue-400">
@@ -268,18 +274,24 @@ export function RecordCard({
 function RecordStat({
   label,
   value,
+  route,
 }: {
   label: string;
   value: React.ReactNode;
+  route?: string;
 }) {
   return (
     <div>
       <div className="text-[11px] font-semibold uppercase tracking-wide text-black/40 dark:text-zinc-500">
         {label}
       </div>
-      <div className="mt-1.5 text-[15px] font-bold text-black dark:text-zinc-100">
+
+      <Link
+        href={route || ""}
+        className={`mt-1.5 text-[15px] font-bold text-black dark:text-zinc-100 ${route ? "cursor-pointer" : "cursor-none"}`}
+      >
         {value}
-      </div>
+      </Link>
     </div>
   );
 }

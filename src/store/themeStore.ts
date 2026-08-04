@@ -2,8 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 type ThemeState = {
-  theme: "light" | "dark";
-  setTheme: (theme: "light" | "dark") => void;
+  theme: "light" | "dark" | "system";
+  setTheme: (theme: "light" | "dark" | "system") => void;
 };
 
 export const useThemeStore = create<ThemeState>()(

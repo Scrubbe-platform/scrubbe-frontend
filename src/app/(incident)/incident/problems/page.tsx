@@ -1,7 +1,8 @@
 // app/developer/problems/page.tsx
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   SlidersHorizontal,
   Layers,
@@ -402,8 +403,27 @@ function shortHash(s: string) {
 
 export default function ProblemRecordsDashboard() {
   // ─── WORKSPACE STATES ───
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [records, setRecords] = useState(INITIAL_RECORDS);
-  const [selectedId, setSelectedId] = useState<string | null>("PR-004417");
+  const [selectedId, setSelectedId] = useState<string | null>(
+    () => searchParams.get("id") || "PR-004417",
+  );
+
+  // Keep the selected record in sync with the `id` search param — lets other
+  // pages deep-link straight to a specific problem, e.g. /incident/problems?id=PR-004417.
+  useEffect(() => {
+    const paramId = searchParams.get("id");
+    if (paramId) setSelectedId(paramId);
+  }, [searchParams]);
+
+  // Selecting a record locally should also push the id into the URL, so the
+  // address bar always reflects what's open (and stays shareable/bookmarkable).
+  const selectRecord = (id: string) => {
+    setSelectedId(id);
+    router.replace(`/incident/problems?id=${id}`, { scroll: false });
+  };
+
   const [activeTab, setActiveTab] = useState("overview");
   const [density, setDensity] = useState<"comfortable" | "compact">(
     "comfortable",
@@ -673,7 +693,7 @@ export default function ProblemRecordsDashboard() {
     };
 
     setRecords([]);
-    setSelectedId(nextId);
+    selectRecord(nextId);
     setIsNewRecordModalOpen(false);
     setNewRecTitle("");
     setNewRecSummary("");
@@ -1116,7 +1136,7 @@ export default function ProblemRecordsDashboard() {
                 <div
                   key={r.id}
                   onClick={() => {
-                    setSelectedId(r.id);
+                    selectRecord(r.id);
                     setActiveTab("overview");
                   }}
                   className={`p-4 cursor-pointer transition-all hover:bg-zinc-50 relative group border-l-2 ${
