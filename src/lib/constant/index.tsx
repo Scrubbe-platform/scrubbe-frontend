@@ -1175,13 +1175,6 @@ export const NewMenu: Record<string, NavItem[]> = {
       isActive: true,
       isMenu: false,
     },
-    {
-      name: "Incident relationship",
-      Icon: RxDisc,
-      link: "/incident/relationship",
-      isActive: false,
-      isMenu: false,
-    },
   ],
   engineering_ecosystem: [
     {

@@ -122,8 +122,7 @@ const Problems = () => {
   }
 
   const handleRowClick = (ticket: Problems) => {
-    console.log(ticket);
-    router.push(`/incident/changes-problems/problems/${ticket.id}`);
+    router.push(`/incident/problems?id=${ticket.id}`);
   };
 
   return (

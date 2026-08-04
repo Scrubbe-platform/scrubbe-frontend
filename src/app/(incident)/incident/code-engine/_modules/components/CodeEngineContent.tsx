@@ -7,6 +7,7 @@ import { apiClient } from "@/lib/api/apiClient";
 import { endpoint } from "@/lib/api/endpoint";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { toast } from "sonner";
 
 interface CodeFix {
   filePath: string;
@@ -51,15 +52,12 @@ function confidenceBarColor(n: number): string {
   return "bg-red-500";
 }
 
-function severityBadgeStyle(s: string): string {
+function severityBadgeDark(s: string): string {
   const upper = s.toUpperCase();
-  if (upper === "CRITICAL" || upper === "P1")
-    return "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border-red-300 dark:border-red-800";
-  if (upper === "HIGH" || upper === "P2")
-    return "bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-800";
-  if (upper === "MEDIUM" || upper === "P3")
-    return "bg-yellow-50 dark:bg-yellow-950/60 text-yellow-600 dark:text-yellow-400 border-yellow-300 dark:border-yellow-800";
-  return "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-800";
+  if (upper === "CRITICAL" || upper === "P1") return "bg-red-900/60 text-red-400";
+  if (upper === "HIGH" || upper === "P2") return "bg-orange-900/60 text-orange-400";
+  if (upper === "MEDIUM" || upper === "P3") return "bg-yellow-900/60 text-yellow-300";
+  return "bg-blue-900/60 text-blue-300";
 }
 
 function CodeEngineContent() {
@@ -79,6 +77,9 @@ function CodeEngineContent() {
   const [baseBranch, setBaseBranch] = useState("main");
   const [view, setView] = useState<"original" | "diff">("diff");
   const [sideBySide, setSideBySide] = useState(false);
+  const [decision, setDecision] = useState<"accepted" | "rejected" | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!incidentParam) {
@@ -177,6 +178,16 @@ function CodeEngineContent() {
     }
   };
 
+  const handleAccept = () => {
+    setDecision("accepted");
+    toast.success("Fix accepted");
+  };
+
+  const handleReject = () => {
+    setDecision("rejected");
+    toast.error("Fix rejected");
+  };
+
   const fix = analysis?.codeFix ?? null;
   const filename = fix?.filePath ?? "";
   const language = fix?.language ?? "typescript";
@@ -188,7 +199,7 @@ function CodeEngineContent() {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-screen bg-white dark:bg-grayscrubbe-900 text-black dark:text-slate-200 font-sans text-sm items-center justify-center gap-3">
+      <div className="flex flex-col h-screen bg-white dark:bg-grayscrubbe-900 text-black dark:text-slate-200 font-ibm text-sm items-center justify-center gap-3">
         <span className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
         <span className="text-neutral-500 text-xs">Loading incident data…</span>
       </div>
@@ -197,7 +208,7 @@ function CodeEngineContent() {
 
   if (fetchError || !analysis) {
     return (
-      <div className="flex flex-col h-screen bg-white dark:bg-grayscrubbe-900 text-black dark:text-slate-200 font-sans text-sm items-center justify-center gap-4 px-6">
+      <div className="flex flex-col h-screen bg-white dark:bg-grayscrubbe-900 text-black dark:text-slate-200 font-ibm text-sm items-center justify-center gap-4 px-6">
         <span className="text-3xl">⚠</span>
         <p className="text-red-500 text-sm text-center max-w-md">
           {fetchError ?? "Incident not found."}
@@ -207,13 +218,11 @@ function CodeEngineContent() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-grayscrubbe-900 text-black dark:text-slate-200 font-sans text-sm">
-      {/* ── TOP NAV ── */}
-
+    <div className="flex flex-col h-screen bg-white dark:bg-grayscrubbe-900 text-black dark:text-slate-200 font-ibm text-sm">
       {/* ── NO FIX YET: PRE-ANALYSIS STATE ── */}
       {!fix && (
         <div className="flex flex-col flex-1 items-center justify-center gap-6 px-6">
-          <div className="max-w-lg w-full bg-white dark:bg-grayscrubbe-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-6 flex flex-col gap-4">
+          <div className="max-w-lg w-full bg-white dark:bg-grayscrubbe-800 border border-gray-200 dark:border-neutral-700 rounded-2xl p-6 flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <span className="text-yellow-400 text-xl"> </span>
               <span className="font-semibold text-base text-black dark:text-neutral-200">
@@ -281,59 +290,133 @@ function CodeEngineContent() {
         </div>
       )}
 
-      {/* ── FIX AVAILABLE: TABS + EDITOR + FOOTER ── */}
+      {/* ── FIX AVAILABLE: DARK CODE-REVIEW CONSOLE ── */}
       {fix && (
-        <>
-          {/* Tabs */}
-          <div className="flex items-end bg-white dark:bg-grayscrubbe-800 border-b border-gray-200 dark:border-neutral-800 shrink-0 pl-2">
-            {(["original", "diff"] as const).map((t) => {
-              const active = view === t;
-              const label = t === "original" ? "FAILED CODE" : "EZRA FIX";
-              return (
-                <button
-                  key={t}
-                  onClick={() => setView(t)}
-                  className={`flex items-center gap-2 px-4 h-[38px] text-xs font-semibold tracking-wide border-b-2 transition-colors cursor-pointer bg-transparent border-x-0 border-t-0
-                    ${
-                      active
-                        ? "border-green-500 text-black dark:text-neutral-200"
-                        : "border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
-                    }`}
-                >
-                  {t === "original" && <span className="text-red-600">○</span>}
-                  {t === "diff" && <span className="text-yellow-400"> </span>}
-                  <span className="uppercase">{label}</span>
-                </button>
-              );
-            })}
-            <div className="ml-auto items-center gap-2 pr-4 text-[11px] text-gray-600 dark:text-neutral-400 md:flex hidden py-2">
-              <Link
-                href={`${pathname}/analysis?id=${incidentParam}`}
-                className="px-5 py-2.5 flex items-center gap-2 rounded-lg text-sm font-bold text-white border-none hover:brightness-110 transition-all"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
-                }}
+        <div className="flex-1 min-h-0 p-4 sm:p-6">
+          <div
+            className="flex h-full max-h-full flex-col overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800"
+            style={{ background: "#0d1117" }}
+          >
+            {/* Nav bar */}
+            <div
+              className="flex shrink-0 items-center gap-3 border-b px-4 py-2.5"
+              style={{ background: "#161b22", borderColor: "#30363d" }}
+            >
+              <span className="text-[12px] font-bold text-white">
+                {analysis.ticketId}
+              </span>
+              {analysis.affectedSystem && (
+                <span className="text-[11px] text-blue-400">
+                  {analysis.affectedSystem}
+                </span>
+              )}
+              {analysis.environment && (
+                <span className="rounded bg-blue-900/60 px-1.5 py-0.5 text-[10px] font-bold text-blue-300">
+                  {analysis.environment}
+                </span>
+              )}
+              <span
+                className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${severityBadgeDark(analysis.severity)}`}
               >
-                View Investigation Analysis
-                <ArrowRight size={16} />
-              </Link>
-              <span>·</span>
-              <span className={confidenceColor(confidence)}>
-                conf: {confidence}%
+                {analysis.severity}
               </span>
             </div>
-          </div>
 
-          {/* File subbar */}
-          {view === "diff" && (
-            <div className="md:flex hidden items-center justify-between px-4 py-1.5 bg-white dark:bg-grayscrubbe-800 border-b border-gray-200 dark:border-neutral-800 shrink-0">
-              <div className="flex items-center gap-2 text-xs text-neutral-400">
-                <span className="text-yellow-400"> </span>
-                <span>{filename} → Scrubbe fix</span>
+            {/* Tab bar */}
+            <div
+              className="flex shrink-0 items-center border-b"
+              style={{ background: "#161b22", borderColor: "#30363d" }}
+            >
+              <button
+                onClick={() => setView("original")}
+                className="flex cursor-pointer items-center gap-2 border-none bg-transparent px-4 py-2.5 text-[12px] font-semibold"
+                style={{
+                  color: view === "original" ? "#f87171" : "#6b7280",
+                  borderBottom:
+                    view === "original"
+                      ? "2px solid #f87171"
+                      : "2px solid transparent",
+                }}
+              >
+                <span className="text-red-500">⊗</span>
+                <span className="uppercase">Failed Code</span>
+              </button>
+
+              <button
+                onClick={() => setView("diff")}
+                className="flex cursor-pointer items-center gap-2 border-none bg-transparent px-4 py-2.5 text-[12px] font-semibold"
+                style={{
+                  color: view === "diff" ? "#4ade80" : "#6b7280",
+                  borderBottom:
+                    view === "diff"
+                      ? "2px solid #4ade80"
+                      : "2px solid transparent",
+                }}
+              >
+                <span className="uppercase">Ezra Fix</span>
+                {fix.prUrl && (
+                  <span className="rounded bg-green-900/40 px-1.5 py-0.5 text-[10px] font-bold text-green-400">
+                    PR #{fix.prNumber}
+                  </span>
+                )}
+              </button>
+
+              <div className="ml-auto hidden items-center gap-2 pr-4 text-[11px] text-gray-500 md:flex">
+                <Link
+                  href={`${pathname}/analysis?id=${incidentParam}`}
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-bold text-white transition-all hover:brightness-110"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
+                  }}
+                >
+                  View Investigation Analysis
+                  <ArrowRight size={13} />
+                </Link>
+                <span>·</span>
+                <span className={confidenceColor(confidence)}>
+                  conf: {confidence}%
+                </span>
               </div>
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-neutral-400 cursor-pointer">
+            </div>
+
+            {/* Status bar */}
+            <div
+              className="shrink-0 px-4 py-2 text-[11px]"
+              style={
+                view === "original"
+                  ? { background: "#1c0a0a", borderLeft: "3px solid #ef4444" }
+                  : { background: "#052e16", borderLeft: "3px solid #22c55e" }
+              }
+            >
+              {view === "original" ? (
+                <>
+                  <p className="mb-1 font-bold text-red-400">
+                    ROOT CAUSE · {analysis.category ?? analysis.status}
+                  </p>
+                  <p className="text-red-300/70">{analysis.summary}</p>
+                </>
+              ) : (
+                <>
+                  <p className="mb-1 font-bold text-green-400">
+                    ✓ FIX GENERATED · {fix.fixType}
+                  </p>
+                  <p className="text-green-300/70">{fix.explanation}</p>
+                </>
+              )}
+            </div>
+
+            {/* File subbar (diff only) */}
+            {view === "diff" && (
+              <div
+                className="hidden shrink-0 items-center justify-between border-b px-4 py-1.5 md:flex"
+                style={{ background: "#161b22", borderColor: "#30363d" }}
+              >
+                <div className="flex items-center gap-2 text-xs text-neutral-400">
+                  <span className="text-yellow-400"> </span>
+                  <span>{filename} → Scrubbe fix</span>
+                </div>
+                <label className="flex cursor-pointer items-center gap-1.5 text-xs text-neutral-400">
                   <input
                     type="checkbox"
                     checked={sideBySide}
@@ -343,135 +426,270 @@ function CodeEngineContent() {
                   Side by side
                 </label>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Editor */}
-          <div className="flex-1 max-h-[700px] overflow-hidden">
-            <DiffEditor
-              height="100%"
-              language={language}
-              original={originalContent}
-              modified={modifiedContent}
-              theme="vs-dark"
-              options={{
-                readOnly: true,
-                renderSideBySide: view === "diff" ? sideBySide : false,
-                minimap: { enabled: false },
-                fontSize: 13,
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-              }}
-            />
-          </div>
-
-          {/* Footer */}
-          <div className="shrink-0 bg-white dark:bg-grayscrubbe-800 border-t border-gray-200 dark:border-neutral-800">
-            {/* Confidence + explanation row */}
-            <div className="flex md:flex-row flex-col items-stretch divide-x divide-gray-200 dark:divide-neutral-800">
-              {/* Confidence */}
-              <div className="flex items-center gap-3 px-5 py-3 shrink-0">
-                <span
-                  className={`text-2xl font-bold ${confidenceColor(confidence)}`}
-                >
-                  {confidence}%
-                </span>
-                <div>
-                  <div className="w-24 h-1 bg-gray-200 dark:bg-neutral-800 rounded-full mb-1">
-                    <div
-                      className={`h-full rounded-full transition-all ${confidenceBarColor(confidence)}`}
-                      style={{ width: `${confidence}%` }}
-                    />
-                  </div>
-                  <p className="text-[11px] text-gray-600 dark:text-neutral-500">
-                    {confidence >= 80
-                      ? "High · eligible"
-                      : confidence >= 60
-                        ? "Medium · review"
-                        : "Low · manual review"}
-                  </p>
-                </div>
+            {/* Editor + Sidebar */}
+            <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[1fr_260px]">
+              <div className="min-h-0">
+                <DiffEditor
+                  height="100%"
+                  language={language}
+                  original={originalContent}
+                  modified={modifiedContent}
+                  theme="vs-dark"
+                  options={{
+                    readOnly: true,
+                    renderSideBySide: view === "diff" ? sideBySide : false,
+                    minimap: { enabled: false },
+                    fontSize: 13,
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                  }}
+                />
               </div>
 
-              {/* Explanation */}
-              <div className="flex items-center px-5 py-3 flex-1 min-w-0">
-                <p className="text-xs text-gray-600 dark:text-neutral-400 line-clamp-2">
-                  {fix.explanation}
-                </p>
-              </div>
-
-              {/* PR section */}
-              <div className="flex items-center gap-2 px-5 py-3 shrink-0">
-                {fix.prUrl ? (
-                  <a
-                    href={fix.prUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-green-500 hover:bg-green-400 text-black text-xs font-bold transition-colors"
-                  >
-                    ↗ View PR #{fix.prNumber}
-                  </a>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={repo}
-                        onChange={(e) => setRepo(e.target.value)}
-                        placeholder="owner/repo"
-                        className="px-2 py-1 rounded border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-xs text-black dark:text-neutral-200 w-36 focus:outline-none focus:border-green-500"
-                      />
-                      <input
-                        type="text"
-                        value={baseBranch}
-                        onChange={(e) => setBaseBranch(e.target.value)}
-                        placeholder="main"
-                        className="px-2 py-1 rounded border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-xs text-black dark:text-neutral-200 w-20 focus:outline-none focus:border-green-500"
-                      />
-                      <button
-                        onClick={() => void handleCreatePR()}
-                        disabled={creatingPR || !repo.trim()}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black text-xs font-bold transition-colors"
-                      >
-                        {creatingPR ? (
-                          <span className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          "↑ Create PR"
-                        )}
-                      </button>
-                    </div>
-                    {prError && (
-                      <p className="text-red-500 text-[11px] max-w-xs">
-                        {prError}
+              {/* Sidebar */}
+              <div
+                className="flex flex-col overflow-y-auto text-[12px]"
+                style={{
+                  background: "#161b22",
+                  borderLeft: "1px solid #30363d",
+                }}
+              >
+                {view === "original" ? (
+                  <div className="p-4">
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                      Root Cause Analysis
+                    </p>
+                    {analysis.techDescription && (
+                      <p className="mb-4 text-[11px] leading-relaxed text-gray-400">
+                        {analysis.techDescription}
                       </p>
                     )}
+                    <div className="my-3 border-t border-[#30363d]" />
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                      Incident
+                    </p>
+                    {(
+                      [
+                        ["ID", analysis.ticketId, "#58a6ff"],
+                        ["Service", analysis.affectedSystem ?? "—", "#d1d5db"],
+                        ["Environment", analysis.environment ?? "—", "#d1d5db"],
+                        ["Severity", analysis.severity, "#d1d5db"],
+                        ["Status", analysis.status, "#d1d5db"],
+                      ] as const
+                    ).map(([k, v, c]) => (
+                      <div key={k} className="mb-1.5 flex justify-between">
+                        <span className="text-[11px] text-gray-500">{k}</span>
+                        <span className="text-[11px]" style={{ color: c }}>
+                          {v}
+                        </span>
+                      </div>
+                    ))}
+                    {(analysis.category || analysis.serviceArea) && (
+                      <>
+                        <div className="my-3 border-t border-[#30363d]" />
+                        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                          Classification
+                        </p>
+                        {analysis.category && (
+                          <div className="mb-1.5 flex justify-between">
+                            <span className="text-[11px] text-gray-500">
+                              Category
+                            </span>
+                            <span className="text-[11px] text-gray-300">
+                              {analysis.category}
+                            </span>
+                          </div>
+                        )}
+                        {analysis.serviceArea && (
+                          <div className="mb-1.5 flex justify-between">
+                            <span className="text-[11px] text-gray-500">
+                              Service area
+                            </span>
+                            <span className="text-[11px] text-gray-300">
+                              {analysis.serviceArea}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    <button
+                      onClick={() => setView("diff")}
+                      className="mt-4 w-full cursor-pointer rounded border-none py-2.5 text-[12px] font-bold text-black hover:brightness-110"
+                      style={{ background: "#f59e0b" }}
+                    >
+                      View Ezra&apos;s fix →
+                    </button>
+                    <p className="mt-2 text-center text-[10px] text-gray-600">
+                      Root cause logged to audit trail
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4">
+                    <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                      Confidence Score
+                    </p>
+                    <p
+                      className={`mb-1 text-[32px] font-black leading-none ${confidenceColor(confidence)}`}
+                    >
+                      {confidence}%
+                    </p>
+                    <div className="mb-1 h-1 rounded bg-gray-700">
+                      <div
+                        className={`h-full rounded transition-all ${confidenceBarColor(confidence)}`}
+                        style={{ width: `${confidence}%` }}
+                      />
+                    </div>
+                    <p className="mb-3 text-[11px] text-gray-500">
+                      {confidence >= 80
+                        ? "High · auto-PR eligible"
+                        : confidence >= 60
+                          ? "Medium · review recommended"
+                          : "Low · manual review"}
+                    </p>
+                    <div className="my-3 border-t border-[#30363d]" />
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                      Fix details
+                    </p>
+                    <div className="mb-1.5 flex justify-between">
+                      <span className="text-[11px] text-gray-500">Type</span>
+                      <span className="text-[11px] text-gray-300">
+                        {fix.fixType}
+                      </span>
+                    </div>
+                    <div className="mb-1.5 flex justify-between">
+                      <span className="text-[11px] text-gray-500">File</span>
+                      <span className="max-w-[130px] truncate text-right text-[11px] text-gray-300">
+                        {filename}
+                      </span>
+                    </div>
+                    {fix.generatedAt && (
+                      <div className="mb-1.5 flex justify-between">
+                        <span className="text-[11px] text-gray-500">
+                          Generated
+                        </span>
+                        <span className="text-[11px] text-gray-300">
+                          {new Date(fix.generatedAt).toLocaleTimeString()}
+                        </span>
+                      </div>
+                    )}
+                    <div className="my-3 border-t border-[#30363d]" />
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                      Pull Request
+                    </p>
+                    {fix.prUrl ? (
+                      <>
+                        <div className="mb-1.5 flex items-center gap-2">
+                          <span className="text-[18px] font-black text-white">
+                            #{fix.prNumber}
+                          </span>
+                          <span className="rounded border border-green-800 bg-green-900/40 px-1.5 py-0.5 text-[10px] font-bold text-green-400">
+                            open
+                          </span>
+                        </div>
+                        {fix.prTitle && (
+                          <p className="mb-3 text-[11px] text-gray-300">
+                            {fix.prTitle}
+                          </p>
+                        )}
+                        <a
+                          href={fix.prUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full cursor-pointer rounded border-none bg-green-500 py-2.5 text-center text-[12px] font-bold text-black hover:brightness-110"
+                        >
+                          ↗ View PR
+                        </a>
+                      </>
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        <input
+                          type="text"
+                          value={repo}
+                          onChange={(e) => setRepo(e.target.value)}
+                          placeholder="owner/repo"
+                          className="rounded border border-neutral-700 bg-[#0d1117] px-2 py-1.5 text-[11px] text-gray-200 placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={baseBranch}
+                          onChange={(e) => setBaseBranch(e.target.value)}
+                          placeholder="main"
+                          className="rounded border border-neutral-700 bg-[#0d1117] px-2 py-1.5 text-[11px] text-gray-200 placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
+                        />
+                        <button
+                          onClick={() => void handleCreatePR()}
+                          disabled={creatingPR || !repo.trim()}
+                          className="flex w-full items-center justify-center gap-1.5 rounded border-none bg-green-500 py-2.5 text-[12px] font-bold text-black transition-colors hover:bg-green-400 disabled:opacity-50"
+                        >
+                          {creatingPR ? (
+                            <span className="h-3 w-3 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                          ) : (
+                            "↑ Create PR"
+                          )}
+                        </button>
+                        {prError && (
+                          <p className="text-[11px] text-red-400">{prError}</p>
+                        )}
+                        <div className="mt-1 grid grid-cols-2 gap-2">
+                          <button
+                            onClick={handleAccept}
+                            disabled={decision !== null}
+                            className="flex items-center justify-center gap-1.5 rounded border-none bg-green-500 py-2 text-[11.5px] font-bold text-black transition-colors hover:bg-green-400 disabled:opacity-50"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={handleReject}
+                            disabled={decision !== null}
+                            className="flex items-center justify-center gap-1.5 rounded border-none bg-red-500 py-2 text-[11.5px] font-bold text-white transition-colors hover:bg-red-400 disabled:opacity-50"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                        {decision && (
+                          <p
+                            className={`text-center text-[11px] font-semibold ${
+                              decision === "accepted"
+                                ? "text-green-400"
+                                : "text-red-400"
+                            }`}
+                          >
+                            {decision === "accepted"
+                              ? "✓ Fix accepted"
+                              : "✕ Fix rejected"}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    <p className="mt-3 text-center text-[10px] text-gray-600">
+                      Every action linked to audit trail
+                    </p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Status bar */}
-            <div className="flex items-center justify-between px-5 py-1.5 border-t border-gray-200 dark:border-neutral-800 text-[11px] text-gray-600 dark:text-neutral-400">
+            {/* Status footer */}
+            <div
+              className="flex shrink-0 items-center justify-between border-t px-4 py-1.5 text-[11px] text-gray-500"
+              style={{ borderColor: "#30363d" }}
+            >
               <div className="flex items-center gap-4">
                 <span className="text-yellow-500"> Scrubbe Code Engine</span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 dark:bg-emerald-400 inline-block" />
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-400" />
                   FIX GENERATED
                 </span>
-                <span className="md:block hidden">
-                  ⊙ Governed · Audited · Safe
-                </span>
               </div>
-              <div className="flex items-center gap-4 md:flex hidden">
+              <div className="hidden items-center gap-4 md:flex">
                 <span>{filename}</span>
                 <span className="capitalize">{language}</span>
-                {fix.generatedAt && (
-                  <span>{new Date(fix.generatedAt).toLocaleTimeString()}</span>
-                )}
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
