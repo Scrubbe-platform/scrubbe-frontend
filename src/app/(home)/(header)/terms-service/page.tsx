@@ -95,7 +95,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
     content: (
       <>
         <P>
-          The following capitalised terms have the meanings set out below
+          The following capitalized terms have the meanings set out below
           throughout these Terms and any Order Form, Data Processing Agreement,
           or addendum that reference them.
         </P>
@@ -110,7 +110,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
               "All data, telemetry, alerts, log payloads, and metadata submitted to or generated within the Service by or on behalf of Customer, including any data processed through connectors and agent pipelines.",
             ],
             [
-              "Authorised User",
+              "Authorized User",
               "An employee, contractor, or agent of Customer who is granted access credentials to the Service under the Customer's subscription and who has accepted these Terms and any applicable acceptable-use policies.",
             ],
             [
@@ -201,7 +201,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           rows={[
             [
               "Incident intelligence pipeline:",
-              "Automated ingestion, normalisation, deduplication, and enrichment of operational events from connected sources.",
+              "Automated ingestion, normalization, deduplication, and enrichment of operational events from connected sources.",
             ],
             [
               "Governed orchestration:",
@@ -209,7 +209,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
             ],
             [
               "Agent framework:",
-              "Specialised AI agents operating within policy boundaries, producing auditable proposals and executing approved actions.",
+              "Specialized AI agents operating within policy boundaries, producing auditable proposals and executing approved actions.",
             ],
             [
               "Connector ecosystem:",
@@ -232,7 +232,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
         <Note color="green" title="Alpha & Beta Features">
           Features designated as "Alpha", "Beta", or "Preview" are provided
           without warranty and may be modified or withdrawn at any time. We will
-          endeavour to provide reasonable notice before withdrawing features
+          endeavor to provide reasonable notice before withdrawing features
           from general availability.
         </Note>
         <P>
@@ -252,12 +252,12 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
         <P>
           <Bold>Account security.</Bold> Customer is responsible for maintaining
           the confidentiality of all authentication credentials issued to or
-          created by Authorised Users. You must promptly notify Scrubbe of any
-          suspected unauthorised access or credential compromise.
+          created by Authorized Users. You must promptly notify Scrubbe of any
+          suspected unauthorized access or credential compromise.
         </P>
         <P>
-          <Bold>Authorised Users.</Bold> Customer may provision access for the
-          number of Authorised Users permitted under the applicable
+          <Bold>Authorized Users.</Bold> Customer may provision access for the
+          number of Authorized Users permitted under the applicable
           Subscription. You may not share credentials between individuals or use
           service accounts in a manner that circumvents per-seat limits.
         </P>
@@ -298,7 +298,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
     content: (
       <>
         <P>
-          Customer and all Authorised Users must use the Service only for lawful
+          Customer and all Authorized Users must use the Service only for lawful
           purposes and in accordance with these Terms. The following uses are
           expressly prohibited:
         </P>
@@ -323,8 +323,8 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           </Li>
           <Li>
             Reselling, sublicensing, or providing access to the Service to any
-            third party outside Customer's organisation without express written
-            authorisation.
+            third party outside Customer's organization without express written
+            authorization.
           </Li>
           <Li>
             Using the Service in a safety-critical context where human life or
@@ -366,22 +366,24 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           ownership interest in Customer Data.
         </P>
         <P>
-          <Bold>Licence to process.</Bold> Customer grants Scrubbe a limited,
-          non-exclusive licence to receive, store, process, and transmit
+          <Bold>License to process.</Bold> Customer grants Scrubbe a limited,
+          non-exclusive license to receive, store, process, and transmit
           Customer Data solely to provide and improve the Service, comply with
           legal obligations, and as otherwise directed by Customer.
         </P>
         <P>
           <Bold>Data Processing Agreement.</Bold> Where Customer Data includes
-          personal data subject to applicable data protection law (including UK
-          GDPR and EU GDPR), the parties shall execute Scrubbe's standard Data
-          Processing Agreement ("DPA"), which is incorporated into these Terms
-          by reference. The DPA governs all processing of personal data under
+          personal data subject to applicable data protection law (including
+          the CCPA/CPRA and other applicable U.S. state privacy laws, and EU
+          GDPR or UK GDPR where Customer Data originates from those regions),
+          the parties shall execute Scrubbe's standard Data Processing
+          Agreement ("DPA"), which is incorporated into these Terms by
+          reference. The DPA governs all processing of personal data under
           these Terms.
         </P>
         <P>
           <Bold>Security.</Bold> Scrubbe implements and maintains technical and
-          organisational security measures appropriate to the risk, including:
+          organizational security measures appropriate to the risk, including:
         </P>
         <Ul>
           <Li>
@@ -404,9 +406,9 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
         </Ul>
         <P>
           <Bold>Data location.</Bold> Customer Data is processed and stored in
-          data centres located in the European Economic Area and/or the United
-          Kingdom by default. Enterprise Customers may request specific data
-          residency configurations in their Order Form.
+          data centers located in the United States by default. Enterprise
+          Customers may request specific data residency configurations in
+          their Order Form.
         </P>
         <P>
           <Bold>Retention and deletion.</Bold> Upon termination or expiry of the
@@ -427,17 +429,17 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           software, agents, orchestration logic, playbook frameworks, APIs,
           Documentation, trademarks (including the Scrubbe name, Diamond S Mark,
           and associated visual identity), and all improvements thereto, are and
-          remain the exclusive property of Scrubbe Ltd or its licensors.
+          remain the exclusive property of Scrubbe Inc. or its licensors.
         </P>
         <P>
-          <Bold>Customer's licence.</Bold> Subject to payment of applicable fees
+          <Bold>Customer's license.</Bold> Subject to payment of applicable fees
           and compliance with these Terms, Scrubbe grants Customer a limited,
-          non-exclusive, non-transferable, non-sublicensable licence to access
+          non-exclusive, non-transferable, non-sublicensable license to access
           and use the Service during the Subscription period solely for
           Customer's internal business operations.
         </P>
         <P>
-          <Bold>Feedback.</Bold> If Customer or any Authorised User provides
+          <Bold>Feedback.</Bold> If Customer or any Authorized User provides
           suggestions, feedback, or ideas relating to the Service ("Feedback"),
           Customer hereby assigns to Scrubbe all right, title, and interest in
           such Feedback. Scrubbe may use Feedback without restriction or
@@ -445,7 +447,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
         </P>
         <P>
           <Bold>Usage data.</Bold> Scrubbe may collect and use aggregated,
-          anonymised usage and performance data derived from Customer's use of
+          anonymized usage and performance data derived from Customer's use of
           the Service to operate, improve, and benchmark the Service, provided
           such data cannot reasonably be used to identify Customer or any
           individual.
@@ -486,7 +488,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
               ["Payment terms", "Net 30 from invoice date", "All plans"],
               [
                 "Overdue interest",
-                "8% per annum above Bank of England base rate (Late Payment Act 1998)",
+                "1.5% per month (18% per annum), or the maximum rate permitted by applicable law, whichever is lower",
                 "All plans",
               ],
               [
@@ -636,7 +638,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           the Service will perform materially in accordance with the
           Documentation; (b) Scrubbe will implement and maintain commercially
           reasonable security measures; and (c) Scrubbe has the right to grant
-          the licences set out in these Terms.
+          the licenses set out in these Terms.
         </P>
         <P>
           <Bold>Customer warrants</Bold> that: (a) it has all rights necessary
@@ -669,7 +671,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           with these Terms (whether in contract, tort including negligence, or
           otherwise) shall not exceed the greater of: (a) the total fees paid or
           payable by Customer in the twelve months immediately preceding the
-          event giving rise to the claim; or (b) £10,000 GBP.
+          event giving rise to the claim; or (b) $12,500 USD.
         </P>
         <P>
           <Bold>Exclusions.</Bold> Neither party shall be liable to the other
@@ -706,8 +708,9 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
         <P>
           <Bold>By Scrubbe.</Bold> Scrubbe will defend Customer against any
           third-party claim that the Service, as provided and used in accordance
-          with these Terms, infringes any UK, EU, or US patent, copyright, or
-          trademark, and will indemnify Customer against damages finally awarded
+          with these Terms, infringes any patent, copyright, trademark, or
+          other intellectual property right, and will indemnify Customer
+          against damages finally awarded
           in such a claim. This obligation does not apply where the claim arises
           from: modification of the Service by Customer; use of the Service in
           combination with non-Scrubbe products; use contrary to the
@@ -748,14 +751,15 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           <Bold>By Scrubbe for cause.</Bold> Scrubbe may terminate these Terms
           immediately on written notice if: (a) Customer is in material breach
           and fails to cure within 30 days of notice; (b) Customer becomes
-          insolvent or enters administration; or (c) continued provision would
-          violate applicable law.
+          insolvent, makes an assignment for the benefit of creditors, or
+          becomes subject to bankruptcy, receivership, or similar proceedings;
+          or (c) continued provision would violate applicable law.
         </P>
         <P>
           <Bold>Effect of termination.</Bold> On termination or expiry:
         </P>
         <Ul>
-          <Li>All licences granted to Customer terminate immediately.</Li>
+          <Li>All licenses granted to Customer terminate immediately.</Li>
           <Li>
             Customer must cease all use of the Service and destroy all copies of
             Documentation in its possession.
@@ -779,15 +783,16 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
       <>
         <P>
           These Terms are governed by and shall be construed in accordance with
-          the laws of England and Wales. The parties irrevocably submit to the
-          exclusive jurisdiction of the courts of England and Wales to settle
-          any dispute arising out of or in connection with these Terms.
+          the laws of the State of Delaware, without regard to its conflict of
+          laws principles. The parties irrevocably submit to the exclusive
+          jurisdiction of the state and federal courts located in Delaware to
+          settle any dispute arising out of or in connection with these Terms.
         </P>
         <P>
           <Bold>Dispute resolution.</Bold> Before commencing legal proceedings,
           the parties agree to attempt resolution through good-faith negotiation
           for at least 30 days. Either party may request a meeting between
-          senior representatives of each organisation.
+          senior representatives of each organization.
         </P>
         <P>
           <Bold>UN Convention.</Bold> The United Nations Convention on Contracts
@@ -844,16 +849,15 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           For legal notices under these Terms, or to report a potential breach
           of these Terms, please contact Scrubbe's legal team using the details
           below. Notices sent by email are deemed received on the next business
-          day. Notices sent by recorded post to the registered address are
-          deemed received three business days after posting.
+          day. Notices sent by certified mail to the registered address are
+          deemed received three business days after mailing.
         </P>
         <div className="grid grid-cols-2 gap-4 my-5">
           {[
             ["Legal enquiries", "legal@scrubbe.com"],
             ["Security & data incidents", "security@scrubbe.com"],
             ["General enquiries", "p.ifediora@scrubbe.com"],
-            ["Phone", "+44 7487 614645"],
-            ["Company", "Scrubbe Ltd"],
+            ["Company", "Scrubbe Inc."],
             ["Website", "www.scrubbe.com"],
           ].map(([label, val]) => (
             <div key={label} className="border-b border-gray-100 pb-3">
@@ -937,8 +941,8 @@ const ScrubbeTermsOfService = () => {
           </h1>
           <p className="text-white/90 max-w-2xl text-[14px] leading-relaxed">
             These Terms of Service ("Terms") constitute a legally binding
-            agreement between Scrubbe Ltd ("Scrubbe", "we", "us") and the
-            organisation or individual ("Customer", "you") accessing or using
+            agreement between Scrubbe Inc. ("Scrubbe", "we", "us") and the
+            organization or individual ("Customer", "you") accessing or using
             the Scrubbe governed multi-agent incident intelligence platform. By
             accessing any part of the Service, you agree to be bound by these
             Terms in full.
@@ -951,7 +955,7 @@ const ScrubbeTermsOfService = () => {
               <Clock size={15} /> Last Reviewed: 21 May 2026
             </span>
             <span className="flex items-center gap-2 text-white/80 text-[13px]">
-              <ShieldIcon size={15} /> Jurisdiction: England &amp; Wales
+              <ShieldIcon size={15} /> Jurisdiction: Delaware, USA
             </span>
           </div>
         </div>
@@ -1014,8 +1018,8 @@ const ScrubbeTermsOfService = () => {
                 <span>Document reference: TOS-2025-v1.0</span>
                 <span>Effective: 21 May 2025</span>
                 <span>Last reviewed: 21 May 2026</span>
-                <span>Jurisdiction: England &amp; Wales</span>
-                <span>Company: Scrubbe Ltd</span>
+                <span>Jurisdiction: Delaware, USA</span>
+                <span>Company: Scrubbe Inc.</span>
               </div>
             </div>
           </div>

@@ -349,8 +349,9 @@ const ScrubbeCookiePolicy = () => {
           </h4>
           <p className="mb-4">
             We use a Consent Management Platform to record and store your cookie
-            preferences, ensuring compliance with **GDPR** and other
-            regulations. Consent logs are maintained for audit purposes and can
+            preferences, ensuring compliance with the **CCPA/CPRA**, **GDPR**
+            (where applicable), and other regulations. Consent logs are
+            maintained for audit purposes and can
             be provided upon request to{" "}
             <a
               href="mailto:support@scrubbe.com"
@@ -383,35 +384,15 @@ const ScrubbeCookiePolicy = () => {
           </p>
 
           <h4 className="font-semibold text-lg mb-2 flex items-center mt-4">
-            <span className="text-scrubbe-green mr-2">&#9650;</span> 7.1 GDPR/UK
-            (EU/UK)
+            <span className="text-scrubbe-green mr-2">&#9650;</span> 7.1
+            CCPA/CPRA (California and other U.S. states)
           </h4>
           <p className="mb-4">
-            Under GDPR, we obtain explicit consent for non-essential cookies via
-            our cookie banner. You have the right to withdraw consent at any
-            time using the preference management form or by contacting{" "}
-            <a
-              href="mailto:support@scrubbe.com"
-              className="text-blue-600 hover:underline"
-            >
-              support@scrubbe.com
-            </a>
-            . See our{" "}
-            <a href="#" className="text-blue-600 hover:underline">
-              Privacy Policy (Section 8.1)
-            </a>{" "}
-            for core rights.
-          </p>
-
-          <h4 className="font-semibold text-lg mb-2 flex items-center mt-4">
-            <span className="text-scrubbe-green mr-2">&#9650;</span> 7.2
-            CCPA/CPRA (California)
-          </h4>
-          <p className="mb-4">
-            California residents can opt out of the sale of personal data via
-            cookies. Scrubbe does not sell personal data, but marketing cookies
-            may involve data sharing with third parties. Use the preference form
-            or email{" "}
+            California and other U.S. state residents can opt out of the sale
+            or sharing of personal data via cookies, including through the
+            Global Privacy Control (GPC) signal, which we honor. Scrubbe does
+            not sell personal data, but marketing cookies may involve data
+            sharing with third parties. Use the preference form or email{" "}
             <a
               href="mailto:support@scrubbe.com"
               className="text-blue-600 hover:underline"
@@ -423,7 +404,29 @@ const ScrubbeCookiePolicy = () => {
             <a href="#" className="text-blue-600 hover:underline">
               Privacy Policy (Section 8.2)
             </a>{" "}
-            for CCPA rights.
+            for CCPA/CPRA rights.
+          </p>
+
+          <h4 className="font-semibold text-lg mb-2 flex items-center mt-4">
+            <span className="text-scrubbe-green mr-2">&#9650;</span> 7.2 GDPR
+            (EU/UK)
+          </h4>
+          <p className="mb-4">
+            For visitors in the European Economic Area or United Kingdom, we
+            obtain explicit consent for non-essential cookies via our cookie
+            banner. You have the right to withdraw consent at any time using
+            the preference management form or by contacting{" "}
+            <a
+              href="mailto:support@scrubbe.com"
+              className="text-blue-600 hover:underline"
+            >
+              support@scrubbe.com
+            </a>
+            . See our{" "}
+            <a href="#" className="text-blue-600 hover:underline">
+              Privacy Policy (Section 8.1)
+            </a>{" "}
+            for core rights.
           </p>
 
           <h4 className="font-semibold text-lg mb-2 flex items-center mt-4">
@@ -537,10 +540,7 @@ const ScrubbeCookiePolicy = () => {
                 support@scrubbe.com
               </a>
             </li>
-            <li>
-              Mailing Address: Scrubbe Limited, 456 Innovation Avenue, Lagos,
-              Nigeria
-            </li>
+            <li>Mailing Address: Scrubbe Inc., United States</li>
           </ul>
           <p className="mt-4">
             If you believe your rights have been violated, you may contact your

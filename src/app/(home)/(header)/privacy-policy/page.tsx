@@ -207,13 +207,13 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
             {
               title: "Data you own",
               body: "Customer incident and telemetry data remains yours. We process it only on your instructions.",
-              tag: "Art. 28 UK GDPR Processor",
+              tag: "CCPA/CPRA Service Provider",
               tagColor: "green" as const,
             },
             {
               title: "Where it lives",
-              body: "Processed and stored in the EEA and UK by default. Enterprise residency options available.",
-              tag: "EEA / UK default",
+              body: "Processed and stored in the United States by default. Enterprise residency options available.",
+              tag: "U.S. default",
               tagColor: "green" as const,
             },
             {
@@ -224,20 +224,20 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
             },
             {
               title: "Your rights",
-              body: "Access, rectification, erasure, portability, restriction, objection — respond within 30 days.",
-              tag: "Art. 15-22 UK GDPR",
+              body: "Know, correct, delete, opt out of sale/sharing, and non-discrimination — respond within 45 days.",
+              tag: "CCPA/CPRA Consumer Rights",
               tagColor: "green" as const,
             },
             {
               title: "Breach notification",
-              body: "We notify you within 72 hours of a confirmed breach affecting your personal data.",
-              tag: "Art. 33-34 UK GDPR",
+              body: "We notify affected customers within 72 hours of confirming a breach affecting your personal data.",
+              tag: "72-hr notification commitment",
               tagColor: "green" as const,
             },
             {
               title: "No selling of data",
               body: "We never sell, rent, or trade personal data to third parties for marketing purposes.",
-              tag: "Zero data brokering",
+              tag: "No sale or sharing (CCPA)",
               tagColor: "green" as const,
             },
           ].map((c) => (
@@ -257,11 +257,11 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
         </div>
         <P>
           This Privacy Policy applies to all personal data processed by Scrubbe
-          Ltd in connection with:
+          Inc. in connection with:
         </P>
         <Ul>
           <Li>
-            <Bold>The Platform:</Bold> Personal data of Authorised Users who
+            <Bold>The Platform:</Bold> Personal data of Authorized Users who
             access the Scrubbe incident intelligence platform under a
             subscription.
           </Li>
@@ -291,8 +291,9 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
         <Note color="blue" title="Controller vs Processor">
           <p className="text-[13px] text-sky-700 leading-relaxed mb-1">
             For personal data in Customer-submitted incident payloads and
-            telemetry, Scrubbe acts as a Data Processor and the Customer is the
-            Data Controller.
+            telemetry, Scrubbe acts as a Data Processor (a "Service Provider"
+            under the CCPA/CPRA) and the Customer is the Data Controller (a
+            "Business" under the CCPA/CPRA).
           </p>
           <p className="text-[13px] text-sky-700 leading-relaxed">
             Our Data Processing Agreement ("DPA") governs that relationship.
@@ -314,8 +315,8 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
         </P>
         <DefTable
           rows={[
-            ["Company", "Scrubbe Ltd"],
-            ["Jurisdiction", "England & Wales"],
+            ["Company", "Scrubbe Inc."],
+            ["Jurisdiction", "United States"],
             [
               "Website",
               <a
@@ -335,8 +336,8 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
               </a>,
             ],
             [
-              "Lead supervisory\nauthority",
-              "Information Commissioner's Office (ICO), United Kingdom. Registration number maintained on the ICO register.",
+              "Primary\nregulators",
+              "Federal Trade Commission (FTC) for general consumer protection; California Privacy Protection Agency (CPPA) and California Attorney General for CCPA/CPRA enforcement; other state Attorneys General as applicable under their respective state privacy laws.",
             ],
           ]}
         />
@@ -357,7 +358,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           rows={[
             [
               "Account & identity",
-              "Name, work email address, job title, organisation name, profile picture",
+              "Name, work email address, job title, organization name, profile picture",
               "Provided by you or your employer at onboarding",
             ],
             [
@@ -388,7 +389,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
             [
               "Connector credentials",
               "API keys, OAuth tokens, service account identifiers for third-party integrations",
-              "Provided by Customer Authorised Users; stored encrypted",
+              "Provided by Customer Authorized Users; stored encrypted",
             ],
             [
               "Marketing & website",
@@ -397,7 +398,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
             ],
             [
               "Payment data",
-              "Billing contact name and email, company name, VAT number. Card details are handled exclusively by our payment processor and never stored by Scrubbe.",
+              "Billing contact name and email, company name, tax identification number (e.g., EIN or VAT/GST where applicable). Card details are handled exclusively by our payment processor and never stored by Scrubbe.",
               "Provided at subscription purchase",
             ],
           ]}
@@ -409,80 +410,6 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           Customer-submitted incident payloads, it is processed as Customer Data
           under the DPA and the Customer is responsible as controller for its
           lawfulness.
-        </P>
-      </>
-    ),
-  },
-  {
-    id: "legal-basis",
-    title: "Legal Basis for Processing",
-    content: (
-      <>
-        <P>
-          We rely on the following legal bases under UK GDPR Article 6 for our
-          processing activities:
-        </P>
-        <DarkTable
-          headers={["Processing Activity", "Legal Basis"]}
-          rows={[
-            [
-              "Provisioning and operating your account",
-              <Badge color="green">Contract — Art. 6(1)(b)</Badge>,
-            ],
-            [
-              "Authentication, session management, security controls",
-              <Badge color="green">Contract — Art. 6(1)(b)</Badge>,
-            ],
-            [
-              "Billing, invoicing, and payment processing",
-              <Badge color="green">Contract — Art. 6(1)(b)</Badge>,
-            ],
-            [
-              "Product usage analytics (aggregated, to improve the Service)",
-              <Badge color="blue">Legitimate Interests — Art. 6(1)(f)</Badge>,
-            ],
-            [
-              "Audit trail and compliance record-keeping",
-              <Badge color="amber">Legal Obligation — Art. 6(1)(c)</Badge>,
-            ],
-            [
-              "Security monitoring, fraud detection, abuse prevention",
-              <Badge color="blue">Legitimate Interests — Art. 6(1)(f)</Badge>,
-            ],
-            [
-              "Customer support and account communications",
-              <Badge color="green">Contract — Art. 6(1)(b)</Badge>,
-            ],
-            [
-              "Marketing emails to prospects and existing customers",
-              <>
-                <Badge color="purple">Consent — Art. 6(1)(a)</Badge>
-                <span className="mx-1 text-gray-400">&</span>
-                <Badge color="blue">Legitimate Interests</Badge>
-              </>,
-            ],
-            [
-              "Non-essential cookies and analytics tracking on website",
-              <Badge color="purple">Consent — Art. 6(1)(a)</Badge>,
-            ],
-            [
-              "Compliance with legal obligations (tax, regulatory)",
-              <Badge color="amber">Legal Obligation — Art. 6(1)(c)</Badge>,
-            ],
-          ]}
-        />
-        <P>
-          Where we rely on <Bold>Legitimate Interests</Bold>, we have conducted
-          a Legitimate Interests Assessment (LIA) and are satisfied that our
-          interests are not overridden by the rights and freedoms of data
-          subjects. You may request a summary of our LIA by contacting{" "}
-          <a
-            href="mailto:privacy@scrubbe.com"
-            className="text-emerald-600 hover:underline"
-          >
-            privacy@scrubbe.com
-          </a>
-          .
         </P>
       </>
     ),
@@ -508,7 +435,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
             ],
             [
               "Product improvement:",
-              "Analysing aggregated, anonymised usage patterns to prioritise features, improve agent accuracy, and optimise system performance. We do not use individual-level usage data to build personal profiles for advertising.",
+              "Analyzing aggregated, anonymized usage patterns to prioritize features, improve agent accuracy, and optimize system performance. We do not use individual-level usage data to build personal profiles for advertising.",
             ],
             [
               "Customer communications:",
@@ -533,8 +460,9 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
             While the Scrubbe Platform uses AI agents to make automated
             decisions about operational incidents, we do not use automated
             decision-making or profiling about individual users or data subjects
-            that produces legal or similarly significant effects — as defined
-            under Art. 22 UK GDPR.
+            that produces legal or similarly significant effects, consistent
+            with automated-decision-making protections under applicable U.S.
+            state privacy laws (e.g., Colorado and Connecticut).
           </p>
         </Note>
       </>
@@ -548,7 +476,9 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
         <P>
           When Customers submit telemetry, alerts, log payloads, and related
           operational data to the Platform, Scrubbe acts exclusively as a{" "}
-          <Bold>data processor</Bold> under Article 28 UK GDPR. This means:
+          <Bold>data processor</Bold> (a "Service Provider" under the
+          CCPA/CPRA, and a "Processor" under other applicable U.S. state
+          privacy laws). This means:
         </P>
         <Ul>
           <Li>
@@ -584,7 +514,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
             Connectors. Scrubbe's ingestion pipeline processes all submitted
             data without inspecting it for personal data at the point of entry —
             it is the Customer's responsibility to apply appropriate data
-            minimisation at source.
+            minimization at source.
           </p>
         </Note>
         <P>
@@ -646,36 +576,37 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
     content: (
       <>
         <P>
-          Scrubbe is headquartered in the United Kingdom. By default, personal
-          data and Customer Data are processed and stored within the EEA and/or
-          the UK, both of which have adequacy decisions or equivalent frameworks
-          in place.
+          Scrubbe is headquartered in the United States. By default, personal
+          data and Customer Data are processed and stored within the United
+          States.
         </P>
         <P>
-          Where data is transferred to countries outside the UK/EEA (for
-          example, via certain sub-processors), we ensure an appropriate
-          safeguard is in place, including:
+          Where we process personal data originating from the European
+          Economic Area (EEA), United Kingdom, or other regions with data
+          transfer restrictions, we put an appropriate safeguard in place for
+          the transfer to the United States, including:
         </P>
         <Ul>
           <Li>
-            <Bold>UK International Data Transfer Agreements (IDTAs)</Bold> for
-            transfers from the UK to third countries.
-          </Li>
-          <Li>
             <Bold>EU Standard Contractual Clauses (SCCs)</Bold> for transfers
-            from the EEA, supplemented by a Transfer Impact Assessment where
-            required.
+            of personal data from the EEA, supplemented by a Transfer Impact
+            Assessment where required.
           </Li>
           <Li>
-            <Bold>UK/EU adequacy decisions</Bold> where the receiving country
-            has been granted adequacy status.
+            <Bold>UK International Data Transfer Agreement (IDTA) / UK
+            Addendum</Bold> for transfers of personal data from the United
+            Kingdom.
+          </Li>
+          <Li>
+            Other legally recognized transfer mechanisms as they become
+            available or are required under applicable law.
           </Li>
         </Ul>
         <P>
-          Enterprise Customers requiring data residency strictly within the UK
-          or EEA may request this configuration in their Order Form. We will
-          identify any sub-processors that may necessitate transfers outside
-          these regions and provide appropriate documentation.
+          Enterprise Customers requiring data residency in a specific region
+          may request this configuration in their Order Form. We will identify
+          any sub-processors that may necessitate transfers outside that
+          region and provide appropriate documentation.
         </P>
         <Note color="blue" title="Transfer Records">
           <p className="text-[13px] text-sky-700 leading-relaxed">
@@ -687,8 +618,8 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
             >
               privacy@scrubbe.com
             </a>
-            . We maintain Article 30 records of processing activities including
-            all international transfer mechanisms.
+            . We maintain records of processing activities, including all
+            international transfer mechanisms.
           </p>
         </Note>
       </>
@@ -727,7 +658,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
             period="7 years"
             color="bg-emerald-400"
             title="Financial & billing records"
-            desc="Invoices, payment records, and associated contact data retained to satisfy statutory accounting obligations under UK Companies Act 2006."
+            desc="Invoices, payment records, and associated contact data retained to satisfy applicable U.S. federal and state tax and accounting recordkeeping requirements."
           />
           <RetentionItem
             period="3 years from last contact"
@@ -751,8 +682,8 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
     content: (
       <>
         <P>
-          Scrubbe implements layered technical and organisational security
-          measures to protect personal data against unauthorised access,
+          Scrubbe implements layered technical and organizational security
+          measures to protect personal data against unauthorized access,
           alteration, disclosure, or destruction. These include:
         </P>
         <DefTable
@@ -790,11 +721,12 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
         <P>
           <Bold>Breach notification.</Bold> In the event of a personal data
           breach that is likely to result in a risk to the rights and freedoms
-          of individuals, we will notify the relevant supervisory authority
-          within 72 hours of becoming aware. We will notify affected Customers
-          without undue delay where the breach is likely to result in high risk
-          to individuals, providing sufficient information to allow them to
-          fulfil their own notification obligations.
+          of individuals, we will notify affected Customers within 72 hours of
+          confirming the breach, providing sufficient information to allow
+          them to fulfill their own notification obligations. Where required
+          by applicable state law, we will also notify affected individuals
+          and state Attorneys General within the timeframes those laws
+          prescribe.
         </P>
         <P>
           To report a security vulnerability or suspected breach, contact{" "}
@@ -815,52 +747,56 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
     content: (
       <>
         <P>
-          Under UK GDPR and EU GDPR, you have the following rights in relation
-          to personal data we hold about you as controller. These rights apply
-          to our processing of your personal data as a Scrubbe user, website
-          visitor, or contact — not to Customer Data (where rights should be
-          directed to the relevant Customer/controller).
+          Depending on your state of residence, you have some or all of the
+          following rights in relation to personal data we hold about you as
+          controller, under applicable U.S. state privacy laws — including the
+          California Consumer Privacy Act as amended by the CPRA ("CCPA/CPRA")
+          and similar laws in Colorado, Connecticut, Virginia, Utah, and other
+          states. These rights apply to our processing of your personal data
+          as a Scrubbe user, website visitor, or contact — not to Customer
+          Data (where rights should be directed to the relevant
+          Customer/controller).
         </P>
         <div className="grid grid-cols-2 gap-3 my-4">
           <RightCard
-            art="Art. 15 UK GDPR"
-            title="Right of Access"
-            desc="Request a copy of the personal data we hold about you, together with information about how and why we process it."
+            art="CCPA/CPRA § 1798.100"
+            title="Right to Know / Access"
+            desc="Request disclosure of the categories and specific pieces of personal information we have collected about you, the sources, purposes, and any third parties it was disclosed to."
           />
           <RightCard
-            art="Art. 16 UK GDPR"
-            title="Right to Rectification"
+            art="CCPA/CPRA § 1798.106"
+            title="Right to Correct"
             desc="Request correction of inaccurate or incomplete personal data we hold about you."
           />
           <RightCard
-            art="Art. 17 UK GDPR"
-            title="Right to Erasure"
-            desc="Request deletion of your personal data where there is no lawful basis for us to continue holding it. Subject to legal retention requirements."
+            art="CCPA/CPRA § 1798.105"
+            title="Right to Delete"
+            desc="Request deletion of your personal data, subject to legal retention requirements and certain exceptions."
           />
           <RightCard
-            art="Art. 18 UK GDPR"
-            title="Right to Restriction"
-            desc="Request that we limit our processing of your personal data in certain circumstances, such as while a dispute about accuracy is resolved."
+            art="CCPA/CPRA § 1798.121"
+            title="Right to Limit Sensitive Data"
+            desc="Limit the use and disclosure of sensitive personal information to what is necessary to provide the Service."
           />
           <RightCard
-            art="Art. 20 UK GDPR"
+            art="CCPA/CPRA § 1798.100"
             title="Right to Portability"
             desc="Receive your personal data in a structured, machine-readable format and transfer it to another controller where technically feasible."
           />
           <RightCard
-            art="Art. 21 UK GDPR"
-            title="Right to Object"
-            desc="Object to processing based on legitimate interests (including profiling) at any time. You may always unsubscribe from marketing communications."
+            art="CCPA/CPRA § 1798.120"
+            title="Right to Opt Out of Sale/Sharing"
+            desc="Direct us not to sell or share your personal information. As noted above, we do not sell or share personal data for cross-context behavioral advertising."
           />
           <RightCard
-            art="Art. 7(3) UK GDPR"
-            title="Right to Withdraw Consent"
-            desc="Withdraw consent at any time where we rely on it as a legal basis. Withdrawal does not affect the lawfulness of prior processing."
+            art="CCPA/CPRA § 1798.125"
+            title="Right to Non-Discrimination"
+            desc="We will not deny goods or services, charge a different price, or provide a different level of service because you exercised a privacy right."
           />
           <RightCard
-            art="Art. 77 UK GDPR"
+            art="State AG / FTC"
             title="Right to Lodge a Complaint"
-            desc="Lodge a complaint with the Information Commissioner's Office (ICO) at ico.org.uk or your local supervisory authority if you believe we have infringed your rights."
+            desc="Lodge a complaint with the California Privacy Protection Agency (CPPA), your state Attorney General, the Federal Trade Commission (FTC), or your local supervisory authority if you believe we have infringed your rights."
           />
         </div>
         <P>
@@ -871,11 +807,13 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           >
             privacy@scrubbe.com
           </a>
-          . We will respond within 30 days (extendable by a further 60 days for
+          . We will respond within 45 days (extendable by a further 45 days for
           complex requests, with notice). We may need to verify your identity
-          before processing the request. Rights requests are free of charge,
-          though we may charge a reasonable fee for manifestly unfounded or
-          excessive requests.
+          before processing the request, and may require a higher level of
+          verification for delete or correct requests. Rights requests are
+          free of charge, though we may charge a reasonable fee for
+          manifestly unfounded, excessive, or repetitive requests. You may
+          designate an authorized agent to submit a request on your behalf.
         </P>
       </>
     ),
@@ -910,7 +848,7 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
             ],
             [
               "Analytics",
-              "Aggregated anonymised usage statistics to understand how the Platform and website are used. We use privacy-preserving analytics that do not fingerprint individuals.",
+              "Aggregated anonymized usage statistics to understand how the Platform and website are used. We use privacy-preserving analytics that do not fingerprint individuals.",
               "Yes — consent required",
             ],
             [
@@ -927,9 +865,12 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
         />
         <P>
           You can manage your cookie preferences at any time via the cookie
-          preference centre, accessible from the footer of any Scrubbe website
-          page. You may also control cookies through your browser settings,
-          though disabling Essential cookies will impair Platform functionality.
+          preference center, accessible from the footer of any Scrubbe website
+          page — including the "Do Not Sell or Share My Personal Information"
+          control required under the CCPA/CPRA. You may also control cookies
+          through your browser settings or by enabling the Global Privacy
+          Control (GPC), though disabling Essential cookies will impair
+          Platform functionality.
         </P>
       </>
     ),
@@ -1012,16 +953,15 @@ const SECTIONS: { id: string; title: string; content: React.ReactNode }[] = [
           For legal notices under these Terms, or to report a potential breach
           of these Terms, please contact Scrubbe's legal team using the details
           below. Notices sent by email are deemed received on the next business
-          day. Notices sent by recorded post to the registered address are
-          deemed received three business days after posting.
+          day. Notices sent by certified mail to the registered address are
+          deemed received three business days after mailing.
         </P>
         <div className="grid grid-cols-2 gap-4 my-5">
           {[
             ["Legal enquiries", "legal@scrubbe.com"],
             ["Security & data incidents", "security@scrubbe.com"],
             ["General enquiries", "p.ifediora@scrubbe.com"],
-            ["Phone", "+44 7487 614645"],
-            ["Company", "Scrubbe Ltd"],
+            ["Company", "Scrubbe Inc."],
             ["Website", "www.scrubbe.com"],
           ].map(([label, val]) => (
             <div key={label} className="border-b border-gray-100 pb-3">
@@ -1104,12 +1044,13 @@ const ScrubbePrivacyPolicy = () => {
             Privacy Policy
           </h1>
           <p className="text-white/90 max-w-2xl text-[14px] leading-relaxed">
-            This Privacy Policy explains how Scrubbe Ltd collects, uses, stores,
+            This Privacy Policy explains how Scrubbe Inc. collects, uses, stores,
             and protects personal data in connection with the Scrubbe incident
             intelligence platform and our marketing presence. We are committed
-            to processing personal data lawfully, transparently, and in
-            accordance with UK GDPR, EU GDPR, and all applicable data protection
-            law.
+            to processing personal data lawfully and transparently, in
+            accordance with the California Consumer Privacy Act (CCPA/CPRA),
+            other applicable U.S. state privacy laws, and applicable data
+            protection law.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-5 mt-6">
             <span className="flex items-center gap-2 text-white/80 text-[13px]">
@@ -1119,7 +1060,7 @@ const ScrubbePrivacyPolicy = () => {
               <Clock size={15} /> Last Reviewed: 21 May 2026
             </span>
             <span className="flex items-center gap-2 text-white/80 text-[13px]">
-              <ShieldIcon size={15} /> Jurisdiction: England &amp; Wales
+              <ShieldIcon size={15} /> Jurisdiction: United States
             </span>
           </div>
         </div>
@@ -1181,8 +1122,8 @@ const ScrubbePrivacyPolicy = () => {
                 <span>Document reference: TOS-2025-v1.0</span>
                 <span>Effective: 21 May 2025</span>
                 <span>Last reviewed: 21 May 2026</span>
-                <span>Jurisdiction: England &amp; Wales</span>
-                <span>Company: Scrubbe Ltd</span>
+                <span>Jurisdiction: United States</span>
+                <span>Company: Scrubbe Inc.</span>
               </div>
             </div>
           </div>
