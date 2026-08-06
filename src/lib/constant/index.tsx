@@ -1,6 +1,7 @@
 import {
   ArrowLeftRight,
   ArrowUp,
+  Boxes,
   Code,
   LayoutDashboard,
   Lock,
@@ -1210,6 +1211,13 @@ export const NewMenu: Record<string, NavItem[]> = {
       Icon: LuLayers,
       link: "/incident/infrastructure",
       isActive: false,
+      isMenu: false,
+    },
+    {
+      name: "Asset Inventory",
+      Icon: Boxes,
+      link: "/incident/asset-inventory",
+      isActive: true,
       isMenu: false,
     },
   ],
