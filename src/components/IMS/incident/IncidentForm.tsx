@@ -34,6 +34,7 @@ import Button from "@/components/ui/Button1";
 import { FaRegFileLines } from "react-icons/fa6";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import FormatTimerDisplay from "./FormatTImerDisplay";
+import { useIncidentBannerStore } from "@/lib/stores/incidentBanner.store";
 import { MdRadioButtonChecked, MdRadioButtonUnchecked } from "react-icons/md";
 
 // ── Schema ────────────────────────────────────────────────────────
@@ -646,7 +647,14 @@ const RaiseIncidentModal = () => {
       await queryClient.invalidateQueries({
         queryKey: [querykeys.INCIDENT_TICKET],
       });
-      toast.success(`Incident ${incident.ticketId} created`);
+      useIncidentBannerStore.getState().show({
+        id: incident.id,
+        ticketId: incident.ticketId,
+        title: incident.title || incident.reason,
+        priority: incident.priority,
+        severity: incident.severity,
+        source: "MANUAL",
+      });
       router.push(`/incident?id=${incident.id}&tab=overview`);
     },
     onError: (err: Error) =>

@@ -12,6 +12,7 @@ import { Terminal } from "lucide-react";
 import clsx from "clsx";
 import { BsArrowBarLeft } from "react-icons/bs";
 import DesktopRestrictionScreen from "./DesktopRetrictionScreen";
+import IncidentCreatedBanner from "./incident/IncidentCreatedBanner";
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const { collapse, toggle } = useSidebar();
@@ -154,6 +155,8 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
       >
         <GlobalSearch />
       </Modal>
+
+      <IncidentCreatedBanner />
     </div>
   );
 };
