@@ -396,10 +396,11 @@ export function generateAssets(): Asset[] {
 
   const certs = assets.filter((a) => a.category === "Certificates");
   certs.forEach((a, i) => {
-    const base = CERTS_SEED[i] || { name: a.name, expiresInDays: 15 + Math.floor(pr(i, 40) * 300), status: undefined };
-    a.expiresInDays = base.expiresInDays;
-    a.certStatus = base.status || (base.expiresInDays <= 7 ? "Critical" : base.expiresInDays <= 30 ? "Warning" : "Valid");
-    if (CERTS_SEED[i]) a.name = CERTS_SEED[i].name;
+    const seed = CERTS_SEED[i];
+    const expiresInDays = seed ? seed.expiresInDays : 15 + Math.floor(pr(i, 40) * 300);
+    a.expiresInDays = expiresInDays;
+    a.certStatus = (seed ? seed.status : undefined) || (expiresInDays <= 7 ? "Critical" : expiresInDays <= 30 ? "Warning" : "Valid");
+    if (seed) a.name = seed.name;
   });
 
   return assets;
