@@ -767,7 +767,10 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
     PRICING: [{ title: "Plans", href: "/pricing" }],
     "CONTACT US": [{ title: "Contact us", href: "/contact-us" }],
     RESOURCES: [
-      { title: "Documentation", href: "/docs" },
+      {
+        title: "Documentation",
+        href: "/https://docs.scrubbe.com/introduction",
+      },
       { title: "Blog", href: "https://scrubbe.medium.com" },
       { title: "Product Demo", href: "/demo" },
       { title: "Reports", href: "/reports" },
