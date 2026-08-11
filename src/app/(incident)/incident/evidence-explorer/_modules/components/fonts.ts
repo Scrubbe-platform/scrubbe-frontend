@@ -1,6 +1,5 @@
-import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
-
-// Matches the blueprint's --display / --sans / --mono font stack exactly.
-export const displayFont = Space_Grotesk({ subsets: ["latin"], weight: ["500", "600", "700"] });
-export const sansFont = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
-export const monoFont = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"] });
+// Fonts loaded at runtime via globals.css @import to avoid next/font/google
+// build-time network dependency (IBM Plex Sans/Mono, Space Grotesk).
+export const displayFont = { className: "ev-font-display" };
+export const sansFont = { className: "ev-font-sans" };
+export const monoFont = { className: "ev-font-mono" };
