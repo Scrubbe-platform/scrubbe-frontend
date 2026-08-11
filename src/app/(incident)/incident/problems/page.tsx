@@ -1147,7 +1147,7 @@ export default function ProblemRecordsDashboard() {
                   <button
                     onClick={async () => {
                       await Promise.allSettled(
-                        [...selectedRowIds].map((id) => handleResolveRecord(id))
+                        Array.from(selectedRowIds).map((id) => handleResolveRecord(id))
                       );
                       setSelectedRowIds(new Set());
                     }}
