@@ -62,5 +62,6 @@ const DecisionLog = ({ incidentId }: { incidentId?: string }) => {
     </div>
   </div>
 );
+};
 
 export default DecisionLog;

@@ -87,5 +87,6 @@ const IncidentDetails = ({ incidentId }: { incidentId?: string }) => {
     </div>
   </div>
 );
+};
 
 export default IncidentDetails;
