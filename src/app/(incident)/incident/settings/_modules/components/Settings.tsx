@@ -328,21 +328,26 @@ export default function Settings() {
     // Persist SLA policies to API
     if (openCat === "sla" && draft) {
       try {
-        await customAxios.post(endpoint.sla_policies.create, {
-          name: "Default SLA Policy",
-          enabled: draft.enabled ?? true,
-          responseTimeP0: draft.p0?.resp,
-          resolutionTimeP0: draft.p0?.res,
-          responseTimeP1: draft.p1?.resp,
-          resolutionTimeP1: draft.p1?.res,
-          responseTimeP2: draft.p2?.resp,
-          resolutionTimeP2: draft.p2?.res,
-          responseTimeP3: draft.p3?.resp,
-          resolutionTimeP3: draft.p3?.res,
-          sloTarget: draft.sloTarget,
-          errorBudget: draft.errorBudget,
-          autoEscalate: draft.autoEscalate,
-        });
+        // Server stores one SlaPolicy per priority level
+        const tiers = [
+          { priority: "CRITICAL", resp: draft.p0?.resp, res: draft.p0?.res },
+          { priority: "HIGH",     resp: draft.p1?.resp, res: draft.p1?.res },
+          { priority: "MEDIUM",   resp: draft.p2?.resp, res: draft.p2?.res },
+          { priority: "LOW",      resp: draft.p3?.resp, res: draft.p3?.res },
+        ];
+        await Promise.allSettled(
+          tiers
+            .filter((t) => t.resp || t.res)
+            .map((t) =>
+              customAxios.post(endpoint.sla_policies.create, {
+                name: `Default SLA — ${t.priority}`,
+                priority: t.priority,
+                responseTimeMinutes: t.resp ?? 30,
+                resolveTimeMinutes: t.res ?? 240,
+                uptimeTarget: draft.sloTarget,
+              })
+            )
+        );
       } catch {
         // Continue with localStorage save even if API call fails
       }
