@@ -50,6 +50,7 @@ export interface Problem {
   ticketId?: string;
   title: string;
   summary?: string;
+  description?: string;
   priority: string;
   status: string;
   category?: string;
