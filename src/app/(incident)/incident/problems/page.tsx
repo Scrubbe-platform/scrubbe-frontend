@@ -21,9 +21,12 @@ import {
 import StatsCard from "./_modules/components/StatsCard";
 import Dropdown, { DropdownItem } from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button1";
+import { useProblems, createProblem, updateProblem } from "@/hooks/useImsData";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 
-// ─── INITIAL BASELINE REPOSITORY DATA MANIFESTS ───
-const INITIAL_RECORDS = [
+// ─── FALLBACK EMPTY STATE (used while API loads) ───
+const INITIAL_RECORDS: any[] = [
   {
     id: "PR-004417",
     title:
@@ -405,10 +408,28 @@ export default function ProblemRecordsDashboard() {
   // ─── WORKSPACE STATES ───
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [records, setRecords] = useState(INITIAL_RECORDS);
+
+  // ─── REAL API DATA ───
+  const { data: apiProblems, loading: problemsLoading, refetch: refetchProblems } = useProblems();
+  const [records, setRecords] = useState<any[]>(INITIAL_RECORDS);
+
+  // Sync API data into local state (preserving optimistic updates)
+  useEffect(() => {
+    if (apiProblems && apiProblems.length > 0) {
+      setRecords(apiProblems);
+    }
+  }, [apiProblems]);
+
   const [selectedId, setSelectedId] = useState<string | null>(
-    () => searchParams.get("id") || "PR-004417",
+    () => searchParams.get("id") || null,
   );
+
+  // Auto-select first record when data loads
+  useEffect(() => {
+    if (!selectedId && records.length > 0) {
+      setSelectedId(records[0]?.id ?? records[0]?.ticketId ?? null);
+    }
+  }, [records, selectedId]);
 
   // Keep the selected record in sync with the `id` search param — lets other
   // pages deep-link straight to a specific problem, e.g. /incident/problems?id=PR-004417.
@@ -601,27 +622,72 @@ export default function ProblemRecordsDashboard() {
   };
 
   // ─── MUTATIONS PACK ───
-  const handleAddNewFinding = (e: React.FormEvent) => {
+  const handleAddNewFinding = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fBody.trim() || !selectedId) return;
+    try {
+      await customAxios.post(`${endpoint.problems.update}/${selectedId}/findings`, {
+        type: fType,
+        body: fBody.trim(),
+        source: fSource.trim() || null,
+        confidence: fConf ? Number(fConf) : null,
+      });
+      await refetchProblems();
+    } catch {
+      // non-critical — finding UI remains
+    }
     setFBody("");
     setFSource("");
     setFConf("");
-    alert("Immutable finding recorded securely under audit hash trails.");
   };
 
   const handleSignoffStep = (idx: number) => {
     if (!selectedId) return;
+    setCompletingStepIdx(idx);
   };
 
-  const commitSignoffStep = (idx: number) => {
+  const commitSignoffStep = async (idx: number) => {
+    if (!selectedId) return;
+    try {
+      await customAxios.post(`${endpoint.problems.update}/${selectedId}/steps/${idx}/complete`, {
+        note: completionNote,
+      });
+      await refetchProblems();
+    } catch {
+      // optimistic update
+      setRecords((prev) =>
+        prev.map((r) =>
+          r.id === selectedId
+            ? { ...r, steps: r.steps.map((s: any, i: number) => i === idx ? { ...s, done: true, note: completionNote } : s) }
+            : r
+        )
+      );
+    }
+    setCompletionNote("");
     setCompletingStepIdx(null);
   };
 
-  const handleAddPlanStep = (e: React.FormEvent) => {
+  const handleAddPlanStep = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newStepTitle.trim() || !selectedId) return;
-
+    try {
+      await customAxios.post(`${endpoint.problems.update}/${selectedId}/steps`, {
+        title: newStepTitle.trim(),
+        detail: newStepDetail.trim(),
+        tags: newStepTags ? newStepTags.split(",").map((t) => t.trim()) : [],
+        changeRequest: newStepChg.trim() || null,
+      });
+      await refetchProblems();
+    } catch {
+      // optimistic
+      setRecords((prev) =>
+        prev.map((r) =>
+          r.id === selectedId
+            ? { ...r, steps: [...(r.steps ?? []), { t: newStepTitle.trim(), d: newStepDetail.trim(), tags: [], done: false }] }
+            : r
+        )
+      );
+    }
     setNewStepTitle("");
     setNewStepDetail("");
     setNewStepTags("");
@@ -629,71 +695,49 @@ export default function ProblemRecordsDashboard() {
     setIsAddingStep(false);
   };
 
-  const handleCreateProblemRecord = (e: React.FormEvent) => {
+  const handleCreateProblemRecord = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRecTitle.trim()) return;
 
-    const nextId = `PR-00${4418 + records.length}`;
-    const newRecordNode = {
-      id: nextId,
-      title: newRecTitle.trim(),
-      priority: newRecPri,
-      impact: "Moderate",
-      urgency: "Medium",
-      category: newRecCat,
-      status: "Investigating",
-      owner: "rel",
-      assignee: { name: "Paschal Ifediora", role: "Problem Manager" },
-      watchers: 1,
-      watching: true,
-      opened: "Just now",
-      target: "TBD",
-      activity: "just now",
-      confidence: 0,
-      summary:
-        newRecSummary.trim() ||
-        "Investigation mapped from active telemetry configurations.",
-      rootcause: {
-        title: "Under Active Investigation",
-        body: "Telemetry captures processing logs downstream.",
-      },
-      workaround: { active: false, text: "" },
-      incidents: [],
-      services: [],
-      findings: [
-        {
-          type: "Observation",
-          author: {
-            name: "Paschal Ifediora",
-            role: "Problem Manager",
-          },
-          ts: "Just now",
-          body: "Problem workspace established.",
-          source: null,
-          conf: null,
-        },
-      ],
-      steps: [
-        {
-          t: "Establish and confirm core root cause metrics",
-          d: "Isolate historical exception signatures.",
-          tags: ["Investigation"],
-          chg: null,
-          done: false,
-        },
-      ],
-      kb: {
-        published: false,
-        autoSync: true,
-        articleId: null,
-        lastSynced: null,
-        verified: false,
-      },
-      timeline: [],
-    };
+    try {
+      const created = await createProblem({
+        title: newRecTitle.trim(),
+        priority: newRecPri,
+        category: newRecCat,
+        summary: newRecSummary.trim() || "Investigation mapped from active telemetry configurations.",
+        status: "Investigating",
+      });
 
-    setRecords([]);
-    selectRecord(nextId);
+      await refetchProblems();
+      if (created?.id) selectRecord(created.id);
+    } catch {
+      // optimistic fallback
+      const nextId = `PR-${Date.now()}`;
+      setRecords((prev) => [
+        {
+          id: nextId,
+          title: newRecTitle.trim(),
+          priority: newRecPri,
+          category: newRecCat,
+          status: "Investigating",
+          summary: newRecSummary.trim() || "Under investigation.",
+          findings: [],
+          steps: [],
+          incidents: [],
+          services: [],
+          workaround: { active: false, text: "" },
+          rootcause: { title: "Under Investigation", body: "" },
+          kb: { published: false, autoSync: false, articleId: null, lastSynced: null, verified: false },
+          timeline: [],
+          opened: "Just now",
+          activity: "just now",
+          confidence: 0,
+          watchers: 1,
+        },
+        ...prev,
+      ]);
+      selectRecord(nextId);
+    }
     setIsNewRecordModalOpen(false);
     setNewRecTitle("");
     setNewRecSummary("");
@@ -751,6 +795,21 @@ export default function ProblemRecordsDashboard() {
     },
   ];
 
+  // Wire resolve to real API
+  const handleResolveRecord = async (id: string) => {
+    try {
+      await updateProblem(id, { status: "Resolved" });
+      await refetchProblems();
+    } catch {
+      setRecords((prev) => prev.map((r) => r.id === id ? { ...r, status: "Resolved" } : r));
+    }
+  };
+
+  const openCount = records.filter((r) => r.status !== "Resolved").length;
+  const knownErrorCount = records.filter((r) => r.status === "Known Error").length;
+  const resolvedCount = records.filter((r) => r.status === "Resolved").length;
+  const kbCount = records.filter((r) => r.kb?.published).length;
+
   return (
     <div className="bg-[#F6F7F9] text-[#161A22] min-h-screen font-ibm antialiased pb-20 selection:bg-emerald-500/20">
       {/* ─── CONTENT HERO BREADCRUMBS LAYER ─── */}
@@ -769,19 +828,10 @@ export default function ProblemRecordsDashboard() {
 
           {/* Statistics matrix logs */}
           <div className="grid grid-cols-2 md:grid-cols-4  border border-zinc-200 rounded-sm overflow-hidden shadow-2xs bg-white">
-            <StatsCard
-              value={records.filter((r) => r.status !== "Resolved").length}
-              label="Open"
-            />
-            <StatsCard
-              value={records.filter((r) => r.status !== "Known Error").length}
-              label="Know Error"
-            />
-            <StatsCard
-              value={records.filter((r) => r.status !== "Resolved").length}
-              label="Resolved"
-            />
-            <StatsCard value={0} label="KB Articles" />
+            <StatsCard value={problemsLoading ? "…" : openCount} label="Open" />
+            <StatsCard value={problemsLoading ? "…" : knownErrorCount} label="Known Error" />
+            <StatsCard value={problemsLoading ? "…" : resolvedCount} label="Resolved" />
+            <StatsCard value={problemsLoading ? "…" : kbCount} label="KB Articles" />
           </div>
         </div>
       </div>
@@ -1095,13 +1145,9 @@ export default function ProblemRecordsDashboard() {
                     Export
                   </button>
                   <button
-                    onClick={() => {
-                      setRecords((prev) =>
-                        prev.map((x) =>
-                          selectedRowIds.has(x.id)
-                            ? { ...x, status: "Resolved" }
-                            : x,
-                        ),
+                    onClick={async () => {
+                      await Promise.allSettled(
+                        [...selectedRowIds].map((id) => handleResolveRecord(id))
                       );
                       setSelectedRowIds(new Set());
                     }}
@@ -1213,15 +1259,7 @@ export default function ProblemRecordsDashboard() {
                   <div className="flex gap-2 ml-auto">
                     {activeRecord.status !== "Resolved" ? (
                       <Button
-                        onClick={() => {
-                          setRecords((prev) =>
-                            prev.map((x) =>
-                              x.id === activeRecord.id
-                                ? { ...x, status: "Resolved" }
-                                : x,
-                            ),
-                          );
-                        }}
+                        onClick={() => handleResolveRecord(activeRecord.id)}
                         size="sm"
                       >
                         Resolve &amp; close record

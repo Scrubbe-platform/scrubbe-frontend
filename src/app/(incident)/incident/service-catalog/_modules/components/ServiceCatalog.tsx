@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Header from "@/components/IMS/DashboardHeader";
@@ -10,7 +10,9 @@ import ServicesTable, { ServicesFilterPreset } from "./ServicesTable";
 import Architecture from "./Architecture";
 import ServiceDetail from "./ServiceDetail";
 import { CreateServiceForm, ServicePatch } from "./EditServiceForm";
-import { SERVICES, ServiceRecord, createService } from "./serviceCatalog.data";
+import { SERVICES, ServiceRecord, createService, updateServicesFromApi } from "./serviceCatalog.data";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 
 type Tab = "overview" | "services" | "architecture" | "detail";
 const TABS: { key: Tab; label: string }[] = [
@@ -24,6 +26,17 @@ export default function ServiceCatalog() {
   const [preset, setPreset] = useState<ServicesFilterPreset | undefined>(undefined);
   const [selected, setSelected] = useState<ServiceRecord | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [apiKey, setApiKey] = useState(0);
+
+  useEffect(() => {
+    customAxios.get(endpoint.service_map.list).then((res) => {
+      const list: any[] = res.data?.data ?? res.data ?? [];
+      if (list.length > 0) {
+        updateServicesFromApi(list);
+        setApiKey((k) => k + 1);
+      }
+    }).catch(() => {});
+  }, []);
 
   function goToServices(p?: ServicesFilterPreset) {
     setPreset(p);
@@ -75,6 +88,7 @@ export default function ServiceCatalog() {
 
         {tab === "overview" && (
           <Overview
+            key={apiKey}
             onOpenTopology={() => setTab("architecture")}
             onOpenServices={goToServices}
             onOpenServiceDetail={openServiceDetail}
@@ -83,13 +97,14 @@ export default function ServiceCatalog() {
         )}
         {tab === "services" && (
           <ServicesTable
+            key={apiKey}
             initialPreset={preset}
             onNewService={() => setAddOpen(true)}
             onOpenServiceDetail={openServiceDetail}
             onBackToOverview={() => setTab("overview")}
           />
         )}
-        {tab === "architecture" && <Architecture onBackToOverview={() => setTab("overview")} />}
+        {tab === "architecture" && <Architecture key={apiKey} onBackToOverview={() => setTab("overview")} />}
         {tab === "detail" && selected && (
           <ServiceDetail
             key={selected.id}

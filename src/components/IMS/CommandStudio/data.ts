@@ -99,6 +99,65 @@ export const SERVICES: Record<string, Service> = {
 
 export const openIncidentIds = () => Object.keys(INCIDENTS).filter((id) => INCIDENTS[id].open);
 
+function mapPriority(severity: string): Priority {
+  const s = (severity ?? "").toUpperCase();
+  if (s === "P0" || s === "CRITICAL") return "P0";
+  if (s === "P1" || s === "HIGH") return "P1";
+  return "P2";
+}
+
+function mapStage(status: string): string {
+  const s = (status ?? "").toUpperCase();
+  if (s === "INVESTIGATING") return "Investigating";
+  if (s === "MITIGATED" || s === "MONITORING") return "Monitoring";
+  if (s === "RESOLVED" || s === "CLOSED") return "Resolved";
+  return "Investigating";
+}
+
+export function loadIncidentsFromApi(list: any[]) {
+  const openOnly = list.filter((inc) => {
+    const s = (inc.status ?? "").toUpperCase();
+    return s !== "RESOLVED" && s !== "CLOSED";
+  });
+  const newEntries: Record<string, Incident> = {};
+  openOnly.forEach((inc: any) => {
+    const id = inc.ticketId ?? inc.id;
+    newEntries[id] = {
+      id,
+      title: inc.title ?? inc.summary ?? "Untitled incident",
+      priority: mapPriority(inc.severity),
+      env: inc.environment ?? "Production",
+      service: inc.affectedSystem ?? inc.service ?? "Unknown",
+      stage: mapStage(inc.status),
+      open: true,
+      rootCause: inc.rootCause ?? inc.summary ?? "Under investigation",
+      confidence: inc.confidence ?? 80,
+      confReasons: inc.confReasons ?? ["Signal correlation", "Incident history"],
+      deployment: { id: inc.deploymentId ?? "—", change: inc.changeId ?? "—", released: inc.deployedAt ? new Date(inc.deployedAt).toLocaleTimeString() : "—", correlated: inc.deploymentCorrelated ? "Yes" : "No" },
+      sla: { target: inc.slaTarget ?? "—", elapsed: "—", remaining: "—", risk: "medium" },
+      commander: inc.commander ?? inc.assignedTo ?? "On-call",
+      techLead: inc.techLead ?? "On-call",
+      comms: inc.commsLead ?? "—",
+      warParticipants: inc.warParticipants ?? 0,
+      warActive: inc.warRoomActive ?? false,
+      warNotes: inc.warNotes ?? [],
+      qScore: inc.qualityScore ?? 75,
+      qMissing: inc.qualityMissing ?? [],
+      similarCount: inc.similarCount ?? 0,
+      similar: inc.similar ?? [],
+      playbook: { name: inc.playbookName ?? "Default Response", confidence: inc.playbookConfidence ?? 80 },
+      causal: inc.causalChain ?? [],
+      rollback: { downtime: inc.rollbackDowntime ?? "—", rule: inc.rollbackRule ?? "Requires approval" },
+      execImpact: inc.executionImpact ?? inc.description ?? "Impact under assessment",
+    };
+  });
+  if (Object.keys(newEntries).length > 0) {
+    // Clear existing and load new
+    Object.keys(INCIDENTS).forEach((k) => delete INCIDENTS[k]);
+    Object.assign(INCIDENTS, newEntries);
+  }
+}
+
 export function incidentFromText(text: string): string | null {
   const t = text.toLowerCase();
   const m = t.match(/si[-\s]?(\d{4,6})/);
@@ -106,9 +165,15 @@ export function incidentFromText(text: string): string | null {
     const id = "SI-" + m[1];
     if (INCIDENTS[id]) return id;
   }
-  if (t.includes("checkout")) return "SI-92837";
-  if (t.includes("payment")) return "SI-92840";
-  if (t.includes("login") || t.includes("auth")) return "SI-92815";
+  // Try to match against real loaded incidents
+  for (const id of Object.keys(INCIDENTS)) {
+    const inc = INCIDENTS[id];
+    if (inc.service && t.includes(inc.service.toLowerCase())) return id;
+    if (inc.title && t.includes(inc.title.toLowerCase().split(" ")[0])) return id;
+  }
+  if (t.includes("checkout")) return Object.keys(INCIDENTS)[0] ?? "SI-92837";
+  if (t.includes("payment")) return Object.keys(INCIDENTS)[1] ?? "SI-92840";
+  if (t.includes("login") || t.includes("auth")) return Object.keys(INCIDENTS)[2] ?? "SI-92815";
   return null;
 }
 

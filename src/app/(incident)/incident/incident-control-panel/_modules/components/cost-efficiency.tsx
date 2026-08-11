@@ -9,9 +9,27 @@ import { CostTrendChart, ChartLegend } from "./charts";
 interface Props {
   onChartClick: (key: string) => void;
   onExpand: () => void;
+  costMetrics?: any;
 }
 
-export default function CostEfficiency({ onChartClick, onExpand }: Props) {
+export default function CostEfficiency({ onChartClick, onExpand, costMetrics }: Props) {
+  const kpis = costMetrics?.kpis?.length
+    ? costMetrics.kpis.map((k: any) => ({
+        label: k.label ?? k.name ?? "Metric",
+        value: k.value ?? k.formattedValue ?? "—",
+        delta: k.delta ?? k.change ?? "",
+        cls: (k.positive ?? k.delta?.startsWith("+")) ? "text-emerald-600" : "text-red-500",
+      }))
+    : COST_KPIS;
+  const bars = costMetrics?.bars?.length
+    ? costMetrics.bars.map((b: any, i: number) => ({
+        label: b.label ?? b.category ?? `Category ${i + 1}`,
+        value: b.value ?? b.hoursSaved ?? 0,
+        color: b.color ?? "#02DD82",
+      }))
+    : COST_BARS;
+  const maxBar = Math.max(...bars.map((b: any) => b.value), 1);
+
   return (
     <Panel
       number="★"
@@ -19,7 +37,7 @@ export default function CostEfficiency({ onChartClick, onExpand }: Props) {
       onExpand={onExpand}
     >
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
-        {COST_KPIS.map((k) => (
+        {kpis.map((k: any) => (
           <div
             key={k.label}
             className="bg-zinc-50 border border-zinc-100 rounded-lg p-3"
@@ -40,7 +58,7 @@ export default function CostEfficiency({ onChartClick, onExpand }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <ChartCard chartKey="costBars" onClick={onChartClick}>
           <SubH>Engineer Hours Saved by Category</SubH>
-          {COST_BARS.map((b) => (
+          {bars.map((b: any) => (
             <div
               key={b.label}
               className="flex items-center gap-2.5 mb-2.5 text-[11.5px]"
@@ -52,7 +70,7 @@ export default function CostEfficiency({ onChartClick, onExpand }: Props) {
                 <div
                   className="h-full rounded-full"
                   style={{
-                    width: `${(b.value / 520) * 100}%`,
+                    width: `${(b.value / maxBar) * 100}%`,
                     background: b.color,
                   }}
                 />

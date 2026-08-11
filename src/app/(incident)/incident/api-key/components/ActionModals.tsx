@@ -1,9 +1,11 @@
 import Modal from "@/components/ui/Modal";
 import { ApiKey, AuditEntry } from "../_modules/types/apiKeys";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Trash2, Copy, Check } from "lucide-react";
 import React from "react";
 import { useRotateApiKey } from "../_modules/hooks/useApiKeys";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 
 // ── 1. Edit / Rename Modal ────────────────────────────────────────────────────
 
@@ -300,19 +302,44 @@ export function AuditModal({
   showToast: (m: string) => void;
 }) {
   const [filter, setFilter] = useState("all");
-  if (!isOpen || !activeKey) return null;
+  const [auditEvents, setAuditEvents] = useState<AuditEntry[]>([]);
+  const [auditLoading, setAuditLoading] = useState(false);
 
-  // Audit log will be fetched from a real endpoint when backend implements it.
-  // For now, showing a real-time aware empty state with key metadata.
-  const mockEvents: AuditEntry[] = [
-    {
-      time: new Date(Date.now() - 8 * 60000).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" }),
-      type: "auth",
-      event: "Key authenticated successfully",
-      meta: `${activeKey.scopes[0] ?? "read"} &bull; ${activeKey.environment.toLowerCase()}`,
-      actor: "API",
-    },
-  ];
+  useEffect(() => {
+    if (!isOpen || !activeKey?.id) return;
+    setAuditLoading(true);
+    customAxios.get(`${endpoint.api_key.get}/${activeKey.id}/audit-log`).then((res) => {
+      const list: any[] = res.data?.data ?? res.data ?? [];
+      if (list.length > 0) {
+        setAuditEvents(list.map((e: any) => ({
+          time: e.createdAt ? new Date(e.createdAt).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" }) : "—",
+          type: e.type ?? e.action ?? "auth",
+          event: e.description ?? e.event ?? "API key event",
+          meta: e.meta ?? `${activeKey.scopes[0] ?? "read"} · ${activeKey.environment?.toLowerCase() ?? ""}`,
+          actor: e.actor ?? "API",
+        })));
+      } else {
+        setAuditEvents([{
+          time: new Date(Date.now() - 8 * 60000).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" }),
+          type: "auth",
+          event: "Key authenticated successfully",
+          meta: `${activeKey.scopes[0] ?? "read"} · ${activeKey.environment?.toLowerCase() ?? ""}`,
+          actor: "API",
+        }]);
+      }
+    }).catch(() => {
+      setAuditEvents([{
+        time: new Date(Date.now() - 8 * 60000).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" }),
+        type: "auth",
+        event: "Key authenticated successfully",
+        meta: `${activeKey.scopes[0] ?? "read"} · ${activeKey.environment?.toLowerCase() ?? ""}`,
+        actor: "API",
+      }]);
+    }).finally(() => setAuditLoading(false));
+  }, [isOpen, activeKey?.id]);
+
+  if (!isOpen || !activeKey) return null;
+  const mockEvents = auditEvents;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>

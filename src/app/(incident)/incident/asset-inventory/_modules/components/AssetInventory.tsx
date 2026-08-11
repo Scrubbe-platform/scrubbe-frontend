@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 import {
   LayoutGrid, Boxes, Cloud, Container, Database, Network, ShieldCheck, Lock, KeyRound,
   GitCompareArrows, RefreshCw, ShieldAlert, Activity, GitBranch, ScrollText, FileCheck2, Sparkles,
@@ -56,6 +58,24 @@ type ModalState =
 
 export default function AssetInventory() {
   const [assets, setAssets] = useState<Asset[]>(() => generateAssets());
+
+  useEffect(() => {
+    customAxios.get(endpoint.assets.list).then((res) => {
+      const list: any[] = res.data?.data ?? res.data ?? [];
+      if (list.length > 0) {
+        setAssets(list.map((a: any) => createAsset({
+          name: a.name ?? a.assetName ?? "Asset",
+          type: a.type ?? a.assetType ?? "Service",
+          category: a.category ?? a.assetCategory ?? a.type ?? "Compute",
+          owner: a.owner ?? a.ownerTeam ?? "Platform",
+          env: a.environment ?? a.env ?? "production",
+          cloud: a.cloud ?? a.provider ?? "aws",
+          region: a.region ?? "us-east-1",
+          lifecycle: a.lifecycle ?? a.lifecycleStage ?? "Active",
+        })));
+      }
+    }).catch(() => {});
+  }, []);
   const [benchmarks, setBenchmarks] = useState<Benchmark[]>(() => BENCHMARKS.map((b) => ({ ...b })));
   const [policies, setPolicies] = useState<PolicyDef[]>(() => POLICIES.map((p) => ({ ...p })));
   const [auditEntries, setAuditEntries] = useState<AuditEntry[]>(INITIAL_AUDIT_ENTRIES);

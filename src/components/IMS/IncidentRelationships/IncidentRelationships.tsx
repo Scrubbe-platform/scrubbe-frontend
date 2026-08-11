@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 import { Check, ChevronLeft, Search, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Header from "@/components/IMS/DashboardHeader";
@@ -70,6 +72,62 @@ export default function IncidentRelationships() {
   const [records, setRecords] = useState<RelationshipRecord[]>(SEED_RECORDS);
   const [proposals, setProposals] = useState<Proposal[]>(SEED_PROPOSALS);
   const [audit, setAudit] = useState<AuditEntry[]>(SEED_AUDIT);
+
+  useEffect(() => {
+    customAxios.get(endpoint.incident_relationships.list).then((res) => {
+      const list: any[] = res.data?.data ?? res.data ?? [];
+      if (list.length > 0) {
+        setRecords(list.map((r: any) => ({
+          id: r.ticketId ?? r.id,
+          title: r.title ?? r.summary ?? "Untitled",
+          status: (r.status === "RESOLVED" || r.status === "Resolved") ? "Resolved" : "In progress",
+          priority: r.severity === "CRITICAL" ? "P0" : r.severity === "HIGH" ? "P1" : "P2",
+          occurred: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "Unknown",
+          problemRecord: r.problemId ?? null,
+          knowledgeArticle: r.knowledgeArticleId ?? null,
+          knownError: r.knownError ?? false,
+          rootCause: r.rootCause ?? "Under investigation",
+          resolution: r.resolution ?? r.resolutionSummary ?? "Pending",
+          assignmentGroup: r.assignmentGroup ?? r.teamName ?? "Unassigned",
+          children: (r.children ?? r.relatedIncidents ?? []).map((c: any) => ({
+            id: c.ticketId ?? c.id,
+            title: c.title ?? "Incident",
+            status: c.status === "RESOLVED" ? "Resolved" : "In progress",
+            resolvedIn: c.resolvedIn ?? "—",
+            group: c.assignmentGroup ?? "—",
+            addedToProblem: c.addedToProblem ?? false,
+            kb: c.knowledgeArticle ?? false,
+          })),
+          history: (r.history ?? r.timeline ?? []).map((h: any) => ({
+            date: h.date ?? h.timestamp ?? new Date(h.createdAt ?? Date.now()).toLocaleString(),
+            event: h.event ?? h.description ?? h.action,
+            who: h.who ?? h.actor,
+            done: h.done ?? true,
+          })),
+          similar: (r.similar ?? []).map((s: any) => ({
+            score: s.score ?? s.similarityScore ?? 80,
+            id: s.ticketId ?? s.id,
+            title: s.title ?? "",
+            status: s.status === "RESOLVED" ? "Resolved" : "In progress",
+            pr: s.problemRecord ?? "—",
+            resolution: s.resolution ?? "—",
+          })),
+          operational: {
+            services: r.affectedServices ?? r.services ?? [r.affectedSystem ?? "Unknown"],
+            totalChildren: r.childCount ?? (r.children ?? []).length,
+            teams: r.teams ?? [],
+            avgResolution: r.avgResolutionTime ?? "—",
+            problemRecord: r.problemId ?? "—",
+            knowledgeArticle: r.knowledgeArticleId ?? "—",
+            knownError: r.knownError ?? false,
+          },
+          evidence: { signals: r.signals ?? [], confidence: r.confidence ?? 80 },
+          ai: { paragraph: r.aiAnalysis ?? r.description ?? "Analysing…", recommendation: r.recommendation ?? "Under review" },
+          outcome: r.outcome ?? SEED_RECORDS[0]?.outcome ?? { items: [], reviewedBy: { name: "—", team: "—" } },
+        })));
+      }
+    }).catch(() => {});
+  }, []);
 
   const [view, setView] = useState<View>("list");
   const [openRecordId, setOpenRecordId] = useState<string | null>(null);

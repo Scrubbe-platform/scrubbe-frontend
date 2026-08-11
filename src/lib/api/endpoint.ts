@@ -1,6 +1,7 @@
 export const endpoint = {
   auth: {
     account_setup: "/business/setup",
+    oauth_business_register: "/auth/oauth/business/register",
     invite_member: "/business/send-invite",
     decode_invite_token: "/business/decode-invite",
     accept_invite: "/business/accept-invite",
@@ -321,6 +322,16 @@ export const endpoint = {
   role_permissions: {
     matrix: "/role-permissions/matrix",      // GET/PUT /role-permissions/matrix
   },
+  incident_templates: {
+    list: "/incident-templates",             // GET /incident-templates
+    create: "/incident-templates",           // POST /incident-templates
+    getOne: "/incident-templates",           // GET /incident-templates/:id
+    update: "/incident-templates",           // PUT /incident-templates/:id
+    archive: "/incident-templates",          // PATCH /incident-templates/:id/archive
+    duplicate: "/incident-templates",        // POST /incident-templates/:id/duplicate
+    recommend: "/incident-templates/recommend", // POST /incident-templates/recommend
+    analytics: "/incident-templates",        // GET /incident-templates/:id/analytics
+  },
   waitlist: {
     register: "/waitlist",                   // POST /waitlist
     list: "/waitlist",                       // GET /waitlist
@@ -329,6 +340,32 @@ export const endpoint = {
     approve: "/waitlist",                    // POST /waitlist/:id/approve
     invite: "/waitlist",                     // POST /waitlist/:id/invite
     reject: "/waitlist",                     // POST /waitlist/:id/reject
+  },
+  assignment_groups: {
+    list: "/assignment-groups",              // GET /assignment-groups
+    create: "/assignment-groups",            // POST /assignment-groups
+    getOne: "/assignment-groups",            // GET /assignment-groups/:id
+    update: "/assignment-groups",            // PUT /assignment-groups/:id
+    delete: "/assignment-groups",            // DELETE /assignment-groups/:id
+    addMember: "/assignment-groups",         // POST /assignment-groups/:id/members
+    removeMember: "/assignment-groups",      // DELETE /assignment-groups/:id/members/:userId
+    assign: "/assignment-groups",            // POST /assignment-groups/:id/assign (assign incident)
+  },
+  incident_relationships: {
+    list: "/incident-ticket",                // GET /incident-ticket/:id/relationships
+    create: "/incident-ticket",              // POST /incident-ticket/:id/relationships
+    update: "/incident-ticket",              // PATCH /incident-ticket/:id/relationships/:relId
+    delete: "/incident-ticket",              // DELETE /incident-ticket/:id/relationships/:relId
+    graph: "/incident-ticket",              // GET /incident-ticket/:id/relationship-graph
+  },
+  assets: {
+    list: "/assets",                         // GET /assets (+ query filters)
+    getOne: "/assets",                       // GET /assets/:id
+    create: "/assets",                       // POST /assets
+    update: "/assets",                       // PATCH /assets/:id
+    delete: "/assets",                       // DELETE /assets/:id
+    sync: "/assets/sync",                    // POST /assets/sync (cloud sync trigger)
+    stats: "/assets/stats",                  // GET /assets/stats
   },
   command_studio: {
     chat: "/command-studio/chat",            // POST — EZRA Command Studio

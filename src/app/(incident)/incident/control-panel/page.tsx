@@ -33,12 +33,62 @@ import {
   PanelNote,
 } from "../incident-control-panel/_modules/libs/panel-notes";
 
+// ── KPI Ezra analysis — live fetch ──
+function KpiEzraAnalysis({ label }: { label: string }) {
+  const { get } = useFetch();
+  const { data, isLoading } = useQuery({
+    queryKey: ["kpi-ezra-analysis", label],
+    queryFn: async () => {
+      const res = await get(`${endpoint.dashboard.get_analytics}?metric=${encodeURIComponent(label)}`);
+      return res.success ? (res.data?.data ?? res.data) : null;
+    },
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const narrative = data?.narrative ?? data?.analysis ?? data?.summary ?? null;
+
+  if (isLoading) {
+    return <p className="text-[13px] text-zinc-400 leading-[1.72] animate-pulse">Analysing {label} trend…</p>;
+  }
+  if (narrative) {
+    return <p className="text-[13px] text-zinc-600 leading-[1.72]">{narrative}</p>;
+  }
+  return (
+    <p className="text-[13px] text-zinc-600 leading-[1.72]">
+      Detailed trend for <strong>{label}</strong> over the selected window. Ezra continuously monitors this metric, surfaces anomalies, and tracks contributing factors to drive continuous improvement.
+    </p>
+  );
+}
+
 // ── Panel digest drawer content ──
-function PanelExpandContent({ panel }: { panel: PanelNote }) {
+function PanelExpandContent({ panel, panelKey }: { panel: PanelNote; panelKey: string }) {
+  const { get } = useFetch();
+  const { data: ezraRes, isLoading: ezraLoading } = useQuery({
+    queryKey: ["ezra-panel-analysis", panelKey],
+    queryFn: async () => {
+      const res = await get(`${endpoint.ezra.analyses}?context=${encodeURIComponent(panelKey)}&type=panel`);
+      return res.success ? (res.data?.data ?? res.data) : null;
+    },
+    retry: false,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const liveNote: string | null = ezraRes?.narrative ?? ezraRes?.analysis ?? ezraRes?.summary ?? null;
+  const liveStats: typeof panel.stats | null = ezraRes?.stats?.length
+    ? ezraRes.stats.map((s: any, i: number) => ({
+        label: s.label ?? panel.stats[i]?.label ?? `Stat ${i + 1}`,
+        value: s.value ?? "—",
+        delta: s.delta ?? s.change ?? "",
+        color: s.color ?? panel.stats[i]?.color ?? "#0F172A",
+      }))
+    : null;
+  const displayStats = liveStats ?? panel.stats;
+
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-2.5">
-        {panel.stats.map((s) => (
+        {displayStats.map((s) => (
           <div
             key={s.label}
             className="bg-zinc-50 border border-zinc-100 rounded-lg p-3"
@@ -64,23 +114,29 @@ function PanelExpandContent({ panel }: { panel: PanelNote }) {
             Ezra Analysis
           </span>
           <span className="text-[11px] text-zinc-400 italic ml-auto">
-            Pre-computed
+            {ezraLoading ? "Loading…" : liveNote ? "Live" : "Pre-computed"}
           </span>
         </div>
-        {panel.note.split("\n\n").map((para, i) => (
-          <p
-            key={i}
-            className="text-[13px] text-zinc-600 leading-[1.72] mb-3 last:mb-0"
-          >
-            {para}
-          </p>
-        ))}
+        {ezraLoading ? (
+          <p className="text-[13px] text-zinc-400 leading-[1.72] animate-pulse">Fetching Ezra analysis…</p>
+        ) : (
+          (liveNote ?? panel.note).split("\n\n").map((para, i) => (
+            <p
+              key={i}
+              className="text-[13px] text-zinc-600 leading-[1.72] mb-3 last:mb-0"
+            >
+              {para}
+            </p>
+          ))
+        )}
       </div>
       <div className="bg-zinc-50 border border-zinc-100 rounded-lg p-3">
         <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
           Data context
         </div>
-        <p className="text-[11px] text-zinc-500 leading-relaxed">{panel.ctx}</p>
+        <p className="text-[11px] text-zinc-500 leading-relaxed">
+          {ezraRes?.dataContext ?? panel.ctx}
+        </p>
       </div>
     </div>
   );
@@ -107,8 +163,15 @@ export default function IntelligenceControlPlanePage() {
     staleTime: 60_000,
   });
 
+  const { data: serviceMapRes } = useQuery({
+    queryKey: ["service-map-topology", "icp"],
+    queryFn: () => get(endpoint.service_map.topology),
+    staleTime: 5 * 60_000,
+  });
+
   const m = metricsRes?.data?.data ?? metricsRes?.data ?? null;
   const a = analyticsRes?.data?.data ?? analyticsRes?.data ?? null;
+  const serviceMap = serviceMapRes?.data?.data ?? serviceMapRes?.data ?? null;
 
   // KPI cards — derived from real metrics when available
   const liveKpis: KPIItem[] | null = useMemo(() => {
@@ -271,10 +334,7 @@ export default function IntelligenceControlPlanePage() {
               Ezra Analysis
             </span>
           </div>
-          <p className="text-[13px] text-zinc-600 leading-[1.72]">
-            Detailed trend for {kpi.label} over the selected window. Full
-            analysis will be connected to the backend Ezra reasoning engine.
-          </p>
+          <KpiEzraAnalysis label={kpi.label} />
         </div>
       </div>,
     );
@@ -287,7 +347,7 @@ export default function IntelligenceControlPlanePage() {
     if (!panel) return;
     setDrawerTitle(panel.title);
     setDrawerSubTitle(panel.tag);
-    setDrawerContent(<PanelExpandContent panel={panel} />);
+    setDrawerContent(<PanelExpandContent panel={panel} panelKey={key} />);
     setDrawerOpen(true);
   }, []);
 
@@ -331,8 +391,12 @@ export default function IntelligenceControlPlanePage() {
           <RemediationIntel
             onChartClick={openChartDrawer}
             onExpand={() => openPanelDrawer("remediation")}
+            remediationData={a?.remediationIntelligence}
           />
-          <KnowledgeGraph onChartClick={openChartDrawer} />
+          <KnowledgeGraph
+            onChartClick={openChartDrawer}
+            graphData={serviceMap}
+          />
           <GovernanceDash
             onChartClick={openChartDrawer}
             onExpand={() => openPanelDrawer("governance")}
@@ -345,10 +409,12 @@ export default function IntelligenceControlPlanePage() {
           <EALDistribution
             onChartClick={openChartDrawer}
             onExpand={() => openPanelDrawer("eal")}
+            ealData={a?.ealDistribution}
           />
           <SLOHealth
             onChartClick={openChartDrawer}
             onExpand={() => openPanelDrawer("slo")}
+            sloMetrics={a?.sloMetrics}
           />
         </div>
 
@@ -356,6 +422,7 @@ export default function IntelligenceControlPlanePage() {
           <CostEfficiency
             onChartClick={openChartDrawer}
             onExpand={() => openPanelDrawer("cost")}
+            costMetrics={a?.costMetrics}
           />
           <LiveFeed events={liveFeedEvents ?? undefined} />
         </div>
@@ -370,6 +437,7 @@ export default function IntelligenceControlPlanePage() {
           <AgentIntelligence
             onChartClick={openChartDrawer}
             onExpand={() => openPanelDrawer("agents")}
+            agentData={a?.agentPerformance}
           />
         </div>
       </main>

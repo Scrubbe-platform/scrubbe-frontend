@@ -1,13 +1,15 @@
 // components/ICP/GovernanceDash.tsx
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { GOV_KPIS, GOV_EVENTS } from "../libs/data";
 import { Panel, SubH, ChartCard, LinkAction, govEventDot } from "./shared";
 import { SuccessDonut } from "./charts";
 import SideModal from "@/components/ui/SideModal";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 
-const POLICY_COMPLIANCE = [
+const POLICY_COMPLIANCE_FALLBACK = [
   { name: "Risk-Guardrail", rate: 98.4 },
   { name: "Auto-Rollback", rate: 97.1 },
   { name: "Confidence", rate: 95.6 },
@@ -30,6 +32,39 @@ export default function GovernanceDash({
 }: Props) {
   const [showCompliance, setShowCompliance] = useState(false);
   const [showAllEvents, setShowAllEvents] = useState(false);
+  const [policyCompliance, setPolicyCompliance] = useState(POLICY_COMPLIANCE_FALLBACK);
+  const [overallCompliance, setOverallCompliance] = useState(96.2);
+  const [govEvents, setGovEvents] = useState(GOV_EVENTS);
+
+  useEffect(() => {
+    // Fetch real guardrails for policy compliance
+    customAxios.get(endpoint.guardrails.list).then((res) => {
+      const list: any[] = res.data?.data ?? res.data ?? [];
+      if (list.length > 0) {
+        const mapped = list.slice(0, 8).map((g: any) => ({
+          name: g.name ?? g.id,
+          rate: g.complianceRate ?? 95,
+        }));
+        setPolicyCompliance(mapped);
+        const avg = mapped.reduce((s, g) => s + g.rate, 0) / mapped.length;
+        setOverallCompliance(Math.round(avg * 10) / 10);
+      }
+    }).catch(() => {});
+
+    // Fetch real decisions for governance events
+    customAxios.get(endpoint.decisions.list + "?limit=8").then((res) => {
+      const list: any[] = res.data?.data ?? res.data ?? [];
+      if (list.length > 0) {
+        setGovEvents(list.map((d: any) => ({
+          type: d.status === "APPROVED" ? "ok" : d.status === "BLOCKED" ? "deny" : "info",
+          title: d.title ?? "Governance decision",
+          detail: d.description ?? "",
+          policy: d.guardrailId ?? "Policy",
+          time: d.createdAt ? new Date(d.createdAt).toLocaleTimeString() : "—",
+        })));
+      }
+    }).catch(() => {});
+  }, []);
 
   const displayKpis = useMemo(() => {
     if (policyViolations === undefined && totalAutonomousActions === undefined)
@@ -76,10 +111,10 @@ export default function GovernanceDash({
           >
             <SubH>Policy Compliance</SubH>
             <div className="w-[100px]">
-              <SuccessDonut rate={96.2} />
+              <SuccessDonut rate={overallCompliance} />
             </div>
             <span className="text-[11px] font-mono font-semibold text-emerald-600">
-              ↑ 2.4%
+              {overallCompliance}% avg
             </span>
             <div className="mt-2">
               <button
@@ -96,7 +131,7 @@ export default function GovernanceDash({
 
           <div>
             <SubH>Recent Governance Events</SubH>
-            {GOV_EVENTS.map((ev, i) => (
+            {govEvents.map((ev, i) => (
               <div
                 key={i}
                 className="flex gap-2.5 py-2 border-t border-zinc-100 first:border-t-0 items-start"
@@ -149,7 +184,7 @@ export default function GovernanceDash({
             {/* Overall donut */}
             <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-5 flex flex-col items-center">
               <div className="w-[160px]">
-                <SuccessDonut rate={96.2} big />
+                <SuccessDonut rate={overallCompliance} big />
               </div>
               <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full mt-3">
                 ↑ 2.4% vs prior period
@@ -162,7 +197,7 @@ export default function GovernanceDash({
                 By policy
               </h3>
               <div className="space-y-3">
-                {POLICY_COMPLIANCE.map((p) => (
+                {policyCompliance.map((p) => (
                   <div key={p.name}>
                     <div className="flex justify-between text-xs mb-1">
                       <span className="text-zinc-600 font-medium">
@@ -214,7 +249,7 @@ export default function GovernanceDash({
                 </tr>
               </thead>
               <tbody>
-                {GOV_EVENTS.map((ev, i) => (
+                {govEvents.map((ev, i) => (
                   <tr key={i} className="border-t border-zinc-100">
                     <td className="py-2.5 pr-2 font-semibold text-zinc-800">
                       {ev.title}

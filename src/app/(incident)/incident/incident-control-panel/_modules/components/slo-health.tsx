@@ -17,24 +17,36 @@ import SideModal from "@/components/ui/SideModal";
 interface Props {
   onChartClick: (key: string) => void;
   onExpand: () => void;
+  sloMetrics?: any[];
 }
 
-export default function SLOHealth({ onChartClick, onExpand }: Props) {
+export default function SLOHealth({ onChartClick, onExpand, sloMetrics }: Props) {
   const [showAllSLO, setShowAllSLO] = useState(false);
 
-  const healthy = SLO_DATA.filter((s) => s.status === "healthy").length;
-  const atRisk = SLO_DATA.filter((s) => s.status === "warn").length;
-  const breached = SLO_DATA.filter((s) => s.status === "breach").length;
+  const data = sloMetrics?.length
+    ? sloMetrics.map((s: any) => ({
+        svc: s.service ?? s.svc ?? "Service",
+        target: s.target ?? s.sloTarget ?? "99.9%",
+        actual: s.actual ?? s.currentValue ?? 99.9,
+        budget: s.budget ?? s.errorBudgetRemaining ?? 5,
+        burn: s.burn ?? s.burnRate ?? 0.5,
+        status: (s.status === "BREACH" || s.status === "breach") ? "breach" as const : (s.status === "WARN" || s.status === "warn" || s.status === "AT_RISK") ? "warn" as const : "healthy" as const,
+      }))
+    : SLO_DATA;
+
+  const healthy = data.filter((s) => s.status === "healthy").length;
+  const atRisk = data.filter((s) => s.status === "warn").length;
+  const breached = data.filter((s) => s.status === "breach").length;
   const avg = (
-    SLO_DATA.reduce((a, s) => a + s.actual, 0) / SLO_DATA.length
+    data.reduce((a, s) => a + s.actual, 0) / data.length
   ).toFixed(2);
-  const fastest = [...SLO_DATA].sort((a, b) => b.burn - a.burn)[0];
+  const fastest = [...data].sort((a, b) => b.burn - a.burn)[0];
 
   return (
     <>
       <Panel number="★" title="SLO Health & Error Budget" onExpand={onExpand}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-          {SLO_DATA.map((s) => {
+          {data.map((s) => {
             const st = sloStatusStyles[s.status];
             return (
               <div
@@ -133,7 +145,7 @@ export default function SLOHealth({ onChartClick, onExpand }: Props) {
                   Services tracked
                 </div>
                 <div className="text-2xl font-bold tracking-tight mt-1 font-ibm">
-                  {SLO_DATA.length}
+                  {data.length}
                 </div>
                 <div className="text-[11px] text-zinc-400">
                   Across production surfaces
@@ -222,7 +234,7 @@ export default function SLOHealth({ onChartClick, onExpand }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {SLO_DATA.map((s) => {
+                  {data.map((s) => {
                     const st = sloStatusStyles[s.status];
                     return (
                       <tr key={s.svc} className="border-t border-zinc-100">

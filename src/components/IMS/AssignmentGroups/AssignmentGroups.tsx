@@ -8,7 +8,9 @@ import Header from "@/components/IMS/DashboardHeader";
 import Modal from "@/components/ui/Modal";
 import Select from "@/components/ui/select";
 import { useCurrentUser, User } from "@/lib/api";
-import { Group, MEMBER_OF, SEED_GROUPS } from "./data";
+import { Group, MEMBER_OF, SEED_GROUPS, Member } from "./data";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 import {
   ChipRow,
   EscalationLadder,
@@ -77,9 +79,59 @@ function ResponsibilitiesGrid({ items }: { items: [string, boolean][] }) {
   );
 }
 
+function mapApiGroup(g: any): Group {
+  const members: Member[] = (g.members ?? []).map((m: any) => ({
+    name: [m.firstName, m.lastName].filter(Boolean).join(" ") || m.name || "Member",
+    role: m.role ?? m.jobTitle ?? "Engineer",
+    availability: m.availability ?? "Online",
+    oncall: m.onCall ?? m.oncall ?? false,
+    incidents: m.activeIncidents ?? m.incidentCount ?? 0,
+  }));
+  return {
+    id: g.id,
+    name: g.name ?? "Group",
+    status: g.status === "ARCHIVED" ? "Archived" : "Active",
+    env: g.environment ?? g.env ?? "Production",
+    description: g.description ?? "",
+    manager: g.manager ?? g.managerName ?? "Unassigned",
+    department: g.department ?? "Engineering",
+    businessUnit: g.businessUnit ?? g.department ?? "Engineering",
+    primaryService: g.primaryService ?? g.service ?? "Unknown",
+    members,
+    responsibilities: (g.responsibilities ?? SEED_GROUPS[0].responsibilities).map((r: any) =>
+      Array.isArray(r) ? r : [r, true]
+    ) as [string, boolean][],
+    services: g.services ?? [],
+    assets: g.assets ?? [],
+    playbooks: g.playbooks ?? [],
+    rules: g.rules ?? [],
+    escalation: g.escalationPath ?? g.escalation ?? [],
+    oncall: { name: g.onCallMember ?? null, ends: g.onCallEnds ?? null },
+    ezra: { enabled: g.ezraEnabled ?? false, assigned: g.ezraAssigned ?? 0 },
+    activeIncidents: (g.activeIncidents ?? []).map((i: any) => [i.id ?? i, i.title ?? "", i.priority ?? "P2"]),
+    history: (g.history ?? []).map((h: any) => [h.id ?? h, h.title ?? ""]),
+    expertise: (g.expertise ?? []).map((e: any) => Array.isArray(e) ? e : [e.skill, e.level]) as [string, number][],
+    knowledge: g.knowledge ?? [],
+    permissions: (g.permissions ?? SEED_GROUPS[0].permissions).map((p: any) =>
+      Array.isArray(p) ? p : [p, true]
+    ) as [string, boolean][],
+  };
+}
+
 export default function AssignmentGroups() {
   const [groups, setGroups] = useState<Group[]>(SEED_GROUPS);
   const [activeId, setActiveId] = useState<string>(SEED_GROUPS[0].id);
+
+  useEffect(() => {
+    customAxios.get(endpoint.assignment_groups.list).then((res) => {
+      const list: any[] = res.data?.data ?? res.data ?? [];
+      if (list.length > 0) {
+        const mapped = list.map(mapApiGroup);
+        setGroups(mapped);
+        setActiveId(mapped[0].id);
+      }
+    }).catch(() => {});
+  }, []);
   const [showProfileMobile, setShowProfileMobile] = useState(false);
 
   const [search, setSearch] = useState("");
@@ -240,6 +292,7 @@ export default function AssignmentGroups() {
     closeModal();
     toast("Group deleted");
     setShowProfileMobile(false);
+    customAxios.delete(`${endpoint.assignment_groups.delete}/${group.id}`).catch(() => {});
   }
   function handleCreate(data: CreateGroupData) {
     const id = "ag-" + Date.now();
@@ -290,6 +343,12 @@ export default function AssignmentGroups() {
     setActiveId(id);
     closeModal();
     toast("Group created");
+    customAxios.post(endpoint.assignment_groups.create, { name: data.name, manager: data.manager, department: data.department, environment: data.env }).then((res) => {
+      const created = res.data?.data ?? res.data;
+      if (created?.id && created.id !== id) {
+        setGroups((prev) => prev.map((g) => g.id === id ? { ...g, id: created.id } : g));
+      }
+    }).catch(() => {});
   }
   function handleEscalationSave(levels: string[]) {
     if (!group || !levels.length) {

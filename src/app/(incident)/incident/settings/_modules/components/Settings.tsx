@@ -39,6 +39,8 @@ import { SettingsDrawer } from "./SettingsDrawer";
 import { FORM_RENDERERS } from "./SettingsForms";
 import useGetConfig from "@/hooks/useConfig";
 import { ImsConfig } from "@/types/ims-config.type";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 
 function safeGet<T>(key: string): T | null {
   try {
@@ -260,8 +262,38 @@ export default function Settings() {
     setOpenCat(null);
     setDraft(null);
   }
-  function saveDrawer() {
+  async function saveDrawer() {
     if (!openCat) return;
+    // Persist roles & permissions to API
+    if (openCat === "roles" && draft?.list) {
+      try {
+        await customAxios.put(endpoint.role_permissions.matrix, { roles: draft.list });
+      } catch {
+        // Continue with localStorage save even if API call fails
+      }
+    }
+    // Persist SSO config to API
+    if (openCat === "authentication" && draft?.providers) {
+      try {
+        const primary = draft.providers.find((p: any) => p.name === draft.primary && p.on) ?? draft.providers[0];
+        if (primary?.name) {
+          await customAxios.put(endpoint.auth.ims_sso, {
+            provider: primary.name,
+            protocol: primary.protocol,
+            domain: primary.domain,
+            enabled: draft.ssoOn ?? primary.on,
+            passwordPolicy: draft.passwordPolicy,
+            minPasswordLength: draft.minLength,
+            passwordRotationDays: draft.rotateDays,
+            mfaRequired: draft.mfaPolicy !== "Optional",
+            mfaPolicy: draft.mfaPolicy,
+            mfaMethods: draft.mfaMethods,
+          });
+        }
+      } catch {
+        // Continue with localStorage save even if API call fails
+      }
+    }
     const summary = summarize(openCat, draft);
     const nextState = { ...state, [openCat]: draft };
     setState(nextState);

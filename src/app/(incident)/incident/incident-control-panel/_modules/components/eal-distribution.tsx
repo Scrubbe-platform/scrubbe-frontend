@@ -10,10 +10,23 @@ import SideModal from "@/components/ui/SideModal";
 interface Props {
   onChartClick: (key: string) => void;
   onExpand: () => void;
+  ealData?: any[];
 }
 
-export default function EALDistribution({ onChartClick, onExpand }: Props) {
+export default function EALDistribution({ onChartClick, onExpand, ealData }: Props) {
   const [showEALPolicy, setShowEALPolicy] = useState(false);
+
+  const levels = ealData?.length
+    ? ealData.map((e: any, i: number) => ({
+        num: e.level ?? e.num ?? `EAL-${i + 1}`,
+        name: e.name ?? e.label ?? `Level ${i + 1}`,
+        count: e.count ?? e.incidentCount ?? 0,
+        pct: e.pct ?? e.percentage ?? 0,
+        color: e.color ?? EAL_LEVELS[i % EAL_LEVELS.length]?.color ?? "#6B7280",
+        active: e.active ?? false,
+        desc: e.desc ?? e.description ?? "",
+      }))
+    : EAL_LEVELS;
 
   return (
     <>
@@ -23,7 +36,7 @@ export default function EALDistribution({ onChartClick, onExpand }: Props) {
         onExpand={onExpand}
       >
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-5">
-          {EAL_LEVELS.map((e) => (
+          {levels.map((e: any) => (
             <div
               key={e.num}
               className={`rounded-lg border p-3 cursor-default ${e.active ? "border-emerald-400 bg-emerald-50/50" : "border-zinc-100 bg-zinc-50"}`}
@@ -110,7 +123,7 @@ export default function EALDistribution({ onChartClick, onExpand }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {EAL_LEVELS.map((e) => (
+                  {levels.map((e: any) => (
                     <tr
                       key={e.num}
                       className={`border-t border-zinc-100 ${e.active ? "bg-emerald-50/50" : ""}`}

@@ -25,9 +25,9 @@ const IncidentDelivery = ({ incident }: { incident: IncidentDetailRecord }) => {
         <div className="grid xl:grid-cols-2 gap-5 pt-2">
           <Evidence />
           <EzraAssessment ticketId={incident.id} />
-          <IncidentDetails />
+          <IncidentDetails incidentId={incident.id} />
           <LinksThatOpen />
-          <DecisionLog />
+          <DecisionLog incidentId={incident.id} />
           <PlaybookSection />
           <AnalystNotes />
           <PolicySection />

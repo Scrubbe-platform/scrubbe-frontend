@@ -10,6 +10,8 @@ import {
   SRC_OPTS,
   SourceKey,
 } from "./evidenceExplorer.data";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 import EvidenceSourcesRail from "./EvidenceSourcesRail";
 import EvidenceFeed from "./EvidenceFeed";
 import EvidenceOverview from "./EvidenceOverview";
@@ -75,6 +77,29 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
   });
 
   const ezraRef = useRef<EzraPanelHandle>(null);
+
+  // Load real signal stats from the API; fall back to hardcoded init values
+  useEffect(() => {
+    const incidentId = incident?.id;
+    const url = incidentId
+      ? `${endpoint.signals.stats}?incidentId=${encodeURIComponent(incidentId)}`
+      : endpoint.signals.stats;
+    customAxios.get(url).then((res) => {
+      const stats = res.data?.data ?? res.data;
+      if (stats) {
+        setLive((prev) => ({
+          ...prev,
+          signals: stats.total ?? stats.count ?? prev.signals,
+          errRate: stats.errorCount ?? stats.errors ?? prev.errRate,
+          affected: stats.affectedUsers ?? stats.userImpact ?? prev.affected,
+          latency: stats.avgLatencyMs ?? stats.latency ?? prev.latency,
+          payErr: stats.errorEvents ?? stats.paymentErrors ?? prev.payErr,
+          pgConn: stats.dbErrors ?? stats.connectionFailures ?? prev.pgConn,
+          k8sRestart: stats.k8sRestarts ?? stats.podRestarts ?? prev.k8sRestart,
+        }));
+      }
+    }).catch(() => {});
+  }, [incident?.id]);
 
   const doTick = () => {
     setLive((prev) => ({

@@ -199,19 +199,23 @@ function KnowledgeGraphSVG({
   height = 270,
   coverageMode,
   activeFilter,
+  nodes = NODES,
+  edges = EDGES,
 }: {
   width?: number;
   height?: number;
   coverageMode: boolean;
   activeFilter: string;
+  nodes?: KGNode[];
+  edges?: KGEdge[];
 }) {
   const nodeMap = useMemo(() => {
     const map: Record<string, { px: number; py: number } & KGNode> = {};
-    NODES.forEach((n) => {
+    nodes.forEach((n) => {
       map[n.id] = { ...n, px: n.x * width, py: n.y * height };
     });
     return map;
-  }, [width, height]);
+  }, [nodes, width, height]);
 
   const scale = width > 400 ? 1.7 : 1;
   const isHighlighted = (n: KGNode) =>
@@ -224,7 +228,7 @@ function KnowledgeGraphSVG({
       style={{ maxHeight: height }}
     >
       {/* Edges */}
-      {EDGES.map((e, i) => {
+      {edges.map((e, i) => {
         const a = nodeMap[e.from];
         const b = nodeMap[e.to];
         if (!a || !b) return null;
@@ -441,18 +445,56 @@ function KnowledgeGraphSVG({
 
 // ── Main component ───────────────────────────────────────────────
 
-interface Props {
-  onChartClick: (key: string) => void;
+const HEALTH_COLOR: Record<string, string> = {
+  healthy: "#02DD82", warning: "#F59E0B", critical: "#EF4444", unknown: "#94A3B8",
+};
+const ICON_KEYS = ["globe", "shield", "card", "cart", "db", "stack"] as const;
+
+function mapApiNodes(apiNodes: any[]): KGNode[] {
+  return apiNodes.map((n: any, i: number) => {
+    const count = apiNodes.length;
+    const angle = (i / count) * 2 * Math.PI - Math.PI / 2;
+    const health = n.health ?? n.status ?? "healthy";
+    return {
+      id: n.id ?? String(i),
+      x: 0.5 + 0.38 * Math.cos(angle),
+      y: 0.5 + 0.38 * Math.sin(angle),
+      label: n.name ?? n.label ?? n.id ?? "Node",
+      color: HEALTH_COLOR[health.toLowerCase()] ?? "#94A3B8",
+      big: n.isRoot ?? n.isCritical ?? false,
+      monitored: n.monitored ?? n.hasMonitoring ?? true,
+      affected: n.affected ?? n.impacted ?? false,
+      impact: n.impact ?? (n.affected ? "Affected" : undefined),
+      layer: n.layer ?? n.type ?? "Services",
+      ic: ICON_KEYS[i % ICON_KEYS.length],
+    };
+  });
 }
 
-export default function KnowledgeGraph({ onChartClick }: Props) {
+function mapApiEdges(apiEdges: any[]): KGEdge[] {
+  return apiEdges.map((e: any) => ({
+    from: e.from ?? e.source ?? e.sourceId ?? "",
+    to: e.to ?? e.target ?? e.targetId ?? "",
+    type: e.type === "impact" ? "impact" : e.type === "rel" ? "rel" : "dep",
+  }));
+}
+
+interface Props {
+  onChartClick: (key: string) => void;
+  graphData?: { nodes?: any[]; edges?: any[] } | null;
+}
+
+export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
   const [filter, setFilter] = useState("Services");
   const [coverageMode, setCoverageMode] = useState(false);
   const [showFullGraph, setShowFullGraph] = useState(false);
 
-  const monitoredCount = NODES.filter((n) => n.monitored).length;
-  const unmonitoredCount = NODES.length - monitoredCount;
-  const affectedCount = NODES.filter((n) => n.affected).length;
+  const displayNodes = graphData?.nodes?.length ? mapApiNodes(graphData.nodes) : NODES;
+  const displayEdges = graphData?.edges?.length ? mapApiEdges(graphData.edges) : EDGES;
+
+  const monitoredCount = displayNodes.filter((n) => n.monitored).length;
+  const unmonitoredCount = displayNodes.length - monitoredCount;
+  const affectedCount = displayNodes.filter((n) => n.affected).length;
 
   return (
     <Panel number="4." title="Operational Knowledge Graph">
@@ -516,7 +558,7 @@ export default function KnowledgeGraph({ onChartClick }: Props) {
 
       {/* Graph */}
       <ChartCard chartKey="cluster" onClick={onChartClick}>
-        <KnowledgeGraphSVG coverageMode={coverageMode} activeFilter={filter} />
+        <KnowledgeGraphSVG coverageMode={coverageMode} activeFilter={filter} nodes={displayNodes} edges={displayEdges} />
       </ChartCard>
 
       {/* Node legend */}
@@ -594,6 +636,8 @@ export default function KnowledgeGraph({ onChartClick }: Props) {
                 height={380}
                 coverageMode={coverageMode}
                 activeFilter={filter}
+                nodes={displayNodes}
+                edges={displayEdges}
               />
             </div>
 
@@ -639,7 +683,7 @@ export default function KnowledgeGraph({ onChartClick }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {NODES.map((n) => (
+                  {displayNodes.map((n) => (
                     <tr key={n.id} className="border-t border-zinc-100">
                       <td className="py-2 pr-2">
                         <div className="flex items-center gap-2">

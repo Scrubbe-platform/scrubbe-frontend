@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Input from "@/components/ui/input";
 import { FormProps, patch } from "./formTypes";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 import {
   Collection, Explain, Notice, SelectField, Section, TagList, TextField, ToggleRow,
 } from "./SettingsPrimitives";
@@ -35,6 +37,23 @@ export function OrganizationForm({ draft, setDraft }: FormProps) {
 
 export function UsersForm({ draft, setDraft }: FormProps) {
   const d = draft;
+
+  useEffect(() => {
+    customAxios.get(endpoint.incident_ticket.get_members).then((res) => {
+      const list: any[] = res.data?.data ?? res.data ?? [];
+      if (list.length > 0) {
+        patch(setDraft, {
+          list: list.map((m: any) => ({
+            name: [m.firstName, m.lastName].filter(Boolean).join(" ") || m.name || m.email?.split("@")[0] || "Member",
+            email: m.email ?? "",
+            role: m.role ?? m.accessLevel ?? "Responder",
+            active: m.active ?? m.status === "ACTIVE" ?? true,
+          })),
+        });
+      }
+    }).catch(() => {});
+  }, []);
+
   return (
     <>
       <Section title={`Members (${d.list.length})`}>
@@ -65,6 +84,17 @@ export function UsersForm({ draft, setDraft }: FormProps) {
 
 export function RolesForm({ draft, setDraft }: FormProps) {
   const d = draft;
+
+  useEffect(() => {
+    customAxios.get(endpoint.role_permissions.matrix).then((res) => {
+      const data = res.data?.data ?? res.data;
+      const roles: any[] = data?.roles ?? [];
+      if (roles.length > 0) {
+        patch(setDraft, { list: roles.map((r: any) => ({ name: r.name ?? r.roleName ?? r.id, level: r.level ?? r.accessLevel ?? "Operate" })) });
+      }
+    }).catch(() => {});
+  }, []);
+
   return (
     <>
       <Notice tone="info">Each role maps to one access level. Operate can act on incidents; Approve can release automated actions; Full admin manages settings.</Notice>
@@ -86,6 +116,27 @@ export function RolesForm({ draft, setDraft }: FormProps) {
 
 export function AuthenticationForm({ draft, setDraft }: FormProps) {
   const d = draft;
+
+  useEffect(() => {
+    customAxios.get(endpoint.auth.ims_sso).then((res) => {
+      const cfg = res.data?.data ?? res.data;
+      if (!cfg) return;
+      const provider = {
+        name: cfg.provider ?? cfg.name ?? "",
+        protocol: cfg.protocol ?? "SAML 2.0",
+        domain: cfg.domain ?? cfg.entityId ?? cfg.ssoUrl ?? "",
+        on: cfg.enabled ?? cfg.active ?? false,
+      };
+      if (provider.name) {
+        patch(setDraft, {
+          ssoOn: cfg.enabled ?? cfg.ssoEnabled ?? d.ssoOn,
+          primary: provider.name || d.primary,
+          providers: [provider],
+        });
+      }
+    }).catch(() => {});
+  }, []);
+
   return (
     <>
       <Explain>This is how people prove who they are before they can touch anything. Connect your identity provider, then set the password and multi-factor rules everyone must meet.</Explain>

@@ -29,6 +29,7 @@ import {
   deleteStagingIncidentAttachment,
 } from "@/lib/incident/incident.api";
 import { useFetch } from "@/hooks/useFetch";
+import { customAxios } from "@/lib/api/axios";
 import { endpoint } from "@/lib/api/endpoint";
 import Button from "@/components/ui/Button1";
 import { FaRegFileLines } from "react-icons/fa6";
@@ -593,9 +594,24 @@ const RaiseIncidentModal = () => {
     [members],
   );
 
-  // Assignment group isn't wired to the backend yet — this just captures the
-  // selection locally so the field exists ahead of the API being ready.
-  const assignmentGroupOptions = [{ value: "", label: "Select assignment group..." }];
+  const [assignmentGroupOptions, setAssignmentGroupOptions] = useState([
+    { value: "", label: "Select assignment group..." },
+  ]);
+
+  useEffect(() => {
+    customAxios.get(endpoint.assignment_groups.list).then((res) => {
+      const list: any[] = res.data?.data ?? res.data ?? [];
+      if (list.length > 0) {
+        setAssignmentGroupOptions([
+          { value: "", label: "Select assignment group..." },
+          ...list.map((g: any) => ({
+            value: g.id ?? g._id ?? "",
+            label: g.name ?? g.groupName ?? g.id ?? "Group",
+          })),
+        ]);
+      }
+    }).catch(() => {});
+  }, []);
 
   const createMutation = useMutation({
     mutationFn: async (data: RaiseIncidentFormValues) => {
@@ -632,6 +648,7 @@ const RaiseIncidentModal = () => {
         reportedBy: "Incident workspace",
         assignedToEmail: data.assignTo,
         incidentCommander: data.assignTo,
+        assignmentGroupId: data.assignmentGroup || undefined,
         financialExposure: data.businessImpact?.trim() || undefined,
         customerCommNeeded: data.notifyChannels !== "no-notification",
         customerMessage:

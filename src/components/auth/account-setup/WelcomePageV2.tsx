@@ -203,6 +203,20 @@ export default function WelcomePageV2() {
   const [draftRows, setDraftRows] = useState([{ email: "", role: "Engineer", perm: "Responder" }]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [sendingInvites, setSendingInvites] = useState(false);
+
+  useEffect(() => {
+    apiClient.get(`${endpoint.incident_ticket.get_members}?status=invited`).then((res) => {
+      const list: any[] = res.data?.data ?? res.data ?? [];
+      if (list.length > 0) {
+        setInvites(list.map((m: any) => ({
+          email: m.email ?? m.inviteEmail ?? "",
+          role: m.teamRole ?? m.role ?? "Engineer",
+          perm: m.permission ?? m.accessLevel ?? "Responder",
+          when: m.invitedAt ? new Date(m.invitedAt).toLocaleDateString() : "previously",
+        })));
+      }
+    }).catch(() => {});
+  }, []);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteText, setPasteText] = useState("");
   const csvInputRef = useRef<HTMLInputElement>(null);

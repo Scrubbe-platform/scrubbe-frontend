@@ -1,8 +1,33 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { INCIDENT_ROWS, LEAD } from "./incidentDelivery.data";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 
-const IncidentDetails = () => (
+const IncidentDetails = ({ incidentId }: { incidentId?: string }) => {
+  const [ticketId, setTicketId] = useState(LEAD.ticketId);
+  const [rows, setRows] = useState(INCIDENT_ROWS);
+
+  useEffect(() => {
+    if (!incidentId) return;
+    customAxios.get(`${endpoint.incident_ticket.getTicket}/${incidentId}`).then((res) => {
+      const inc = res.data?.data ?? res.data;
+      if (!inc) return;
+      setTicketId(inc.ticketId ?? inc.id ?? LEAD.ticketId);
+      setRows([
+        { title: "Incident ID", value: inc.ticketId ?? inc.id ?? LEAD.ticketId },
+        { title: "Correlation key", value: inc.correlationKey ?? `${inc.affectedSystem ?? "service"} · ${inc.rootCause ?? "unknown"} · ${inc.environment ?? "prod"}` },
+        { title: "Severity", value: inc.severity ?? "P2" },
+        { title: "Status", value: inc.status ?? "INVESTIGATING" },
+        { title: "Affected system", value: inc.affectedSystem ?? inc.service ?? "—" },
+        { title: "Assigned to", value: inc.assignedTo ?? inc.owner ?? "On-call team" },
+        { title: "Created", value: inc.createdAt ? new Date(inc.createdAt).toLocaleString() : "—" },
+        { title: "Description", value: inc.summary ?? inc.description ?? INCIDENT_ROWS.find((r) => r.title === "Description")?.value ?? "—", full: true },
+      ] as typeof INCIDENT_ROWS);
+    }).catch(() => {});
+  }, [incidentId]);
+
+  return (
   <div className="rounded-2xl border border-[#DDDDDD] bg-white dark:bg-zinc-900/40 overflow-hidden">
     {/* Header strip */}
     <div className="flex items-center justify-between gap-4 px-6 py-3.5 bg-zinc-50 dark:bg-zinc-900/60 border-b border-zinc-100 dark:border-zinc-800">
@@ -10,7 +35,7 @@ const IncidentDetails = () => (
         Incident
       </p>
       <p className="text-[13px] font-bold font-mono text-black dark:text-zinc-100">
-        {LEAD.ticketId}
+        {ticketId}
       </p>
     </div>
 
@@ -26,7 +51,7 @@ const IncidentDetails = () => (
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {INCIDENT_ROWS.map((row) => (
+        {rows.map((row) => (
           <div
             key={row.title}
             className={`rounded-xl bg-zinc-50 dark:bg-zinc-900/60 p-4 ${

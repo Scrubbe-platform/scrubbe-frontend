@@ -123,6 +123,46 @@ export function byName(name: string) {
   return SERVICES.find((s) => s.name === name);
 }
 
+export function mapApiService(api: any, idx: number): ServiceRecord {
+  const healthRaw = (api.health ?? api.status ?? "").toUpperCase();
+  const health: Health = healthRaw === "CRITICAL" || healthRaw === "DOWN" ? "Critical" : healthRaw === "WARNING" || healthRaw === "DEGRADED" ? "Warning" : "Healthy";
+  const tier = api.tier ?? api.criticality ?? 2;
+  return {
+    id: api.id ?? "SRV-" + String(101 + idx).padStart(5, "0"),
+    name: api.name ?? api.serviceName ?? `Service ${idx + 1}`,
+    owner: api.team ?? api.owner ?? api.ownerTeam ?? "Unassigned",
+    tier,
+    health,
+    env: api.environment ?? api.env ?? "Production",
+    runtime: api.runtime ?? "Kubernetes",
+    cloud: api.cloud ?? "AWS",
+    region: api.region ?? "us-east-1",
+    lang: api.language ?? api.lang ?? "TypeScript",
+    incidents: api.openIncidents ?? api.incidentCount ?? 0,
+    deps: api.dependencyCount ?? api.deps ?? 3,
+    healthScore: api.healthScore ?? (health === "Critical" ? 45 : health === "Warning" ? 72 : 95),
+    slo: api.sloTarget ?? api.slo ?? 99.9,
+    version: api.version ?? "1.0.0",
+    pods: api.podCount ?? api.pods ?? 4,
+    repoCount: api.repoCount ?? 1,
+    createdYearsAgo: api.createdYearsAgo ?? 1,
+    availability: api.availability ?? "99.95",
+    latency: api.p99LatencyMs ?? api.latencyMs ?? api.latency ?? 45,
+    errorRate: api.errorRate ?? "0.05",
+    traffic: api.requestsPerMin ?? api.traffic ?? 5000,
+    cpu: api.cpuUsagePct ?? api.cpu ?? 35,
+    mem: api.memUsagePct ?? api.mem ?? 42,
+    riskScore: health === "Critical" ? "High" : health === "Warning" ? "Medium" : "Low",
+    deploymentConfidence: api.deploymentConfidence ?? 90,
+    lastIncidentWeeksAgo: api.lastIncidentWeeksAgo ?? 2,
+  };
+}
+
+export function updateServicesFromApi(apiList: any[]) {
+  const mapped = apiList.map(mapApiService);
+  SERVICES.splice(0, SERVICES.length, ...mapped);
+}
+
 /* ───────────────────── automation levels ───────────────────── */
 
 export interface AutomationLevel {

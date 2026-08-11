@@ -258,10 +258,21 @@ const SignalNode = ({ data }: { data: GraphNodeData }) => {
 
 // ── Graph data builders (full 10-node blueprint graph) ───────────
 
-const buildSignalNodes = (incident: IncidentDetailRecord): Node[] => {
+interface SignalStats {
+  errorCount?: number;
+  usersImpacted?: number;
+  failedTransactions?: number;
+  cpuPct?: number;
+}
+
+const buildSignalNodes = (incident: IncidentDetailRecord, stats?: SignalStats | null): Node[] => {
   const svc = incident.service || "Primary Service";
   const sev = incident.severity;
   const isCrit = sev === "P0" || sev === "P1";
+  const errorCount = stats?.errorCount ?? 1287;
+  const usersImpacted = stats?.usersImpacted ?? 5243;
+  const failedTxns = stats?.failedTransactions ?? 3118;
+  const cpuPct = stats?.cpuPct ?? 87;
 
   return [
     {
@@ -319,7 +330,7 @@ const buildSignalNodes = (incident: IncidentDetailRecord): Node[] => {
             pct: incident.score || 92,
             color: "#EF4444",
           },
-          { label: "Errors", value: "1,287", pct: 82, color: "#EF4444" },
+          { label: "Errors", value: errorCount.toLocaleString(), pct: Math.min(100, Math.round(errorCount / 15)), color: "#EF4444" },
           {
             label: "Duration",
             value: incident.elapsedLabel,
@@ -430,12 +441,12 @@ const buildSignalNodes = (incident: IncidentDetailRecord): Node[] => {
       position: { x: 860, y: 400 },
       data: {
         label: "CPU",
-        sub: "Utilisation 87%",
+        sub: `Utilisation ${cpuPct}%`,
         kind: "Infrastructure / Compute",
         nodeType: "infra",
         sev: "Warning",
         metrics: [
-          { label: "CPU", value: "87%", pct: 87, color: "#3B82F6" },
+          { label: "CPU", value: `${cpuPct}%`, pct: cpuPct, color: "#3B82F6" },
           { label: "Run queue", value: "6.4", pct: 64, color: "#3B82F6" },
         ],
       },
@@ -446,13 +457,13 @@ const buildSignalNodes = (incident: IncidentDetailRecord): Node[] => {
       position: { x: 1120, y: 180 },
       data: {
         label: "Customers impacted",
-        sub: "5,243 users",
+        sub: `${usersImpacted.toLocaleString()} users`,
         kind: "Business / User impact",
         nodeType: "user",
         sev: "Critical",
         metrics: [
-          { label: "Users", value: "5,243", pct: 90, color: "#EC4899" },
-          { label: "Failed txns", value: "3,118", pct: 70, color: "#EC4899" },
+          { label: "Users", value: usersImpacted.toLocaleString(), pct: 90, color: "#EC4899" },
+          { label: "Failed txns", value: failedTxns.toLocaleString(), pct: 70, color: "#EC4899" },
         ],
       },
     },
@@ -1647,12 +1658,32 @@ function SignalGraphWorkspace({
   const timeline = useMemo(() => buildTimeline(incident), [incident]);
   const auditTrail = useMemo(() => buildAuditTrail(incident), [incident]);
   const nodeTypes = useMemo(() => ({ signalNode: SignalNode }), []);
+  const [signalStats, setSignalStats] = useState<SignalStats | null>(null);
 
   useEffect(() => {
-    setNodes(buildSignalNodes(incident));
+    if (!incident?.id) return;
+    import("@/lib/api/axios").then(({ customAxios }) => {
+      import("@/lib/api/endpoint").then(({ endpoint }) => {
+        customAxios.get(`${endpoint.signals.stats}?incidentId=${incident.id}`).then((res) => {
+          const d = res.data?.data ?? res.data;
+          if (d) {
+            setSignalStats({
+              errorCount: d.errorCount ?? d.errors,
+              usersImpacted: d.usersImpacted ?? d.affectedUsers,
+              failedTransactions: d.failedTransactions ?? d.failedTxns,
+              cpuPct: d.cpuPct ?? d.cpuUsage,
+            });
+          }
+        }).catch(() => {});
+      });
+    });
+  }, [incident?.id]);
+
+  useEffect(() => {
+    setNodes(buildSignalNodes(incident, signalStats));
     setEdges(buildSignalEdges(incident));
     setSelectedNodeId("service");
-  }, [incident, setEdges, setNodes]);
+  }, [incident, signalStats, setEdges, setNodes]);
 
   // Causal path node IDs — the main chain from deploy → root → service → user
   const causalIds = useMemo(

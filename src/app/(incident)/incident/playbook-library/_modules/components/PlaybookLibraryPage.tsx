@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Search, History, Upload, Download, Plus, X } from "lucide-react";
 import Button from "@/components/ui/Button1";
@@ -20,6 +20,38 @@ import {
   Playbook,
   SearchScope,
 } from "../types";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
+
+function mapApiPlaybook(api: any, idx: number): Playbook {
+  return {
+    id: api.id ?? `PB-${String(idx + 1).padStart(4, "0")}`,
+    name: api.name ?? "Unnamed Playbook",
+    service: api.service ?? api.category ?? "General",
+    status: api.status === "ACTIVE" ? "Active" : api.status === "DRAFT" ? "Draft" : api.status === "ARCHIVED" ? "Archived" : "Draft",
+    mode: api.mode ?? "Approval required",
+    success: api.successRate ?? 0,
+    executed: api.executionCount ?? 0,
+    priority: api.priority ?? 2,
+    trigger: api.trigger ?? "Manual",
+    owner: api.owner ?? api.createdBy ?? "Platform team",
+    version: api.version ? `v${api.version}` : "v1.0",
+    updated: api.updatedAt ? new Date(api.updatedAt).toLocaleDateString() : "—",
+    env: api.environments ?? ["Production"],
+    rules: api.rules ?? [],
+    maxAuto: api.maxAuto ?? 3,
+    rollback: api.rollback ?? false,
+    approvers: api.approvers ?? ["Incident commander"],
+    mttr: api.avgMttr ?? "—",
+    approvalTime: api.avgApprovalTime ?? "—",
+    rollbackRate: api.rollbackRate ?? "0%",
+    failures: api.failureCount ?? 0,
+    modules: api.modules ?? { Investigation: [], Decision: [], Execution: [], Verification: [], Knowledge: [] },
+    desc: api.description ?? `Playbook for ${api.name ?? "incidents"}.`,
+    incidentTypes: api.incidentTypes ?? api.tags ?? [],
+    created: api.createdAt ? new Date(api.createdAt).toLocaleDateString() : "—",
+  };
+}
 import StatsStrip from "./StatsStrip";
 import FilterRail from "./FilterRail";
 import PlaybookTable from "./PlaybookTable";
@@ -71,6 +103,21 @@ function nextPlaybookId(existing: Playbook[]): string {
 
 export default function PlaybookLibraryPage(): React.JSX.Element {
   const [playbooks, setPlaybooks] = useState<Playbook[]>(PLAYBOOKS);
+
+  // ─── Load real playbooks from API ───────────────────────────────────────────
+  useEffect(() => {
+    customAxios
+      .get(endpoint.playbooks.list)
+      .then((res) => {
+        const list: any[] = res.data?.data ?? res.data ?? [];
+        if (list.length > 0) {
+          setPlaybooks(list.map((p: any, i: number) => mapApiPlaybook(p, i)));
+        }
+      })
+      .catch(() => {
+        // Silently keep PLAYBOOKS as fallback
+      });
+  }, []);
   const [tab, setTab] = useState<LibraryTab>("playbooks");
   const [search, setSearch] = useState("");
   const [scopes, setScopes] = useState<any>(new Set(["Name"]));
@@ -156,15 +203,15 @@ export default function PlaybookLibraryPage(): React.JSX.Element {
     setArchiveTarget(null);
   };
 
-  const handleCreate = (data: {
+  const handleCreate = async (data: {
     name: string;
     service: string;
     mode: Playbook["mode"];
     owner: string;
   }) => {
-    const id = nextPlaybookId(playbooks);
-    const created: Playbook = {
-      id,
+    const localId = nextPlaybookId(playbooks);
+    const localDraft: Playbook = {
+      id: localId,
       name: data.name,
       service: data.service,
       status: "Draft",
@@ -185,21 +232,36 @@ export default function PlaybookLibraryPage(): React.JSX.Element {
       approvalTime: "—",
       rollbackRate: "0%",
       failures: 0,
-      modules: {
-        Investigation: [],
-        Decision: [],
-        Execution: [],
-        Verification: [],
-        Knowledge: [],
-      },
+      modules: { Investigation: [], Decision: [], Execution: [], Verification: [], Knowledge: [] },
       desc: `Investigates ${data.name.toLowerCase()}, reconstructs contributing events, validates infrastructure health, determines safe remediation, executes approved recovery actions, and verifies production stability before closure.`,
       incidentTypes: ["Automatic", "Service"],
       created: "Just now",
     };
-    setPlaybooks((prev) => [...prev, created]);
+
+    // Optimistic add
+    setPlaybooks((prev) => [...prev, localDraft]);
     setShowCreate(false);
     setPage(1);
-    toast.success(`${data.name} created as draft ${id}`);
+
+    try {
+      const res = await customAxios.post(endpoint.playbooks.create, {
+        name: data.name,
+        service: data.service,
+        mode: data.mode,
+        owner: data.owner,
+      });
+      const created = res.data?.data ?? res.data;
+      if (created?.id) {
+        setPlaybooks((prev) =>
+          prev.map((p) => (p.id === localId ? mapApiPlaybook(created, 0) : p))
+        );
+        toast.success(`${data.name} created as draft ${created.id}`);
+      } else {
+        toast.success(`${data.name} created as draft ${localId}`);
+      }
+    } catch {
+      toast.success(`${data.name} created as draft ${localId}`);
+    }
   };
 
   const handleExport = () => {

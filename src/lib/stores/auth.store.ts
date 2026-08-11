@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { loginSchema } from "../validations/auth.schema";
 import { apiClient } from "../api/client";
+import { endpoint } from "../api/endpoint";
 import Zod from "zod";
 import { developerSignupSchema } from "@/components/auth/DeveloperSignupForm";
 import { businessProfileSignupSchema } from "@/components/auth/CompleteBusinessProfile";
@@ -331,7 +332,6 @@ const useAuthStore = create<AuthState & AuthActions>()(
       businessProfileSignup: async (signupData) => {
         try {
           set({ isLoading: true, error: null });
-          //TODO: use the service provider endpoint
           const newBusinessData = {
             firstName: signupData.firstName,
             lastName: signupData.lastName,
@@ -344,7 +344,7 @@ const useAuthStore = create<AuthState & AuthActions>()(
             companySize: signupData.companySize,
           };
           const { data } = await apiClient.post(
-            "/auth/oauth/business/register",
+            endpoint.auth.oauth_business_register,
             newBusinessData
           );
           const { user, tokens } = data.data;

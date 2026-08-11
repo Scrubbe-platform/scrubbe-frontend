@@ -48,6 +48,7 @@ import {
   PROMPT_LIBRARY,
   USER,
   incidentFromText,
+  loadIncidentsFromApi,
   openIncidentIds,
   serviceFromText,
 } from "./data";
@@ -299,6 +300,14 @@ export default function CommandStudio() {
       const resp = await getUser();
       setCurrentUser(resp as User);
     })();
+  }, []);
+
+  // Load real open incidents from the API to populate the selector
+  useEffect(() => {
+    get(endpoint.incident_ticket.get).then((res: any) => {
+      const list: any[] = res?.data?.data ?? res?.data ?? [];
+      if (list.length > 0) loadIncidentsFromApi(list);
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {

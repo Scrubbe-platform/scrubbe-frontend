@@ -16,12 +16,37 @@ const TABS = [
 interface Props {
   onChartClick: (key: string) => void;
   onExpand: () => void;
+  remediationData?: any;
 }
 
-export default function RemediationIntel({ onChartClick, onExpand }: Props) {
+const REMEDIATION_COLORS = ["#02DD82", "#3B82F6", "#A855F7", "#22D3EE", "#F59E0B"];
+
+export default function RemediationIntel({ onChartClick, onExpand, remediationData }: Props) {
   const [tab, setTab] = useState<string>("Overview");
 
-  const view = REMEDIATION_TABS[tab] || REMEDIATION_TABS.Overview;
+  const liveTabs: Record<string, typeof REMEDIATION_TABS.Overview> | null = remediationData
+    ? {
+        Overview: {
+          successRate: remediationData.successRate ?? remediationData.overallSuccessRate ?? REMEDIATION_TABS.Overview.successRate,
+          delta: remediationData.delta ?? remediationData.trend ?? REMEDIATION_TABS.Overview.delta,
+          remediations: remediationData.topRemediations?.length
+            ? remediationData.topRemediations.map((r: any, i: number) => ({
+                name: r.name ?? r.action ?? r.type ?? "Remediation",
+                rate: r.successRate ?? r.rate ?? 0,
+                attempts: r.attempts ?? r.count ?? 0,
+                color: REMEDIATION_COLORS[i % REMEDIATION_COLORS.length],
+              }))
+            : REMEDIATION_TABS.Overview.remediations,
+          risks: remediationData.risks?.length
+            ? remediationData.risks.map((r: any) => ({ name: r.name ?? r.risk, rate: r.rate ?? r.riskScore ?? 0 }))
+            : REMEDIATION_TABS.Overview.risks,
+          note: remediationData.note ?? REMEDIATION_TABS.Overview.note,
+        },
+      }
+    : null;
+
+  const tabs = liveTabs ?? REMEDIATION_TABS;
+  const view = tabs[tab] || REMEDIATION_TABS[tab] || REMEDIATION_TABS.Overview;
 
   return (
     <Panel number="3." title="Remediation Intelligence" onExpand={onExpand}>

@@ -1,9 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Code, PlayCircle, Zap, PlusSquare, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { REMEDIATION } from "./incidentDelivery.data";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 
 const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const router = useRouter();
@@ -12,6 +14,26 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const [ezraStatus, setEzraStatus] = useState<"idle" | "running" | "done">(
     "idle",
   );
+  const [blastData, setBlastData] = useState<typeof REMEDIATION>(REMEDIATION);
+
+  useEffect(() => {
+    if (!incidentId) return;
+    customAxios.get(`${endpoint.blast_radius.getForTrigger}/${incidentId}`).then((res) => {
+      const d = res.data?.data ?? res.data;
+      if (d) {
+        setBlastData({
+          ...REMEDIATION,
+          confidence: d.confidence ?? R.confidence,
+          risk: d.riskLevel ?? d.risk ?? R.risk,
+          action: d.suggestedAction ?? d.recommendation ?? R.action,
+          source: d.changeId ?? d.deploymentId ?? R.source,
+          approval: d.approvalRequired ? "Requires approval" : "No approval needed",
+        });
+      }
+    }).catch(() => {});
+  }, [incidentId]);
+
+  const R = blastData;
 
   const executeSafeAction = () => {
     setExecuting(true);
@@ -68,7 +90,7 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
       icon: <PlusSquare size={14} />,
       label: "Create PR",
       action: () =>
-        toast.info("PR created", { description: REMEDIATION.previewId }),
+        toast.info("PR created", { description: R.previewId }),
     },
     {
       icon: <Zap size={14} />,
@@ -83,38 +105,38 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const statusChips = [
     {
       label: "Confidence",
-      value: `${REMEDIATION.confidence}%`,
+      value: `${R.confidence}%`,
       valueClass: "text-emerald-600",
     },
-    { label: "Risk", value: REMEDIATION.risk, valueClass: "text-emerald-600" },
+    { label: "Risk", value: R.risk, valueClass: "text-emerald-600" },
     {
       label: "Source",
-      value: REMEDIATION.source,
+      value: R.source,
       valueClass: "text-black font-mono",
     },
     {
       label: "Approval",
-      value: REMEDIATION.approval,
+      value: R.approval,
       valueClass: "text-black",
     },
   ];
 
-  const prNoteMatch = REMEDIATION.prChange.match(/(Aligns with.*)$/);
+  const prNoteMatch = R.prChange.match(/(Aligns with.*)$/);
   const prChangeMain = prNoteMatch
-    ? REMEDIATION.prChange.slice(0, prNoteMatch.index).trim()
-    : REMEDIATION.prChange;
+    ? R.prChange.slice(0, prNoteMatch.index).trim()
+    : R.prChange;
   const prChangeNote = prNoteMatch ? prNoteMatch[1] : null;
 
   const suggestionCards = [
     {
       title: "Suggested action",
-      body: REMEDIATION.action,
+      body: R.action,
       note: null as string | null,
     },
     { title: "Suggested PR change", body: prChangeMain, note: prChangeNote },
     {
       title: "Suggested CI action",
-      body: REMEDIATION.ciAction,
+      body: R.ciAction,
       note: null as string | null,
     },
   ];
@@ -122,17 +144,17 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
   const verifyStats = [
     {
       label: "CI rerun",
-      value: executed ? "PASS" : REMEDIATION.verify.ciRerun,
+      value: executed ? "PASS" : R.verify.ciRerun,
       valueClass: "text-blue-600",
     },
     {
       label: "Flake rate",
-      value: REMEDIATION.verify.flake,
+      value: R.verify.flake,
       valueClass: "text-emerald-600",
     },
     {
       label: "Affected jobs",
-      value: String(REMEDIATION.verify.jobs),
+      value: String(R.verify.jobs),
       valueClass: "text-black",
     },
   ];
@@ -222,13 +244,13 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
                 </p>
                 <span
                   className="text-[10.5px] font-mono px-2 py-0.5 rounded border border-[#DDDDDD] dark:border-zinc-700 text-black/60 dark:text-zinc-400 max-w-[160px] truncate"
-                  title={REMEDIATION.previewId}
+                  title={R.previewId}
                 >
-                  {REMEDIATION.previewId}
+                  {R.previewId}
                 </span>
               </div>
               <pre className="rounded-lg border border-[#DDDDDD] dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/60 p-3 text-[12px] font-mono text-black/70 dark:text-zinc-400 leading-relaxed whitespace-pre-wrap">
-                {REMEDIATION.preview}
+                {R.preview}
               </pre>
             </div>
 
@@ -254,21 +276,21 @@ const Remediation: React.FC<{ incidentId?: string }> = ({ incidentId }) => {
               <p className="text-[12.5px] text-black/60 dark:text-zinc-400">
                 {executed
                   ? "Safe action executed — verification completed green."
-                  : REMEDIATION.verifyNote}
+                  : R.verifyNote}
               </p>
               <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
                 {[
                   {
                     label: "Executive",
                     value: executed
-                      ? REMEDIATION.executiveDone
-                      : REMEDIATION.executive,
+                      ? R.executiveDone
+                      : R.executive,
                   },
                   {
                     label: "Analyst",
                     value: executed
-                      ? REMEDIATION.analystDone
-                      : REMEDIATION.analyst,
+                      ? R.analystDone
+                      : R.analyst,
                   },
                 ].map(({ label, value }) => (
                   <div key={label} className="py-2 first:pt-0 last:pb-0">

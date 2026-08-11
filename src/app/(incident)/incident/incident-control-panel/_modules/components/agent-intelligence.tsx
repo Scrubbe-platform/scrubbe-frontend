@@ -10,11 +10,27 @@ import SideModal from "@/components/ui/SideModal";
 interface Props {
   onChartClick: (key: string) => void;
   onExpand: () => void;
+  agentData?: any[];
 }
 
-export default function AgentIntelligence({ onChartClick, onExpand }: Props) {
+export default function AgentIntelligence({ onChartClick, onExpand, agentData }: Props) {
   const [showAllAgents, setShowAllAgents] = useState(false);
   const [showAgentHealth, setShowAgentHealth] = useState(false);
+
+  const agents = agentData?.length
+    ? agentData.map((a: any, i: number) => ({
+        name: a.name ?? a.agentName ?? `Agent ${i + 1}`,
+        accuracy: a.accuracy ?? a.accuracyPct ?? 90,
+        tasks: a.tasks ?? a.taskCount ?? 0,
+        trend: a.trend ?? AGENTS[i % AGENTS.length]?.trend ?? [80, 85, 88, 90],
+        color: a.color ?? AGENTS[i % AGENTS.length]?.color ?? "#02DD82",
+        latency: a.latency ?? a.avgLatencyMs ?? "—",
+        drift: a.drift ?? a.driftPct ?? 0,
+      }))
+    : AGENTS;
+  const overallHealth = agents.length > 0
+    ? Math.round(agents.reduce((s: number, a: any) => s + (a.accuracy ?? 0), 0) / agents.length * 10) / 10
+    : 90.4;
 
   return (
     <>
@@ -33,7 +49,7 @@ export default function AgentIntelligence({ onChartClick, onExpand }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {AGENTS.map((a) => (
+                {agents.map((a: any) => (
                   <tr key={a.name} className="border-t border-zinc-100">
                     <td className="py-2 font-medium text-zinc-700 truncate max-w-[120px]">
                       {a.name}
@@ -72,7 +88,7 @@ export default function AgentIntelligence({ onChartClick, onExpand }: Props) {
           >
             <SubH>Agent Health</SubH>
             <div className="w-[90px]">
-              <SuccessDonut rate={90.4} />
+              <SuccessDonut rate={overallHealth} />
             </div>
             <span className="text-[11px] font-mono font-semibold text-emerald-600">
               ↑ 4.2%
@@ -112,7 +128,7 @@ export default function AgentIntelligence({ onChartClick, onExpand }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {AGENTS.map((a) => (
+                {agents.map((a: any) => (
                   <tr key={a.name} className="border-t border-zinc-100">
                     <td className="py-2.5 pr-2 font-semibold text-zinc-800">
                       {a.name}
@@ -188,7 +204,7 @@ export default function AgentIntelligence({ onChartClick, onExpand }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {AGENTS.map((a) => (
+                  {agents.map((a: any) => (
                     <tr key={a.name} className="border-t border-zinc-100">
                       <td className="py-2.5 pr-2 font-semibold text-zinc-800">
                         {a.name}
