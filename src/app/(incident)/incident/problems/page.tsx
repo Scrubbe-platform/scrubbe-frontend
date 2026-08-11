@@ -700,12 +700,15 @@ export default function ProblemRecordsDashboard() {
     if (!newRecTitle.trim()) return;
 
     try {
+      const priorityMap: Record<string, string> = { P0: "CRITICAL", P1: "HIGH", P2: "MEDIUM", P3: "LOW" };
       const created = await createProblem({
         title: newRecTitle.trim(),
-        priority: newRecPri,
+        priority: priorityMap[newRecPri] ?? "MEDIUM",
         category: newRecCat,
+        description: newRecSummary.trim() || "Investigation mapped from active telemetry configurations.",
         summary: newRecSummary.trim() || "Investigation mapped from active telemetry configurations.",
         status: "Investigating",
+        impact: "Service degradation",
       });
 
       await refetchProblems();
