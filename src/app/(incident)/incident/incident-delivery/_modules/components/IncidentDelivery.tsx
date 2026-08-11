@@ -29,7 +29,7 @@ const IncidentDelivery = ({ incident }: { incident: IncidentDetailRecord }) => {
           <LinksThatOpen />
           <DecisionLog incidentId={incident.id} />
           <PlaybookSection />
-          <AnalystNotes />
+          <AnalystNotes incidentId={incident.id} />
           <PolicySection />
         </div>
         <Remediation incidentId={incident.id} />

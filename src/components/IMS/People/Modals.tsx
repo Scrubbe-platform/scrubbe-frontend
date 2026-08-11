@@ -120,7 +120,7 @@ export function AdminSignInForm({ onAuthenticate, onCancel }: { onAuthenticate: 
   );
 }
 
-export function ChangePasswordForm({ onSave, onCancel }: { onSave: (newPw: string) => void; onCancel: () => void }) {
+export function ChangePasswordForm({ onSave, onCancel }: { onSave: (newPw: string, currentPw?: string) => void; onCancel: () => void }) {
   const [current, setCurrent] = useState("");
   const [newPw, setNewPw] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -135,7 +135,7 @@ export function ChangePasswordForm({ onSave, onCancel }: { onSave: (newPw: strin
       setError("New passwords don't match");
       return;
     }
-    onSave(newPw);
+    onSave(newPw, current);
   }
 
   return (

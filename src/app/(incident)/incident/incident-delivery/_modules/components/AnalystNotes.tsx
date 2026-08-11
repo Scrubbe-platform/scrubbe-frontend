@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import SideModal from "@/components/ui/SideModal";
 import AnalystNote from "./Modal/AnalystNote";
 import { NOTES } from "./incidentDelivery.data";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 
 interface Note {
   author: string;
@@ -10,14 +12,23 @@ interface Note {
   content: string;
 }
 
-const AnalystNotes = () => {
+const AnalystNotes = ({ incidentId }: { incidentId?: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [notes, setNotes] = useState<Note[]>(NOTES);
 
-  const addNote = (content: string) => {
+  const addNote = async (content: string) => {
     const now = new Date();
     const timestamp = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")} · today`;
     setNotes((prev) => [...prev, { author: "You", timestamp, content }]);
+    if (incidentId) {
+      customAxios
+        .post(endpoint.incident_ticket.send_comment, {
+          ticketId: incidentId,
+          content,
+          type: "NOTE",
+        })
+        .catch(() => {});
+    }
   };
 
   return (

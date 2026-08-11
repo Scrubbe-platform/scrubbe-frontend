@@ -1,9 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { HYPOTHESES } from "./incidentDelivery.data";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 
 const tierBar = (confidence: number) =>
   confidence >= 90
@@ -44,6 +46,34 @@ const HypothesisLedger: React.FC<{ incidentId?: string }> = ({
 }) => {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
+  const [hypotheses, setHypotheses] = useState(HYPOTHESES);
+
+  useEffect(() => {
+    if (!incidentId) return;
+    customAxios
+      .get(`${endpoint.investigation_analysis.get}/${incidentId}`)
+      .then((res) => {
+        const data = res.data?.data ?? res.data;
+        const rootCauses: any[] = data?.rootCauses ?? data?.hypotheses ?? [];
+        if (rootCauses.length > 0) {
+          setHypotheses(
+            rootCauses.map((rc: any, i: number) => ({
+              id: rc.id ?? String(i),
+              title: rc.cause ?? rc.title ?? rc.hypothesis ?? "Unknown cause",
+              why: rc.description ?? rc.why ?? "",
+              confidence: rc.confidence ?? rc.confidenceScore ?? 75,
+              risk: rc.risk ?? "",
+              ref: rc.ref ?? "",
+              evidence: Array.isArray(rc.evidence) ? rc.evidence : [],
+              top: i === 0,
+              runUrl: rc.runUrl ?? undefined,
+              diffUrl: rc.diffUrl ?? undefined,
+            })),
+          );
+        }
+      })
+      .catch(() => {});
+  }, [incidentId]);
 
   return (
     <div className="space-y-4">
@@ -71,7 +101,7 @@ const HypothesisLedger: React.FC<{ incidentId?: string }> = ({
 
       {/* Cards */}
       <div className="space-y-4">
-        {HYPOTHESES.map((hyp, i) => {
+        {hypotheses.map((hyp, i) => {
           const showEvidence = expanded || hyp.top;
           const num = String(i + 1).padStart(2, "0");
 

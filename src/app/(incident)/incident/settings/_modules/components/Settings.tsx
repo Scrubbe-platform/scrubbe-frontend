@@ -325,8 +325,36 @@ export default function Settings() {
         }),
       );
     }
-    // TODO: case "sla" — POST /sla-policies when policy data is structured
-    // TODO: case "notifications" — integrate with /integrations notification settings
+    // Persist SLA policies to API
+    if (openCat === "sla" && draft) {
+      try {
+        await customAxios.post(endpoint.sla_policies.create, {
+          name: "Default SLA Policy",
+          enabled: draft.enabled ?? true,
+          responseTimeP0: draft.p0?.resp,
+          resolutionTimeP0: draft.p0?.res,
+          responseTimeP1: draft.p1?.resp,
+          resolutionTimeP1: draft.p1?.res,
+          responseTimeP2: draft.p2?.resp,
+          resolutionTimeP2: draft.p2?.res,
+          responseTimeP3: draft.p3?.resp,
+          resolutionTimeP3: draft.p3?.res,
+          sloTarget: draft.sloTarget,
+          errorBudget: draft.errorBudget,
+          autoEscalate: draft.autoEscalate,
+        });
+      } catch {
+        // Continue with localStorage save even if API call fails
+      }
+    }
+    // Persist notification settings to API
+    if (openCat === "notifications" && draft) {
+      try {
+        await customAxios.patch(endpoint.business.notification_settings, draft);
+      } catch {
+        // Continue with localStorage save even if API call fails
+      }
+    }
     const summary = summarize(openCat, draft);
     const nextState = { ...state, [openCat]: draft };
     setState(nextState);

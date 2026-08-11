@@ -28,11 +28,12 @@ interface PmCtx {
   analysis: any;
   incidentId: string;
   refetch: () => void;
+  refetchSections: () => void;
   refetchActions: () => void;
 }
 const PmCtx = createContext<PmCtx>({
   pm: null, sections: [], actions: [], auditEvents: [], analysis: null,
-  incidentId: "", refetch: () => {}, refetchActions: () => {},
+  incidentId: "", refetch: () => {}, refetchSections: () => {}, refetchActions: () => {},
 });
 const usePm = () => useContext(PmCtx);
 
@@ -69,25 +70,98 @@ const Empty = ({ label = "No data available" }: { label?: string }) => (
   <p className="text-[13px] text-zinc-400 dark:text-zinc-500 italic py-4">{label}</p>
 );
 
-const Section = ({ icon, title, children }: {
+const Section = ({ icon, title, children, sectionType, sectionBody }: {
   icon: React.ReactNode; title: React.ReactNode; children: React.ReactNode;
+  sectionType?: string; sectionBody?: Record<string, any> | null;
 }) => {
   const [open, setOpen] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+  const { incidentId, refetchSections, pm } = usePm();
+  const pmStatus = pm?.status ?? "DRAFT";
+  const canEdit = sectionType && ["DRAFT", "IN_REVIEW"].includes(pmStatus);
+
+  const startEdit = () => {
+    setDraft(sectionBody ? JSON.stringify(sectionBody, null, 2) : "{}");
+    setEditing(true);
+  };
+
+  const saveEdit = async () => {
+    if (!incidentId || !sectionType) return;
+    setSaving(true);
+    try {
+      const parsed = JSON.parse(draft);
+      await (await import("@/lib/api/apiClient")).apiClient.patch(
+        `${endpoint.postmortems.section}/${incidentId}/sections/${sectionType}`,
+        { body: parsed },
+      );
+      refetchSections();
+      setEditing(false);
+      toast.success("Section saved");
+    } catch {
+      toast.error("Invalid JSON or save failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden bg-white dark:bg-zinc-900/40 mb-4">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors"
-      >
-        <div className="flex items-center gap-3 text-[15px] font-bold text-zinc-900 dark:text-zinc-100">
+      <div className="w-full flex items-center justify-between px-6 py-4">
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="flex items-center gap-3 text-[15px] font-bold text-zinc-900 dark:text-zinc-100 flex-1 text-left"
+        >
           {icon} {title}
+        </button>
+        <div className="flex items-center gap-2">
+          {canEdit && !editing && (
+            <button
+              onClick={startEdit}
+              title="Edit section"
+              className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors p-1 rounded"
+            >
+              <FileEdit size={14} />
+            </button>
+          )}
+          <button onClick={() => setOpen((v) => !v)} className="text-zinc-400">
+            {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
         </div>
-        {open ? <ChevronUp size={16} className="text-zinc-400" /> : <ChevronDown size={16} className="text-zinc-400" />}
-      </button>
+      </div>
+      {editing && (
+        <div className="px-6 pb-4 border-t border-zinc-100 dark:border-zinc-800">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2 mt-4">
+            Edit section body (JSON)
+          </p>
+          <textarea
+            className="w-full h-48 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-[12px] font-mono text-zinc-800 dark:text-zinc-200 p-3 resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+          />
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={saveEdit}
+              disabled={saving}
+              className="px-4 py-1.5 rounded-lg bg-blue-600 text-white text-[13px] font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              {saving ? "Saving…" : "Save"}
+            </button>
+            <button
+              onClick={() => setEditing(false)}
+              className="px-4 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-[13px] font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
       {open && <div className="px-6 pb-6">{children}</div>}
     </div>
   );
 };
+
 
 const FieldGrid = ({ fields }: { fields: [string, React.ReactNode][] }) => (
   <div className="grid grid-cols-4 gap-0 border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden">
@@ -242,7 +316,7 @@ const TabRootCause = () => {
   const teamThinking = whoIsThinking();
 
   return (
-    <Section icon={<Search size={16} />} title="Root Cause Analysis">
+    <Section icon={<Search size={16} />} title="Root Cause Analysis" sectionType="ROOT_CAUSE_ANALYSIS" sectionBody={body}>
       {ticketId && (
         <div className="flex items-center gap-3 mb-4">
           <button
@@ -347,7 +421,7 @@ const TabLessonsLearned = () => {
   };
 
   return (
-    <Section icon={<FileEdit size={16} />} title="Lessons Learned">
+    <Section icon={<FileEdit size={16} />} title="Lessons Learned" sectionType="LESSONS_LEARNED" sectionBody={body}>
       {lessons.length === 0 && !headline ? (
         <Empty label="Lessons learned not yet documented for this postmortem." />
       ) : (
@@ -637,7 +711,7 @@ const TabRemediation = () => {
     }));
 
   return (
-    <Section icon={<RefreshCw size={16} />} title="Remediation">
+    <Section icon={<RefreshCw size={16} />} title="Remediation" sectionType="REMEDIATION" sectionBody={body}>
       {remActions.length === 0 && decisionLog.length === 0 ? (
         <Empty label="No remediation actions recorded yet." />
       ) : (
@@ -1078,7 +1152,7 @@ export default function PostmortemDetailPage({ incidentId }: { incidentId?: stri
     staleTime: 30_000,
   });
 
-  const { data: sections = [] } = useQuery({
+  const { data: sections = [], refetch: refetchSections } = useQuery({
     queryKey: ["pm-sections", incidentId],
     queryFn: async () => {
       const res = await get(`${endpoint.postmortems.sections}/${incidentId}/sections`);
@@ -1166,6 +1240,7 @@ export default function PostmortemDetailPage({ incidentId }: { incidentId?: stri
     analysis,
     incidentId: incidentId ?? "",
     refetch: () => { refetch(); },
+    refetchSections: () => { refetchSections(); },
     refetchActions: () => { refetchActions(); },
   };
 

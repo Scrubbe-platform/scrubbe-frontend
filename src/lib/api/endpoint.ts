@@ -1,4 +1,10 @@
 export const endpoint = {
+  business: {
+    members_profile: "/business/members",            // PATCH /:userId/profile
+    members_mfa: "/business/members",                // PATCH /:userId/mfa
+    members_reset_password: "/business/members",     // POST  /:userId/reset-password
+    notification_settings: "/business/settings/notifications", // GET / PATCH
+  },
   auth: {
     account_setup: "/business/setup",
     oauth_business_register: "/auth/oauth/business/register",

@@ -350,28 +350,42 @@ export default function AssignmentGroups() {
       }
     }).catch(() => {});
   }
+  function persistGroup(id: string, patch: Record<string, unknown>) {
+    customAxios
+      .put(`${endpoint.assignment_groups.update}/${id}`, patch)
+      .catch(() => {});
+  }
+
   function handleEscalationSave(levels: string[]) {
     if (!group || !levels.length) {
       toast("Add at least one level");
       return;
     }
+    const updatedMeta = { ...((group as any).metadata ?? {}), escalation: levels };
     updateGroup(group.id, (g) => ({ ...g, escalation: levels }));
+    persistGroup(group.id, { metadata: updatedMeta });
     closeModal();
     toast("Escalation path saved");
   }
   function handleOncallSave(name: string | null, ends: string) {
     if (!group) return;
+    const updatedMeta = { ...((group as any).metadata ?? {}), oncall: name ? { name, ends } : { name: null, ends: null } };
     updateGroup(group.id, (g) => ({
       ...g,
       members: g.members.map((m) => ({ ...m, oncall: m.name === name })),
       oncall: name ? { name, ends } : { name: null, ends: null },
     }));
+    persistGroup(group.id, { metadata: updatedMeta });
     closeModal();
     toast(name ? `On-call set to ${name}` : "On-call cleared");
   }
   function handleEditGeneral(patch: Partial<Group>) {
     if (!group) return;
     updateGroup(group.id, (g) => ({ ...g, ...patch }));
+    persistGroup(group.id, {
+      ...(patch.name !== undefined ? { name: patch.name } : {}),
+      ...(patch.description !== undefined ? { description: patch.description } : {}),
+    });
     closeModal();
     toast("Changes saved");
   }
@@ -380,6 +394,12 @@ export default function AssignmentGroups() {
     const m = group.members[idx];
     if (!m) return;
     const willOn = !m.oncall;
+    const newOncall = willOn
+      ? { name: m.name, ends: group.oncall.ends || "Tomorrow · 09:00 UTC" }
+      : group.oncall.name === m.name
+        ? { name: null, ends: null }
+        : group.oncall;
+    const updatedMeta = { ...((group as any).metadata ?? {}), oncall: newOncall };
     updateGroup(group.id, (g) => ({
       ...g,
       members: g.members.map((x, i) =>
@@ -389,24 +409,24 @@ export default function AssignmentGroups() {
             ? { ...x, oncall: false }
             : x,
       ),
-      oncall: willOn
-        ? { name: m.name, ends: g.oncall.ends || "Tomorrow · 09:00 UTC" }
-        : g.oncall.name === m.name
-          ? { name: null, ends: null }
-          : g.oncall,
+      oncall: newOncall,
     }));
+    persistGroup(group.id, { metadata: updatedMeta });
     closeModal();
     toast(willOn ? `On-call set to ${m.name}` : "On-call cleared");
   }
   function handleEzraToggle() {
     if (!group) return;
+    const nextEnabled = !group.ezra.enabled;
+    const updatedMeta = { ...((group as any).metadata ?? {}), ezra: { enabled: nextEnabled } };
     updateGroup(group.id, (g) => ({
       ...g,
-      ezra: { ...g.ezra, enabled: !g.ezra.enabled },
+      ezra: { ...g.ezra, enabled: nextEnabled },
     }));
+    persistGroup(group.id, { metadata: updatedMeta });
     closeModal();
     toast(
-      !group.ezra.enabled
+      nextEnabled
         ? "Ezra assignment enabled"
         : "Ezra assignment paused",
     );

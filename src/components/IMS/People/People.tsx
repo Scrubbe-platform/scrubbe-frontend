@@ -173,7 +173,7 @@ export default function People() {
     setEditingSelf(true);
   }
 
-  function saveDetails() {
+  async function saveDetails() {
     const general = { ...selected.general };
     (
       ["Full name", "Phone", "Location", "Time zone", "Language"] as const
@@ -184,6 +184,24 @@ export default function People() {
     const name = general["Full name"] || selected.name;
     applyEdit(selected.id, { general, name, initials: initialsOf(name) });
     setEditingSelf(false);
+
+    const nameParts = name.trim().split(/\s+/);
+    const firstName = nameParts[0] ?? "";
+    const lastName = nameParts.slice(1).join(" ");
+
+    try {
+      if (selected.self) {
+        await apiClient.put(endpoint.auth.update_profile, { firstName, lastName });
+      } else {
+        await apiClient.patch(`${endpoint.business.members_profile}/${selected.id}/profile`, {
+          firstName,
+          lastName,
+          businessAddress: general["Location"],
+        });
+      }
+    } catch {
+      // local state already updated — non-fatal
+    }
     toast("Your details were saved");
   }
 
@@ -198,6 +216,9 @@ export default function People() {
       status: nextStatus,
       _prevStatus: willActivate ? undefined : p.status,
     });
+    apiClient
+      .patch(`/business/members/${p.id}/active`, { active: willActivate })
+      .catch(() => {});
     const who = p.self ? "Your" : `${p.name}'s`;
     toast(
       willActivate
@@ -212,6 +233,9 @@ export default function People() {
     applyEdit(p.id, {
       account: { ...account, mfa: nextOn ? "Enabled" : "Disabled" },
     });
+    apiClient
+      .patch(`${endpoint.business.members_mfa}/${p.id}/mfa`, { enabled: nextOn })
+      .catch(() => {});
     const who = p.self ? "Your" : `${p.name}'s`;
     toast(
       nextOn
@@ -231,7 +255,15 @@ export default function People() {
     toast("Admin session ended");
   }
 
-  function savePassword(_newPw: string) {
+  async function savePassword(newPw: string, currentPw?: string) {
+    try {
+      await apiClient.post(endpoint.auth.change_password, {
+        currentPassword: currentPw ?? "",
+        newPassword: newPw,
+      });
+    } catch {
+      // non-fatal — update local state optimistically
+    }
     if (selfPerson && !selfPerson.security.agent) {
       applyEdit(selfPerson.id, {
         security: {
@@ -244,8 +276,16 @@ export default function People() {
     toast("Your password was updated");
   }
 
-  function saveAdminResetPassword(personId: string, _pw: string) {
+  async function saveAdminResetPassword(personId: string, _pw: string) {
     const person = people.find((p) => p.id === personId);
+    try {
+      await apiClient.post(
+        `${endpoint.business.members_reset_password}/${personId}/reset-password`,
+        {},
+      );
+    } catch {
+      // non-fatal
+    }
     if (person && !person.security.agent) {
       applyEdit(personId, {
         security: {
