@@ -512,7 +512,7 @@ export default function ProblemRecordsDashboard() {
         d: "Matching incident signatures clustered into a single record.",
         ok: false,
       });
-      r.findings.forEach((f) =>
+      r.findings.forEach((f: any) =>
         ev.push({
           ts: f.ts,
           author: f.author,
@@ -521,7 +521,7 @@ export default function ProblemRecordsDashboard() {
           ok: f.type === "Decision",
         }),
       );
-      r.steps.forEach((s, i) => {
+      r.steps.forEach((s: any, i: number) => {
         if (s.done)
           ev.push({
             ts: s.at,
