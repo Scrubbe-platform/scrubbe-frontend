@@ -503,7 +503,7 @@ export default function ProblemRecordsDashboard() {
 
   // Seed Timeline logs on state mount
   const computedRecords = useMemo(() => {
-    return records.map((r) => {
+    return records.map((r: any) => {
       const ev: any[] = [];
       ev.push({
         ts: r.opened + " · 00:00",
@@ -553,12 +553,12 @@ export default function ProblemRecordsDashboard() {
     });
   }, [records]);
 
-  const activeRecord = computedRecords.find((x) => x.id === selectedId) || null;
+  const activeRecord = computedRecords.find((x: any) => x.id === selectedId) || null;
 
   // ─── FILTER & SORT PROCESSING LOOP ───
   const processedRecords = useMemo(() => {
     return computedRecords
-      .filter((r) => {
+      .filter((r: any) => {
         if (statusFilter === "open" && r.status === "Resolved") return false;
         if (
           statusFilter !== "all" &&
@@ -586,30 +586,30 @@ export default function ProblemRecordsDashboard() {
         }
         return true;
       })
-      .sort((a, b) => {
+      .sort((a: any, b: any) => {
         if (sortBy === "priority") return a.priority.localeCompare(b.priority);
         if (sortBy === "incidents")
           return b.incidents.length - a.incidents.length;
-        return 0; // Fallback chronologically standard
+        return 0;
       });
   }, [computedRecords, statusFilter, advancedFilters, searchQuery, sortBy]);
 
   // Bulk selectors operations handlers
   const isAllVisibleSelected =
     processedRecords.length > 0 &&
-    processedRecords.every((r) => selectedRowIds.has(r.id));
-  const isAnyVisibleSelected = processedRecords.some((r) =>
+    processedRecords.every((r: any) => selectedRowIds.has(r.id));
+  const isAnyVisibleSelected = processedRecords.some((r: any) =>
     selectedRowIds.has(r.id),
   );
 
   const handleToggleSelectAll = () => {
     if (isAllVisibleSelected) {
       const next = new Set(selectedRowIds);
-      processedRecords.forEach((r) => next.delete(r.id));
+      processedRecords.forEach((r: any) => next.delete(r.id));
       setSelectedRowIds(next);
     } else {
       const next = new Set(selectedRowIds);
-      processedRecords.forEach((r) => next.add(r.id));
+      processedRecords.forEach((r: any) => next.add(r.id));
       setSelectedRowIds(next);
     }
   };
@@ -656,7 +656,7 @@ export default function ProblemRecordsDashboard() {
     } catch {
       // optimistic update
       setRecords((prev) =>
-        prev.map((r) =>
+        prev.map((r: any) =>
           r.id === selectedId
             ? { ...r, steps: r.steps.map((s: any, i: number) => i === idx ? { ...s, done: true, note: completionNote } : s) }
             : r
@@ -681,7 +681,7 @@ export default function ProblemRecordsDashboard() {
     } catch {
       // optimistic
       setRecords((prev) =>
-        prev.map((r) =>
+        prev.map((r: any) =>
           r.id === selectedId
             ? { ...r, steps: [...(r.steps ?? []), { t: newStepTitle.trim(), d: newStepDetail.trim(), tags: [], done: false }] }
             : r
@@ -801,14 +801,14 @@ export default function ProblemRecordsDashboard() {
       await updateProblem(id, { status: "Resolved" });
       await refetchProblems();
     } catch {
-      setRecords((prev) => prev.map((r) => r.id === id ? { ...r, status: "Resolved" } : r));
+      setRecords((prev) => prev.map((r: any) => r.id === id ? { ...r, status: "Resolved" } : r));
     }
   };
 
-  const openCount = records.filter((r) => r.status !== "Resolved").length;
-  const knownErrorCount = records.filter((r) => r.status === "Known Error").length;
-  const resolvedCount = records.filter((r) => r.status === "Resolved").length;
-  const kbCount = records.filter((r) => r.kb?.published).length;
+  const openCount = records.filter((r: any) => r.status !== "Resolved").length;
+  const knownErrorCount = records.filter((r: any) => r.status === "Known Error").length;
+  const resolvedCount = records.filter((r: any) => r.status === "Resolved").length;
+  const kbCount = records.filter((r: any) => r.kb?.published).length;
 
   return (
     <div className="bg-[#F6F7F9] text-[#161A22] min-h-screen font-ibm antialiased pb-20 selection:bg-emerald-500/20">
@@ -1167,7 +1167,7 @@ export default function ProblemRecordsDashboard() {
           </div>
 
           <div className="overflow-y-auto divide-y divide-zinc-100 flex-1">
-            {processedRecords.map((r) => {
+            {processedRecords.map((r: any) => {
               const active = r.id === selectedId;
               const isChecked = selectedRowIds.has(r.id);
               const pct = r.steps.length
@@ -1480,7 +1480,7 @@ export default function ProblemRecordsDashboard() {
                         Correlated incidents ({activeRecord.incidents.length})
                       </p>
                       <div className="border border-zinc-100 rounded-xl overflow-hidden divide-y divide-zinc-100">
-                        {activeRecord.incidents.map((inc, idx) => (
+                        {activeRecord.incidents.map((inc: any, idx: number) => (
                           <div
                             key={idx}
                             className="flex items-center gap-3 px-4 py-3"
@@ -1594,7 +1594,7 @@ export default function ProblemRecordsDashboard() {
                     </form>
 
                     <div className="space-y-3">
-                      {[...activeRecord.findings].reverse().map((f, i) => (
+                      {Array.from(activeRecord.findings).reverse().map((f: any, i: number) => (
                         <div
                           key={i}
                           className="p-4 border border-zinc-100 rounded-xl bg-white space-y-2"
@@ -1635,7 +1635,7 @@ export default function ProblemRecordsDashboard() {
                 {/* RESOLUTION TAB */}
                 {activeTab === "resolution" && (
                   <div className="space-y-3 animate-fadeIn">
-                    {activeRecord.steps.map((step, idx) => {
+                    {activeRecord.steps.map((step: any, idx: number) => {
                       const isCompleting = completingStepIdx === idx;
                       return (
                         <div
