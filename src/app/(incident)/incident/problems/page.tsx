@@ -1172,7 +1172,7 @@ export default function ProblemRecordsDashboard() {
               const isChecked = selectedRowIds.has(r.id);
               const pct = r.steps.length
                 ? Math.round(
-                    (r.steps.filter((x) => x.done).length / r.steps.length) *
+                    (r.steps.filter((x: any) => x.done).length / r.steps.length) *
                       100,
                   )
                 : 0;
@@ -1315,7 +1315,7 @@ export default function ProblemRecordsDashboard() {
               {/* Progress strip */}
               {(() => {
                 const total = activeRecord.steps.length;
-                const done = activeRecord.steps.filter((x) => x.done).length;
+                const done = activeRecord.steps.filter((x: any) => x.done).length;
                 const pct = total ? Math.round((done / total) * 100) : 0;
                 const full = pct === 100;
                 return (
@@ -1353,7 +1353,7 @@ export default function ProblemRecordsDashboard() {
                   {
                     id: "resolution",
                     label: "Resolution",
-                    count: `${activeRecord.steps.filter((x) => x.done).length}/${activeRecord.steps.length}`,
+                    count: `${activeRecord.steps.filter((x: any) => x.done).length}/${activeRecord.steps.length}`,
                   },
                   {
                     id: "kb",
