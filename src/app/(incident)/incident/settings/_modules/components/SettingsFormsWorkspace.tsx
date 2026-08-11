@@ -47,7 +47,7 @@ export function UsersForm({ draft, setDraft }: FormProps) {
             name: [m.firstName, m.lastName].filter(Boolean).join(" ") || m.name || m.email?.split("@")[0] || "Member",
             email: m.email ?? "",
             role: m.role ?? m.accessLevel ?? "Responder",
-            active: m.active ?? m.status === "ACTIVE" ?? true,
+            active: m.active !== undefined ? Boolean(m.active) : m.status === "ACTIVE",
           })),
         });
       }
