@@ -540,7 +540,7 @@ export default function ProblemRecordsDashboard() {
           ok: true,
         });
 
-      const timeline = ev.reverse().map((e) => ({
+      const timeline = ev.reverse().map((e: any) => ({
         ...e,
         hash: shortHash(
           e.ts +
@@ -1517,7 +1517,7 @@ export default function ProblemRecordsDashboard() {
                           Affected services
                         </p>
                         <div className="border border-zinc-100 rounded-xl overflow-hidden divide-y divide-zinc-100">
-                          {activeRecord.services.map((svc, idx) => (
+                          {activeRecord.services.map((svc: any, idx: number) => (
                             <div
                               key={idx}
                               className="flex items-center gap-3 px-4 py-3"
@@ -1665,7 +1665,7 @@ export default function ProblemRecordsDashboard() {
                               </p>
                               {step.tags?.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-1">
-                                  {step.tags.map((tag) => (
+                                  {step.tags.map((tag: any) => (
                                     <span
                                       key={tag}
                                       className=" text-[10px] bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded"
