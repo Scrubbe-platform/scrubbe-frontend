@@ -227,6 +227,7 @@ export default function IncidentRelationships() {
     if (!p) return;
     const target = records.find((r) => r.id === p.target);
     if (target) {
+      // Optimistically update local state
       setRecords((prev) =>
         prev.map((r) =>
           r.id === p.target
@@ -266,6 +267,14 @@ export default function IncidentRelationships() {
         `linked ${p.incident.id} into ${target.id} (${p.confidence}% match)`,
       );
       toast(`${p.incident.id} linked into ${target.id} · audit logged`);
+      // Persist the relationship to the server
+      customAxios
+        .post(`${endpoint.incident_relationships.create}/${p.target}/relationships`, {
+          targetId: p.incident.id,
+          type: "RELATED_TO",
+          notes: `Correlation proposal confirmed — ${p.confidence}% match`,
+        })
+        .catch(() => {}); // optimistic — local state already updated
     }
     setProposals((prev) => prev.filter((x) => x.id !== id));
   }

@@ -64,7 +64,7 @@ export default function IncidentTemplates() {
     setView("wizard");
   }
 
-  function duplicateTemplate(t: TemplateRecord) {
+  async function duplicateTemplate(t: TemplateRecord) {
     const base = t.name.replace(/ \(copy( \d+)?\)$/, "");
     let n = 1;
     let newName = `${base} (copy)`;
@@ -73,9 +73,30 @@ export default function IncidentTemplates() {
       newName = `${base} (copy ${n})`;
     }
     const clone: TemplateRecord = { ...t, name: newName, status: "Draft", usage: 0, updated: "just now" };
+    // Optimistic add
     setTemplates((prev) => [clone, ...prev]);
     setSelected(clone);
     toast.success(`Duplicated as "${newName}"`);
+    // Persist to server if we have a server ID
+    const existingId = (t as any)._id;
+    if (existingId) {
+      try {
+        const res = await customAxios.post(
+          `${endpoint.incident_templates.duplicate}/${existingId}/duplicate`,
+        );
+        const duped = res.data?.data ?? res.data;
+        if (duped?.id) {
+          // Update the local clone with the real server ID
+          setTemplates((prev) =>
+            prev.map((x) =>
+              x.name === newName ? ({ ...x, _id: duped.id } as any) : x,
+            ),
+          );
+        }
+      } catch {
+        // Optimistic — local state already updated
+      }
+    }
   }
 
   async function submitTemplate(record: TemplateRecord) {

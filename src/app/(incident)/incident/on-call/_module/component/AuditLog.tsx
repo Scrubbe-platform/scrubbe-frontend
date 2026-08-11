@@ -1,7 +1,8 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Table as CustomTable } from "@/components/ui/table";
+import { customAxios } from "@/lib/api/axios";
 
 interface AuditLogEntry {
   timestamp: string; // ISO format or localized string
@@ -70,7 +71,29 @@ const MOCK_AUDIT_LOG: AuditLogEntry[] = [
 ];
 
 export default function AuditLogWorkspace() {
-  const [logs] = useState<AuditLogEntry[]>(MOCK_AUDIT_LOG);
+  const [logs, setLogs] = useState<AuditLogEntry[]>(MOCK_AUDIT_LOG);
+
+  useEffect(() => {
+    customAxios
+      .get("/audit-trail?resourceType=ON_CALL&limit=50")
+      .then((res) => {
+        const data = res.data?.data ?? res.data;
+        if (Array.isArray(data) && data.length > 0) {
+          setLogs(
+            data.map((e: any) => ({
+              timestamp: e.createdAt
+                ? new Date(e.createdAt).toLocaleString()
+                : (e.timestamp ?? ""),
+              action: e.action ?? e.event ?? "",
+              actor: e.actorName ?? e.actor ?? e.userId ?? "System",
+              target: e.target ?? e.resourceId ?? "",
+              detail: e.detail ?? e.description ?? "",
+            })),
+          );
+        }
+      })
+      .catch(() => {}); // fallback to mock data on error
+  }, []);
 
   const columns: ColumnDef<AuditLogEntry, any>[] = [
     {

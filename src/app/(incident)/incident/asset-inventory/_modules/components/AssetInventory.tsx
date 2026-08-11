@@ -150,17 +150,31 @@ export default function AssetInventory() {
   function bulkHealthCheck(items: Asset[]) {
     toast.info(`Running health checks on ${items.length} asset${items.length === 1 ? "" : "s"}…`);
     setTimeout(() => toast.success(`Health checks complete for ${items.length} asset${items.length === 1 ? "" : "s"}`), 1100);
+    // Persist health check trigger to server
+    Promise.allSettled(
+      items.map((a: Asset) => customAxios.patch(`${endpoint.assets.update}/${a.id}`, { lastHealthCheckAt: new Date().toISOString() })),
+    ).catch(() => {});
   }
   function bulkDrift(items: Asset[]) {
     toast.info(`Running drift scan on ${items.length} asset${items.length === 1 ? "" : "s"}…`);
     setTimeout(() => toast.success(`Drift scan complete — ${items.filter((a) => a.drift).length} finding(s)`), 1200);
+    // Persist drift scan trigger to server
+    Promise.allSettled(
+      items.map((a: Asset) => customAxios.patch(`${endpoint.assets.update}/${a.id}`, { lastDriftScanAt: new Date().toISOString() })),
+    ).catch(() => {});
   }
   function bulkException(items: Asset[]) {
     setAssets((prev) => prev.map((a) => (items.some((i) => i.id === a.id) ? { ...a, risk: "Low" } : a)));
     toast.success(`${items.length} asset${items.length === 1 ? "" : "s"} marked as risk exceptions`);
+    // Persist risk exception to server
+    Promise.allSettled(
+      items.map((a: Asset) => customAxios.patch(`${endpoint.assets.update}/${a.id}`, { risk: "Low", riskException: true })),
+    ).catch(() => {});
   }
   function runComplianceScan() {
     toast.info("Running compliance scan across all standards…");
+    // Trigger server-side compliance scan
+    customAxios.post(endpoint.assets.sync, { trigger: "COMPLIANCE_SCAN" }).catch(() => {});
     setTimeout(() => {
       setAssets((prev) => prev.map((a) => {
         const applicable = benchmarks.filter((b) => b.enabled && (b.appliesTo === a.category || b.appliesTo === "All")).map((b) => b.id);
@@ -469,10 +483,27 @@ export default function AssetInventory() {
 
       <Modal isOpen={modal?.kind === "register"} onClose={() => setModal(null)}>
         <RegisterAssetModal
-          onRegister={(a) => {
+          onRegister={async (a) => {
+            // Optimistic add
             setAssets((prev) => [a, ...prev]);
             setModal(null);
             toast.success(`${a.name} added to the inventory`);
+            // Persist to server
+            try {
+              const res = await customAxios.post(endpoint.assets.create, {
+                name: a.name,
+                type: a.type,
+                category: a.category,
+                owner: a.owner,
+                environment: a.env,
+              });
+              const created = res.data?.data ?? res.data;
+              if (created?.id && created.id !== a.id) {
+                setAssets((prev) => prev.map((x) => (x.id === a.id ? { ...x, id: created.id } : x)));
+              }
+            } catch {
+              // Optimistic — local state already updated
+            }
           }}
           onClose={() => setModal(null)}
         />
@@ -480,7 +511,7 @@ export default function AssetInventory() {
 
       <Modal isOpen={modal?.kind === "provision"} onClose={() => setModal(null)}>
         <ProvisionAssetWizard
-          onProvision={(fields) => {
+          onProvision={async (fields) => {
             const a = createAsset({
               name: fields.name, type: fields.type, category: fields.category, owner: fields.owner,
               env: fields.env, cloud: fields.cloud, region: fields.region, lifecycle: "Provisioned",
@@ -489,11 +520,32 @@ export default function AssetInventory() {
             a.tagged = fields.requireTags;
             a.cpu = fields.size === "Large" ? 35 : fields.size === "Small" ? 12 : 20;
             a.mem = fields.size === "Large" ? 40 : fields.size === "Small" ? 15 : 22;
+            // Optimistic add
             setAssets((prev) => [a, ...prev]);
             logAudit("Asset provisioned", a.name);
             setModal(null);
             toast.success(`${a.name} provisioned and live`);
             openDetail(a.id);
+            // Persist to server
+            try {
+              const res = await customAxios.post(endpoint.assets.create, {
+                name: fields.name,
+                type: fields.type,
+                category: fields.category,
+                owner: fields.owner,
+                environment: fields.env,
+                provider: fields.cloud,
+                region: fields.region,
+                lifecycle: "Provisioned",
+                metadata: { size: fields.size, benchmarks: fields.benchmarks, requireTags: fields.requireTags },
+              });
+              const created = res.data?.data ?? res.data;
+              if (created?.id && created.id !== a.id) {
+                setAssets((prev) => prev.map((x) => (x.id === a.id ? { ...x, id: created.id } : x)));
+              }
+            } catch {
+              // Optimistic — local state already updated
+            }
           }}
           onClose={() => setModal(null)}
         />
@@ -514,11 +566,18 @@ export default function AssetInventory() {
       <Modal isOpen={modal?.kind === "reassign"} onClose={() => setModal(null)}>
         <ReassignOwnerModal
           count={modalAssets.length}
-          onReassign={(owner) => {
+          onReassign={async (owner) => {
             const ids = new Set(modalAssets.map((a) => a.id));
+            // Optimistic update
             setAssets((prev) => prev.map((a) => (ids.has(a.id) ? { ...a, owner } : a)));
             toast.success(`Owner reassigned to ${owner}`);
             setModal(null);
+            // Persist to server
+            await Promise.allSettled(
+              modalAssets.map((a: Asset) =>
+                customAxios.patch(`${endpoint.assets.update}/${a.id}`, { owner }),
+              ),
+            ).catch(() => {});
           }}
           onClose={() => setModal(null)}
         />

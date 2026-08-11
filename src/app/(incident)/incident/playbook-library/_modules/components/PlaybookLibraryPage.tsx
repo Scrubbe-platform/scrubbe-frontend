@@ -169,38 +169,64 @@ export default function PlaybookLibraryPage(): React.JSX.Element {
     });
   };
 
-  const handleDuplicate = (id: string) => {
+  const handleDuplicate = async (id: string) => {
     const src = playbooks.find((p) => p.id === id);
     if (!src) return;
+    const localId = nextPlaybookId(playbooks);
     const copy: Playbook = {
       ...JSON.parse(JSON.stringify(src)),
-      id: nextPlaybookId(playbooks),
+      id: localId,
       name: `${src.name} (copy)`,
       status: "Draft",
       version: "v0.1",
       executed: 0,
       updated: "Just now",
     };
+    // Optimistic add
     setPlaybooks((prev) => [...prev, copy]);
     toast.success(`Duplicated as ${copy.name} — created as draft`);
+    // Persist to server
+    try {
+      const res = await customAxios.post(`${endpoint.playbooks.clone}/${id}/clone`);
+      const cloned = res.data?.data ?? res.data;
+      if (cloned?.id && cloned.id !== localId) {
+        // Update the local copy with the real server ID
+        setPlaybooks((prev) =>
+          prev.map((p) => (p.id === localId ? { ...p, id: cloned.id } : p))
+        );
+      }
+    } catch {
+      // Optimistic — local state already updated
+    }
   };
 
-  const handleArchiveConfirm = (id: string) => {
-    setPlaybooks((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? { ...p, status: p.status === "Archived" ? "Draft" : "Archived" }
-          : p,
-      ),
-    );
+  const handleArchiveConfirm = async (id: string) => {
     const p = playbooks.find((x) => x.id === id);
     const restoring = p?.status === "Archived";
+    // Optimistic update
+    setPlaybooks((prev) =>
+      prev.map((pb) =>
+        pb.id === id
+          ? { ...pb, status: restoring ? "Draft" : "Archived" }
+          : pb,
+      ),
+    );
     toast.success(
       restoring
         ? `${p?.name} restored as draft`
         : `${p?.name} archived — audit trail preserved`,
     );
     setArchiveTarget(null);
+    // Persist to server
+    try {
+      if (restoring) {
+        await customAxios.put(`${endpoint.playbooks.update}/${id}`, { status: "Draft" });
+      } else {
+        await customAxios.delete(`${endpoint.playbooks.delete}/${id}`);
+      }
+    } catch {
+      // Optimistic — local state already updated
+    }
   };
 
   const handleCreate = async (data: {

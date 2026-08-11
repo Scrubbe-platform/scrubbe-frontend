@@ -53,12 +53,24 @@ export default function ServiceCatalog() {
     setTab("detail");
   }
 
-  function handleCreateService(patch: ServicePatch) {
+  async function handleCreateService(patch: ServicePatch) {
+    // Optimistic local create
     const record = createService(patch);
     setAddOpen(false);
     toast.success(`"${record.name}" added to the catalog`);
     setSelected(record);
     setTab("detail");
+    // Persist to server
+    try {
+      const res = await customAxios.post(endpoint.service_map.create, patch);
+      const created = res.data?.data ?? res.data;
+      // If server returned an ID, update the local record
+      if (created?.id && record.id !== created.id) {
+        record.id = created.id;
+      }
+    } catch {
+      // Optimistic — local state already updated
+    }
   }
 
   return (

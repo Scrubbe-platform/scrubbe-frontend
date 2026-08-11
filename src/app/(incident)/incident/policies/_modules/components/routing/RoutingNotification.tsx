@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FormWrapper from "../FormWrapper";
 import { z } from "zod";
 import Input from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
 import { toast } from "sonner";
+import { customAxios } from "@/lib/api/axios";
 
 // ── Data ──────────────────────────────────────────────────────────
 
@@ -66,6 +67,22 @@ const RoutingNotification = () => {
   const [channels, setChannels] = useState<Record<string, boolean>>({
     slack: false, teams: false, email: false, sms: false,
   });
+
+  // Load existing routing rules and pre-populate channel state
+  useEffect(() => {
+    customAxios
+      .get(`${endpoint.guardrails.list}?ruleType=ROUTING`)
+      .then((res) => {
+        const data = res.data?.data ?? res.data;
+        if (Array.isArray(data) && data.length > 0) {
+          const firstRule = data[0];
+          if (firstRule?.channels && typeof firstRule.channels === "object") {
+            setChannels((prev) => ({ ...prev, ...firstRule.channels }));
+          }
+        }
+      })
+      .catch(() => {}); // fallback to default channel state on error
+  }, []);
 
   const { control, handleSubmit, formState: { isValid, errors } } = useForm<TFormScheme>({
     resolver: zodResolver(formScheme),

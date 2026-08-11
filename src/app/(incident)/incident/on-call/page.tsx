@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useMember from "@/hooks/useMember";
 import { useFetch } from "@/hooks/useFetch";
 import { endpoint } from "@/lib/api/endpoint";
+import { customAxios } from "@/lib/api/axios";
 import Button from "@/components/ui/Button1";
 import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -383,9 +384,27 @@ function EditModal({
     </select>
   );
 
-  const handleReassign = () => {};
+  const handleReassign = async () => {
+    try {
+      await customAxios.patch(`${endpoint.on_call.update_assignment}/${shift.id}`, {
+        memberId: reassignTo,
+        reason,
+        notes,
+      });
+      onClose();
+    } catch {
+      console.error("Failed to update assignment");
+    }
+  };
 
-  const handleRemove = () => {};
+  const handleRemove = async () => {
+    try {
+      await customAxios.delete(`${endpoint.on_call.remove_assignment}/${shift.id}`);
+      onClose();
+    } catch {
+      console.error("Failed to remove assignment");
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">

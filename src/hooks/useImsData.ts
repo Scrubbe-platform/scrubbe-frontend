@@ -396,35 +396,35 @@ export interface AssignmentGroup {
 }
 
 export function useAssignmentGroups() {
-  return useFetchOnce<AssignmentGroup[]>("/assignment-groups");
+  return useFetchOnce<AssignmentGroup[]>(endpoint.assignment_groups.list);
 }
 
 export function useAssignmentGroupDetail(id: string | null) {
-  return useFetchOnce<AssignmentGroup>(id ? `/assignment-groups/${id}` : null, [id]);
+  return useFetchOnce<AssignmentGroup>(id ? `${endpoint.assignment_groups.getOne}/${id}` : null, [id]);
 }
 
 export async function createAssignmentGroup(payload: Partial<AssignmentGroup>) {
-  const res = await customAxios.post("/assignment-groups", payload);
+  const res = await customAxios.post(endpoint.assignment_groups.create, payload);
   return res.data?.data ?? res.data;
 }
 
 export async function updateAssignmentGroup(id: string, payload: Partial<AssignmentGroup>) {
-  const res = await customAxios.put(`/assignment-groups/${id}`, payload);
+  const res = await customAxios.put(`${endpoint.assignment_groups.update}/${id}`, payload);
   return res.data?.data ?? res.data;
 }
 
 export async function deleteAssignmentGroup(id: string) {
-  const res = await customAxios.delete(`/assignment-groups/${id}`);
+  const res = await customAxios.delete(`${endpoint.assignment_groups.delete}/${id}`);
   return res.data;
 }
 
 export async function addGroupMember(groupId: string, userId: string, role = "MEMBER") {
-  const res = await customAxios.post(`/assignment-groups/${groupId}/members`, { userId, role });
+  const res = await customAxios.post(`${endpoint.assignment_groups.addMember}/${groupId}/members`, { userId, role });
   return res.data?.data ?? res.data;
 }
 
 export async function removeGroupMember(groupId: string, userId: string) {
-  const res = await customAxios.delete(`/assignment-groups/${groupId}/members/${userId}`);
+  const res = await customAxios.delete(`${endpoint.assignment_groups.removeMember}/${groupId}/members/${userId}`);
   return res.data;
 }
 
@@ -440,7 +440,7 @@ export interface IncidentRelationship {
 
 export function useIncidentRelationships(incidentId: string | null) {
   return useFetchOnce<{ parents: IncidentRelationship[]; children: IncidentRelationship[]; related: IncidentRelationship[] }>(
-    incidentId ? `/incidents/${incidentId}/relationships` : null,
+    incidentId ? `${endpoint.incident_relationships.list}/${incidentId}/relationships` : null,
     [incidentId]
   );
 }
@@ -450,7 +450,7 @@ export async function createIncidentRelationship(
   targetIncidentId: string,
   type: IncidentRelationship["type"]
 ) {
-  const res = await customAxios.post(`/incidents/${incidentId}/relationships`, {
+  const res = await customAxios.post(`${endpoint.incident_relationships.create}/${incidentId}/relationships`, {
     targetIncidentId,
     type,
   });
@@ -458,7 +458,7 @@ export async function createIncidentRelationship(
 }
 
 export async function deleteIncidentRelationship(incidentId: string, relationshipId: string) {
-  const res = await customAxios.delete(`/incidents/${incidentId}/relationships/${relationshipId}`);
+  const res = await customAxios.delete(`${endpoint.incident_relationships.delete}/${incidentId}/relationships/${relationshipId}`);
   return res.data;
 }
 
@@ -495,7 +495,7 @@ export function useAssets(params?: { type?: string; status?: string; environment
 }
 
 export function useAssetSummary() {
-  return useFetchOnce<{ total: number; byType: Record<string, number>; byStatus: Record<string, number>; criticalCount: number }>("/assets/summary");
+  return useFetchOnce<{ total: number; byType: Record<string, number>; byStatus: Record<string, number>; criticalCount: number }>(endpoint.assets.stats);
 }
 
 // ─── Settings Users ───────────────────────────────────────────────────────────
@@ -511,16 +511,16 @@ export interface SettingsUser {
 }
 
 export function useSettingsUsers() {
-  return useFetchOnce<SettingsUser[]>("/settings/users");
+  return useFetchOnce<SettingsUser[]>(endpoint.incident_ticket.get_members);
 }
 
 export async function inviteUser(email: string, role: string) {
-  const res = await customAxios.post("/settings/users/invite", { email, role });
+  const res = await customAxios.post(endpoint.auth.invite_member, { email, role });
   return res.data?.data ?? res.data;
 }
 
 export async function updateUserRole(userId: string, role: string) {
-  const res = await customAxios.put(`/settings/users/${userId}/role`, { role });
+  const res = await customAxios.patch(`/business/members/${userId}/role`, { role });
   return res.data?.data ?? res.data;
 }
 
@@ -595,7 +595,26 @@ export function useIncidentTemplateAnalytics(id: string | null) {
 }
 
 export function useTemplateRecommendations() {
-  return useFetchOnce<any[]>("/incident-templates/recommendations/pending");
+  const [state, setState] = useState<FetchState<any[]>>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+
+  useEffect(() => {
+    setState((s) => ({ ...s, loading: true, error: null }));
+    customAxios
+      .post(endpoint.incident_templates.recommend, {})
+      .then((res) => {
+        const data = res.data?.data ?? res.data ?? [];
+        setState({ data: Array.isArray(data) ? data : [], loading: false, error: null });
+      })
+      .catch(() => {
+        setState({ data: [], loading: false, error: null });
+      });
+  }, []);
+
+  return { ...state, refetch: () => {} };
 }
 
 export async function publishTemplate(id: string) {

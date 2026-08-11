@@ -294,6 +294,39 @@ export default function Settings() {
         // Continue with localStorage save even if API call fails
       }
     }
+    // Persist organization profile to API
+    if (openCat === "organization") {
+      try {
+        await customAxios.patch("/business/settings/organization", {
+          name: draft.orgName,
+          industry: draft.industry,
+          timezone: draft.timezone,
+          domain: draft.domain,
+          units: draft.units,
+          locations: draft.locations,
+        });
+      } catch {
+        // Continue with localStorage save even if API call fails
+      }
+    }
+    // Sync member role / active changes to API
+    if (openCat === "users" && Array.isArray(draft?.list)) {
+      await Promise.allSettled(
+        (draft.list as any[]).map(async (m: any) => {
+          if (m.id) {
+            await customAxios.patch(`/business/members/${m.id}/role`, { role: m.role }).catch(() => {});
+            if (typeof m.active === "boolean") {
+              await customAxios.patch(`/business/members/${m.id}/active`, { active: m.active }).catch(() => {});
+            }
+          } else if (m.email && String(m.email).includes("@")) {
+            // New member — send invite
+            await customAxios.post(endpoint.auth.invite_member, { email: m.email, role: m.role }).catch(() => {});
+          }
+        }),
+      );
+    }
+    // TODO: case "sla" — POST /sla-policies when policy data is structured
+    // TODO: case "notifications" — integrate with /integrations notification settings
     const summary = summarize(openCat, draft);
     const nextState = { ...state, [openCat]: draft };
     setState(nextState);

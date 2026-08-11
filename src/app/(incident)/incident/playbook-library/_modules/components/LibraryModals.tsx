@@ -1,7 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Modal from "@/components/ui/Modal";
 import { MODES, OWNERS, SERVICES } from "../data";
 import { ExecutionMode, Playbook } from "../types";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 
 const inputCls =
   "w-full border border-zinc-300 rounded-lg px-3 py-2 text-sm text-zinc-900 bg-white font-medium outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors";
@@ -175,11 +177,30 @@ export function ImportPlaybookModal({
             type="file"
             accept="application/json,.json,.yaml,.yml"
             className="hidden"
-            onChange={(e) => {
+            onChange={async (e) => {
               const f = e.target.files?.[0];
               if (!f) return;
-              onImported(f.name);
               e.target.value = "";
+              // Parse JSON and submit to server
+              try {
+                const text = await f.text();
+                let parsed: any;
+                try {
+                  parsed = JSON.parse(text);
+                } catch {
+                  // YAML or invalid JSON — fall back to name-only import
+                  onImported(f.name);
+                  return;
+                }
+                const payload: any[] = Array.isArray(parsed) ? parsed : [parsed];
+                await Promise.all(
+                  payload.map((p: any) => customAxios.post(endpoint.playbooks.create, p)),
+                );
+                onImported(f.name);
+              } catch {
+                // Fall back to name-only import so the UI still responds
+                onImported(f.name);
+              }
             }}
           />
         </div>
@@ -213,6 +234,28 @@ export function VersionHistoryModal({
   isOpen: boolean;
   onClose: () => void;
 }): React.JSX.Element {
+  const [rows, setRows] = useState(LIBRARY_VERSION_ROWS);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    customAxios
+      .get(endpoint.playbooks.executions)
+      .then((res) => {
+        const data = res.data?.data ?? res.data;
+        if (Array.isArray(data) && data.length > 0) {
+          setRows(
+            data.map((e: any) => ({
+              pb: e.playbookName ?? e.name ?? `Playbook ${e.playbookId ?? ""}`,
+              v: e.version ?? `v${e.id ?? "?"}`,
+              change: e.summary ?? e.notes ?? "",
+              by: e.triggeredBy ?? e.approvedBy ?? "System",
+            })),
+          );
+        }
+      })
+      .catch(() => {}); // fallback to static rows
+  }, [isOpen]);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="sm:max-w-2xl">
       <div className="p-5">
@@ -235,8 +278,8 @@ export function VersionHistoryModal({
               </tr>
             </thead>
             <tbody>
-              {LIBRARY_VERSION_ROWS.map((r) => (
-                <tr key={r.pb} className="border-b border-zinc-100 last:border-0">
+              {rows.map((r, i) => (
+                <tr key={i} className="border-b border-zinc-100 last:border-0">
                   <td className="px-3.5 py-2.5 font-semibold text-zinc-800">{r.pb}</td>
                   <td className="px-3.5 py-2.5 font-mono text-xs text-zinc-500">{r.v}</td>
                   <td className="px-3.5 py-2.5 text-zinc-500">{r.change}</td>
