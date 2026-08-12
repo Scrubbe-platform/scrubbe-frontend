@@ -52,23 +52,42 @@ const Plan = () => {
       Monthly: "month",
       Yearly: "year",
     };
-    return data
-      ?.filter((value: any) => value.billingCycle === cycle[billingCycle])
-      ?.map((value: any) => {
-        const feature = Object.entries(value.values).filter(([key, items]) => {
-          if (!features.includes(key)) return false;
-          const v = items as any;
-          if (!v || v === "❌" || v === "No" || v === false || v === "false") return false;
-          return true;
-        });
+    const requestedCycle = cycle[billingCycle];
 
-        return {
-          ...value,
-          feature: feature?.map((value) =>
-            value[1] === "Basic" ? `Basic Dashboards & Reporting` : value[1]
-          ),
-        };
+    // Prefer plans matching the requested cycle; fall back to monthly if yearly doesn't exist in DB.
+    let source = data?.filter((value: any) => value.billingCycle === requestedCycle);
+    const usingFallback = billingCycle === "Yearly" && (!source || source.length === 0);
+    if (usingFallback) {
+      source = data?.filter((value: any) => value.billingCycle === "month");
+    }
+
+    return source?.map((value: any) => {
+      const feature = Object.entries(value.values).filter(([key, items]) => {
+        if (!features.includes(key)) return false;
+        const v = items as any;
+        if (!v || v === "❌" || v === "No" || v === false || v === "false") return false;
+        return true;
       });
+
+      // Compute yearly price from monthly if we're in fallback mode
+      const yearlyPrice =
+        usingFallback && typeof value.values.Price === "number" && value.values.Price > 0
+          ? Math.round(value.values.Price * 12 * 0.85)
+          : null;
+
+      return {
+        ...value,
+        billingCycle: usingFallback ? "year" : value.billingCycle,
+        values: {
+          ...value.values,
+          Price: yearlyPrice !== null ? yearlyPrice : value.values.Price,
+          _monthlyPrice: value.values.Price, // keep for reference
+        },
+        feature: feature?.map((value) =>
+          value[1] === "Basic" ? `Basic Dashboards & Reporting` : value[1]
+        ),
+      };
+    });
   }, [data, billingCycle]);
 
   const handlePayment = async (plan: any) => {
