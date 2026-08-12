@@ -8,7 +8,6 @@ import {
   IncidentStats,
 } from "@/lib/incident/incident.types";
 import Modal from "@/components/ui/Modal";
-import WarRoom from "./WarRoom";
 import AddContextForm from "./ContextForm";
 import Dropdown from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button1";
@@ -46,7 +45,6 @@ const IncidentHeader = ({
   const searchParams = useSearchParams();
   const activeId = searchParams.get("id") ?? incident.id;
   const currentTab = searchParams.get("tab");
-  const [openWarRoom, setOpenWarRoom] = useState(false);
   const [openContext, setOpenContext] = useState(false);
   const [openChatModal, setOpenChatModal] = useState(false);
   const tabs: TabItem[] = [
@@ -151,7 +149,7 @@ const IncidentHeader = ({
                 value: "war-room",
                 label: "War Room",
                 icon: <Video size={14} />,
-                onClick: () => setOpenWarRoom(true),
+                onClick: () => router.push(`/incident/war-rooms/live/${activeId}`),
               },
               {
                 value: "message",
@@ -199,9 +197,6 @@ const IncidentHeader = ({
           onCancel={() => setOpenContext(false)}
           context={context}
         />
-      </Modal>
-      <Modal onClose={() => setOpenWarRoom(false)} isOpen={openWarRoom}>
-        <WarRoom incident={incident} onClose={() => setOpenWarRoom(false)} />
       </Modal>
       {openChatModal && (
         <MessagesModal onClose={() => setOpenChatModal(false)} />

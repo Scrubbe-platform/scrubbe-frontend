@@ -10,14 +10,14 @@ import { genPassword, copyToClipboard } from "./utils";
 type Tone = "ok" | "warn" | "major" | "neutral";
 
 const toneText: Record<Tone, string> = {
-  ok: "text-emerald-700 bg-emerald-50 border-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20",
+  ok: "text-IMSLightGreen bg-IMSLightGreen/10 border-IMSLightGreen/15 dark:text-IMSLightGreen dark:bg-IMSLightGreen/10 dark:border-IMSLightGreen/20",
   warn: "text-amber-700 bg-amber-50 border-amber-100 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/20",
   major:
     "text-rose-700 bg-rose-50 border-rose-100 dark:text-rose-400 dark:bg-rose-500/10 dark:border-rose-500/20",
   neutral: "border-zinc-200 text-black dark:border-zinc-700 dark:text-zinc-400",
 };
 const toneDot: Record<Tone, string> = {
-  ok: "bg-emerald-500",
+  ok: "bg-IMSLightGreen",
   warn: "bg-amber-500",
   major: "bg-rose-500",
   neutral: "bg-zinc-400",
@@ -98,13 +98,13 @@ export function KVRows({
           key={i}
           className="flex items-center justify-between gap-4 border-b border-zinc-100 py-3.5 last:border-b-0 dark:border-zinc-800"
         >
-          <span className="shrink-0 text-[13.5px] text-black/55 dark:text-zinc-500">
+          <span className="shrink-0 text-[12.5px] text-black/55 dark:text-zinc-500">
             {k}
           </span>
           <span
             className={cn(
-              "inline-flex items-center justify-end gap-2.5 text-right text-[15px] font-semibold text-black dark:text-zinc-200",
-              mono && "font-mono text-[13.5px]",
+              "inline-flex items-center justify-end gap-2.5 text-right text-[13px] font-semibold text-black dark:text-zinc-200",
+              mono && "font-mono text-[12.5px]",
             )}
           >
             {v}
@@ -138,8 +138,8 @@ export function InlineButton({
       className={cn(
         "rounded-md border px-2.5 py-1 text-[11.5px] transition-colors",
         muted
-          ? "border-zinc-300 text-black hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-400"
-          : "border-sky-200 text-sky-600 hover:bg-sky-50 dark:border-sky-500/30 dark:text-sky-400 dark:hover:bg-sky-500/10",
+          ? "border-zinc-300 text-black hover:border-IMSLightGreen hover:text-IMSLightGreen dark:border-zinc-700 dark:text-zinc-400"
+          : "border-IMSLightGreen/25 text-IMSLightGreen hover:bg-IMSLightGreen/10 dark:border-IMSLightGreen/30 dark:text-IMSLightGreen dark:hover:bg-IMSLightGreen/10",
       )}
     >
       {children}
@@ -166,9 +166,9 @@ export function Chip({
     <span
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-[14px] font-medium",
+        "inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-[13px] font-medium",
         accent
-          ? "cursor-pointer border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-400"
+          ? "cursor-pointer border-IMSLightGreen/25 bg-IMSLightGreen/10 text-IMSLightGreen dark:border-IMSLightGreen/30 dark:bg-IMSLightGreen/10 dark:text-IMSLightGreen"
           : "border-zinc-200 bg-white text-black dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200",
       )}
     >
@@ -188,7 +188,7 @@ export function PermGrid({ perms }: { perms: [string, PermLevel, string?][] }) {
       {perms.map(([name, level, label], i) => {
         const cls =
           level === "yes"
-            ? "text-emerald-600 dark:text-emerald-400"
+            ? "text-IMSLightGreen dark:text-IMSLightGreen"
             : level === "limited"
               ? "text-amber-600 dark:text-amber-400"
               : "text-black dark:text-zinc-500";
@@ -236,7 +236,7 @@ export function StatBox({
         <div className="text-[11px] font-semibold uppercase tracking-wide text-black/50 dark:text-zinc-500">
           {label}
         </div>
-        <div className="mt-2 text-[18px] font-semibold leading-none text-black dark:text-zinc-100">
+        <div className="mt-2 text-[16px] font-semibold leading-none text-black dark:text-zinc-100">
           {value}
         </div>
       </div>
@@ -246,7 +246,7 @@ export function StatBox({
     <div className="rounded-lg bg-white p-6 shadow-sm shadow-light dark:bg-zinc-900/40">
       <div
         className={cn(
-          "text-[20px] font-bold leading-none text-black dark:text-zinc-100",
+          "text-[17px] font-bold leading-none text-black dark:text-zinc-100",
           danger && "text-rose-600 dark:text-rose-400",
         )}
       >
@@ -273,7 +273,7 @@ export function ToggleRow({
   return (
     <div className="mt-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
       <div className="flex items-center justify-between gap-4">
-        <span className="text-[14px] font-semibold text-black dark:text-zinc-100">
+        <span className="text-[13px] font-semibold text-black dark:text-zinc-100">
           {title}
         </span>
         <Switch checked={on} onChange={onClick} />
@@ -312,7 +312,7 @@ export function SessionRow({
         </div>
       </div>
       {current ? (
-        <span className="whitespace-nowrap rounded-md border border-emerald-200 px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-wide text-emerald-600 dark:border-emerald-500/30 dark:text-emerald-400">
+        <span className="whitespace-nowrap rounded-md border border-IMSLightGreen/25 px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-wide text-IMSLightGreen dark:border-IMSLightGreen/30 dark:text-IMSLightGreen">
           This session
         </span>
       ) : (
@@ -345,7 +345,7 @@ export function PasswordField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 py-2 font-mono text-[12.5px] text-black focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+        className="min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 py-2 font-mono text-[12.5px] text-black focus:border-IMSLightGreen focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
       />
       <button
         type="button"
@@ -354,7 +354,7 @@ export function PasswordField({
           onChange(pw);
           onGenerate?.(pw);
         }}
-        className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-zinc-300 px-2.5 text-[11.5px] font-semibold text-black transition-colors hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-300"
+        className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-zinc-300 px-2.5 text-[11.5px] font-semibold text-black transition-colors hover:border-IMSLightGreen hover:text-IMSLightGreen dark:border-zinc-700 dark:text-zinc-300"
       >
         <RefreshCw size={13} /> Generate
       </button>
@@ -370,8 +370,8 @@ export function PasswordField({
         className={cn(
           "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 text-[11.5px] font-semibold transition-colors",
           copied
-            ? "border-emerald-300 text-emerald-600 dark:border-emerald-500/40 dark:text-emerald-400"
-            : "border-zinc-300 text-black hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-300",
+            ? "border-IMSLightGreen/40 text-IMSLightGreen dark:border-IMSLightGreen/40 dark:text-IMSLightGreen"
+            : "border-zinc-300 text-black hover:border-IMSLightGreen hover:text-IMSLightGreen dark:border-zinc-700 dark:text-zinc-300",
         )}
       >
         {copied ? <Check size={13} /> : <Copy size={13} />}

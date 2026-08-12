@@ -32,7 +32,6 @@ import Modal from "../ui/Modal";
 import { Calendar, Clock } from "lucide-react";
 import { formatTime } from "@/lib/utils";
 import { IncidentDetailRecord } from "@/lib/incident/incident.types";
-import CreateWarRoom from "./CreateWarRoom";
 
 const formScheme = z.object({
   source: z.string().nonempty({ message: "source is required" }),
@@ -93,7 +92,6 @@ const EditIncidentTicket = () => {
     resolver: zodResolver(formScheme),
     mode: "onChange",
   });
-  const [openWarRoom, setOpenWarRoom] = useState(false);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -155,7 +153,7 @@ const EditIncidentTicket = () => {
             return;
           }
           if (data.priority === "CRITICAL") {
-            setOpenWarRoom(true);
+            router.push(`/incident/war-rooms/live/${ticket?.id}`);
           }
         }
       } catch (error) {
@@ -680,13 +678,6 @@ const EditIncidentTicket = () => {
         )}
       </Modal>
 
-      <Modal isOpen={openWarRoom} onClose={() => setOpenWarRoom(false)}>
-        <CreateWarRoom
-          onClose={() => setOpenWarRoom(false)}
-          incidentId={ticket?.id}
-          priority={ticket?.priority}
-        />
-      </Modal>
     </div>
   );
 };

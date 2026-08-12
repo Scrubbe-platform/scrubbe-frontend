@@ -82,23 +82,6 @@ export default function IncidentCreatedBanner() {
   // unmounts itself in the same tick.
   return (
     <>
-      {process.env.NODE_ENV === "development" && (
-        <button
-          type="button"
-          onClick={() =>
-            useIncidentBannerStore.getState().show({
-              id: "demo-incident",
-              ticketId: "SI-000000",
-              title: "Checkout API returning elevated 5xx errors",
-              priority: "CRITICAL",
-              source: "MANUAL",
-            })
-          }
-          className="fixed bottom-4 right-4 z-[200] rounded-full bg-black px-4 py-2.5 text-[12.5px] font-bold text-white shadow-lg hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-        >
-          Demo banner
-        </button>
-      )}
       <div className="pointer-events-none fixed inset-x-0 top-6 z-[200] flex items-start justify-center px-4">
         <AnimatePresence>
           {banner && (() => {

@@ -400,23 +400,23 @@ export default function People() {
                 {people.length}
               </span>
             </h1> */}
-            <p className="mt-1 text-[14px] text-black/60 dark:text-zinc-400">
+            <p className="mt-1 text-[13px] text-black/60 dark:text-zinc-400">
               The authoritative directory of everyone — and everything — that
               can act inside your workspace.
             </p>
           </div>
           <div className="ml-auto flex flex-wrap items-center gap-2.5">
             {/* {adminUnlocked ? (
-              <span className="flex items-center gap-2 rounded-md border border-sky-200 bg-sky-50 px-3 py-1.5 font-mono text-[10.5px] text-sky-700 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-400">
+              <span className="flex items-center gap-2 rounded-md border border-IMSLightGreen/25 bg-IMSLightGreen/10 px-3 py-1.5 font-mono text-[10.5px] text-IMSLightGreen dark:border-IMSLightGreen/30 dark:bg-IMSLightGreen/10 dark:text-IMSLightGreen">
                 <ShieldCheck size={13} /> Admin session · 15 min
-                <button onClick={lockAdmin} className="border-l border-sky-200 pl-2 font-sans text-[11px] font-semibold hover:underline dark:border-sky-500/30">
+                <button onClick={lockAdmin} className="border-l border-IMSLightGreen/25 pl-2 font-sans text-[11px] font-semibold hover:underline dark:border-IMSLightGreen/30">
                   Lock
                 </button>
               </span>
             ) : (
               <button
                 onClick={() => setModal({ kind: "adminSignIn" })}
-                className="flex items-center gap-2 rounded-md bg-emerald-600 px-5 py-2.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-emerald-700"
+                className="flex items-center gap-2 rounded-md bg-IMSLightGreen px-5 py-2.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-[#1a8a47]"
               >
                 <ShieldCheck size={14} /> Admin Sign-in
               </button>
@@ -424,7 +424,7 @@ export default function People() {
             {canInvite && (
               <button
                 onClick={() => setModal({ kind: "invite" })}
-                className="flex items-center gap-2 rounded-md bg-emerald-600 px-5 py-2.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-emerald-700"
+                className="flex items-center gap-2 rounded-md bg-IMSLightGreen px-5 py-2.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-[#1a8a47]"
               >
                 <UserPlus size={14} />
                 Invite person
@@ -443,7 +443,7 @@ export default function People() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search people…"
-              className="w-full h-[36px] rounded-md border border-zinc-300 pl-9 pr-3 text-[13.5px] text-black placeholder:text-black/40 focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200"
+              className="w-full h-[36px] rounded-md border border-zinc-300 pl-9 pr-3 text-[12.5px] text-black placeholder:text-black/40 focus:border-IMSLightGreen focus:outline-none dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200"
             />
           </div>
           <div className="w-[150px] shrink-0">
@@ -505,7 +505,7 @@ export default function People() {
             </span>
             <span className="ml-auto flex items-center gap-3.5 text-[12px] text-black/50 dark:text-zinc-500">
               <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />{" "}
+                <span className="h-1.5 w-1.5 rounded-full bg-IMSLightGreen" />{" "}
                 Online
               </span>
               <span className="flex items-center gap-1.5">
@@ -566,7 +566,7 @@ export default function People() {
             <div className="rounded-lg bg-white p-7 shadow-sm shadow-light dark:bg-zinc-900/60">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="flex capitalize flex-wrap items-center gap-2.5 text-2xl font-bold leading-tight text-black dark:text-zinc-100">
+                  <div className="flex capitalize flex-wrap items-center gap-2.5 text-[19px] font-bold leading-tight text-black dark:text-zinc-100">
                     {selected.name}
                     {isSelf && (
                       <span className="rounded-full border border-zinc-200 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-black/60 dark:border-zinc-700 dark:text-zinc-400">
@@ -574,12 +574,12 @@ export default function People() {
                       </span>
                     )}
                     {isAgent && (
-                      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400">
+                      <span className="rounded-full border border-IMSLightGreen/25 bg-IMSLightGreen/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-IMSLightGreen dark:border-IMSLightGreen/30 dark:bg-IMSLightGreen/10 dark:text-IMSLightGreen">
                         Governed AI agent
                       </span>
                     )}
                   </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2.5 text-[14.5px] text-black/60 dark:text-zinc-400">
+                  <div className="mt-2 flex flex-wrap items-center gap-2.5 text-[13px] text-black/60 dark:text-zinc-400">
                     <b className="font-semibold text-black dark:text-zinc-200">
                       {selected.title}
                     </b>
@@ -607,7 +607,7 @@ export default function People() {
                   {isAgent && adminUnlocked && (
                     <button
                       onClick={() => toast("Opening Ezra configuration")}
-                      className="rounded-lg border border-zinc-300 px-3 py-1.5 text-[12px] text-black hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-200"
+                      className="rounded-lg border border-zinc-300 px-3 py-1.5 text-[12px] text-black hover:border-IMSLightGreen hover:text-IMSLightGreen dark:border-zinc-700 dark:text-zinc-200"
                     >
                       Configure agent
                     </button>
@@ -615,7 +615,7 @@ export default function People() {
                   {!isAgent && isSelf && !editingSelf && (
                     <button
                       onClick={() => startEdit(selected)}
-                      className="rounded-lg border border-zinc-300 px-3 py-1.5 text-[12px] text-black hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-200"
+                      className="rounded-lg border border-zinc-300 px-3 py-1.5 text-[12px] text-black hover:border-IMSLightGreen hover:text-IMSLightGreen dark:border-zinc-700 dark:text-zinc-200"
                     >
                       Edit profile
                     </button>
@@ -624,7 +624,7 @@ export default function People() {
                     <>
                       <button
                         onClick={saveDetails}
-                        className="rounded-lg bg-emerald-600 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-emerald-700"
+                        className="rounded-lg bg-IMSLightGreen px-3 py-1.5 text-[12px] font-medium text-white hover:bg-[#1a8a47]"
                       >
                         Save changes
                       </button>
@@ -639,16 +639,16 @@ export default function People() {
                 </div>
               </div>
               {isAgent && (
-                <div className="mt-4 flex items-center gap-3 rounded-lg bg-emerald-50 px-3.5 py-2.5 dark:bg-emerald-500/10">
+                <div className="mt-4 flex items-center gap-3 rounded-lg bg-IMSLightGreen/10 px-3.5 py-2.5 dark:bg-IMSLightGreen/10">
                   <ShieldCheck
                     size={16}
-                    className="shrink-0 text-emerald-600 dark:text-emerald-400"
+                    className="shrink-0 text-IMSLightGreen dark:text-IMSLightGreen"
                   />
                   <div>
                     <div className="text-[12px] font-semibold text-black dark:text-zinc-200">
                       Runs under delegated authority — never its own
                     </div>
-                    <div className="text-[11px] text-emerald-700 dark:text-emerald-400">
+                    <div className="text-[11px] text-IMSLightGreen dark:text-IMSLightGreen">
                       RBAC-scoped · secrets denied · every action approved &amp;
                       audited
                     </div>
@@ -676,12 +676,12 @@ export default function People() {
                       "inline-flex items-center gap-2",
                       (s.availability === "Available" ||
                         s.availability === "Online") &&
-                        "text-emerald-600 dark:text-emerald-400",
+                        "text-IMSLightGreen dark:text-IMSLightGreen",
                     )}
                   >
                     {(s.availability === "Available" ||
                       s.availability === "Online") && (
-                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="h-2 w-2 rounded-full bg-IMSLightGreen" />
                     )}
                     {s.availability}
                   </span>
@@ -753,7 +753,7 @@ export default function People() {
                               key={k}
                               className="flex items-center justify-between gap-4 border-b border-zinc-100 py-3.5 last:border-b-0 dark:border-zinc-800"
                             >
-                              <span className="shrink-0 text-[13.5px] text-black/55 dark:text-zinc-500">
+                              <span className="shrink-0 text-[12.5px] text-black/55 dark:text-zinc-500">
                                 {k}
                               </span>
                               {editable ? (
@@ -765,10 +765,10 @@ export default function People() {
                                       [k]: e.target.value,
                                     }))
                                   }
-                                  className="w-[56%] max-w-[230px] rounded-lg border border-zinc-300 px-2.5 py-1.5 text-right text-[14px] text-black focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                                  className="w-[56%] max-w-[230px] rounded-lg border border-zinc-300 px-2.5 py-1.5 text-right text-[13px] text-black focus:border-IMSLightGreen focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                                 />
                               ) : (
-                                <span className="inline-flex items-center gap-2 text-[15px] font-semibold text-black dark:text-zinc-200">
+                                <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-black dark:text-zinc-200">
                                   {v} <ManagedBadge />
                                 </span>
                               )}
@@ -1032,7 +1032,7 @@ export default function People() {
                             "rounded-lg border px-3 py-1.5 text-[12px] font-medium transition-colors",
                             danger
                               ? "border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10"
-                              : "border-zinc-300 text-black hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-200",
+                              : "border-zinc-300 text-black hover:border-IMSLightGreen hover:text-IMSLightGreen dark:border-zinc-700 dark:text-zinc-200",
                           )}
                         >
                           {label}
@@ -1102,7 +1102,7 @@ function PersonRow({
 }) {
   const dotTone =
     p.status === "online"
-      ? "bg-emerald-500"
+      ? "bg-IMSLightGreen"
       : p.status === "away"
         ? "bg-amber-500"
         : p.status === "disabled"
@@ -1120,7 +1120,7 @@ function PersonRow({
     >
       <span
         className={cn(
-          "flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-[15px] font-semibold",
+          "flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-[13px] font-semibold",
           p.kind === "agent"
             ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
             : "border border-zinc-200 bg-white text-black/70 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300",
@@ -1129,10 +1129,10 @@ function PersonRow({
         {p.initials}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-1.5 text-[14.5px] font-semibold leading-tight text-black dark:text-zinc-100">
+        <span className="flex items-center gap-1.5 text-[13px] font-semibold leading-tight text-black dark:text-zinc-100">
           <span className="truncate">{p.name}</span>
           {p.kind === "agent" && (
-            <span className="shrink-0 rounded-md bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-sky-700 dark:bg-sky-500/15 dark:text-sky-400">
+            <span className="shrink-0 rounded-md bg-IMSLightGreen/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-IMSLightGreen dark:bg-IMSLightGreen/15 dark:text-IMSLightGreen">
               AI
             </span>
           )}
