@@ -1,6 +1,8 @@
 "use client";
 
 import PricingHero from "@/components/IMS/pricing/Hero";
+import { useFetch } from "@/hooks/useFetch";
+import useAuthStore from "@/lib/stores/auth.store";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -159,8 +161,11 @@ function BillingToggle({
 
 function Calculator() {
   const router = useRouter();
+  const { user } = useAuthStore();
+  const { post } = useFetch();
   const [annual, setAnnual] = useState(false);
   const [planKey, setPlanKey] = useState<PlanKey>("growth");
+  const [ctaLoading, setCtaLoading] = useState(false);
   const [team, setTeam] = useState(25);
   const [inc, setInc] = useState(75);
   const [exec, setExec] = useState(250);
@@ -198,6 +203,46 @@ function Calculator() {
     setPlanKey(key);
     setInc(PLANS[key].incIncluded);
     setExec(PLANS[key].execIncluded);
+  };
+
+  const handleCalcCta = async () => {
+    const billing = annual ? "year" : "month";
+    if (planKey === "starter") {
+      if (user) {
+        router.push(`${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`);
+      } else {
+        router.push("/auth/business-signup");
+      }
+      return;
+    }
+    if (planKey === "enterprise") {
+      return; // handled by cal.com elsewhere
+    }
+    const planType = planKey === "scale" ? "professional" : planKey;
+    if (user) {
+      setCtaLoading(true);
+      try {
+        const res = await post("/pricing/checkout/create-session", {
+          planType,
+          billingCycle: billing,
+          successUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`,
+          cancelUrl: window.location.href,
+        });
+        if (res.success) {
+          window.location.href = res.data.data.url;
+        } else {
+          alert(typeof res.data === "string" ? res.data : "Checkout failed. Please try again.");
+        }
+      } catch {
+        alert("Something went wrong. Please try again.");
+      } finally {
+        setCtaLoading(false);
+      }
+    } else {
+      localStorage.setItem("scrubbe_plan_intent", JSON.stringify({ planType, billingCycle: billing }));
+      const cb = encodeURIComponent(`${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`);
+      router.push(`/auth/signin?callbackUrl=${cb}`);
+    }
   };
 
   return (
@@ -380,11 +425,12 @@ function Calculator() {
             </div>
 
             <button
-              onClick={() => router.push(`/auth/business-signup?plan=${planKey}&billing=${annual ? "yearly" : "monthly"}`)}
-              className="w-full py-3.5 rounded-xl bg-[#00D26A] text-white font-semibold text-[15px] cursor-pointer border-0"
+              onClick={handleCalcCta}
+              disabled={ctaLoading}
+              className="w-full py-3.5 rounded-xl bg-[#00D26A] text-white font-semibold text-[15px] cursor-pointer border-0 disabled:opacity-70"
               style={{ boxShadow: "0 4px 14px rgba(0,210,106,.22)" }}
             >
-              Start free trial
+              {ctaLoading ? "Redirecting…" : "Start free trial"}
             </button>
           </div>
 
@@ -737,19 +783,55 @@ const TIERS = [
 
 function Tiers() {
   const router = useRouter();
+  const { user } = useAuthStore();
+  const { post } = useFetch();
   const [annual, setAnnual] = useState(false);
+  const [ctaLoading, setCtaLoading] = useState<string | null>(null);
   const disc = annual ? 0.8 : 1;
 
-  const handleTierCta = (key: string) => {
-    const billing = annual ? "yearly" : "monthly";
+  const handleTierCta = async (key: string) => {
+    const billing = annual ? "year" : "month";
+
+    // Enterprise/scale book-demo — handled by cal.com data attributes; nothing extra
+    if (key === "enterprise" || key === "scale") return;
+
     if (key === "starter") {
-      router.push("/auth/business-signup");
-    } else if (key === "growth") {
-      router.push(`/auth/business-signup?plan=growth&billing=${billing}`);
-    } else if (key === "scale") {
-      router.push(`/auth/business-signup?plan=pro&billing=${billing}`);
+      if (user) {
+        router.push(`${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`);
+      } else {
+        router.push("/auth/business-signup");
+      }
+      return;
     }
-    // enterprise/book-demo handled via cal.com data attributes
+
+    const planType = key; // "growth" → "growth", others map as needed
+
+    if (user) {
+      // Logged-in: hit checkout API directly
+      setCtaLoading(key);
+      try {
+        const res = await post("/pricing/checkout/create-session", {
+          planType,
+          billingCycle: billing,
+          successUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`,
+          cancelUrl: window.location.href,
+        });
+        if (res.success) {
+          window.location.href = res.data.data.url;
+        } else {
+          alert(typeof res.data === "string" ? res.data : "Checkout failed. Please try again.");
+        }
+      } catch {
+        alert("Something went wrong. Please try again.");
+      } finally {
+        setCtaLoading(null);
+      }
+    } else {
+      // Not logged in: save intent → redirect to signin
+      localStorage.setItem("scrubbe_plan_intent", JSON.stringify({ planType, billingCycle: billing }));
+      const cb = encodeURIComponent(`${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`);
+      router.push(`/auth/signin?callbackUrl=${cb}`);
+    }
   };
 
   return (
@@ -870,10 +952,11 @@ function Tiers() {
 
                 <button
                   onClick={() => handleTierCta(t.key)}
+                  disabled={ctaLoading === t.key}
                   data-cal-namespace={t.key === "enterprise" || t.key === "scale" ? "hero-demo" : undefined}
                   data-cal-link={t.key === "enterprise" || t.key === "scale" ? "scrubbe/decision-system-demo" : undefined}
                   data-cal-config={t.key === "enterprise" || t.key === "scale" ? '{"layout":"month_view","theme":"light"}' : undefined}
-                  className={`w-full px-4 py-3 rounded-[10px] font-semibold text-sm cursor-pointer mt-auto transition-all ${
+                  className={`w-full px-4 py-3 rounded-[10px] font-semibold text-sm cursor-pointer mt-auto transition-all disabled:opacity-70 ${
                     t.ctaP
                       ? "bg-[#00D26A] text-white border-0"
                       : "bg-white text-[#0A1F14] border border-[#E5EAE7] hover:border-[#00D26A]"
@@ -884,7 +967,7 @@ function Tiers() {
                       : undefined
                   }
                 >
-                  {t.cta}
+                  {ctaLoading === t.key ? "Redirecting…" : t.cta}
                 </button>
               </div>
             );

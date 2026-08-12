@@ -56,9 +56,10 @@ const Plan = () => {
       ?.filter((value: any) => value.billingCycle === cycle[billingCycle])
       ?.map((value: any) => {
         const feature = Object.entries(value.values).filter(([key, items]) => {
-          if (features.includes(key) && items !== "❌") {
-            return items;
-          }
+          if (!features.includes(key)) return false;
+          const v = items as any;
+          if (!v || v === "❌" || v === "No" || v === false || v === "false") return false;
+          return true;
         });
 
         return {
@@ -71,25 +72,51 @@ const Plan = () => {
   }, [data, billingCycle]);
 
   const handlePayment = async (plan: any) => {
-    if (plan) {
-      const data = {
+    if (!plan) return;
+    setLoading(plan.type);
+
+    try {
+      // Free plan — subscribe directly, no Stripe checkout needed
+      if (plan.values.Price === 0 || plan.values.Price === "0" || plan.type === "starter") {
+        const res = await post(endpoint.plans.create_subscription, { planId: plan.id });
+        setLoading("");
+        if (res.status === 401) {
+          toast.error("Please sign in to continue");
+          router.push("/auth/signin?to=payment");
+          return;
+        }
+        if (res.success) {
+          toast.success("Free plan activated!");
+          router.refresh();
+        } else {
+          toast.error(typeof res.data === "string" ? res.data : "Failed to activate free plan");
+        }
+        return;
+      }
+
+      // Paid plan — open Stripe checkout
+      const res = await post(endpoint.plans.create_session, {
         planType: plan.type,
         billingCycle: plan.billingCycle,
         quantity: agent > 0 ? agent : 1,
         successUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`,
         cancelUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`,
-      };
-      setLoading(plan.type);
-      const res = await post(endpoint.plans.create_session, data);
+      });
       setLoading("");
+
       if (res.status === 401) {
-        toast.error("Please signup to continue");
+        toast.error("Please sign in to continue");
         router.push("/auth/signin?to=payment");
         return;
       }
       if (res.success) {
         window.location.href = res.data.data.url;
+      } else {
+        toast.error(typeof res.data === "string" ? res.data : "Checkout failed. Please try again.");
       }
+    } catch {
+      setLoading("");
+      toast.error("Something went wrong. Please try again.");
     }
   };
   return (
@@ -114,7 +141,9 @@ const Plan = () => {
               </p>
               <p className=" text-[#4A4187] font-bold text-2xl">
                 {" "}
-                {typeof selectPlan?.values.Price === "string"
+                {selectPlan?.values.Price === 0 || selectPlan?.values.Price === "0"
+                  ? "Free forever"
+                  : typeof selectPlan?.values.Price === "string"
                   ? `${selectPlan?.values.Price} (+14 days free trial on request)`
                   : `$${
                       Number(agent) < 1
@@ -122,7 +151,7 @@ const Plan = () => {
                         : Number(
                             selectPlan?.values.Price * agent
                           ).toLocaleString()
-                    }/agent/${billingCycle}(+14 days free trial)`}
+                    }/agent/${billingCycle} (+14 days free trial)`}
               </p>
 
               <div>
@@ -147,18 +176,24 @@ const Plan = () => {
             type="number"
             onChange={(e) => setAgent(e.target.value)}
           />
-          <div className="flex justify-between items-center mb-2">
-            <p>{billingCycle} Total</p>
-            <p className=" font-semibold">
-              ${Number(selectPlan.values.Price) * agent}
-            </p>
-          </div>
+          {selectPlan.values.Price !== 0 && selectPlan.values.Price !== "0" && (
+            <div className="flex justify-between items-center mb-2">
+              <p>{billingCycle} Total</p>
+              <p className=" font-semibold">
+                ${Number(selectPlan.values.Price) * agent}
+              </p>
+            </div>
+          )}
           <button
             onClick={() => handlePayment(selectPlan)}
             disabled={loading === selectPlan?.type}
             className="bg-IMSLightGreen hover:bg-IMSDarkGreen text-white  font-semibold py-2 px-4 rounded transition-colors duration-200 w-full text-nowrap"
           >
-            Proceed to Payment
+            {loading === selectPlan?.type
+              ? "Processing..."
+              : selectPlan.values.Price === 0 || selectPlan.values.Price === "0"
+              ? "Get Started Free"
+              : "Proceed to Payment"}
           </button>
         </div>
       ) : (
@@ -204,7 +239,9 @@ const Plan = () => {
                   </p>
                   <p className=" text-[#4A4187] font-bold text-2xl">
                     {" "}
-                    {typeof value?.values.Price === "string"
+                    {value?.values.Price === 0 || value?.values.Price === "0"
+                      ? "Free forever"
+                      : typeof value?.values.Price === "string"
                       ? `${value?.values.Price} (+14 days free trial on request)`
                       : `$${
                           Number(agent) < 1
@@ -212,7 +249,7 @@ const Plan = () => {
                             : Number(
                                 value?.values.Price * agent
                               ).toLocaleString()
-                        }/agent/${billingCycle}(+14 days free trial)`}
+                        }/agent/${billingCycle} (+14 days free trial)`}
                   </p>
 
                   <div>
@@ -236,7 +273,9 @@ const Plan = () => {
                   disabled={loading === value?.type}
                   className="bg-IMSLightGreen hover:bg-IMSDarkGreen text-white  font-semibold py-2 px-4 rounded transition-colors duration-200 w-full text-nowrap"
                 >
-                  Upgrade to <span className=" capitalize">{value?.type}</span>
+                  {value?.values.Price === 0 || value?.values.Price === "0"
+                    ? "Get Started Free"
+                    : <>Upgrade to <span className=" capitalize">{value?.type}</span></>}
                 </button>
               </div>
             ))}

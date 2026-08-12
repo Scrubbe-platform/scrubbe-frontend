@@ -7,7 +7,7 @@ import { endpoint } from "@/lib/api/endpoint";
 import useAuthStore from "@/lib/stores/auth.store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const Page = () => {
@@ -30,6 +30,31 @@ const Page = () => {
       return null;
     },
   });
+
+  // Auto-checkout if user was redirected here after login with a stored plan intent
+  useEffect(() => {
+    const raw = localStorage.getItem("scrubbe_plan_intent");
+    if (!raw || !user) return;
+    try {
+      const intent = JSON.parse(raw) as { planType: string; billingCycle: string };
+      localStorage.removeItem("scrubbe_plan_intent");
+      post(endpoint.plans.create_session, {
+        planType: intent.planType,
+        billingCycle: intent.billingCycle,
+        successUrl: `${window.location.origin}/incident/billings`,
+        cancelUrl: `${window.location.origin}/incident/billings`,
+      }).then((res) => {
+        if (res.success) {
+          window.location.href = res.data.data.url;
+        } else {
+          toast.error("Could not start checkout. Please try again from the billing page.");
+        }
+      });
+    } catch {
+      localStorage.removeItem("scrubbe_plan_intent");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const openBillingPortal = async () => {
     setPortalLoading(true);
