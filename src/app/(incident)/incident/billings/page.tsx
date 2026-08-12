@@ -194,7 +194,7 @@ const Page = () => {
         </div>
       </div>
 
-      <Modal onClose={() => setOpenPlan(false)} isOpen={openPlan}>
+      <Modal onClose={() => setOpenPlan(false)} isOpen={openPlan} className="sm:max-w-2xl">
         <Plan />
       </Modal>
     </div>
