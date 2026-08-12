@@ -454,20 +454,21 @@ const Plan = () => {
                         )}
                       </div>
 
-                      {/* Feature pills */}
+                      {/* Feature list */}
                       {value?.feature && value.feature.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5">
                           {value.feature.slice(0, 3).map((f: string) => (
                             <span
                               key={f}
-                              className="text-[10px] px-2 py-0.5 rounded bg-white/6 text-white/40 border border-white/8"
+                              className="text-[10px] text-white/45 flex items-center gap-1"
                             >
+                              <span className="text-[#02DD86]/50 text-[8px]">●</span>
                               {f}
                             </span>
                           ))}
                           {value.feature.length > 3 && (
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-white/6 text-white/30">
-                              +{value.feature.length - 3}
+                            <span className="text-[10px] text-white/25">
+                              +{value.feature.length - 3} more
                             </span>
                           )}
                         </div>
