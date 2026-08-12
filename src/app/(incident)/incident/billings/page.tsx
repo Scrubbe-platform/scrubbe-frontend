@@ -7,16 +7,25 @@ import { endpoint } from "@/lib/api/endpoint";
 import useAuthStore from "@/lib/stores/auth.store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const Page = () => {
   const [openPlan, setOpenPlan] = useState(false);
+  const searchParams = useSearchParams();
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
   const { get, patch, post } = useFetch();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
+
+  // Auto-open Plan modal when redirected from pricing page with ?plan= param
+  useEffect(() => {
+    if (searchParams.get("plan")) {
+      setOpenPlan(true);
+    }
+  }, [searchParams]);
 
   const { data } = useQuery({
     queryKey: ["SUBSCRIPTION"],

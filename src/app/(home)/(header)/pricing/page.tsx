@@ -804,34 +804,14 @@ function Tiers() {
       return;
     }
 
-    const planType = key; // "growth" → "growth", others map as needed
-
-    if (user) {
-      // Logged-in: hit checkout API directly
-      setCtaLoading(key);
-      try {
-        const res = await post("/pricing/checkout/create-session", {
-          planType,
-          billingCycle: billing,
-          successUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`,
-          cancelUrl: window.location.href,
-        });
-        if (res.success) {
-          window.location.href = res.data.data.url;
-        } else {
-          alert(typeof res.data === "string" ? res.data : "Checkout failed. Please try again.");
-        }
-      } catch {
-        alert("Something went wrong. Please try again.");
-      } finally {
-        setCtaLoading(null);
-      }
-    } else {
-      // Not logged in: save intent → redirect to signin
-      localStorage.setItem("scrubbe_plan_intent", JSON.stringify({ planType, billingCycle: billing }));
-      const cb = encodeURIComponent(`${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`);
-      router.push(`/auth/signin?callbackUrl=${cb}`);
-    }
+    // Always redirect to the billings page with plan intent in the URL.
+    // Calling the checkout API from scrubbe.com causes cross-domain auth issues
+    // (token lives in incidents.scrubbe.com localStorage, not here).
+    // The billings page is the authenticated context where checkout works reliably.
+    const incidentBase = process.env.NEXT_PUBLIC_INCIDENT_URL;
+    const billingUrl = `${incidentBase}/incident/billings?plan=${key}&billing=${billing}`;
+    setCtaLoading(key);
+    window.location.href = billingUrl;
   };
 
   return (

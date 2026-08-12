@@ -96,7 +96,8 @@ const Plan = () => {
 
       // Paid plan — open Stripe checkout
       const res = await post(endpoint.plans.create_session, {
-        planType: plan.type,
+        planId: plan.id,        // primary key — server resolves by ID first
+        planType: plan.type,    // fallback
         billingCycle: plan.billingCycle,
         quantity: agent > 0 ? agent : 1,
         successUrl: `${process.env.NEXT_PUBLIC_INCIDENT_URL}/incident/billings`,
