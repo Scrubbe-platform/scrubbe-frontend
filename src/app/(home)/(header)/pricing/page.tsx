@@ -2,6 +2,7 @@
 
 import PricingHero from "@/components/IMS/pricing/Hero";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 // ─────────────────────────────────────────────────────────────────
 // Data
@@ -157,6 +158,7 @@ function BillingToggle({
 // ─────────────────────────────────────────────────────────────────
 
 function Calculator() {
+  const router = useRouter();
   const [annual, setAnnual] = useState(false);
   const [planKey, setPlanKey] = useState<PlanKey>("growth");
   const [team, setTeam] = useState(25);
@@ -378,6 +380,7 @@ function Calculator() {
             </div>
 
             <button
+              onClick={() => router.push(`/auth/business-signup?plan=${planKey}&billing=${annual ? "yearly" : "monthly"}`)}
               className="w-full py-3.5 rounded-xl bg-[#00D26A] text-white font-semibold text-[15px] cursor-pointer border-0"
               style={{ boxShadow: "0 4px 14px rgba(0,210,106,.22)" }}
             >
@@ -733,8 +736,21 @@ const TIERS = [
 ];
 
 function Tiers() {
+  const router = useRouter();
   const [annual, setAnnual] = useState(false);
   const disc = annual ? 0.8 : 1;
+
+  const handleTierCta = (key: string) => {
+    const billing = annual ? "yearly" : "monthly";
+    if (key === "starter") {
+      router.push("/auth/business-signup");
+    } else if (key === "growth") {
+      router.push(`/auth/business-signup?plan=growth&billing=${billing}`);
+    } else if (key === "scale") {
+      router.push(`/auth/business-signup?plan=pro&billing=${billing}`);
+    }
+    // enterprise/book-demo handled via cal.com data attributes
+  };
 
   return (
     <section className="py-16 md:py-24">
@@ -853,6 +869,10 @@ function Tiers() {
                 </ul>
 
                 <button
+                  onClick={() => handleTierCta(t.key)}
+                  data-cal-namespace={t.key === "enterprise" || t.key === "scale" ? "hero-demo" : undefined}
+                  data-cal-link={t.key === "enterprise" || t.key === "scale" ? "scrubbe/decision-system-demo" : undefined}
+                  data-cal-config={t.key === "enterprise" || t.key === "scale" ? '{"layout":"month_view","theme":"light"}' : undefined}
                   className={`w-full px-4 py-3 rounded-[10px] font-semibold text-sm cursor-pointer mt-auto transition-all ${
                     t.ctaP
                       ? "bg-[#00D26A] text-white border-0"
@@ -1221,6 +1241,7 @@ function ValueReframe() {
 // ─────────────────────────────────────────────────────────────────
 
 function FinalCta() {
+  const router = useRouter();
   return (
     <section className="py-18 md:py-[100px] text-center">
       <div className="max-w-[1200px] mx-auto px-6">
@@ -1235,6 +1256,7 @@ function FinalCta() {
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
           <button
+            onClick={() => router.push("/auth/business-signup")}
             className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl bg-[#00D26A] text-white font-semibold text-[15px] cursor-pointer border-0"
             style={{ boxShadow: "0 4px 14px rgba(0,210,106,.22)" }}
           >

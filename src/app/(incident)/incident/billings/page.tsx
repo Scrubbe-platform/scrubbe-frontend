@@ -13,7 +13,8 @@ import toast from "react-hot-toast";
 const Page = () => {
   const [openPlan, setOpenPlan] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
-  const { get, patch } = useFetch();
+  const [portalLoading, setPortalLoading] = useState(false);
+  const { get, patch, post } = useFetch();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
 
@@ -29,6 +30,24 @@ const Page = () => {
       return null;
     },
   });
+
+  const openBillingPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const res = await post("/pricing/billing-portal", {
+        returnUrl: `${window.location.origin}/incident/billings`,
+      });
+      if (res.success && res.data?.data?.url) {
+        window.location.href = res.data.data.url;
+      } else {
+        toast.error("Could not open billing portal");
+      }
+    } catch {
+      toast.error("Failed to open billing portal");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   const cancelMutation = useMutation({
     mutationFn: async () => {
@@ -124,9 +143,20 @@ const Page = () => {
           ) : (
             <p className="text-sm text-rose-500 font-medium">Cancellation scheduled</p>
           )}
-          <CButton className=" !w-fit" onClick={() => setOpenPlan(true)}>
-            Upgrade Plan
-          </CButton>
+          <div className="flex items-center gap-2">
+            {data?.plan && data.plan.type !== "starter" && (
+              <CButton
+                onClick={openBillingPortal}
+                disabled={portalLoading}
+                className="!w-fit bg-transparent border border-IMSLightGreen text-IMSLightGreen hover:bg-transparent shadow-none text-sm"
+              >
+                {portalLoading ? "Opening..." : "Manage Billing"}
+              </CButton>
+            )}
+            <CButton className=" !w-fit" onClick={() => setOpenPlan(true)}>
+              Upgrade Plan
+            </CButton>
+          </div>
         </div>
       </div>
 
