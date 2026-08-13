@@ -119,6 +119,45 @@ function Slider({
   );
 }
 
+// Reference ticks positioned at their true percentage along [min, max] —
+// NOT evenly spaced in pixels — so a tick's position always matches where
+// that value actually sits on the slider above it.
+function SliderScale({
+  min,
+  max,
+  points,
+}: {
+  min: number;
+  max: number;
+  points: { value: number; label: string }[];
+}) {
+  return (
+    <div className="relative h-4 mt-2.5 text-xs text-[#5B6B62]">
+      {points.map(({ value, label }, i) => {
+        const pct = ((value - min) / (max - min)) * 100;
+        const isFirst = i === 0;
+        const isLast = i === points.length - 1;
+        return (
+          <span
+            key={label}
+            className="absolute whitespace-nowrap"
+            style={{
+              left: `${pct}%`,
+              transform: isFirst
+                ? "translateX(0)"
+                : isLast
+                ? "translateX(-100%)"
+                : "translateX(-50%)",
+            }}
+          >
+            {label}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 function BillingToggle({
   annual,
   onChange,
@@ -174,8 +213,8 @@ function Calculator() {
   const disc = annual ? 0.8 : 1;
   const platform = plan.platform * disc;
   const users = team * plan.perUser * disc;
-  const incOver = Math.max(0, inc - plan.incIncluded) * plan.incOver * disc;
-  const execOver = Math.max(0, exec - plan.execIncluded) * plan.execOver * disc;
+  const incOver = Math.max(0, inc - plan.incIncluded) * plan.incOver;
+  const execOver = Math.max(0, exec - plan.execIncluded) * plan.execOver;
   const total = platform + users + incOver + execOver;
 
   const incI =
@@ -214,9 +253,6 @@ function Calculator() {
         router.push("/auth/business-signup");
       }
       return;
-    }
-    if (planKey === "enterprise") {
-      return; // handled by cal.com elsewhere
     }
     const planType = planKey === "scale" ? "professional" : planKey;
     if (user) {
@@ -296,12 +332,16 @@ function Calculator() {
                 </span>
               </div>
               <Slider value={team} min={1} max={500} onChange={setTeam} />
-              <div className="flex justify-between mt-2.5 text-xs text-[#5B6B62]">
-                <span>1</span>
-                <span>50</span>
-                <span>200</span>
-                <span>500+</span>
-              </div>
+              <SliderScale
+                min={1}
+                max={500}
+                points={[
+                  { value: 1, label: "1" },
+                  { value: 50, label: "50" },
+                  { value: 200, label: "200" },
+                  { value: 500, label: "500+" },
+                ]}
+              />
             </div>
 
             {/* Incidents */}
@@ -314,13 +354,17 @@ function Calculator() {
                   <strong className="text-[#00A855]">{inc}</strong> / month
                 </span>
               </div>
-              <Slider value={inc} min={10} max={500} onChange={setInc} />
-              <div className="flex justify-between mt-2.5 text-xs text-[#5B6B62]">
-                <span>10</span>
-                <span>100</span>
-                <span>250</span>
-                <span>500</span>
-              </div>
+              <Slider value={inc} min={10} max={1000} onChange={setInc} />
+              <SliderScale
+                min={10}
+                max={1000}
+                points={[
+                  { value: 10, label: "10" },
+                  { value: 250, label: "250" },
+                  { value: 500, label: "500" },
+                  { value: 1000, label: "1,000" },
+                ]}
+              />
               <div className="flex flex-wrap items-center gap-2.5 mt-3 text-sm">
                 <span className="text-[#5B6B62]">Intensity:</span>
                 <span
@@ -345,12 +389,17 @@ function Calculator() {
                   month
                 </span>
               </div>
-              <Slider value={exec} min={0} max={2000} onChange={setExec} />
-              <div className="flex justify-between mt-2.5 text-xs text-[#5B6B62]">
-                <span>Safe (manual)</span>
-                <span>Balanced</span>
-                <span>Highly automated</span>
-              </div>
+              <Slider value={exec} min={0} max={5000} onChange={setExec} />
+              <SliderScale
+                min={0}
+                max={5000}
+                points={[
+                  { value: 0, label: "0" },
+                  { value: 1000, label: "1,000" },
+                  { value: 2500, label: "2,500" },
+                  { value: 5000, label: "5,000" },
+                ]}
+              />
               <div className="flex flex-wrap items-center gap-2.5 mt-3 text-sm">
                 <span className="text-[#5B6B62]">Posture:</span>
                 <span
@@ -373,65 +422,106 @@ function Calculator() {
               <span className="w-2 h-2 rounded-full bg-[#00D26A] inline-block" />
               {plan.name}
             </div>
-            <h3 className="text-sm text-[#5B6B62] mt-3.5 font-medium">
-              {annual ? "Estimated yearly" : "Estimated monthly"}
-            </h3>
-            <div className="text-5xl font-extrabold tracking-tight mt-2 mb-1 leading-none text-[#0A1F14]">
-              <span className="text-[28px] align-top mr-0.5 text-[#5B6B62]">
-                $
-              </span>
-              {Math.round(total).toLocaleString()}
-            </div>
-            <p className="text-sm text-[#5B6B62]">
-              {annual
-                ? "per year, billed annually"
-                : "per month, billed monthly"}
-            </p>
-
-            <div className="my-6 border-t border-dashed border-[#E5EAE7] pt-5 space-y-1.5">
-              {[
-                { label: "Platform", amt: fmt(platform) },
-                {
-                  label: `Users (${team >= 500 ? "500+" : team})`,
-                  amt: fmt(users),
-                },
-                { label: "Incident overage", amt: fmt(incOver) },
-                { label: "Execution overage", amt: fmt(execOver) },
-              ].map(({ label, amt }) => (
-                <div
-                  key={label}
-                  className="flex justify-between py-1.5 text-sm"
-                >
-                  <span className="text-[#5B6B62]">{label}</span>
-                  <span className="font-mono font-semibold text-[#0A1F14]">
-                    {amt}
-                  </span>
+            {planKey === "enterprise" ? (
+              <>
+                <h3 className="text-sm text-[#5B6B62] mt-3.5 font-medium">
+                  Custom pricing
+                </h3>
+                <div className="text-4xl font-extrabold tracking-tight mt-2 mb-1 leading-none text-[#0A1F14]">
+                  Let&apos;s talk
                 </div>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-between px-4 py-3 bg-[#FAFBFA] rounded-xl mb-4 border border-[#E5EAE7]">
-              <div>
-                <p className="font-semibold text-sm text-[#0A1F14]">
-                  {annual ? "Yearly billing selected" : "Annual option"}
+                <p className="text-sm text-[#5B6B62]">
+                  Enterprise pricing is negotiated around your incident
+                  volume, execution needs, deployment model, and compliance
+                  requirements.
                 </p>
-                <p className="text-xs text-[#5B6B62] mt-0.5">
-                  Switch to yearly for {fmt(plan.platform * 0.8)}/mo ·{" "}
-                  <span className="bg-[#00D26A] text-white px-2 py-0.5 rounded text-[11px] font-bold">
-                    SAVE 20%
+
+                <div className="my-6 border-t border-dashed border-[#E5EAE7] pt-5 space-y-2.5">
+                  {[
+                    "Custom incident volume (500–5,000+)",
+                    "Custom execution pricing ($0.20–$0.40)",
+                    "Dedicated control plane + on-prem/VPC deployment",
+                  ].map((t) => (
+                    <div key={t} className="flex items-start gap-2.5">
+                      <CheckIcon />
+                      <span className="text-sm text-[#1A2E22]">{t}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  data-cal-namespace="hero-demo"
+                  data-cal-link="scrubbe/decision-system-demo"
+                  data-cal-config='{"layout":"month_view","theme":"light"}'
+                  className="w-full py-3.5 rounded-xl bg-[#00D26A] text-white font-semibold text-[15px] cursor-pointer border-0"
+                  style={{ boxShadow: "0 4px 14px rgba(0,210,106,.22)" }}
+                >
+                  Book a call
+                </button>
+              </>
+            ) : (
+              <>
+                <h3 className="text-sm text-[#5B6B62] mt-3.5 font-medium">
+                  {annual ? "Estimated yearly" : "Estimated monthly"}
+                </h3>
+                <div className="text-5xl font-extrabold tracking-tight mt-2 mb-1 leading-none text-[#0A1F14]">
+                  <span className="text-[28px] align-top mr-0.5 text-[#5B6B62]">
+                    $
                   </span>
+                  {Math.round(total).toLocaleString()}
+                </div>
+                <p className="text-sm text-[#5B6B62]">
+                  {annual
+                    ? "per year, billed annually"
+                    : "per month, billed monthly"}
                 </p>
-              </div>
-            </div>
 
-            <button
-              onClick={handleCalcCta}
-              disabled={ctaLoading}
-              className="w-full py-3.5 rounded-xl bg-[#00D26A] text-white font-semibold text-[15px] cursor-pointer border-0 disabled:opacity-70"
-              style={{ boxShadow: "0 4px 14px rgba(0,210,106,.22)" }}
-            >
-              {ctaLoading ? "Redirecting…" : "Start free trial"}
-            </button>
+                <div className="my-6 border-t border-dashed border-[#E5EAE7] pt-5 space-y-1.5">
+                  {[
+                    { label: "Platform", amt: fmt(platform) },
+                    {
+                      label: `Users (${team >= 500 ? "500+" : team})`,
+                      amt: fmt(users),
+                    },
+                    { label: "Incident overage", amt: fmt(incOver) },
+                    { label: "Execution overage", amt: fmt(execOver) },
+                  ].map(({ label, amt }) => (
+                    <div
+                      key={label}
+                      className="flex justify-between py-1.5 text-sm"
+                    >
+                      <span className="text-[#5B6B62]">{label}</span>
+                      <span className="font-mono font-semibold text-[#0A1F14]">
+                        {amt}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between px-4 py-3 bg-[#FAFBFA] rounded-xl mb-4 border border-[#E5EAE7]">
+                  <div>
+                    <p className="font-semibold text-sm text-[#0A1F14]">
+                      {annual ? "Yearly billing selected" : "Annual option"}
+                    </p>
+                    <p className="text-xs text-[#5B6B62] mt-0.5">
+                      Switch to yearly for {fmt(plan.platform * 0.8)}/mo ·{" "}
+                      <span className="bg-[#00D26A] text-white px-2 py-0.5 rounded text-[11px] font-bold">
+                        SAVE 20%
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleCalcCta}
+                  disabled={ctaLoading}
+                  className="w-full py-3.5 rounded-xl bg-[#00D26A] text-white font-semibold text-[15px] cursor-pointer border-0 disabled:opacity-70"
+                  style={{ boxShadow: "0 4px 14px rgba(0,210,106,.22)" }}
+                >
+                  {ctaLoading ? "Redirecting…" : "Start free trial"}
+                </button>
+              </>
+            )}
           </div>
 
           {/* ROI strip */}
@@ -482,7 +572,12 @@ function MttrRoi() {
       max: 50,
       set: setEng,
       display: `${eng} engineers`,
-      scale: ["2", "12", "30", "50"],
+      points: [
+        { value: 2, label: "2" },
+        { value: 12, label: "12" },
+        { value: 30, label: "30" },
+        { value: 50, label: "50" },
+      ],
     },
     {
       label: "Incidents per month",
@@ -492,7 +587,12 @@ function MttrRoi() {
       step: 10,
       set: setInc,
       display: `${inc.toLocaleString()} incidents`,
-      scale: ["10", "500", "1,250", "2,000"],
+      points: [
+        { value: 10, label: "10" },
+        { value: 500, label: "500" },
+        { value: 1250, label: "1,250" },
+        { value: 2000, label: "2,000" },
+      ],
     },
     {
       label: "Average MTTR today",
@@ -502,7 +602,12 @@ function MttrRoi() {
       step: 5,
       set: setMttr,
       display: `${mttr} min`,
-      scale: ["15m", "2h", "5h", "8h"],
+      points: [
+        { value: 15, label: "15m" },
+        { value: 120, label: "2h" },
+        { value: 300, label: "5h" },
+        { value: 480, label: "8h" },
+      ],
     },
     {
       label: "Avg engineer hourly cost",
@@ -512,7 +617,12 @@ function MttrRoi() {
       step: 5,
       set: setCost,
       display: `$${cost}/hr`,
-      scale: ["$50", "$125", "$220", "$300"],
+      points: [
+        { value: 50, label: "$50" },
+        { value: 125, label: "$125" },
+        { value: 220, label: "$220" },
+        { value: 300, label: "$300" },
+      ],
     },
   ];
 
@@ -568,7 +678,7 @@ function MttrRoi() {
                   Tune your current incident load
                 </p>
                 <p className="text-sm text-[#5B6B62] mt-1">
-                  The calculator uses Scrubbe's benchmark assumptions as the
+                  The calculator uses Scrubbe&apos;s benchmark assumptions as the
                   baseline.
                 </p>
               </div>
@@ -582,7 +692,7 @@ function MttrRoi() {
             </div>
 
             {controls.map(
-              ({ label, value, min, max, step, set, display, scale }, i) => (
+              ({ label, value, min, max, step, set, display, points }, i) => (
                 <div key={i} className="py-5 border-t border-[#F2F5F3]">
                   <div className="flex flex-wrap justify-between items-baseline gap-4 mb-3.5">
                     <span className="text-[13px] font-extrabold uppercase tracking-[.08em] text-[#1A2E22]">
@@ -599,11 +709,7 @@ function MttrRoi() {
                     step={step ?? 1}
                     onChange={set}
                   />
-                  <div className="flex justify-between mt-2.5 text-xs text-[#5B6B62]">
-                    {scale.map((s) => (
-                      <span key={s}>{s}</span>
-                    ))}
-                  </div>
+                  <SliderScale min={min} max={max} points={points} />
                 </div>
               )
             )}
@@ -696,7 +802,7 @@ const TIERS = [
       "Timeline + audit logs",
       "Manual approvals only",
     ],
-    cta: "Start with Starter",
+    cta: "Start free trial",
     ctaP: false,
     badge: null,
   },
@@ -749,7 +855,7 @@ const TIERS = [
       "Incident replay + simulation",
       "Advanced audit + compliance logs",
     ],
-    cta: "Talk to sales",
+    cta: "Start free trial",
     ctaP: false,
     badge: null,
   },
@@ -792,8 +898,8 @@ function Tiers() {
   const handleTierCta = async (key: string) => {
     const billing = annual ? "year" : "month";
 
-    // Enterprise/scale book-demo — handled by cal.com data attributes; nothing extra
-    if (key === "enterprise" || key === "scale") return;
+    // Enterprise book-demo — handled by cal.com data attributes; nothing extra
+    if (key === "enterprise") return;
 
     if (key === "starter") {
       if (user) {
@@ -870,20 +976,27 @@ function Tiers() {
                 </p>
 
                 <div className="text-[36px] font-extrabold tracking-tight leading-none text-[#0A1F14]">
-                  {t.key === "enterprise" ? "From " : ""}
-                  {fmt(platform)}
-                  <small className="text-[13px] text-[#5B6B62] font-medium">
-                    {" "}
-                    / mo{t.key !== "enterprise" ? " platform" : ""}
-                  </small>
+                  {t.key === "enterprise" ? (
+                    "Custom pricing"
+                  ) : (
+                    <>
+                      {fmt(platform)}
+                      <small className="text-[13px] text-[#5B6B62] font-medium">
+                        {" "}
+                        / mo platform
+                      </small>
+                    </>
+                  )}
                 </div>
                 <div className="min-h-[19px] mt-1.5 text-[12px] font-bold text-[#00A855]">
-                  {annual
+                  {annual && t.key !== "enterprise"
                     ? `Billed yearly: ${fmt(t.mp * 0.8 * 12)} platform / year`
                     : ""}
                 </div>
                 <div className="mt-1 text-[13px] text-[#5B6B62] font-mono">
-                  {t.mu > 0
+                  {t.key === "enterprise"
+                    ? "Let's talk"
+                    : t.mu > 0
                     ? `+ ${fmt(t.mu * disc)} / user / month${
                         annual ? " effective" : ""
                       }`
@@ -933,9 +1046,9 @@ function Tiers() {
                 <button
                   onClick={() => handleTierCta(t.key)}
                   disabled={ctaLoading === t.key}
-                  data-cal-namespace={t.key === "enterprise" || t.key === "scale" ? "hero-demo" : undefined}
-                  data-cal-link={t.key === "enterprise" || t.key === "scale" ? "scrubbe/decision-system-demo" : undefined}
-                  data-cal-config={t.key === "enterprise" || t.key === "scale" ? '{"layout":"month_view","theme":"light"}' : undefined}
+                  data-cal-namespace={t.key === "enterprise" ? "hero-demo" : undefined}
+                  data-cal-link={t.key === "enterprise" ? "scrubbe/decision-system-demo" : undefined}
+                  data-cal-config={t.key === "enterprise" ? '{"layout":"month_view","theme":"light"}' : undefined}
                   className={`w-full px-4 py-3 rounded-[10px] font-semibold text-sm cursor-pointer mt-auto transition-all disabled:opacity-70 ${
                     t.ctaP
                       ? "bg-[#00D26A] text-white border-0"
@@ -1048,7 +1161,7 @@ function UsageExplainer() {
             How usage works
           </h2>
           <p className="text-[17px] text-[#5B6B62] max-w-[580px] mx-auto">
-            Two simple meters. Both are designed so you don't pay for noise.
+            Two simple meters. Both are designed so you don&apos;t pay for noise.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1185,7 +1298,7 @@ const FAQS = [
   },
   {
     q: "Is Enterprise pricing fixed?",
-    a: "Enterprise starts from $6,000 per month. Final pricing depends on incident volume, execution pricing, deployment model, support requirements, compliance controls, and custom user pricing.",
+    a: "No. Enterprise pricing is fully custom and depends on incident volume, execution pricing, deployment model, support requirements, compliance controls, and user pricing. Talk to sales for a quote.",
   },
 ];
 
@@ -1290,7 +1403,7 @@ function ValueReframe() {
         </div>
         <p className="mt-10 pt-7 border-t border-white/10 text-base text-white/70 italic">
           <strong className="not-italic text-white font-semibold">
-            Scrubbe doesn't just detect incidents
+            Scrubbe doesn&apos;t just detect incidents
           </strong>{" "}
           — it controls how they are resolved.
         </p>
@@ -1345,7 +1458,7 @@ function FinalCta() {
 
 export default function PricingPage() {
   return (
-    <main className="font-sans antialiased bg-white text-[#0A1F14]">
+    <main className="font-ibm antialiased bg-white text-[#0A1F14]">
       <PricingHero />
       <div className="max-w-[1200px] mx-auto px-6">
         <Calculator />

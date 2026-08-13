@@ -8,6 +8,8 @@ export interface Member {
   availability: Availability;
   oncall: boolean;
   incidents: number;
+  email?: string;
+  userId?: string;
 }
 
 export const M = (name: string, role: string, availability: Availability, oncall: boolean, incidents: number): Member => ({ name, role, availability, oncall, incidents });

@@ -5,6 +5,7 @@ import { Copy, ShieldCheck, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Select from "@/components/ui/select";
 import Switch from "@/components/ui/Switch";
+import useMember from "@/hooks/useMember";
 import { Availability, EZRA, Group, ITEM_MODULE, Member, RULE_DESC, deriveUser, initialsOf } from "./data";
 import { AvailabilityLabel, KVGrid } from "./sections";
 
@@ -89,17 +90,38 @@ export function TransferManagerForm({ group, onSave, onCancel }: { group: Group;
   );
 }
 
-export function AddMemberForm({ onSave, onCancel }: { onSave: (m: Member) => void; onCancel: () => void }) {
-  const [name, setName] = useState("");
+export function AddMemberForm({ existingEmails, onSave, onCancel }: { existingEmails: string[]; onSave: (m: Member) => void; onCancel: () => void }) {
+  const { data: people = [], isLoading } = useMember();
+  const [selectedEmail, setSelectedEmail] = useState("");
   const [role, setRole] = useState(ROLE_OPTIONS[0]);
   const [availability, setAvailability] = useState<Availability>("Online");
   const [oncall, setOncall] = useState(false);
+
+  const existingSet = new Set(existingEmails.map((e) => e.toLowerCase()));
+  const available = people.filter((p) => !existingSet.has((p.email ?? "").toLowerCase()));
+  const selected = available.find((p) => p.email === selectedEmail);
+
   return (
     <div className="p-4">
       <ModalTitle>Add member</ModalTitle>
       <div className="mt-4 space-y-3.5">
-        <Field label="Name">
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" className={inputCls} />
+        <Field label="Person">
+          <Select
+            value={selectedEmail}
+            onChange={(e) => setSelectedEmail(e.target.value)}
+            options={[
+              { value: "", label: isLoading ? "Loading people…" : "Select a person..." },
+              ...available.map((p) => ({
+                value: p.email,
+                label: `${[p.firstname, p.lastname].filter(Boolean).join(" ") || p.email} (${p.email})`,
+              })),
+            ]}
+          />
+          {!isLoading && available.length === 0 && (
+            <p className="mt-1.5 text-[11.5px] text-black dark:text-zinc-500">
+              Everyone in People is already a member of this group.
+            </p>
+          )}
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Role">
@@ -130,7 +152,22 @@ export function AddMemberForm({ onSave, onCancel }: { onSave: (m: Member) => voi
       </div>
       <ModalFoot>
         <GhostBtn onClick={onCancel}>Cancel</GhostBtn>
-        <PrimaryBtn onClick={() => name.trim() && onSave({ name: name.trim(), role, availability, oncall, incidents: 0 })}>Add member</PrimaryBtn>
+        <PrimaryBtn
+          onClick={() =>
+            selected &&
+            onSave({
+              name: `${selected.firstname ?? ""} ${selected.lastname ?? ""}`.trim() || selected.email,
+              email: selected.email,
+              userId: selected.id,
+              role,
+              availability,
+              oncall,
+              incidents: 0,
+            })
+          }
+        >
+          Add member
+        </PrimaryBtn>
       </ModalFoot>
     </div>
   );

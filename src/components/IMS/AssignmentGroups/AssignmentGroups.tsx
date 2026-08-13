@@ -86,6 +86,8 @@ function mapApiGroup(g: any): Group {
     availability: m.availability ?? "Online",
     oncall: m.onCall ?? m.oncall ?? false,
     incidents: m.activeIncidents ?? m.incidentCount ?? 0,
+    email: m.email ?? m.userEmail ?? m.user?.email ?? undefined,
+    userId: m.userId ?? m.id ?? m.memberId ?? undefined,
   }));
   return {
     id: g.id,
@@ -119,19 +121,53 @@ function mapApiGroup(g: any): Group {
 }
 
 export default function AssignmentGroups() {
-  const [groups, setGroups] = useState<Group[]>(SEED_GROUPS);
-  const [activeId, setActiveId] = useState<string>(SEED_GROUPS[0].id);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [activeId, setActiveId] = useState<string>("");
+  const [groupsLoading, setGroupsLoading] = useState(true);
+  const [groupsError, setGroupsError] = useState(false);
 
-  useEffect(() => {
-    customAxios.get(endpoint.assignment_groups.list).then((res) => {
-      const list: any[] = res.data?.data ?? res.data ?? [];
-      if (list.length > 0) {
+  // The list endpoint returns a lighter snapshot than a single group's real
+  // detail (its `members` array isn't reliable there) — re-pull the
+  // authoritative record whenever a group is actually opened or mutated,
+  // rather than trusting the list's copy of it.
+  function refreshGroupDetail(id: string) {
+    return customAxios
+      .get(`${endpoint.assignment_groups.getOne}/${id}`)
+      .then((res) => {
+        const raw = res.data?.data ?? res.data;
+        if (raw?.id) {
+          const mapped = mapApiGroup(raw);
+          setGroups((prev) => prev.map((g) => (g.id === id ? mapped : g)));
+        }
+      })
+      .catch(() => {});
+  }
+
+  function loadGroups() {
+    setGroupsLoading(true);
+    setGroupsError(false);
+    customAxios
+      .get(endpoint.assignment_groups.list)
+      .then((res) => {
+        const list: any[] = res.data?.data ?? res.data ?? [];
         const mapped = list.map(mapApiGroup);
         setGroups(mapped);
-        setActiveId(mapped[0].id);
-      }
-    }).catch(() => {});
-  }, []);
+        const firstId = mapped[0]?.id ?? "";
+        setActiveId(firstId);
+        if (firstId) refreshGroupDetail(firstId);
+      })
+      .catch(() => {
+        setGroupsError(true);
+      })
+      .finally(() => {
+        setGroupsLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    loadGroups();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [showProfileMobile, setShowProfileMobile] = useState(false);
 
   const [search, setSearch] = useState("");
@@ -220,6 +256,7 @@ export default function AssignmentGroups() {
   function selectGroup(id: string) {
     setActiveId(id);
     setShowProfileMobile(true);
+    refreshGroupDetail(id);
   }
 
   const group = groups.find((g) => g.id === activeId);
@@ -246,17 +283,29 @@ export default function AssignmentGroups() {
     closeModal();
     toast("Manager transferred");
   }
-  function handleAddMember(m: {
-    name: string;
-    role: string;
-    availability: any;
-    oncall: boolean;
-    incidents: number;
-  }) {
+  function handleAddMember(m: Member) {
     if (!group) return;
-    updateGroup(group.id, (g) => ({ ...g, members: [...g.members, m] }));
+    const groupId = group.id;
+    updateGroup(groupId, (g) => ({ ...g, members: [...g.members, m] }));
     closeModal();
     toast("Member added");
+    customAxios
+      .post(`${endpoint.assignment_groups.addMember}/${groupId}/members`, {
+        userId: m.userId,
+        email: m.email,
+        role: m.role,
+        availability: m.availability,
+        oncall: m.oncall,
+      })
+      .then(() => refreshGroupDetail(groupId))
+      .catch((err) => {
+        const serverMessage = err?.response?.data?.message;
+        toast(
+          serverMessage
+            ? `Couldn't save the new member: ${serverMessage}`
+            : "Couldn't save the new member — try again",
+        );
+      });
   }
   function handleRemoveMember(idx: number) {
     if (!group) return;
@@ -553,19 +602,50 @@ export default function AssignmentGroups() {
             )}
           </div>
           <div className="flex-1 overflow-y-auto">
-            {!filtered.length && (
+            {groupsLoading ? (
+              <p className="px-5 py-10 text-center text-[12.5px] leading-relaxed text-black dark:text-zinc-500">
+                Loading assignment groups…
+              </p>
+            ) : groupsError ? (
+              <div className="px-5 py-10 text-center">
+                <p className="text-[12.5px] leading-relaxed text-black dark:text-zinc-500">
+                  Couldn&apos;t load assignment groups.
+                </p>
+                <button
+                  onClick={loadGroups}
+                  className="mt-2 text-[12px] font-medium text-emerald-600 hover:underline dark:text-emerald-400"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : !groups.length ? (
+              <div className="px-5 py-10 text-center">
+                <p className="text-[12.5px] leading-relaxed text-black dark:text-zinc-500">
+                  No assignment groups yet.
+                </p>
+                {isManager && (
+                  <button
+                    onClick={() => setModal({ kind: "create" })}
+                    className="mt-2 text-[12px] font-medium text-emerald-600 hover:underline dark:text-emerald-400"
+                  >
+                    Create your first group →
+                  </button>
+                )}
+              </div>
+            ) : !filtered.length ? (
               <p className="px-5 py-10 text-center text-[12.5px] leading-relaxed text-black dark:text-zinc-500">
                 No assignment groups match these filters.
               </p>
+            ) : (
+              filtered.map((g) => (
+                <GroupListRow
+                  key={g.id}
+                  group={g}
+                  active={g.id === activeId}
+                  onClick={() => selectGroup(g.id)}
+                />
+              ))
             )}
-            {filtered.map((g) => (
-              <GroupListRow
-                key={g.id}
-                group={g}
-                active={g.id === activeId}
-                onClick={() => selectGroup(g.id)}
-              />
-            ))}
           </div>
         </aside>
 
@@ -578,7 +658,13 @@ export default function AssignmentGroups() {
         >
           {!group ? (
             <p className="p-8 text-[13px] text-black dark:text-zinc-500">
-              Select a group to view its profile.
+              {groupsLoading
+                ? "Loading…"
+                : groupsError
+                  ? "Couldn't load assignment groups."
+                  : !groups.length
+                    ? "No assignment groups yet."
+                    : "Select a group to view its profile."}
             </p>
           ) : (
             <div className="mx-auto max-w-5xl px-5 py-5 pb-14 sm:px-7">
@@ -860,7 +946,13 @@ export default function AssignmentGroups() {
           />
         )}
         {modal.kind === "addMember" && (
-          <AddMemberForm onSave={handleAddMember} onCancel={closeModal} />
+          <AddMemberForm
+            existingEmails={(group?.members ?? [])
+              .map((m) => m.email)
+              .filter((e): e is string => Boolean(e))}
+            onSave={handleAddMember}
+            onCancel={closeModal}
+          />
         )}
         {group && modal.kind === "merge" && (
           <MergeForm

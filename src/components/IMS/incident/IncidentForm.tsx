@@ -22,6 +22,7 @@ import Input from "@/components/ui/input";
 import Select from "@/components/ui/select";
 import TextArea from "@/components/ui/text-area";
 import useMember from "@/hooks/useMember";
+import { useAssignmentGroups, useAssignmentGroupDetail } from "@/hooks/useImsData";
 import { querykeys } from "@/lib/constant";
 import {
   createIncident,
@@ -29,7 +30,6 @@ import {
   deleteStagingIncidentAttachment,
 } from "@/lib/incident/incident.api";
 import { useFetch } from "@/hooks/useFetch";
-import { customAxios } from "@/lib/api/axios";
 import { endpoint } from "@/lib/api/endpoint";
 import Button from "@/components/ui/Button1";
 import { FaRegFileLines } from "react-icons/fa6";
@@ -562,6 +562,7 @@ const RaiseIncidentModal = () => {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<RaiseIncidentFormValues>({
     resolver: zodResolver(raiseIncidentSchema),
@@ -583,35 +584,111 @@ const RaiseIncidentModal = () => {
     },
   });
 
+  const watchedAssignmentGroup = watch("assignmentGroup");
+  const watchedAssignTo = watch("assignTo");
+
+  const { data: assignmentGroupsList, error: assignmentGroupsError } =
+    useAssignmentGroups();
+  // The list endpoint doesn't reliably include each group's member roster —
+  // fetch the specific selected group's real detail instead, the same fix
+  // applied to the Assignment Groups page itself.
+  const {
+    data: selectedGroupDetail,
+    loading: groupDetailLoading,
+    error: groupDetailError,
+  } = useAssignmentGroupDetail(watchedAssignmentGroup || null);
+
+  const assignmentGroupOptions = useMemo(
+    () => [
+      { value: "", label: "Select assignment group..." },
+      ...(assignmentGroupsList ?? []).map((g) => ({
+        value: g.id,
+        label: g.name,
+      })),
+    ],
+    [assignmentGroupsList],
+  );
+
+  // Narrow "Assign To" down to the selected assignment group's roster.
+  const { filteredMembers, groupNote } = useMemo(() => {
+    if (!watchedAssignmentGroup) {
+      return { filteredMembers: members, groupNote: null as string | null };
+    }
+    if (groupDetailLoading) {
+      return {
+        filteredMembers: [] as typeof members,
+        groupNote: "Loading this group's members…",
+      };
+    }
+    if (groupDetailError) {
+      return {
+        filteredMembers: members,
+        groupNote: "Couldn't load this group's roster — showing everyone.",
+      };
+    }
+    const raw = selectedGroupDetail?.members ?? [];
+    if (raw.length === 0) {
+      return {
+        filteredMembers: [] as typeof members,
+        groupNote: "This group has no members yet.",
+      };
+    }
+    const ids = new Set(
+      raw.map((m) => (m.userId ?? "").toLowerCase()).filter(Boolean),
+    );
+    const emails = new Set(
+      raw.map((m) => (m.email ?? "").toLowerCase()).filter(Boolean),
+    );
+    let matched = members.filter(
+      (m) =>
+        ids.has((m.id ?? "").toLowerCase()) ||
+        emails.has((m.email ?? "").toLowerCase()),
+    );
+    if (!matched.length) {
+      const names = new Set(
+        raw.map((m) => (m.name ?? "").trim().toLowerCase()).filter(Boolean),
+      );
+      matched = members.filter((m) =>
+        names.has(`${m.firstname ?? ""} ${m.lastname ?? ""}`.trim().toLowerCase()),
+      );
+    }
+    if (!matched.length) {
+      return {
+        filteredMembers: members,
+        groupNote:
+          "Couldn't match this group's roster to People — showing everyone.",
+      };
+    }
+    return { filteredMembers: matched, groupNote: null as string | null };
+  }, [
+    watchedAssignmentGroup,
+    selectedGroupDetail,
+    groupDetailLoading,
+    groupDetailError,
+    members,
+  ]);
+
+  // Clear a now-invalid assignee when switching groups, but don't fight
+  // the user on every keystroke elsewhere in the form.
+  useEffect(() => {
+    if (
+      watchedAssignTo &&
+      !filteredMembers.some((m) => m.email === watchedAssignTo)
+    ) {
+      setValue("assignTo", "");
+    }
+  }, [watchedAssignmentGroup]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const assigneeOptions = useMemo(
     () => [
       { value: "", label: "Select incident owner..." },
-      ...members.map((m) => {
+      ...filteredMembers.map((m) => {
         const n = `${m.firstname ?? ""} ${m.lastname ?? ""}`.trim() || m.email;
         return { value: m.email, label: `${n} (${m.email})` };
       }),
     ],
-    [members],
+    [filteredMembers],
   );
-
-  const [assignmentGroupOptions, setAssignmentGroupOptions] = useState([
-    { value: "", label: "Select assignment group..." },
-  ]);
-
-  useEffect(() => {
-    customAxios.get(endpoint.assignment_groups.list).then((res) => {
-      const list: any[] = res.data?.data ?? res.data ?? [];
-      if (list.length > 0) {
-        setAssignmentGroupOptions([
-          { value: "", label: "Select assignment group..." },
-          ...list.map((g: any) => ({
-            value: g.id ?? g._id ?? "",
-            label: g.name ?? g.groupName ?? g.id ?? "Group",
-          })),
-        ]);
-      }
-    }).catch(() => {});
-  }, []);
 
   const createMutation = useMutation({
     mutationFn: async (data: RaiseIncidentFormValues) => {
@@ -965,29 +1042,43 @@ const RaiseIncidentModal = () => {
           >
             <div className="space-y-5">
               <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-                <Controller
-                  name="assignmentGroup"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      {...field}
-                      label="Assignment Group"
-                      options={assignmentGroupOptions}
-                    />
+                <div>
+                  <Controller
+                    name="assignmentGroup"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        label="Assignment Group"
+                        options={assignmentGroupOptions}
+                      />
+                    )}
+                  />
+                  {assignmentGroupsError && (
+                    <p className="mt-1 text-[11px] text-amber-600 dark:text-amber-400">
+                      Couldn&apos;t load assignment groups: {assignmentGroupsError}
+                    </p>
                   )}
-                />
-                <Controller
-                  name="assignTo"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      {...field}
-                      label="Assign To *"
-                      error={errors.assignTo?.message}
-                      options={assigneeOptions}
-                    />
+                </div>
+                <div>
+                  <Controller
+                    name="assignTo"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        label="Assign To *"
+                        error={errors.assignTo?.message}
+                        options={assigneeOptions}
+                      />
+                    )}
+                  />
+                  {groupNote && (
+                    <p className="mt-1 text-[11px] text-amber-600 dark:text-amber-400">
+                      {groupNote}
+                    </p>
                   )}
-                />
+                </div>
                 <Controller
                   name="notifyChannels"
                   control={control}
