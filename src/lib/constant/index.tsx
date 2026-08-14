@@ -1066,7 +1066,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "War Rooms",
       Icon: LuVideo,
       link: "/incident/war-rooms",
-      isActive: false,
+      isActive: true,
       isMenu: false,
     },
     {
@@ -1254,7 +1254,7 @@ export const NewMenu: Record<string, NavItem[]> = {
       name: "Plans and Billings",
       Icon: IoWalletOutline,
       link: "/incident/billing",
-      isActive: false,
+      isActive: true,
       isMenu: false,
     },
   ],

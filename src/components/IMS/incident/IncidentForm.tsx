@@ -463,7 +463,6 @@ export function EvidenceSection({
     </>
   );
 }
-// ── Main modal ────────────────────────────────────────────────────
 
 const RaiseIncidentModal = () => {
   const router = useRouter();

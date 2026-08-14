@@ -198,16 +198,33 @@ function BillingToggle({
 // 1. CALCULATOR
 // ─────────────────────────────────────────────────────────────────
 
-function Calculator() {
+function Calculator({
+  annual,
+  setAnnual,
+  planKey,
+  setPlanKey,
+  team,
+  setTeam,
+  inc,
+  setInc,
+  exec,
+  setExec,
+}: {
+  annual: boolean;
+  setAnnual: (a: boolean) => void;
+  planKey: PlanKey;
+  setPlanKey: (k: PlanKey) => void;
+  team: number;
+  setTeam: (n: number) => void;
+  inc: number;
+  setInc: (n: number) => void;
+  exec: number;
+  setExec: (n: number) => void;
+}) {
   const router = useRouter();
   const { user } = useAuthStore();
   const { post } = useFetch();
-  const [annual, setAnnual] = useState(false);
-  const [planKey, setPlanKey] = useState<PlanKey>("growth");
   const [ctaLoading, setCtaLoading] = useState(false);
-  const [team, setTeam] = useState(25);
-  const [inc, setInc] = useState(75);
-  const [exec, setExec] = useState(250);
 
   const plan = PLANS[planKey];
   const disc = annual ? 0.8 : 1;
@@ -331,12 +348,12 @@ function Calculator() {
                   responders
                 </span>
               </div>
-              <Slider value={team} min={1} max={500} onChange={setTeam} />
+              <Slider value={team} min={0} max={500} onChange={setTeam} />
               <SliderScale
-                min={1}
+                min={0}
                 max={500}
                 points={[
-                  { value: 1, label: "1" },
+                  { value: 0, label: "0" },
                   { value: 50, label: "50" },
                   { value: 200, label: "200" },
                   { value: 500, label: "500+" },
@@ -462,7 +479,7 @@ function Calculator() {
             ) : (
               <>
                 <h3 className="text-sm text-[#5B6B62] mt-3.5 font-medium">
-                  {annual ? "Estimated yearly" : "Estimated monthly"}
+                  Estimated monthly cost
                 </h3>
                 <div className="text-5xl font-extrabold tracking-tight mt-2 mb-1 leading-none text-[#0A1F14]">
                   <span className="text-[28px] align-top mr-0.5 text-[#5B6B62]">
@@ -472,7 +489,7 @@ function Calculator() {
                 </div>
                 <p className="text-sm text-[#5B6B62]">
                   {annual
-                    ? "per year, billed annually"
+                    ? `per month, billed annually as ${fmt(total * 12)}/yr`
                     : "per month, billed monthly"}
                 </p>
 
@@ -887,11 +904,24 @@ const TIERS = [
   },
 ];
 
-function Tiers() {
+function Tiers({
+  annual,
+  setAnnual,
+  planKey,
+  team,
+  inc,
+  exec,
+}: {
+  annual: boolean;
+  setAnnual: (a: boolean) => void;
+  planKey: PlanKey;
+  team: number;
+  inc: number;
+  exec: number;
+}) {
   const router = useRouter();
   const { user } = useAuthStore();
   const { post } = useFetch();
-  const [annual, setAnnual] = useState(false);
   const [ctaLoading, setCtaLoading] = useState<string | null>(null);
   const disc = annual ? 0.8 : 1;
 
@@ -940,6 +970,14 @@ function Tiers() {
           {TIERS.map((t) => {
             const platform = t.mp * disc;
             const isFeat = t.key === "growth";
+            const isLive = t.key === planKey && t.key !== "enterprise";
+            const livePlan = isLive ? PLANS[t.key as PlanKey] : null;
+            const liveTotal = livePlan
+              ? livePlan.platform * disc +
+                team * livePlan.perUser * disc +
+                Math.max(0, inc - livePlan.incIncluded) * livePlan.incOver +
+                Math.max(0, exec - livePlan.execIncluded) * livePlan.execOver
+              : 0;
             return (
               <div
                 key={t.key}
@@ -975,9 +1013,23 @@ function Tiers() {
                   {t.pos}
                 </p>
 
+                {isLive && (
+                  <div className="mb-1.5 inline-flex items-center gap-1.5 text-[11px] font-bold text-[#00A855]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00D26A] inline-block" />
+                    Live from your plan builder
+                  </div>
+                )}
                 <div className="text-[36px] font-extrabold tracking-tight leading-none text-[#0A1F14]">
                   {t.key === "enterprise" ? (
                     "Custom pricing"
+                  ) : isLive ? (
+                    <>
+                      {fmt(liveTotal)}
+                      <small className="text-[13px] text-[#5B6B62] font-medium">
+                        {" "}
+                        / mo estimated
+                      </small>
+                    </>
                   ) : (
                     <>
                       {fmt(platform)}
@@ -989,13 +1041,17 @@ function Tiers() {
                   )}
                 </div>
                 <div className="min-h-[19px] mt-1.5 text-[12px] font-bold text-[#00A855]">
-                  {annual && t.key !== "enterprise"
-                    ? `Billed yearly: ${fmt(t.mp * 0.8 * 12)} platform / year`
-                    : ""}
+                  {t.key === "enterprise" || !annual
+                    ? ""
+                    : isLive
+                    ? `Billed yearly: ${fmt(liveTotal * 12)} / year`
+                    : `Billed yearly: ${fmt(t.mp * 0.8 * 12)} platform / year`}
                 </div>
                 <div className="mt-1 text-[13px] text-[#5B6B62] font-mono">
                   {t.key === "enterprise"
                     ? "Let's talk"
+                    : isLive
+                    ? `${team >= 500 ? "500+" : team} users · ${inc} incidents · ${exec} actions`
                     : t.mu > 0
                     ? `+ ${fmt(t.mu * disc)} / user / month${
                         annual ? " effective" : ""
@@ -1457,14 +1513,44 @@ function FinalCta() {
 // ─────────────────────────────────────────────────────────────────
 
 export default function PricingPage() {
+  // Shared between the calculator and the plan cards so the card matching
+  // whatever plan you're building shows the same tallied total, not a
+  // second, independent number.
+  const [annual, setAnnual] = useState(false);
+  // Default to Starter — the first plan in the listing — with the sliders
+  // starting at that plan's own included capacity, not an arbitrary
+  // pre-filled state.
+  const [planKey, setPlanKey] = useState<PlanKey>("starter");
+  const [team, setTeam] = useState(0);
+  const [inc, setInc] = useState<number>(PLANS.starter.incIncluded);
+  const [exec, setExec] = useState<number>(PLANS.starter.execIncluded);
+
   return (
     <main className="font-ibm antialiased bg-white text-[#0A1F14]">
       <PricingHero />
       <div className="max-w-[1200px] mx-auto px-6">
-        <Calculator />
+        <Calculator
+          annual={annual}
+          setAnnual={setAnnual}
+          planKey={planKey}
+          setPlanKey={setPlanKey}
+          team={team}
+          setTeam={setTeam}
+          inc={inc}
+          setInc={setInc}
+          exec={exec}
+          setExec={setExec}
+        />
       </div>
       <MttrRoi />
-      <Tiers />
+      <Tiers
+        annual={annual}
+        setAnnual={setAnnual}
+        planKey={planKey}
+        team={team}
+        inc={inc}
+        exec={exec}
+      />
       <CompareTable />
       <UsageExplainer />
       <Faq />
