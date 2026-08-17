@@ -5,10 +5,10 @@ import Dropdown from "@/components/ui/Dropdown";
 import { Playbook } from "../types";
 
 const STATUS_CLS: Record<Playbook["status"], string> = {
-  Active: "bg-emerald-50 text-emerald-600",
-  Draft: "bg-amber-50 text-amber-700",
-  Disabled: "bg-zinc-100 text-zinc-500",
-  Archived: "bg-transparent text-zinc-500 border border-dashed border-zinc-300",
+  Active: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
+  Draft: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
+  Disabled: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800/60 dark:text-zinc-400",
+  Archived: "bg-transparent text-zinc-500 border border-dashed border-zinc-300 dark:text-zinc-500 dark:border-zinc-700",
 };
 
 function StatusBadge({ status }: { status: Playbook["status"] }) {
@@ -46,11 +46,11 @@ export default function PlaybookTable({
   const end = Math.min(total, page * pageSize);
 
   return (
-    <div className="shadow-sm shadow-light rounded-xl bg-white overflow-hidden">
+    <div className="shadow-sm shadow-light rounded-xl bg-white dark:bg-zinc-900/40 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[760px]">
           <thead>
-            <tr className="bg-zinc-50 border-b border-zinc-200">
+            <tr className="bg-zinc-50 border-b border-zinc-200 dark:bg-zinc-900/60 dark:border-zinc-800">
               {[
                 "Name",
                 "Service",
@@ -61,7 +61,7 @@ export default function PlaybookTable({
               ].map((h) => (
                 <th
                   key={h}
-                  className="text-[10.5px] font-semibold tracking-wider uppercase text-zinc-400 px-3.5 py-2.5 whitespace-nowrap"
+                  className="text-[10.5px] font-semibold tracking-wider uppercase text-zinc-400 dark:text-zinc-500 px-3.5 py-2.5 whitespace-nowrap"
                 >
                   {h}
                 </th>
@@ -75,21 +75,21 @@ export default function PlaybookTable({
                 onClick={() =>
                   router.push(`/incident/playbook-library/${p.id}`)
                 }
-                className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50 cursor-pointer transition-colors"
+                className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50 cursor-pointer transition-colors dark:border-zinc-800 dark:hover:bg-zinc-900/40"
               >
-                <td className="px-3.5 py-3 text-[13.5px] text-zinc-700">
+                <td className="px-3.5 py-3 text-[13.5px] text-zinc-700 dark:text-zinc-300">
                   {p.name}
                 </td>
-                <td className="px-3.5 py-3 text-sm text-zinc-700 whitespace-nowrap">
+                <td className="px-3.5 py-3 text-sm text-zinc-700 whitespace-nowrap dark:text-zinc-400">
                   {p.service}
                 </td>
                 <td className="px-3.5 py-3">
                   <StatusBadge status={p.status} />
                 </td>
-                <td className="px-3.5 py-3 text-sm text-zinc-700 whitespace-nowrap">
+                <td className="px-3.5 py-3 text-sm text-zinc-700 whitespace-nowrap dark:text-zinc-400">
                   {p.mode}
                 </td>
-                <td className="px-3.5 py-3 text-sm text-zinc-700">{p.owner}</td>
+                <td className="px-3.5 py-3 text-sm text-zinc-700 dark:text-zinc-400">{p.owner}</td>
                 <td
                   className="px-3.5 py-3 text-right"
                   onClick={(e) => e.stopPropagation()}
@@ -98,7 +98,7 @@ export default function PlaybookTable({
                     position="left"
                     align="left"
                     trigger={
-                      <button className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors">
+                      <button className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800">
                         <MoreVertical size={15} />
                       </button>
                     }
@@ -135,8 +135,8 @@ export default function PlaybookTable({
         </table>
 
         {rows.length === 0 && (
-          <div className="py-14 text-center text-zinc-500">
-            <h3 className="font-semibold text-zinc-800 mb-1">
+          <div className="py-14 text-center text-zinc-500 dark:text-zinc-500">
+            <h3 className="font-semibold text-zinc-800 mb-1 dark:text-zinc-200">
               No playbooks match
             </h3>
             <p className="text-sm">
@@ -147,15 +147,15 @@ export default function PlaybookTable({
         )}
       </div>
 
-      <div className="flex items-center gap-3.5 px-4 py-3 border-t border-zinc-200 bg-zinc-50">
-        <span className="text-xs text-zinc-500">
+      <div className="flex items-center gap-3.5 px-4 py-3 border-t border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/60">
+        <span className="text-xs text-zinc-500 dark:text-zinc-500">
           Showing {start}–{end} of {total} playbooks
         </span>
         <div className="ml-auto flex items-center gap-1">
           <button
             disabled={page === 1}
             onClick={() => onPageChange(page - 1)}
-            className="min-w-[30px] h-[30px] rounded-md border border-zinc-200 text-xs text-zinc-500 disabled:opacity-40 hover:border-zinc-900 hover:text-zinc-900 disabled:hover:border-zinc-200 disabled:hover:text-zinc-500 transition-colors"
+            className="min-w-[30px] h-[30px] rounded-md border border-zinc-200 text-xs text-zinc-500 disabled:opacity-40 hover:border-zinc-900 hover:text-zinc-900 disabled:hover:border-zinc-200 disabled:hover:text-zinc-500 transition-colors dark:border-zinc-700 dark:text-zinc-500 dark:hover:border-zinc-100 dark:hover:text-zinc-100 dark:disabled:hover:border-zinc-700 dark:disabled:hover:text-zinc-500"
           >
             ‹
           </button>
@@ -165,8 +165,8 @@ export default function PlaybookTable({
               onClick={() => onPageChange(n)}
               className={`min-w-[30px] h-[30px] rounded-md border text-xs font-mono transition-colors ${
                 n === page
-                  ? "bg-zinc-900 text-white border-zinc-900"
-                  : "border-zinc-200 text-zinc-500 hover:border-zinc-900 hover:text-zinc-900"
+                  ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                  : "border-zinc-200 text-zinc-500 hover:border-zinc-900 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-500 dark:hover:border-zinc-100 dark:hover:text-zinc-100"
               }`}
             >
               {n}
@@ -175,7 +175,7 @@ export default function PlaybookTable({
           <button
             disabled={page === totalPages}
             onClick={() => onPageChange(page + 1)}
-            className="min-w-[30px] h-[30px] rounded-md border border-zinc-200 text-xs text-zinc-500 disabled:opacity-40 hover:border-zinc-900 hover:text-zinc-900 disabled:hover:border-zinc-200 disabled:hover:text-zinc-500 transition-colors"
+            className="min-w-[30px] h-[30px] rounded-md border border-zinc-200 text-xs text-zinc-500 disabled:opacity-40 hover:border-zinc-900 hover:text-zinc-900 disabled:hover:border-zinc-200 disabled:hover:text-zinc-500 transition-colors dark:border-zinc-700 dark:text-zinc-500 dark:hover:border-zinc-100 dark:hover:text-zinc-100 dark:disabled:hover:border-zinc-700 dark:disabled:hover:text-zinc-500"
           >
             ›
           </button>

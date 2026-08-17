@@ -219,7 +219,7 @@ const RaiseIncident = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark text-slate-300 p-8 font-sans">
+    <div className="min-h-screen bg-white dark:bg-dark text-slate-700 dark:text-slate-300 p-8 font-sans">
       <AddCodeEngineSignal
         actionLabel="Add Metric"
         label="Metrics"
@@ -883,7 +883,7 @@ Refusal Reasons:"
                         {(watch("metrics") ?? []).map(
                           (item: string, idx: number) => (
                             <div
-                              className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
+                              className="text-sm  rounded-full px-2 py-1 w-fit bg-gray-100 dark:bg-dark"
                               key={idx}
                             >
                               {item}
@@ -908,7 +908,7 @@ Refusal Reasons:"
                         {(watch("logStreams") ?? []).map(
                           (item: string, idx: number) => (
                             <div
-                              className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
+                              className="text-sm  rounded-full px-2 py-1 w-fit bg-gray-100 dark:bg-dark"
                               key={idx}
                             >
                               {item}
@@ -933,7 +933,7 @@ Refusal Reasons:"
                         {(watch("pipelines") ?? []).map(
                           (item: string, idx: number) => (
                             <div
-                              className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
+                              className="text-sm  rounded-full px-2 py-1 w-fit bg-gray-100 dark:bg-dark"
                               key={idx}
                             >
                               {item}
@@ -958,7 +958,7 @@ Refusal Reasons:"
                         {(watch("fraudRiskView") ?? []).map(
                           (item: string, idx: number) => (
                             <div
-                              className="text-sm  rounded-full px-2 py-1 w-fit bg-dark"
+                              className="text-sm  rounded-full px-2 py-1 w-fit bg-gray-100 dark:bg-dark"
                               key={idx}
                             >
                               {item}
@@ -1338,15 +1338,15 @@ const AddCodeEngineSignal = ({
     closeModal();
   };
   return (
-    <Modal isOpen={open} onClose={closeModal} className="!bg-dark">
-      <p className="text-white font-bold">{label}</p>
+    <Modal isOpen={open} onClose={closeModal} className="!bg-white dark:!bg-dark">
+      <p className="text-black dark:text-white font-bold">{label}</p>
       <div className="py-6">
         <Input
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder=" "
-          className="!bg-[#08132F]"
-          labelClassName="!text-white"
+          className="!bg-gray-50 dark:!bg-[#08132F]"
+          labelClassName="!text-black dark:!text-white"
           label={label}
         />
         <div className="flex justify-end gap-4 items-center">

@@ -8,9 +8,9 @@ interface AnalyticsCostSectionProps {
 
 function Metric({ k, v }: { k: string; v: React.ReactNode }): React.JSX.Element {
   return (
-    <div className="border border-zinc-200 rounded-lg bg-zinc-50 px-3.5 py-3">
-      <div className="text-xs text-zinc-500">{k}</div>
-      <div className="font-mono font-semibold text-[22px] tracking-tight mt-1">{v}</div>
+    <div className="border border-zinc-200 rounded-lg bg-zinc-50 px-3.5 py-3 dark:border-zinc-800 dark:bg-zinc-900/40">
+      <div className="text-xs text-zinc-500 dark:text-zinc-400">{k}</div>
+      <div className="font-mono font-semibold text-[22px] tracking-tight mt-1 dark:text-zinc-100">{v}</div>
     </div>
   );
 }
@@ -45,13 +45,13 @@ export default function AnalyticsCostSection({ playbook: p }: AnalyticsCostSecti
       >
         <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))" }}>
           <Metric k="Avg. cost — manual response" v={`$${manualCost}`} />
-          <Metric k="Avg. cost — automated response" v={<span className="text-emerald-600">${autoCost}</span>} />
-          <Metric k="Engineer-hours saved" v={<>{hoursSaved}<span className="text-xs text-zinc-400"> hrs/mo</span></>} />
-          <Metric k="Monthly savings" v={<span className="text-emerald-600">${monthlySavings.toLocaleString()}</span>} />
+          <Metric k="Avg. cost — automated response" v={<span className="text-emerald-600 dark:text-emerald-400">${autoCost}</span>} />
+          <Metric k="Engineer-hours saved" v={<>{hoursSaved}<span className="text-xs text-zinc-400 dark:text-zinc-500"> hrs/mo</span></>} />
+          <Metric k="Monthly savings" v={<span className="text-emerald-600 dark:text-emerald-400">${monthlySavings.toLocaleString()}</span>} />
         </div>
         <div className="flex items-baseline gap-2.5 mt-4">
-          <span className="font-mono text-3xl font-bold text-emerald-600">{roi}×</span>
-          <span className="text-sm text-zinc-500">return on automation investment</span>
+          <span className="font-mono text-3xl font-bold text-emerald-600 dark:text-emerald-400">{roi}×</span>
+          <span className="text-sm text-zinc-500 dark:text-zinc-400">return on automation investment</span>
         </div>
       </SectionShell>
     </>

@@ -50,7 +50,7 @@ export default function RemediationIntel({ onChartClick, onExpand, remediationDa
 
   return (
     <Panel number="3." title="Remediation Intelligence" onExpand={onExpand}>
-      <div className="flex gap-1 border-b border-zinc-100 mb-4">
+      <div className="flex gap-1 border-b border-zinc-100 dark:border-zinc-800 mb-4">
         {TABS.map((t) => (
           <button
             key={t}
@@ -58,8 +58,8 @@ export default function RemediationIntel({ onChartClick, onExpand, remediationDa
             onClick={() => setTab(t)}
             className={`py-2 px-3 text-xs font-semibold border-b-2 -mb-px transition-colors ${
               tab === t
-                ? "border-emerald-500 text-emerald-700"
-                : "border-transparent text-zinc-400 hover:text-zinc-600"
+                ? "border-emerald-500 dark:border-emerald-400 text-emerald-700 dark:text-emerald-400"
+                : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
             }`}
           >
             {t}
@@ -78,7 +78,7 @@ export default function RemediationIntel({ onChartClick, onExpand, remediationDa
           <div className="w-[100px]">
             <SuccessDonut rate={view.successRate} />
           </div>
-          <span className="text-[11px] font-mono font-semibold text-emerald-600">
+          <span className="text-[11px] font-mono font-semibold text-emerald-600 dark:text-emerald-400">
             {view.delta}
           </span>
         </ChartCard>
@@ -92,7 +92,7 @@ export default function RemediationIntel({ onChartClick, onExpand, remediationDa
           </SubH>
           <table className="w-full text-[11.5px]">
             <thead>
-              <tr className="text-zinc-400 font-semibold text-[10.5px]">
+              <tr className="text-zinc-400 dark:text-zinc-500 font-semibold text-[10.5px]">
                 <th className="text-left pb-2">
                   {tab === "Overview" ? "Remediation" : tab.replace("By ", "")}
                 </th>
@@ -102,12 +102,12 @@ export default function RemediationIntel({ onChartClick, onExpand, remediationDa
             </thead>
             <tbody>
               {view.remediations.map((r) => (
-                <tr key={r.name} className="border-t border-zinc-100">
-                  <td className="py-1.5 font-medium text-zinc-700">{r.name}</td>
+                <tr key={r.name} className="border-t border-zinc-100 dark:border-zinc-800">
+                  <td className="py-1.5 font-medium text-zinc-700 dark:text-zinc-300">{r.name}</td>
                   <td className="text-right">
                     <MiniBar pct={r.rate} />
                   </td>
-                  <td className="text-right font-mono text-zinc-500">
+                  <td className="text-right font-mono text-zinc-500 dark:text-zinc-500">
                     {r.attempts}
                   </td>
                 </tr>
@@ -124,10 +124,10 @@ export default function RemediationIntel({ onChartClick, onExpand, remediationDa
           {view.risks.map((r) => (
             <div
               key={r.name}
-              className="flex items-center gap-2 py-1.5 border-t border-zinc-100 first:border-t-0 text-[11.5px] text-zinc-600"
+              className="flex items-center gap-2 py-1.5 border-t border-zinc-100 dark:border-zinc-800 first:border-t-0 text-[11.5px] text-zinc-600 dark:text-zinc-400"
             >
               <span className="flex-1">{r.name}</span>
-              <span className="font-mono font-semibold text-amber-600">
+              <span className="font-mono font-semibold text-amber-600 dark:text-amber-400">
                 {r.rate}%
               </span>
             </div>
@@ -138,7 +138,7 @@ export default function RemediationIntel({ onChartClick, onExpand, remediationDa
         </div>
       </div>
 
-      <div className="text-[11px] text-zinc-400 italic mt-3">{view.note}</div>
+      <div className="text-[11px] text-zinc-400 dark:text-zinc-500 italic mt-3">{view.note}</div>
     </Panel>
   );
 }

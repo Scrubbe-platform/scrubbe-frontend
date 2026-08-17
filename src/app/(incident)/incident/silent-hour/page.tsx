@@ -70,9 +70,9 @@ const Page = () => {
   };
 
   return (
-    <div className="bg-dark space-y-8 p-6">
+    <div className="bg-white dark:bg-dark space-y-8 p-6">
       <div className="flex justify-between gap-4 ">
-        <div className="text-white">
+        <div className="text-black dark:text-white">
           <p className="text-lg font-semibold">Setting</p>
           <p className="text-lg font-medium">
             Quiet Hours & Enterprise Suppression

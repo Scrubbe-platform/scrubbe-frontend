@@ -56,12 +56,12 @@ export default function MergeModal({
       <div className="p-5 space-y-5 min-w-[480px] max-w-lg">
         {/* Header */}
         <div className="flex items-start gap-3">
-          <div className="h-9 w-9 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center flex-shrink-0">
-            <GitMerge size={16} className="text-amber-600" />
+          <div className="h-9 w-9 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 flex items-center justify-center flex-shrink-0">
+            <GitMerge size={16} className="text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-zinc-900">Merge Incidents</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">
+            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Merge Incidents</h2>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               Select the primary incident to keep. All others will be archived.
             </p>
           </div>
@@ -69,7 +69,7 @@ export default function MergeModal({
 
         {/* Incident list */}
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
+          <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
             Select primary incident
           </p>
           <div className="space-y-1.5 max-h-60 overflow-y-auto">
@@ -82,34 +82,34 @@ export default function MergeModal({
                   onClick={() => setPrimaryId(i.id)}
                   className={`w-full text-left flex items-center gap-3 p-3 rounded-lg border transition-all ${
                     isPrimary
-                      ? "border-indigo-400 bg-indigo-50/60"
-                      : "border-zinc-100 bg-white hover:border-zinc-200 hover:bg-zinc-50"
+                      ? "border-indigo-400 dark:border-indigo-500/50 bg-indigo-50/60 dark:bg-indigo-500/10"
+                      : "border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
                   }`}
                 >
                   <div
                     className={`h-4 w-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                      isPrimary ? "border-indigo-600 bg-indigo-600" : "border-zinc-300"
+                      isPrimary ? "border-indigo-600 bg-indigo-600" : "border-zinc-300 dark:border-zinc-600"
                     }`}
                   >
                     {isPrimary && <Check size={9} className="text-white" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-zinc-700">
+                      <span className="text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300">
                         {i.ticketId}
                       </span>
                       <span
-                        className={`px-1.5 py-0.5 rounded text-[9px] font-bold border ${priColors[i.severity] ?? "text-zinc-500 bg-zinc-50 border-zinc-100"}`}
+                        className={`px-1.5 py-0.5 rounded text-[9px] font-bold border ${priColors[i.severity] ?? "text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/60 border-zinc-100 dark:border-zinc-700"}`}
                       >
                         {i.severity}
                       </span>
                       {isPrimary && (
-                        <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                        <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-100 dark:border-indigo-500/20">
                           PRIMARY
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-zinc-600 truncate mt-0.5">{i.title}</p>
+                    <p className="text-[11px] text-zinc-600 dark:text-zinc-400 truncate mt-0.5">{i.title}</p>
                   </div>
                 </button>
               );
@@ -119,9 +119,9 @@ export default function MergeModal({
 
         {/* Warning */}
         {secondaryIncidents.length > 0 && (
-          <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-50 border border-amber-100">
-            <AlertTriangle size={13} className="text-amber-600 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-800 leading-snug">
+          <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20">
+            <AlertTriangle size={13} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-800 dark:text-amber-300 leading-snug">
               <span className="font-semibold">
                 {secondaryIncidents.map((i) => i.ticketId).join(", ")}
               </span>{" "}

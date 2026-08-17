@@ -64,9 +64,9 @@ const History = () => {
 
   return (
     <div className="flex flex-col min-h-screen overflow-y-auto">
-      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 dark:bg-transparent bg-dark">
+      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 bg-transparent dark:bg-dark">
         {ticket?.createdAt ? (
-          <div className="text-white py-2 px-2 border rounded-sm text-base">
+          <div className="text-black dark:text-white py-2 px-2 border rounded-sm text-base">
             <b className="capitalize">Ticket Created: </b>
             <span className="opacity-60">
               at <b>{moment(ticket.createdAt).format("YYYY-MM-DD")}</b>
@@ -78,7 +78,7 @@ const History = () => {
           {(data as IHistory[] | undefined)?.map((item) => (
             <div
               key={item.timestamp + item.action + item.comment}
-              className="text-white py-2 px-2 border rounded-sm text-base"
+              className="text-black dark:text-white py-2 px-2 border rounded-sm text-base"
             >
               <b className="capitalize">{item.action.split("_").join(" ")}: </b>
               <span className="opacity-60">
@@ -97,7 +97,7 @@ const History = () => {
         </div>
 
         {!isLoading && (!data || data.length === 0) ? (
-          <div className="text-white py-6 px-4 border border-dashed rounded-sm text-sm opacity-70">
+          <div className="text-black dark:text-white py-6 px-4 border border-dashed rounded-sm text-sm opacity-70">
             No incident history has been recorded yet.
           </div>
         ) : null}

@@ -41,7 +41,7 @@ export default function AgentIntelligence({ onChartClick, onExpand, agentData }:
             <SubH>Agent Performance Overview</SubH>
             <table className="w-full text-[11.5px]">
               <thead>
-                <tr className="text-zinc-400 font-semibold text-[10.5px]">
+                <tr className="text-zinc-400 dark:text-zinc-500 font-semibold text-[10.5px]">
                   <th className="text-left pb-2">Agent</th>
                   <th className="text-left pb-2">Acc.</th>
                   <th className="text-left pb-2">Tasks</th>
@@ -50,14 +50,14 @@ export default function AgentIntelligence({ onChartClick, onExpand, agentData }:
               </thead>
               <tbody>
                 {agents.map((a: any) => (
-                  <tr key={a.name} className="border-t border-zinc-100">
-                    <td className="py-2 font-medium text-zinc-700 truncate max-w-[120px]">
+                  <tr key={a.name} className="border-t border-zinc-100 dark:border-zinc-800">
+                    <td className="py-2 font-medium text-zinc-700 dark:text-zinc-300 truncate max-w-[120px]">
                       {a.name}
                     </td>
-                    <td className="py-2 font-mono text-emerald-600 font-semibold">
+                    <td className="py-2 font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
                       {a.accuracy}%
                     </td>
-                    <td className="py-2 font-mono text-zinc-500">{a.tasks}</td>
+                    <td className="py-2 font-mono text-zinc-500 dark:text-zinc-500">{a.tasks}</td>
                     <td className="py-2 max-w-[60px]">
                       <Sparkline data={a.trend} color={a.color} height={20} />
                     </td>
@@ -90,7 +90,7 @@ export default function AgentIntelligence({ onChartClick, onExpand, agentData }:
             <div className="w-[90px]">
               <SuccessDonut rate={overallHealth} />
             </div>
-            <span className="text-[11px] font-mono font-semibold text-emerald-600">
+            <span className="text-[11px] font-mono font-semibold text-emerald-600 dark:text-emerald-400">
               ↑ 4.2%
             </span>
             <div className="mt-2">
@@ -119,7 +119,7 @@ export default function AgentIntelligence({ onChartClick, onExpand, agentData }:
           <div className="overflow-x-auto">
             <table className="w-full text-[12px]">
               <thead>
-                <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 border-b border-zinc-200">
+                <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b border-zinc-200 dark:border-zinc-800">
                   <th className="text-left pb-2 pr-2">Agent</th>
                   <th className="text-left pb-2 pr-2">Accuracy</th>
                   <th className="text-left pb-2 pr-2">Tasks</th>
@@ -129,33 +129,33 @@ export default function AgentIntelligence({ onChartClick, onExpand, agentData }:
               </thead>
               <tbody>
                 {agents.map((a: any) => (
-                  <tr key={a.name} className="border-t border-zinc-100">
-                    <td className="py-2.5 pr-2 font-semibold text-zinc-800">
+                  <tr key={a.name} className="border-t border-zinc-100 dark:border-zinc-800">
+                    <td className="py-2.5 pr-2 font-semibold text-zinc-800 dark:text-zinc-100">
                       {a.name}
                     </td>
                     <td className="py-2.5 pr-2">
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           a.accuracy >= 90
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-amber-50 text-amber-700"
+                            ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                            : "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400"
                         }`}
                       >
                         {a.accuracy}%
                       </span>
                     </td>
-                    <td className="py-2.5 pr-2 font-mono text-zinc-500">
+                    <td className="py-2.5 pr-2 font-mono text-zinc-500 dark:text-zinc-500">
                       {a.tasks}
                     </td>
-                    <td className="py-2.5 pr-2 font-mono text-zinc-500">
+                    <td className="py-2.5 pr-2 font-mono text-zinc-500 dark:text-zinc-500">
                       {a.latency}
                     </td>
                     <td className="py-2.5">
                       <span
                         className={
                           a.drift.startsWith("-")
-                            ? "text-red-600"
-                            : "text-emerald-600"
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-emerald-600 dark:text-emerald-400"
                         }
                       >
                         {a.drift}
@@ -179,23 +179,23 @@ export default function AgentIntelligence({ onChartClick, onExpand, agentData }:
         >
           <div className="space-y-5">
             {/* Fleet health donut */}
-            <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-5 flex flex-col items-center">
+            <div className="bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 rounded-xl p-5 flex flex-col items-center">
               <div className="w-[160px]">
                 <SuccessDonut rate={90.4} big />
               </div>
-              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full mt-3">
+              <span className="text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full mt-3">
                 ↑ 4.2% · 6 of 6 agents healthy
               </span>
             </div>
 
             {/* Per-agent status table */}
             <div className="overflow-x-auto">
-              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-2.5">
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500 mb-2.5">
                 Per-agent status
               </h3>
               <table className="w-full text-[12px]">
                 <thead>
-                  <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 border-b border-zinc-200">
+                  <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b border-zinc-200 dark:border-zinc-800">
                     <th className="text-left pb-2 pr-2">Agent</th>
                     <th className="text-left pb-2 pr-2">Accuracy</th>
                     <th className="text-left pb-2 pr-2">30d drift</th>
@@ -205,33 +205,33 @@ export default function AgentIntelligence({ onChartClick, onExpand, agentData }:
                 </thead>
                 <tbody>
                   {agents.map((a: any) => (
-                    <tr key={a.name} className="border-t border-zinc-100">
-                      <td className="py-2.5 pr-2 font-semibold text-zinc-800">
+                    <tr key={a.name} className="border-t border-zinc-100 dark:border-zinc-800">
+                      <td className="py-2.5 pr-2 font-semibold text-zinc-800 dark:text-zinc-100">
                         {a.name}
                       </td>
-                      <td className="py-2.5 pr-2 font-mono text-zinc-700">
+                      <td className="py-2.5 pr-2 font-mono text-zinc-700 dark:text-zinc-300">
                         {a.accuracy}%
                       </td>
                       <td className="py-2.5 pr-2">
                         <span
                           className={
                             a.drift.startsWith("-")
-                              ? "text-red-600"
-                              : "text-emerald-600"
+                              ? "text-red-600 dark:text-red-400"
+                              : "text-emerald-600 dark:text-emerald-400"
                           }
                         >
                           {a.drift}
                         </span>
                       </td>
-                      <td className="py-2.5 pr-2 font-mono text-zinc-500">
+                      <td className="py-2.5 pr-2 font-mono text-zinc-500 dark:text-zinc-500">
                         {a.latency}
                       </td>
                       <td className="py-2.5">
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                             a.accuracy >= 90
-                              ? "bg-emerald-50 text-emerald-700"
-                              : "bg-amber-50 text-amber-700"
+                              ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                              : "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400"
                           }`}
                         >
                           {a.accuracy >= 90 ? "Healthy" : "Monitor"}

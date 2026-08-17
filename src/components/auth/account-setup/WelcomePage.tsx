@@ -554,7 +554,7 @@ const ScrubbeOnboarding = () => {
                       exit={{ opacity: 0, y: -10 }}
                       className="space-y-6"
                     >
-                      <div className="p-4 rounded-lg bg-dark">
+                      <div className="p-4 rounded-lg bg-gray-50 dark:bg-dark">
                         <div className="grid grid-cols-2 gap-3">
                           <Controller
                             name="ssoConfiguration.ssoType"

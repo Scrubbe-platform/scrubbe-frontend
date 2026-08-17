@@ -49,13 +49,13 @@ function KpiEzraAnalysis({ label }: { label: string }) {
   const narrative = data?.narrative ?? data?.analysis ?? data?.summary ?? null;
 
   if (isLoading) {
-    return <p className="text-[13px] text-zinc-400 leading-[1.72] animate-pulse">Analysing {label} trend…</p>;
+    return <p className="text-[13px] text-zinc-400 dark:text-zinc-500 leading-[1.72] animate-pulse">Analysing {label} trend…</p>;
   }
   if (narrative) {
-    return <p className="text-[13px] text-zinc-600 leading-[1.72]">{narrative}</p>;
+    return <p className="text-[13px] text-zinc-600 dark:text-zinc-300 leading-[1.72]">{narrative}</p>;
   }
   return (
-    <p className="text-[13px] text-zinc-600 leading-[1.72]">
+    <p className="text-[13px] text-zinc-600 dark:text-zinc-300 leading-[1.72]">
       Detailed trend for <strong>{label}</strong> over the selected window. Ezra continuously monitors this metric, surfaces anomalies, and tracks contributing factors to drive continuous improvement.
     </p>
   );
@@ -91,9 +91,9 @@ function PanelExpandContent({ panel, panelKey }: { panel: PanelNote; panelKey: s
         {displayStats.map((s) => (
           <div
             key={s.label}
-            className="bg-zinc-50 border border-zinc-100 rounded-lg p-3"
+            className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3"
           >
-            <div className="text-[10.5px] text-zinc-400 font-semibold uppercase tracking-wider">
+            <div className="text-[10.5px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase tracking-wider">
               {s.label}
             </div>
             <div
@@ -103,38 +103,38 @@ function PanelExpandContent({ panel, panelKey }: { panel: PanelNote; panelKey: s
               {s.value}
             </div>
             {s.delta && (
-              <div className="text-[11px] text-zinc-500 mt-0.5">{s.delta}</div>
+              <div className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5">{s.delta}</div>
             )}
           </div>
         ))}
       </div>
       <div>
-        <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-zinc-100">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+        <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-full">
             Ezra Analysis
           </span>
-          <span className="text-[11px] text-zinc-400 italic ml-auto">
+          <span className="text-[11px] text-zinc-400 dark:text-zinc-500 italic ml-auto">
             {ezraLoading ? "Loading…" : liveNote ? "Live" : "Pre-computed"}
           </span>
         </div>
         {ezraLoading ? (
-          <p className="text-[13px] text-zinc-400 leading-[1.72] animate-pulse">Fetching Ezra analysis…</p>
+          <p className="text-[13px] text-zinc-400 dark:text-zinc-500 leading-[1.72] animate-pulse">Fetching Ezra analysis…</p>
         ) : (
           (liveNote ?? panel.note).split("\n\n").map((para, i) => (
             <p
               key={i}
-              className="text-[13px] text-zinc-600 leading-[1.72] mb-3 last:mb-0"
+              className="text-[13px] text-zinc-600 dark:text-zinc-300 leading-[1.72] mb-3 last:mb-0"
             >
               {para}
             </p>
           ))
         )}
       </div>
-      <div className="bg-zinc-50 border border-zinc-100 rounded-lg p-3">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
+      <div className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">
           Data context
         </div>
-        <p className="text-[11px] text-zinc-500 leading-relaxed">
+        <p className="text-[11px] text-zinc-500 dark:text-zinc-500 leading-relaxed">
           {ezraRes?.dataContext ?? panel.ctx}
         </p>
       </div>
@@ -183,7 +183,7 @@ export default function IntelligenceControlPlanePage() {
         label: "MTTR Improvement",
         value: m.avgMTTR ? `${m.avgMTTR}m` : "—",
         delta: "last 30 days",
-        cls: "text-emerald-600",
+        cls: "text-emerald-600 dark:text-emerald-400",
         color: "#02DD82",
         spark: [m.avgMTTR ?? 0],
       },
@@ -191,7 +191,7 @@ export default function IntelligenceControlPlanePage() {
         label: "Autonomous Success Rate",
         value: `${m.automationRate ?? 0}%`,
         delta: `${m.autoRemediated ?? 0} auto-remediated`,
-        cls: "text-emerald-600",
+        cls: "text-emerald-600 dark:text-emerald-400",
         color: "#02DD82",
         spark: [m.automationRate ?? 0],
       },
@@ -199,7 +199,7 @@ export default function IntelligenceControlPlanePage() {
         label: "Human Override Rate",
         value: `${humanOverride}%`,
         delta: "vs autonomous",
-        cls: "text-purple-600",
+        cls: "text-purple-600 dark:text-purple-400",
         color: "#A855F7",
         spark: [humanOverride],
       },
@@ -207,7 +207,7 @@ export default function IntelligenceControlPlanePage() {
         label: "Incidents Resolved",
         value: `${m.resolvedIncidents ?? m.metrics?.resolvedThisMonth ?? 0}`,
         delta: "last 30 days",
-        cls: "text-emerald-600",
+        cls: "text-emerald-600 dark:text-emerald-400",
         color: "#3B82F6",
         spark: [m.resolvedIncidents ?? 0],
       },
@@ -215,7 +215,7 @@ export default function IntelligenceControlPlanePage() {
         label: "Open Incidents",
         value: `${m.openIncidents ?? 0}`,
         delta: `${m.criticalIncidents ?? 0} critical`,
-        cls: m.criticalIncidents > 0 ? "text-red-500" : "text-zinc-500",
+        cls: m.criticalIncidents > 0 ? "text-red-500 dark:text-red-400" : "text-zinc-500 dark:text-zinc-500",
         color: "#F59E0B",
         spark: [m.openIncidents ?? 0],
       },
@@ -223,7 +223,7 @@ export default function IntelligenceControlPlanePage() {
         label: "SLA Compliance",
         value: `${m.slaCompliance ?? 0}%`,
         delta: `${m.policyViolations ?? 0} violations`,
-        cls: m.slaCompliance >= 95 ? "text-emerald-600" : "text-amber-600",
+        cls: m.slaCompliance >= 95 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400",
         color: "#22D3EE",
         spark: [m.slaCompliance ?? 0],
       },
@@ -314,7 +314,7 @@ export default function IntelligenceControlPlanePage() {
     setDrawerSubTitle("Learning Overview KPI · last 30 days");
     setDrawerContent(
       <div className="space-y-5">
-        <div className="bg-zinc-50 rounded-xl border border-zinc-100 p-5">
+        <div className="bg-zinc-50 dark:bg-zinc-900/40 rounded-xl border border-zinc-100 dark:border-zinc-800 p-5">
           <div className="text-center mb-4">
             <div
               className="text-4xl font-bold font-ibm"
@@ -329,8 +329,8 @@ export default function IntelligenceControlPlanePage() {
           <KPIDetailChart data={kpi.spark} color={kpi.color} />
         </div>
         <div>
-          <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-zinc-100">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+          <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-full">
               Ezra Analysis
             </span>
           </div>
@@ -356,7 +356,7 @@ export default function IntelligenceControlPlanePage() {
       <Header title="Intelligence Control Plane" />
       <main className="p-4 sm:p-6 pb-24 max-w-[2000px] mx-auto space-y-5 font-ibm">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <p className="text-sm text-zinc-500 max-w-2xl">
+          <p className="text-sm text-zinc-500 dark:text-zinc-500 max-w-2xl">
             Closed-loop learning. Continuous improvement.
           </p>
           <div className="flex items-center gap-2.5">

@@ -65,7 +65,7 @@ function ModalBtn({
         "inline-flex items-center gap-2 h-9 px-4 rounded-lg text-xs font-semibold transition-colors",
         primary
           ? "bg-gradient-to-b from-emerald-400 to-emerald-500 text-emerald-950 shadow-sm shadow-emerald-500/30 hover:brightness-105"
-          : "shadow-sm shadow-light bg-white text-zinc-600 hover:bg-slate-50",
+          : "shadow-sm shadow-light bg-white dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800",
       )}
     >
       {children}
@@ -130,40 +130,40 @@ const typeStyles: Record<
 > = {
   root: {
     stripe: "bg-rose-500",
-    badge: "bg-rose-50",
-    badgeText: "text-rose-600",
+    badge: "bg-rose-50 dark:bg-rose-500/10",
+    badgeText: "text-rose-600 dark:text-rose-400",
   },
   service: {
     stripe: "bg-purple-500",
-    badge: "bg-purple-50",
-    badgeText: "text-purple-600",
+    badge: "bg-purple-50 dark:bg-purple-500/10",
+    badgeText: "text-purple-600 dark:text-purple-400",
   },
   infra: {
     stripe: "bg-blue-500",
-    badge: "bg-blue-50",
-    badgeText: "text-blue-600",
+    badge: "bg-blue-50 dark:bg-blue-500/10",
+    badgeText: "text-blue-600 dark:text-blue-400",
   },
   user: {
     stripe: "bg-pink-500",
-    badge: "bg-pink-50",
-    badgeText: "text-pink-600",
+    badge: "bg-pink-50 dark:bg-pink-500/10",
+    badgeText: "text-pink-600 dark:text-pink-400",
   },
   event: {
     stripe: "bg-zinc-400",
-    badge: "bg-zinc-100",
-    badgeText: "text-zinc-600",
+    badge: "bg-zinc-100 dark:bg-zinc-800",
+    badgeText: "text-zinc-600 dark:text-zinc-300",
   },
   change: {
     stripe: "bg-amber-500",
-    badge: "bg-amber-50",
-    badgeText: "text-amber-700",
+    badge: "bg-amber-50 dark:bg-amber-500/10",
+    badgeText: "text-amber-700 dark:text-amber-400",
   },
 };
 
 const sevBadgeStyle: Record<string, string> = {
-  Critical: "bg-rose-50 text-rose-600",
-  Warning: "bg-amber-50 text-amber-600",
-  Info: "bg-zinc-100 text-zinc-500",
+  Critical: "bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400",
+  Warning: "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  Info: "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-500",
 };
 
 // ── Flow node (matching the blueprint design) ────────────────────
@@ -174,7 +174,7 @@ const SignalNode = ({ data }: { data: GraphNodeData }) => {
   return (
     <div
       className={cn(
-        "relative bg-white rounded-xl shadow-sm shadow-light shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden",
+        "relative bg-white dark:bg-zinc-900 rounded-xl shadow-sm shadow-light shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden",
         data.dimmed && "opacity-30 saturate-50",
       )}
       style={{ minWidth: labels ? 160 : 120 }}
@@ -182,7 +182,7 @@ const SignalNode = ({ data }: { data: GraphNodeData }) => {
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-2 !h-2 !bg-zinc-300 !border-white"
+        className="!w-2 !h-2 !bg-zinc-300 dark:!bg-zinc-600 !border-white dark:!border-zinc-900"
       />
 
       {/* Left color stripe */}
@@ -216,7 +216,7 @@ const SignalNode = ({ data }: { data: GraphNodeData }) => {
                       : "CF"}
           </span>
         </div>
-        <span className="text-[12px] font-bold text-zinc-900 leading-tight truncate">
+        <span className="text-[12px] font-bold text-zinc-900 dark:text-zinc-100 leading-tight truncate">
           {data.label}
         </span>
       </div>
@@ -224,7 +224,7 @@ const SignalNode = ({ data }: { data: GraphNodeData }) => {
       {/* Sub + severity (hidden when labels off) */}
       <div className="px-3 pb-2 pl-4">
         {labels && (
-          <p className="text-[11px] text-zinc-500 font-medium leading-snug">
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-500 font-medium leading-snug">
             {data.sub}
           </p>
         )}
@@ -232,7 +232,7 @@ const SignalNode = ({ data }: { data: GraphNodeData }) => {
           <span
             className={cn(
               "inline-block mt-1 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded",
-              sevBadgeStyle[data.sev] || "bg-zinc-100 text-zinc-500",
+              sevBadgeStyle[data.sev] || "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-500",
             )}
           >
             {data.sev}
@@ -244,13 +244,13 @@ const SignalNode = ({ data }: { data: GraphNodeData }) => {
         type="source"
         position={Position.Right}
         id="right"
-        className="!w-2 !h-2 !bg-zinc-300 !border-white"
+        className="!w-2 !h-2 !bg-zinc-300 dark:!bg-zinc-600 !border-white dark:!border-zinc-900"
       />
       <Handle
         type="source"
         position={Position.Bottom}
         id="bottom"
-        className="!w-2 !h-2 !bg-zinc-300 !border-white"
+        className="!w-2 !h-2 !bg-zinc-300 dark:!bg-zinc-600 !border-white dark:!border-zinc-900"
       />
     </div>
   );
@@ -753,17 +753,17 @@ const buildAuditTrail = (incident: IncidentDetailRecord): AuditEntry[] => {
 // ── Severity pill styles ─────────────────────────────────────────
 
 const sevPill: Record<string, string> = {
-  P0: "bg-red-50 text-red-600 border-red-200",
-  P1: "bg-red-50 text-red-600 border-red-200",
-  P2: "bg-amber-50 text-amber-600 border-amber-200",
-  P3: "bg-zinc-50 text-zinc-500 border-zinc-200",
+  P0: "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/20",
+  P1: "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/20",
+  P2: "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20",
+  P3: "bg-zinc-50 dark:bg-zinc-800/60 text-zinc-500 dark:text-zinc-500 border-zinc-200 dark:border-zinc-800",
 };
 
 // ── Reusable atoms ───────────────────────────────────────────────
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[10px] font-bold uppercase tracking-[.06em] text-zinc-400 mb-2">
+    <p className="text-[10px] font-bold uppercase tracking-[.06em] text-zinc-400 dark:text-zinc-500 mb-2">
       {children}
     </p>
   );
@@ -771,9 +771,9 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 function KV({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3 py-2 border-b border-dashed border-zinc-100 last:border-b-0">
-      <span className="text-xs text-zinc-400">{label}</span>
-      <span className="text-xs font-semibold text-zinc-800 text-right font-ibm">
+    <div className="flex items-center justify-between gap-3 py-2 border-b border-dashed border-zinc-100 dark:border-zinc-800 last:border-b-0">
+      <span className="text-xs text-zinc-400 dark:text-zinc-500">{label}</span>
+      <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-100 text-right font-ibm">
         {value}
       </span>
     </div>
@@ -793,12 +793,12 @@ function ContextCell({
     <button
       type="button"
       onClick={onClick}
-      className="flex-1 min-w-[120px] flex flex-col gap-1 px-4 py-3 border-r border-zinc-100 last:border-r-0 hover:bg-slate-50 transition-colors text-left"
+      className="flex-1 min-w-[120px] flex flex-col gap-1 px-4 py-3 border-r border-zinc-100 dark:border-zinc-800 last:border-r-0 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors text-left"
     >
-      <span className="text-[10px] font-semibold uppercase tracking-[.06em] text-zinc-400">
+      <span className="text-[10px] font-semibold uppercase tracking-[.06em] text-zinc-400 dark:text-zinc-500">
         {label}
       </span>
-      <span className="text-[13px] font-semibold text-zinc-800 flex items-center gap-2">
+      <span className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
         {value}
       </span>
     </button>
@@ -849,26 +849,26 @@ function Modal({
     >
       <div
         className={cn(
-          "bg-white rounded-2xl shadow-sm shadow-light shadow-2xl w-full animate-in fade-in slide-in-from-bottom-3 duration-200",
+          "bg-white dark:bg-zinc-900 rounded-2xl shadow-sm shadow-light shadow-2xl w-full animate-in fade-in slide-in-from-bottom-3 duration-200",
           wide ? "max-w-[920px]" : "max-w-[640px]",
         )}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-100">
-          <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
             {icon}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-[15px] font-bold text-zinc-900">{title}</h3>
+            <h3 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100">{title}</h3>
             {subtitle && (
-              <p className="text-xs text-zinc-400 mt-0.5">{subtitle}</p>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{subtitle}</p>
             )}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
           >
             <X size={15} />
           </button>
@@ -877,7 +877,7 @@ function Modal({
         <div className="px-5 py-4 max-h-[64vh] overflow-auto">{children}</div>
         {/* Footer */}
         {footer && (
-          <div className="px-5 py-3.5 border-t border-zinc-100 bg-zinc-50 rounded-b-2xl flex justify-end gap-2.5">
+          <div className="px-5 py-3.5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/60 rounded-b-2xl flex justify-end gap-2.5">
             {footer}
           </div>
         )}
@@ -960,7 +960,7 @@ function ReconstructionModal({
           <button
             type="button"
             onClick={onClose}
-            className="h-9 px-4 rounded-lg text-xs font-semibold shadow-sm shadow-light bg-white text-zinc-600 hover:bg-zinc-50 transition-colors"
+            className="h-9 px-4 rounded-lg text-xs font-semibold shadow-sm shadow-light bg-white dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
           >
             Close
           </button>
@@ -975,7 +975,7 @@ function ReconstructionModal({
       }
     >
       {/* Run metadata */}
-      <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3.5 mb-4 space-y-0">
+      <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/60 p-3.5 mb-4 space-y-0">
         {[
           { k: "Run ID", v: `RR-${incident.ticketId}-01` },
           { k: "Computed", v: fmtDate(incident.updatedAt) },
@@ -988,10 +988,10 @@ function ReconstructionModal({
         ].map((row) => (
           <div
             key={row.k}
-            className="flex justify-between gap-3 py-2 border-b border-dashed border-zinc-200 last:border-b-0 text-xs"
+            className="flex justify-between gap-3 py-2 border-b border-dashed border-zinc-200 dark:border-zinc-700 last:border-b-0 text-xs"
           >
-            <span className="text-zinc-400">{row.k}</span>
-            <span className="font-semibold text-zinc-700 font-ibm text-right">
+            <span className="text-zinc-400 dark:text-zinc-500">{row.k}</span>
+            <span className="font-semibold text-zinc-700 dark:text-zinc-300 font-ibm text-right">
               {row.v}
             </span>
           </div>
@@ -999,7 +999,7 @@ function ReconstructionModal({
       </div>
 
       {/* Summary */}
-      <p className="text-[13px] text-zinc-600 leading-relaxed mb-4">
+      <p className="text-[13px] text-zinc-600 dark:text-zinc-300 leading-relaxed mb-4">
         {incident.aiAnalysis?.suggestion ||
           incident.impactSummary ||
           incident.description ||
@@ -1008,29 +1008,29 @@ function ReconstructionModal({
 
       {/* Reconstructed sequence */}
       <Eyebrow>Reconstructed sequence</Eyebrow>
-      <div className="border border-zinc-100 rounded-xl overflow-hidden mb-5">
+      <div className="border border-zinc-100 dark:border-zinc-800 rounded-xl overflow-hidden mb-5">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-zinc-100 bg-zinc-50">
-              <th className="text-left px-3 py-2.5 text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">
+            <tr className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/60">
+              <th className="text-left px-3 py-2.5 text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-semibold">
                 Time
               </th>
-              <th className="text-left px-3 py-2.5 text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">
+              <th className="text-left px-3 py-2.5 text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-semibold">
                 Signal
               </th>
-              <th className="text-left px-3 py-2.5 text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">
+              <th className="text-left px-3 py-2.5 text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-semibold">
                 Layer
               </th>
             </tr>
           </thead>
           <tbody>
             {timeline.map((row, i) => (
-              <tr key={i} className="border-b border-zinc-100 last:border-b-0">
-                <td className="px-3 py-2.5 font-ibm text-zinc-500">
+              <tr key={i} className="border-b border-zinc-100 dark:border-zinc-800 last:border-b-0">
+                <td className="px-3 py-2.5 font-ibm text-zinc-500 dark:text-zinc-500">
                   {row.time}
                 </td>
-                <td className="px-3 py-2.5 text-zinc-700">{row.signal}</td>
-                <td className="px-3 py-2.5 text-zinc-500">{row.layer}</td>
+                <td className="px-3 py-2.5 text-zinc-700 dark:text-zinc-300">{row.signal}</td>
+                <td className="px-3 py-2.5 text-zinc-500 dark:text-zinc-500">{row.layer}</td>
               </tr>
             ))}
           </tbody>
@@ -1043,12 +1043,12 @@ function ReconstructionModal({
         {confidenceMetrics.map((m) => (
           <div key={m.label}>
             <div className="flex justify-between text-xs mb-1.5">
-              <span className="text-zinc-500 font-medium">{m.label}</span>
-              <span className="font-bold font-ibm text-zinc-700">
+              <span className="text-zinc-500 dark:text-zinc-500 font-medium">{m.label}</span>
+              <span className="font-bold font-ibm text-zinc-700 dark:text-zinc-300">
                 {m.value}
               </span>
             </div>
-            <div className="h-1.5 rounded-full bg-zinc-100 overflow-hidden">
+            <div className="h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
               <div
                 className="h-full rounded-full bg-indigo-500"
                 style={{ width: `${m.pct}%` }}
@@ -1121,10 +1121,10 @@ function RerunModal({
   }, [open, steps]);
 
   const logColors: Record<string, string> = {
-    info: "bg-zinc-50 text-zinc-600",
-    ok: "bg-emerald-50 text-emerald-800",
-    warn: "bg-amber-50 text-amber-800",
-    err: "bg-red-50 text-red-800",
+    info: "bg-zinc-50 dark:bg-zinc-800/60 text-zinc-600 dark:text-zinc-300",
+    ok: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400",
+    warn: "bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400",
+    err: "bg-red-50 dark:bg-red-500/10 text-red-800 dark:text-red-400",
   };
 
   return (
@@ -1144,18 +1144,18 @@ function RerunModal({
               logColors[line.type] || logColors.info,
             )}
           >
-            <span className="text-zinc-400 shrink-0">{line.time}</span>
+            <span className="text-zinc-400 dark:text-zinc-500 shrink-0">{line.time}</span>
             <span>{line.text}</span>
           </div>
         ))}
         {!done && logLines.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-400">
+          <div className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-400 dark:text-zinc-500">
             <div className="w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
             Processing…
           </div>
         )}
         {done && (
-          <div className="flex items-center gap-2 mt-3 px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-700">
+          <div className="flex items-center gap-2 mt-3 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
             <Check size={14} />
             Re-run complete — root cause re-confirmed at {incident.score || "—"}
             % confidence
@@ -1216,23 +1216,23 @@ const ROUTE_LABEL: Record<string, string> = {
 };
 
 const ROUTE_COLORS: Record<string, string> = {
-  auto: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  approval: "bg-amber-50 text-amber-700 border-amber-200",
-  manual: "bg-blue-50 text-blue-700 border-blue-200",
-  blocked: "bg-red-50 text-red-700 border-red-200",
+  auto: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20",
+  approval: "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20",
+  manual: "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20",
+  blocked: "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20",
 };
 
 const EAL_COLORS: Record<number, string> = {
-  0: "bg-zinc-100 text-zinc-600",
-  1: "bg-blue-50 text-blue-700",
-  2: "bg-amber-50 text-amber-700",
-  3: "bg-emerald-50 text-emerald-700",
+  0: "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300",
+  1: "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400",
+  2: "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400",
+  3: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
 };
 
 const BLAST_COLORS: Record<string, string> = {
-  LOW: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  MEDIUM: "bg-amber-50 text-amber-700 border-amber-200",
-  UNKNOWN: "bg-red-50 text-red-700 border-red-200",
+  LOW: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20",
+  MEDIUM: "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20",
+  UNKNOWN: "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20",
 };
 
 function buildActions(incident: IncidentDetailRecord): RemediationAction[] {
@@ -1329,16 +1329,16 @@ function RemediationModal({
                 onClose();
                 onOpenGate(i);
               }}
-              className="w-full flex gap-3 items-start p-4 rounded-xl border border-zinc-100 bg-white hover:bg-slate-50 hover:border-zinc-200 transition-colors text-left"
+              className="w-full flex gap-3 items-start p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors text-left"
             >
-              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
                 <Sparkles size={15} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-zinc-900">
+                <p className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-100">
                   {action.title}
                 </p>
-                <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1 leading-relaxed">
                   {action.description}
                 </p>
                 <div className="flex flex-wrap gap-1.5 mt-2.5">
@@ -1372,7 +1372,7 @@ function RemediationModal({
           );
         })}
       </div>
-      <p className="text-xs text-zinc-400 mt-3">
+      <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-3">
         Nothing here executes without passing blast-radius and automation-level
         checks at the gate.
       </p>
@@ -1427,11 +1427,13 @@ function ExecutionGateModal({
     <div
       className={cn(
         "rounded-xl border p-4",
-        highlight ? "border-zinc-200 bg-white" : "border-zinc-100 bg-zinc-50",
+        highlight
+          ? "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/40"
+          : "border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/60",
       )}
     >
-      <h4 className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[.05em] text-zinc-400 mb-3">
-        <span className="w-5 h-5 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">
+      <h4 className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[.05em] text-zinc-400 dark:text-zinc-500 mb-3">
+        <span className="w-5 h-5 rounded-md bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-[10px] font-bold">
           {step}
         </span>
         {title}
@@ -1487,13 +1489,13 @@ function ExecutionGateModal({
       <div className="space-y-3.5">
         {/* Step 1 — EAL */}
         <GateStep step={1} title="Effective Automation Level">
-          <div className="text-[12.5px] text-zinc-600 font-ibm leading-relaxed">
-            EAL = <b className="text-zinc-900">min</b>( playbook.automationStage{" "}
-            <b className="text-zinc-900">L{action.stage}</b>,
+          <div className="text-[12.5px] text-zinc-600 dark:text-zinc-300 font-ibm leading-relaxed">
+            EAL = <b className="text-zinc-900 dark:text-zinc-100">min</b>( playbook.automationStage{" "}
+            <b className="text-zinc-900 dark:text-zinc-100">L{action.stage}</b>,
             policy.maxAutomationLevel{" "}
-            <b className="text-zinc-900">L{action.policyMax}</b>,
+            <b className="text-zinc-900 dark:text-zinc-100">L{action.policyMax}</b>,
             riskClassifier.computedLevel{" "}
-            <b className="text-zinc-900">L{action.risk}</b>) ={" "}
+            <b className="text-zinc-900 dark:text-zinc-100">L{action.risk}</b>) ={" "}
             <span
               className={cn(
                 "inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ml-1",
@@ -1504,12 +1506,12 @@ function ExecutionGateModal({
             </span>
           </div>
           <div className="flex flex-wrap gap-1.5 mt-3">
-            <span className="inline-flex items-center text-[10px] font-semibold text-zinc-500 bg-white shadow-sm shadow-light rounded-full px-2.5 py-1">
-              <span className="text-zinc-400 mr-1.5">playbook</span>{" "}
+            <span className="inline-flex items-center text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900/40 shadow-sm shadow-light rounded-full px-2.5 py-1">
+              <span className="text-zinc-400 dark:text-zinc-500 mr-1.5">playbook</span>{" "}
               {action.playbook}
             </span>
-            <span className="inline-flex items-center text-[10px] font-semibold text-zinc-500 bg-white shadow-sm shadow-light rounded-full px-2.5 py-1">
-              <span className="text-zinc-400 mr-1.5">policy</span>{" "}
+            <span className="inline-flex items-center text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900/40 shadow-sm shadow-light rounded-full px-2.5 py-1">
+              <span className="text-zinc-400 dark:text-zinc-500 mr-1.5">policy</span>{" "}
               {action.policy}
             </span>
           </div>
@@ -1521,10 +1523,10 @@ function ExecutionGateModal({
             className={cn(
               "flex items-start gap-3 rounded-lg p-3 text-xs",
               isUnknown
-                ? "bg-red-50 border border-red-200 text-red-800"
+                ? "bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-800 dark:text-red-400"
                 : blast.level === "MEDIUM"
-                  ? "bg-amber-50 border border-amber-200 text-amber-800"
-                  : "bg-emerald-50 border border-emerald-200 text-emerald-800",
+                  ? "bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-400"
+                  : "bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400",
             )}
           >
             <AlertTriangle size={14} className="shrink-0 mt-0.5" />
@@ -1548,8 +1550,8 @@ function ExecutionGateModal({
         {/* Step 3 — Guardrails */}
         <GateStep step={3} title="Guardrails">
           {isUnknown ? (
-            <div className="flex items-center gap-2.5 text-xs text-zinc-400">
-              <span className="w-5 h-5 rounded-md bg-zinc-100 flex items-center justify-center text-zinc-400">
+            <div className="flex items-center gap-2.5 text-xs text-zinc-400 dark:text-zinc-500">
+              <span className="w-5 h-5 rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 dark:text-zinc-500">
                 –
               </span>
               Guardrail checks not run — blocked upstream by unknown blast
@@ -1566,9 +1568,9 @@ function ExecutionGateModal({
               ].map((guard, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2.5 text-xs text-zinc-700"
+                  className="flex items-center gap-2.5 text-xs text-zinc-700 dark:text-zinc-300"
                 >
-                  <span className="w-5 h-5 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <span className="w-5 h-5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                     <Check size={12} />
                   </span>
                   {guard}
@@ -1584,12 +1586,12 @@ function ExecutionGateModal({
             className={cn(
               "flex items-start gap-3 rounded-lg p-3 text-xs",
               route === "blocked"
-                ? "bg-red-50 border border-red-200 text-red-800"
+                ? "bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-800 dark:text-red-400"
                 : route === "approval"
-                  ? "bg-amber-50 border border-amber-200 text-amber-800"
+                  ? "bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-400"
                   : route === "auto"
-                    ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-                    : "bg-blue-50 border border-blue-200 text-blue-800",
+                    ? "bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400"
+                    : "bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-800 dark:text-blue-400",
             )}
           >
             {route === "blocked" ? (
@@ -1718,14 +1720,14 @@ function SignalGraphWorkspace({
   ];
 
   return (
-    <div className="flex flex-col text-zinc-800 font-ibm">
+    <div className="flex flex-col text-zinc-800 dark:text-zinc-200 font-ibm">
       {/* ── Page header ── */}
       <div className="flex items-end justify-between gap-5 px-5 pt-5 pb-3 flex-wrap">
         <div>
-          <h1 className="text-xl font-bold text-zinc-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight flex items-center gap-3">
             Signal Graph
           </h1>
-          <p className="text-[13px] text-zinc-500 mt-1 max-w-2xl">
+          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-1 max-w-2xl">
             How this incident unfolded across systems, services and
             dependencies. Select any node to inspect its evidence.
           </p>
@@ -1742,7 +1744,7 @@ function SignalGraphWorkspace({
       </div>
 
       {/* ── Context bar ── */}
-      <div className="mx-5 mb-4 flex flex-wrap items-stretch bg-white rounded-xl shadow-sm shadow-light overflow-hidden">
+      <div className="mx-5 mb-4 flex flex-wrap items-stretch bg-white dark:bg-zinc-900/40 rounded-xl shadow-sm shadow-light overflow-hidden">
         <ContextCell
           label="Incident"
           value={
@@ -1775,7 +1777,7 @@ function SignalGraphWorkspace({
         <ContextCell
           label="Status"
           value={
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-zinc-100 text-zinc-600 capitalize">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 capitalize">
               {incident.status.toLowerCase().replace(/_/g, " ")}
             </span>
           }
@@ -1788,24 +1790,24 @@ function SignalGraphWorkspace({
 
       {/* ── Ezra insight banner ── */}
       {incident.aiAnalysis?.suggestion && (
-        <div className="mx-5 mb-4 flex gap-4 items-start rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50/80 via-purple-50/40 to-white p-4 overflow-hidden relative">
+        <div className="mx-5 mb-4 flex gap-4 items-start rounded-xl border border-indigo-200 dark:border-indigo-500/20 bg-gradient-to-r from-indigo-50/80 via-purple-50/40 to-white dark:from-indigo-500/10 dark:via-purple-500/5 dark:to-zinc-900/40 p-4 overflow-hidden relative">
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-l-xl" />
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-md shadow-indigo-500/40">
             <Sparkles size={20} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-bold text-zinc-900 mb-1">
+            <p className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100 mb-1">
               Ezra Analysis
             </p>
-            <p className="text-[13px] text-zinc-600 leading-relaxed">
+            <p className="text-[13px] text-zinc-600 dark:text-zinc-300 leading-relaxed">
               {shortText(incident.aiAnalysis.suggestion, 280)}
             </p>
             <div className="flex flex-wrap gap-1.5 mt-3">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-500 bg-white shadow-sm shadow-light rounded-full px-2.5 py-1">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900/60 shadow-sm shadow-light rounded-full px-2.5 py-1">
                 <span className="w-[7px] h-[7px] rounded-full bg-rose-500" />
                 {incident.severity}
               </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-500 bg-white shadow-sm shadow-light rounded-full px-2.5 py-1">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900/60 shadow-sm shadow-light rounded-full px-2.5 py-1">
                 <span className="w-[7px] h-[7px] rounded-full bg-purple-500" />
                 {incident.service || "Service"}
               </span>
@@ -1817,13 +1819,13 @@ function SignalGraphWorkspace({
       {/* ── 3-column grid ── */}
       <div className="grid grid-cols-1 lg:grid-cols-[268px_minmax(0,1fr)_322px] gap-4 px-5 items-start">
         {/* LEFT: Reconstruction timeline */}
-        <div className="bg-white rounded-xl shadow-sm shadow-light overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
-            <h2 className="text-[13px] font-bold flex items-center gap-2 text-zinc-800">
-              <Clock size={14} className="text-zinc-400" />
+        <div className="bg-white dark:bg-zinc-900/40 rounded-xl shadow-sm shadow-light overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+            <h2 className="text-[13px] font-bold flex items-center gap-2 text-zinc-800 dark:text-zinc-100">
+              <Clock size={14} className="text-zinc-400 dark:text-zinc-500" />
               Reconstruction timeline
             </h2>
-            <span className="text-[11px] text-zinc-400 font-medium">
+            <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium">
               {timeline.length} events
             </span>
           </div>
@@ -1839,24 +1841,24 @@ function SignalGraphWorkspace({
                 className={cn(
                   "w-full grid grid-cols-[46px_1fr] gap-2 px-2.5 py-2.5 rounded-lg text-left transition-colors",
                   selectedNodeId === ev.nodeId
-                    ? "bg-indigo-50"
-                    : "hover:bg-slate-50",
+                    ? "bg-indigo-50 dark:bg-indigo-500/10"
+                    : "hover:bg-slate-50 dark:hover:bg-zinc-800",
                 )}
               >
                 <div className="flex flex-col items-center relative">
                   {i < timeline.length - 1 && (
-                    <div className="absolute top-5 bottom-[-14px] w-[2px] bg-zinc-200 left-1/2 -translate-x-1/2" />
+                    <div className="absolute top-5 bottom-[-14px] w-[2px] bg-zinc-200 dark:bg-zinc-700 left-1/2 -translate-x-1/2" />
                   )}
-                  <span className="text-[10px] font-ibm font-bold text-zinc-500">
+                  <span className="text-[10px] font-ibm font-bold text-zinc-500 dark:text-zinc-500">
                     {ev.time}
                   </span>
                   <div
-                    className="relative z-10 w-2.5 h-2.5 rounded-full bg-white border-[2.5px] mt-1"
+                    className="relative z-10 w-2.5 h-2.5 rounded-full bg-white dark:bg-zinc-900 border-[2.5px] mt-1"
                     // style={{ borderColor: ev.tagColor }}
                   />
                 </div>
                 <div>
-                  <p className="text-[12px] text-zinc-600 font-medium leading-snug">
+                  <p className="text-[12px] text-zinc-600 dark:text-zinc-300 font-medium leading-snug">
                     {ev.label}
                   </p>
                   <span
@@ -1885,23 +1887,23 @@ function SignalGraphWorkspace({
         {/* CENTER: Graph canvas */}
         <div
           className={cn(
-            "bg-white rounded-xl shadow-sm shadow-light overflow-hidden flex flex-col transition-all duration-300",
+            "bg-white dark:bg-zinc-900/40 rounded-xl shadow-sm shadow-light overflow-hidden flex flex-col transition-all duration-300",
             expanded && "fixed inset-4 z-50 shadow-2xl",
           )}
         >
-          <div className="px-4 py-3 border-b border-zinc-100">
-            <h2 className="text-sm font-bold text-zinc-800">
+          <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+            <h2 className="text-sm font-bold text-zinc-800 dark:text-zinc-100">
               System signal flow & causal chain
             </h2>
-            <p className="text-[12px] text-zinc-500 mt-1 max-w-[760px]">
+            <p className="text-[12px] text-zinc-500 dark:text-zinc-400 mt-1 max-w-[760px]">
               This incident originated from{" "}
-              <b className="text-zinc-700">
+              <b className="text-zinc-700 dark:text-zinc-300">
                 {incident.service || "the primary service"}
               </b>
               . Select any node to inspect its evidence.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-2.5 border-b border-zinc-100 bg-slate-50/80">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-slate-50/80 dark:bg-zinc-800/40">
             {[
               { color: "#EF4444", label: "Root cause", border: "solid" },
               { color: "#F59E0B", label: "Contributing", border: "dashed" },
@@ -1911,7 +1913,7 @@ function SignalGraphWorkspace({
             ].map((l) => (
               <span
                 key={l.label}
-                className="inline-flex items-center gap-2 text-[11px] font-semibold text-zinc-500"
+                className="inline-flex items-center gap-2 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400"
               >
                 <span
                   className="w-3 h-3 rounded"
@@ -1920,21 +1922,21 @@ function SignalGraphWorkspace({
                 {l.label}
               </span>
             ))}
-            <span className="ml-auto text-[10.5px] text-zinc-400 font-semibold">
+            <span className="ml-auto text-[10.5px] text-zinc-400 dark:text-zinc-500 font-semibold">
               Edge value = temporal-correlation strength (0–1)
             </span>
           </div>
 
           {/* Graph toolbar */}
-          <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 border-b border-zinc-100">
+          <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800">
             <button
               type="button"
               onClick={() => setShowLabels((v) => !v)}
               className={cn(
                 "text-[11.5px] font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
                 showLabels
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                  : "bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-50",
+                  ? "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400"
+                  : "bg-white dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800",
               )}
             >
               Labels
@@ -1945,8 +1947,8 @@ function SignalGraphWorkspace({
               className={cn(
                 "text-[11.5px] font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
                 focusCausal
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                  : "bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-50",
+                  ? "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400"
+                  : "bg-white dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800",
               )}
             >
               Focus causal path
@@ -1956,14 +1958,14 @@ function SignalGraphWorkspace({
               <button
                 type="button"
                 onClick={() => reactFlowInstance.zoomOut({ duration: 200 })}
-                className="px-2.5 py-1.5 text-xs font-bold text-zinc-500 hover:bg-zinc-50 transition-colors border-r border-zinc-200"
+                className="px-2.5 py-1.5 text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors border-r border-zinc-200 dark:border-zinc-700"
               >
                 –
               </button>
               <button
                 type="button"
                 onClick={() => reactFlowInstance.zoomIn({ duration: 200 })}
-                className="px-2.5 py-1.5 text-xs font-bold text-zinc-500 hover:bg-zinc-50 transition-colors"
+                className="px-2.5 py-1.5 text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
               >
                 +
               </button>
@@ -1973,7 +1975,7 @@ function SignalGraphWorkspace({
               onClick={() =>
                 reactFlowInstance.fitView({ padding: 0.15, duration: 300 })
               }
-              className="text-[11.5px] font-semibold px-2.5 py-1.5 rounded-lg shadow-sm shadow-light text-zinc-500 hover:bg-zinc-50 transition-colors"
+              className="text-[11.5px] font-semibold px-2.5 py-1.5 rounded-lg shadow-sm shadow-light text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
             >
               Fit
             </button>
@@ -1990,8 +1992,8 @@ function SignalGraphWorkspace({
               className={cn(
                 "text-[11.5px] font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
                 expanded
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                  : "border-zinc-200 text-zinc-500 hover:bg-zinc-50",
+                  ? "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400"
+                  : "border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800",
               )}
             >
               {expanded ? "Collapse" : "Expand"}
@@ -2017,13 +2019,13 @@ function SignalGraphWorkspace({
                 size={1}
                 variant={BackgroundVariant.Dots}
               />
-              <Controls className="!bg-white !border-zinc-200 !shadow-sm" />
+              <Controls className="!bg-white dark:!bg-zinc-900 !border-zinc-200 dark:!border-zinc-700 !shadow-sm" />
             </ReactFlow>
             <div className="pointer-events-none absolute left-3 top-3 flex flex-wrap gap-2">
-              <span className="rounded-full border border-rose-200 bg-white/90 backdrop-blur-sm px-3 py-1 text-[10px] font-semibold text-rose-600">
+              <span className="rounded-full border border-rose-200 dark:border-rose-500/20 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm px-3 py-1 text-[10px] font-semibold text-rose-600 dark:text-rose-400">
                 {incident.ticketId} / {incident.service || "Incident"}
               </span>
-              <span className="rounded-full shadow-sm shadow-light bg-white/90 backdrop-blur-sm px-3 py-1 text-[10px] font-semibold text-zinc-600">
+              <span className="rounded-full shadow-sm shadow-light bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm px-3 py-1 text-[10px] font-semibold text-zinc-600 dark:text-zinc-300">
                 {incident.environment || "runtime"} /{" "}
                 {incident.region || "global"}
               </span>
@@ -2032,19 +2034,19 @@ function SignalGraphWorkspace({
         </div>
 
         {/* RIGHT: Intelligence panel */}
-        <div className="bg-white rounded-xl shadow-sm shadow-light overflow-hidden">
-          <div className="px-4 py-3.5 border-b border-zinc-100 bg-gradient-to-b from-slate-50 to-white">
+        <div className="bg-white dark:bg-zinc-900/40 rounded-xl shadow-sm shadow-light overflow-hidden">
+          <div className="px-4 py-3.5 border-b border-zinc-100 dark:border-zinc-800 bg-gradient-to-b from-slate-50 to-white dark:from-zinc-800/40 dark:to-zinc-900/40">
             {selectedNodeData ? (
-              <p className="text-[15px] font-bold text-zinc-900 mt-1.5 tracking-tight leading-snug">
+              <p className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100 mt-1.5 tracking-tight leading-snug">
                 {selectedNodeData.label}
               </p>
             ) : (
-              <p className="text-sm text-zinc-400">
+              <p className="text-sm text-zinc-400 dark:text-zinc-500">
                 Click a node to inspect it.
               </p>
             )}
           </div>
-          <div className="flex gap-1 px-4 border-b border-zinc-100">
+          <div className="flex gap-1 px-4 border-b border-zinc-100 dark:border-zinc-800">
             {(
               [
                 { id: "narrative" as IntelTab, label: "Narrative" },
@@ -2059,8 +2061,8 @@ function SignalGraphWorkspace({
                 className={cn(
                   "py-2.5 px-1 mr-3 text-xs font-medium border-b-2 -mb-px transition-colors",
                   intelTab === tab.id
-                    ? "border-black text-black"
-                    : "border-transparent text-zinc-400 hover:text-zinc-600",
+                    ? "border-black dark:border-white text-black dark:text-white"
+                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300",
                 )}
               >
                 {tab.label}
@@ -2069,22 +2071,22 @@ function SignalGraphWorkspace({
           </div>
           <div className="p-4">
             {intelTab === "narrative" && (
-              <div className="text-[13px] text-zinc-600 leading-[1.74] space-y-3">
+              <div className="text-[13px] text-zinc-600 dark:text-zinc-300 leading-[1.74] space-y-3">
                 {NODE_STORIES[selectedNodeId] ? (
                   NODE_STORIES[selectedNodeId].map((paragraph, pi) => (
-                    <p key={pi} className="text-[13px] text-zinc-600">
+                    <p key={pi} className="text-[13px] text-zinc-600 dark:text-zinc-300">
                       {paragraph}
                     </p>
                   ))
                 ) : (
                   <>
-                    <p className="text-sm text-zinc-800 font-medium">
+                    <p className="text-sm text-zinc-800 dark:text-zinc-100 font-medium">
                       {incident.impactSummary ||
                         incident.description ||
                         "Narrative is being computed by the analysis engine."}
                     </p>
                     <p
-                      className="text-sm text-zinc-500"
+                      className="text-sm text-zinc-500 dark:text-zinc-500"
                       dangerouslySetInnerHTML={{
                         __html:
                           incident.techDescription ||
@@ -2105,14 +2107,14 @@ function SignalGraphWorkspace({
                   {selectedNodeData.metrics.map((m) => (
                     <div key={m.label}>
                       <div className="flex justify-between text-xs">
-                        <span className="text-zinc-500 font-medium">
+                        <span className="text-zinc-500 dark:text-zinc-500 font-medium">
                           {m.label}
                         </span>
-                        <span className="font-bold font-ibm text-zinc-800">
+                        <span className="font-bold font-ibm text-zinc-800 dark:text-zinc-100">
                           {m.value}
                         </span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-zinc-100 mt-1.5 overflow-hidden">
+                      <div className="h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 mt-1.5 overflow-hidden">
                         <div
                           className="h-full rounded-full"
                           style={{ width: `${m.pct}%`, background: m.color }}
@@ -2121,8 +2123,8 @@ function SignalGraphWorkspace({
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-800">
-                  <p className="flex items-center gap-2 text-[10px] font-bold uppercase text-red-600 mb-1">
+                <div className="mt-4 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-3 text-xs text-red-800 dark:text-red-400">
+                  <p className="flex items-center gap-2 text-[10px] font-bold uppercase text-red-600 dark:text-red-400 mb-1">
                     <AlertTriangle size={12} />
                     Why this matters
                   </p>
@@ -2153,16 +2155,16 @@ function SignalGraphWorkspace({
                   <button
                     key={i}
                     type="button"
-                    className="w-full flex gap-3 items-start p-3 rounded-lg border border-zinc-100 bg-white hover:bg-slate-50 hover:border-zinc-200 transition-colors text-left"
+                    className="w-full flex gap-3 items-start p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors text-left"
                   >
-                    <div className="w-7 h-7 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0 text-zinc-500">
+                    <div className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 text-zinc-500 dark:text-zinc-400">
                       <FileText size={14} />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-zinc-800">
+                      <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-100">
                         {ev.title}
                       </p>
-                      <p className="text-[11px] font-ibm text-zinc-400 mt-0.5">
+                      <p className="text-[11px] font-ibm text-zinc-400 dark:text-zinc-500 mt-0.5">
                         {ev.meta}
                       </p>
                     </div>
@@ -2171,8 +2173,8 @@ function SignalGraphWorkspace({
               </div>
             )}
           </div>
-          <div className="border-t border-zinc-100 px-4 py-3.5">
-            <h3 className="text-xs font-bold flex items-center gap-2 text-zinc-700 mb-3">
+          <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3.5">
+            <h3 className="text-xs font-bold flex items-center gap-2 text-zinc-700 dark:text-zinc-300 mb-3">
               Contributing factors
             </h3>
             <div className="space-y-0">
@@ -2181,27 +2183,27 @@ function SignalGraphWorkspace({
                 .map((action, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-3 py-2 border-b border-dashed border-zinc-100 last:border-b-0"
+                    className="flex items-center gap-3 py-2 border-b border-dashed border-zinc-100 dark:border-zinc-800 last:border-b-0"
                   >
                     <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
-                    <span className="text-xs text-zinc-600 flex-1">
+                    <span className="text-xs text-zinc-600 dark:text-zinc-300 flex-1">
                       {shortText(action, 100)}
                     </span>
-                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-amber-50 text-amber-600">
+                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
                       Med
                     </span>
                   </div>
                 ))}
               {(!incident.recommendedActions ||
                 incident.recommendedActions.length === 0) && (
-                <p className="text-xs text-zinc-400 italic">
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 italic">
                   No contributing factors identified yet.
                 </p>
               )}
             </div>
           </div>
-          <div className="border-t border-zinc-100 px-4 py-3.5">
-            <h3 className="text-xs font-bold flex items-center gap-2 text-zinc-700 mb-3">
+          <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3.5">
+            <h3 className="text-xs font-bold flex items-center gap-2 text-zinc-700 dark:text-zinc-300 mb-3">
               Impact summary
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -2209,27 +2211,27 @@ function SignalGraphWorkspace({
                 {
                   label: "Services affected",
                   value: incident.correlatedSignalIds?.length || 1,
-                  color: "text-purple-600",
+                  color: "text-purple-600 dark:text-purple-400",
                 },
                 {
                   label: "Signals",
                   value: timeline.length,
-                  color: "text-blue-600",
+                  color: "text-blue-600 dark:text-blue-400",
                 },
                 {
                   label: "Comments",
                   value: incident.commentsCount,
-                  color: "text-pink-600",
+                  color: "text-pink-600 dark:text-pink-400",
                 },
                 {
                   label: "Risk score",
                   value: incident.riskScore ?? "—",
-                  color: "text-amber-600",
+                  color: "text-amber-600 dark:text-amber-400",
                 },
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-lg border border-zinc-100 bg-slate-50 p-3 text-center hover:bg-white hover:border-zinc-200 transition-colors cursor-default"
+                  className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800/60 p-3 text-center hover:bg-white dark:hover:bg-zinc-900/40 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors cursor-default"
                 >
                   <p
                     className={cn(
@@ -2239,7 +2241,7 @@ function SignalGraphWorkspace({
                   >
                     {stat.value}
                   </p>
-                  <p className="text-[10px] text-zinc-400 font-semibold mt-0.5">
+                  <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold mt-0.5">
                     {stat.label}
                   </p>
                 </div>
@@ -2250,12 +2252,12 @@ function SignalGraphWorkspace({
       </div>
 
       {/* ── Lower section: Ezra Causal Reconstruction ── */}
-      <div className="mx-5 mt-4 bg-white rounded-xl shadow-sm shadow-light overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
-          <h2 className="text-[13px] font-bold flex items-center gap-2 text-zinc-800">
+      <div className="mx-5 mt-4 bg-white dark:bg-zinc-900/40 rounded-xl shadow-sm shadow-light overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+          <h2 className="text-[13px] font-bold flex items-center gap-2 text-zinc-800 dark:text-zinc-100">
             Ezra · Causal Reconstruction
           </h2>
-          <span className="text-[11px] text-zinc-400 font-medium">
+          <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium">
             {incident.ticketId}
           </span>
         </div>
@@ -2265,24 +2267,24 @@ function SignalGraphWorkspace({
               {engineSteps.map((step, i) => (
                 <li
                   key={i}
-                  className="flex gap-3 items-start text-[12.5px] text-zinc-600"
+                  className="flex gap-3 items-start text-[12.5px] text-zinc-600 dark:text-zinc-300"
                 >
-                  <span className="w-5 h-5 rounded-md bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="w-5 h-5 rounded-md bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
                     <Check size={12} />
                   </span>
                   {step}
                 </li>
               ))}
             </ul>
-            <div className="rounded-xl border border-zinc-100 bg-slate-50 p-4">
-              <h4 className="text-[11px] uppercase tracking-[.05em] text-zinc-400 font-bold mb-3">
+            <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800/60 p-4">
+              <h4 className="text-[11px] uppercase tracking-[.05em] text-zinc-400 dark:text-zinc-500 font-bold mb-3">
                 Ezra output
               </h4>
               {[
                 {
                   label: "Root cause identified",
                   value: (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                       {incident.category || "Yes"}
                     </span>
                   ),
@@ -2290,7 +2292,7 @@ function SignalGraphWorkspace({
                 {
                   label: "Confidence score",
                   value: (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
                       {incident.score ? `${incident.score}%` : "—"}
                     </span>
                   ),
@@ -2298,7 +2300,7 @@ function SignalGraphWorkspace({
                 {
                   label: "Signal path accuracy",
                   value: (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
                       {incident.riskScore && incident.riskScore > 50
                         ? "High"
                         : "Medium"}
@@ -2308,9 +2310,9 @@ function SignalGraphWorkspace({
               ].map((row) => (
                 <div
                   key={row.label}
-                  className="flex items-center justify-between py-2.5 border-b border-dashed border-zinc-200 last:border-b-0 text-[12.5px]"
+                  className="flex items-center justify-between py-2.5 border-b border-dashed border-zinc-200 dark:border-zinc-700 last:border-b-0 text-[12.5px]"
                 >
-                  <span className="text-zinc-600">{row.label}</span>
+                  <span className="text-zinc-600 dark:text-zinc-300">{row.label}</span>
                   {row.value}
                 </div>
               ))}
@@ -2320,7 +2322,7 @@ function SignalGraphWorkspace({
             <button
               type="button"
               onClick={() => setShowReport(true)}
-              className="inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-xs font-semibold shadow-sm shadow-light bg-white text-zinc-600 hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-xs font-semibold shadow-sm shadow-light bg-white dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
             >
               <FileText size={14} />
               View full report
@@ -2328,7 +2330,7 @@ function SignalGraphWorkspace({
             <button
               type="button"
               onClick={() => setShowRerun(true)}
-              className="inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-xs font-semibold shadow-sm shadow-light bg-white text-zinc-600 hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-xs font-semibold shadow-sm shadow-light bg-white dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
             >
               <RefreshCcw size={14} />
               Ask Ezra to re-run
@@ -2338,13 +2340,13 @@ function SignalGraphWorkspace({
       </div>
 
       {/* ── Append-only audit trail ── */}
-      <div className="mx-5 mt-4 bg-white rounded-xl shadow-sm shadow-light overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
-          <h2 className="text-[13px] font-bold flex items-center gap-2 text-zinc-800">
-            <FileText size={14} className="text-zinc-400" />
+      <div className="mx-5 mt-4 bg-white dark:bg-zinc-900/40 rounded-xl shadow-sm shadow-light overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+          <h2 className="text-[13px] font-bold flex items-center gap-2 text-zinc-800 dark:text-zinc-100">
+            <FileText size={14} className="text-zinc-400 dark:text-zinc-500" />
             Append-only audit
           </h2>
-          <span className="text-[11px] text-zinc-400 font-medium">
+          <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium">
             {auditTrail.length} events
           </span>
         </div>
@@ -2352,36 +2354,36 @@ function SignalGraphWorkspace({
           {auditTrail.map((entry, i) => (
             <div
               key={i}
-              className="grid grid-cols-[74px_1fr] gap-3 px-3 py-2.5 rounded-lg border-b border-dashed border-zinc-100 last:border-b-0 hover:bg-slate-50 transition-colors"
+              className="grid grid-cols-[74px_1fr] gap-3 px-3 py-2.5 rounded-lg border-b border-dashed border-zinc-100 dark:border-zinc-800 last:border-b-0 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
             >
-              <span className="font-ibm text-[10.5px] text-zinc-400 pt-0.5">
+              <span className="font-ibm text-[10.5px] text-zinc-400 dark:text-zinc-500 pt-0.5">
                 {entry.time}
               </span>
               <div>
                 <span
                   className={cn(
                     "text-[11.5px] font-bold",
-                    entry.isEzra ? "text-indigo-600" : "text-zinc-800",
+                    entry.isEzra ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-800 dark:text-zinc-100",
                   )}
                 >
                   {entry.actor}
                 </span>
-                <p className="text-xs text-zinc-600 mt-0.5">{entry.event}</p>
-                <p className="font-ibm text-[10px] text-zinc-400 mt-1">
+                <p className="text-xs text-zinc-600 dark:text-zinc-300 mt-0.5">{entry.event}</p>
+                <p className="font-ibm text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">
                   {entry.ref}
                 </p>
               </div>
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-2 px-4 py-2.5 border-t border-zinc-100 bg-zinc-50 rounded-b-xl text-[10.5px] text-zinc-400 font-ibm">
-          <Lock size={12} className="text-emerald-600" />
+        <div className="flex items-center gap-2 px-4 py-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/60 rounded-b-xl text-[10.5px] text-zinc-400 dark:text-zinc-500 font-ibm">
+          <Lock size={12} className="text-emerald-600 dark:text-emerald-400" />
           Immutable · every state transition and execution is recorded here
         </div>
       </div>
 
       {/* ── Footer bar ── */}
-      <footer className="flex items-center justify-between h-9 mt-4 mx-5 mb-5 px-4 rounded-lg bg-slate-50 border border-zinc-100 text-[10px] font-ibm text-zinc-400">
+      <footer className="flex items-center justify-between h-9 mt-4 mx-5 mb-5 px-4 rounded-lg bg-slate-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 text-[10px] font-ibm text-zinc-400 dark:text-zinc-500">
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />

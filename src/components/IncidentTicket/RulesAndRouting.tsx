@@ -142,16 +142,16 @@ export default function RulesAndRouting() {
     <div className="space-y-6">
       {/* Dedup / routing summary */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="border border-white/10 rounded-xl p-4 bg-dark space-y-1">
+        <div className="border border-black/10 dark:border-white/10 rounded-xl p-4 bg-white dark:bg-dark space-y-1">
           <p className="text-xs text-gray-500 uppercase tracking-widest">
             Dedup window
           </p>
-          <p className="text-lg font-bold text-white">{dedupWindow}s</p>
+          <p className="text-lg font-bold text-black dark:text-white">{dedupWindow}s</p>
           <p className="text-xs text-gray-400">
             Duplicate signals within this window are merged.
           </p>
         </div>
-        <div className="border border-white/10 rounded-xl p-4 bg-dark space-y-1">
+        <div className="border border-black/10 dark:border-white/10 rounded-xl p-4 bg-white dark:bg-dark space-y-1">
           <p className="text-xs text-gray-500 uppercase tracking-widest">
             Active rules
           </p>
@@ -162,11 +162,11 @@ export default function RulesAndRouting() {
             of {rules.length} routing rules enabled
           </p>
         </div>
-        <div className="border border-white/10 rounded-xl p-4 bg-dark space-y-1">
+        <div className="border border-black/10 dark:border-white/10 rounded-xl p-4 bg-white dark:bg-dark space-y-1">
           <p className="text-xs text-gray-500 uppercase tracking-widest">
             Sources
           </p>
-          <p className="text-lg font-bold text-white">{sourceCount}</p>
+          <p className="text-lg font-bold text-black dark:text-white">{sourceCount}</p>
           <p className="text-xs text-gray-400">
             Distinct inbound sources represented in the routing table.
           </p>
@@ -174,8 +174,8 @@ export default function RulesAndRouting() {
       </div>
 
       {/* Routing pipeline visual */}
-      <div className="border border-white/10 rounded-xl p-6 bg-dark">
-        <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">
+      <div className="border border-black/10 dark:border-white/10 rounded-xl p-6 bg-white dark:bg-dark">
+        <h3 className="text-sm font-bold text-black dark:text-white mb-4 uppercase tracking-wider">
           Signal routing pipeline
         </h3>
         <div className="flex items-center gap-3 flex-wrap">
@@ -200,24 +200,24 @@ export default function RulesAndRouting() {
         </div>
         <p className="text-xs text-gray-500 mt-4">
           All inbound webhooks pass through this pipeline. Routing rules are
-          applied at the <span className="text-white">Route</span> step based on
+          applied at the <span className="text-black dark:text-white">Route</span> step based on
           source and condition.
         </p>
       </div>
 
       {/* Rules table */}
-      <div className="border border-white/10 rounded-xl bg-dark overflow-hidden">
-        <div className="flex justify-between items-center p-4 border-b border-white/10">
-          <h3 className="text-sm font-bold text-white">Routing rules</h3>
+      <div className="border border-black/10 dark:border-white/10 rounded-xl bg-white dark:bg-dark overflow-hidden">
+        <div className="flex justify-between items-center p-4 border-b border-black/10 dark:border-white/10">
+          <h3 className="text-sm font-bold text-black dark:text-white">Routing rules</h3>
           <button className="text-xs text-IMSCyan border border-IMSCyan px-3 py-1 rounded-lg hover:bg-IMSCyan/10 transition-colors">
             + Add rule
           </button>
         </div>
-        <div className="divide-y divide-white/5">
+        <div className="divide-y divide-black/5 dark:divide-white/5">
           {rules.map((rule) => (
             <div
               key={rule.id}
-              className="flex items-center gap-4 p-4 hover:bg-white/[0.02]"
+              className="flex items-center gap-4 p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
             >
               <button onClick={() => toggleRule(rule.id)} className="shrink-0">
                 {rule.enabled ? (
@@ -227,7 +227,7 @@ export default function RulesAndRouting() {
                 )}
               </button>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">
+                <p className="text-sm font-medium text-black dark:text-white truncate">
                   {rule.name}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
@@ -244,7 +244,7 @@ export default function RulesAndRouting() {
                   </span>
                 </div>
               </div>
-              <div className="shrink-0 flex items-center gap-2 text-[10px] text-gray-400 border border-white/5 rounded px-2 py-1">
+              <div className="shrink-0 flex items-center gap-2 text-[10px] text-gray-400 border border-black/5 dark:border-white/5 rounded px-2 py-1">
                 <GitBranch size={10} />
                 {rule.action}
               </div>
@@ -254,13 +254,13 @@ export default function RulesAndRouting() {
       </div>
 
       {/* Webhook URLs */}
-      <div className="border border-white/10 rounded-xl p-6 bg-dark space-y-4">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+      <div className="border border-black/10 dark:border-white/10 rounded-xl p-6 bg-white dark:bg-dark space-y-4">
+        <h3 className="text-sm font-bold text-black dark:text-white uppercase tracking-wider">
           Webhook endpoints
         </h3>
         <p className="text-xs text-gray-400">
           Point your source systems to these URLs. Include your Scrubbe API key
-          in the <span className="font-mono text-white">X-API-Key</span> header.
+          in the <span className="font-mono text-black dark:text-white">X-API-Key</span> header.
         </p>
         <div className="space-y-2">
           {[

@@ -1253,7 +1253,7 @@ export const NewMenu: Record<string, NavItem[]> = {
     {
       name: "Plans and Billings",
       Icon: IoWalletOutline,
-      link: "/incident/billing",
+      link: "/incident/billings",
       isActive: true,
       isMenu: false,
     },

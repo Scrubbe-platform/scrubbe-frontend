@@ -57,30 +57,30 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
   };
 
   return (
-    <aside className="rounded-xl border border-zinc-200 bg-white overflow-hidden flex flex-col">
+    <aside className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 overflow-hidden flex flex-col">
       <div className="px-5 pt-5 pb-1">
-        <b className={`${displayFont.className} text-[20px] font-bold block text-black`}>Ezra</b>
+        <b className={`${displayFont.className} text-[20px] font-bold block text-black dark:text-zinc-100`}>Ezra</b>
         {teamThinking && !thinking ? (
-          <span className="mt-0.5 flex items-center gap-1.5 text-[13px] text-emerald-600">
+          <span className="mt-0.5 flex items-center gap-1.5 text-[13px] text-emerald-600 dark:text-emerald-400">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             {teamThinking.triggeredBy.name} is querying…
           </span>
         ) : (
-          <span className="mt-0.5 block text-[13px] text-black/50">Investigating · SI-7A42K91</span>
+          <span className="mt-0.5 block text-[13px] text-black/50 dark:text-zinc-500">Investigating · SI-7A42K91</span>
         )}
       </div>
 
       <div className="p-5 flex flex-col gap-6">
         {/* Assessment */}
-        <div className="rounded-lg border border-zinc-200 p-4">
+        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 p-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[13px] text-black/50">Current Assessment</span>
-            <span className={`${monoFont.className} text-[28px] font-bold text-black`}>{confidence}%</span>
+            <span className="text-[13px] text-black/50 dark:text-zinc-500">Current Assessment</span>
+            <span className={`${monoFont.className} text-[28px] font-bold text-black dark:text-zinc-100`}>{confidence}%</span>
           </div>
-          <div className="h-2 rounded-full bg-zinc-100 overflow-hidden">
+          <div className="h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
             <div className="h-full rounded-full bg-emerald-600 transition-all duration-1000" style={{ width: `${confidence}%` }} />
           </div>
-          <p className="mt-3 text-[13px] text-black/50 leading-relaxed">
+          <p className="mt-3 text-[13px] text-black/50 dark:text-zinc-500 leading-relaxed">
             Confidence reflects corroboration across timing, correlation, and agent findings.
           </p>
         </div>
@@ -91,8 +91,8 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
           <div className="flex flex-col gap-3">
             {CAUSES.map(([title], i) => (
               <div key={title} className="flex items-baseline gap-2.5">
-                <span className={`${monoFont.className} text-[13px] font-bold text-emerald-600 shrink-0`}>{i + 1}</span>
-                <span className="text-[14px] font-semibold text-black">{title}</span>
+                <span className={`${monoFont.className} text-[13px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0`}>{i + 1}</span>
+                <span className="text-[14px] font-semibold text-black dark:text-zinc-100">{title}</span>
               </div>
             ))}
           </div>
@@ -103,8 +103,8 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
           <SectionTitle label="Active Findings" />
           <div className="flex flex-col gap-2.5">
             {FINDINGS.map((f, i) => (
-              <div key={i} className="flex gap-2.5 text-[13.5px] items-start text-black/70">
-                <Check size={15} className="text-emerald-600 shrink-0 mt-0.5" />
+              <div key={i} className="flex gap-2.5 text-[13.5px] items-start text-black/70 dark:text-zinc-300">
+                <Check size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                 {f}
               </div>
             ))}
@@ -115,14 +115,14 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
         <div>
           <SectionTitle label="Investigative Timeline" />
           <div className="relative pl-6">
-            <div className="absolute left-[7px] top-1 bottom-1 w-px bg-zinc-200" />
+            <div className="absolute left-[7px] top-1 bottom-1 w-px bg-zinc-200 dark:bg-zinc-800" />
             {TIMELINE.map(([time, desc, hot], i) => (
               <div key={i} className="relative pb-5 last:pb-0">
                 <span
-                  className={`absolute -left-6 top-0.5 w-[14px] h-[14px] rounded-full bg-white ${hot ? "bg-zinc-900 border-2 border-zinc-900" : "border-2 border-zinc-300"}`}
+                  className={`absolute -left-6 top-0.5 w-[14px] h-[14px] rounded-full bg-white dark:bg-zinc-900 ${hot ? "bg-zinc-900 border-2 border-zinc-900 dark:bg-zinc-100 dark:border-zinc-100" : "border-2 border-zinc-300 dark:border-zinc-700"}`}
                 />
-                <div className={`${monoFont.className} text-[12.5px] text-black/45`}>{time}</div>
-                <div className={`text-[14.5px] font-semibold mt-0.5 ${hot ? "text-zinc-900" : "text-black"}`}>{desc}</div>
+                <div className={`${monoFont.className} text-[12.5px] text-black/45 dark:text-zinc-500`}>{time}</div>
+                <div className={`text-[14.5px] font-semibold mt-0.5 ${hot ? "text-zinc-900 dark:text-zinc-100" : "text-black dark:text-zinc-100"}`}>{desc}</div>
               </div>
             ))}
           </div>
@@ -131,23 +131,23 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
         {/* Recommendation */}
         <div>
           <SectionTitle label="Recommended Action" />
-          <div className="rounded-lg bg-zinc-50 p-4">
+          <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/60 p-4">
             {liveResult ? (
-              <div className="text-[13.5px] text-black leading-relaxed mb-3 whitespace-pre-wrap">
+              <div className="text-[13.5px] text-black dark:text-zinc-100 leading-relaxed mb-3 whitespace-pre-wrap">
                 {typeof liveResult.result === "string"
                   ? liveResult.result
                   : (liveResult.result as any)?.summary ?? (liveResult.result as any)?.analysis ?? "Analysis complete."}
               </div>
             ) : (
               <>
-                <h4 className={`${displayFont.className} font-bold text-[17px] text-black mb-3`}>Roll back deployment</h4>
+                <h4 className={`${displayFont.className} font-bold text-[17px] text-black dark:text-zinc-100 mb-3`}>Roll back deployment</h4>
                 <div className="flex justify-between text-[13.5px] py-1.5">
-                  <span className="text-black/50">Expected outcome</span>
-                  <span className={`${monoFont.className} font-bold text-black`}>−80% failures</span>
+                  <span className="text-black/50 dark:text-zinc-500">Expected outcome</span>
+                  <span className={`${monoFont.className} font-bold text-black dark:text-zinc-100`}>−80% failures</span>
                 </div>
                 <div className="flex justify-between text-[13.5px] py-1.5">
-                  <span className="text-black/50">Confidence</span>
-                  <span className={`${monoFont.className} font-bold text-black`}>84%</span>
+                  <span className="text-black/50 dark:text-zinc-500">Confidence</span>
+                  <span className={`${monoFont.className} font-bold text-black dark:text-zinc-100`}>84%</span>
                 </div>
               </>
             )}
@@ -164,22 +164,22 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
         <div>
           <SectionTitle label="Impact Analysis" />
           <div className="grid grid-cols-2 gap-2.5">
-            <div className="rounded-lg border border-zinc-200 px-3.5 py-3">
-              <div className="text-[11px] tracking-wide uppercase text-black/45">Users Impacted</div>
-              <div className={`${monoFont.className} text-[19px] font-bold text-black mt-1`}>14,293</div>
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 px-3.5 py-3">
+              <div className="text-[11px] tracking-wide uppercase text-black/45 dark:text-zinc-500">Users Impacted</div>
+              <div className={`${monoFont.className} text-[19px] font-bold text-black dark:text-zinc-100 mt-1`}>14,293</div>
             </div>
-            <div className="rounded-lg border border-zinc-200 px-3.5 py-3">
-              <div className="text-[11px] tracking-wide uppercase text-black/45">Affected Services</div>
-              <div className={`${monoFont.className} text-[19px] font-bold text-black mt-1`}>3</div>
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 px-3.5 py-3">
+              <div className="text-[11px] tracking-wide uppercase text-black/45 dark:text-zinc-500">Affected Services</div>
+              <div className={`${monoFont.className} text-[19px] font-bold text-black dark:text-zinc-100 mt-1`}>3</div>
             </div>
-            <div className="col-span-2 rounded-lg border border-zinc-200 px-3.5 py-3 flex items-center justify-between">
-              <div className="text-[11px] tracking-wide uppercase text-black/45">Revenue Risk</div>
-              <span className="text-[12px] font-semibold px-2.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-600">High</span>
+            <div className="col-span-2 rounded-lg border border-zinc-200 dark:border-zinc-800 px-3.5 py-3 flex items-center justify-between">
+              <div className="text-[11px] tracking-wide uppercase text-black/45 dark:text-zinc-500">Revenue Risk</div>
+              <span className="text-[12px] font-semibold px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400">High</span>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-2.5">
             {["payments-api", "checkout-service", "customer-portal"].map((s) => (
-              <span key={s} className={`${monoFont.className} text-[12px] bg-white border border-zinc-200 rounded-md px-2.5 py-1 text-black`}>{s}</span>
+              <span key={s} className={`${monoFont.className} text-[12px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md px-2.5 py-1 text-black dark:text-zinc-100`}>{s}</span>
             ))}
           </div>
         </div>
@@ -187,13 +187,13 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
         {/* Ask Ezra */}
         <div>
           <SectionTitle label="Ask Ezra" />
-          <div className="rounded-lg bg-zinc-50 p-4">
+          <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/60 p-4">
             <div className="flex flex-col gap-3 mb-3">
               {thread.map((m, i) =>
                 m.role === "ezra" ? (
-                  <div key={i} className="text-[13.5px] leading-relaxed text-black">
+                  <div key={i} className="text-[13.5px] leading-relaxed text-black dark:text-zinc-100">
                     <b className="block font-bold mb-1">Ezra</b>
-                    <span className="[&_b]:text-blue-600 [&_b]:font-semibold" dangerouslySetInnerHTML={{ __html: m.content }} />
+                    <span className="[&_b]:text-blue-600 dark:[&_b]:text-blue-400 [&_b]:font-semibold" dangerouslySetInnerHTML={{ __html: m.content }} />
                   </div>
                 ) : (
                   <div key={i} className="self-end ml-auto max-w-[85%] bg-emerald-600 text-white text-[13.5px] leading-relaxed rounded-lg rounded-br-sm px-3 py-2">
@@ -201,7 +201,7 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
                   </div>
                 ),
               )}
-              {thinking && <div className="text-[13px] text-black/50">Ezra is thinking…</div>}
+              {thinking && <div className="text-[13px] text-black/50 dark:text-zinc-500">Ezra is thinking…</div>}
               <div ref={endRef} />
             </div>
             <div className="flex flex-wrap gap-2 mb-3">
@@ -209,7 +209,7 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
                 <button
                   key={q}
                   onClick={() => ask(q)}
-                  className="text-[12.5px] text-left border border-zinc-200 bg-white rounded-lg px-3 py-1.5 text-black/70 hover:border-emerald-400 hover:text-emerald-600 transition-colors"
+                  className="text-[12.5px] text-left border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded-lg px-3 py-1.5 text-black/70 dark:text-zinc-300 hover:border-emerald-400 dark:hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
                 >
                   {q}
                 </button>
@@ -224,7 +224,7 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
                   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(); }
                 }}
                 placeholder="Ask about this incident…"
-                className="flex-1 resize-none rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-[13px] text-black outline-none focus:border-emerald-400 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.12)] transition-colors min-h-[40px] max-h-[100px]"
+                className="flex-1 resize-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2.5 text-[13px] text-black dark:text-zinc-100 outline-none focus:border-emerald-400 dark:focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.12)] transition-colors min-h-[40px] max-h-[100px]"
               />
               <button
                 onClick={() => ask()}
@@ -243,7 +243,7 @@ const EzraPanel = forwardRef<EzraPanelHandle, { confidence: number; onOpenRemedi
 EzraPanel.displayName = "EzraPanel";
 
 const SectionTitle = ({ label }: { label: string }) => (
-  <h3 className={`${displayFont.className} text-[15px] font-bold text-black mb-3`}>{label}</h3>
+  <h3 className={`${displayFont.className} text-[15px] font-bold text-black dark:text-zinc-100 mb-3`}>{label}</h3>
 );
 
 export default EzraPanel;

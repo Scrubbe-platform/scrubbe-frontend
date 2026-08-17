@@ -393,19 +393,19 @@ const NewEditIncidentTicket = () => {
   if (ticketQuery.isLoading) {
     return (
       <div className="p-6 max-w-2xl mx-auto w-full flex flex-col gap-5 animate-pulse">
-        <div className="h-6 w-[60%] rounded-md bg-gray-200" />
+        <div className="h-6 w-[60%] rounded-md bg-gray-200 dark:bg-zinc-800" />
         <div className="grid grid-cols-2 gap-4">
-          <div className="h-20 rounded-xl bg-gray-200" />
-          <div className="h-20 rounded-xl bg-gray-200" />
+          <div className="h-20 rounded-xl bg-gray-200 dark:bg-zinc-800" />
+          <div className="h-20 rounded-xl bg-gray-200 dark:bg-zinc-800" />
         </div>
-        <div className="h-96 rounded-xl bg-gray-200" />
+        <div className="h-96 rounded-xl bg-gray-200 dark:bg-zinc-800" />
       </div>
     );
   }
 
   if (!ticket) {
     return (
-      <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-sm text-slate-400">
+      <div className="mt-6 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02] p-6 text-sm text-slate-500 dark:text-slate-400">
         Incident details are unavailable for editing.
       </div>
     );

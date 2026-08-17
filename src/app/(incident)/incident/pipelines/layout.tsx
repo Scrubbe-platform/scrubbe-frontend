@@ -4,7 +4,7 @@ import Sidebar from './_modules/component/Sidebar'
 
 const layout = ({children}:{children: ReactNode}) => {
   return (
-    <div className='bg-dark min-h-screen p-6'>
+    <div className='bg-white dark:bg-dark min-h-screen p-6'>
         <Header/>
         <div className='grid grid-cols-[.4fr,1fr] mt-5 gap-4'>
             <div>

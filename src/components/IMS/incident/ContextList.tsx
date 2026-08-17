@@ -29,18 +29,18 @@ const ContextRow = ({
   label: string;
   children: React.ReactNode;
 }) => (
-  <div className="border-b border-white/10 py-5 flex flex-col gap-2">
+  <div className="border-b border-zinc-200 dark:border-white/10 py-5 flex flex-col gap-2">
     <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
       {label}
     </span>
-    <div className="text-white text-[14px] font-medium leading-relaxed">
+    <div className="text-zinc-900 dark:text-white text-[14px] font-medium leading-relaxed">
       {children}
     </div>
   </div>
 );
 
 const TagPill = ({ label }: { label: string }) => (
-  <span className="px-3 py-1 bg-white/5 border border-white/10 rounded text-xs text-white">
+  <span className="px-3 py-1 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded text-xs text-zinc-800 dark:text-white">
     {label}
   </span>
 );
@@ -53,11 +53,11 @@ const IncidentContextView: React.FC<SubmittedContextProps> = ({
   return (
     <div className="w-full rounded-2xl p-6 border border-green-400/30">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-white opacity-90 tracking-tight">
+        <h2 className="text-xl font-bold text-zinc-900 dark:text-white opacity-90 tracking-tight">
           Incident Context
         </h2>
         <div className="text-[12px] text-slate-500 font-medium">
-          Submitted by <span className="text-slate-300">{submittedBy}</span> ·{" "}
+          Submitted by <span className="text-slate-600 dark:text-slate-300">{submittedBy}</span> ·{" "}
           {submittedAt}
         </div>
       </div>
@@ -84,7 +84,7 @@ const IncidentContextView: React.FC<SubmittedContextProps> = ({
             {data.labels.length > 0 ? (
               data.labels.map((tag) => <TagPill key={tag} label={tag} />)
             ) : (
-              <span className="text-slate-600 italic">No labels added</span>
+              <span className="text-slate-600 dark:text-slate-400 italic">No labels added</span>
             )}
           </div>
         </ContextRow>
@@ -94,7 +94,7 @@ const IncidentContextView: React.FC<SubmittedContextProps> = ({
             {data.relatedIncidents.length > 0 ? (
               data.relatedIncidents.map((id) => <TagPill key={id} label={id} />)
             ) : (
-              <span className="text-slate-600 italic">None linked</span>
+              <span className="text-slate-600 dark:text-slate-400 italic">None linked</span>
             )}
           </div>
         </ContextRow>
@@ -108,15 +108,15 @@ const IncidentContextView: React.FC<SubmittedContextProps> = ({
               {data.runbookOverrideUrl}
             </a>
           ) : (
-            <span className="text-slate-600 italic">None provided</span>
+            <span className="text-slate-600 dark:text-slate-400 italic">None provided</span>
           )}
         </ContextRow>
 
         <ContextRow label="Escalate to">{data.escalateTo}</ContextRow>
 
         <ContextRow label="Evidence & attachments">
-          <div className="flex items-center gap-2 text-slate-400">
-            <span className="text-white font-semibold">
+          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+            <span className="text-zinc-900 dark:text-white font-semibold">
               {data.evidenceCount} files
             </span>{" "}
             attached to this incident
@@ -137,7 +137,7 @@ export default function ContextList({
   if (!context) {
     return (
       <div className="p-5">
-        <div className="rounded-2xl border border-dashed border-white/10 p-6 text-sm text-slate-400">
+        <div className="rounded-2xl border border-dashed border-zinc-200 dark:border-white/10 p-6 text-sm text-slate-600 dark:text-slate-400">
           No context has been saved for {incident.ticketId} yet. Add incident
           context below to enrich this workspace.
         </div>

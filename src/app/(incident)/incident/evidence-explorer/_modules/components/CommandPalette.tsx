@@ -35,8 +35,8 @@ const CommandPalette: React.FC<{ open: boolean; onClose: () => void; commands: C
       className="fixed inset-0 bg-[rgba(20,20,30,0.34)] backdrop-blur-[2px] z-[300] flex items-start justify-center pt-[13vh] px-5"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-[600px] bg-white rounded-[14px] shadow-2xl overflow-hidden">
-        <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-[#F0EFEA]">
+      <div className="w-full max-w-[600px] bg-white dark:bg-zinc-900 text-[#15151A] dark:text-zinc-100 rounded-[14px] shadow-2xl overflow-hidden">
+        <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-[#F0EFEA] dark:border-zinc-800">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} className="w-[17px] h-[17px] opacity-45 shrink-0">
             <circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" />
           </svg>
@@ -55,26 +55,26 @@ const CommandPalette: React.FC<{ open: boolean; onClose: () => void; commands: C
             }}
             className="flex-1 outline-none text-[15px] bg-transparent"
           />
-          <span className="text-[10.5px] font-mono text-[#8A8A93] border border-[#E7E6E0] rounded-[5px] px-1.5 py-0.5">esc</span>
+          <span className="text-[10.5px] font-mono text-[#8A8A93] dark:text-zinc-500 border border-[#E7E6E0] dark:border-zinc-800 rounded-[5px] px-1.5 py-0.5">esc</span>
         </div>
         <div className="max-h-[48vh] overflow-auto p-1.5">
           {filtered.length === 0 ? (
-            <div className="p-7 text-center text-[#8A8A93] text-[13px]">No matching commands</div>
+            <div className="p-7 text-center text-[#8A8A93] dark:text-zinc-500 text-[13px]">No matching commands</div>
           ) : (
             filtered.map((c, i) => {
               const head = c.grp !== lastGrp ? c.grp : null;
               lastGrp = c.grp;
               return (
                 <React.Fragment key={i}>
-                  {head && <div className="text-[10px] tracking-wide uppercase text-[#B5B5BC] px-2.5 pt-2.5 pb-1">{head}</div>}
+                  {head && <div className="text-[10px] tracking-wide uppercase text-[#B5B5BC] dark:text-zinc-600 px-2.5 pt-2.5 pb-1">{head}</div>}
                   <div
                     onClick={() => run(c)}
                     onMouseEnter={() => setSel(i)}
-                    className={`flex items-center gap-2.5 px-2.5 py-2 rounded-[8px] cursor-pointer ${i === sel ? "bg-[#EEF0FF]" : ""}`}
+                    className={`flex items-center gap-2.5 px-2.5 py-2 rounded-[8px] cursor-pointer ${i === sel ? "bg-[#EEF0FF] dark:bg-blue-500/10" : ""}`}
                   >
                     <span className="flex-1 min-w-0">
                       <b className="font-medium text-[13px] block truncate">{c.label}</b>
-                      <span className="block text-[11px] text-[#8A8A93]">{c.sub}</span>
+                      <span className="block text-[11px] text-[#8A8A93] dark:text-zinc-500">{c.sub}</span>
                     </span>
                   </div>
                 </React.Fragment>

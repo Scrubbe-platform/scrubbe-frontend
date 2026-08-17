@@ -83,7 +83,7 @@ export default function ChartDrawerContent({ chartKey }: { chartKey: string }) {
   const note = CHART_NOTES[chartKey];
   if (!note)
     return (
-      <p className="text-sm text-zinc-400">
+      <p className="text-sm text-zinc-400 dark:text-zinc-500">
         No analysis available for this chart.
       </p>
     );
@@ -91,20 +91,20 @@ export default function ChartDrawerContent({ chartKey }: { chartKey: string }) {
   return (
     <div className="space-y-5">
       {CHART_MAP[chartKey] && (
-        <div className="bg-zinc-50 rounded-xl border border-zinc-100 p-5">
+        <div className="bg-zinc-50 dark:bg-zinc-900/40 rounded-xl border border-zinc-100 dark:border-zinc-800 p-5">
           {CHART_MAP[chartKey]}
         </div>
       )}
       <div>
-        <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-zinc-100">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+        <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-full">
             Ezra Analysis
           </span>
-          <span className="text-[11px] text-zinc-400 italic ml-auto">
+          <span className="text-[11px] text-zinc-400 dark:text-zinc-500 italic ml-auto">
             Pre-computed
           </span>
         </div>
-        <p className="text-[13px] text-zinc-600 leading-[1.72]">{note.note}</p>
+        <p className="text-[13px] text-zinc-600 dark:text-zinc-300 leading-[1.72]">{note.note}</p>
       </div>
     </div>
   );

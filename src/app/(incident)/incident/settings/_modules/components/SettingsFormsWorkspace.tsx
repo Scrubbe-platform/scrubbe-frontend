@@ -5,6 +5,7 @@ import Input from "@/components/ui/input";
 import { FormProps, patch } from "./formTypes";
 import { customAxios } from "@/lib/api/axios";
 import { endpoint } from "@/lib/api/endpoint";
+import { useThemeStore } from "@/store/themeStore";
 import {
   Collection, Explain, Notice, SelectField, Section, TagList, TextField, ToggleRow,
 } from "./SettingsPrimitives";
@@ -177,6 +178,7 @@ export function AuthenticationForm({ draft, setDraft }: FormProps) {
 
 export function AppearanceForm({ draft, setDraft }: FormProps) {
   const d = draft;
+  const { theme, setTheme } = useThemeStore();
   return (
     <>
       <Explain>Controls what your team and customers <b>see</b> — the console theme, your logo, and the branding on status pages and emails.</Explain>
@@ -192,7 +194,16 @@ export function AppearanceForm({ draft, setDraft }: FormProps) {
           </div>
           <div className="mt-1.5 text-[12px] text-black/50 dark:text-zinc-500">Used for primary buttons, links and highlights.</div>
         </div>
-        <SelectField label="Theme" value={d.theme} onChange={(v) => patch(setDraft, { theme: v })} options={["System", "Light", "Dark"]} />
+        <SelectField
+          label="Theme"
+          help="Changes take effect immediately for this session."
+          value={theme.charAt(0).toUpperCase() + theme.slice(1)}
+          onChange={(v) => {
+            setTheme(v.toLowerCase() as "light" | "dark" | "system");
+            patch(setDraft, { theme: v });
+          }}
+          options={["System", "Light", "Dark"]}
+        />
       </Section>
       <Section title="Email branding">
         <ToggleRow title="Brand outbound emails" desc="Apply your logo and colour to notification emails." checked={d.emailBranding} onChange={(v) => patch(setDraft, { emailBranding: v })} last />

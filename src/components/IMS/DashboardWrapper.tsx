@@ -5,7 +5,6 @@ import { motion, useMotionValue } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "@/lib/stores/useSidebar";
 import { useCommands } from "@/lib/stores/command.store";
-import { useThemeStore } from "@/store/themeStore";
 import Modal from "../ui/Modal";
 import GlobalSearch from "./Dashboard/GlobalSearch";
 import { Terminal } from "lucide-react";
@@ -18,7 +17,6 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const { collapse, toggle } = useSidebar();
   const pathname = usePathname();
   const { setOpenCommandPalette, openCommandPalette } = useCommands();
-  const { theme } = useThemeStore();
   const [width, setWidth] = useState(0);
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
@@ -29,16 +27,6 @@ const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const isMobile = width < 768;
-
-  // Apply theme class to <html> whenever theme changes
-  useEffect(() => {
-    const root = document.documentElement;
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-    const isDark = theme === "dark";
-    root.classList.toggle("dark", isDark);
-  }, [theme]);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {

@@ -30,10 +30,10 @@ export const COLORS = {
 } as const;
 
 export const TAG_CLASS: Record<string, string> = {
-  "t-crit": "bg-[#FDECEC] text-[#B42A30]",
-  "t-warn": "bg-[#FBF1DF] text-[#9A6206]",
-  "t-acc": "bg-[#EEF0FF] text-[#1B30C4]",
-  "t-neu": "bg-[#F1F0EB] text-[#52525B]",
+  "t-crit": "bg-[#FDECEC] dark:bg-red-500/10 text-[#B42A30] dark:text-red-400",
+  "t-warn": "bg-[#FBF1DF] dark:bg-amber-500/10 text-[#9A6206] dark:text-amber-400",
+  "t-acc": "bg-[#EEF0FF] dark:bg-blue-500/10 text-[#1B30C4] dark:text-blue-400",
+  "t-neu": "bg-[#F1F0EB] dark:bg-zinc-800 text-[#52525B] dark:text-zinc-400",
 };
 export const RAIL_CLASS: Record<string, string> = {
   "r-crit": "bg-[#E5484D]",

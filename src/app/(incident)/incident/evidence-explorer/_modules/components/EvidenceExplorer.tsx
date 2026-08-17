@@ -261,14 +261,14 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
 
   return (
     <div
-      className={`${sansFont.className} min-h-screen bg-[#FBFBF9] text-[#15151A] flex flex-col`}
+      className={`${sansFont.className} min-h-screen bg-[#FBFBF9] dark:bg-zinc-950 text-[#15151A] dark:text-zinc-100 flex flex-col`}
     >
       {/* Top bar */}
-      <header className="px-[22px] py-4 bg-white border-b border-[#E7E6E0]">
+      <header className="px-[22px] py-4 bg-white dark:bg-zinc-900 border-b border-[#E7E6E0] dark:border-zinc-800">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-1.5 h-9 px-4 rounded-[10px] border border-[#E7E6E0] bg-white text-[13.5px] font-medium text-[#15151A] hover:bg-[#F6F6F3] transition-colors"
+            className="flex items-center gap-1.5 h-9 px-4 rounded-[10px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13.5px] font-medium text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800 transition-colors"
           >
             <svg
               viewBox="0 0 24 24"
@@ -292,13 +292,13 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
             </button>
             <button
               onClick={() => toast.info("Escalation triggered (simulated)")}
-              className="h-9 px-5 rounded-[10px] border border-[#E7E6E0] bg-white text-[13.5px] font-medium text-[#15151A] hover:bg-[#F6F6F3] transition-colors"
+              className="h-9 px-5 rounded-[10px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13.5px] font-medium text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800 transition-colors"
             >
               Escalate
             </button>
             <button
               onClick={() => toast.info("Handoff request sent (simulated)")}
-              className="h-9 px-5 rounded-[10px] border border-[#E7E6E0] bg-white text-[13.5px] font-medium text-[#15151A] hover:bg-[#F6F6F3] transition-colors"
+              className="h-9 px-5 rounded-[10px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13.5px] font-medium text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800 transition-colors"
             >
               Handoff
             </button>
@@ -306,20 +306,20 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
         </div>
         <div className="mt-4 min-w-0">
           <h1
-            className={`${displayFont.className} text-[26px] font-bold tracking-tight text-[#15151A] m-0`}
+            className={`${displayFont.className} text-[26px] font-bold tracking-tight text-[#15151A] dark:text-zinc-100 m-0`}
           >
             Evidence Explorer
           </h1>
-          <p className="text-[13px] text-[#8A8A93] m-0 mt-1">
+          <p className="text-[13px] text-[#8A8A93] dark:text-zinc-500 m-0 mt-1">
             Investigate every signal correlated to this incident.
           </p>
         </div>
       </header>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-2.5 px-[22px] py-2.5 bg-white border-b border-[#E7E6E0] flex-wrap sticky top-0 z-[25]">
+      <div className="flex items-center gap-2.5 px-[22px] py-2.5 bg-white dark:bg-zinc-900 border-b border-[#E7E6E0] dark:border-zinc-800 flex-wrap sticky top-0 z-[25]">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] text-[#8A8A93]">Source</span>
+          <span className="text-[13px] text-[#8A8A93] dark:text-zinc-500">Source</span>
           <div className="relative">
             <button
               onClick={() => {
@@ -327,7 +327,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
                 setTimeOpen(false);
                 setAutoOpen(false);
               }}
-              className="flex items-center gap-1.5 h-9 px-3.5 rounded-[9px] border border-[#E7E6E0] bg-white text-[13px] font-medium hover:bg-[#F6F6F3]"
+              className="flex items-center gap-1.5 h-9 px-3.5 rounded-[9px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-medium text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
             >
               {SRC_OPTS.find(([, k]) => k === activeSource)?.[0]}
               <svg
@@ -341,8 +341,8 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
               </svg>
             </button>
             {sourceOpen && (
-              <div className="absolute z-30 top-[calc(100%+6px)] left-0 min-w-[210px] bg-white border border-[#E7E6E0] rounded-[10px] shadow-lg p-[5px]">
-                <div className="text-[10px] tracking-wide uppercase text-[#B5B5BC] px-[9px] pt-1.5 pb-1">
+              <div className="absolute z-30 top-[calc(100%+6px)] left-0 min-w-[210px] bg-white dark:bg-zinc-900 border border-[#E7E6E0] dark:border-zinc-800 rounded-[10px] shadow-lg p-[5px]">
+                <div className="text-[10px] tracking-wide uppercase text-[#B5B5BC] dark:text-zinc-600 px-[9px] pt-1.5 pb-1">
                   Evidence source
                 </div>
                 {SRC_OPTS.map(([lab, key]) => (
@@ -352,7 +352,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
                       setActiveSource(key);
                       setSourceOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between text-left px-[9px] py-[7px] text-[12.5px] rounded-[6px] hover:bg-[#F6F6F3] ${activeSource === key ? "text-[#1B30C4] font-semibold" : ""}`}
+                    className={`w-full flex items-center justify-between text-left px-[9px] py-[7px] text-[12.5px] rounded-[6px] text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800 ${activeSource === key ? "text-[#1B30C4] dark:text-blue-400 font-semibold" : ""}`}
                   >
                     {lab}
                   </button>
@@ -366,11 +366,11 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
 
         <button
           onClick={() => setCmdkOpen(true)}
-          className="flex items-center justify-between gap-4 h-9 px-3.5 min-w-[170px] rounded-[9px] border border-[#E7E6E0] bg-white text-[13px] text-[#8A8A93] hover:bg-[#F6F6F3]"
+          className="flex items-center justify-between gap-4 h-9 px-3.5 min-w-[170px] rounded-[9px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] text-[#8A8A93] dark:text-zinc-500 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
         >
           <span>Search</span>
           <span
-            className={`${monoFont.className} text-[10.5px] border border-[#E7E6E0] rounded-[5px] px-1.5`}
+            className={`${monoFont.className} text-[10.5px] border border-[#E7E6E0] dark:border-zinc-800 rounded-[5px] px-1.5`}
           >
             ⌘K
           </span>
@@ -383,7 +383,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
               setSourceOpen(false);
               setAutoOpen(false);
             }}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-[9px] border border-[#E7E6E0] bg-white text-[13px] font-medium hover:bg-[#F6F6F3]"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-[9px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-medium text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
           >
             {QUICK.find(([, m]) => m === windowMinutes)?.[0] ??
               `Last ${windowMinutes} minutes`}
@@ -398,7 +398,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
             </svg>
           </button>
           {timeOpen && (
-            <div className="absolute z-30 top-[calc(100%+6px)] right-0 w-[220px] bg-white border border-[#E7E6E0] rounded-[10px] shadow-lg p-3">
+            <div className="absolute z-30 top-[calc(100%+6px)] right-0 w-[220px] bg-white dark:bg-zinc-900 border border-[#E7E6E0] dark:border-zinc-800 rounded-[10px] shadow-lg p-3">
               <div className="grid grid-cols-2 gap-1.5">
                 {QUICK.map(([lab, mins]) => (
                   <button
@@ -407,7 +407,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
                       setWindowMinutes(mins);
                       setTimeOpen(false);
                     }}
-                    className={`text-left rounded-[7px] px-2.5 py-[7px] text-[12px] border ${windowMinutes === mins ? "bg-[#EEF0FF] text-[#1B30C4] border-[#DCE0FF] font-semibold" : "border-[#E7E6E0] hover:bg-[#F6F6F3]"}`}
+                    className={`text-left rounded-[7px] px-2.5 py-[7px] text-[12px] border ${windowMinutes === mins ? "bg-[#EEF0FF] dark:bg-blue-500/10 text-[#1B30C4] dark:text-blue-400 border-[#DCE0FF] dark:border-blue-500/20 font-semibold" : "border-[#E7E6E0] dark:border-zinc-800 text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"}`}
                   >
                     {lab}
                   </button>
@@ -417,11 +417,11 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
           )}
         </div>
 
-        <div className="relative inline-flex items-stretch border border-[#E7E6E0] rounded-[9px] overflow-hidden bg-white">
+        <div className="relative inline-flex items-stretch border border-[#E7E6E0] dark:border-zinc-800 rounded-[9px] overflow-hidden bg-white dark:bg-zinc-900">
           <button
             onClick={doTick}
             title="Refresh now"
-            className="flex items-center h-9 px-2.5 hover:bg-[#F6F6F3]"
+            className="flex items-center h-9 px-2.5 text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
           >
             <svg
               viewBox="0 0 24 24"
@@ -439,14 +439,14 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
               setSourceOpen(false);
               setTimeOpen(false);
             }}
-            className={`${monoFont.className} flex items-center gap-1.5 h-9 px-3 border-l border-[#F0EFEA] text-[13px] text-[#15151A] hover:bg-[#F6F6F3]`}
+            className={`${monoFont.className} flex items-center gap-1.5 h-9 px-3 border-l border-[#F0EFEA] dark:border-zinc-800 text-[13px] text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800`}
           >
             <span className="inline-block w-[6px] h-[6px] rounded-full bg-[#0EA47F]" />
             {AR_OPTS.find(([, ms]) => ms === autoRefreshMs)?.[0] ?? "Off"}
           </button>
           {autoOpen && (
-            <div className="absolute z-30 top-[calc(100%+6px)] right-0 min-w-[130px] bg-white border border-[#E7E6E0] rounded-[10px] shadow-lg p-[5px]">
-              <div className="text-[10px] tracking-wide uppercase text-[#B5B5BC] px-[9px] pt-1.5 pb-1">
+            <div className="absolute z-30 top-[calc(100%+6px)] right-0 min-w-[130px] bg-white dark:bg-zinc-900 border border-[#E7E6E0] dark:border-zinc-800 rounded-[10px] shadow-lg p-[5px]">
+              <div className="text-[10px] tracking-wide uppercase text-[#B5B5BC] dark:text-zinc-600 px-[9px] pt-1.5 pb-1">
                 Auto refresh
               </div>
               {AR_OPTS.map(([lab, ms]) => (
@@ -456,7 +456,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
                     setAutoRefreshMs(ms);
                     setAutoOpen(false);
                   }}
-                  className={`w-full text-left px-[9px] py-[7px] text-[12.5px] rounded-[6px] hover:bg-[#F6F6F3] ${autoRefreshMs === ms ? "text-[#1B30C4] font-semibold" : ""}`}
+                  className={`w-full text-left px-[9px] py-[7px] text-[12.5px] rounded-[6px] text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800 ${autoRefreshMs === ms ? "text-[#1B30C4] dark:text-blue-400 font-semibold" : ""}`}
                 >
                   {lab}
                 </button>
@@ -468,13 +468,13 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
         <button
           onClick={() => setFiltersVisible((v) => !v)}
           aria-pressed={filtersVisible}
-          className={`h-9 px-3.5 rounded-[9px] border text-[13px] font-medium ${filtersVisible ? "bg-[#EEF0FF] border-[#DCE0FF] text-[#1B30C4]" : "border-[#E7E6E0] bg-white text-[#15151A] hover:bg-[#F6F6F3]"}`}
+          className={`h-9 px-3.5 rounded-[9px] border text-[13px] font-medium ${filtersVisible ? "bg-[#EEF0FF] dark:bg-blue-500/10 border-[#DCE0FF] dark:border-blue-500/20 text-[#1B30C4] dark:text-blue-400" : "border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"}`}
         >
           Filters
         </button>
         <button
           onClick={doExport}
-          className="flex items-center gap-1.5 h-9 px-3.5 rounded-[9px] border border-[#E7E6E0] bg-white text-[13px] font-semibold text-[#15151A] hover:bg-[#F6F6F3]"
+          className="flex items-center gap-1.5 h-9 px-3.5 rounded-[9px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-semibold text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
         >
           <svg
             viewBox="0 0 24 24"
@@ -490,7 +490,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
         <button
           onClick={() => setSettingsOpen(true)}
           title="Settings"
-          className="flex items-center justify-center w-9 h-9 rounded-[9px] border border-[#E7E6E0] bg-white text-[#15151A] hover:bg-[#F6F6F3]"
+          className="flex items-center justify-center w-9 h-9 rounded-[9px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
         >
           <Settings size={16} />
         </button>
@@ -511,7 +511,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
 
         <div className="min-w-0">
           {/* Tabstrip */}
-          <div className="sticky top-0 z-[8] flex items-center gap-4 border-b border-[#F0EFEA] bg-[#FBFBF9] mb-3">
+          <div className="sticky top-0 z-[8] flex items-center gap-4 border-b border-[#F0EFEA] dark:border-zinc-800 bg-[#FBFBF9] dark:bg-zinc-950 mb-3">
             {[
               { key: "overview" as const, label: "Overview" },
               { key: "evidence" as const, label: "Evidence" },
@@ -519,7 +519,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
               <button
                 key={tabItem.key}
                 onClick={() => setTab(tabItem.key)}
-                className={`relative h-[39px] text-[14px] ${displayFont.className} ${tab === tabItem.key ? "text-[#16A34A] font-semibold after:content-[''] after:absolute after:left-0 after:right-0 after:-bottom-px after:h-0.5 after:bg-[#16A34A] after:rounded-full" : "text-[#8A8A93] font-medium hover:text-[#15151A]"}`}
+                className={`relative h-[39px] text-[14px] ${displayFont.className} ${tab === tabItem.key ? "text-[#16A34A] dark:text-emerald-400 font-semibold after:content-[''] after:absolute after:left-0 after:right-0 after:-bottom-px after:h-0.5 after:bg-[#16A34A] dark:after:bg-emerald-400 after:rounded-full" : "text-[#8A8A93] dark:text-zinc-500 font-medium hover:text-[#15151A] dark:hover:text-zinc-100"}`}
               >
                 {tabItem.label}
               </button>
@@ -546,10 +546,10 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
             <>
               <div className="flex items-start justify-between gap-3 mb-4 px-1">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-widest text-[#8A8A93]">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-[#8A8A93] dark:text-zinc-500">
                     Evidence Feed
                   </p>
-                  <p className="text-[14px] text-[#15151A] mt-0.5">
+                  <p className="text-[14px] text-[#15151A] dark:text-zinc-100 mt-0.5">
                     Showing {SRC_OPTS.find(([, k]) => k === activeSource)?.[0]}
                     {filters.find((f) => f.type === "env") && (
                       <> · {filters.find((f) => f.type === "env")?.value}</>
@@ -557,7 +557,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
                     · {QUICK.find(([, m]) => m === windowMinutes)?.[0]}
                   </p>
                 </div>
-                <span className="text-[12.5px] text-[#52525B] bg-[#F1F0EB] rounded-full px-3 py-1 shrink-0">
+                <span className="text-[12.5px] text-[#52525B] dark:text-zinc-400 bg-[#F1F0EB] dark:bg-zinc-800 rounded-full px-3 py-1 shrink-0">
                   {feedCount} entries
                 </span>
               </div>
@@ -581,7 +581,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
         />
       )}
       <div
-        className={`fixed inset-y-0 right-0 z-40 w-[400px] max-w-[92vw] bg-[#FBFBF9] shadow-2xl transition-transform duration-300 ${
+        className={`fixed inset-y-0 right-0 z-40 w-[400px] max-w-[92vw] bg-[#FBFBF9] dark:bg-zinc-950 shadow-2xl transition-transform duration-300 ${
           ezraOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -589,7 +589,7 @@ const EvidenceExplorer: React.FC<{ incident: IncidentDetailRecord }> = ({
           <button
             onClick={() => setEzraOpen(false)}
             aria-label="Close"
-            className="self-end mb-2 flex items-center justify-center w-8 h-8 rounded-[8px] border border-[#E7E6E0] bg-white text-[#8A8A93] hover:bg-[#F6F6F3] hover:text-[#15151A] shrink-0"
+            className="self-end mb-2 flex items-center justify-center w-8 h-8 rounded-[8px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[#8A8A93] dark:text-zinc-500 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800 hover:text-[#15151A] dark:hover:text-zinc-100 shrink-0"
           >
             <svg
               viewBox="0 0 24 24"

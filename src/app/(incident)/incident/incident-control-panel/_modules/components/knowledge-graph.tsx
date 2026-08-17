@@ -224,7 +224,7 @@ function KnowledgeGraphSVG({
   return (
     <svg
       viewBox={`0 0 ${width} ${height}`}
-      className="w-full"
+      className="w-full [--kg-label:#334155] dark:[--kg-label:#E4E4E7] [--kg-notelemetry:#B45309] dark:[--kg-notelemetry:#FBBF24]"
       style={{ maxHeight: height }}
     >
       {/* Edges */}
@@ -362,7 +362,7 @@ function KnowledgeGraphSVG({
               x={n.px}
               y={n.py + R + 12 * scale}
               textAnchor="middle"
-              fill={n.monitored ? "#334155" : "#94A3B8"}
+              fill={n.monitored ? "var(--kg-label)" : "#94A3B8"}
               fontSize={9 * scale}
               fontWeight={600}
               fontFamily="'IBM Plex Sans', system-ui, sans-serif"
@@ -377,7 +377,7 @@ function KnowledgeGraphSVG({
                 x={n.px}
                 y={n.py + R + 21 * scale}
                 textAnchor="middle"
-                fill="#B45309"
+                fill="var(--kg-notelemetry)"
                 fontSize={7.2 * scale}
                 fontFamily="'IBM Plex Mono', monospace"
               >
@@ -507,8 +507,8 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
             onClick={() => setFilter(f.key)}
             className={`flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-md transition-colors ${
               filter === f.key
-                ? "bg-zinc-200 text-zinc-800 font-semibold"
-                : "text-zinc-500 hover:bg-zinc-100"
+                ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-100 font-semibold"
+                : "text-zinc-500 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             }`}
           >
             <span
@@ -525,13 +525,13 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
           onClick={() => setCoverageMode((v) => !v)}
           className={`flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-md transition-colors ${
             coverageMode
-              ? "bg-emerald-50 text-emerald-700 font-semibold"
-              : "text-zinc-500 hover:bg-zinc-100"
+              ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold"
+              : "text-zinc-500 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           }`}
           title="Highlight services with no active telemetry"
         >
           <span
-            className="w-2 h-2 rounded-full border-[1.5px] border-dashed border-zinc-400"
+            className="w-2 h-2 rounded-full border-[1.5px] border-dashed border-zinc-400 dark:border-zinc-600"
             style={{ background: "transparent" }}
           />
           Coverage
@@ -540,7 +540,7 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
         {/* Filters button */}
         <button
           type="button"
-          className="ml-auto flex items-center gap-1.5 text-[11px] text-zinc-500 border border-zinc-200 px-2.5 py-1 rounded-md hover:bg-zinc-50 transition-colors"
+          className="ml-auto flex items-center gap-1.5 text-[11px] text-zinc-500 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-800 px-2.5 py-1 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
         >
           <svg
             viewBox="0 0 24 24"
@@ -566,7 +566,7 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
         {LEGEND.map((l) => (
           <span
             key={l.label}
-            className="flex items-center gap-1.5 text-[11px] text-zinc-500"
+            className="flex items-center gap-1.5 text-[11px] text-zinc-500 dark:text-zinc-500"
           >
             {l.type === "dot" && (
               <span
@@ -575,11 +575,11 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
               />
             )}
             {l.type === "ring" && (
-              <span className="w-2 h-2 rounded-full border-[1.5px] border-dashed border-zinc-400" />
+              <span className="w-2 h-2 rounded-full border-[1.5px] border-dashed border-zinc-400 dark:border-zinc-600" />
             )}
             {l.type === "blast" && (
               <span
-                className="w-2.5 h-2.5 rounded-full bg-white border-[1.5px] border-red-500"
+                className="w-2.5 h-2.5 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-red-500"
                 style={{
                   boxShadow: "0 0 0 2.5px rgba(239,68,68,.18)",
                 }}
@@ -591,24 +591,24 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
       </div>
 
       {/* Coverage summary bar */}
-      <div className="flex items-center gap-3 flex-wrap mt-2.5 px-3 py-2.5 bg-zinc-50 border border-zinc-100 rounded-lg text-[11px] text-zinc-500">
+      <div className="flex items-center gap-3 flex-wrap mt-2.5 px-3 py-2.5 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg text-[11px] text-zinc-500 dark:text-zinc-500">
         <span className="flex items-center gap-1.5">
           Monitoring coverage
-          <span className="font-mono font-bold text-zinc-800">
+          <span className="font-mono font-bold text-zinc-800 dark:text-zinc-100">
             {monitoredCount}/{NODES.length}
           </span>
         </span>
-        <span className="w-px h-3.5 bg-zinc-200" />
+        <span className="w-px h-3.5 bg-zinc-200 dark:bg-zinc-700" />
         <span className="flex items-center gap-1.5">
           No telemetry
-          <span className="font-mono font-bold text-amber-600">
+          <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
             {unmonitoredCount}
           </span>
         </span>
-        <span className="w-px h-3.5 bg-zinc-200" />
+        <span className="w-px h-3.5 bg-zinc-200 dark:bg-zinc-700" />
         <span className="flex items-center gap-1.5">
           In current blast radius
-          <span className="font-mono font-bold text-red-600">
+          <span className="font-mono font-bold text-red-600 dark:text-red-400">
             {affectedCount}
           </span>
         </span>
@@ -630,7 +630,7 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
         >
           <div className="space-y-4">
             {/* Large graph */}
-            <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-4">
+            <div className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-xl p-4">
               <KnowledgeGraphSVG
                 width={540}
                 height={380}
@@ -646,7 +646,7 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
               {LEGEND.map((l) => (
                 <span
                   key={l.label}
-                  className="flex items-center gap-1.5 text-[11px] text-zinc-500"
+                  className="flex items-center gap-1.5 text-[11px] text-zinc-500 dark:text-zinc-500"
                 >
                   {l.type === "dot" && (
                     <span
@@ -655,11 +655,11 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
                     />
                   )}
                   {l.type === "ring" && (
-                    <span className="w-2 h-2 rounded-full border-[1.5px] border-dashed border-zinc-400" />
+                    <span className="w-2 h-2 rounded-full border-[1.5px] border-dashed border-zinc-400 dark:border-zinc-600" />
                   )}
                   {l.type === "blast" && (
                     <span
-                      className="w-2.5 h-2.5 rounded-full bg-white border-[1.5px] border-red-500"
+                      className="w-2.5 h-2.5 rounded-full bg-white dark:bg-zinc-900 border-[1.5px] border-red-500"
                       style={{ boxShadow: "0 0 0 2.5px rgba(239,68,68,.18)" }}
                     />
                   )}
@@ -670,12 +670,12 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
 
             {/* Node details table */}
             <div>
-              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-2">
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500 mb-2">
                 All Nodes
               </h3>
               <table className="w-full text-[12px]">
                 <thead>
-                  <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 border-b border-zinc-200">
+                  <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b border-zinc-200 dark:border-zinc-800">
                     <th className="text-left pb-2">Node</th>
                     <th className="text-left pb-2">Layer</th>
                     <th className="text-left pb-2">Status</th>
@@ -684,37 +684,37 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
                 </thead>
                 <tbody>
                   {displayNodes.map((n) => (
-                    <tr key={n.id} className="border-t border-zinc-100">
+                    <tr key={n.id} className="border-t border-zinc-100 dark:border-zinc-800">
                       <td className="py-2 pr-2">
                         <div className="flex items-center gap-2">
                           <span
                             className="w-2.5 h-2.5 rounded-full"
                             style={{ background: n.color }}
                           />
-                          <span className="font-semibold text-zinc-800">
+                          <span className="font-semibold text-zinc-800 dark:text-zinc-100">
                             {n.label}
                           </span>
                         </div>
                       </td>
-                      <td className="py-2 pr-2 text-zinc-500">{n.layer}</td>
+                      <td className="py-2 pr-2 text-zinc-500 dark:text-zinc-500">{n.layer}</td>
                       <td className="py-2 pr-2">
                         {n.monitored ? (
-                          <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full">
                             Monitored
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
                             No telemetry
                           </span>
                         )}
                       </td>
                       <td className="py-2">
                         {n.affected ? (
-                          <span className="text-[10px] font-bold bg-red-50 text-red-700 px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-bold bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 px-2 py-0.5 rounded-full">
                             {n.impact || "Affected"}
                           </span>
                         ) : (
-                          <span className="text-[10px] text-zinc-400">—</span>
+                          <span className="text-[10px] text-zinc-400 dark:text-zinc-500">—</span>
                         )}
                       </td>
                     </tr>
@@ -724,30 +724,30 @@ export default function KnowledgeGraph({ onChartClick, graphData }: Props) {
             </div>
 
             {/* Coverage summary */}
-            <div className="flex items-center gap-3 flex-wrap px-3 py-2.5 bg-zinc-50 border border-zinc-100 rounded-lg text-[11px] text-zinc-500">
+            <div className="flex items-center gap-3 flex-wrap px-3 py-2.5 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg text-[11px] text-zinc-500 dark:text-zinc-500">
               <span className="flex items-center gap-1.5">
                 Monitoring coverage
-                <span className="font-mono font-bold text-zinc-800">
+                <span className="font-mono font-bold text-zinc-800 dark:text-zinc-100">
                   {monitoredCount}/{NODES.length}
                 </span>
               </span>
-              <span className="w-px h-3.5 bg-zinc-200" />
+              <span className="w-px h-3.5 bg-zinc-200 dark:bg-zinc-700" />
               <span className="flex items-center gap-1.5">
                 No telemetry
-                <span className="font-mono font-bold text-amber-600">
+                <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
                   {unmonitoredCount}
                 </span>
               </span>
-              <span className="w-px h-3.5 bg-zinc-200" />
+              <span className="w-px h-3.5 bg-zinc-200 dark:bg-zinc-700" />
               <span className="flex items-center gap-1.5">
                 In blast radius
-                <span className="font-mono font-bold text-red-600">
+                <span className="font-mono font-bold text-red-600 dark:text-red-400">
                   {affectedCount}
                 </span>
               </span>
             </div>
 
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <p className="text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed">
               Unmonitored nodes force blast radius → Unknown, holding
               auto-execution until telemetry is established.
             </p>

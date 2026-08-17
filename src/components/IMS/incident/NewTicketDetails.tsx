@@ -20,18 +20,18 @@ const NewTicketDetails = () => {
 
   if (ticketQuery.isLoading) {
     return (
-      <div className="bg-dark text-white p-6 space-y-4">
-        <div className="h-6 w-48 rounded-md bg-white/10" />
-        <div className="h-24 rounded-xl bg-white/[0.03]" />
-        <div className="h-96 rounded-xl bg-white/[0.03]" />
+      <div className="bg-white dark:bg-dark text-black dark:text-white p-6 space-y-4">
+        <div className="h-6 w-48 rounded-md bg-black/10 dark:bg-white/10" />
+        <div className="h-24 rounded-xl bg-black/[0.03] dark:bg-white/[0.03]" />
+        <div className="h-96 rounded-xl bg-black/[0.03] dark:bg-white/[0.03]" />
       </div>
     );
   }
 
   if (!ticket) {
     return (
-      <div className="bg-dark text-white p-6">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+      <div className="bg-white dark:bg-dark text-black dark:text-white p-6">
+        <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-6">
           <h1 className="text-2xl font-bold">Incident not found</h1>
           <p className="mt-3 text-sm text-slate-400">
             This incident could not be resolved from the current route.
@@ -50,14 +50,14 @@ const NewTicketDetails = () => {
   }
 
   return (
-    <div className="bg-dark text-white">
+    <div className="bg-white dark:bg-dark text-black dark:text-white">
       <div className="p-6 mx-auto w-full">
         <div
-          className="flex items-center gap-2 mb-2 cursor-pointer text-white"
+          className="flex items-center gap-2 mb-2 cursor-pointer text-black dark:text-white"
           onClick={() => router.push("/incident/tickets")}
         >
           <ChevronLeft />
-          <h1 className="text-xl font-bold text-white">{ticket.ticketId}</h1>
+          <h1 className="text-xl font-bold text-black dark:text-white">{ticket.ticketId}</h1>
         </div>
 
         <p className="font-semibold mb-2">
@@ -84,14 +84,14 @@ const NewTicketDetails = () => {
           </p>
         </div>
 
-        <div className="flex gap-8 border-b border-white/10 mb-6">
+        <div className="flex gap-8 border-b border-black/10 dark:border-white/10 mb-6">
           {TABS.map((item, index) => (
             <button
               key={item}
               className={`py-2 px-2 flex-1 text-sm font-medium border-b-2 transition-colors ${
                 tab === index
                   ? "border-IMSCyan text-IMSCyan"
-                  : "border-transparent text-white hover:text-IMSCyan"
+                  : "border-transparent text-black dark:text-white hover:text-IMSCyan"
               }`}
               onClick={() => setTab(index)}
             >

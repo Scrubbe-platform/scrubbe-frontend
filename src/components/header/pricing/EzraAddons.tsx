@@ -47,10 +47,10 @@ const PricingAndAddons = () => {
   }
 
   return (
-    <div className="bg-dark text-white p-8 min-h-screen font-sans">
+    <div className="bg-white dark:bg-dark text-black dark:text-white p-8 min-h-screen font-sans">
       {/* Header Section */}
       <div className="max-w-7xl mx-auto mb-12">
-        <p className="text-white text-lg mb-2">Feature comparison</p>
+        <p className="text-black dark:text-white text-lg mb-2">Feature comparison</p>
         <h1 className="text-5xl font-bold mb-2 font-bigshotOne">What you get, and why it matters</h1>
         <p className="text-gray-400">Hover the dotted terms for definitions.</p>
       </div>

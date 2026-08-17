@@ -90,9 +90,9 @@ export default function GovernanceDash({
           {displayKpis.map((k) => (
             <div
               key={k.label}
-              className="bg-zinc-50 border border-zinc-100 rounded-lg p-3"
+              className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3"
             >
-              <div className="text-[11px] text-zinc-500">{k.label}</div>
+              <div className="text-[11px] text-zinc-500 dark:text-zinc-500">{k.label}</div>
               <div className="text-2xl font-bold tracking-tight mt-1 font-ibm">
                 {k.value}
               </div>
@@ -113,7 +113,7 @@ export default function GovernanceDash({
             <div className="w-[100px]">
               <SuccessDonut rate={overallCompliance} />
             </div>
-            <span className="text-[11px] font-mono font-semibold text-emerald-600">
+            <span className="text-[11px] font-mono font-semibold text-emerald-600 dark:text-emerald-400">
               {overallCompliance}% avg
             </span>
             <div className="mt-2">
@@ -134,31 +134,31 @@ export default function GovernanceDash({
             {govEvents.map((ev, i) => (
               <div
                 key={i}
-                className="flex gap-2.5 py-2 border-t border-zinc-100 first:border-t-0 items-start"
+                className="flex gap-2.5 py-2 border-t border-zinc-100 dark:border-zinc-800 first:border-t-0 items-start"
               >
                 <span
                   className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold ${
                     ev.type === "deny"
-                      ? "bg-red-50 text-red-500"
+                      ? "bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400"
                       : ev.type === "ok"
-                        ? "bg-emerald-50 text-emerald-500"
-                        : "bg-blue-50 text-blue-500"
+                        ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 dark:text-emerald-400"
+                        : "bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400"
                   }`}
                 >
                   {ev.type === "deny" ? "✕" : ev.type === "ok" ? "✓" : "i"}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-semibold text-zinc-800">
+                  <div className="text-xs font-semibold text-zinc-800 dark:text-zinc-100">
                     {ev.title}
                   </div>
-                  <div className="text-[11px] text-zinc-500 mt-0.5">
+                  <div className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5">
                     {ev.detail}
                   </div>
-                  <span className="text-[10px] font-mono bg-zinc-100 border border-zinc-200 text-zinc-500 px-1.5 py-0.5 rounded mt-1 inline-block">
+                  <span className="text-[10px] font-mono bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-500 px-1.5 py-0.5 rounded mt-1 inline-block">
                     Policy: {ev.policy}
                   </span>
                 </div>
-                <span className="text-[10.5px] text-zinc-400 shrink-0">
+                <span className="text-[10.5px] text-zinc-400 dark:text-zinc-500 shrink-0">
                   {ev.time}
                 </span>
               </div>
@@ -182,32 +182,32 @@ export default function GovernanceDash({
         >
           <div className="space-y-5">
             {/* Overall donut */}
-            <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-5 flex flex-col items-center">
+            <div className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-xl p-5 flex flex-col items-center">
               <div className="w-[160px]">
                 <SuccessDonut rate={overallCompliance} big />
               </div>
-              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full mt-3">
+              <span className="text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full mt-3">
                 ↑ 2.4% vs prior period
               </span>
             </div>
 
             {/* Per-policy breakdown */}
             <div>
-              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-3">
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500 mb-3">
                 By policy
               </h3>
               <div className="space-y-3">
                 {policyCompliance.map((p) => (
                   <div key={p.name}>
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-zinc-600 font-medium">
+                      <span className="text-zinc-600 dark:text-zinc-300 font-medium">
                         {p.name}
                       </span>
-                      <span className="font-mono font-bold text-zinc-800">
+                      <span className="font-mono font-bold text-zinc-800 dark:text-zinc-100">
                         {p.rate}%
                       </span>
                     </div>
-                    <div className="h-2 rounded-full bg-zinc-100 overflow-hidden">
+                    <div className="h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
                       <div
                         className="h-full rounded-full"
                         style={{
@@ -220,7 +220,7 @@ export default function GovernanceDash({
                   </div>
                 ))}
               </div>
-              <p className="text-[11px] text-zinc-400 mt-4 leading-relaxed">
+              <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-4 leading-relaxed">
                 5 policy violations recorded this period, down 37.5%. Remaining
                 violations are concentrated in the Capacity policy where novel
                 scaling patterns occasionally exceed pre-approved thresholds.
@@ -241,7 +241,7 @@ export default function GovernanceDash({
           <div className="overflow-x-auto">
             <table className="w-full text-[12px]">
               <thead>
-                <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 border-b border-zinc-200">
+                <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b border-zinc-200 dark:border-zinc-800">
                   <th className="text-left pb-2 pr-2">Event</th>
                   <th className="text-left pb-2 pr-2">Detail</th>
                   <th className="text-left pb-2 pr-2">Policy</th>
@@ -250,22 +250,22 @@ export default function GovernanceDash({
               </thead>
               <tbody>
                 {govEvents.map((ev, i) => (
-                  <tr key={i} className="border-t border-zinc-100">
-                    <td className="py-2.5 pr-2 font-semibold text-zinc-800">
+                  <tr key={i} className="border-t border-zinc-100 dark:border-zinc-800">
+                    <td className="py-2.5 pr-2 font-semibold text-zinc-800 dark:text-zinc-100">
                       {ev.title}
                     </td>
-                    <td className="py-2.5 pr-2 text-zinc-500">{ev.detail}</td>
+                    <td className="py-2.5 pr-2 text-zinc-500 dark:text-zinc-500">{ev.detail}</td>
                     <td className="py-2.5 pr-2">
-                      <span className="text-[10px] font-mono bg-zinc-100 border border-zinc-200 text-zinc-500 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-mono bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-500 px-1.5 py-0.5 rounded">
                         {ev.policy}
                       </span>
                     </td>
-                    <td className="py-2.5 text-zinc-400">{ev.time}</td>
+                    <td className="py-2.5 text-zinc-400 dark:text-zinc-500">{ev.time}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="text-[11px] text-zinc-400 mt-4 leading-relaxed">
+            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-4 leading-relaxed">
               Every state transition is written to an immutable audit record
               with its exact policy version.
             </p>

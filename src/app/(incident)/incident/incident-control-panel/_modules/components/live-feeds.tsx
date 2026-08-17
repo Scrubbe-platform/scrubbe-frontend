@@ -28,7 +28,7 @@ export default function LiveFeed({ events }: Props) {
     <>
       <Panel number="★" title="Live Activity Feed">
         <div className="flex items-center justify-between mb-3">
-          <div className="text-[11px] text-zinc-400">
+          <div className="text-[11px] text-zinc-400 dark:text-zinc-500">
             Real-time orchestration activity
           </div>
           <div className="flex gap-1">
@@ -37,7 +37,7 @@ export default function LiveFeed({ events }: Props) {
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={`text-[11px] px-2 py-1 rounded-md capitalize transition-colors ${filter === f ? "bg-zinc-200 text-zinc-800 font-semibold" : "text-zinc-500 hover:bg-zinc-100"}`}
+                className={`text-[11px] px-2 py-1 rounded-md capitalize transition-colors ${filter === f ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-100 font-semibold" : "text-zinc-500 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
               >
                 {f}
               </button>
@@ -48,20 +48,20 @@ export default function LiveFeed({ events }: Props) {
         {filtered.map((ev, i) => (
           <div
             key={i}
-            className="flex gap-2.5 py-2.5 border-t border-zinc-100 first:border-t-0 items-start"
+            className="flex gap-2.5 py-2.5 border-t border-zinc-100 dark:border-zinc-800 first:border-t-0 items-start"
           >
             <span
               className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${feedDot[ev.type]}`}
             />
             <div className="flex-1 min-w-0">
-              <div className="text-xs font-semibold text-zinc-800">
+              <div className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
                 {ev.title}
               </div>
-              <div className="text-[11px] text-zinc-500 mt-0.5">
+              <div className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5">
                 {ev.detail}
               </div>
             </div>
-            <span className="text-[10.5px] text-zinc-400 shrink-0">
+            <span className="text-[10.5px] text-zinc-400 dark:text-zinc-500 shrink-0">
               {ev.time}
             </span>
           </div>
@@ -88,7 +88,7 @@ export default function LiveFeed({ events }: Props) {
                   key={f}
                   type="button"
                   onClick={() => setFilter(f)}
-                  className={`text-[11px] px-2.5 py-1 rounded-md capitalize transition-colors ${filter === f ? "bg-zinc-200 text-zinc-800 font-semibold" : "text-zinc-500 hover:bg-zinc-100"}`}
+                  className={`text-[11px] px-2.5 py-1 rounded-md capitalize transition-colors ${filter === f ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-100 font-semibold" : "text-zinc-500 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
                 >
                   {f}
                 </button>
@@ -98,7 +98,7 @@ export default function LiveFeed({ events }: Props) {
             <div className="overflow-x-auto">
               <table className="w-full text-[12px]">
                 <thead>
-                  <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 border-b border-zinc-200">
+                  <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b border-zinc-200 dark:border-zinc-800">
                     <th className="text-left pb-2 pr-2">Type</th>
                     <th className="text-left pb-2 pr-2">Event</th>
                     <th className="text-left pb-2 pr-2">Detail</th>
@@ -107,32 +107,32 @@ export default function LiveFeed({ events }: Props) {
                 </thead>
                 <tbody>
                   {filtered.map((ev, i) => (
-                    <tr key={i} className="border-t border-zinc-100">
+                    <tr key={i} className="border-t border-zinc-100 dark:border-zinc-800">
                       <td className="py-2.5 pr-2">
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${
                             ev.type === "remediation"
-                              ? "bg-emerald-50 text-emerald-700"
+                              ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
                               : ev.type === "governance"
-                                ? "bg-amber-50 text-amber-700"
-                                : "bg-blue-50 text-blue-700"
+                                ? "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                                : "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400"
                           }`}
                         >
                           {ev.type}
                         </span>
                       </td>
-                      <td className="py-2.5 pr-2 font-semibold text-zinc-800">
+                      <td className="py-2.5 pr-2 font-semibold text-zinc-800 dark:text-zinc-200">
                         {ev.title}
                       </td>
-                      <td className="py-2.5 pr-2 text-zinc-500">{ev.detail}</td>
-                      <td className="py-2.5 text-zinc-400">{ev.time}</td>
+                      <td className="py-2.5 pr-2 text-zinc-500 dark:text-zinc-500">{ev.detail}</td>
+                      <td className="py-2.5 text-zinc-400 dark:text-zinc-500">{ev.time}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
+            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
               Every orchestration action, governance decision, and agent
               retraining event is written to an immutable audit record.
             </p>

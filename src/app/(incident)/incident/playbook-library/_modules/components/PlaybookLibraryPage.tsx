@@ -319,7 +319,7 @@ export default function PlaybookLibraryPage(): React.JSX.Element {
     <main className="p-4 sm:p-6 pb-24 max-w-[1600px] mx-auto space-y-6 font-ibm">
       {/* Page head */}
       <div className="flex flex-wrap items-start gap-4 justify-between">
-        <p className="text-sm text-zinc-500 max-w-2xl">
+        <p className="text-sm text-zinc-500 max-w-2xl dark:text-zinc-400">
           Governed operational workflows that define how Scrubbe investigates,
           coordinates, validates, and executes incident response across your
           engineering ecosystem.
@@ -346,7 +346,7 @@ export default function PlaybookLibraryPage(): React.JSX.Element {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[280px]">
           <Search
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500"
             size={15}
           />
           <input
@@ -357,12 +357,12 @@ export default function PlaybookLibraryPage(): React.JSX.Element {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full h-[42px] pl-10 pr-9 rounded-lg border border-zinc-300 text-sm text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
+            className="w-full h-[42px] pl-10 pr-9 rounded-lg border border-zinc-300 text-sm text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
             >
               <X size={14} />
             </button>
@@ -392,15 +392,15 @@ export default function PlaybookLibraryPage(): React.JSX.Element {
         >
           <Download size={14} /> Export
         </Button>
-        <div className="flex border border-zinc-300 rounded-lg overflow-hidden ml-auto">
+        <div className="flex border border-zinc-300 rounded-lg overflow-hidden ml-auto dark:border-zinc-700">
           {(["playbooks", "modules"] as LibraryTab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`px-3.5 py-2 text-sm font-semibold transition-colors ${
                 tab === t
-                  ? "bg-zinc-900 text-white"
-                  : "text-zinc-500 hover:bg-zinc-50"
+                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
+                  : "text-zinc-500 hover:bg-zinc-50 dark:text-zinc-500 dark:hover:bg-zinc-800"
               }`}
             >
               {t === "playbooks" ? "Playbooks" : "Module library"}
@@ -424,7 +424,7 @@ export default function PlaybookLibraryPage(): React.JSX.Element {
             {activeFilterCount > 0 && (
               <button
                 onClick={clearAllFilters}
-                className="w-full mt-2 text-xs font-semibold text-center text-zinc-500 hover:text-zinc-900 border border-zinc-200 rounded-lg py-2 hover:bg-zinc-50 transition-colors"
+                className="w-full mt-2 text-xs font-semibold text-center text-zinc-500 hover:text-zinc-900 border border-zinc-200 rounded-lg py-2 hover:bg-zinc-50 transition-colors dark:text-zinc-500 dark:hover:text-zinc-100 dark:border-zinc-800 dark:hover:bg-zinc-800"
               >
                 Clear all filters
               </button>

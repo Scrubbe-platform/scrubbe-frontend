@@ -8,7 +8,7 @@ export default function NotFound() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-dark flex items-center justify-center p-6 font-sans selection:bg-IMSCyan selection:text-black">
+    <div className="min-h-screen bg-white dark:bg-dark flex items-center justify-center p-6 font-sans selection:bg-IMSCyan selection:text-black">
       {/* Background Signal Grid Effect */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(91,143,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(91,143,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
@@ -21,7 +21,7 @@ export default function NotFound() {
           <motion.h1
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-[120px] font-black text-white leading-none tracking-tighter"
+            className="text-[120px] font-black text-black dark:text-white leading-none tracking-tighter"
           >
             404
           </motion.h1>
@@ -39,7 +39,7 @@ export default function NotFound() {
 
         {/* Status Header */}
         <div className="space-y-3">
-          <h2 className="text-2xl font-bold text-white">Page Not Found</h2>
+          <h2 className="text-2xl font-bold text-black dark:text-white">Page Not Found</h2>
           <p className="text-gray-400 text-[13px] max-w-md mx-auto leading-relaxed">
             The resource you are looking for has been decommissioned or moved to
             a different node. No corresponding AuditEvent was found for this
@@ -53,7 +53,7 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <CButton
             onClick={() => router.back()}
-            className="w-full sm:w-auto border border-white/10 bg-white/5 text-white hover:bg-white/10"
+            className="w-full sm:w-auto border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10"
           >
             <ArrowLeft className="size-4 mr-2" /> Back
           </CButton>

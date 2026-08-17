@@ -212,7 +212,7 @@ function InvestigationAnalysisInner() {
   // ── Loading state ──────────────────────────────────────────────────────────
   if (loading || generating) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-zinc-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="animate-spin text-slate-400" size={28} />
           <p className="text-sm text-slate-500 font-medium">
@@ -228,7 +228,7 @@ function InvestigationAnalysisInner() {
   // ── Error state ────────────────────────────────────────────────────────────
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-8">
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-zinc-950 flex items-center justify-center p-8">
         <div className="max-w-md text-center space-y-4">
           <p className="text-sm text-red-500 font-medium">
             {error ?? "No analysis data available."}
@@ -274,7 +274,7 @@ function InvestigationAnalysisInner() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-[#1e293b] p-4 md:p-8 max-w-[1000px] mx-auto font-sans antialiased">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-zinc-950 text-[#1e293b] p-4 md:p-8 max-w-[1000px] mx-auto font-sans antialiased">
       <button
         onClick={() => router.back()}
         className="flex items-center gap-2 px-3 py-1.5 border mb-2 border-slate-200 rounded-lg text-xs font-semibold text-slate-600 bg-white hover:bg-slate-50 transition-colors shadow-sm"
@@ -328,7 +328,7 @@ function InvestigationAnalysisInner() {
         <div className="p-6 md:p-10 space-y-12">
           {/* RUN LOG TOP SUMMARY HEADER */}
           <section className="space-y-3">
-            <p className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 uppercase">
+            <p className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 dark:text-zinc-500 uppercase">
               {data.eyebrow}
             </p>
             <h2 className="text-[22px] md:text-[26px] font-bold text-slate-900 tracking-tight leading-snug max-w-[850px]">
@@ -343,53 +343,53 @@ function InvestigationAnalysisInner() {
 
           {/* 1. EXECUTIVE SUMMARY */}
           <section className="space-y-3">
-            <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 uppercase">
+            <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 dark:text-zinc-500 uppercase">
               1. EXECUTIVE SUMMARY
             </h3>
-            <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 tracking-tight">
+            <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 dark:text-zinc-100 tracking-tight">
               {data.summaryTitle}
             </h4>
-            <div className="space-y-4 text-[14px] font-medium text-slate-600 leading-relaxed max-w-[900px]">
+            <div className="space-y-4 text-[14px] font-medium text-slate-600 dark:text-zinc-400 leading-relaxed max-w-[900px]">
               <p>{data.summaryBody}</p>
-              <p className="text-slate-500">{data.summarySub}</p>
+              <p className="text-slate-500 dark:text-zinc-400">{data.summarySub}</p>
             </div>
           </section>
 
           {/* 2. INVESTIGATION SCOPE */}
           <section className="space-y-3">
-            <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 uppercase">
+            <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 dark:text-zinc-500 uppercase">
               2. INVESTIGATION SCOPE
             </h3>
-            <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 tracking-tight">
+            <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 dark:text-zinc-100 tracking-tight">
               {data.scopeTitle}
             </h4>
-            <div className="space-y-4 text-[14px] font-medium text-slate-600 leading-relaxed max-w-[900px]">
+            <div className="space-y-4 text-[14px] font-medium text-slate-600 dark:text-zinc-400 leading-relaxed max-w-[900px]">
               <p>{data.scopeBody}</p>
-              <p className="text-slate-500">{data.scopeSub}</p>
+              <p className="text-slate-500 dark:text-zinc-400">{data.scopeSub}</p>
             </div>
           </section>
 
           {/* 3. WHAT WAS ANALYSED */}
           <section className="space-y-3">
-            <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 uppercase">
+            <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 dark:text-zinc-500 uppercase">
               3. WHAT WAS ANALYSED
             </h3>
-            <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 tracking-tight">
+            <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 dark:text-zinc-100 tracking-tight">
               {data.analysisTitle}
             </h4>
-            <div className="space-y-4 text-[14px] font-medium text-slate-600 leading-relaxed max-w-[900px]">
+            <div className="space-y-4 text-[14px] font-medium text-slate-600 dark:text-zinc-400 leading-relaxed max-w-[900px]">
               <p>{data.analysisBody}</p>
-              <p className="text-slate-500">{data.analysisSub}</p>
+              <p className="text-slate-500 dark:text-zinc-400">{data.analysisSub}</p>
             </div>
           </section>
 
           {/* 4. CODE ENGINE ASSESSMENT */}
           <section className="space-y-4">
             <div className="space-y-1">
-              <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 uppercase">
+              <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 dark:text-zinc-500 uppercase">
                 4. CODE ENGINE ASSESSMENT
               </h3>
-              <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 tracking-tight">
+              <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 dark:text-zinc-100 tracking-tight">
                 {data.assessmentTitle}
               </h4>
             </div>
@@ -437,10 +437,10 @@ function InvestigationAnalysisInner() {
           {data.causalFactors.length > 0 && (
             <section className="space-y-4">
               <div className="space-y-1">
-                <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 uppercase">
+                <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 dark:text-zinc-500 uppercase">
                   5. CAUSAL FACTORS
                 </h3>
-                <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 tracking-tight">
+                <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 dark:text-zinc-100 tracking-tight">
                   Ezra records every factor, and does not collapse them into one
                   root cause.
                 </h4>
@@ -506,15 +506,15 @@ function InvestigationAnalysisInner() {
           {/* 6. HOW IT UNFOLDED */}
           <section className="space-y-4">
             <div className="space-y-1">
-              <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 uppercase">
+              <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 dark:text-zinc-500 uppercase">
                 6. HOW IT UNFOLDED
               </h3>
-              <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 tracking-tight">
+              <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 dark:text-zinc-100 tracking-tight">
                 {data.unfoldedTitle}
               </h4>
             </div>
 
-            <div className="space-y-4 text-[14px] font-medium text-slate-600 leading-relaxed max-w-[900px]">
+            <div className="space-y-4 text-[14px] font-medium text-slate-600 dark:text-zinc-400 leading-relaxed max-w-[900px]">
               <p>{data.unfoldedBody1}</p>
               <p>{data.unfoldedBody2}</p>
               <p>{data.unfoldedBody3}</p>
@@ -531,10 +531,10 @@ function InvestigationAnalysisInner() {
           {data.actions.length > 0 && (
             <section className="space-y-4">
               <div className="space-y-1">
-                <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 uppercase">
+                <h3 className="text-[11px] font-mono font-bold tracking-[0.15em] text-slate-400 dark:text-zinc-500 uppercase">
                   7. RECOMMENDED ACTIONS
                 </h3>
-                <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 tracking-tight">
+                <h4 className="text-[16px] md:text-[18px] font-bold text-slate-900 dark:text-zinc-100 tracking-tight">
                   {data.actionsTitle}
                 </h4>
               </div>
@@ -566,7 +566,7 @@ export default function InvestigationAnalysis() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+        <div className="min-h-screen bg-[#f8fafc] dark:bg-zinc-950 flex items-center justify-center">
           <Loader2 className="animate-spin text-slate-400" size={28} />
         </div>
       }

@@ -154,9 +154,9 @@ export default function FilterRail({
   );
 
   return (
-    <div className="bg-white shadow-sm shadow-light rounded-xl sticky top-20 max-h-[calc(100vh-120px)] overflow-y-auto">
-      <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100">
-        <span className="text-sm font-semibold text-zinc-800">Filters</span>
+    <div className="bg-white dark:bg-zinc-900/40 shadow-sm shadow-light rounded-xl sticky top-20 max-h-[calc(100vh-120px)] overflow-y-auto">
+      <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100 dark:border-zinc-800">
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Filters</span>
         {totalActive > 0 && (
           <button
             onClick={onClear}
@@ -168,14 +168,14 @@ export default function FilterRail({
         )}
       </div>
 
-      <div className="divide-y divide-zinc-100">
+      <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
         {/* Date Range */}
         <details open className="group">
-          <summary className="flex items-center justify-between px-4 py-2.5 cursor-pointer list-none text-xs font-medium text-zinc-600 select-none">
+          <summary className="flex items-center justify-between px-4 py-2.5 cursor-pointer list-none text-xs font-medium text-zinc-600 dark:text-zinc-400 select-none">
             <span>Date Range</span>
             <ChevronDown
               size={13}
-              className="text-zinc-400 group-open:rotate-180 transition-transform"
+              className="text-zinc-400 dark:text-zinc-500 group-open:rotate-180 transition-transform"
             />
           </summary>
           <div className="px-3 pb-3 grid grid-cols-2 gap-1.5">
@@ -188,8 +188,8 @@ export default function FilterRail({
                 }
                 className={`py-1.5 text-[10px] rounded-md border font-medium transition-colors ${
                   dateRange === opt
-                    ? "bg-blue-50 border-blue-300 text-blue-700"
-                    : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:border-zinc-300"
+                    ? "bg-blue-50 dark:bg-blue-500/10 border-blue-300 dark:border-blue-500/30 text-blue-700 dark:text-blue-400"
+                    : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-600"
                 }`}
               >
                 {opt}
@@ -203,7 +203,7 @@ export default function FilterRail({
           const activeCount = filters[g.key]?.size ?? 0;
           return (
             <details key={g.key} className="group">
-              <summary className="flex items-center justify-between px-4 py-2.5 cursor-pointer list-none text-sm font-medium text-zinc-600 select-none">
+              <summary className="flex items-center justify-between px-4 py-2.5 cursor-pointer list-none text-sm font-medium text-zinc-600 dark:text-zinc-400 select-none">
                 <span className="flex items-center gap-1.5">
                   {g.label}
                   {activeCount > 0 && (
@@ -214,7 +214,7 @@ export default function FilterRail({
                 </span>
                 <ChevronDown
                   size={13}
-                  className="text-zinc-400 group-open:rotate-180 transition-transform"
+                  className="text-zinc-400 dark:text-zinc-500 group-open:rotate-180 transition-transform"
                 />
               </summary>
               <div className="px-3 pb-3 flex flex-col gap-0.5">
@@ -224,7 +224,7 @@ export default function FilterRail({
                   return (
                     <label
                       key={opt}
-                      className="flex items-center gap-2 px-1.5 py-1 rounded cursor-pointer hover:bg-zinc-50 group/item"
+                      className="flex items-center gap-2 px-1.5 py-1 rounded cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 group/item"
                     >
                       <input
                         type="checkbox"
@@ -232,14 +232,14 @@ export default function FilterRail({
                         onChange={() => handleToggle(g.key, opt)}
                         className="accent-indigo-600 w-3.5 h-3.5 flex-shrink-0 cursor-pointer"
                       />
-                      <span className="flex-1 text-sm text-zinc-700 truncate">
+                      <span className="flex-1 text-sm text-zinc-700 dark:text-zinc-300 truncate">
                         {opt}
                       </span>
                       <span
                         className={`text-[10px] tabular-nums ${
                           count > 0
-                            ? "text-zinc-500 font-medium"
-                            : "text-zinc-300"
+                            ? "text-zinc-500 dark:text-zinc-400 font-medium"
+                            : "text-zinc-300 dark:text-zinc-600"
                         }`}
                       >
                         {count}

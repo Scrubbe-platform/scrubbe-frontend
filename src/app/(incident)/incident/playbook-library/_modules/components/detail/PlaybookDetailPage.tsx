@@ -66,10 +66,10 @@ const SECTIONS: { id: string; label: string }[] = [
 ];
 
 const STATUS_CLS: Record<Playbook["status"], string> = {
-  Active: "bg-emerald-50 text-emerald-600",
-  Draft: "bg-amber-50 text-amber-700",
-  Disabled: "bg-zinc-100 text-zinc-500",
-  Archived: "bg-transparent text-zinc-500 border border-dashed border-zinc-300",
+  Active: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
+  Draft: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
+  Disabled: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800/60 dark:text-zinc-400",
+  Archived: "bg-transparent text-zinc-500 border border-dashed border-zinc-300 dark:text-zinc-500 dark:border-zinc-700",
 };
 
 function nextDuplicateId(): string {
@@ -130,15 +130,15 @@ export default function PlaybookDetailPage({
   if (!playbook) {
     return (
       <div className="max-w-lg mx-auto p-10 text-center">
-        <h2 className="font-bold text-lg text-zinc-800 mb-2">
+        <h2 className="font-bold text-lg text-zinc-800 dark:text-zinc-100 mb-2">
           Playbook not found
         </h2>
-        <p className="text-sm text-zinc-500 mb-5">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-5">
           It may have been removed, or the link is out of date.
         </p>
         <button
           onClick={() => router.push("/incident/playbook-library")}
-          className="px-4 py-2 text-sm font-semibold border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
+          className="px-4 py-2 text-sm font-semibold border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors dark:border-zinc-700 dark:hover:bg-zinc-800"
         >
           Back to library
         </button>
@@ -186,15 +186,15 @@ export default function PlaybookDetailPage({
     <main className="max-w-[1200px] mx-auto p-4 sm:p-6 pb-24 font-ibm">
       {/* breadcrumb + actions */}
       {!isIncident && (
-        <div className="flex items-center gap-3 flex-wrap mb-6 sticky top-0  backdrop-blur z-30 py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 border-b border-zinc-100">
+        <div className="flex items-center gap-3 flex-wrap mb-6 sticky top-0  backdrop-blur z-30 py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 border-b border-zinc-100 dark:border-zinc-800">
           <button
             onClick={() => router.push("/incident/playbook-library")}
-            className="text-sm text-zinc-500 hover:text-zinc-800 font-medium transition-colors"
+            className="text-sm text-zinc-500 hover:text-zinc-800 font-medium transition-colors dark:text-zinc-500 dark:hover:text-zinc-200"
           >
             Playbook library
           </button>
-          <ChevronRight size={13} className="text-zinc-300 shrink-0" />
-          <span className="text-sm font-semibold text-zinc-900 truncate">
+          <ChevronRight size={13} className="text-zinc-300 shrink-0 dark:text-zinc-700" />
+          <span className="text-sm font-semibold text-zinc-900 truncate dark:text-zinc-100">
             {playbook.name}
           </span>
         </div>
@@ -204,11 +204,11 @@ export default function PlaybookDetailPage({
       <div className="mb-7 flex justify-between items-center">
         <div>
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="font-bold text-[26px] text-zinc-900 tracking-tight">
+            <h1 className="font-bold text-[26px] text-zinc-900 tracking-tight dark:text-zinc-100">
               {playbook.name}
             </h1>
           </div>
-          <p className="text-sm text-zinc-500 max-w-3xl mt-3 leading-relaxed">
+          <p className="text-sm text-zinc-500 max-w-3xl mt-3 leading-relaxed dark:text-zinc-400">
             {playbook.desc}
           </p>
         </div>
@@ -217,7 +217,7 @@ export default function PlaybookDetailPage({
             position="bottom"
             align="right"
             trigger={
-              <button className="w-8 h-8 rounded-lg border flex items-center justify-center text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 transition-colors">
+              <button className="w-8 h-8 rounded-lg border flex items-center justify-center text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 transition-colors dark:border-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800">
                 <MoreVertical size={16} />
               </button>
             }
@@ -255,15 +255,15 @@ export default function PlaybookDetailPage({
 
       {/* index nav + sections */}
       <div className="grid grid-cols-1 lg:grid-cols-[196px_1fr] gap-8 items-start">
-        <nav className="hidden lg:flex flex-col gap-0.5 sticky top-[86px] bg-white rounded-lg py-4 pl-3 shadow-sm shadow-light">
+        <nav className="hidden lg:flex flex-col gap-0.5 sticky top-[86px] bg-white rounded-lg py-4 pl-3 shadow-sm shadow-light dark:bg-zinc-900/40">
           {SECTIONS.map((s) => (
             <button
               key={s.id}
               onClick={() => jumpTo(s.id)}
               className={`text-left text-[12.5px] px-2.5 py-1.5 border-l-2 transition-colors ${
                 activeNav === s.id
-                  ? "text-zinc-900 font-semibold border-zinc-900"
-                  : "text-zinc-500 border-zinc-200 hover:text-zinc-800"
+                  ? "text-zinc-900 font-semibold border-zinc-900 dark:text-zinc-100 dark:border-zinc-100"
+                  : "text-zinc-500 border-zinc-200 hover:text-zinc-800 dark:text-zinc-500 dark:border-zinc-800 dark:hover:text-zinc-200"
               }`}
             >
               {s.label}

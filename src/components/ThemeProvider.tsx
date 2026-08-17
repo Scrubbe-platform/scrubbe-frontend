@@ -11,10 +11,18 @@ export default function ThemeProvider({
 
   useEffect(() => {
     const html = document.documentElement;
-    if (theme === "dark") {
-      html.classList.add("dark");
-    } else {
-      html.classList.remove("dark");
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const applyTheme = () => {
+      const isDark = theme === "dark" || (theme === "system" && media.matches);
+      html.classList.toggle("dark", isDark);
+    };
+
+    applyTheme();
+
+    if (theme === "system") {
+      media.addEventListener("change", applyTheme);
+      return () => media.removeEventListener("change", applyTheme);
     }
   }, [theme]);
 

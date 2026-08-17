@@ -83,7 +83,7 @@ export default function ErrorLogs() {
           {
             label: "Total signals",
             value: stats?.total ?? 0,
-            color: "text-white",
+            color: "text-black dark:text-white",
           },
           { label: "Open", value: stats?.open ?? 0, color: "text-red-500" },
           {
@@ -99,7 +99,7 @@ export default function ErrorLogs() {
         ].map((s) => (
           <div
             key={s.label}
-            className="border border-white/10 rounded-xl p-4 bg-dark"
+            className="border border-black/10 dark:border-white/10 rounded-xl p-4 bg-white dark:bg-dark"
           >
             <p className="text-xs text-gray-500 uppercase tracking-widest">
               {s.label}
@@ -123,7 +123,7 @@ export default function ErrorLogs() {
               "text-xs px-3 py-1 rounded-lg border transition-colors",
               statusFilter === f
                 ? "border-IMSCyan text-IMSCyan bg-IMSCyan/10"
-                : "border-white/10 text-gray-400 hover:border-white/30"
+                : "border-black/10 dark:border-white/10 text-gray-400 hover:border-black/30 dark:hover:border-white/30"
             )}
           >
             {f}
@@ -132,9 +132,9 @@ export default function ErrorLogs() {
       </div>
 
       {/* Signals table */}
-      <div className="border border-white/10 rounded-xl bg-dark overflow-hidden">
-        <div className="p-4 border-b border-white/10">
-          <h3 className="text-sm font-bold text-white">
+      <div className="border border-black/10 dark:border-white/10 rounded-xl bg-white dark:bg-dark overflow-hidden">
+        <div className="p-4 border-b border-black/10 dark:border-white/10">
+          <h3 className="text-sm font-bold text-black dark:text-white">
             Ingestion signals & error log
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
@@ -148,7 +148,7 @@ export default function ErrorLogs() {
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-12 bg-white/5 rounded-lg animate-pulse"
+                className="h-12 bg-black/5 dark:bg-white/5 rounded-lg animate-pulse"
               />
             ))}
           </div>
@@ -164,8 +164,8 @@ export default function ErrorLogs() {
         )}
 
         {!isLoading && filtered.length > 0 && (
-          <div className="divide-y divide-white/5">
-            <div className="grid grid-cols-[120px_80px_100px_80px_1fr_140px] gap-4 px-4 py-2 text-[10px] text-gray-500 uppercase tracking-widest border-b border-white/5">
+          <div className="divide-y divide-black/5 dark:divide-white/5">
+            <div className="grid grid-cols-[120px_80px_100px_80px_1fr_140px] gap-4 px-4 py-2 text-[10px] text-gray-500 uppercase tracking-widest border-b border-black/5 dark:border-white/5">
               <span>Source</span>
               <span>Type</span>
               <span>Severity</span>
@@ -176,9 +176,9 @@ export default function ErrorLogs() {
             {filtered.map((signal) => (
               <div
                 key={signal.id}
-                className="grid grid-cols-[120px_80px_100px_80px_1fr_140px] gap-4 px-4 py-3 items-center hover:bg-white/[0.02] text-sm"
+                className="grid grid-cols-[120px_80px_100px_80px_1fr_140px] gap-4 px-4 py-3 items-center hover:bg-black/[0.02] dark:hover:bg-white/[0.02] text-sm"
               >
-                <span className="text-xs font-mono text-gray-300 truncate capitalize">
+                <span className="text-xs font-mono text-gray-700 dark:text-gray-300 truncate capitalize">
                   {signal.source?.toLowerCase() ?? "—"}
                 </span>
                 <span className="text-xs text-gray-400 truncate">
@@ -201,7 +201,7 @@ export default function ErrorLogs() {
                     {signal.status}
                   </span>
                 </span>
-                <span className="text-xs text-gray-300 truncate">
+                <span className="text-xs text-gray-700 dark:text-gray-300 truncate">
                   {signal.summary ?? "—"}
                 </span>
                 <span className="text-xs text-gray-500">

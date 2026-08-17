@@ -139,9 +139,9 @@ export default function IncidentDurationCard({
       : incident.status);
 
   return (
-    <div className=" font-ibm text-zinc-800 p-5 space-y-1.5">
+    <div className=" font-ibm text-zinc-800 dark:text-zinc-300 p-5 space-y-1.5">
       {/* ── Header ── */}
-      <h3 className="text-base font-bold text-zinc-900 pb-2">
+      <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 pb-2">
         Incident Duration
       </h3>
 
@@ -196,7 +196,11 @@ export default function IncidentDurationCard({
             <span className="inline-flex items-center gap-1.5">
               {withinTarget ? "Within Target" : "Breached"}
               <span
-                className={withinTarget ? "text-emerald-600" : "text-red-500"}
+                className={
+                  withinTarget
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-red-500 dark:text-red-400"
+                }
               >
                 {withinTarget ? "✓" : "✗"}
               </span>
@@ -231,11 +235,11 @@ function Cell({
   muted?: boolean;
 }) {
   return (
-    <div className="bg-zinc-50 rounded-base px-4 py-3">
-      <div className="text-xs font-semibold text-zinc-800">{label}</div>
+    <div className="bg-zinc-50 dark:bg-zinc-800/60 rounded-base px-4 py-3">
+      <div className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">{label}</div>
       <div
         className={`text-sm mt-1 ${
-          muted ? "text-zinc-400 italic" : "text-zinc-500"
+          muted ? "text-zinc-400 dark:text-zinc-500 italic" : "text-zinc-500 dark:text-zinc-400"
         }`}
       >
         {value}
@@ -245,5 +249,5 @@ function Cell({
 }
 
 function Divider() {
-  return <hr className="border-zinc-300/50" />;
+  return <hr className="border-zinc-300/50 dark:border-zinc-700/50" />;
 }

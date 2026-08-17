@@ -42,9 +42,9 @@ export default function LearningOverview({
             key={kpi.label}
             type="button"
             onClick={() => onKpiClick(kpi)}
-            className="text-left bg-zinc-50 border border-zinc-100 rounded-lg p-3 hover:border-zinc-300 hover:bg-white transition-all cursor-pointer"
+            className="text-left bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-white dark:hover:bg-zinc-800/60 transition-all cursor-pointer"
           >
-            <div className="text-[11px] text-zinc-500 leading-snug h-7">
+            <div className="text-[11px] text-zinc-500 dark:text-zinc-500 leading-snug h-7">
               {kpi.label}
             </div>
             <div className="text-2xl font-bold tracking-tight mt-1 font-ibm">
@@ -62,7 +62,7 @@ export default function LearningOverview({
         <ChartCard
           chartKey="mttr"
           onClick={onChartClick}
-          className="bg-zinc-50 border border-zinc-100 rounded-lg p-3.5"
+          className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3.5"
         >
           <SubH>MTTR Trend</SubH>
           <div className="h-[130px]">
@@ -73,7 +73,7 @@ export default function LearningOverview({
         <ChartCard
           chartKey="categories"
           onClick={onChartClick}
-          className="bg-zinc-50 border border-zinc-100 rounded-lg p-3.5"
+          className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3.5"
         >
           <SubH>Top Recurring Categories</SubH>
           <div className="flex items-center gap-3">
@@ -84,14 +84,14 @@ export default function LearningOverview({
               {displayCategories.map((c) => (
                 <div
                   key={c.name}
-                  className="flex items-center gap-2 text-[11px] text-zinc-600"
+                  className="flex items-center gap-2 text-[11px] text-zinc-600 dark:text-zinc-400"
                 >
                   <span
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{ background: c.color }}
                   />
                   <span className="flex-1 truncate">{c.name}</span>
-                  <span className="font-mono font-semibold text-zinc-800">
+                  <span className="font-mono font-semibold text-zinc-800 dark:text-zinc-200">
                     {c.pct}%
                   </span>
                 </div>
@@ -103,7 +103,7 @@ export default function LearningOverview({
         <ChartCard
           chartKey="effective"
           onClick={onChartClick}
-          className="bg-zinc-50 border border-zinc-100 rounded-lg p-3.5"
+          className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3.5"
         >
           <SubH>Most Effective Remediations</SubH>
           <div className="h-[140px]">

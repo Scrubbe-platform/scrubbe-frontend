@@ -38,10 +38,10 @@ import { useRouter } from "next/navigation";
 import AssignModal from "./AssignModal";
 
 export const priColors: { [key: string]: string } = {
-  P0: "text-red-600 bg-red-50 border-red-100",
-  P1: "text-amber-600 bg-amber-50 border-amber-100",
-  P2: "text-blue-600 bg-blue-50 border-blue-100",
-  P3: "text-green-500 bg-green-50 border-green-100",
+  P0: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20",
+  P1: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/20",
+  P2: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20",
+  P3: "text-green-500 dark:text-green-400 bg-green-50 dark:bg-green-500/10 border-green-100 dark:border-green-500/20",
 };
 
 type FilterKey =
@@ -347,7 +347,7 @@ export default function IncidentLibraryPage() {
       <main className="p-4 sm:p-6 pb-24 max-w-[1600px] mx-auto space-y-6 font-ibm">
         {/* Page header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm text-zinc-500 max-w-2xl">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-2xl">
             Your organization's searchable operational memory for every
             incident, investigation, and resolution.
           </p>
@@ -374,7 +374,7 @@ export default function IncidentLibraryPage() {
             {/* Search */}
             <div className="relative max-w-xl w-full">
               <Search
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500"
                 size={15}
               />
               <input
@@ -385,12 +385,12 @@ export default function IncidentLibraryPage() {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                className="w-full h-[36px] pl-10 pr-4 rounded-sm text-xs shadow shadow-light text-zinc-900 outline-none focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                className="w-full h-[36px] pl-10 pr-4 rounded-sm text-xs shadow shadow-light text-zinc-900 dark:text-zinc-100 dark:bg-zinc-900/60 outline-none focus:bg-white dark:focus:bg-zinc-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
               />
               {search && (
                 <button
                   onClick={() => setSearch("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
                 >
                   <X size={13} />
                 </button>
@@ -400,7 +400,7 @@ export default function IncidentLibraryPage() {
             {/* Active filter chips */}
             {activeFilterCount > 0 && (
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">
                   {activeFilterCount} filter{activeFilterCount > 1 ? "s" : ""}{" "}
                   active
                 </span>
@@ -444,16 +444,16 @@ export default function IncidentLibraryPage() {
                 </Button>
               }
             >
-              <div className="bg-indigo-50/60 border border-indigo-100 rounded-lg p-3 space-y-2 w-64">
-                <div className="flex items-center justify-between text-[9px] font-medium text-indigo-900 uppercase">
-                  <span className="flex items-center text-indigo-600 gap-1.5">
+              <div className="bg-indigo-50/60 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-lg p-3 space-y-2 w-64">
+                <div className="flex items-center justify-between text-[9px] font-medium text-indigo-900 dark:text-indigo-300 uppercase">
+                  <span className="flex items-center text-indigo-600 dark:text-indigo-400 gap-1.5">
                     <Sparkles size={13} /> Ask Ezra AI
                   </span>
                   <span className="font-ibm text-[7px] text-indigo-400">
                     Semantic
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-1.5 text-[9px] text-zinc-600">
+                <div className="grid grid-cols-2 gap-1.5 text-[9px] text-zinc-600 dark:text-zinc-400">
                   <button
                     type="button"
                     onClick={() => {
@@ -464,14 +464,14 @@ export default function IncidentLibraryPage() {
                         payload: Array.from(selectedIds).slice(0, 2),
                       });
                     }}
-                    className="w-full text-left p-1.5 bg-white rounded border border-indigo-100 hover:border-indigo-300 transition-all truncate"
+                    className="w-full text-left p-1.5 bg-white dark:bg-zinc-900/60 rounded border border-indigo-100 dark:border-indigo-500/20 hover:border-indigo-300 dark:hover:border-indigo-500/40 transition-all truncate"
                   >
                     "Find duplicates side-by-side"
                   </button>
                   <button
                     type="button"
                     onClick={() => setSearch("Database")}
-                    className="w-full text-left p-1.5 bg-white rounded border border-indigo-100 hover:border-indigo-300 transition-all truncate"
+                    className="w-full text-left p-1.5 bg-white dark:bg-zinc-900/60 rounded border border-indigo-100 dark:border-indigo-500/20 hover:border-indigo-300 dark:hover:border-indigo-500/40 transition-all truncate"
                   >
                     Show DB Outages
                   </button>
@@ -496,12 +496,12 @@ export default function IncidentLibraryPage() {
           </div>
 
           {/* Incident table */}
-          <div className="col-span-12 lg:col-span-9 bg-white z-0 shadow-sm shadow-light rounded-md overflow-hidden">
-            <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100">
-              <div className="text-sm font-semibold text-zinc-800">
+          <div className="col-span-12 lg:col-span-9 bg-white dark:bg-zinc-900/40 z-0 shadow-sm shadow-light rounded-md overflow-hidden">
+            <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100 dark:border-zinc-800">
+              <div className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
                 Incident List
                 {filteredIncidents.length !== incidents.length && (
-                  <span className="ml-2 text-xs font-normal text-zinc-400">
+                  <span className="ml-2 text-xs font-normal text-zinc-400 dark:text-zinc-500">
                     ({filteredIncidents.length} of {incidents.length})
                   </span>
                 )}
@@ -511,7 +511,7 @@ export default function IncidentLibraryPage() {
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
-                  className="h-7 rounded-lg px-2 bg-white outline-none cursor-pointer text-xs"
+                  className="h-7 rounded-lg px-2 bg-white dark:bg-zinc-900 dark:text-zinc-200 outline-none cursor-pointer text-xs"
                 >
                   <option value="opened-desc">Newest First</option>
                   <option value="opened-asc">Oldest First</option>
@@ -523,7 +523,7 @@ export default function IncidentLibraryPage() {
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm border-collapse min-w-[900px]">
-                <thead className="border-b bg-zinc-50 border-zinc-100 text-sm font-medium text-zinc-600">
+                <thead className="border-b bg-zinc-50 dark:bg-zinc-800/60 border-zinc-100 dark:border-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400">
                   <tr>
                     <th className="p-3 w-10">
                       <input
@@ -546,36 +546,36 @@ export default function IncidentLibraryPage() {
                     <th className="p-3 w-10">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100 text-zinc-800">
+                <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800 text-zinc-800 dark:text-zinc-300">
                   {isLoading &&
                     Array.from({ length: 6 }).map((_, idx) => (
                       <tr key={idx} className="animate-pulse">
                         <td className="p-3">
-                          <div className="h-3 w-3 bg-zinc-100 rounded" />
+                          <div className="h-3 w-3 bg-zinc-100 dark:bg-zinc-800 rounded" />
                         </td>
                         <td className="p-3">
-                          <div className="h-3 w-20 bg-zinc-100 rounded" />
+                          <div className="h-3 w-20 bg-zinc-100 dark:bg-zinc-800 rounded" />
                         </td>
                         <td className="p-3">
-                          <div className="h-3 w-48 bg-zinc-100 rounded" />
+                          <div className="h-3 w-48 bg-zinc-100 dark:bg-zinc-800 rounded" />
                         </td>
                         <td className="p-3">
-                          <div className="h-3 w-10 bg-zinc-100 rounded" />
+                          <div className="h-3 w-10 bg-zinc-100 dark:bg-zinc-800 rounded" />
                         </td>
                         <td className="p-3">
-                          <div className="h-3 w-20 bg-zinc-100 rounded" />
+                          <div className="h-3 w-20 bg-zinc-100 dark:bg-zinc-800 rounded" />
                         </td>
                         <td className="p-3">
-                          <div className="h-3 w-24 bg-zinc-100 rounded" />
+                          <div className="h-3 w-24 bg-zinc-100 dark:bg-zinc-800 rounded" />
                         </td>
                         <td className="p-3">
-                          <div className="h-3 w-28 bg-zinc-100 rounded" />
+                          <div className="h-3 w-28 bg-zinc-100 dark:bg-zinc-800 rounded" />
                         </td>
                         <td className="p-3">
-                          <div className="h-3 w-20 bg-zinc-100 rounded" />
+                          <div className="h-3 w-20 bg-zinc-100 dark:bg-zinc-800 rounded" />
                         </td>
                         <td className="p-3">
-                          <div className="h-3 w-4 bg-zinc-100 rounded" />
+                          <div className="h-3 w-4 bg-zinc-100 dark:bg-zinc-800 rounded" />
                         </td>
                       </tr>
                     ))}
@@ -592,7 +592,7 @@ export default function IncidentLibraryPage() {
                           onClick={() =>
                             router.push(`/incident/tickets/${i.id}`)
                           }
-                          className={`hover:bg-zinc-50/50 cursor-pointer text-sm font-ibm text-zinc-600 transition-colors ${isChecked ? "bg-indigo-50/30" : ""}`}
+                          className={`hover:bg-zinc-50/50 dark:hover:bg-zinc-800/40 cursor-pointer text-sm font-ibm text-zinc-600 dark:text-zinc-400 transition-colors ${isChecked ? "bg-indigo-50/30 dark:bg-indigo-500/10" : ""}`}
                         >
                           <td
                             className="p-3"
@@ -605,7 +605,7 @@ export default function IncidentLibraryPage() {
                               className="accent-indigo-600 h-3.5 w-3.5"
                             />
                           </td>
-                          <td className="p-3 font-mono text-xs font-semibold text-zinc-700">
+                          <td className="p-3 font-mono text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                             {i.ticketId ?? i.id}
                           </td>
                           <td
@@ -615,7 +615,7 @@ export default function IncidentLibraryPage() {
                           </td>
                           <td className="p-3">
                             <span
-                              className={`px-2 py-0.5 border rounded-md text-[11px] font-semibold ${priColors[i.severity] ?? "text-zinc-500 bg-zinc-50 border-zinc-100"}`}
+                              className={`px-2 py-0.5 border rounded-md text-[11px] font-semibold ${priColors[i.severity] ?? "text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/60 border-zinc-100 dark:border-zinc-700"}`}
                             >
                               {i.severity}
                             </span>
@@ -630,7 +630,7 @@ export default function IncidentLibraryPage() {
                           <td className="p-3 text-sm">{i.service}</td>
                           <td className="p-3 text-sm truncate max-w-[120px]">
                             {i.assignedToName || i.assignedToEmail || (
-                              <span className="text-zinc-300 italic">
+                              <span className="text-zinc-300 dark:text-zinc-600 italic">
                                 Unassigned
                               </span>
                             )}
@@ -656,7 +656,7 @@ export default function IncidentLibraryPage() {
                                 <div>
                                   <BsThreeDotsVertical
                                     size={14}
-                                    className="text-zinc-400 hover:text-zinc-600 cursor-pointer"
+                                    className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 cursor-pointer"
                                   />
                                 </div>
                               }
@@ -712,7 +712,7 @@ export default function IncidentLibraryPage() {
 
             {/* Empty state */}
             {!isLoading && filteredIncidents.length === 0 && (
-              <div className="p-12 text-center text-sm text-zinc-400 italic border-t border-zinc-100 space-y-2">
+              <div className="p-12 text-center text-sm text-zinc-400 dark:text-zinc-500 italic border-t border-zinc-100 dark:border-zinc-800 space-y-2">
                 <p>No incidents match the current filters.</p>
                 {activeFilterCount > 0 && (
                   <button
@@ -726,7 +726,7 @@ export default function IncidentLibraryPage() {
             )}
 
             {/* Pagination */}
-            <div className="h-11 px-4 border-t border-zinc-100 flex items-center justify-between text-sm text-zinc-400 bg-zinc-50/50">
+            <div className="h-11 px-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-sm text-zinc-400 dark:text-zinc-500 bg-zinc-50/50 dark:bg-zinc-800/30">
               <span className="font-medium font-ibm text-xs">
                 Showing{" "}
                 {filteredIncidents.length === 0
@@ -742,17 +742,17 @@ export default function IncidentLibraryPage() {
                 <button
                   disabled={page === 1}
                   onClick={() => setPage((p) => p - 1)}
-                  className="h-7 px-2.5 rounded-md border bg-white enabled:hover:bg-zinc-50 disabled:opacity-40 transition-colors font-semibold text-zinc-700 text-xs"
+                  className="h-7 px-2.5 rounded-md border dark:border-zinc-700 bg-white dark:bg-zinc-900 enabled:hover:bg-zinc-50 dark:enabled:hover:bg-zinc-800 disabled:opacity-40 transition-colors font-semibold text-zinc-700 dark:text-zinc-300 text-xs"
                 >
                   Prev
                 </button>
-                <span className="text-xs text-zinc-500 px-1">
+                <span className="text-xs text-zinc-500 dark:text-zinc-400 px-1">
                   {page} / {totalPages}
                 </span>
                 <button
                   disabled={page === totalPages}
                   onClick={() => setPage((p) => p + 1)}
-                  className="h-7 px-2.5 rounded-md border bg-white enabled:hover:bg-zinc-50 disabled:opacity-40 transition-colors font-semibold text-zinc-700 text-xs"
+                  className="h-7 px-2.5 rounded-md border dark:border-zinc-700 bg-white dark:bg-zinc-900 enabled:hover:bg-zinc-50 dark:enabled:hover:bg-zinc-800 disabled:opacity-40 transition-colors font-semibold text-zinc-700 dark:text-zinc-300 text-xs"
                 >
                   Next
                 </button>

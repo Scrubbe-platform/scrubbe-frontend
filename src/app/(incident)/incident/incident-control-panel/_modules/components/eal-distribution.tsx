@@ -39,12 +39,12 @@ export default function EALDistribution({ onChartClick, onExpand, ealData }: Pro
           {levels.map((e: any) => (
             <div
               key={e.num}
-              className={`rounded-lg border p-3 cursor-default ${e.active ? "border-emerald-400 bg-emerald-50/50" : "border-zinc-100 bg-zinc-50"}`}
+              className={`rounded-lg border p-3 cursor-default ${e.active ? "border-emerald-400 dark:border-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-500/10" : "border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40"}`}
             >
-              <div className="text-[9px] font-mono font-bold tracking-wider text-zinc-400 uppercase">
+              <div className="text-[9px] font-mono font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
                 {e.num}
               </div>
-              <div className="text-[11px] font-bold text-zinc-800 mt-0.5 leading-snug">
+              <div className="text-[11px] font-bold text-zinc-800 dark:text-zinc-100 mt-0.5 leading-snug">
                 {e.name}
               </div>
               <div
@@ -53,13 +53,13 @@ export default function EALDistribution({ onChartClick, onExpand, ealData }: Pro
               >
                 {e.count}
               </div>
-              <div className="h-1 rounded-full bg-zinc-200 mt-1.5 overflow-hidden">
+              <div className="h-1 rounded-full bg-zinc-200 dark:bg-zinc-800 mt-1.5 overflow-hidden">
                 <div
                   className="h-full rounded-full"
                   style={{ width: `${e.pct}%`, background: e.color }}
                 />
               </div>
-              <div className="text-[10px] text-zinc-400 mt-1.5">{e.desc}</div>
+              <div className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1.5">{e.desc}</div>
             </div>
           ))}
         </div>
@@ -81,16 +81,16 @@ export default function EALDistribution({ onChartClick, onExpand, ealData }: Pro
 
           <div>
             <SubH>Autonomy Posture Summary</SubH>
-            <div className="text-[12.5px] text-zinc-600 leading-relaxed space-y-2">
+            <div className="text-[12.5px] text-zinc-600 dark:text-zinc-300 leading-relaxed space-y-2">
               <p>
-                <strong className="text-zinc-900">60.9%</strong> of incidents
+                <strong className="text-zinc-900 dark:text-zinc-100">60.9%</strong> of incidents
                 are now handled at EAL 3 or above — up from 48% thirty days ago.
               </p>
               <p>
                 EAL 4 headcount grew 33% as the learning loop validated new
                 playbook classes.
               </p>
-              <p className="text-zinc-400">
+              <p className="text-zinc-400 dark:text-zinc-500">
                 Policy guardrails remain active across all EAL levels.
               </p>
             </div>
@@ -114,7 +114,7 @@ export default function EALDistribution({ onChartClick, onExpand, ealData }: Pro
             <div className="overflow-x-auto">
               <table className="w-full text-[12px]">
                 <thead>
-                  <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 border-b border-zinc-200">
+                  <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b border-zinc-200 dark:border-zinc-800">
                     <th className="text-left pb-2 pr-2">Level</th>
                     <th className="text-left pb-2 pr-2">Name</th>
                     <th className="text-left pb-2 pr-2">Incidents</th>
@@ -126,7 +126,7 @@ export default function EALDistribution({ onChartClick, onExpand, ealData }: Pro
                   {levels.map((e: any) => (
                     <tr
                       key={e.num}
-                      className={`border-t border-zinc-100 ${e.active ? "bg-emerald-50/50" : ""}`}
+                      className={`border-t border-zinc-100 dark:border-zinc-800 ${e.active ? "bg-emerald-50/50 dark:bg-emerald-500/10" : ""}`}
                     >
                       <td className="py-2.5 pr-2">
                         <span
@@ -136,7 +136,7 @@ export default function EALDistribution({ onChartClick, onExpand, ealData }: Pro
                           {e.num}
                         </span>
                       </td>
-                      <td className="py-2.5 pr-2 font-semibold text-zinc-800">
+                      <td className="py-2.5 pr-2 font-semibold text-zinc-800 dark:text-zinc-100">
                         {e.name}
                       </td>
                       <td
@@ -145,10 +145,10 @@ export default function EALDistribution({ onChartClick, onExpand, ealData }: Pro
                       >
                         {e.count}
                       </td>
-                      <td className="py-2.5 pr-2 font-mono text-zinc-500">
+                      <td className="py-2.5 pr-2 font-mono text-zinc-500 dark:text-zinc-500">
                         {e.pct}%
                       </td>
-                      <td className="py-2.5 text-zinc-500 text-[11px]">
+                      <td className="py-2.5 text-zinc-500 dark:text-zinc-500 text-[11px]">
                         {e.desc}
                       </td>
                     </tr>
@@ -157,7 +157,7 @@ export default function EALDistribution({ onChartClick, onExpand, ealData }: Pro
               </table>
             </div>
 
-            <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-4">
+            <div className="bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 rounded-xl p-4">
               <SubH>EAL Transition Trend</SubH>
               <div className="h-[200px]">
                 <EALTrendChart big />
@@ -171,7 +171,7 @@ export default function EALDistribution({ onChartClick, onExpand, ealData }: Pro
               />
             </div>
 
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
+            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
               EAL is computed once at match time and never recomputed. Policy
               guardrails constrain the maximum EAL any playbook can reach — even
               a fully automated playbook will be capped at the policy ceiling

@@ -18,7 +18,7 @@ export default function CostEfficiency({ onChartClick, onExpand, costMetrics }: 
         label: k.label ?? k.name ?? "Metric",
         value: k.value ?? k.formattedValue ?? "—",
         delta: k.delta ?? k.change ?? "",
-        cls: (k.positive ?? k.delta?.startsWith("+")) ? "text-emerald-600" : "text-red-500",
+        cls: (k.positive ?? k.delta?.startsWith("+")) ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400",
       }))
     : COST_KPIS;
   const bars = costMetrics?.bars?.length
@@ -40,9 +40,9 @@ export default function CostEfficiency({ onChartClick, onExpand, costMetrics }: 
         {kpis.map((k: any) => (
           <div
             key={k.label}
-            className="bg-zinc-50 border border-zinc-100 rounded-lg p-3"
+            className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3"
           >
-            <div className="text-[11px] text-zinc-500 leading-snug h-6">
+            <div className="text-[11px] text-zinc-500 dark:text-zinc-500 leading-snug h-6">
               {k.label}
             </div>
             <div className="text-xl font-bold tracking-tight mt-1 font-ibm">
@@ -63,10 +63,10 @@ export default function CostEfficiency({ onChartClick, onExpand, costMetrics }: 
               key={b.label}
               className="flex items-center gap-2.5 mb-2.5 text-[11.5px]"
             >
-              <span className="text-zinc-500 w-[130px] shrink-0 truncate">
+              <span className="text-zinc-500 dark:text-zinc-500 w-[130px] shrink-0 truncate">
                 {b.label}
               </span>
-              <div className="flex-1 h-[7px] bg-zinc-100 rounded-full overflow-hidden">
+              <div className="flex-1 h-[7px] bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full"
                   style={{
@@ -75,7 +75,7 @@ export default function CostEfficiency({ onChartClick, onExpand, costMetrics }: 
                   }}
                 />
               </div>
-              <span className="font-mono text-[10.5px] text-zinc-500 w-10 text-right">
+              <span className="font-mono text-[10.5px] text-zinc-500 dark:text-zinc-500 w-10 text-right">
                 {b.value}h
               </span>
             </div>

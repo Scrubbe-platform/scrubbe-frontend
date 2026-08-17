@@ -6,7 +6,7 @@ import { customAxios } from "@/lib/api/axios";
 import { endpoint } from "@/lib/api/endpoint";
 
 const inputCls =
-  "w-full border border-zinc-300 rounded-lg px-3 py-2 text-sm text-zinc-900 bg-white font-medium outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors";
+  "w-full border border-zinc-300 rounded-lg px-3 py-2 text-sm text-zinc-900 bg-white font-medium outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200";
 
 /* ---------- Create playbook ---------- */
 
@@ -45,14 +45,14 @@ export function CreatePlaybookModal({
       className="sm:max-w-md"
     >
       <div className="p-5">
-        <h3 className="font-bold text-[16px] text-zinc-900 mb-1">Create playbook</h3>
-        <p className="text-xs text-zinc-500 mb-5">
+        <h3 className="font-bold text-[16px] text-zinc-900 mb-1 dark:text-zinc-100">Create playbook</h3>
+        <p className="text-xs text-zinc-500 mb-5 dark:text-zinc-400">
           New playbooks start as drafts and must pass governance review before activation.
         </p>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-zinc-600 mb-1.5">
+            <label className="block text-xs font-semibold text-zinc-600 mb-1.5 dark:text-zinc-400">
               Playbook name
             </label>
             <input
@@ -67,7 +67,7 @@ export function CreatePlaybookModal({
             {error && <p className="text-xs text-red-500 mt-1.5">{error}</p>}
           </div>
           <div>
-            <label className="block text-xs font-semibold text-zinc-600 mb-1.5">Service</label>
+            <label className="block text-xs font-semibold text-zinc-600 mb-1.5 dark:text-zinc-400">Service</label>
             <select value={service} onChange={(e) => setService(e.target.value)} className={inputCls}>
               {SERVICES.map((s) => (
                 <option key={s}>{s}</option>
@@ -75,7 +75,7 @@ export function CreatePlaybookModal({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-zinc-600 mb-1.5">
+            <label className="block text-xs font-semibold text-zinc-600 mb-1.5 dark:text-zinc-400">
               Execution mode
             </label>
             <div className="flex gap-1.5 flex-wrap">
@@ -86,20 +86,20 @@ export function CreatePlaybookModal({
                   onClick={() => setMode(m)}
                   className={`border rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
                     mode === m
-                      ? "border-zinc-900 bg-zinc-100 text-zinc-900"
-                      : "border-zinc-300 text-zinc-500 hover:border-zinc-400"
+                      ? "border-zinc-900 bg-zinc-100 text-zinc-900 dark:border-zinc-100 dark:bg-zinc-800 dark:text-zinc-100"
+                      : "border-zinc-300 text-zinc-500 hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-500 dark:hover:border-zinc-600"
                   }`}
                 >
                   {m}
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-zinc-400 mt-1.5">
+            <p className="text-[11px] text-zinc-400 mt-1.5 dark:text-zinc-600">
               Operational rules can tighten this, never loosen it.
             </p>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-zinc-600 mb-1.5">Owner</label>
+            <label className="block text-xs font-semibold text-zinc-600 mb-1.5 dark:text-zinc-400">Owner</label>
             <select value={owner} onChange={(e) => setOwner(e.target.value)} className={inputCls}>
               {OWNERS.map((o) => (
                 <option key={o}>{o}</option>
@@ -114,7 +114,7 @@ export function CreatePlaybookModal({
               reset();
               onClose();
             }}
-            className="px-4 py-2 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors dark:text-zinc-400 dark:hover:bg-zinc-800"
           >
             Cancel
           </button>
@@ -155,20 +155,20 @@ export function ImportPlaybookModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="sm:max-w-md">
       <div className="p-5">
-        <h3 className="font-bold text-[16px] text-zinc-900 mb-1">Import playbooks</h3>
-        <p className="text-xs text-zinc-500 mb-5">
+        <h3 className="font-bold text-[16px] text-zinc-900 mb-1 dark:text-zinc-100">Import playbooks</h3>
+        <p className="text-xs text-zinc-500 mb-5 dark:text-zinc-400">
           Imported playbooks arrive as drafts and pass through governance review before
           activation.
         </p>
 
-        <div className="border-2 border-dashed border-zinc-300 rounded-xl px-5 py-8 text-center text-sm text-zinc-500">
-          <b className="text-zinc-800">Choose a file</b> — JSON or YAML playbook definitions.
-          <div className="text-xs text-zinc-400 mt-1">
+        <div className="border-2 border-dashed border-zinc-300 rounded-xl px-5 py-8 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-500">
+          <b className="text-zinc-800 dark:text-zinc-200">Choose a file</b> — JSON or YAML playbook definitions.
+          <div className="text-xs text-zinc-400 mt-1 dark:text-zinc-600">
             Modules referenced by ID are matched against the module library.
           </div>
           <button
             onClick={() => fileRef.current?.click()}
-            className="mt-4 px-4 py-2 text-sm font-semibold border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
+            className="mt-4 px-4 py-2 text-sm font-semibold border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors dark:border-zinc-700 dark:hover:bg-zinc-800"
           >
             Choose file
           </button>
@@ -208,7 +208,7 @@ export function ImportPlaybookModal({
         <div className="flex justify-end mt-6">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors dark:text-zinc-400 dark:hover:bg-zinc-800"
           >
             Cancel
           </button>
@@ -259,18 +259,18 @@ export function VersionHistoryModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="sm:max-w-2xl">
       <div className="p-5">
-        <h3 className="font-bold text-[16px] text-zinc-900 mb-1">Library version history</h3>
-        <p className="text-xs text-zinc-500 mb-5">
+        <h3 className="font-bold text-[16px] text-zinc-900 mb-1 dark:text-zinc-100">Library version history</h3>
+        <p className="text-xs text-zinc-500 mb-5 dark:text-zinc-400">
           Most recent approved changes across all playbooks.
         </p>
-        <div className="border border-zinc-200 rounded-lg overflow-hidden">
+        <div className="border border-zinc-200 rounded-lg overflow-hidden dark:border-zinc-800">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-zinc-50 border-b border-zinc-200">
+              <tr className="bg-zinc-50 border-b border-zinc-200 dark:bg-zinc-900/60 dark:border-zinc-800">
                 {["Playbook", "Version", "Change", "Approved by"].map((h) => (
                   <th
                     key={h}
-                    className="text-left text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 px-3.5 py-2.5"
+                    className="text-left text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 px-3.5 py-2.5 dark:text-zinc-500"
                   >
                     {h}
                   </th>
@@ -279,11 +279,11 @@ export function VersionHistoryModal({
             </thead>
             <tbody>
               {rows.map((r, i) => (
-                <tr key={i} className="border-b border-zinc-100 last:border-0">
-                  <td className="px-3.5 py-2.5 font-semibold text-zinc-800">{r.pb}</td>
-                  <td className="px-3.5 py-2.5 font-mono text-xs text-zinc-500">{r.v}</td>
-                  <td className="px-3.5 py-2.5 text-zinc-500">{r.change}</td>
-                  <td className="px-3.5 py-2.5 text-zinc-700">{r.by}</td>
+                <tr key={i} className="border-b border-zinc-100 last:border-0 dark:border-zinc-800">
+                  <td className="px-3.5 py-2.5 font-semibold text-zinc-800 dark:text-zinc-200">{r.pb}</td>
+                  <td className="px-3.5 py-2.5 font-mono text-xs text-zinc-500 dark:text-zinc-500">{r.v}</td>
+                  <td className="px-3.5 py-2.5 text-zinc-500 dark:text-zinc-500">{r.change}</td>
+                  <td className="px-3.5 py-2.5 text-zinc-700 dark:text-zinc-400">{r.by}</td>
                 </tr>
               ))}
             </tbody>
@@ -292,7 +292,7 @@ export function VersionHistoryModal({
         <div className="flex justify-end mt-5">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors dark:text-zinc-400 dark:hover:bg-zinc-800"
           >
             Close
           </button>
@@ -320,11 +320,11 @@ export function ArchiveModal({
     <Modal isOpen={!!playbook} onClose={onClose} className="sm:max-w-sm">
       {playbook && (
         <div className="p-5">
-          <h3 className="font-bold text-[16px] text-zinc-900 mb-1">
+          <h3 className="font-bold text-[16px] text-zinc-900 mb-1 dark:text-zinc-100">
             {restoring ? "Restore playbook" : "Archive playbook"}
           </h3>
-          <p className="text-xs text-zinc-500 mb-4">{playbook.name}</p>
-          <p className="text-sm text-zinc-500 leading-relaxed mb-5">
+          <p className="text-xs text-zinc-500 mb-4 dark:text-zinc-400">{playbook.name}</p>
+          <p className="text-sm text-zinc-500 leading-relaxed mb-5 dark:text-zinc-400">
             {restoring
               ? "Restoring returns this playbook to draft. It must pass governance review before it can execute again."
               : "Archiving removes this playbook from active routing. Its version history, executions, and audit trail are preserved and remain queryable."}
@@ -332,7 +332,7 @@ export function ArchiveModal({
           <div className="flex justify-end gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors dark:text-zinc-400 dark:hover:bg-zinc-800"
             >
               Cancel
             </button>
@@ -341,7 +341,7 @@ export function ArchiveModal({
               className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
                 restoring
                   ? "text-white bg-emerald-500 hover:bg-emerald-600"
-                  : "text-red-600 border border-zinc-300 hover:bg-red-50"
+                  : "text-red-600 dark:text-red-400 border border-zinc-300 dark:border-zinc-700 hover:bg-red-50 dark:hover:bg-red-500/10"
               }`}
             >
               {restoring ? "Restore as draft" : "Archive playbook"}

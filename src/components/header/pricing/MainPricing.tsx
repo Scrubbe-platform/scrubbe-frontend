@@ -175,7 +175,7 @@ const MainPricing = () => {
   const [type, setType] = useState("business");
   const [duration, setDuration] = useState("monthly");
   return (
-    <div className=" bg-dark px-4 md:px-6 lg:px-20 xl:px-20 py-40 min-h-screen">
+    <div className=" bg-white dark:bg-dark px-4 md:px-6 lg:px-20 xl:px-20 py-40 min-h-screen">
       <motion.div
         className=" max-w-[1440px] mx-auto space-y-8 "
         variants={containerVariants}
@@ -183,10 +183,10 @@ const MainPricing = () => {
         whileInView="show"
         viewport={{ once: true, amount: 0.3 }}
       >
-        <p className=" text-white text-3xl md:text-5xl font-bold text-center font-bigshotOne max-w-lg mx-auto ">
+        <p className=" text-black dark:text-white text-3xl md:text-5xl font-bold text-center font-bigshotOne max-w-lg mx-auto ">
         Pricing that scales with  <span className="text-transparent bg-clip-text bg-gradient-to-r from-IMSCyan via-[#8250BE] to-[#8250BE]">trust and authority.</span>
         </p>
-        <p className="text-center font-medium text-white max-w-3xl mx-auto">
+        <p className="text-center font-medium text-black dark:text-white max-w-3xl mx-auto">
         Scrubbe isn’t priced like an ITSM tool. You’re not paying for “tickets”. You’re paying for how much decision-making authority you delegate — under strict policies, playbooks, and a full decision log.
         </p>
         <div className="flex gap-3 justify-center">
@@ -215,7 +215,7 @@ const MainPricing = () => {
        
        <div>
         <div className="flex justify-between items-center">
-          <p className="text-base text-white">Plans & tiers</p>
+          <p className="text-base text-black dark:text-white">Plans & tiers</p>
           <div className="flex gap-3">
             <div className="border-IMSCyan border bg-transparent hover:bg-transparent text-IMSCyan w-fit px-4 rounded-lg py-2 text-sm">Compare Features</div>
             <div className="border-IMSCyan border bg-transparent hover:bg-transparent text-IMSCyan w-fit px-4 rounded-lg py-2 text-sm">Help me choose</div>
@@ -223,10 +223,10 @@ const MainPricing = () => {
         </div>
 
         <div>
-        <p className=" text-white text-2xl md:text-4xl font-bold font-bigshotOne ">
+        <p className=" text-black dark:text-white text-2xl md:text-4xl font-bold font-bigshotOne ">
         Choose your authority level
         </p>
-        <p className="text-base text-white">Start read-only, then unlock governance, activation, and execution as confidence grows.</p>
+        <p className="text-base text-black dark:text-white">Start read-only, then unlock governance, activation, and execution as confidence grows.</p>
         </div>
        </div>
 
@@ -253,13 +253,13 @@ const MainPricing = () => {
             className={`${
               duration === "yearly"
                 ? "text-IMSCyan font-semibold"
-                : "text-white"
+                : "text-black dark:text-white"
             }`}
           >
             Annual
           </p>
         </div>
-        <p className="text-sm text-white text-center pt-2">Annual includes ~15% discount (illustrative).</p>
+        <p className="text-sm text-black dark:text-white text-center pt-2">Annual includes ~15% discount (illustrative).</p>
         </div>
 
         {/* <div className=" grid grid-cols-3 gap-6">

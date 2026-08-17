@@ -33,10 +33,10 @@ export default function RelatedHealthSection({
             <button
               key={rel.name}
               onClick={() => toast(`${rel.name} opens in its console`)}
-              className="flex items-center gap-2.5 border border-zinc-200 rounded-lg px-3.5 py-3 text-sm font-semibold hover:border-zinc-900 transition-colors text-left"
+              className="flex items-center gap-2.5 border border-zinc-200 rounded-lg px-3.5 py-3 text-sm font-semibold hover:border-zinc-900 transition-colors text-left text-zinc-900 dark:border-zinc-800 dark:text-zinc-100 dark:hover:border-zinc-500"
             >
               {rel.name}
-              <span className="ml-auto font-mono text-xs text-zinc-400">
+              <span className="ml-auto font-mono text-xs text-zinc-400 dark:text-zinc-500">
                 {rel.cnt}
               </span>
             </button>
@@ -46,7 +46,7 @@ export default function RelatedHealthSection({
 
       <div
         id="s-health"
-        className="border   rounded-xl bg-white p-6 flex flex-wrap items-center gap-6 scroll-mt-32"
+        className="border border-zinc-200 rounded-xl bg-white p-6 flex flex-wrap items-center gap-6 scroll-mt-32 dark:border-zinc-800 dark:bg-zinc-900/40"
       >
         <svg width="72" height="72" viewBox="0 0 72 72" className="shrink-0">
           <circle
@@ -82,23 +82,23 @@ export default function RelatedHealthSection({
           </text>
         </svg>
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
             Playbook health
           </div>
-          <h3 className="font-bold text-[15.5px] text-zinc-900 mt-0.5">
+          <h3 className="font-bold text-[15.5px] text-zinc-900 mt-0.5 dark:text-zinc-100">
             Operational readiness
           </h3>
-          <p className="text-sm text-zinc-500 mt-0.5 max-w-md">
+          <p className="text-sm text-zinc-500 mt-0.5 max-w-md dark:text-zinc-400">
             All {playbook.rules.length} linked operational rules valid. No
             conflicting execution permissions detected.
           </p>
         </div>
         <div className="ml-auto text-right">
-          <div className="text-xs text-zinc-400">Last governance review</div>
-          <div className="text-sm font-semibold">3 days ago</div>
+          <div className="text-xs text-zinc-400 dark:text-zinc-500">Last governance review</div>
+          <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">3 days ago</div>
           <button
             onClick={onRequestReview}
-            className="mt-2 px-3.5 py-1.5 text-xs font-semibold border border-zinc-300 rounded-lg hover:bg-white transition-colors"
+            className="mt-2 px-3.5 py-1.5 text-xs font-semibold border border-zinc-300 rounded-lg hover:bg-white transition-colors dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
           >
             Request review
           </button>

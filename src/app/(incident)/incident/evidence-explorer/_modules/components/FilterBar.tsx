@@ -23,13 +23,13 @@ const FilterBar: React.FC<{ filters: FilterChip[]; onChange: (filters: FilterChi
   };
 
   return (
-    <div className="flex items-center gap-2.5 px-5 py-2.5 bg-[#F6F6F3] border-b border-[#E7E6E0] flex-wrap">
-      <span className="text-[10.5px] tracking-[.1em] uppercase text-[#8A8A93] font-semibold mr-0.5">Filters</span>
+    <div className="flex items-center gap-2.5 px-5 py-2.5 bg-[#F6F6F3] dark:bg-zinc-900/40 border-b border-[#E7E6E0] dark:border-zinc-800 flex-wrap">
+      <span className="text-[10.5px] tracking-[.1em] uppercase text-[#8A8A93] dark:text-zinc-500 font-semibold mr-0.5">Filters</span>
       {filters.map((f) => (
-        <span key={f.id} className="inline-flex items-center gap-2 h-7 pl-[11px] pr-1.5 bg-white border border-[#E7E6E0] rounded-full text-[12px]">
-          <span className="text-[10.5px] text-[#8A8A93]">{f.label}</span>
-          <span className="font-mono font-medium text-[#15151A]">{f.value}</span>
-          <button onClick={() => remove(f.id)} className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[#8A8A93] hover:bg-[#F1F0EB] hover:text-[#15151A]">
+        <span key={f.id} className="inline-flex items-center gap-2 h-7 pl-[11px] pr-1.5 bg-white dark:bg-zinc-900 border border-[#E7E6E0] dark:border-zinc-800 rounded-full text-[12px]">
+          <span className="text-[10.5px] text-[#8A8A93] dark:text-zinc-500">{f.label}</span>
+          <span className="font-mono font-medium text-[#15151A] dark:text-zinc-100">{f.value}</span>
+          <button onClick={() => remove(f.id)} className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[#8A8A93] dark:text-zinc-500 hover:bg-[#F1F0EB] dark:hover:bg-zinc-800 hover:text-[#15151A] dark:hover:text-zinc-100">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="w-[11px] h-[11px]"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
         </span>
@@ -37,16 +37,16 @@ const FilterBar: React.FC<{ filters: FilterChip[]; onChange: (filters: FilterChi
       <div className="relative">
         <button
           onClick={() => setOpen((o) => !o)}
-          className="inline-flex items-center gap-1.5 h-7 px-[11px] rounded-full border border-dashed border-[#cfceC6] text-[12px] text-[#52525B] hover:border-[#2540F2] hover:text-[#1B30C4] hover:bg-[#EEF0FF] transition-colors"
+          className="inline-flex items-center gap-1.5 h-7 px-[11px] rounded-full border border-dashed border-[#cfceC6] dark:border-zinc-700 text-[12px] text-[#52525B] dark:text-zinc-400 hover:border-[#2540F2] dark:hover:border-blue-500 hover:text-[#1B30C4] dark:hover:text-blue-400 hover:bg-[#EEF0FF] dark:hover:bg-blue-500/10 transition-colors"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 5v14M5 12h14" /></svg>
           Add Filter
         </button>
         {open && (
-          <div className="absolute z-20 top-[calc(100%+6px)] left-0 min-w-[210px] bg-white border border-[#E7E6E0] rounded-[10px] shadow-lg p-[5px]">
-            <div className="text-[10px] tracking-wide uppercase text-[#B5B5BC] px-[9px] pt-1.5 pb-1">Add a filter</div>
+          <div className="absolute z-20 top-[calc(100%+6px)] left-0 min-w-[210px] bg-white dark:bg-zinc-900 border border-[#E7E6E0] dark:border-zinc-800 rounded-[10px] shadow-lg p-[5px]">
+            <div className="text-[10px] tracking-wide uppercase text-[#B5B5BC] dark:text-zinc-600 px-[9px] pt-1.5 pb-1">Add a filter</div>
             {ADD_OPTIONS.map((opt) => (
-              <button key={opt.val} onClick={() => add(opt)} className="w-full text-left px-[9px] py-[7px] text-[12.5px] rounded-[6px] hover:bg-[#F6F6F3]">
+              <button key={opt.val} onClick={() => add(opt)} className="w-full text-left px-[9px] py-[7px] text-[12.5px] text-[#15151A] dark:text-zinc-100 rounded-[6px] hover:bg-[#F6F6F3] dark:hover:bg-zinc-800">
                 {opt.label}
               </button>
             ))}

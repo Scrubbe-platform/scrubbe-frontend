@@ -37,8 +37,8 @@ function FilterChip({
       onClick={onClick}
       className={`text-[11px] px-2.5 py-1 rounded-md border transition-colors ${
         active
-          ? "bg-emerald-50 border-emerald-400 text-emerald-700 font-semibold"
-          : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
+          ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-400 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-400 font-semibold"
+          : "bg-white dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700"
       }`}
     >
       {label}
@@ -108,24 +108,24 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
           <div className="flex-1 relative">
             <Search
               size={15}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500"
             />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search incidents, services, errors, keywords..."
-              className="w-full h-9 pl-9 pr-3 rounded-lg text-xs bg-zinc-50 border border-zinc-200 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition"
+              className="w-full h-9 pl-9 pr-3 rounded-lg text-xs bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition dark:text-zinc-100"
             />
           </div>
           <button
             type="button"
             onClick={() => setShowAdvanced((v) => !v)}
-            className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 whitespace-nowrap flex items-center gap-1.5"
+            className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 whitespace-nowrap flex items-center gap-1.5"
           >
             Advanced Search
             {activeFilterCount > 0 && (
-              <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 rounded-full w-4 h-4 flex items-center justify-center">
+              <span className="text-[9px] font-bold bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-full w-4 h-4 flex items-center justify-center">
                 {activeFilterCount}
               </span>
             )}
@@ -134,17 +134,17 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
 
         {/* ── Advanced filter panel (collapsible) ── */}
         {showAdvanced && (
-          <div className="mb-4 p-4 bg-zinc-50 border border-zinc-200 rounded-xl space-y-3">
+          <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Service */}
               <div>
-                <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block">
+                <label className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-500 uppercase tracking-wider mb-1.5 block">
                   Service
                 </label>
                 <select
                   value={filterSvc}
                   onChange={(e) => setFilterSvc(e.target.value)}
-                  className="w-full h-8 px-2.5 text-xs border border-zinc-200 rounded-md bg-white outline-none focus:border-emerald-400"
+                  className="w-full h-8 px-2.5 text-xs border border-zinc-200 dark:border-zinc-800 rounded-md bg-white dark:bg-zinc-900/40 text-zinc-900 dark:text-zinc-100 outline-none focus:border-emerald-400"
                 >
                   <option value="">All services</option>
                   {SERVICES?.map((s) => (
@@ -157,13 +157,13 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
 
               {/* Environment */}
               <div>
-                <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block">
+                <label className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-500 uppercase tracking-wider mb-1.5 block">
                   Environment
                 </label>
                 <select
                   value={filterEnv}
                   onChange={(e) => setFilterEnv(e.target.value)}
-                  className="w-full h-8 px-2.5 text-xs border border-zinc-200 rounded-md bg-white outline-none focus:border-emerald-400"
+                  className="w-full h-8 px-2.5 text-xs border border-zinc-200 dark:border-zinc-800 rounded-md bg-white dark:bg-zinc-900/40 text-zinc-900 dark:text-zinc-100 outline-none focus:border-emerald-400"
                 >
                   <option value="">All environments</option>
                   {ENVIRONMENTS.map((e) => (
@@ -177,7 +177,7 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
 
             {/* Priority chips */}
             <div>
-              <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block">
+              <label className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-500 uppercase tracking-wider mb-1.5 block">
                 Priority
               </label>
               <div className="flex gap-1.5">
@@ -194,9 +194,9 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
 
             {/* Similarity threshold */}
             <div>
-              <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex justify-between">
+              <label className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-500 uppercase tracking-wider mb-1.5 flex justify-between">
                 <span>Similarity threshold</span>
-                <span className="text-zinc-400 font-mono normal-case">
+                <span className="text-zinc-400 dark:text-zinc-500 font-mono normal-case">
                   ≥ {similarity}% match
                 </span>
               </label>
@@ -206,7 +206,7 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
                 max={100}
                 value={similarity}
                 onChange={(e) => setSimilarity(Number(e.target.value))}
-                className="w-full h-1.5 bg-zinc-200 rounded-full appearance-none cursor-pointer accent-emerald-500"
+                className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full appearance-none cursor-pointer accent-emerald-500"
               />
             </div>
 
@@ -222,7 +222,7 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
 
             {/* Active filter summary */}
             {activeFilterCount > 0 && (
-              <div className="text-[11px] text-zinc-400">
+              <div className="text-[11px] text-zinc-400 dark:text-zinc-500">
                 {filtered.length} incident{filtered.length !== 1 ? "s" : ""}{" "}
                 match{filtered.length === 1 ? "es" : ""} your filters
               </div>
@@ -242,7 +242,7 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
                   <div
                     key={inc.id}
                     onClick={() => navigateToIncident(inc)}
-                    className="flex items-center gap-2.5 py-2.5 px-2.5 rounded-lg hover:bg-zinc-50 cursor-pointer transition group"
+                    className="flex items-center gap-2.5 py-2.5 px-2.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer transition group"
                   >
                     <span
                       className={`text-[9px] font-mono font-bold px-1.5 py-1 rounded border min-w-[28px] text-center ${sevColors[inc.sev]}`}
@@ -250,21 +250,21 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
                       {inc.sev}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[12.5px] font-semibold text-zinc-800 truncate group-hover:text-emerald-700 transition-colors">
+                      <div className="text-[12.5px] font-semibold text-zinc-800 dark:text-zinc-100 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                         {inc.name}
                       </div>
-                      <div className="text-[11px] text-zinc-400 mt-0.5">
+                      <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
                         {inc.meta}
                       </div>
                     </div>
-                    <div className="text-[10.5px] text-zinc-400 text-right shrink-0">
+                    <div className="text-[10.5px] text-zinc-400 dark:text-zinc-500 text-right shrink-0">
                       {inc.similar}
                     </div>
                   </div>
                 ))}
 
               {filtered.length === 0 && (
-                <div className="py-6 text-center text-sm text-zinc-400 italic">
+                <div className="py-6 text-center text-sm text-zinc-400 dark:text-zinc-500 italic">
                   No incidents match these filters.
                 </div>
               )}
@@ -280,7 +280,7 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
           {/* Cluster scatter */}
           <ChartCard chartKey="cluster" onClick={onChartClick}>
             <SubH>Similar Incident Clusters</SubH>
-            <div className="text-[10.5px] text-zinc-400 mb-2">
+            <div className="text-[10.5px] text-zinc-400 dark:text-zinc-500 mb-2">
               Vector-embedded incidents grouped by similarity
             </div>
             <div className="h-[180px]">
@@ -303,7 +303,7 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
         >
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold bg-zinc-100 text-zinc-500 rounded-full px-2.5 py-1">
+              <span className="text-[10px] font-bold bg-zinc-100 dark:bg-zinc-800/60 text-zinc-500 dark:text-zinc-500 rounded-full px-2.5 py-1">
                 {sourceIncidents.length} incidents
               </span>
             </div>
@@ -312,7 +312,7 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
             <div className="overflow-x-auto">
               <table className="w-full text-[12px]">
                 <thead>
-                  <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 border-b border-zinc-200">
+                  <tr className="text-[10.5px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b border-zinc-200 dark:border-zinc-800">
                     <th className="text-left pb-2 pr-2">Priority</th>
                     <th className="text-left pb-2 pr-2">Incident</th>
                     <th className="text-left pb-2 pr-2">Service</th>
@@ -329,7 +329,7 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
                         setShowAllIncidents(false);
                         navigateToIncident(inc);
                       }}
-                      className="border-t border-zinc-100 hover:bg-zinc-50 cursor-pointer transition-colors"
+                      className="border-t border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
                     >
                       <td className="py-2.5 pr-2">
                         <span
@@ -339,17 +339,17 @@ export default function IncidentMemory({ onChartClick, incidents }: Props) {
                         </span>
                       </td>
                       <td className="py-2.5 pr-2">
-                        <div className="font-semibold text-zinc-800">
+                        <div className="font-semibold text-zinc-800 dark:text-zinc-100">
                           {inc.name}
                         </div>
-                        <div className="text-[10.5px] text-zinc-400 mt-0.5">
+                        <div className="text-[10.5px] text-zinc-400 dark:text-zinc-500 mt-0.5">
                           {inc.meta}
                         </div>
                       </td>
-                      <td className="py-2.5 pr-2 text-zinc-600">{inc.svc}</td>
-                      <td className="py-2.5 pr-2 text-zinc-600">{inc.env}</td>
-                      <td className="py-2.5 pr-2 text-zinc-600">{inc.cat}</td>
-                      <td className="py-2.5 text-zinc-400">{inc.similar}</td>
+                      <td className="py-2.5 pr-2 text-zinc-600 dark:text-zinc-300">{inc.svc}</td>
+                      <td className="py-2.5 pr-2 text-zinc-600 dark:text-zinc-300">{inc.env}</td>
+                      <td className="py-2.5 pr-2 text-zinc-600 dark:text-zinc-300">{inc.cat}</td>
+                      <td className="py-2.5 text-zinc-400 dark:text-zinc-500">{inc.similar}</td>
                     </tr>
                   ))}
                 </tbody>

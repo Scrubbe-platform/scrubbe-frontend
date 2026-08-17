@@ -25,7 +25,7 @@ export default function ExportModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="p-4 space-y-5">
-        <h2 className="text-base font-bold text-zinc-900">
+        <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
           Export Intelligence Report
         </h2>
         <div className="grid grid-cols-3 gap-2.5">
@@ -37,27 +37,27 @@ export default function ExportModal({
             <button
               key={fmt.label}
               type="button"
-              className="border border-zinc-200 rounded-xl p-3 text-center hover:border-emerald-400 hover:bg-emerald-50/30 transition-colors"
+              className="border border-zinc-200 dark:border-zinc-700 rounded-xl p-3 text-center hover:border-emerald-400 dark:hover:border-emerald-500 hover:bg-emerald-50/30 dark:hover:bg-emerald-500/10 transition-colors"
             >
               <div className="text-2xl mb-1">{fmt.emoji}</div>
-              <div className="text-xs font-bold text-zinc-800">{fmt.label}</div>
-              <div className="text-[10px] text-zinc-400 mt-0.5">{fmt.sub}</div>
+              <div className="text-xs font-bold text-zinc-800 dark:text-zinc-100">{fmt.label}</div>
+              <div className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5">{fmt.sub}</div>
             </button>
           ))}
         </div>
         <div>
-          <div className="text-xs font-semibold text-zinc-600 mb-2">
+          <div className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 mb-2">
             Include Sections
           </div>
           {SECTIONS.map((s) => (
             <label
               key={s}
-              className="flex items-center gap-2.5 text-xs text-zinc-600 cursor-pointer py-1"
+              className="flex items-center gap-2.5 text-xs text-zinc-600 dark:text-zinc-300 cursor-pointer py-1"
             >
               <input
                 type="checkbox"
                 defaultChecked
-                className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
+                className="rounded border-zinc-300 dark:border-zinc-700 text-emerald-600 focus:ring-emerald-500"
               />
               {s}
             </label>

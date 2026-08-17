@@ -100,7 +100,7 @@ export default function AuditLogWorkspace() {
       accessorKey: "timestamp",
       header: "Timestamp",
       cell: ({ getValue }) => (
-        <span className="font-mono text-[11px] text-[#64748B]">
+        <span className="font-mono text-[11px] text-[#64748B] dark:text-zinc-500">
           {getValue<string>()}
         </span>
       ),
@@ -109,14 +109,14 @@ export default function AuditLogWorkspace() {
       accessorKey: "action",
       header: "Action",
       cell: ({ getValue }) => (
-        <span className="font-bold text-[#0F172A]">{getValue<string>()}</span>
+        <span className="font-bold text-[#0F172A] dark:text-zinc-100">{getValue<string>()}</span>
       ),
     },
     {
       accessorKey: "actor",
       header: "Actor Origin",
       cell: ({ getValue }) => (
-        <span className="inline-flex items-center gap-1.5 bg-[#F1FEF9] border border-[#A7F3D0] rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-[#065F46]">
+        <span className="inline-flex items-center gap-1.5 bg-[#F1FEF9] dark:bg-emerald-500/10 border border-[#A7F3D0] dark:border-emerald-800/50 rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-[#065F46] dark:text-emerald-400">
           {getValue<string>()}
         </span>
       ),
@@ -125,14 +125,14 @@ export default function AuditLogWorkspace() {
       accessorKey: "target",
       header: "Impact Target",
       cell: ({ getValue }) => (
-        <span className="font-medium text-[#0F172A]">{getValue<string>()}</span>
+        <span className="font-medium text-[#0F172A] dark:text-zinc-100">{getValue<string>()}</span>
       ),
     },
     {
       accessorKey: "detail",
       header: "Details Context",
       cell: ({ getValue }) => (
-        <span className="text-[#64748B] font-light leading-relaxed">
+        <span className="text-[#64748B] dark:text-zinc-500 font-light leading-relaxed">
           {getValue<string>()}
         </span>
       ),
@@ -170,12 +170,12 @@ export default function AuditLogWorkspace() {
   // --- Row Styling Callback using your specific (data) => string signature ---
   const handleRowClassName = (data: AuditLogEntry) => {
     let baseStyle =
-      "hover:bg-[#F0FDF8] transition-colors cursor-pointer text-xs ";
+      "hover:bg-[#F0FDF8] dark:hover:bg-emerald-500/10 transition-colors cursor-pointer text-xs ";
     if (
       data.action.toLowerCase().includes("failed") ||
       data.action.toLowerCase().includes("error")
     ) {
-      return baseStyle + "bg-red-50/40";
+      return baseStyle + "bg-red-50/40 dark:bg-red-500/10";
     }
     return baseStyle;
   };
@@ -205,19 +205,19 @@ export default function AuditLogWorkspace() {
     // ('Audit trail payload successfully exported to CSV snapshot');
   };
   return (
-    <div className="w-full bg-[#F7F9FB] min-h-screen text-[#0F172A] font-sans antialiased p-6">
+    <div className="w-full bg-[#F7F9FB] dark:bg-zinc-950 min-h-screen text-[#0F172A] dark:text-zinc-100 font-sans antialiased p-6">
       <div className="max-w-[1400px] mx-auto space-y-5">
         {/* HEADER BLOCK */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold tracking-tight">Audit Log</h2>
-            <p className="text-xs text-[#64748B] mt-0.5">
+            <p className="text-xs text-[#64748B] dark:text-zinc-500 mt-0.5">
               All on-call assignment and policy changes
             </p>
           </div>
           <button
             onClick={handleExportCSV}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold hover:border-[#02DD82] hover:bg-[#F0FDF8] text-[#64748B] hover:text-[#0F172A] transition self-start sm:self-center shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-zinc-900/40 border border-[#E2E8F0] dark:border-zinc-800 rounded-lg text-xs font-semibold hover:border-[#02DD82] hover:bg-[#F0FDF8] dark:hover:bg-zinc-800 text-[#64748B] dark:text-zinc-500 hover:text-[#0F172A] dark:hover:text-zinc-100 transition self-start sm:self-center shadow-2xs"
           >
             <svg
               className="w-3.5 h-3.5"
@@ -237,16 +237,16 @@ export default function AuditLogWorkspace() {
         </div>
 
         {/* CUSTOM INJECTED TANSTACK TABLE MODULE */}
-        <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-2xs overflow-hidden p-1">
+        <div className="bg-white dark:bg-zinc-900/40 border border-[#E2E8F0] dark:border-zinc-800 rounded-xl shadow-2xs overflow-hidden p-1">
           <CustomTable
             data={filteredLogs}
             columns={columns}
-            headerClassName="bg-[#FAFBFD] text-[10.5px] font-bold tracking-wider text-[#64748B] uppercase border-b border-[#E2E8F0]"
+            headerClassName="bg-[#FAFBFD] dark:bg-zinc-900/60 text-[10.5px] font-bold tracking-wider text-[#64748B] dark:text-zinc-500 uppercase border-b border-[#E2E8F0] dark:border-zinc-800"
             rowClassName={handleRowClassName}
           />
 
           {filteredLogs.length === 0 && (
-            <div className="p-8 text-center text-xs font-medium text-[#64748B] italic bg-white">
+            <div className="p-8 text-center text-xs font-medium text-[#64748B] dark:text-zinc-500 italic bg-white dark:bg-zinc-900/40">
               Zero records found matching query filter indices.
             </div>
           )}
@@ -255,7 +255,7 @@ export default function AuditLogWorkspace() {
 
       {/* FLOATER FEEDBACK TOAST */}
       {toast && (
-        <div className="fixed top-8 right-6 bg-[#0F172A] text-white font-semibold text-xs py-3 px-5 rounded-xl shadow-2xl z-50 flex items-center gap-2">
+        <div className="fixed top-8 right-6 bg-[#0F172A] dark:bg-zinc-800 text-white font-semibold text-xs py-3 px-5 rounded-xl shadow-2xl z-50 flex items-center gap-2">
           <span className="w-1.5 h-1.5 bg-[#02DD82] rounded-full animate-pulse" />
           <span>{toast}</span>
         </div>

@@ -352,7 +352,7 @@ const EvidenceOverview: React.FC<{
       <div className="flex justify-end">
         <button
           onClick={onOpenEzra}
-          className="h-9 px-4 rounded-[9px] border border-[#E7E6E0] bg-white text-[13px] font-medium text-[#15151A] hover:bg-[#F6F6F3] transition-colors"
+          className="h-9 px-4 rounded-[9px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-medium text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800 transition-colors"
         >
           More details
         </button>
@@ -363,20 +363,20 @@ const EvidenceOverview: React.FC<{
         {kpis.map((k) => (
           <div
             key={k.k}
-            className="relative rounded-[10px] shadow-sm shadow-light bg-white px-4 pt-3.5 pb-3.5 min-h-[112px] overflow-hidden"
+            className="relative rounded-[10px] shadow-sm shadow-light bg-white dark:bg-zinc-900/40 px-4 pt-3.5 pb-3.5 min-h-[112px] overflow-hidden"
           >
-            <div className="text-[13px] text-[#8A8A93]">{k.k}</div>
-            <div className="text-2xl tracking-tight leading-none text-[#15151A] mt-2">
+            <div className="text-[13px] text-[#8A8A93] dark:text-zinc-500">{k.k}</div>
+            <div className="text-2xl tracking-tight leading-none text-[#15151A] dark:text-zinc-100 mt-2">
               {k.sv}
               {k.unit && (
-                <span className="text-[13px] text-[#8A8A93] font-medium ml-0.5">
+                <span className="text-[13px] text-[#8A8A93] dark:text-zinc-500 font-medium ml-0.5">
                   {k.unit}
                 </span>
               )}
             </div>
-            <div className="text-[12.5px] mt-2 text-[#8A8A93]">{k.sd}</div>
+            <div className="text-[12.5px] mt-2 text-[#8A8A93] dark:text-zinc-500">{k.sd}</div>
             {k.progress != null ? (
-              <div className="h-1.5 rounded-full bg-amber-100 overflow-hidden mt-2.5">
+              <div className="h-1.5 rounded-full bg-amber-100 dark:bg-amber-500/10 overflow-hidden mt-2.5">
                 <div
                   className="h-full rounded-full"
                   style={{ width: `${k.progress}%`, background: k.thr }}
@@ -390,23 +390,23 @@ const EvidenceOverview: React.FC<{
       </div>
 
       {/* Signal rate */}
-      <div className="rounded-[10px] border border-[#DDDDDD] bg-white overflow-hidden">
-        <div className="flex items-center gap-2 px-[13px] py-2.5 border-b border-[#F0EFEA]">
+      <div className="rounded-[10px] border border-[#DDDDDD] dark:border-zinc-800 bg-white dark:bg-zinc-900/40 overflow-hidden">
+        <div className="flex items-center gap-2 px-[13px] py-2.5 border-b border-[#F0EFEA] dark:border-zinc-800">
           <svg
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth={1.9}
-            className="w-3.5 h-3.5 opacity-60"
+            className="w-3.5 h-3.5 opacity-60 text-[#15151A] dark:text-zinc-100"
           >
             <path d="M3 17l5-6 4 3 5-8 4 5" />
           </svg>
           <span
-            className={`${displayFont.className} font-semibold text-[12.5px]`}
+            className={`${displayFont.className} font-semibold text-[12.5px] text-[#15151A] dark:text-zinc-100`}
           >
             Signal rate
           </span>
-          <span className="text-[11px] text-[#8A8A93]">
+          <span className="text-[11px] text-[#8A8A93] dark:text-zinc-500">
             events / minute across sources
           </span>
         </div>
@@ -475,23 +475,23 @@ const EvidenceOverview: React.FC<{
 
       <div className="grid grid-cols-1 gap-3.5">
         {/* Volume histogram */}
-        <div className="rounded-[10px] border border-[#DDDDDD] bg-white overflow-hidden">
-          <div className="flex items-center gap-2 px-[13px] py-2.5 border-b border-[#F0EFEA]">
+        <div className="rounded-[10px] border border-[#DDDDDD] dark:border-zinc-800 bg-white dark:bg-zinc-900/40 overflow-hidden">
+          <div className="flex items-center gap-2 px-[13px] py-2.5 border-b border-[#F0EFEA] dark:border-zinc-800">
             <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth={1.9}
-              className="w-3.5 h-3.5 opacity-60"
+              className="w-3.5 h-3.5 opacity-60 text-[#15151A] dark:text-zinc-100"
             >
               <path d="M4 20V10M9 20V4M14 20v-7M19 20v-12" />
             </svg>
             <span
-              className={`${displayFont.className} font-semibold text-[12.5px]`}
+              className={`${displayFont.className} font-semibold text-[12.5px] text-[#15151A] dark:text-zinc-100`}
             >
               Signal volume
             </span>
-            <div className="ml-auto inline-flex items-center gap-0.5 p-[3px] bg-[#F1F0EB] rounded-[9px]">
+            <div className="ml-auto inline-flex items-center gap-0.5 p-[3px] bg-[#F1F0EB] dark:bg-zinc-800 rounded-[9px]">
               {(["minute", "source"] as const).map((m) => (
                 <button
                   key={m}
@@ -501,8 +501,8 @@ const EvidenceOverview: React.FC<{
                   }}
                   className={`text-[12px] font-medium px-3 py-[5px] rounded-[7px] transition-colors ${
                     histMode === m
-                      ? "bg-white text-[#16A34A] shadow-sm"
-                      : "text-[#52525B] hover:text-[#15151A]"
+                      ? "bg-white dark:bg-zinc-900 text-[#16A34A] dark:text-emerald-400 shadow-sm"
+                      : "text-[#52525B] dark:text-zinc-400 hover:text-[#15151A] dark:hover:text-zinc-100"
                   }`}
                 >
                   {m === "minute" ? "By minute" : "By source"}
@@ -579,31 +579,31 @@ const EvidenceOverview: React.FC<{
         </div>
 
         {/* Alerts */}
-        <div className="rounded-[10px] border border-[#DDDDDD] bg-white overflow-hidden">
-          <div className="flex items-center gap-2 px-[13px] py-2.5 border-b border-[#F0EFEA]">
+        <div className="rounded-[10px] border border-[#DDDDDD] dark:border-zinc-800 bg-white dark:bg-zinc-900/40 overflow-hidden">
+          <div className="flex items-center gap-2 px-[13px] py-2.5 border-b border-[#F0EFEA] dark:border-zinc-800">
             <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth={1.8}
-              className="w-3.5 h-3.5 opacity-60"
+              className="w-3.5 h-3.5 opacity-60 text-[#15151A] dark:text-zinc-100"
             >
               <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
             </svg>
             <span
-              className={`${displayFont.className} font-semibold text-[12.5px]`}
+              className={`${displayFont.className} font-semibold text-[12.5px] text-[#15151A] dark:text-zinc-100`}
             >
               Alerts
             </span>
-            <div className="ml-auto inline-flex items-center gap-0.5 p-[3px] bg-[#F1F0EB] rounded-[9px]">
+            <div className="ml-auto inline-flex items-center gap-0.5 p-[3px] bg-[#F1F0EB] dark:bg-zinc-800 rounded-[9px]">
               {(["all", "firing", "silenced"] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setAlFilter(f)}
                   className={`text-[12px] font-medium px-3 py-[5px] rounded-[7px] capitalize transition-colors ${
                     alFilter === f
-                      ? "bg-white text-[#16A34A] shadow-sm"
-                      : "text-[#52525B] hover:text-[#15151A]"
+                      ? "bg-white dark:bg-zinc-900 text-[#16A34A] dark:text-emerald-400 shadow-sm"
+                      : "text-[#52525B] dark:text-zinc-400 hover:text-[#15151A] dark:hover:text-zinc-100"
                   }`}
                 >
                   {f}
@@ -613,20 +613,20 @@ const EvidenceOverview: React.FC<{
           </div>
           <div className="p-[13px] flex flex-col gap-3 max-h-[320px] overflow-y-auto">
             {visibleAlerts.length === 0 ? (
-              <div className="py-4 text-center text-[12.5px] text-[#8A8A93]">
+              <div className="py-4 text-center text-[12.5px] text-[#8A8A93] dark:text-zinc-500">
                 No alerts in this view.
               </div>
             ) : (
               visibleAlerts.map((a) => (
                 <div
                   key={a.id}
-                  className={`rounded-[12px] border border-[#E7E6E0] bg-white px-5 py-4 flex items-center justify-between gap-4 transition-opacity ${a.state !== "firing" ? "opacity-60" : ""}`}
+                  className={`rounded-[12px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 px-5 py-4 flex items-center justify-between gap-4 transition-opacity ${a.state !== "firing" ? "opacity-60" : ""}`}
                 >
                   <div className="min-w-0">
-                    <div className="font-bold text-[14px] text-[#15151A]">
+                    <div className="font-bold text-[14px] text-[#15151A] dark:text-zinc-100">
                       {a.name}
                     </div>
-                    <div className="text-[12.5px] text-[#8A8A93] mt-1">
+                    <div className="text-[12.5px] text-[#8A8A93] dark:text-zinc-500 mt-1">
                       {a.meta}
                     </div>
                   </div>
@@ -640,7 +640,7 @@ const EvidenceOverview: React.FC<{
                               description: a.name,
                             });
                           }}
-                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] bg-white text-[13px] font-semibold text-[#15151A] hover:bg-[#F6F6F3]"
+                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-semibold text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
                         >
                           Acknowledge
                         </button>
@@ -651,7 +651,7 @@ const EvidenceOverview: React.FC<{
                               description: a.name,
                             });
                           }}
-                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] bg-white text-[13px] font-semibold text-[#15151A] hover:bg-[#F6F6F3]"
+                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-semibold text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
                         >
                           Silence
                         </button>
@@ -666,7 +666,7 @@ const EvidenceOverview: React.FC<{
                               description: a.name,
                             });
                           }}
-                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] bg-white text-[13px] font-semibold text-[#15151A] hover:bg-[#F6F6F3]"
+                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-semibold text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
                         >
                           Silence
                         </button>
@@ -677,7 +677,7 @@ const EvidenceOverview: React.FC<{
                               description: a.name,
                             });
                           }}
-                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] bg-white text-[13px] font-semibold text-[#15151A] hover:bg-[#F6F6F3]"
+                          className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-semibold text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
                         >
                           Reset
                         </button>
@@ -689,7 +689,7 @@ const EvidenceOverview: React.FC<{
                           setAlertState(a.id, "firing");
                           toast.info("Alert active", { description: a.name });
                         }}
-                        className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] bg-white text-[13px] font-semibold text-[#15151A] hover:bg-[#F6F6F3]"
+                        className="h-9 px-4 rounded-[8px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-semibold text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
                       >
                         Activate
                       </button>
@@ -703,29 +703,29 @@ const EvidenceOverview: React.FC<{
       </div>
 
       {/* War room */}
-      <div className="rounded-[10px] border border-[#DDDDDD] bg-white overflow-hidden">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-[#F0EFEA]">
+      <div className="rounded-[10px] border border-[#DDDDDD] dark:border-zinc-800 bg-white dark:bg-zinc-900/40 overflow-hidden">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-[#F0EFEA] dark:border-zinc-800">
           <span
-            className={`${displayFont.className} font-bold text-[15px] text-[#15151A]`}
+            className={`${displayFont.className} font-bold text-[15px] text-[#15151A] dark:text-zinc-100`}
           >
             War room
           </span>
-          <span className="text-[13px] text-[#8A8A93]">
+          <span className="text-[13px] text-[#8A8A93] dark:text-zinc-500">
             coordinated response · SI-7A42K91
           </span>
         </div>
         <div className="p-5">
           <div className="flex items-center gap-3 mb-4 text-[13px]">
-            <span className="flex items-center gap-2 px-3 py-1.5 rounded-[8px] border border-[#E7E6E0] bg-white shrink-0">
+            <span className="flex items-center gap-2 px-3 py-1.5 rounded-[8px] border border-[#E7E6E0] dark:border-zinc-800 bg-white dark:bg-zinc-900 shrink-0">
               <span className="relative w-[7px] h-[7px] rounded-full bg-[#E5484D]">
                 <span className="absolute inset-[-4px] rounded-full border-[1.5px] border-[#E5484D] opacity-50 animate-ping" />
               </span>
-              <b className="text-[#15151A]">War room live</b>
+              <b className="text-[#15151A] dark:text-zinc-100">War room live</b>
             </span>
-            <span className="text-[#8A8A93]">4 responders + 3 agents</span>
-            <span className="ml-auto text-[#8A8A93] shrink-0">
+            <span className="text-[#8A8A93] dark:text-zinc-500">4 responders + 3 agents</span>
+            <span className="ml-auto text-[#8A8A93] dark:text-zinc-500 shrink-0">
               elapsed{" "}
-              <b className={`${monoFont.className} text-[15px] text-[#15151A]`}>
+              <b className={`${monoFont.className} text-[15px] text-[#15151A] dark:text-zinc-100`}>
                 {String(Math.floor(elapsed / 60)).padStart(2, "0")}:
                 {String(elapsed % 60).padStart(2, "0")}
               </b>
@@ -736,16 +736,16 @@ const EvidenceOverview: React.FC<{
             <button
               onClick={() => setWrActionsOpen((o) => !o)}
               aria-label="War room actions"
-              className="flex items-center justify-center w-9 h-9 rounded-[8px] border border-[#E7E6E0] bg-[#F6F6F3] hover:bg-[#EFEEE8] transition-colors"
+              className="flex items-center justify-center w-9 h-9 rounded-[8px] border border-[#E7E6E0] dark:border-zinc-800 bg-[#F6F6F3] dark:bg-zinc-800 hover:bg-[#EFEEE8] dark:hover:bg-zinc-700 transition-colors"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#52525B]">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#52525B] dark:text-zinc-400">
                 <circle cx="12" cy="5" r="1.6" />
                 <circle cx="12" cy="12" r="1.6" />
                 <circle cx="12" cy="19" r="1.6" />
               </svg>
             </button>
             {wrActionsOpen && (
-              <div className="absolute z-20 top-[calc(100%+6px)] right-0 min-w-[220px] bg-white border border-[#E7E6E0] rounded-[10px] shadow-lg p-[5px]">
+              <div className="absolute z-20 top-[calc(100%+6px)] right-0 min-w-[220px] bg-white dark:bg-zinc-900 border border-[#E7E6E0] dark:border-zinc-800 rounded-[10px] shadow-lg p-[5px]">
                 {wrActions.map((a, i) => (
                   <button
                     key={i}
@@ -755,8 +755,8 @@ const EvidenceOverview: React.FC<{
                     }}
                     className={`w-full text-left px-[11px] py-[9px] text-[13px] font-medium rounded-[6px] transition-colors ${
                       a.danger
-                        ? "text-[#B42A30] hover:bg-[#FDECEC]"
-                        : "text-[#15151A] hover:bg-[#F6F6F3]"
+                        ? "text-[#B42A30] dark:text-red-400 hover:bg-[#FDECEC] dark:hover:bg-red-500/10"
+                        : "text-[#15151A] dark:text-zinc-100 hover:bg-[#F6F6F3] dark:hover:bg-zinc-800"
                     }`}
                   >
                     {a.t}
@@ -770,25 +770,25 @@ const EvidenceOverview: React.FC<{
             {wrLog.map((e, i) => (
               <div
                 key={i}
-                className="grid grid-cols-[64px_1fr] gap-3 py-3 border-b last:border-0 border-[#F0EFEA] text-[13px]"
+                className="grid grid-cols-[64px_1fr] gap-3 py-3 border-b last:border-0 border-[#F0EFEA] dark:border-zinc-800 text-[13px]"
               >
-                <span className="text-[12px] text-[#8A8A93] pt-0.5">
+                <span className="text-[12px] text-[#8A8A93] dark:text-zinc-500 pt-0.5">
                   {e.t}
                 </span>
                 <div>
                   <div
-                    className={`text-[14px] text-[#15151A] ${
+                    className={`text-[14px] text-[#15151A] dark:text-zinc-100 ${
                       e.cls === "gate"
-                        ? "[&_b]:text-[#1B30C4]"
+                        ? "[&_b]:text-[#1B30C4] dark:[&_b]:text-blue-400"
                         : e.cls === "appr"
-                          ? "[&_b]:text-[#0a7a5e]"
+                          ? "[&_b]:text-[#0a7a5e] dark:[&_b]:text-emerald-400"
                           : e.cls === "act"
-                            ? "[&_b]:text-[#B42A30]"
+                            ? "[&_b]:text-[#B42A30] dark:[&_b]:text-red-400"
                             : ""
                     }`}
                     dangerouslySetInnerHTML={{ __html: e.html }}
                   />
-                  <div className="text-[12.5px] text-[#8A8A93] mt-1">
+                  <div className="text-[12.5px] text-[#8A8A93] dark:text-zinc-500 mt-1">
                     {e.who}
                   </div>
                 </div>
