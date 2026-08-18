@@ -313,16 +313,17 @@ export default function HeroSection() {
         </svg>
       </div>
       <div className="relative z-10 w-full max-w-[1480px] mx-auto px-8 lg:px-16 py-20">
-        <div className="max-w-[700px] ">
+        <div className="max-w-[800px] ">
           {/* Headline */}
           <div className="mb-5" style={{ minHeight: 200 }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={active}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="h-[350px]"
               >
                 <h1
                   className="font-semibold tracking-wide text-gray-950 leading-[1.08] mb-5"
@@ -345,7 +346,7 @@ export default function HeroSection() {
           </div>
 
           {/* Timer bars + pause/play */}
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 my-5">
             {SLIDES.map((_, i) => (
               <TimerBar
                 key={i}
@@ -363,6 +364,23 @@ export default function HeroSection() {
 
           {/* CTA */}
           <CTAButton />
+
+          {/* NVIDIA Inception */}
+          <img
+            src="/nvidia.jfif"
+            alt="NVIDIA"
+            className="w-[130px] mt-3 rounded object-contain"
+          />
+          <div className="mt-3 flex items-center gap-3 max-w-[460px]">
+            <p className="text-[12.5px] leading-snug text-gray-500">
+              <span className="font-semibold text-gray-800">
+                Backed by NVIDIA Inception —
+              </span>{" "}
+              Scrubbe is a member of the NVIDIA Inception Program, exploring
+              NVIDIA accelerated computing to power the next generation of
+              autonomous incident response.
+            </p>
+          </div>
 
           {/* Pipeline breadcrumb */}
           <PipelineBreadcrumb />
