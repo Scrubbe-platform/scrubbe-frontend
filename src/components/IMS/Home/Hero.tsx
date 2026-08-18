@@ -313,7 +313,7 @@ export default function HeroSection() {
         </svg>
       </div>
       <div className="relative z-10 w-full max-w-[1480px] mx-auto px-8 lg:px-16 py-20">
-        <div className="max-w-[800px] ">
+        <div className="max-w-[800px] 2xl:max-w-[850px]">
           {/* Headline */}
           <div className="mb-5" style={{ minHeight: 200 }}>
             <AnimatePresence mode="wait">
@@ -323,11 +323,11 @@ export default function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="h-[350px]"
+                className="h-[300px]"
               >
                 <h1
                   className="font-semibold tracking-wide text-gray-950 leading-[1.08] mb-5"
-                  style={{ fontSize: "clamp(44px, 4vw, 76px)" }}
+                  style={{ fontSize: "clamp(38px, 3.4vw, 62px)" }}
                 >
                   {slide.headline.map((line, i) => (
                     <span key={i}>
@@ -369,7 +369,7 @@ export default function HeroSection() {
           <img
             src="/nvidia.jfif"
             alt="NVIDIA"
-            className="w-[130px] mt-3 rounded object-contain"
+            className="w-[130px] mt-10 rounded object-contain"
           />
           <div className="mt-3 flex items-center gap-3 max-w-[460px]">
             <p className="text-[12.5px] leading-snug text-gray-500">
@@ -381,9 +381,6 @@ export default function HeroSection() {
               autonomous incident response.
             </p>
           </div>
-
-          {/* Pipeline breadcrumb */}
-          <PipelineBreadcrumb />
         </div>
       </div>
 
