@@ -314,18 +314,6 @@ export default function HeroSection() {
       </div>
       <div className="relative z-10 w-full max-w-[1480px] mx-auto px-8 lg:px-16 py-20">
         <div className="max-w-[700px] ">
-          {/* NVIDIA Inception badge */}
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 shadow-sm">
-            <img
-              src="/nvidia.png"
-              alt="NVIDIA"
-              className="h-4 w-4 shrink-0 object-contain"
-            />
-            <span className="text-[12.5px] font-medium text-gray-600">
-              Supported by NVIDIA Inception Program
-            </span>
-          </div>
-
           {/* Headline */}
           <div className="mb-5" style={{ minHeight: 200 }}>
             <AnimatePresence mode="wait">

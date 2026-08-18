@@ -10,11 +10,6 @@ import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 // ── Inline icons ──────────────────────────────────────────────────────────────
-const CheckIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
-    <path d="M2.5 6.5l3 3 5-5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
 const PlusIcon = () => (
   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
     <path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
@@ -51,11 +46,8 @@ const ENTERPRISE_CARD = {
   perUserPrice: null,
   features: [
     "500–5,000+ incidents/month",
-    "Custom execution credits",
     "Dedicated control plane",
     "On-prem / VPC deployment",
-    "Advanced RBAC, SSO, SCIM",
-    "24/7 dedicated support",
   ],
 };
 
@@ -207,53 +199,57 @@ const Plan = () => {
 
   // ── Billing toggle ──────────────────────────────────────────────────────────
   const BillingToggle = () => (
-    <div className="inline-flex items-center rounded-lg bg-white/6 border border-white/10 p-0.5">
+    <div className="inline-flex items-center rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 p-1">
       <button
         onClick={() => setBillingCycle("Monthly")}
-        className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all duration-150 ${
-          billingCycle === "Monthly" ? "bg-white/15 text-white" : "text-white/40 hover:text-white/70"
+        className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
+          billingCycle === "Monthly"
+            ? "bg-white dark:bg-zinc-900 text-black dark:text-zinc-100 shadow-sm"
+            : "text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-200"
         }`}
       >
         Monthly
       </button>
       <button
         onClick={() => setBillingCycle("Yearly")}
-        className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all duration-150 flex items-center gap-1.5 ${
-          billingCycle === "Yearly" ? "bg-white/15 text-white" : "text-white/40 hover:text-white/70"
+        className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 flex items-center gap-1.5 ${
+          billingCycle === "Yearly"
+            ? "bg-white dark:bg-zinc-900 text-black dark:text-zinc-100 shadow-sm"
+            : "text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-200"
         }`}
       >
         Yearly
-        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#02DD86]/25 text-[#02DD86] font-bold">−20%</span>
+        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-IMSLightGreen text-white font-bold">−20%</span>
       </button>
     </div>
   );
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="bg-IMSGreen rounded-lg overflow-hidden">
+    <div className="bg-white dark:bg-zinc-900/40 rounded-lg overflow-hidden">
       {selectPlan && activePlan ? (
         /* ── UPGRADE DETAIL VIEW: two-panel ── */
         <div className="flex flex-col">
           <div className="flex flex-col sm:flex-row min-h-0">
 
             {/* Left: Current plan */}
-            <div className="sm:w-[40%] border-b sm:border-b-0 sm:border-r border-white/10 p-5 flex flex-col gap-4">
+            <div className="sm:w-[40%] border-b sm:border-b-0 sm:border-r border-zinc-100 dark:border-zinc-800 p-5 flex flex-col gap-4">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-2">Current Plan</p>
-                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/8 border border-white/10 mb-3">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#02DD86]" />
-                  <span className="text-[11px] text-white/60 font-medium">Active</span>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Current Plan</p>
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 mb-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-IMSLightGreen" />
+                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Active</span>
                 </div>
-                <h3 className="text-xl font-bold text-white font-Poppins">{currentPlanName}</h3>
+                <h3 className="text-xl font-bold text-black dark:text-zinc-100">{currentPlanName}</h3>
                 {currentPlanPrice === 0 ? (
-                  <p className="text-2xl font-bold text-white/90 font-Poppins mt-0.5">Free</p>
+                  <p className="text-2xl font-bold text-black dark:text-zinc-100 mt-0.5">Free</p>
                 ) : (
                   <div className="mt-0.5">
-                    <p className="text-xl font-bold text-white/90 font-Poppins">
-                      ${currentPlanPrice.toLocaleString()}<span className="text-sm font-normal text-white/40">/mo platform</span>
+                    <p className="text-xl font-bold text-black dark:text-zinc-100">
+                      ${currentPlanPrice.toLocaleString()}<span className="text-sm font-normal text-zinc-400 dark:text-zinc-500">/mo platform</span>
                     </p>
                     {currentPlanPerUser > 0 && (
-                      <p className="text-xs text-white/40">+ ${currentPlanPerUser}/seat/mo</p>
+                      <p className="text-xs text-zinc-400 dark:text-zinc-500">+ ${currentPlanPerUser}/seat/mo</p>
                     )}
                   </div>
                 )}
@@ -263,11 +259,11 @@ const Plan = () => {
             {/* Right: Target plan */}
             <div className="flex-1 p-5 flex flex-col gap-4">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-2">Upgrading to</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Upgrading to</p>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-xl font-bold text-white font-Poppins">{activePlan.name}</h3>
+                  <h3 className="text-xl font-bold text-black dark:text-zinc-100">{activePlan.name}</h3>
                   {activePlan.isPopular && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#02DD86]/20 text-[#02DD86] border border-[#02DD86]/30 font-semibold">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full border border-IMSLightGreen text-IMSLightGreen font-semibold">
                       Most popular
                     </span>
                   )}
@@ -276,65 +272,65 @@ const Plan = () => {
 
               {/* Billing toggle */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-2">Billing cycle</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Billing cycle</p>
                 <BillingToggle />
               </div>
 
               {/* Seat stepper */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-2">Team seats</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Team seats</p>
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center rounded-lg border border-white/12 bg-white/6 overflow-hidden">
+                  <div className="flex items-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 overflow-hidden">
                     <button
                       onClick={() => setSeats((s) => Math.max(1, s - 1))}
-                      className="px-3 py-2 text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+                      className="px-3 py-2 text-zinc-400 dark:text-zinc-500 hover:text-black dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                       aria-label="Remove a seat"
                     >
                       <MinusIcon />
                     </button>
-                    <span className="px-4 py-2 text-white font-ibm text-sm min-w-[2.5rem] text-center tabular-nums">
+                    <span className="px-4 py-2 text-black dark:text-zinc-100 font-ibm text-sm min-w-[2.5rem] text-center tabular-nums">
                       {seats}
                     </span>
                     <button
                       onClick={() => setSeats((s) => s + 1)}
-                      className="px-3 py-2 text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+                      className="px-3 py-2 text-zinc-400 dark:text-zinc-500 hover:text-black dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                       aria-label="Add a seat"
                     >
                       <PlusIcon />
                     </button>
                   </div>
-                  <p className="text-[11px] text-white/40">{seats === 1 ? "agent / seat" : "agents / seats"}</p>
+                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{seats === 1 ? "agent / seat" : "agents / seats"}</p>
                 </div>
               </div>
 
               {/* Price breakdown */}
-              <div className="mt-auto pt-4 border-t border-white/8 flex flex-col gap-1">
-                <div className="flex justify-between text-[11px] text-white/40">
+              <div className="mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800 flex flex-col gap-1">
+                <div className="flex justify-between text-[11px] text-zinc-400 dark:text-zinc-500">
                   <span>Platform fee</span>
                   <span>${displayPlatformPrice(activePlan.price)}/{cycleLabel}</span>
                 </div>
-                <div className="flex justify-between text-[11px] text-white/40">
+                <div className="flex justify-between text-[11px] text-zinc-400 dark:text-zinc-500">
                   <span>{seats} seat{seats !== 1 ? "s" : ""} × ${displayPerUserPrice(activePlan.perUserPrice)}/{cycleLabel}</span>
                   <span>${(Math.round((activePlan.perUserPrice ?? 0) * (billingCycle === "Yearly" ? 12 * 0.8 : 1)) * seats).toLocaleString()}/{cycleLabel}</span>
                 </div>
-                <div className="flex justify-between text-base font-bold text-white mt-1">
+                <div className="flex justify-between text-base font-bold text-black dark:text-zinc-100 mt-1">
                   <span>Total</span>
                   <span>
                     ${computedTotal?.toLocaleString()}
-                    <span className="text-xs font-normal text-white/40">/{cycleLabel}</span>
+                    <span className="text-xs font-normal text-zinc-400 dark:text-zinc-500">/{cycleLabel}</span>
                   </span>
                 </div>
                 {billingCycle === "Yearly" && (
-                  <p className="text-[10px] text-[#02DD86] mt-0.5">20% annual discount applied</p>
+                  <p className="text-[10px] text-IMSLightGreen mt-0.5">20% annual discount applied</p>
                 )}
-                <p className="text-[10px] text-white/30 mt-1">14-day free trial included</p>
+                <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">14-day free trial included</p>
               </div>
 
               {/* CTA */}
               <button
                 onClick={() => handlePayment(activePlan)}
                 disabled={loading === activePlan?.type}
-                className="w-full py-2.5 px-5 rounded-xl bg-[#02DD86] text-IMSGreen font-semibold text-sm hover:bg-[#00c97a] active:bg-[#00b56e] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-5 rounded-xl bg-IMSLightGreen text-white font-semibold text-sm hover:bg-IMSLightGreen/90 active:bg-IMSLightGreen/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 flex items-center justify-center gap-2"
               >
                 {loading === activePlan?.type ? (
                   <><SpinnerIcon /> Processing…</>
@@ -346,14 +342,14 @@ const Plan = () => {
           </div>
 
           {/* Footer */}
-          <div className="px-5 py-3 border-t border-white/8 flex items-center justify-between gap-3 bg-white/3">
+          <div className="px-5 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between gap-3 bg-zinc-50 dark:bg-zinc-800/30">
             <button
               onClick={() => setSelectPlan(null)}
-              className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500 hover:text-black dark:hover:text-zinc-200 transition-colors"
             >
               <ArrowLeftIcon /> All plans
             </button>
-            <p className="text-[10px] text-white/25">Secure checkout via Stripe</p>
+            <p className="text-[10px] text-zinc-300 dark:text-zinc-600">Secure checkout via Stripe</p>
           </div>
         </div>
       ) : (
@@ -363,14 +359,14 @@ const Plan = () => {
           {/* Header */}
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <h2 className="text-base font-bold text-white font-Poppins">Available Plans</h2>
-              <p className="text-[11px] text-white/40 mt-0.5">Platform fee + per seat · 14-day free trial on all paid plans</p>
+              <h2 className="text-xl font-bold text-black dark:text-zinc-100">Available plans</h2>
+              <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5">Platform fee + per seat · 14-day free trial on all paid plans</p>
             </div>
             <BillingToggle />
           </div>
 
           {/* Plan cards */}
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-4">
 
             {/* Dynamic plans from API */}
             {plans?.map((value: any) => {
@@ -382,43 +378,43 @@ const Plan = () => {
               return (
                 <div
                   key={value.id}
-                  className={`rounded-xl border p-4 flex flex-col gap-2.5 transition-all duration-150 ${
+                  className={`rounded-2xl border p-5 flex flex-col gap-3.5 transition-all duration-150 ${
                     isPopular
-                      ? "border-[#02DD86]/40 bg-[#02DD86]/5"
-                      : "border-white/10 bg-white/3 hover:bg-white/5 hover:border-white/20"
+                      ? "border-2 border-IMSLightGreen"
+                      : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
                     {/* Name + badges */}
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-bold text-white font-Poppins">{value.name}</span>
+                        <span className="text-lg font-bold text-black dark:text-zinc-100">{value.name}</span>
                         {isPopular && (
-                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#02DD86]/20 text-[#02DD86] border border-[#02DD86]/30 font-bold uppercase tracking-wide">
+                          <span className="text-[11px] px-2.5 py-0.5 rounded-full border border-IMSLightGreen text-IMSLightGreen font-semibold">
                             Most popular
                           </span>
                         )}
                       </div>
                       {/* Pricing */}
                       {isFree ? (
-                        <p className="text-[11px] text-white/40">No credit card required</p>
+                        <p className="text-[13px] text-zinc-500 dark:text-zinc-400">No credit card required</p>
                       ) : (
-                        <p className="text-[11px] text-white/40">
+                        <p className="text-[13px] text-zinc-500 dark:text-zinc-400">
                           ${platformDisplay}/{cycleLabel} platform + ${perUserDisplay}/seat/{cycleLabel}
                         </p>
                       )}
                     </div>
 
                     {/* Price + CTA */}
-                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                    <div className="flex flex-col items-end gap-2.5 flex-shrink-0">
                       {isFree ? (
-                        <p className="text-lg font-bold text-white font-Poppins">Free</p>
+                        <p className="text-2xl font-bold text-black dark:text-zinc-100">Free</p>
                       ) : (
                         <div className="text-right">
-                          <p className="text-lg font-bold text-white font-Poppins">
+                          <p className="text-2xl font-bold text-black dark:text-zinc-100">
                             ${platformDisplay}
                           </p>
-                          <p className="text-[10px] text-white/35">platform/{cycleLabel}</p>
+                          <p className="text-[11px] text-zinc-400 dark:text-zinc-500">platform/{cycleLabel}</p>
                         </div>
                       )}
 
@@ -432,20 +428,18 @@ const Plan = () => {
                           }
                         }}
                         disabled={loading === value.type}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 whitespace-nowrap disabled:opacity-50 ${
-                          isFree
-                            ? "bg-white/8 text-white/70 hover:bg-white/12 border border-white/12"
-                            : isPopular
-                            ? "bg-[#02DD86] text-IMSGreen hover:bg-[#00c97a]"
-                            : "bg-white/10 text-white hover:bg-white/16 border border-white/15"
+                        className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-150 whitespace-nowrap disabled:opacity-50 ${
+                          isPopular
+                            ? "bg-IMSLightGreen text-white hover:bg-IMSLightGreen/90"
+                            : "bg-white dark:bg-zinc-900 text-black dark:text-zinc-100 border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600"
                         }`}
                       >
                         {loading === value.type ? (
-                          <span className="flex items-center gap-1"><SpinnerIcon /> …</span>
+                          <span className="flex items-center gap-1.5"><SpinnerIcon /> …</span>
                         ) : isFree ? (
-                          "Get Started"
+                          "Get started"
                         ) : (
-                          <span className="flex items-center gap-1">Select <ArrowRightIcon /></span>
+                          "Select"
                         )}
                       </button>
                     </div>
@@ -453,47 +447,51 @@ const Plan = () => {
 
                   {/* Key features */}
                   {value.values && (
-                    <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                      {[
-                        value.values.Incidents,
-                        value.values.Integration,
-                        value.values.Support,
-                      ]
-                        .filter(Boolean)
-                        .slice(0, 3)
-                        .map((f: string) => (
-                          <span key={f} className="text-[10px] text-white/45 flex items-center gap-1">
-                            <span className="text-[#02DD86]/50 text-[8px]">●</span>
-                            {f}
-                          </span>
-                        ))}
-                    </div>
+                    <>
+                      <div className="border-t border-zinc-100 dark:border-zinc-800" />
+                      <div className="flex flex-wrap gap-x-6 gap-y-1.5">
+                        {[
+                          value.values.Incidents,
+                          value.values.Integration,
+                          value.values.Support,
+                        ]
+                          .filter(Boolean)
+                          .slice(0, 3)
+                          .map((f: string) => (
+                            <span key={f} className="text-[13px] text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-IMSLightGreen shrink-0" />
+                              {f}
+                            </span>
+                          ))}
+                      </div>
+                    </>
                   )}
                 </div>
               );
             })}
 
             {/* Static Enterprise card */}
-            <div className="rounded-xl border border-white/10 bg-white/3 p-4 flex flex-col gap-2.5">
-              <div className="flex items-start justify-between gap-3">
+            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-5 flex flex-col gap-3.5">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div className="flex flex-col gap-1">
-                  <span className="text-sm font-bold text-white font-Poppins">Enterprise</span>
-                  <p className="text-[11px] text-white/40">Starting at $6,000/mo · custom per-seat pricing</p>
+                  <span className="text-lg font-bold text-black dark:text-zinc-100">{ENTERPRISE_CARD.name}</span>
+                  <p className="text-[13px] text-zinc-500 dark:text-zinc-400">Starting at $6,000/mo · custom per-seat pricing</p>
                 </div>
-                <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                  <p className="text-lg font-bold text-white font-Poppins">Custom</p>
+                <div className="flex flex-col items-end gap-2.5 flex-shrink-0">
+                  <p className="text-2xl font-bold text-black dark:text-zinc-100">Custom</p>
                   <a
                     href="mailto:sales@scrubbe.com"
-                    className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-white/10 text-white hover:bg-white/16 border border-white/15 transition-all duration-150 whitespace-nowrap"
+                    className="px-5 py-2 rounded-lg text-sm font-semibold bg-white dark:bg-zinc-900 text-black dark:text-zinc-100 border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all duration-150 whitespace-nowrap"
                   >
-                    Contact sales
+                    Contact Sales
                   </a>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                {["500–5,000+ incidents/month", "Dedicated control plane", "On-prem / VPC deployment"].map((f) => (
-                  <span key={f} className="text-[10px] text-white/45 flex items-center gap-1">
-                    <span className="text-[#02DD86]/50 text-[8px]">●</span>
+              <div className="border-t border-zinc-100 dark:border-zinc-800" />
+              <div className="flex flex-wrap gap-x-6 gap-y-1.5">
+                {ENTERPRISE_CARD.features.map((f) => (
+                  <span key={f} className="text-[13px] text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-IMSLightGreen shrink-0" />
                     {f}
                   </span>
                 ))}
@@ -503,20 +501,20 @@ const Plan = () => {
             {/* Loading skeletons */}
             {!plans && (
               <>{[1, 2, 3].map((i) => (
-                <div key={i} className="rounded-xl border border-white/10 bg-white/3 p-4 animate-pulse">
+                <div key={i} className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-5 animate-pulse">
                   <div className="flex justify-between items-start">
                     <div className="flex flex-col gap-2">
-                      <div className="h-4 w-20 bg-white/10 rounded" />
-                      <div className="h-3 w-44 bg-white/6 rounded" />
+                      <div className="h-4 w-20 bg-zinc-100 dark:bg-zinc-800 rounded" />
+                      <div className="h-3 w-44 bg-zinc-100 dark:bg-zinc-800 rounded" />
                     </div>
-                    <div className="h-6 w-14 bg-white/10 rounded" />
+                    <div className="h-6 w-14 bg-zinc-100 dark:bg-zinc-800 rounded" />
                   </div>
                 </div>
               ))}</>
             )}
           </div>
 
-          <p className="text-[10px] text-white/25 text-center">
+          <p className="text-[12px] text-zinc-400 dark:text-zinc-500 text-center">
             All prices in USD · Secure checkout via Stripe · Cancel anytime
           </p>
         </div>

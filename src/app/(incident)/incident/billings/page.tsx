@@ -109,24 +109,24 @@ const Page = () => {
 
   return (
     <div className=" p-4">
-      <p className=" text-lg font-bold"> Billing and Usage </p>
+      <p className=" text-lg font-bold text-black dark:text-zinc-100"> Billing and Usage </p>
 
-      <div className="p-4 rounded-lg bg-white border border-neutral-200">
+      <div className="p-4 rounded-lg bg-white dark:bg-zinc-900/40 border border-neutral-200 dark:border-zinc-800">
         <div className="  flex flex-row justify-between  gap-3">
           <div className="flex flex-col gap-2 justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <p className=" font-medium text-base">{planName} Plan</p>
-                <div className={`text-xs px-2 py-1 rounded-lg w-fit border ${isCancelPending ? "bg-rose-100 text-rose-600 border-rose-400" : "bg-emerald-100 text-emerald-600 border-emerald-500"}`}>
+                <p className=" font-medium text-base text-black dark:text-zinc-100">{planName} Plan</p>
+                <div className={`text-xs px-2 py-1 rounded-lg w-fit border ${isCancelPending ? "bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-400 dark:border-rose-500/30" : "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500 dark:border-emerald-500/30"}`}>
                   {isCancelPending ? "Cancelling" : data?.status ?? "Active"}
                 </div>
               </div>
-              <p className=" font-bold">${planPrice}/month</p>
+              <p className=" font-bold text-black dark:text-zinc-100">${planPrice}/month</p>
             </div>
 
             <div>
-              <p className="text-sm font-medium mt-2">Next Billing date</p>
-              <p className="text-sm mt-1 ">
+              <p className="text-sm font-medium mt-2 text-black dark:text-zinc-200">Next Billing date</p>
+              <p className="text-sm mt-1 text-zinc-500 dark:text-zinc-400">
                 {billingEnd
                   ? isCancelPending
                     ? `Subscription ends on ${billingEnd}`
@@ -136,8 +136,8 @@ const Page = () => {
             </div>
           </div>
           <div className=" flex-col flex justify-between items-end gap-2">
-            <p className=" text-2xl font-bold">${planPrice}/month</p>
-            <p className=" text-sm">{data?.plan?.maxAgents ?? 1} agents available</p>
+            <p className=" text-2xl font-bold text-black dark:text-zinc-100">${planPrice}/month</p>
+            <p className=" text-sm text-zinc-500 dark:text-zinc-400">{data?.plan?.maxAgents ?? 1} agents available</p>
             <CButton
               onClick={() => setOpenPlan(true)}
               className=" text-IMSLightGreen bg-transparent hover:bg-transparent border border-IMSLightGreen rounded-lg p-1 text-sm flex items-center gap-2 px-2 w-fit"
@@ -147,11 +147,11 @@ const Page = () => {
             </CButton>
           </div>
         </div>
-        <div className="flex justify-between items-center border-t border-neutral-300 mt-3 pt-3">
+        <div className="flex justify-between items-center border-t border-neutral-300 dark:border-zinc-800 mt-3 pt-3">
           {!isCancelPending ? (
             confirmCancel ? (
               <div className="flex items-center gap-3">
-                <p className="text-sm text-gray-600">Are you sure you want to cancel?</p>
+                <p className="text-sm text-gray-600 dark:text-zinc-400">Are you sure you want to cancel?</p>
                 <CButton
                   onClick={() => cancelMutation.mutate()}
                   disabled={cancelMutation.isPending}
@@ -161,7 +161,7 @@ const Page = () => {
                 </CButton>
                 <CButton
                   onClick={() => setConfirmCancel(false)}
-                  className="!w-fit bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-50 shadow-none text-sm"
+                  className="!w-fit bg-transparent border border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 shadow-none text-sm"
                 >
                   Keep Plan
                 </CButton>

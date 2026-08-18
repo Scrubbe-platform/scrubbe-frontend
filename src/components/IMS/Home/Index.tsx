@@ -1,5 +1,6 @@
 import React from "react";
 import Hero from "./Hero";
+import NvidiaInceptionModal from "./NvidiaInceptionModal";
 import Features from "./Features";
 import Impacts from "./Impacts";
 import Contact from "./Contact";
@@ -29,6 +30,7 @@ import ScrubbeSDKSection from "./SdkSection";
 const Index = () => {
   return (
     <div className=" overflow-x-hidden bg-[#060709]">
+      <NvidiaInceptionModal />
       <Hero />
       <CategoryShiftBanner />
       <TickerItem />
