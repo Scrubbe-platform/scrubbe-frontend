@@ -5,25 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  X,
-  Upload,
-  Layers,
-  Plus,
-  Trash2,
-  Link2,
-  Bold,
-  Italic,
-  Underline,
-  Strikethrough,
-  AlignLeft,
-  ChevronDown,
-  Info,
-  InfoIcon,
-  File,
-  User,
-  FileText,
-} from "lucide-react";
+import { X, Upload, InfoIcon, File, User, FileText } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -46,7 +28,7 @@ import { FaRegFileLines } from "react-icons/fa6";
 import Button from "@/components/ui/Button1";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import FormatTimerDisplay from "./FormatTImerDisplay";
-import { AttachedFile, EvidenceSection } from "./IncidentForm";
+import { AttachedFile } from "./IncidentForm";
 
 // ── Schema Definitions ─────────────────────────────────────────────
 
@@ -193,7 +175,7 @@ const AddContextForm = ({
       environment: incident.environment ?? "",
       assignedTo: incident.assignedToName ?? incident.assignedToEmail ?? "",
       priority: incident.severity ?? incident.priority ?? "P1",
-      state: incident?.state,
+      state: incident?.status,
       description: incident.description || "",
       title: incident.title || "",
       summary: incident.summary,
@@ -271,6 +253,7 @@ const AddContextForm = ({
         assignedTo: data.assignedTo,
         priority: data.priority,
         state: data.state,
+        status: data.state,
         description: data.description,
         title: data.title,
         summary: data.summary,
@@ -310,37 +293,6 @@ const AddContextForm = ({
       }
     },
   });
-
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && tagInput.trim()) {
-      e.preventDefault();
-      if (!currentTags.includes(tagInput.trim())) {
-        setValue("labels", [...currentTags, tagInput.trim()]);
-      }
-      setTagInput("");
-    }
-  };
-
-  // ── Child State Array Modifiers ──────────────────────────────────
-  const handleAddChildIncident = () => {
-    if (!newChildId.trim() || !newChildTitle.trim()) return;
-    const newChild = {
-      id: Date.now().toString(),
-      ticketId: newChildId.trim(),
-      title: newChildTitle.trim(),
-      severity: newChildSev,
-    };
-    setValue("childIncidents", [...childIncidents, newChild]);
-    setNewChildId("");
-    setNewChildTitle("");
-  };
-
-  const handleRemoveChildIncident = (id: string) => {
-    setValue(
-      "childIncidents",
-      childIncidents.filter((c) => c.id !== id),
-    );
-  };
 
   const IMAGE_TYPES = [
     "image/png",

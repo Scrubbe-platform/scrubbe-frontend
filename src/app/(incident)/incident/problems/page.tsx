@@ -1,4 +1,4 @@
-// app/developer/problems/page.tsx
+﻿// app/developer/problems/page.tsx
 "use client";
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
@@ -24,331 +24,6 @@ import Button from "@/components/ui/Button1";
 import { useProblems, createProblem, updateProblem } from "@/hooks/useImsData";
 import { customAxios } from "@/lib/api/axios";
 import { endpoint } from "@/lib/api/endpoint";
-
-// ─── FALLBACK EMPTY STATE (used while API loads) ───
-const INITIAL_RECORDS: any[] = [
-  {
-    id: "PR-004417",
-    title:
-      "Recurrent connection-pool exhaustion in payments-api under sustained peak load",
-    priority: "P1",
-    impact: "High",
-    urgency: "High",
-    category: "Database",
-    status: "Known Error",
-    owner: "pay",
-    assignee: {
-      name: "Paschal Ifediora",
-      role: "Problem Manager",
-    },
-    watchers: 7,
-    watching: true,
-    opened: "May 11",
-    target: "Jun 14",
-    activity: "2h ago",
-    confidence: 91,
-    summary:
-      "Five severity incidents over 38 days have been correlated into a single underlying problem. Recurrence is driven by a database connection pool sized for one replica rather than the horizontally scaled fleet, with secondary amplification from a missing statement timeout.",
-    rootcause: {
-      title: "Connection pool sized per-replica, not for the autoscaled fleet",
-      body: "Each payments-api replica opens a fixed pool of maximumPoolSize=20. Under peak load the fleet scales to 12 replicas, requesting 240 connections against a database ceiling of 200. New replicas are starved at boot and requests queue past the acquisition timeout, returning 503s. A missing statement_timeout lets slow analytical queries hold connections, amplifying the shortfall.",
-    },
-    workaround: {
-      active: true,
-      text: "During forecasted peak windows the runbook raises the replica floor to 6, caps per-replica pool to 14 via live config, and terminates analytical queries exceeding 10s. This reduces mean time to restore from 38 to 22 minutes and prevents customer-visible errors.",
-    },
-    incidents: [
-      {
-        id: "SI-003204",
-        sev: "P0",
-        desc: "503 surge during checkout peak",
-        date: "Jun 04",
-      },
-      {
-        id: "SI-003188",
-        sev: "P0",
-        desc: "Pool exhaustion on payouts",
-        date: "May 28",
-      },
-      {
-        id: "SI-003012",
-        sev: "P1",
-        desc: "Gateway latency spike",
-        date: "May 19",
-      },
-      {
-        id: "SI-002903",
-        sev: "P1",
-        desc: "503 burst on refunds",
-        date: "May 11",
-      },
-      {
-        id: "SI-002841",
-        sev: "P2",
-        desc: "First observed occurrence",
-        date: "Apr 28",
-      },
-    ],
-    services: [
-      {
-        n: "payments-api",
-        i: "Critical",
-        cls: "bg-red-50 text-red-700 border-red-100",
-      },
-      {
-        n: "checkout-orchestrator",
-        i: "High",
-        cls: "bg-amber-50 text-amber-700 border-amber-100",
-      },
-      {
-        n: "payouts-worker",
-        i: "High",
-        cls: "bg-amber-50 text-amber-700 border-amber-100",
-      },
-      {
-        n: "refunds-service",
-        i: "Moderate",
-        cls: "bg-blue-50 text-blue-700 border-blue-100",
-      },
-    ],
-    findings: [
-      {
-        type: "Evidence",
-        author: {
-          name: "Paschal Ifediora",
-          role: "Problem Manager",
-        },
-        ts: "May 11 · 09:50",
-        body: "Connection-pool saturation precedes every gateway error spike by 40–70 seconds, consistent across all five correlated incident windows.",
-        source: "Telemetry · 5 incident windows",
-        conf: 96,
-      },
-      {
-        type: "Evidence",
-        author: {
-          name: "Paschal Ifediora",
-          role: "Problem Manager",
-        },
-        ts: "May 11 · 10:03",
-        body: "Database rejected 1,284 connection attempts at the 200-connection ceiling during the SI-003188 window, aligned with fleet scale-out to 12 replicas.",
-        source: "pg_stat_activity + server logs",
-        conf: 93,
-      },
-      {
-        type: "Evidence",
-        author: {
-          name: "Paschal Ifediora",
-          role: "Problem Manager",
-        },
-        ts: "May 11 · 10:08",
-        body: "maximumPoolSize is hardcoded to 20 and unaware of replica count; no shared connection layer (PgBouncer) is present in the path.",
-        source: "payments-api@v4.18.2 config",
-        conf: 99,
-      },
-      {
-        type: "Observation",
-        author: {
-          name: "Paschal Ifediora",
-          role: "Problem Manager",
-        },
-        ts: "May 11 · 10:15",
-        body: "Confirmed the autoscaler reaches 12 replicas during the 18:00–20:00 checkout peak on every incident date. Connection demand at 12×20 exceeds the database ceiling — the maths is unambiguous.",
-        source: null,
-        conf: null,
-      },
-      {
-        type: "Decision",
-        author: {
-          name: "Paschal Ifediora",
-          role: "Problem Manager",
-        },
-        ts: "May 11 · 10:21",
-        body: "Root cause accepted as replica-unaware pool sizing with a secondary statement-timeout amplifier. Promoting record to Known Error and authorising the interim workaround while the permanent fix is designed.",
-        source: null,
-        conf: null,
-      },
-    ],
-    steps: [
-      {
-        t: "Introduce a connection proxy in transaction-pooling mode",
-        d: "Deploy a PgBouncer sidecar so replicas share a fan-in connection layer instead of each holding a private pool. Roll out as a single-replica canary and validate connection counts before fleet-wide promotion.",
-        tags: ["Non-disruptive", "Canary first"],
-        chg: null,
-        done: true,
-        by: "am",
-        at: "May 28 · 14:05",
-        note: "Canary validated; connection count held flat under load.",
-      },
-      {
-        t: "Set a fleet-wide connection budget below the database ceiling",
-        d: "Configure the proxy to a hard cap of 160 connections against the 200 ceiling, reserving 40 for administrative and replication traffic. Removes the structural possibility of exhaustion regardless of replica count.",
-        tags: ["Budget 160/200"],
-        chg: null,
-        done: true,
-        by: "jt",
-        at: "Jun 04 · 16:08",
-        note: "Budget enforced cluster-wide; verified against peak replay.",
-      },
-      {
-        t: "Cap per-replica pool size and bind it to replica budget",
-        d: "Lower application maximumPoolSize to 12 and derive the effective ceiling from the shared budget so scale-out can never over-subscribe the database.",
-        tags: ["Config change"],
-        chg: null,
-        done: false,
-      },
-      {
-        t: "Enforce a statement timeout on the payments role",
-        d: "Apply statement_timeout=10s to the payments database role to release connections held by slow analytical reads. Schema-adjacent — proceeds under change control during a maintenance window.",
-        tags: ["Maintenance window"],
-        chg: "CHG-2025-0142",
-        done: false,
-      },
-      {
-        t: "Verify across two peak windows, then retire the interim workaround",
-        d: "Confirm zero saturation events across two consecutive peak-traffic windows, decommission the temporary pre-scale runbook, and close the record.",
-        tags: ["14-day clean window"],
-        chg: null,
-        done: false,
-      },
-    ],
-    kb: {
-      published: true,
-      autoSync: true,
-      articleId: "KB-1182",
-      lastSynced: "Jun 04, 16:10",
-      verified: false,
-    },
-    timeline: [],
-  },
-  {
-    id: "PR-004392",
-    title:
-      "Memory growth in notification-dispatcher leading to periodic out-of-memory restarts",
-    priority: "P2",
-    impact: "Moderate",
-    urgency: "Medium",
-    category: "Application",
-    status: "Investigating",
-    owner: "rel",
-    assignee: {
-      name: "Paschal Ifediora",
-      role: "Problem Manager",
-    },
-    watchers: 3,
-    watching: false,
-    opened: "May 22",
-    target: "Jun 20",
-    activity: "1d ago",
-    confidence: 62,
-    summary:
-      "The notification-dispatcher restarts every 9–14 hours under steady load, with memory growing linearly between restarts. Investigation points toward an unbounded in-memory retry buffer that is not evicted after successful delivery.",
-    rootcause: {
-      title: "Suspected unbounded retry buffer (under verification)",
-      body: "Heap profiles show steady growth in a retry-tracking map; entries appear to persist after successful delivery rather than being evicted. A confirming heap-diff across two restart cycles is in progress before promotion to a confirmed root cause.",
-    },
-    workaround: {
-      active: true,
-      text: "A scheduled rolling restart every 6 hours keeps memory below the OOM threshold and avoids unplanned restarts during peak send windows. Crude but effective until the leak is fixed.",
-    },
-    incidents: [
-      {
-        id: "SI-003151",
-        sev: "P2",
-        desc: "Dispatcher OOM restart",
-        date: "May 30",
-      },
-      {
-        id: "SI-003090",
-        sev: "P2",
-        desc: "Delivery delay during restart",
-        date: "May 25",
-      },
-      {
-        id: "SI-003041",
-        sev: "P3",
-        desc: "Memory alert, auto-recovered",
-        date: "May 22",
-      },
-    ],
-    services: [
-      {
-        n: "notification-dispatcher",
-        i: "High",
-        cls: "bg-amber-50 text-amber-700 border-amber-100",
-      },
-      {
-        n: "email-gateway",
-        i: "Moderate",
-        cls: "bg-blue-50 text-blue-700 border-blue-100",
-      },
-    ],
-    findings: [
-      {
-        type: "Evidence",
-        author: {
-          name: "Paschal Ifediora",
-          role: "Problem Manager",
-        },
-        ts: "May 30 · 08:20",
-        body: "Heap grows approximately 80MB per hour between restarts under steady traffic, independent of message volume.",
-        source: "Continuous heap sampling",
-        conf: 90,
-      },
-      {
-        type: "Hypothesis",
-        author: {
-          name: "Paschal Ifediora",
-          role: "Problem Manager",
-        },
-        ts: "May 30 · 09:10",
-        body: "Retained-heap analysis suggests the retry-tracking map is the dominant growth source. Capturing a confirming diff across two restart cycles before treating this as the root cause.",
-        source: "Heap snapshot",
-        conf: 71,
-      },
-    ],
-    steps: [
-      {
-        t: "Capture confirming heap-diff across two restart cycles",
-        d: "Snapshot heap immediately after restart and just before the next OOM, then diff retained object graphs to confirm the retry map as the growth source.",
-        tags: ["Verification"],
-        chg: null,
-        done: true,
-        by: "jt",
-        at: "May 31 · 11:00",
-        note: "Diff confirms retry map retains delivered entries.",
-      },
-      {
-        t: "Add eviction on successful delivery",
-        d: "Remove entries from the retry-tracking map on delivery acknowledgement and add a bounded TTL for dropped acknowledgements.",
-        tags: ["Code change"],
-        chg: null,
-        done: false,
-      },
-      {
-        t: "Introduce a hard cap with backpressure",
-        d: "Bound the retry buffer to a configurable maximum and apply backpressure when reached, so a downstream stall can never exhaust memory.",
-        tags: ["Resilience"],
-        chg: null,
-        done: false,
-      },
-      {
-        t: "Load-test against replayed traffic and confirm flat memory",
-        d: "Replay 72 hours of production traffic in staging and confirm memory stays flat across multiple cycles before rollout.",
-        tags: ["72h replay"],
-        chg: null,
-        done: false,
-      },
-    ],
-    kb: {
-      published: false,
-      autoSync: false,
-      articleId: null,
-      lastSynced: null,
-      verified: false,
-    },
-    timeline: [],
-  },
-];
 
 const PEOPLE = {
   pi: {
@@ -410,8 +85,12 @@ export default function ProblemRecordsDashboard() {
   const searchParams = useSearchParams();
 
   // ─── REAL API DATA ───
-  const { data: apiProblems, loading: problemsLoading, refetch: refetchProblems } = useProblems();
-  const [records, setRecords] = useState<any[]>(INITIAL_RECORDS);
+  const {
+    data: apiProblems,
+    loading: problemsLoading,
+    refetch: refetchProblems,
+  } = useProblems();
+  const [records, setRecords] = useState<any[]>([]);
 
   // Sync API data into local state (preserving optimistic updates)
   useEffect(() => {
@@ -512,7 +191,7 @@ export default function ProblemRecordsDashboard() {
         d: "Matching incident signatures clustered into a single record.",
         ok: false,
       });
-      r.findings.forEach((f: any) =>
+      r?.findings?.forEach((f: any) =>
         ev.push({
           ts: f.ts,
           author: f.author,
@@ -521,7 +200,7 @@ export default function ProblemRecordsDashboard() {
           ok: f.type === "Decision",
         }),
       );
-      r.steps.forEach((s: any, i: number) => {
+      r?.steps?.forEach((s: any, i: number) => {
         if (s.done)
           ev.push({
             ts: s.at,
@@ -533,7 +212,7 @@ export default function ProblemRecordsDashboard() {
       });
       if (r.status === "Resolved")
         ev.push({
-          ts: r.kb.lastSynced || r.activity,
+          ts: r.kb?.lastSynced || r.activity,
           author: { name: "Paschal Ifediora", role: "Problem Manager" },
           t: "Record resolved and closed",
           d: "All remediation steps verified.",
@@ -546,14 +225,22 @@ export default function ProblemRecordsDashboard() {
           e.ts +
             e.t +
             e.d +
-            (typeof e.author === "string" ? e.author : e.author.name),
+            (typeof e.author === "string" ? e.author : e.author?.name),
         ),
       }));
       return { ...r, timeline };
     });
   }, [records]);
 
-  const activeRecord = computedRecords.find((x: any) => x.id === selectedId) || null;
+  const activeRecord =
+    computedRecords.find((x: any) => x.id === selectedId) || null;
+
+  // Real API records don't guarantee the same rich shape as the mock
+  // fallback data — derive safe, always-defined views of the fields that
+  // get accessed repeatedly below instead of optional-chaining every use.
+  const activeSteps = activeRecord?.steps ?? [];
+  const activeKb = activeRecord?.kb ?? {};
+  const activeRootcause = activeRecord?.rootcause ?? { title: "", body: "" };
 
   // ─── FILTER & SORT PROCESSING LOOP ───
   const processedRecords = useMemo(() => {
@@ -571,25 +258,26 @@ export default function ProblemRecordsDashboard() {
         if (af.pris.length && !af.pris.includes(r.priority)) return false;
         if (af.cats.length && !af.cats.includes(r.category)) return false;
         if (af.owners.length && !af.owners.includes(r.owner)) return false;
-        if (af.assignees.length && !af.assignees.includes(r.assignee.name))
+        if (af.assignees.length && !af.assignees.includes(r.assignee?.name))
           return false;
-        if (af.kb === "published" && !r.kb.published) return false;
-        if (af.kb === "unpublished" && r.kb.published) return false;
+        if (af.kb === "published" && !r.kb?.published) return false;
+        if (af.kb === "unpublished" && r.kb?.published) return false;
 
         if (searchQuery) {
           const q = searchQuery.toLowerCase();
           const matches =
-            r.title.toLowerCase().includes(q) ||
-            r.id.toLowerCase().includes(q) ||
-            r.summary.toLowerCase().includes(q);
+            r.title?.toLowerCase().includes(q) ||
+            r.id?.toLowerCase().includes(q) ||
+            r.summary?.toLowerCase().includes(q);
           if (!matches) return false;
         }
         return true;
       })
       .sort((a: any, b: any) => {
-        if (sortBy === "priority") return a.priority.localeCompare(b.priority);
+        if (sortBy === "priority")
+          return (a.priority ?? "").localeCompare(b.priority ?? "");
         if (sortBy === "incidents")
-          return b.incidents.length - a.incidents.length;
+          return (b.incidents?.length ?? 0) - (a.incidents?.length ?? 0);
         return 0;
       });
   }, [computedRecords, statusFilter, advancedFilters, searchQuery, sortBy]);
@@ -617,7 +305,8 @@ export default function ProblemRecordsDashboard() {
   const handleToggleRowCheckbox = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const next = new Set(selectedRowIds);
-    next.has(id) ? next.delete(id) : next.add(id);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
     setSelectedRowIds(next);
   };
 
@@ -626,12 +315,15 @@ export default function ProblemRecordsDashboard() {
     e.preventDefault();
     if (!fBody.trim() || !selectedId) return;
     try {
-      await customAxios.post(`${endpoint.problems.update}/${selectedId}/findings`, {
-        type: fType,
-        body: fBody.trim(),
-        source: fSource.trim() || null,
-        confidence: fConf ? Number(fConf) : null,
-      });
+      await customAxios.post(
+        `${endpoint.problems.update}/${selectedId}/findings`,
+        {
+          type: fType,
+          body: fBody.trim(),
+          source: fSource.trim() || null,
+          confidence: fConf ? Number(fConf) : null,
+        },
+      );
       await refetchProblems();
     } catch {
       // non-critical — finding UI remains
@@ -649,18 +341,26 @@ export default function ProblemRecordsDashboard() {
   const commitSignoffStep = async (idx: number) => {
     if (!selectedId) return;
     try {
-      await customAxios.post(`${endpoint.problems.update}/${selectedId}/steps/${idx}/complete`, {
-        note: completionNote,
-      });
+      await customAxios.post(
+        `${endpoint.problems.update}/${selectedId}/steps/${idx}/complete`,
+        {
+          note: completionNote,
+        },
+      );
       await refetchProblems();
     } catch {
       // optimistic update
       setRecords((prev) =>
         prev.map((r: any) =>
           r.id === selectedId
-            ? { ...r, steps: r.steps.map((s: any, i: number) => i === idx ? { ...s, done: true, note: completionNote } : s) }
-            : r
-        )
+            ? {
+                ...r,
+                steps: (r.steps ?? []).map((s: any, i: number) =>
+                  i === idx ? { ...s, done: true, note: completionNote } : s,
+                ),
+              }
+            : r,
+        ),
       );
     }
     setCompletionNote("");
@@ -671,21 +371,35 @@ export default function ProblemRecordsDashboard() {
     e.preventDefault();
     if (!newStepTitle.trim() || !selectedId) return;
     try {
-      await customAxios.post(`${endpoint.problems.update}/${selectedId}/steps`, {
-        title: newStepTitle.trim(),
-        detail: newStepDetail.trim(),
-        tags: newStepTags ? newStepTags.split(",").map((t) => t.trim()) : [],
-        changeRequest: newStepChg.trim() || null,
-      });
+      await customAxios.post(
+        `${endpoint.problems.update}/${selectedId}/steps`,
+        {
+          title: newStepTitle.trim(),
+          detail: newStepDetail.trim(),
+          tags: newStepTags ? newStepTags.split(",").map((t) => t.trim()) : [],
+          changeRequest: newStepChg.trim() || null,
+        },
+      );
       await refetchProblems();
     } catch {
       // optimistic
       setRecords((prev) =>
         prev.map((r: any) =>
           r.id === selectedId
-            ? { ...r, steps: [...(r.steps ?? []), { t: newStepTitle.trim(), d: newStepDetail.trim(), tags: [], done: false }] }
-            : r
-        )
+            ? {
+                ...r,
+                steps: [
+                  ...(r.steps ?? []),
+                  {
+                    t: newStepTitle.trim(),
+                    d: newStepDetail.trim(),
+                    tags: [],
+                    done: false,
+                  },
+                ],
+              }
+            : r,
+        ),
       );
     }
     setNewStepTitle("");
@@ -700,13 +414,22 @@ export default function ProblemRecordsDashboard() {
     if (!newRecTitle.trim()) return;
 
     try {
-      const priorityMap: Record<string, string> = { P0: "CRITICAL", P1: "HIGH", P2: "MEDIUM", P3: "LOW" };
+      const priorityMap: Record<string, string> = {
+        P0: "CRITICAL",
+        P1: "HIGH",
+        P2: "MEDIUM",
+        P3: "LOW",
+      };
       const created = await createProblem({
         title: newRecTitle.trim(),
         priority: priorityMap[newRecPri] ?? "MEDIUM",
         category: newRecCat,
-        description: newRecSummary.trim() || "Investigation mapped from active telemetry configurations.",
-        summary: newRecSummary.trim() || "Investigation mapped from active telemetry configurations.",
+        description:
+          newRecSummary.trim() ||
+          "Investigation mapped from active telemetry configurations.",
+        summary:
+          newRecSummary.trim() ||
+          "Investigation mapped from active telemetry configurations.",
         status: "Investigating",
         impact: "Service degradation",
       });
@@ -730,7 +453,13 @@ export default function ProblemRecordsDashboard() {
           services: [],
           workaround: { active: false, text: "" },
           rootcause: { title: "Under Investigation", body: "" },
-          kb: { published: false, autoSync: false, articleId: null, lastSynced: null, verified: false },
+          kb: {
+            published: false,
+            autoSync: false,
+            articleId: null,
+            lastSynced: null,
+            verified: false,
+          },
           timeline: [],
           opened: "Just now",
           activity: "just now",
@@ -804,13 +533,19 @@ export default function ProblemRecordsDashboard() {
       await updateProblem(id, { status: "Resolved" });
       await refetchProblems();
     } catch {
-      setRecords((prev) => prev.map((r: any) => r.id === id ? { ...r, status: "Resolved" } : r));
+      setRecords((prev) =>
+        prev.map((r: any) => (r.id === id ? { ...r, status: "Resolved" } : r)),
+      );
     }
   };
 
   const openCount = records.filter((r: any) => r.status !== "Resolved").length;
-  const knownErrorCount = records.filter((r: any) => r.status === "Known Error").length;
-  const resolvedCount = records.filter((r: any) => r.status === "Resolved").length;
+  const knownErrorCount = records.filter(
+    (r: any) => r.status === "Known Error",
+  ).length;
+  const resolvedCount = records.filter(
+    (r: any) => r.status === "Resolved",
+  ).length;
   const kbCount = records.filter((r: any) => r.kb?.published).length;
 
   return (
@@ -832,9 +567,18 @@ export default function ProblemRecordsDashboard() {
           {/* Statistics matrix logs */}
           <div className="grid grid-cols-2 md:grid-cols-4  border border-zinc-200 rounded-sm overflow-hidden shadow-2xs bg-white">
             <StatsCard value={problemsLoading ? "…" : openCount} label="Open" />
-            <StatsCard value={problemsLoading ? "…" : knownErrorCount} label="Known Error" />
-            <StatsCard value={problemsLoading ? "…" : resolvedCount} label="Resolved" />
-            <StatsCard value={problemsLoading ? "…" : kbCount} label="KB Articles" />
+            <StatsCard
+              value={problemsLoading ? "…" : knownErrorCount}
+              label="Known Error"
+            />
+            <StatsCard
+              value={problemsLoading ? "…" : resolvedCount}
+              label="Resolved"
+            />
+            <StatsCard
+              value={problemsLoading ? "…" : kbCount}
+              label="KB Articles"
+            />
           </div>
         </div>
       </div>
@@ -872,12 +616,6 @@ export default function ProblemRecordsDashboard() {
           />
 
           {/* IMPLEMENTING USER DROPDOWN COMPONENT EXACTLY FOR DENSITY CONFIG */}
-          <Dropdown
-            items={densityDropdownItems}
-            value={density}
-            onChange={(val) => setDensity(val as any)}
-            align="right"
-          />
 
           <div className="relative">
             <button
@@ -977,7 +715,7 @@ export default function ProblemRecordsDashboard() {
                             <span
                               className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
                             >
-                              {active && "✓"}
+                              {active && "âœ“"}
                             </span>
                             <span>{p}</span>
                           </button>
@@ -1013,7 +751,7 @@ export default function ProblemRecordsDashboard() {
                             <span
                               className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
                             >
-                              {active && "✓"}
+                              {active && "âœ“"}
                             </span>
                             <span>{c}</span>
                           </button>
@@ -1042,7 +780,7 @@ export default function ProblemRecordsDashboard() {
                             <span
                               className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
                             >
-                              {active && "✓"}
+                              {active && "âœ“"}
                             </span>
                             <span>{value}</span>
                           </button>
@@ -1078,7 +816,7 @@ export default function ProblemRecordsDashboard() {
                               <span
                                 className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
                               >
-                                {active && "✓"}
+                                {active && "âœ“"}
                               </span>
                               <span>{value.name}</span>
                             </button>
@@ -1150,7 +888,9 @@ export default function ProblemRecordsDashboard() {
                   <button
                     onClick={async () => {
                       await Promise.allSettled(
-                        Array.from(selectedRowIds).map((id) => handleResolveRecord(id))
+                        Array.from(selectedRowIds).map((id) =>
+                          handleResolveRecord(id),
+                        ),
                       );
                       setSelectedRowIds(new Set());
                     }}
@@ -1173,9 +913,10 @@ export default function ProblemRecordsDashboard() {
             {processedRecords.map((r: any) => {
               const active = r.id === selectedId;
               const isChecked = selectedRowIds.has(r.id);
-              const pct = r.steps.length
+              const pct = r?.steps?.length
                 ? Math.round(
-                    (r.steps.filter((x: any) => x.done).length / r.steps.length) *
+                    (r.steps.filter((x: any) => x.done).length /
+                      r.steps.length) *
                       100,
                   )
                 : 0;
@@ -1202,7 +943,7 @@ export default function ProblemRecordsDashboard() {
                     />
                     <div className="flex items-center gap-2">
                       <span className=" text-[11px] text-zinc-400 font-medium">
-                        {r.id}
+                        {r.ticketId}
                       </span>
                       {/* Priority badge */}
                       <span
@@ -1232,8 +973,8 @@ export default function ProblemRecordsDashboard() {
                   </h4>
 
                   <div className="flex items-center gap-4 text-[11px]  text-zinc-400 mb-2">
-                    <span>{r.incidents.length} offenses</span>
-                    <span>{r.findings.length} findings</span>
+                    <span>{r.incidents?.length ?? 0} offenses</span>
+                    <span>{r.findings?.length ?? 0} findings</span>
                     <span>{r.activity}</span>
                   </div>
                 </div>
@@ -1242,7 +983,9 @@ export default function ProblemRecordsDashboard() {
 
             {processedRecords.length === 0 && (
               <div className="p-10 text-center text-sm text-zinc-400 italic">
-                No records match the current filter.
+                {problemsLoading
+                  ? "Loading problem records…"
+                  : "No records match the current filter."}
               </div>
             )}
           </div>
@@ -1256,7 +999,7 @@ export default function ProblemRecordsDashboard() {
               <div className="px-7 pt-6 pb-0">
                 <div className="flex flex-wrap items-center gap-2 mb-4">
                   <span className=" text-[10.5px] text-zinc-500 bg-zinc-50 px-2 py-0.5 rounded border border-zinc-100">
-                    {activeRecord?.id}
+                    {activeRecord?.ticketId}
                   </span>
 
                   <div className="flex gap-2 ml-auto">
@@ -1288,7 +1031,7 @@ export default function ProblemRecordsDashboard() {
                     },
                     {
                       label: "Assignee",
-                      value: activeRecord.assignee.name,
+                      value: activeRecord.assignee?.name,
                     },
                     {
                       label: "Impact / Urgency",
@@ -1317,8 +1060,8 @@ export default function ProblemRecordsDashboard() {
 
               {/* Progress strip */}
               {(() => {
-                const total = activeRecord.steps.length;
-                const done = activeRecord.steps.filter((x: any) => x.done).length;
+                const total = activeSteps.length;
+                const done = activeSteps.filter((x: any) => x.done).length;
                 const pct = total ? Math.round((done / total) * 100) : 0;
                 const full = pct === 100;
                 return (
@@ -1351,22 +1094,22 @@ export default function ProblemRecordsDashboard() {
                   {
                     id: "findings",
                     label: "Findings",
-                    count: activeRecord.findings.length,
+                    count: activeRecord.findings?.length ?? 0,
                   },
                   {
                     id: "resolution",
                     label: "Resolution",
-                    count: `${activeRecord.steps.filter((x: any) => x.done).length}/${activeRecord.steps.length}`,
+                    count: `${activeSteps.filter((x: any) => x.done).length}/${activeSteps.length}`,
                   },
                   {
                     id: "kb",
                     label: "Knowledge Base",
-                    count: activeRecord.kb.published ? "synced" : "draft",
+                    count: activeKb.published ? "synced" : "draft",
                   },
                   {
                     id: "activity",
                     label: "Activity",
-                    count: activeRecord.timeline.length,
+                    count: activeRecord.timeline?.length ?? 0,
                   },
                 ].map((tab) => (
                   <button
@@ -1403,7 +1146,7 @@ export default function ProblemRecordsDashboard() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                       {/* Root cause card — two column with confidence ring */}
                       <div className="p-4 border border-zinc-200 rounded-xl bg-zinc-50/40 flex gap-4 items-start">
                         {/* Confidence ring */}
@@ -1425,7 +1168,7 @@ export default function ProblemRecordsDashboard() {
                               stroke="#067A5C"
                               strokeWidth="6"
                               strokeLinecap="round"
-                              strokeDasharray={`${(activeRecord.confidence / 100) * 163.4} 163.4`}
+                              strokeDasharray={`${((activeRecord.confidence ?? 0) / 100) * 163.4} 163.4`}
                               transform="rotate(-90 32 32)"
                             />
                             <text
@@ -1438,7 +1181,7 @@ export default function ProblemRecordsDashboard() {
                               fill="#067A5C"
                               fontFamily="inherit"
                             >
-                              {activeRecord.confidence}%
+                              {activeRecord.confidence ?? 0}%
                             </text>
                           </svg>
                           <span className=" text-[8.5px] uppercase tracking-widest text-zinc-400">
@@ -1450,10 +1193,10 @@ export default function ProblemRecordsDashboard() {
                             Root cause
                           </p>
                           <h4 className="font-bold text-zinc-950 text-sm leading-snug mb-2">
-                            {activeRecord.rootcause.title}
+                            {activeRootcause.title}
                           </h4>
                           <p className="text-xs text-zinc-600 leading-relaxed">
-                            {activeRecord.rootcause.body}
+                            {activeRootcause.body}
                           </p>
                         </div>
                       </div>
@@ -1480,61 +1223,66 @@ export default function ProblemRecordsDashboard() {
                     {/* Correlated incidents */}
                     <div>
                       <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-3">
-                        Correlated incidents ({activeRecord.incidents.length})
+                        Correlated incidents (
+                        {activeRecord.incidents?.length ?? 0})
                       </p>
                       <div className="border border-zinc-100 rounded-xl overflow-hidden divide-y divide-zinc-100">
-                        {activeRecord.incidents.map((inc: any, idx: number) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-3 px-4 py-3"
-                          >
-                            <span
-                              className={` text-xs font-bold px-1.5 py-0.5 rounded shrink-0 ${
-                                inc.sev === "P0"
-                                  ? "bg-red-50 text-red-700"
-                                  : inc.sev === "P1"
-                                    ? "bg-amber-50 text-amber-700"
-                                    : "bg-blue-50 text-blue-700"
-                              }`}
+                        {(activeRecord.incidents ?? []).map(
+                          (inc: any, idx: number) => (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-3 px-4 py-3"
                             >
-                              {inc.sev}
-                            </span>
-                            <span className=" text-sm font-semibold text-zinc-900 shrink-0">
-                              {inc.id}
-                            </span>
-                            <span className="text-sm text-zinc-500 flex-1 truncate">
-                              {inc.desc}
-                            </span>
-                            <span className=" text-xs text-zinc-400 shrink-0">
-                              {inc.date}
-                            </span>
-                          </div>
-                        ))}
+                              <span
+                                className={` text-xs font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                                  inc.sev === "P0"
+                                    ? "bg-red-50 text-red-700"
+                                    : inc.sev === "P1"
+                                      ? "bg-amber-50 text-amber-700"
+                                      : "bg-blue-50 text-blue-700"
+                                }`}
+                              >
+                                {inc.sev}
+                              </span>
+                              <span className=" text-sm font-semibold text-zinc-900 shrink-0">
+                                {inc.id}
+                              </span>
+                              <span className="text-sm text-zinc-500 flex-1 truncate">
+                                {inc.desc}
+                              </span>
+                              <span className=" text-xs text-zinc-400 shrink-0">
+                                {inc.date}
+                              </span>
+                            </div>
+                          ),
+                        )}
                       </div>
                     </div>
 
                     {/* Affected services */}
-                    {activeRecord.services.length > 0 && (
+                    {(activeRecord.services?.length ?? 0) > 0 && (
                       <div>
                         <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-3">
                           Affected services
                         </p>
                         <div className="border border-zinc-100 rounded-xl overflow-hidden divide-y divide-zinc-100">
-                          {activeRecord.services.map((svc: any, idx: number) => (
-                            <div
-                              key={idx}
-                              className="flex items-center gap-3 px-4 py-3"
-                            >
-                              <span className=" text-sm text-zinc-700 flex-1">
-                                {svc.n}
-                              </span>
-                              <span
-                                className={`text-xs font-semibold px-2.5 py-1 rounded-md border ${svc.cls}`}
+                          {activeRecord.services.map(
+                            (svc: any, idx: number) => (
+                              <div
+                                key={idx}
+                                className="flex items-center gap-3 px-4 py-3"
                               >
-                                {svc.i}
-                              </span>
-                            </div>
-                          ))}
+                                <span className=" text-sm text-zinc-700 flex-1">
+                                  {svc.n}
+                                </span>
+                                <span
+                                  className={`text-xs font-semibold px-2.5 py-1 rounded-md border ${svc.cls}`}
+                                >
+                                  {svc.i}
+                                </span>
+                              </div>
+                            ),
+                          )}
                         </div>
                       </div>
                     )}
@@ -1597,40 +1345,44 @@ export default function ProblemRecordsDashboard() {
                     </form>
 
                     <div className="space-y-3">
-                      {Array.from(activeRecord.findings).reverse().map((f: any, i: number) => (
-                        <div
-                          key={i}
-                          className="p-4 border border-zinc-100 rounded-xl bg-white space-y-2"
-                        >
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2 py-0.5 rounded border  font-bold text-[10px] uppercase bg-zinc-100 text-zinc-600 border-zinc-200">
-                              {f.type}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <div className="bg-blue-900 text-white rounded-md size-7 text-sm justify-center items-center flex uppercase">
-                                {f?.author?.name?.slice(0, 2)}
-                              </div>
-                              <span className="text-sm">{f?.author.name}</span>
-                            </div>
-                            {f.conf && (
-                              <span className=" text-[10px] text-emerald-700 font-bold">
-                                {f.conf}% confidence
+                      {Array.from(activeRecord.findings ?? [])
+                        .reverse()
+                        .map((f: any, i: number) => (
+                          <div
+                            key={i}
+                            className="p-4 border border-zinc-100 rounded-xl bg-white space-y-2"
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="px-2 py-0.5 rounded border  font-bold text-[10px] uppercase bg-zinc-100 text-zinc-600 border-zinc-200">
+                                {f.type}
                               </span>
-                            )}
-                            <span className=" text-[11px] text-zinc-400 ml-auto">
-                              {f.ts}
-                            </span>
-                          </div>
-                          <p className="text-sm text-zinc-700 leading-relaxed">
-                            {f.body}
-                          </p>
-                          {f.source && (
-                            <p className=" text-[11px] text-blue-700 font-semibold">
-                              ↳ {f.source}
+                              <div className="flex items-center gap-2">
+                                <div className="bg-blue-900 text-white rounded-md size-7 text-sm justify-center items-center flex uppercase">
+                                  {f?.author?.name?.slice(0, 2)}
+                                </div>
+                                <span className="text-sm">
+                                  {f?.author?.name}
+                                </span>
+                              </div>
+                              {f.conf && (
+                                <span className=" text-[10px] text-emerald-700 font-bold">
+                                  {f.conf}% confidence
+                                </span>
+                              )}
+                              <span className=" text-[11px] text-zinc-400 ml-auto">
+                                {f.ts}
+                              </span>
+                            </div>
+                            <p className="text-sm text-zinc-700 leading-relaxed">
+                              {f.body}
                             </p>
-                          )}
-                        </div>
-                      ))}
+                            {f.source && (
+                              <p className=" text-[11px] text-blue-700 font-semibold">
+                                â†³ {f.source}
+                              </p>
+                            )}
+                          </div>
+                        ))}
                     </div>
                   </div>
                 )}
@@ -1638,7 +1390,7 @@ export default function ProblemRecordsDashboard() {
                 {/* RESOLUTION TAB */}
                 {activeTab === "resolution" && (
                   <div className="space-y-3 animate-fadeIn">
-                    {activeRecord.steps.map((step: any, idx: number) => {
+                    {activeSteps.map((step: any, idx: number) => {
                       const isCompleting = completingStepIdx === idx;
                       return (
                         <div
@@ -1775,12 +1527,10 @@ export default function ProblemRecordsDashboard() {
                       {/* Icon */}
                       <div
                         className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
-                          activeRecord.kb.published
-                            ? "bg-emerald-50"
-                            : "bg-zinc-100"
+                          activeKb.published ? "bg-emerald-50" : "bg-zinc-100"
                         }`}
                       >
-                        {activeRecord.kb.published ? (
+                        {activeKb.published ? (
                           <BookOpen size={20} className="text-emerald-600" />
                         ) : (
                           <FileText size={20} className="text-zinc-400" />
@@ -1790,18 +1540,18 @@ export default function ProblemRecordsDashboard() {
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-zinc-900 text-sm">
-                          {activeRecord.kb.published
+                          {activeKb.published
                             ? "Published to knowledge base"
                             : "Not yet published"}
                         </p>
                         <p className="text-xs text-zinc-500 margin-top:2px">
-                          {activeRecord.kb.published ? (
+                          {activeKb.published ? (
                             <>
                               Article{" "}
                               <span className="text-emerald-700 font-semibold font-mono">
-                                {activeRecord.kb.articleId}
+                                {activeKb.articleId}
                               </span>{" "}
-                              &middot; last synced {activeRecord.kb.lastSynced}
+                              &middot; last synced {activeKb.lastSynced}
                             </>
                           ) : (
                             "Publish this record to generate a searchable knowledge base article for support and on-call teams."
@@ -1822,17 +1572,17 @@ export default function ProblemRecordsDashboard() {
                     </div>
 
                     <div className="relative pl-6 border-l border-zinc-200 ml-3 space-y-6">
-                      {activeRecord.timeline.map((item: any, idx: number) => {
+                      {(activeRecord.timeline ?? []).map((item: any, idx: number) => {
                         const isStringAuthor = typeof item.author === "string";
                         const authorName = isStringAuthor
                           ? PEOPLE[item.author as keyof typeof PEOPLE]?.name ||
                             item.author
-                          : item.author.name;
+                          : item.author?.name;
                         const authorInitials = isStringAuthor
                           ? PEOPLE[item.author as keyof typeof PEOPLE]?.init ||
                             "??"
-                          : item.author.init ||
-                            item.author.name
+                          : item.author?.init ||
+                            item.author?.name
                               ?.split(" ")
                               .map((n: string) => n[0])
                               .join("") ||
@@ -1876,8 +1626,9 @@ export default function ProblemRecordsDashboard() {
             </div>
           ) : (
             <div className="p-16 text-center text-sm text-zinc-400 italic">
-              Select a record from the left rail to load its investigation
-              workspace.
+              {problemsLoading
+                ? "Loading problem records…"
+                : "Select a record from the left rail to load its investigation workspace."}
             </div>
           )}
         </div>

@@ -104,7 +104,7 @@ function formatTimestamp(ts: string): string {
       ? "Today"
       : date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
 
-    return `${prefix} at ${time} · ${relative}`;
+    return `${prefix} at ${time}`;
   } catch {
     return ts;
   }

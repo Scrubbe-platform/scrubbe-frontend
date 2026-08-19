@@ -374,7 +374,7 @@ export default function HeroSection() {
           <div className="mt-3 flex items-center gap-3 max-w-[460px]">
             <p className="text-[12.5px] leading-snug text-gray-500">
               <span className="font-semibold text-gray-800">
-                Backed by NVIDIA Inception —
+                Backed by NVIDIA Inception Program —
               </span>{" "}
               Scrubbe is a member of the NVIDIA Inception Program, exploring
               NVIDIA accelerated computing to power the next generation of
