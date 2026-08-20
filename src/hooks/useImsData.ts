@@ -49,29 +49,30 @@ export interface Problem {
   id: string;
   ticketId?: string;
   title: string;
-  summary?: string;
   description?: string;
   priority: string;
   status: string;
   category?: string;
   impact?: string;
   urgency?: string;
-  owner?: string;
+  owner?: string | null;
+  // Not yet returned by the API — there's also no way to set this from the
+  // create-record form, so it'll stay empty until both a picker and backend
+  // support exist. See src/app/(incident)/incident/problems/page.tsx.
   assignee?: { name: string; role: string };
   watchers?: number;
   watching?: boolean;
-  opened?: string;
   target?: string;
-  activity?: string;
   confidence?: number;
-  rootcause?: { title: string; body: string };
-  workaround?: { active: boolean; text: string };
-  incidents?: { id: string; sev: string; desc: string; date: string }[];
+  rootCauseNote?: string | null;
+  proposedFix?: string | null;
+  linkIncident?: { id: string; sev: string; desc: string; date: string }[];
   services?: { n: string; i: string; cls: string }[];
   findings?: any[];
   steps?: any[];
   kb?: { published: boolean; autoSync: boolean; articleId: string | null; lastSynced: string | null; verified: boolean };
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export function useProblems() {

@@ -22,37 +22,10 @@ import StatsCard from "./_modules/components/StatsCard";
 import Dropdown, { DropdownItem } from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button1";
 import { useProblems, createProblem, updateProblem } from "@/hooks/useImsData";
+import useMember from "@/hooks/useMember";
 import { customAxios } from "@/lib/api/axios";
 import { endpoint } from "@/lib/api/endpoint";
-
-const PEOPLE = {
-  pi: {
-    init: "PI",
-    name: "Paschal Ifediora",
-    role: "Problem Manager",
-    sys: false,
-  },
-  am: { init: "AO", name: "Amara Okafor", role: "Senior SRE", sys: false },
-  jt: { init: "JT", name: "Jon Tan", role: "Database Engineer", sys: false },
-  ce: {
-    init: "CE",
-    name: "Correlation Engine",
-    role: "Automated analysis",
-    sys: true,
-  },
-  df: {
-    init: "DF",
-    name: "Database Forensics",
-    role: "Automated analysis",
-    sys: true,
-  },
-  ca: {
-    init: "CA",
-    name: "Configuration Analysis",
-    role: "Automated analysis",
-    sys: true,
-  },
-};
+import { toast } from "sonner";
 
 const OWNERS: Record<string, string> = {
   rel: "Platform Reliability",
@@ -79,6 +52,35 @@ function shortHash(s: string) {
   return hash(s).slice(0, 6) + "…";
 }
 
+// The API sends raw ISO timestamps (createdAt / updatedAt) — the UI wants
+// short display strings, so format them client-side instead of expecting
+// the backend to pre-format dates.
+function formatShortDate(iso?: string | null): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function formatRelativeTime(iso?: string | null): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const diffMs = Date.now() - d.getTime();
+  const mins = Math.round(diffMs / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return formatShortDate(iso);
+}
+
+function getErrorMessage(err: any, fallback: string): string {
+  return err?.response?.data?.message || fallback;
+}
+
 export default function ProblemRecordsDashboard() {
   // ─── WORKSPACE STATES ───
   const router = useRouter();
@@ -90,6 +92,7 @@ export default function ProblemRecordsDashboard() {
     loading: problemsLoading,
     refetch: refetchProblems,
   } = useProblems();
+  const { data: members = [] } = useMember();
   const [records, setRecords] = useState<any[]>([]);
 
   // Sync API data into local state (preserving optimistic updates)
@@ -111,7 +114,7 @@ export default function ProblemRecordsDashboard() {
   }, [records, selectedId]);
 
   // Keep the selected record in sync with the `id` search param — lets other
-  // pages deep-link straight to a specific problem, e.g. /incident/problems?id=PR-004417.
+  // pages deep-link straight to a specific problem, e.g. /incident/problems?id=<record-id>.
   useEffect(() => {
     const paramId = searchParams.get("id");
     if (paramId) setSelectedId(paramId);
@@ -164,7 +167,8 @@ export default function ProblemRecordsDashboard() {
   const [newRecTitle, setNewRecTitle] = useState("");
   const [newRecPri, setNewRecPri] = useState("P1");
   const [newRecCat, setNewRecCat] = useState("Database");
-  const [newRecOwner, setNewRecOwner] = useState("Platform Reliability");
+  const [newRecOwner, setNewRecOwner] = useState("rel");
+  const [newRecAssigneeEmail, setNewRecAssigneeEmail] = useState("");
   const [newRecSummary, setNewRecSummary] = useState("");
 
   // Multiselect advanced popover filters
@@ -183,10 +187,11 @@ export default function ProblemRecordsDashboard() {
   // Seed Timeline logs on state mount
   const computedRecords = useMemo(() => {
     return records.map((r: any) => {
+      const recordOwner = r.assignee ?? { name: "System", role: "Automated" };
       const ev: any[] = [];
       ev.push({
-        ts: r.opened + " · 00:00",
-        author: { name: "Paschal Ifediora", role: "Problem Manager" },
+        ts: formatShortDate(r.createdAt) + " · 00:00",
+        author: recordOwner,
         t: "Problem record opened",
         d: "Matching incident signatures clustered into a single record.",
         ok: false,
@@ -212,8 +217,8 @@ export default function ProblemRecordsDashboard() {
       });
       if (r.status === "Resolved")
         ev.push({
-          ts: r.kb?.lastSynced || r.activity,
-          author: { name: "Paschal Ifediora", role: "Problem Manager" },
+          ts: r.kb?.lastSynced || formatRelativeTime(r.updatedAt),
+          author: recordOwner,
           t: "Record resolved and closed",
           d: "All remediation steps verified.",
           ok: true,
@@ -240,7 +245,16 @@ export default function ProblemRecordsDashboard() {
   // get accessed repeatedly below instead of optional-chaining every use.
   const activeSteps = activeRecord?.steps ?? [];
   const activeKb = activeRecord?.kb ?? {};
-  const activeRootcause = activeRecord?.rootcause ?? { title: "", body: "" };
+
+  // Real assignee names pulled from whatever records are actually loaded,
+  // instead of a hardcoded roster.
+  const dynamicAssignees = useMemo(() => {
+    const seen = new Set<string>();
+    computedRecords.forEach((r: any) => {
+      if (r.assignee?.name) seen.add(r.assignee.name);
+    });
+    return Array.from(seen).sort();
+  }, [computedRecords]);
 
   // ─── FILTER & SORT PROCESSING LOOP ───
   const processedRecords = useMemo(() => {
@@ -268,7 +282,7 @@ export default function ProblemRecordsDashboard() {
           const matches =
             r.title?.toLowerCase().includes(q) ||
             r.id?.toLowerCase().includes(q) ||
-            r.summary?.toLowerCase().includes(q);
+            r.description?.toLowerCase().includes(q);
           if (!matches) return false;
         }
         return true;
@@ -276,8 +290,6 @@ export default function ProblemRecordsDashboard() {
       .sort((a: any, b: any) => {
         if (sortBy === "priority")
           return (a.priority ?? "").localeCompare(b.priority ?? "");
-        if (sortBy === "incidents")
-          return (b.incidents?.length ?? 0) - (a.incidents?.length ?? 0);
         return 0;
       });
   }, [computedRecords, statusFilter, advancedFilters, searchQuery, sortBy]);
@@ -325,12 +337,12 @@ export default function ProblemRecordsDashboard() {
         },
       );
       await refetchProblems();
-    } catch {
-      // non-critical — finding UI remains
+      setFBody("");
+      setFSource("");
+      setFConf("");
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't save the finding — try again."));
     }
-    setFBody("");
-    setFSource("");
-    setFConf("");
   };
 
   const handleSignoffStep = (idx: number) => {
@@ -348,23 +360,11 @@ export default function ProblemRecordsDashboard() {
         },
       );
       await refetchProblems();
-    } catch {
-      // optimistic update
-      setRecords((prev) =>
-        prev.map((r: any) =>
-          r.id === selectedId
-            ? {
-                ...r,
-                steps: (r.steps ?? []).map((s: any, i: number) =>
-                  i === idx ? { ...s, done: true, note: completionNote } : s,
-                ),
-              }
-            : r,
-        ),
-      );
+      setCompletionNote("");
+      setCompletingStepIdx(null);
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't complete this step — try again."));
     }
-    setCompletionNote("");
-    setCompletingStepIdx(null);
   };
 
   const handleAddPlanStep = async (e: React.FormEvent) => {
@@ -381,37 +381,29 @@ export default function ProblemRecordsDashboard() {
         },
       );
       await refetchProblems();
-    } catch {
-      // optimistic
-      setRecords((prev) =>
-        prev.map((r: any) =>
-          r.id === selectedId
-            ? {
-                ...r,
-                steps: [
-                  ...(r.steps ?? []),
-                  {
-                    t: newStepTitle.trim(),
-                    d: newStepDetail.trim(),
-                    tags: [],
-                    done: false,
-                  },
-                ],
-              }
-            : r,
-        ),
-      );
+      setNewStepTitle("");
+      setNewStepDetail("");
+      setNewStepTags("");
+      setNewStepChg("");
+      setIsAddingStep(false);
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't add this step — try again."));
     }
-    setNewStepTitle("");
-    setNewStepDetail("");
-    setNewStepTags("");
-    setNewStepChg("");
-    setIsAddingStep(false);
   };
 
   const handleCreateProblemRecord = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRecTitle.trim()) return;
+
+    const assigneeMember = members.find((m) => m.email === newRecAssigneeEmail);
+    const assignee = assigneeMember
+      ? {
+          name:
+            `${assigneeMember.firstname ?? ""} ${assigneeMember.lastname ?? ""}`.trim() ||
+            assigneeMember.email,
+          role: assigneeMember.role,
+        }
+      : undefined;
 
     try {
       const priorityMap: Record<string, string> = {
@@ -427,52 +419,22 @@ export default function ProblemRecordsDashboard() {
         description:
           newRecSummary.trim() ||
           "Investigation mapped from active telemetry configurations.",
-        summary:
-          newRecSummary.trim() ||
-          "Investigation mapped from active telemetry configurations.",
         status: "Investigating",
         impact: "Service degradation",
+        owner: newRecOwner,
+        assignee,
       });
 
       await refetchProblems();
       if (created?.id) selectRecord(created.id);
-    } catch {
-      // optimistic fallback
-      const nextId = `PR-${Date.now()}`;
-      setRecords((prev) => [
-        {
-          id: nextId,
-          title: newRecTitle.trim(),
-          priority: newRecPri,
-          category: newRecCat,
-          status: "Investigating",
-          summary: newRecSummary.trim() || "Under investigation.",
-          findings: [],
-          steps: [],
-          incidents: [],
-          services: [],
-          workaround: { active: false, text: "" },
-          rootcause: { title: "Under Investigation", body: "" },
-          kb: {
-            published: false,
-            autoSync: false,
-            articleId: null,
-            lastSynced: null,
-            verified: false,
-          },
-          timeline: [],
-          opened: "Just now",
-          activity: "just now",
-          confidence: 0,
-          watchers: 1,
-        },
-        ...prev,
-      ]);
-      selectRecord(nextId);
+      setIsNewRecordModalOpen(false);
+      setNewRecTitle("");
+      setNewRecSummary("");
+    } catch (err) {
+      toast.error(
+        getErrorMessage(err, "Couldn't create the problem record — try again."),
+      );
     }
-    setIsNewRecordModalOpen(false);
-    setNewRecTitle("");
-    setNewRecSummary("");
   };
 
   const handleToggleAdvancedFilter = (
@@ -491,7 +453,6 @@ export default function ProblemRecordsDashboard() {
   const sortDropdownItems: DropdownItem[] = [
     { value: "recent", label: "Sort: Most Recent" },
     { value: "priority", label: "Sort: Severity Priority" },
-    { value: "incidents", label: "Sort: Correlated Outages" },
   ];
 
   const viewsDropdownItems: DropdownItem[] = [
@@ -532,10 +493,8 @@ export default function ProblemRecordsDashboard() {
     try {
       await updateProblem(id, { status: "Resolved" });
       await refetchProblems();
-    } catch {
-      setRecords((prev) =>
-        prev.map((r: any) => (r.id === id ? { ...r, status: "Resolved" } : r)),
-      );
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't resolve this record — try again."));
     }
   };
 
@@ -715,7 +674,7 @@ export default function ProblemRecordsDashboard() {
                             <span
                               className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
                             >
-                              {active && "âœ“"}
+                              {active && "✓"}
                             </span>
                             <span>{p}</span>
                           </button>
@@ -751,7 +710,7 @@ export default function ProblemRecordsDashboard() {
                             <span
                               className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
                             >
-                              {active && "âœ“"}
+                              {active && "✓"}
                             </span>
                             <span>{c}</span>
                           </button>
@@ -780,7 +739,7 @@ export default function ProblemRecordsDashboard() {
                             <span
                               className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
                             >
-                              {active && "âœ“"}
+                              {active && "✓"}
                             </span>
                             <span>{value}</span>
                           </button>
@@ -795,33 +754,31 @@ export default function ProblemRecordsDashboard() {
                       Assigned Problem Manager
                     </span>
                     <div className="flex flex-wrap gap-1">
-                      {Object.entries(PEOPLE)
-                        .filter(([_, p]) => !p.sys)
-                        .map(([key, value]) => {
-                          const active = advancedFilters.assignees.includes(
-                            value.name,
-                          );
-                          return (
-                            <button
-                              key={key}
-                              type="button"
-                              onClick={() =>
-                                handleToggleAdvancedFilter(
-                                  "assignees",
-                                  value.name,
-                                )
-                              }
-                              className={`px-3 h-8 border rounded-lg flex items-center gap-2 font-medium transition-all ${active ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+                      {dynamicAssignees.length === 0 && (
+                        <span className="text-[11px] text-zinc-400 italic">
+                          No assignees on loaded records yet.
+                        </span>
+                      )}
+                      {dynamicAssignees.map((name) => {
+                        const active = advancedFilters.assignees.includes(name);
+                        return (
+                          <button
+                            key={name}
+                            type="button"
+                            onClick={() =>
+                              handleToggleAdvancedFilter("assignees", name)
+                            }
+                            className={`px-3 h-8 border rounded-lg flex items-center gap-2 font-medium transition-all ${active ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+                          >
+                            <span
+                              className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
                             >
-                              <span
-                                className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
-                              >
-                                {active && "âœ“"}
-                              </span>
-                              <span>{value.name}</span>
-                            </button>
-                          );
-                        })}
+                              {active && "✓"}
+                            </span>
+                            <span>{name}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -973,9 +930,8 @@ export default function ProblemRecordsDashboard() {
                   </h4>
 
                   <div className="flex items-center gap-4 text-[11px]  text-zinc-400 mb-2">
-                    <span>{r.incidents?.length ?? 0} offenses</span>
                     <span>{r.findings?.length ?? 0} findings</span>
-                    <span>{r.activity}</span>
+                    <span>{formatRelativeTime(r.updatedAt)}</span>
                   </div>
                 </div>
               );
@@ -1027,23 +983,30 @@ export default function ProblemRecordsDashboard() {
                   {[
                     {
                       label: "Owning team",
-                      value: OWNERS[activeRecord.owner] || activeRecord.owner,
+                      value:
+                        OWNERS[activeRecord.owner] || activeRecord.owner || "—",
                     },
                     {
                       label: "Assignee",
-                      value: activeRecord.assignee?.name,
+                      value: activeRecord.assignee?.name || "Unassigned",
                     },
                     {
                       label: "Impact / Urgency",
-                      value: `${activeRecord.impact} / ${activeRecord.urgency}`,
+                      value:
+                        [activeRecord.impact, activeRecord.urgency]
+                          .filter(Boolean)
+                          .join(" / ") || "—",
                     },
                     {
                       label: "Opened",
-                      value: activeRecord.opened,
+                      value: formatShortDate(activeRecord.createdAt),
                     },
                     {
                       label: "Watchers",
-                      value: `${activeRecord.watchers} operators`,
+                      value:
+                        typeof activeRecord.watchers === "number"
+                          ? `${activeRecord.watchers} operators`
+                          : "—",
                     },
                   ].map(({ label, value }) => (
                     <div key={label}>
@@ -1142,7 +1105,7 @@ export default function ProblemRecordsDashboard() {
                         Summary
                       </p>
                       <p className="text-sm text-zinc-700 leading-relaxed bg-zinc-50/50 p-4 border border-zinc-100 rounded-xl">
-                        {activeRecord.summary}
+                        {activeRecord.description}
                       </p>
                     </div>
 
@@ -1192,17 +1155,14 @@ export default function ProblemRecordsDashboard() {
                           <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-2">
                             Root cause
                           </p>
-                          <h4 className="font-bold text-zinc-950 text-sm leading-snug mb-2">
-                            {activeRootcause.title}
-                          </h4>
                           <p className="text-xs text-zinc-600 leading-relaxed">
-                            {activeRootcause.body}
+                            {activeRecord.rootCauseNote || "Not yet determined."}
                           </p>
                         </div>
                       </div>
 
-                      {/* Workaround */}
-                      {activeRecord.workaround?.text && (
+                      {/* Proposed fix */}
+                      {activeRecord.proposedFix && (
                         <div className="p-4 border border-zinc-200 rounded-xl bg-zinc-50/40 flex gap-3 items-start">
                           <AlertCircle
                             size={18}
@@ -1210,53 +1170,14 @@ export default function ProblemRecordsDashboard() {
                           />
                           <div>
                             <p className="font-bold text-black text-sm mb-1">
-                              Active workaround
+                              Proposed fix
                             </p>
                             <p className="text-xs text-gray-900/80 leading-relaxed">
-                              {activeRecord.workaround.text}
+                              {activeRecord.proposedFix}
                             </p>
                           </div>
                         </div>
                       )}
-                    </div>
-
-                    {/* Correlated incidents */}
-                    <div>
-                      <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-3">
-                        Correlated incidents (
-                        {activeRecord.incidents?.length ?? 0})
-                      </p>
-                      <div className="border border-zinc-100 rounded-xl overflow-hidden divide-y divide-zinc-100">
-                        {(activeRecord.incidents ?? []).map(
-                          (inc: any, idx: number) => (
-                            <div
-                              key={idx}
-                              className="flex items-center gap-3 px-4 py-3"
-                            >
-                              <span
-                                className={` text-xs font-bold px-1.5 py-0.5 rounded shrink-0 ${
-                                  inc.sev === "P0"
-                                    ? "bg-red-50 text-red-700"
-                                    : inc.sev === "P1"
-                                      ? "bg-amber-50 text-amber-700"
-                                      : "bg-blue-50 text-blue-700"
-                                }`}
-                              >
-                                {inc.sev}
-                              </span>
-                              <span className=" text-sm font-semibold text-zinc-900 shrink-0">
-                                {inc.id}
-                              </span>
-                              <span className="text-sm text-zinc-500 flex-1 truncate">
-                                {inc.desc}
-                              </span>
-                              <span className=" text-xs text-zinc-400 shrink-0">
-                                {inc.date}
-                              </span>
-                            </div>
-                          ),
-                        )}
-                      </div>
                     </div>
 
                     {/* Affected services */}
@@ -1378,7 +1299,7 @@ export default function ProblemRecordsDashboard() {
                             </p>
                             {f.source && (
                               <p className=" text-[11px] text-blue-700 font-semibold">
-                                â†³ {f.source}
+                                ↳ {f.source}
                               </p>
                             )}
                           </div>
@@ -1575,18 +1496,15 @@ export default function ProblemRecordsDashboard() {
                       {(activeRecord.timeline ?? []).map((item: any, idx: number) => {
                         const isStringAuthor = typeof item.author === "string";
                         const authorName = isStringAuthor
-                          ? PEOPLE[item.author as keyof typeof PEOPLE]?.name ||
-                            item.author
+                          ? item.author
                           : item.author?.name;
-                        const authorInitials = isStringAuthor
-                          ? PEOPLE[item.author as keyof typeof PEOPLE]?.init ||
-                            "??"
-                          : item.author?.init ||
-                            item.author?.name
-                              ?.split(" ")
-                              .map((n: string) => n[0])
-                              .join("") ||
-                            "??";
+                        const authorInitials =
+                          item.author?.init ||
+                          authorName
+                            ?.split(" ")
+                            .map((n: string) => n[0])
+                            .join("") ||
+                          "??";
 
                         return (
                           <div key={item.hash || idx} className="relative">
@@ -1696,6 +1614,42 @@ export default function ProblemRecordsDashboard() {
                     <option>Network</option>
                     <option>Compute</option>
                     <option>Application</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label>Owning Team</label>
+                  <select
+                    value={newRecOwner}
+                    onChange={(e) => setNewRecOwner(e.target.value)}
+                    className="h-9 px-2 border rounded-lg bg-white cursor-pointer outline-none"
+                  >
+                    {Object.entries(OWNERS).map(([code, label]) => (
+                      <option key={code} value={code}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label>Assign To</label>
+                  <select
+                    value={newRecAssigneeEmail}
+                    onChange={(e) => setNewRecAssigneeEmail(e.target.value)}
+                    className="h-9 px-2 border rounded-lg bg-white cursor-pointer outline-none"
+                  >
+                    <option value="">Unassigned</option>
+                    {members.map((m) => {
+                      const n =
+                        `${m.firstname ?? ""} ${m.lastname ?? ""}`.trim() ||
+                        m.email;
+                      return (
+                        <option key={m.id} value={m.email}>
+                          {n} ({m.email})
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               </div>
