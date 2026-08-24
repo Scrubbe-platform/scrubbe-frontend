@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import toast from "react-hot-toast";
 import { OWNERS } from "../../../data";
 import { Playbook } from "../../../types";
-import SectionShell from "../SectionShell";
+import SectionShell, { IllustrativeBadge } from "../SectionShell";
 
 interface GovernanceSectionProps {
   playbook: Playbook;
@@ -15,7 +15,7 @@ function Cell({
   label,
   children,
 }: {
-  label: string;
+  label: React.ReactNode;
   children: React.ReactNode;
 }): React.JSX.Element {
   return (
@@ -89,7 +89,14 @@ export default function GovernanceSection({
             Manage access
           </button>
         </Cell>
-        <Cell label="SLA · ack / first action / resolution">
+        <Cell
+          label={
+            <span className="flex items-center gap-1.5">
+              SLA · ack / first action / resolution
+              <IllustrativeBadge />
+            </span>
+          }
+        >
           {sla ? `${sla.ack} / ${sla.firstAction} / ${sla.resolution}` : "—"}
         </Cell>
         <Cell label="Change-freeze awareness">
@@ -119,8 +126,9 @@ export default function GovernanceSection({
               ))}
             </select>
           </div>
-          <label className="block text-xs font-semibold text-zinc-600 mb-2 dark:text-zinc-300">
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 mb-2 dark:text-zinc-300">
             Maintainers
+            <IllustrativeBadge />
           </label>
           <div className="flex gap-1.5 flex-wrap mb-3">
             {maintainers.length === 0 && (

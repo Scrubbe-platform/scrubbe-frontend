@@ -42,6 +42,7 @@ export default function AnalyticsCostSection({ playbook: p }: AnalyticsCostSecti
         eyebrow="Automation value"
         title="Cost & ROI"
         sub="What this playbook is worth compared to a manual, human-run response — measured over the last 30 days."
+        illustrative
       >
         <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))" }}>
           <Metric k="Avg. cost — manual response" v={`$${manualCost}`} />

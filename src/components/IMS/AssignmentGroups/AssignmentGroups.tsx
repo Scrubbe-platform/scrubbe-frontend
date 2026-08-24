@@ -265,58 +265,92 @@ export default function AssignmentGroups() {
     setModal({ kind: "none" });
   }
 
-  function handleRename(name: string, description: string) {
-    if (!group) return;
-    updateGroup(group.id, (g) => ({ ...g, name, description }));
-    closeModal();
-    toast("Saved");
+  function reportSaveError(err: any, action: string) {
+    const serverMessage = err?.response?.data?.message;
+    toast(
+      serverMessage
+        ? `Couldn't ${action}: ${serverMessage}`
+        : `Couldn't ${action} — try again`,
+    );
   }
-  function handleArchiveToggle() {
-    if (!group) return;
-    const nextStatus = group.status === "Archived" ? "Active" : "Archived";
-    updateGroup(group.id, (g) => ({ ...g, status: nextStatus }));
-    toast(nextStatus === "Archived" ? "Group archived" : "Group restored");
-  }
-  function handleTransfer(name: string) {
-    if (!group) return;
-    updateGroup(group.id, (g) => ({ ...g, manager: name }));
-    closeModal();
-    toast("Manager transferred");
-  }
-  function handleAddMember(m: Member) {
+  async function handleRename(name: string, description: string) {
     if (!group) return;
     const groupId = group.id;
-    updateGroup(groupId, (g) => ({ ...g, members: [...g.members, m] }));
-    closeModal();
-    toast("Member added");
-    customAxios
-      .post(`${endpoint.assignment_groups.addMember}/${groupId}/members`, {
+    try {
+      await customAxios.put(`${endpoint.assignment_groups.update}/${groupId}`, { name, description });
+      updateGroup(groupId, (g) => ({ ...g, name, description }));
+      closeModal();
+      toast("Saved");
+    } catch (err) {
+      reportSaveError(err, "save the changes");
+    }
+  }
+  async function handleArchiveToggle() {
+    if (!group) return;
+    const groupId = group.id;
+    const nextStatus = group.status === "Archived" ? "Active" : "Archived";
+    try {
+      await customAxios.put(`${endpoint.assignment_groups.update}/${groupId}`, { status: nextStatus });
+      updateGroup(groupId, (g) => ({ ...g, status: nextStatus }));
+      toast(nextStatus === "Archived" ? "Group archived" : "Group restored");
+    } catch (err) {
+      reportSaveError(err, nextStatus === "Archived" ? "archive the group" : "restore the group");
+    }
+  }
+  async function handleTransfer(name: string) {
+    if (!group) return;
+    const groupId = group.id;
+    try {
+      await customAxios.put(`${endpoint.assignment_groups.update}/${groupId}`, { manager: name });
+      updateGroup(groupId, (g) => ({ ...g, manager: name }));
+      closeModal();
+      toast("Manager transferred");
+    } catch (err) {
+      reportSaveError(err, "transfer the manager");
+    }
+  }
+  async function handleAddMember(m: Member) {
+    if (!group) return;
+    const groupId = group.id;
+    try {
+      await customAxios.post(`${endpoint.assignment_groups.addMember}/${groupId}/members`, {
         userId: m.userId,
         email: m.email,
         role: m.role,
         availability: m.availability,
         oncall: m.oncall,
-      })
-      .then(() => refreshGroupDetail(groupId))
-      .catch((err) => {
-        const serverMessage = err?.response?.data?.message;
-        toast(
-          serverMessage
-            ? `Couldn't save the new member: ${serverMessage}`
-            : "Couldn't save the new member — try again",
-        );
       });
+      updateGroup(groupId, (g) => ({ ...g, members: [...g.members, m] }));
+      closeModal();
+      toast("Member added");
+      refreshGroupDetail(groupId);
+    } catch (err) {
+      reportSaveError(err, "save the new member");
+    }
   }
-  function handleRemoveMember(idx: number) {
+  async function handleRemoveMember(idx: number) {
     if (!group) return;
+    const groupId = group.id;
     const removed = group.members[idx];
-    updateGroup(group.id, (g) => {
-      const members = g.members.filter((_, i) => i !== idx);
-      const oncall =
-        g.oncall.name === removed?.name ? { name: null, ends: null } : g.oncall;
-      return { ...g, members, oncall };
-    });
-    toast("Member removed");
+    if (!removed?.userId) {
+      toast("This member has no linked account id — can't remove");
+      return;
+    }
+    try {
+      await customAxios.delete(
+        `${endpoint.assignment_groups.removeMember}/${groupId}/members/${removed.userId}`,
+      );
+      updateGroup(groupId, (g) => {
+        const members = g.members.filter((_, i) => i !== idx);
+        const oncall =
+          g.oncall.name === removed?.name ? { name: null, ends: null } : g.oncall;
+        return { ...g, members, oncall };
+      });
+      toast("Member removed");
+      refreshGroupDetail(groupId);
+    } catch (err) {
+      reportSaveError(err, "remove the member");
+    }
   }
   function handleMerge(sourceId: string) {
     if (!group) return;
@@ -333,18 +367,38 @@ export default function AssignmentGroups() {
     closeModal();
     toast(`Merged ${src.name} into ${group.name}`);
   }
-  function handleDelete() {
+  async function handleDelete() {
     if (!group) return;
-    const remaining = groups.filter((g) => g.id !== group.id);
-    setGroups(remaining);
-    setActiveId(remaining[0]?.id ?? "");
-    closeModal();
-    toast("Group deleted");
-    setShowProfileMobile(false);
-    customAxios.delete(`${endpoint.assignment_groups.delete}/${group.id}`).catch(() => {});
+    const groupId = group.id;
+    try {
+      await customAxios.delete(`${endpoint.assignment_groups.delete}/${groupId}`);
+      const remaining = groups.filter((g) => g.id !== groupId);
+      setGroups(remaining);
+      setActiveId(remaining[0]?.id ?? "");
+      closeModal();
+      toast("Group deleted");
+      setShowProfileMobile(false);
+    } catch (err) {
+      reportSaveError(err, "delete the group");
+    }
   }
-  function handleCreate(data: CreateGroupData) {
-    const id = "ag-" + Date.now();
+  async function handleCreate(data: CreateGroupData) {
+    let created: any = null;
+    try {
+      const res = await customAxios.post(endpoint.assignment_groups.create, {
+        name: data.name,
+        manager: data.manager,
+        department: data.department,
+        environment: data.env,
+        businessUnit: data.businessUnit,
+        primaryService: data.primaryService,
+      });
+      created = res.data?.data ?? res.data;
+    } catch (err) {
+      reportSaveError(err, "create the group");
+      return;
+    }
+    const id = created?.id ?? "ag-" + Date.now();
     const newGroup: Group = {
       id,
       name: data.name,
@@ -392,53 +446,65 @@ export default function AssignmentGroups() {
     setActiveId(id);
     closeModal();
     toast("Group created");
-    customAxios.post(endpoint.assignment_groups.create, { name: data.name, manager: data.manager, department: data.department, environment: data.env }).then((res) => {
-      const created = res.data?.data ?? res.data;
-      if (created?.id && created.id !== id) {
-        setGroups((prev) => prev.map((g) => g.id === id ? { ...g, id: created.id } : g));
-      }
-    }).catch(() => {});
   }
   function persistGroup(id: string, patch: Record<string, unknown>) {
-    customAxios
-      .put(`${endpoint.assignment_groups.update}/${id}`, patch)
-      .catch(() => {});
+    return customAxios.put(`${endpoint.assignment_groups.update}/${id}`, patch);
   }
 
-  function handleEscalationSave(levels: string[]) {
+  async function handleEscalationSave(levels: string[]) {
     if (!group || !levels.length) {
       toast("Add at least one level");
       return;
     }
     const updatedMeta = { ...((group as any).metadata ?? {}), escalation: levels };
-    updateGroup(group.id, (g) => ({ ...g, escalation: levels }));
-    persistGroup(group.id, { metadata: updatedMeta });
-    closeModal();
-    toast("Escalation path saved");
+    try {
+      await persistGroup(group.id, { metadata: updatedMeta });
+      updateGroup(group.id, (g) => ({ ...g, escalation: levels }));
+      closeModal();
+      toast("Escalation path saved");
+    } catch (err) {
+      reportSaveError(err, "save the escalation path");
+    }
   }
-  function handleOncallSave(name: string | null, ends: string) {
+  async function handleOncallSave(name: string | null, ends: string) {
     if (!group) return;
     const updatedMeta = { ...((group as any).metadata ?? {}), oncall: name ? { name, ends } : { name: null, ends: null } };
-    updateGroup(group.id, (g) => ({
-      ...g,
-      members: g.members.map((m) => ({ ...m, oncall: m.name === name })),
-      oncall: name ? { name, ends } : { name: null, ends: null },
-    }));
-    persistGroup(group.id, { metadata: updatedMeta });
-    closeModal();
-    toast(name ? `On-call set to ${name}` : "On-call cleared");
+    try {
+      await persistGroup(group.id, { metadata: updatedMeta });
+      updateGroup(group.id, (g) => ({
+        ...g,
+        members: g.members.map((m) => ({ ...m, oncall: m.name === name })),
+        oncall: name ? { name, ends } : { name: null, ends: null },
+      }));
+      closeModal();
+      toast(name ? `On-call set to ${name}` : "On-call cleared");
+    } catch (err) {
+      reportSaveError(err, "save the on-call rotation");
+    }
   }
-  function handleEditGeneral(patch: Partial<Group>) {
+  async function handleEditGeneral(patch: Partial<Group>) {
     if (!group) return;
-    updateGroup(group.id, (g) => ({ ...g, ...patch }));
-    persistGroup(group.id, {
-      ...(patch.name !== undefined ? { name: patch.name } : {}),
-      ...(patch.description !== undefined ? { description: patch.description } : {}),
-    });
-    closeModal();
-    toast("Changes saved");
+    try {
+      await persistGroup(group.id, {
+        ...(patch.name !== undefined ? { name: patch.name } : {}),
+        ...(patch.description !== undefined ? { description: patch.description } : {}),
+        ...(patch.manager !== undefined ? { manager: patch.manager } : {}),
+        ...(patch.department !== undefined ? { department: patch.department } : {}),
+        ...(patch.env !== undefined ? { environment: patch.env } : {}),
+        ...(patch.businessUnit !== undefined ? { businessUnit: patch.businessUnit } : {}),
+        ...(patch.primaryService !== undefined ? { primaryService: patch.primaryService } : {}),
+        ...(patch.status !== undefined
+          ? { status: patch.status === "Archived" ? "ARCHIVED" : "ACTIVE" }
+          : {}),
+      });
+      updateGroup(group.id, (g) => ({ ...g, ...patch }));
+      closeModal();
+      toast("Changes saved");
+    } catch (err) {
+      reportSaveError(err, "save the changes");
+    }
   }
-  function handleToggleMemberOncall(idx: number) {
+  async function handleToggleMemberOncall(idx: number) {
     if (!group) return;
     const m = group.members[idx];
     if (!m) return;
@@ -449,36 +515,40 @@ export default function AssignmentGroups() {
         ? { name: null, ends: null }
         : group.oncall;
     const updatedMeta = { ...((group as any).metadata ?? {}), oncall: newOncall };
-    updateGroup(group.id, (g) => ({
-      ...g,
-      members: g.members.map((x, i) =>
-        i === idx
-          ? { ...x, oncall: willOn }
-          : willOn
-            ? { ...x, oncall: false }
-            : x,
-      ),
-      oncall: newOncall,
-    }));
-    persistGroup(group.id, { metadata: updatedMeta });
-    closeModal();
-    toast(willOn ? `On-call set to ${m.name}` : "On-call cleared");
+    try {
+      await persistGroup(group.id, { metadata: updatedMeta });
+      updateGroup(group.id, (g) => ({
+        ...g,
+        members: g.members.map((x, i) =>
+          i === idx
+            ? { ...x, oncall: willOn }
+            : willOn
+              ? { ...x, oncall: false }
+              : x,
+        ),
+        oncall: newOncall,
+      }));
+      closeModal();
+      toast(willOn ? `On-call set to ${m.name}` : "On-call cleared");
+    } catch (err) {
+      reportSaveError(err, "update on-call");
+    }
   }
-  function handleEzraToggle() {
+  async function handleEzraToggle() {
     if (!group) return;
     const nextEnabled = !group.ezra.enabled;
     const updatedMeta = { ...((group as any).metadata ?? {}), ezra: { enabled: nextEnabled } };
-    updateGroup(group.id, (g) => ({
-      ...g,
-      ezra: { ...g.ezra, enabled: nextEnabled },
-    }));
-    persistGroup(group.id, { metadata: updatedMeta });
-    closeModal();
-    toast(
-      nextEnabled
-        ? "Ezra assignment enabled"
-        : "Ezra assignment paused",
-    );
+    try {
+      await persistGroup(group.id, { metadata: updatedMeta });
+      updateGroup(group.id, (g) => ({
+        ...g,
+        ezra: { ...g.ezra, enabled: nextEnabled },
+      }));
+      closeModal();
+      toast(nextEnabled ? "Ezra assignment enabled" : "Ezra assignment paused");
+    } catch (err) {
+      reportSaveError(err, nextEnabled ? "enable Ezra assignment" : "pause Ezra assignment");
+    }
   }
 
   return (

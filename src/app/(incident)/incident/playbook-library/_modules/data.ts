@@ -15,6 +15,37 @@ import {
   VersionDef,
 } from "./types";
 
+/** Maps a raw `/playbooks` API record onto the frontend Playbook shape. */
+export function mapApiPlaybook(api: any, idx: number): Playbook {
+  return {
+    id: api.id ?? `PB-${String(idx + 1).padStart(4, "0")}`,
+    name: api.name ?? "Unnamed Playbook",
+    service: api.service ?? api.category ?? "General",
+    status: api.status === "ACTIVE" ? "Active" : api.status === "DRAFT" ? "Draft" : api.status === "ARCHIVED" ? "Archived" : "Draft",
+    mode: api.mode ?? "Approval required",
+    success: api.successRate ?? 0,
+    executed: api.executionCount ?? 0,
+    priority: api.priority ?? 2,
+    trigger: api.trigger ?? "Manual",
+    owner: api.owner ?? api.createdBy ?? "Platform team",
+    version: api.version ? `v${api.version}` : "v1.0",
+    updated: api.updatedAt ? new Date(api.updatedAt).toLocaleDateString() : "—",
+    env: api.environments ?? ["Production"],
+    rules: api.rules ?? [],
+    maxAuto: api.maxAuto ?? 3,
+    rollback: api.rollback ?? false,
+    approvers: api.approvers ?? ["Incident commander"],
+    mttr: api.avgMttr ?? "—",
+    approvalTime: api.avgApprovalTime ?? "—",
+    rollbackRate: api.rollbackRate ?? "0%",
+    failures: api.failureCount ?? 0,
+    modules: api.modules ?? { Investigation: [], Decision: [], Execution: [], Verification: [], Knowledge: [] },
+    desc: api.description ?? `Playbook for ${api.name ?? "incidents"}.`,
+    incidentTypes: api.incidentTypes ?? api.tags ?? [],
+    created: api.createdAt ? new Date(api.createdAt).toLocaleDateString() : "—",
+  };
+}
+
 export const MODULES: ModuleDef[] = [
   { id: "M-INV-01", cat: "Investigation", name: "Evidence intake", ver: "3.2", owner: "Platform team", desc: "Collects logs, metrics, deployment records, infrastructure state, and dependency health for the affected services." },
   { id: "M-INV-02", cat: "Investigation", name: "Topology snapshot", ver: "2.0", owner: "Platform team", desc: "Captures the live service topology and dependency graph at incident time for blast radius reasoning." },

@@ -21,6 +21,7 @@ export default function CompositionFlowSection({
         eyebrow="Modular architecture"
         title="Composition"
         sub="This playbook is assembled from governed, reusable modules. Select a module to see every playbook that shares it."
+        illustrative
       >
         <div className="space-y-3">
           {CAT_ORDER.map((cat) => (
@@ -59,6 +60,7 @@ export default function CompositionFlowSection({
         eyebrow="Governed execution"
         title="Execution flow"
         sub="Fourteen governed steps. Diamond nodes are governance gates — execution pauses there until rules pass and approvers act."
+        illustrative
       >
         <div className="pl-1.5">
           {STEPS.map((s, i) => (

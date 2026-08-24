@@ -26,6 +26,7 @@ interface PlaybookTableProps {
   total: number;
   page: number;
   pageSize: number;
+  loading?: boolean;
   onPageChange: (page: number) => void;
   onDuplicate: (id: string) => void;
   onArchiveToggle: (id: string) => void;
@@ -36,6 +37,7 @@ export default function PlaybookTable({
   total,
   page,
   pageSize,
+  loading,
   onPageChange,
   onDuplicate,
   onArchiveToggle,
@@ -137,11 +139,12 @@ export default function PlaybookTable({
         {rows.length === 0 && (
           <div className="py-14 text-center text-zinc-500 dark:text-zinc-500">
             <h3 className="font-semibold text-zinc-800 mb-1 dark:text-zinc-200">
-              No playbooks match
+              {loading ? "Loading playbooks…" : "No playbooks match"}
             </h3>
             <p className="text-sm">
-              Adjust the filters or search terms, or create a playbook for this
-              scenario.
+              {loading
+                ? "Fetching your playbooks from the server."
+                : "Adjust the filters or search terms, or create a playbook for this scenario."}
             </p>
           </div>
         )}

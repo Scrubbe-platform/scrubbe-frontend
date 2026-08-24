@@ -20,6 +20,7 @@ export default function AgentsStagesSection({
         eyebrow="Coordinated by the orchestrator"
         title="AI agents"
         sub="Specialist agents this playbook deploys. Every conclusion they reach is attributed in the audit trail."
+        illustrative
       >
         <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))" }}>
           {AGENTS.map((a) => (
@@ -53,6 +54,7 @@ export default function AgentsStagesSection({
         eyebrow="Investigation"
         title="Investigation stages"
         sub="Six stages, each backed by a governed module."
+        illustrative
       >
         <div className="border border-zinc-200 rounded-lg overflow-hidden dark:border-zinc-800">
           {STAGE_DATA.map((s) => {

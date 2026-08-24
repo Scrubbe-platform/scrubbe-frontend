@@ -20,6 +20,7 @@ export default function IncidentsChangesSection({
         eyebrow="Traceable to real executions"
         title="Linked incidents"
         sub="The most recent incidents this playbook was executed against."
+        illustrative
       >
         <div className="border border-zinc-200 rounded-lg divide-y divide-zinc-100 dark:border-zinc-800 dark:divide-zinc-800">
           {[0, 1, 2].map((i) => (
@@ -43,6 +44,7 @@ export default function IncidentsChangesSection({
         eyebrow="Complete audit trail"
         title="Change approval"
         sub="Every modification to this playbook required approval before taking effect."
+        illustrative
       >
         <div className="border border-zinc-200 rounded-lg overflow-hidden dark:border-zinc-800">
           <table className="w-full text-sm">

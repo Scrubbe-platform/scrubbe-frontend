@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Search, History, Upload, Download, Plus, X } from "lucide-react";
 import Button from "@/components/ui/Button1";
 import {
   FILTER_DEFS,
   MODULES,
-  PLAYBOOKS,
   SCOPES,
   fval,
+  mapApiPlaybook,
   ruleById,
   AGENTS,
 } from "../data";
@@ -22,36 +22,6 @@ import {
 } from "../types";
 import { customAxios } from "@/lib/api/axios";
 import { endpoint } from "@/lib/api/endpoint";
-
-function mapApiPlaybook(api: any, idx: number): Playbook {
-  return {
-    id: api.id ?? `PB-${String(idx + 1).padStart(4, "0")}`,
-    name: api.name ?? "Unnamed Playbook",
-    service: api.service ?? api.category ?? "General",
-    status: api.status === "ACTIVE" ? "Active" : api.status === "DRAFT" ? "Draft" : api.status === "ARCHIVED" ? "Archived" : "Draft",
-    mode: api.mode ?? "Approval required",
-    success: api.successRate ?? 0,
-    executed: api.executionCount ?? 0,
-    priority: api.priority ?? 2,
-    trigger: api.trigger ?? "Manual",
-    owner: api.owner ?? api.createdBy ?? "Platform team",
-    version: api.version ? `v${api.version}` : "v1.0",
-    updated: api.updatedAt ? new Date(api.updatedAt).toLocaleDateString() : "—",
-    env: api.environments ?? ["Production"],
-    rules: api.rules ?? [],
-    maxAuto: api.maxAuto ?? 3,
-    rollback: api.rollback ?? false,
-    approvers: api.approvers ?? ["Incident commander"],
-    mttr: api.avgMttr ?? "—",
-    approvalTime: api.avgApprovalTime ?? "—",
-    rollbackRate: api.rollbackRate ?? "0%",
-    failures: api.failureCount ?? 0,
-    modules: api.modules ?? { Investigation: [], Decision: [], Execution: [], Verification: [], Knowledge: [] },
-    desc: api.description ?? `Playbook for ${api.name ?? "incidents"}.`,
-    incidentTypes: api.incidentTypes ?? api.tags ?? [],
-    created: api.createdAt ? new Date(api.createdAt).toLocaleDateString() : "—",
-  };
-}
 import StatsStrip from "./StatsStrip";
 import FilterRail from "./FilterRail";
 import PlaybookTable from "./PlaybookTable";
@@ -102,21 +72,27 @@ function nextPlaybookId(existing: Playbook[]): string {
 }
 
 export default function PlaybookLibraryPage(): React.JSX.Element {
-  const [playbooks, setPlaybooks] = useState<Playbook[]>(PLAYBOOKS);
+  const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
+  const [playbooksLoading, setPlaybooksLoading] = useState(true);
 
   // ─── Load real playbooks from API ───────────────────────────────────────────
-  useEffect(() => {
-    customAxios
+  const refetchPlaybooks = useCallback(() => {
+    setPlaybooksLoading(true);
+    return customAxios
       .get(endpoint.playbooks.list)
       .then((res) => {
         const list: any[] = res.data?.data ?? res.data ?? [];
-        if (list.length > 0) {
-          setPlaybooks(list.map((p: any, i: number) => mapApiPlaybook(p, i)));
-        }
+        setPlaybooks(list.map((p: any, i: number) => mapApiPlaybook(p, i)));
       })
       .catch(() => {
-        // Silently keep PLAYBOOKS as fallback
-      });
+        setPlaybooks([]);
+      })
+      .finally(() => setPlaybooksLoading(false));
+  }, []);
+
+  useEffect(() => {
+    refetchPlaybooks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [tab, setTab] = useState<LibraryTab>("playbooks");
   const [search, setSearch] = useState("");
@@ -163,7 +139,8 @@ export default function PlaybookLibraryPage(): React.JSX.Element {
   const toggleScope = (s: SearchScope) => {
     setScopes((prev: any) => {
       const next = new Set(prev);
-      next.has(s) ? next.delete(s) : next.add(s);
+      if (next.has(s)) next.delete(s);
+      else next.add(s);
       if (next.size === 0) next.add("Name");
       return next;
     });
@@ -436,6 +413,7 @@ export default function PlaybookLibraryPage(): React.JSX.Element {
               total={filtered.length}
               page={safePage}
               pageSize={PAGE_SIZE}
+              loading={playbooksLoading}
               onPageChange={setPage}
               onDuplicate={handleDuplicate}
               onArchiveToggle={(id) => {
@@ -458,11 +436,18 @@ export default function PlaybookLibraryPage(): React.JSX.Element {
       <ImportPlaybookModal
         isOpen={showImport}
         onClose={() => setShowImport(false)}
-        onImported={(fileName) => {
+        onImported={({ fileName, succeeded, failed }) => {
           setShowImport(false);
-          toast.success(
-            `${fileName} imported — 1 playbook created as draft, pending governance review`,
-          );
+          if (succeeded > 0) {
+            toast.success(
+              failed > 0
+                ? `${fileName} — ${succeeded} imported as draft, ${failed} failed`
+                : `${fileName} — ${succeeded} playbook${succeeded === 1 ? "" : "s"} imported as draft, pending governance review`,
+            );
+            refetchPlaybooks();
+          } else {
+            toast.error(`${fileName} — import failed, nothing was created`);
+          }
         }}
       />
       <VersionHistoryModal

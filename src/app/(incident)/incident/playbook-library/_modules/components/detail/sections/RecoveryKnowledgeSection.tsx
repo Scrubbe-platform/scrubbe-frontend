@@ -20,6 +20,7 @@ export default function RecoveryKnowledgeSection({
         eyebrow="Progression gate"
         title="Recovery validation"
         sub="This checklist decides whether the incident may progress automatically. Run it to preview the current signals."
+        illustrative
       >
         <div className="grid gap-2.5" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))" }}>
           {RECOVERY.map((c) => (
@@ -68,6 +69,7 @@ export default function RecoveryKnowledgeSection({
         eyebrow="After execution"
         title="Knowledge generation"
         sub="Generated automatically after every execution and written back to the platform."
+        illustrative
       >
         <div className="grid gap-2.5" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(215px,1fr))" }}>
           {KNOWLEDGE_OUT.map((k) => (

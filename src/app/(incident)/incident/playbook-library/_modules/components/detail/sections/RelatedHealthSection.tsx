@@ -2,7 +2,7 @@ import React from "react";
 import toast from "react-hot-toast";
 import { RELATED } from "../../../data";
 import { Playbook } from "../../../types";
-import SectionShell from "../SectionShell";
+import SectionShell, { IllustrativeBadge } from "../SectionShell";
 
 interface RelatedHealthSectionProps {
   playbook: Playbook;
@@ -24,6 +24,7 @@ export default function RelatedHealthSection({
         eyebrow="Linked automatically"
         title="Related knowledge"
         sub="Everything Scrubbe has linked to this playbook across the platform."
+        illustrative
       >
         <div
           className="grid gap-2.5"
@@ -94,7 +95,10 @@ export default function RelatedHealthSection({
           </p>
         </div>
         <div className="ml-auto text-right">
-          <div className="text-xs text-zinc-400 dark:text-zinc-500">Last governance review</div>
+          <div className="flex items-center justify-end gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+            Last governance review
+            <IllustrativeBadge />
+          </div>
           <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">3 days ago</div>
           <button
             onClick={onRequestReview}

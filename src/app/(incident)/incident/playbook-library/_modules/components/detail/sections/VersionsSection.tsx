@@ -17,6 +17,7 @@ export default function VersionsSection({
       eyebrow="Immutable history"
       title="Version history"
       sub="Every version is preserved. Restoring creates a new version — history is never rewritten."
+      illustrative
     >
       <div className="space-y-0">
         {VERSIONS.map((v, i) => (

@@ -219,6 +219,11 @@ export interface CreateGroupData {
 }
 
 export function CreateGroupForm({ defaultManager, onCreate, onCancel }: { defaultManager: string; onCreate: (d: CreateGroupData) => void; onCancel: () => void }) {
+  const { data: people = [], isLoading: peopleLoading } = useMember();
+  const managerOptions = people.map((p) => {
+    const n = `${p.firstname ?? ""} ${p.lastname ?? ""}`.trim() || p.email;
+    return { value: n, label: `${n} (${p.email})` };
+  });
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [manager, setManager] = useState("");
@@ -240,7 +245,14 @@ export function CreateGroupForm({ defaultManager, onCreate, onCancel }: { defaul
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Manager">
-            <input value={manager} onChange={(e) => setManager(e.target.value)} placeholder={defaultManager} className={inputCls} />
+            <Select
+              value={manager}
+              onChange={(e) => setManager(e.target.value)}
+              options={[
+                { value: "", label: peopleLoading ? "Loading people…" : `Default — ${defaultManager}` },
+                ...managerOptions,
+              ]}
+            />
           </Field>
           <Field label="Primary service">
             <input value={primaryService} onChange={(e) => setPrimaryService(e.target.value)} placeholder="e.g. Analytics" className={inputCls} />
@@ -359,6 +371,11 @@ export function OnCallManagerForm({ group, onSave, onCancel }: { group: Group; o
 }
 
 export function EditGeneralForm({ group, onSave, onCancel }: { group: Group; onSave: (patch: Partial<Group>) => void; onCancel: () => void }) {
+  const { data: people = [], isLoading: peopleLoading } = useMember();
+  const managerOptions = people.map((p) => {
+    const n = `${p.firstname ?? ""} ${p.lastname ?? ""}`.trim() || p.email;
+    return { value: n, label: `${n} (${p.email})` };
+  });
   const [name, setName] = useState(group.name);
   const [description, setDescription] = useState(group.description);
   const [manager, setManager] = useState(group.manager);
@@ -380,7 +397,17 @@ export function EditGeneralForm({ group, onSave, onCancel }: { group: Group; onS
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Manager">
-            <input value={manager} onChange={(e) => setManager(e.target.value)} className={inputCls} />
+            <Select
+              value={manager}
+              onChange={(e) => setManager(e.target.value)}
+              options={[
+                ...(manager && !managerOptions.some((o) => o.value === manager)
+                  ? [{ value: manager, label: manager }]
+                  : []),
+                { value: "", label: peopleLoading ? "Loading people…" : "Unassigned" },
+                ...managerOptions,
+              ]}
+            />
           </Field>
           <Field label="Primary service">
             <input value={primaryService} onChange={(e) => setPrimaryService(e.target.value)} className={inputCls} />

@@ -14,13 +14,24 @@ const IncidentDetails = ({ incidentId }: { incidentId?: string }) => {
       const inc = res.data?.data ?? res.data;
       if (!inc) return;
       setTicketId(inc.ticketId ?? inc.id ?? LEAD.ticketId);
+      const assignee = inc.assignedTo ?? inc.owner;
+      const assigneeDisplay =
+        inc.assignedToName ||
+        inc.assignedToEmail ||
+        (typeof assignee === "string"
+          ? assignee
+          : assignee
+            ? `${assignee.firstName ?? ""} ${assignee.lastName ?? ""}`.trim() ||
+              assignee.email
+            : null) ||
+        "On-call team";
       setRows([
         { title: "Incident ID", value: inc.ticketId ?? inc.id ?? LEAD.ticketId },
         { title: "Correlation key", value: inc.correlationKey ?? `${inc.affectedSystem ?? "service"} · ${inc.rootCause ?? "unknown"} · ${inc.environment ?? "prod"}` },
         { title: "Severity", value: inc.severity ?? "P2" },
         { title: "Status", value: inc.status ?? "INVESTIGATING" },
         { title: "Affected system", value: inc.affectedSystem ?? inc.service ?? "—" },
-        { title: "Assigned to", value: inc.assignedTo ?? inc.owner ?? "On-call team" },
+        { title: "Assigned to", value: assigneeDisplay },
         { title: "Created", value: inc.createdAt ? new Date(inc.createdAt).toLocaleString() : "—" },
         { title: "Description", value: inc.summary ?? inc.description ?? INCIDENT_ROWS.find((r) => r.title === "Description")?.value ?? "—", full: true },
       ] as typeof INCIDENT_ROWS);

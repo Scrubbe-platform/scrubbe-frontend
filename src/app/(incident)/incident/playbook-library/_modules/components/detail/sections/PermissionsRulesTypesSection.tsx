@@ -25,6 +25,7 @@ export default function PermissionsRulesTypesSection({
         eyebrow="Bounded automation"
         title="Execution permissions"
         sub="Exactly what automation is permitted. Blocked actions cannot be enabled from within the playbook — only through operational rules."
+        illustrative
       >
         <div className="border border-zinc-200 rounded-lg divide-y divide-zinc-100 dark:border-zinc-800 dark:divide-zinc-800">
           {PERMISSIONS.map((x) => (
@@ -48,6 +49,7 @@ export default function PermissionsRulesTypesSection({
         eyebrow="Governance layer"
         title="Linked operational rules"
         sub="These rules decide whether this playbook is allowed to act. Select a rule to inspect it."
+        illustrative
       >
         <div className="border border-zinc-200 rounded-lg overflow-hidden dark:border-zinc-800">
           <table className="w-full text-sm">

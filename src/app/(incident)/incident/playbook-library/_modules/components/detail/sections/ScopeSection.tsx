@@ -23,6 +23,7 @@ export default function ScopeSection({ playbook, onUpdate }: ScopeSectionProps):
       eyebrow="Binding · not just a definition"
       title="Where this playbook applies"
       sub="A playbook only runs where it's bound. This defines which real services it is allowed to act on."
+      illustrative
     >
       <div className="grid gap-3 mb-4" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(215px,1fr))" }}>
         <div className="border border-zinc-200 rounded-lg bg-zinc-50 px-3.5 py-3 dark:border-zinc-800 dark:bg-zinc-800/60">

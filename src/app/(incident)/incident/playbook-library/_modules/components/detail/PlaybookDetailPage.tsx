@@ -15,13 +15,15 @@ import {
 import {
   CHANGES,
   MODULES,
-  PLAYBOOKS,
   ensureGovExtras,
   ensureScope,
+  mapApiPlaybook,
   modById,
   pLabel,
 } from "../../data";
 import { AgentDef, ModuleDef, Playbook, RuleDef, StepDef } from "../../types";
+import { customAxios } from "@/lib/api/axios";
+import { endpoint } from "@/lib/api/endpoint";
 import Dropdown from "@/components/ui/Dropdown";
 import { ArchiveModal } from "../LibraryModals";
 import ModuleDrawer from "../ModuleDrawer";
@@ -72,16 +74,6 @@ const STATUS_CLS: Record<Playbook["status"], string> = {
   Archived: "bg-transparent text-zinc-500 border border-dashed border-zinc-300 dark:text-zinc-500 dark:border-zinc-700",
 };
 
-function nextDuplicateId(): string {
-  return (
-    "PB-" +
-    String(1000 + PLAYBOOKS.length + Math.floor(Math.random() * 900)).padStart(
-      4,
-      "0",
-    )
-  );
-}
-
 interface PlaybookDetailPageProps {
   playbookId: string;
   isIncident?: boolean;
@@ -93,11 +85,25 @@ export default function PlaybookDetailPage({
 }: PlaybookDetailPageProps): React.JSX.Element {
   const router = useRouter();
 
-  const playbook = useMemo(() => {
-    const p = PLAYBOOKS.find((x) => x.id === playbookId);
-    return p ? ensureScope(ensureGovExtras(p)) : null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const [fetched, setFetched] = useState<Playbook | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    customAxios
+      .get(`${endpoint.playbooks.getOne}/${playbookId}`)
+      .then((res) => {
+        const raw = res.data?.data ?? res.data;
+        setFetched(raw ? mapApiPlaybook(raw, 0) : null);
+      })
+      .catch(() => setFetched(null))
+      .finally(() => setLoading(false));
   }, [playbookId]);
+
+  const playbook = useMemo(() => {
+    return fetched ? ensureScope(ensureGovExtras(fetched)) : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetched]);
 
   const [, setTick] = useState(0);
   const [activeNav, setActiveNav] = useState(SECTIONS[0].id);
@@ -126,6 +132,16 @@ export default function PlaybookDetailPage({
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="max-w-lg mx-auto p-10 text-center">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Loading playbook…
+        </p>
+      </div>
+    );
+  }
 
   if (!playbook) {
     return (
@@ -156,29 +172,43 @@ export default function PlaybookDetailPage({
     setActiveNav(id);
   };
 
-  const handleDuplicate = (): void => {
-    const copy: Playbook = {
-      ...JSON.parse(JSON.stringify(playbook)),
-      id: nextDuplicateId(),
-      name: `${playbook.name} (copy)`,
-      status: "Draft",
-      version: "v0.1",
-      executed: 0,
-      updated: "Just now",
-    };
-    PLAYBOOKS.push(copy);
-    toast.success(`Duplicated as ${copy.name} — created as draft`);
-    router.push("/incident/playbook-library");
+  const handleDuplicate = async (): Promise<void> => {
+    try {
+      const res = await customAxios.post(
+        `${endpoint.playbooks.clone}/${playbook.id}/clone`,
+      );
+      const cloned = res.data?.data ?? res.data;
+      toast.success(`Duplicated as ${cloned?.name ?? playbook.name} (copy) — created as draft`);
+      router.push("/incident/playbook-library");
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ?? "Couldn't duplicate this playbook — try again.",
+      );
+    }
   };
 
-  const handleArchiveConfirm = (): void => {
+  const handleArchiveConfirm = async (): Promise<void> => {
     const restoring = playbook.status === "Archived";
-    updatePlaybook({ status: restoring ? "Draft" : "Archived" });
-    toast.success(
-      restoring
-        ? `${playbook.name} restored as draft`
-        : `${playbook.name} archived — audit trail preserved`,
-    );
+    try {
+      if (restoring) {
+        await customAxios.put(`${endpoint.playbooks.update}/${playbook.id}`, {
+          status: "Draft",
+        });
+      } else {
+        await customAxios.delete(`${endpoint.playbooks.delete}/${playbook.id}`);
+      }
+      updatePlaybook({ status: restoring ? "Draft" : "Archived" });
+      toast.success(
+        restoring
+          ? `${playbook.name} restored as draft`
+          : `${playbook.name} archived — audit trail preserved`,
+      );
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ??
+          `Couldn't ${restoring ? "restore" : "archive"} this playbook — try again.`,
+      );
+    }
     setArchiving(false);
   };
 

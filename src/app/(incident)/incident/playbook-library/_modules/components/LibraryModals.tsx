@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import Modal from "@/components/ui/Modal";
 import { MODES, OWNERS, SERVICES } from "../data";
 import { ExecutionMode, Playbook } from "../types";
@@ -139,10 +140,16 @@ export function CreatePlaybookModal({
 
 /* ---------- Import playbooks ---------- */
 
+interface ImportResult {
+  fileName: string;
+  succeeded: number;
+  failed: number;
+}
+
 interface ImportPlaybookModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onImported: (fileName: string) => void;
+  onImported: (result: ImportResult) => void;
 }
 
 export function ImportPlaybookModal({
@@ -151,6 +158,7 @@ export function ImportPlaybookModal({
   onImported,
 }: ImportPlaybookModalProps): React.JSX.Element {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="sm:max-w-md">
@@ -162,45 +170,52 @@ export function ImportPlaybookModal({
         </p>
 
         <div className="border-2 border-dashed border-zinc-300 rounded-xl px-5 py-8 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-500">
-          <b className="text-zinc-800 dark:text-zinc-200">Choose a file</b> — JSON or YAML playbook definitions.
+          <b className="text-zinc-800 dark:text-zinc-200">Choose a file</b> — JSON playbook definitions.
           <div className="text-xs text-zinc-400 mt-1 dark:text-zinc-600">
-            Modules referenced by ID are matched against the module library.
+            YAML isn&apos;t supported yet — export as JSON first. Modules referenced by ID are
+            matched against the module library.
           </div>
           <button
+            disabled={importing}
             onClick={() => fileRef.current?.click()}
-            className="mt-4 px-4 py-2 text-sm font-semibold border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors dark:border-zinc-700 dark:hover:bg-zinc-800"
+            className="mt-4 px-4 py-2 text-sm font-semibold border border-zinc-300 rounded-lg hover:bg-zinc-50 disabled:opacity-50 transition-colors dark:border-zinc-700 dark:hover:bg-zinc-800"
           >
-            Choose file
+            {importing ? "Importing…" : "Choose file"}
           </button>
           <input
             ref={fileRef}
             type="file"
-            accept="application/json,.json,.yaml,.yml"
+            accept="application/json,.json"
             className="hidden"
             onChange={async (e) => {
               const f = e.target.files?.[0];
               if (!f) return;
               e.target.value = "";
-              // Parse JSON and submit to server
-              try {
-                const text = await f.text();
-                let parsed: any;
-                try {
-                  parsed = JSON.parse(text);
-                } catch {
-                  // YAML or invalid JSON — fall back to name-only import
-                  onImported(f.name);
-                  return;
-                }
-                const payload: any[] = Array.isArray(parsed) ? parsed : [parsed];
-                await Promise.all(
-                  payload.map((p: any) => customAxios.post(endpoint.playbooks.create, p)),
-                );
-                onImported(f.name);
-              } catch {
-                // Fall back to name-only import so the UI still responds
-                onImported(f.name);
+
+              if (/\.ya?ml$/i.test(f.name)) {
+                toast.error("YAML import isn't supported yet — export as JSON first.");
+                return;
               }
+
+              const text = await f.text();
+              let parsed: any;
+              try {
+                parsed = JSON.parse(text);
+              } catch {
+                toast.error(`Couldn't parse ${f.name} — check it's valid JSON.`);
+                return;
+              }
+
+              const payload: any[] = Array.isArray(parsed) ? parsed : [parsed];
+              setImporting(true);
+              const results = await Promise.allSettled(
+                payload.map((p: any) => customAxios.post(endpoint.playbooks.create, p)),
+              );
+              setImporting(false);
+
+              const succeeded = results.filter((r) => r.status === "fulfilled").length;
+              const failed = results.length - succeeded;
+              onImported({ fileName: f.name, succeeded, failed });
             }}
           />
         </div>
