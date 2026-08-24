@@ -2,7 +2,9 @@
 
 import { useRef, useState } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { Settings } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 // ── Code samples ──────────────────────────────────────────────────
 
@@ -306,173 +308,168 @@ export default function APISection() {
   const [showResponse, setShowResponse] = useState(false);
   return (
     <div ref={ref} className="w-full bg-white">
-      <div className="max-w-[960px] mx-auto px-6 py-16 space-y-20">
-        {/* ── Hero block: outer bordered white card ── */}
-        <div className="border border-gray-200 rounded-2xl bg-white overflow-hidden">
-          <div className="px-8 pt-10 pb-8">
-            {/* Label */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={inView ? { opacity: 1 } : {}}
-              transition={{ duration: 0.5 }}
-              className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-500 mb-4 font-mono"
-            >
-              Scrubbe API Section
-            </motion.p>
-
-            {/* Heading */}
+      <div className="max-w-[1480px] mx-auto px-6 py-16 space-y-20">
+        {/* ── Hero block: headline + CTAs left, illustration right ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          <div>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="font-black text-gray-950 leading-[1.08] tracking-[-0.03em] mb-4"
-              style={{ fontSize: "clamp(30px, 4vw, 54px)" }}
+              className="font-serif font-bold text-gray-950 leading-[1.15] mb-5"
+              style={{ fontSize: "clamp(30px, 3.4vw, 46px)" }}
             >
-              Programmable
-              <br />
-              Incident <span className="text-emerald-500">Control.</span>
+              Incident response , built into your infrastructure
             </motion.h2>
 
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.55, delay: 0.1 }}
-              className="text-[15px] text-gray-500 leading-relaxed mb-8 max-w-xl"
+              className="text-[15px] text-gray-500 leading-relaxed mb-8 max-w-[480px]"
             >
-              Build incident automation directly into your stack with Scrubbe's
-              governed API.
+              Connect Scrubbe directly to your existing stack and program
+              investigations , approvals and remediation into your operational
+              workflows
             </motion.p>
 
-            {/* Info box — gear icon matching screenshot */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="flex items-start gap-4 border border-gray-200 rounded-xl p-5 mb-8"
+              transition={{ duration: 0.5, delay: 0.18 }}
+              className="flex items-center gap-3"
             >
-              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                <Settings size={18} className="text-gray-600" />
-              </div>
-              <div>
-                <p className="text-[13.5px] text-gray-600 leading-relaxed mb-2">
-                  Integrate incident intelligence, approvals, investigations,
-                  and remediation into your internal tools, CI/CD pipelines,
-                  chatops workflows, and monitoring systems.
-                </p>
-                <p className="text-[13.5px] text-gray-500 leading-relaxed">
-                  Scrubbe API gives engineering teams a programmable control
-                  plane for incident response — so incidents can be triggered,
-                  analyzed, approved, and resolved through code.
-                </p>
-              </div>
+              <Link
+                href="/docs"
+                className="px-6 py-3 rounded-lg shadow-md shadow-light font-bold text-[14px] text-white bg-black hover:brightness-110 transition-all"
+              >
+                Read the API docs
+              </Link>
+              <Link
+                href="/connector"
+                className="px-6 py-3 rounded-lg shadow-md shadow-IMSDarkGreen/15 font-bold text-[14px] text-black bg-white border border-gray-300 hover:border-gray-400 transition-all"
+              >
+                Explore Integrations
+              </Link>
             </motion.div>
+          </div>
 
-            {/* ── Code playground ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="border border-gray-200 rounded-xl overflow-hidden"
-            >
-              {/* Top bar */}
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-gray-50">
-                <span className="px-2.5 py-1 rounded text-[11px] font-bold bg-emerald-500 text-white tracking-wide uppercase">
-                  API Request
-                </span>
-                <span className="px-2.5 py-1 rounded text-[11px] font-semibold border border-gray-300 text-gray-600 tracking-wide uppercase">
-                  Example : Create Incident
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={inView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="relative w-full aspect-[4/3] hidden lg:block"
+          >
+            <Image
+              src="/IMS/api-docs.png"
+              alt="Scrubbe API"
+              fill
+              className="object-contain"
+            />
+          </motion.div>
+        </div>
+
+        {/* ── Code playground card ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="border border-gray-200 rounded-2xl bg-white p-8"
+        >
+          <h3 className="text-[20px] font-bold text-black mb-1">
+            Post /v1/incidents
+          </h3>
+          <p className="text-[13.5px] text-gray-500 mb-6">
+            Create an incident programmatically
+          </p>
+
+          <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Request panel */}
+            <div className="rounded-xl p-4" style={{ background: "#f4f5f7" }}>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[13px] font-semibold text-gray-700">
+                  Request
                 </span>
                 <button
-                  className="px-3 py-1 rounded text-[12px] font-bold text-white border-0 cursor-pointer transition-all hover:brightness-110"
-                  style={{
-                    background: "linear-gradient(90deg, #1a2a1a, #22c55e)",
-                  }}
                   onClick={() => setShowResponse(true)}
+                  className="px-4 py-1.5 rounded-lg bg-black text-white text-[12.5px] font-semibold border-0 cursor-pointer hover:brightness-110 transition-all"
                 >
                   Try it
                 </button>
               </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr]">
-                {/* Left — dark code editor */}
-                <div
-                  style={{
-                    background: "#0d1117",
-                    borderRight: "1px solid #1f2937",
-                  }}
-                >
-                  <div className="flex items-center border-b border-[#1f2937] overflow-x-auto">
-                    {LANGS.map((lang) => (
-                      <button
-                        key={lang}
-                        onClick={() => setActiveLang(lang)}
-                        className="flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-medium whitespace-nowrap cursor-pointer border-0 bg-transparent transition-colors"
-                        style={{
-                          color: activeLang === lang ? "#f9fafb" : "#6b7280",
-                          borderBottom:
-                            activeLang === lang
-                              ? "2px solid #22c55e"
-                              : "2px solid transparent",
-                        }}
-                      >
-                        <span style={{ fontSize: 9, color: "#6b7280" }}>◯</span>
-                        {LANG_LABELS[lang]}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="p-5 min-h-[300px]">
-                    <CodeBlock lang={activeLang} />
-                  </div>
+              <div
+                className="rounded-lg overflow-hidden"
+                style={{ background: "#0d1117" }}
+              >
+                <div className="flex items-center border-b border-[#1f2937] overflow-x-auto">
+                  {LANGS.map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => setActiveLang(lang)}
+                      className="flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-medium whitespace-nowrap cursor-pointer border-0 bg-transparent transition-colors"
+                      style={{
+                        color: activeLang === lang ? "#f9fafb" : "#6b7280",
+                        borderBottom:
+                          activeLang === lang
+                            ? "2px solid #22c55e"
+                            : "2px solid transparent",
+                      }}
+                    >
+                      <span style={{ fontSize: 9, color: "#6b7280" }}>◯</span>
+                      {LANG_LABELS[lang]}
+                    </button>
+                  ))}
                 </div>
-
-                {/* Right — white response panel, always visible */}
-                <div className="bg-white">
-                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 font-mono">
-                      Response
-                    </span>
-
-                    {showResponse && (
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200 font-mono">
-                        201 CREATED
-                      </span>
-                    )}
-                  </div>
-                  {showResponse && (
-                    <pre className="p-5 text-[12px] font-mono text-gray-600 leading-6 overflow-auto">
-                      {RESPONSE_CODE}
-                    </pre>
-                  )}
-                  {/* <div className="p-5 font-mono text-[12.5px] leading-6 min-h-[300px]">
-                    {RESPONSE_LINES.map((line, i) => (
-                      <div key={i} className="flex gap-4">
-                        <span className="select-none w-5 text-right shrink-0 text-gray-400">
-                          {i + 1}
-                        </span>
-                        <span style={{ color: line.color ?? "#374151" }}>
-                          {line.text}
-                        </span>
-                      </div>
-                    ))}
-                  </div> */}
+                <div className="p-4 min-h-[280px] overflow-auto">
+                  <CodeBlock lang={activeLang} />
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            {/* Start with Doc — inside card, right-aligned */}
-            <div className="flex justify-end mt-6">
-              <button
-                className="px-6 py-3 rounded-lg font-bold text-[14px] text-white border-0 cursor-pointer transition-all hover:brightness-110"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
-                }}
+            {/* Center arrow */}
+            <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-gray-200 items-center justify-center shadow-sm">
+              <ArrowRight size={16} className="text-gray-700" />
+            </div>
+
+            {/* Response panel */}
+            <div className="rounded-xl p-4" style={{ background: "#f4f5f7" }}>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[13px] font-semibold text-gray-700">
+                  Response
+                </span>
+                {showResponse && (
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200 font-mono">
+                    201 CREATED
+                  </span>
+                )}
+              </div>
+              <div
+                className="rounded-lg overflow-hidden min-h-[280px]"
+                style={{ background: "#0d1117" }}
               >
-                Start with Doc
-              </button>
+                {showResponse ? (
+                  <pre className="p-4 text-[12px] font-mono text-gray-300 leading-6 overflow-auto">
+                    {RESPONSE_CODE}
+                  </pre>
+                ) : (
+                  <div className="p-4 text-[12.5px] text-gray-500 font-mono">
+                    Click "Try it" to see a response
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+
+          <div className="flex justify-end mt-6">
+            <Link
+              href="/docs"
+              className="text-[14px] font-bold text-black underline underline-offset-4 inline-flex items-center gap-1.5 hover:text-gray-700 transition-colors"
+            >
+              Start with Doc
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        </motion.div>
 
         {/* ── Connected Systems — two-column editorial matching the screenshot ── */}
 

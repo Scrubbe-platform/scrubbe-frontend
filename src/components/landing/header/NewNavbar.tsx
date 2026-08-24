@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { ChevronDown, X, Menu, ArrowRight } from "lucide-react";
+import { ChevronDown, X, Menu, ArrowRight, Search, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -51,38 +51,41 @@ function NavCard({
 // Bottom right: 2 plain link cards
 // ─────────────────────────────────────────────────────────────────
 
+const PRODUCT_CARDS = [
+  {
+    title: "How it works",
+    desc: "The full incident decision loop",
+    href: "/how-it-works",
+  },
+  { title: "Platform", desc: "Core orchestration engine", href: "/platform" },
+  { title: "Ezra", desc: "AI code & root cause intelligence", href: "/ezra" },
+  {
+    title: "Playbooks",
+    desc: "Reusable, versioned response plans",
+    href: "/playbooks",
+  },
+  {
+    title: "Connectors",
+    desc: "Native integrations across your stack",
+    href: "/connectors",
+  },
+];
+const PRODUCT_BOTTOM = [
+  {
+    title: "Pipeline",
+    desc: "Direct path into the live workflow and state model.",
+    href: "/pipeline",
+  },
+  {
+    title: "Governance",
+    desc: "Jump to policy, approval, and audit-focused sections.",
+    href: "/governance",
+  },
+];
+
 function ProductDropdown() {
-  const cards = [
-    {
-      title: "How it works",
-      desc: "The full incident decision loop",
-      href: "/how-it-works",
-    },
-    { title: "Platform", desc: "Core orchestration engine", href: "/platform" },
-    { title: "Ezra", desc: "AI code & root cause intelligence", href: "/ezra" },
-    {
-      title: "Playbooks",
-      desc: "Reusable, versioned response plans",
-      href: "/playbooks",
-    },
-    {
-      title: "Connectors",
-      desc: "Native integrations across your stack",
-      href: "/connectors",
-    },
-  ];
-  const bottom = [
-    {
-      title: "Pipeline",
-      desc: "Direct path into the live workflow and state model.",
-      href: "/pipeline",
-    },
-    {
-      title: "Governance",
-      desc: "Jump to policy, approval, and audit-focused sections.",
-      href: "/governance",
-    },
-  ];
+  const cards = PRODUCT_CARDS;
+  const bottom = PRODUCT_BOTTOM;
 
   return (
     <div className="grid grid-cols-2 gap-0 h-full">
@@ -142,71 +145,74 @@ function ProductDropdown() {
 // CHALLENGES dropdown — same layout as Product
 // ─────────────────────────────────────────────────────────────────
 
+const CHALLENGES_CARDS = [
+  {
+    title: "Fragmented Signals",
+    desc: "Multiple tools, no unified incident context",
+    href: "/challenges/fragmented-signals",
+  },
+  {
+    title: "Root cause clarity",
+    desc: "Faster path from symptoms to cause",
+    href: "/challenges/root-cause",
+  },
+  {
+    title: "Incident Response",
+    desc: "Coordination under pressure",
+    href: "/challenges/incident-response",
+  },
+  {
+    title: "Decision Bottlenecks",
+    desc: "Reduce waiting at approval gates",
+    href: "/challenges/decision-bottlenecks",
+  },
+  {
+    title: "Automation Safety",
+    desc: "Guardrails before execution",
+    href: "/challenges/automation-safety",
+  },
+  {
+    title: "Alert Fatigue",
+    desc: "Collapse noise into signal",
+    href: "/challenges/alert-fatigue",
+  },
+  {
+    title: "Repeated Incidents",
+    desc: "Turn outcomes into learned patterns",
+    href: "/challenges/repeated-incidents",
+  },
+  {
+    title: "Manual triage",
+    desc: "Automate decision-to-decision",
+    href: "/challenges/manual-triage",
+  },
+  {
+    title: "Scaling Reliability",
+    desc: "Grow operational confidence as systems grow",
+    href: "/challenges/scaling-reliability",
+  },
+  {
+    title: "Ungoverned automation",
+    desc: "Policy-first AI execution",
+    href: "/challenges/ungoverned-automation",
+  },
+];
+const CHALLENGES_BOTTOM = [
+  {
+    title: "Blast radius risk",
+    desc: "Map impact before acting",
+    href: "/challenges/blast-radius",
+  },
+  {
+    title: "Control Layer",
+    desc: "Governed automation with human checkpoints",
+    href: "/challenges/control-layer",
+  },
+];
+
 function ChallengesDropdown() {
-  const cards = [
-    {
-      title: "Fragmented Signals",
-      desc: "Multiple tools, no unified incident context",
-      href: "/challenges/fragmented-signals",
-    },
-    {
-      title: "Root cause clarity",
-      desc: "Faster path from symptoms to cause",
-      href: "/challenges/root-cause",
-    },
-    {
-      title: "Incident Response",
-      desc: "Coordination under pressure",
-      href: "/challenges/incident-response",
-    },
-    {
-      title: "Decision Bottlenecks",
-      desc: "Reduce waiting at approval gates",
-      href: "/challenges/decision-bottlenecks",
-    },
-    {
-      title: "Automation Safety",
-      desc: "Guardrails before execution",
-      href: "/challenges/automation-safety",
-    },
-    {
-      title: "Alert Fatigue",
-      desc: "Collapse noise into signal",
-      href: "/challenges/alert-fatigue",
-    },
-    {
-      title: "Repeated Incidents",
-      desc: "Turn outcomes into learned patterns",
-      href: "/challenges/repeated-incidents",
-    },
-    {
-      title: "Manual triage",
-      desc: "Automate decision-to-decision",
-      href: "/challenges/manual-triage",
-    },
-    {
-      title: "Scaling Reliability",
-      desc: "Grow operational confidence as systems grow",
-      href: "/challenges/scaling-reliability",
-    },
-    {
-      title: "Ungoverned automation",
-      desc: "Policy-first AI execution",
-      href: "/challenges/ungoverned-automation",
-    },
-  ];
-  const bottom = [
-    {
-      title: "Blast radius risk",
-      desc: "Map impact before acting",
-      href: "/challenges/blast-radius",
-    },
-    {
-      title: "Control Layer",
-      desc: "Governed automation with human checkpoints",
-      href: "/challenges/control-layer",
-    },
-  ];
+  const cards = CHALLENGES_CARDS;
+  const bottom = CHALLENGES_BOTTOM;
 
   return (
     <div className="grid grid-cols-2 gap-0 h-full">
@@ -261,56 +267,58 @@ function ChallengesDropdown() {
 // SOLUTIONS dropdown — 3-column layout: By Industry | By Use Case | By Team
 // ─────────────────────────────────────────────────────────────────
 
+const SOLUTIONS_COLS = [
+  {
+    heading: "By Industry",
+    links: [
+      { title: "Fintech", href: "/solutions/fintech" },
+      { title: "E-Commerce", href: "/solutions/ecommerce" },
+      { title: "Saas", href: "/solutions/saas" },
+      { title: "Healthcare", href: "/solutions/healthcare" },
+      { title: "Gaming", href: "/solutions/gaming" },
+      { title: "Enterprise", href: "/solutions/enterprise" },
+    ],
+  },
+  {
+    heading: "By Use Case",
+    links: [
+      { title: "Incident Detection", href: "/solutions/incident-detection" },
+      { title: "Root Cause Analysis", href: "/solutions/root-cause" },
+      {
+        title: "Automated Remediation",
+        href: "/solutions/automated-remediation",
+      },
+      {
+        title: "Deployment Monitoring",
+        href: "/solutions/deployment-monitoring",
+      },
+      {
+        title: "Incident Intelligence",
+        href: "/solutions/incident-intelligence",
+      },
+      { title: "Governance", href: "/solutions/governance" },
+    ],
+  },
+  {
+    heading: "By Team",
+    links: [
+      {
+        title: "Platform Engineering",
+        href: "/solutions/platform-engineering",
+      },
+      { title: "SRE / Devops", href: "/solutions/sre-devops" },
+      {
+        title: "Engineering Leadership",
+        href: "/solutions/engineering-leadership",
+      },
+      { title: "Security", href: "/solutions/security" },
+      { title: "QA/Release", href: "/solutions/qa-release" },
+    ],
+  },
+];
+
 function SolutionsDropdown() {
-  const cols = [
-    {
-      heading: "By Industry",
-      links: [
-        { title: "Fintech", href: "/solutions/fintech" },
-        { title: "E-Commerce", href: "/solutions/ecommerce" },
-        { title: "Saas", href: "/solutions/saas" },
-        { title: "Healthcare", href: "/solutions/healthcare" },
-        { title: "Gaming", href: "/solutions/gaming" },
-        { title: "Enterprise", href: "/solutions/enterprise" },
-      ],
-    },
-    {
-      heading: "By Use Case",
-      links: [
-        { title: "Incident Detection", href: "/solutions/incident-detection" },
-        { title: "Root Cause Analysis", href: "/solutions/root-cause" },
-        {
-          title: "Automated Remediation",
-          href: "/solutions/automated-remediation",
-        },
-        {
-          title: "Deployment Monitoring",
-          href: "/solutions/deployment-monitoring",
-        },
-        {
-          title: "Incident Intelligence",
-          href: "/solutions/incident-intelligence",
-        },
-        { title: "Governance", href: "/solutions/governance" },
-      ],
-    },
-    {
-      heading: "By Team",
-      links: [
-        {
-          title: "Platform Engineering",
-          href: "/solutions/platform-engineering",
-        },
-        { title: "SRE / Devops", href: "/solutions/sre-devops" },
-        {
-          title: "Engineering Leadership",
-          href: "/solutions/engineering-leadership",
-        },
-        { title: "Security", href: "/solutions/security" },
-        { title: "QA/Release", href: "/solutions/qa-release" },
-      ],
-    },
-  ];
+  const cols = SOLUTIONS_COLS;
 
   return (
     <div className="grid grid-cols-3 divide-x divide-gray-100 p-2">
@@ -344,58 +352,60 @@ function SolutionsDropdown() {
 // CONNECTIONS dropdown — 2-col, 3-row grouped sections with green dot labels
 // ─────────────────────────────────────────────────────────────────
 
+const CONNECTIONS_SECTIONS = [
+  {
+    label: "Code & Version Control",
+    links: [
+      { title: "GitHub", href: "/connector/github" },
+      { title: "GitLab", href: "/connector/gitlab" },
+      { title: "Bitbucket", href: "/" },
+    ],
+    caption: "Track deployments & commits that trigger incidents",
+  },
+  {
+    label: "Cloud & Infrastructure",
+    links: [
+      { title: "AWS", href: "/" },
+      { title: "Azure", href: "/" },
+      { title: "Google Cloud", href: "/" },
+    ],
+    caption: "Monitor infra signals, scaling events & service health",
+  },
+  {
+    label: "Orchestration & Runtime",
+    links: [{ title: "Kubernetes", href: "/" }],
+    caption: "Track deployments & commits that trigger incidents",
+  },
+  {
+    label: "Warroom & Alerts",
+    links: [
+      { title: "Slack", href: "/" },
+      { title: "Microsoft Teams", href: "/" },
+    ],
+    caption: "Ingests alert & Spin up context-rich warrooms",
+  },
+  {
+    label: "Observability",
+    links: [
+      { title: "Datadog", href: "/" },
+      { title: "Prometheus", href: "/" },
+      { title: "Grafana", href: "/" },
+    ],
+    caption: "Metrics, logs & alerts from your existing stack",
+  },
+  {
+    label: "Build Your Own",
+    links: [
+      { title: "Node.js SDK", href: "/sdk/nodejs" },
+      { title: "Python SDK", href: "/sdk/python" },
+      { title: "Webhook Ingestion", href: "/sdk/webhooks" },
+    ],
+    caption: "Send custom signals from any system into Scrubbe",
+  },
+];
+
 function ConnectionsDropdown() {
-  const sections = [
-    {
-      label: "Code & Version Control",
-      links: [
-        { title: "GitHub", href: "/connector/github" },
-        { title: "GitLab", href: "/connector/gitlab" },
-        { title: "Bitbucket", href: "/" },
-      ],
-      caption: "Track deployments & commits that trigger incidents",
-    },
-    {
-      label: "Cloud & Infrastructure",
-      links: [
-        { title: "AWS", href: "/" },
-        { title: "Azure", href: "/" },
-        { title: "Google Cloud", href: "/" },
-      ],
-      caption: "Monitor infra signals, scaling events & service health",
-    },
-    {
-      label: "Orchestration & Runtime",
-      links: [{ title: "Kubernetes", href: "/" }],
-      caption: "Track deployments & commits that trigger incidents",
-    },
-    {
-      label: "Warroom & Alerts",
-      links: [
-        { title: "Slack", href: "/" },
-        { title: "Microsoft Teams", href: "/" },
-      ],
-      caption: "Ingests alert & Spin up context-rich warrooms",
-    },
-    {
-      label: "Observability",
-      links: [
-        { title: "Datadog", href: "/" },
-        { title: "Prometheus", href: "/" },
-        { title: "Grafana", href: "/" },
-      ],
-      caption: "Metrics, logs & alerts from your existing stack",
-    },
-    {
-      label: "Build Your Own",
-      links: [
-        { title: "Node.js SDK", href: "/sdk/nodejs" },
-        { title: "Python SDK", href: "/sdk/python" },
-        { title: "Webhook Ingestion", href: "/sdk/webhooks" },
-      ],
-      caption: "Send custom signals from any system into Scrubbe",
-    },
-  ];
+  const sections = CONNECTIONS_SECTIONS;
 
   return (
     <div className="grid grid-cols-2 divide-y divide-gray-100">
@@ -441,39 +451,41 @@ function ConnectionsDropdown() {
 // RESOURCES dropdown — same 2-col card layout as Product/Challenges
 // ─────────────────────────────────────────────────────────────────
 
+const RESOURCES_CARDS = [
+  {
+    title: "Documentation",
+    desc: "APIs, SDKs, and integration guides",
+    href: "/docs",
+  },
+  {
+    title: "Reports",
+    desc: "Incident Intelligence and operational trends",
+    href: "/reports",
+  },
+  {
+    title: "Product Demo",
+    desc: "Guided walkthroughs and UI tours",
+    href: "/demo",
+  },
+  {
+    title: "Architecture",
+    desc: "How the governed pipeline fits together",
+    href: "/architecture",
+  },
+  {
+    title: "Blog",
+    desc: "Notes from engineering and platform design",
+    href: "https://scrubbe.medium.com/",
+  },
+  {
+    title: "Community",
+    desc: "Notes from engineering and platform design",
+    href: "/community",
+  },
+];
+
 function ResourcesDropdown() {
-  const cards = [
-    {
-      title: "Documentation",
-      desc: "APIs, SDKs, and integration guides",
-      href: "/docs",
-    },
-    {
-      title: "Reports",
-      desc: "Incident Intelligence and operational trends",
-      href: "/reports",
-    },
-    {
-      title: "Product Demo",
-      desc: "Guided walkthroughs and UI tours",
-      href: "/demo",
-    },
-    {
-      title: "Architecture",
-      desc: "How the governed pipeline fits together",
-      href: "/architecture",
-    },
-    {
-      title: "Blog",
-      desc: "Notes from engineering and platform design",
-      href: "https://scrubbe.medium.com/",
-    },
-    {
-      title: "Community",
-      desc: "Notes from engineering and platform design",
-      href: "/community",
-    },
-  ];
+  const cards = RESOURCES_CARDS;
 
   return (
     <div className="grid grid-cols-2 gap-0 h-full">
@@ -511,39 +523,41 @@ function ResourcesDropdown() {
 // SECURITY dropdown — same 2-col card layout
 // ─────────────────────────────────────────────────────────────────
 
+const SECURITY_CARDS = [
+  {
+    title: "Security Overview",
+    desc: "Platform-wide safeguards and principles",
+    href: "/security/overview",
+  },
+  {
+    title: "Data Protection",
+    desc: "Handling, storage, and isolation controls",
+    href: "/security/data-protection",
+  },
+  {
+    title: "Access Controls",
+    desc: "Permissions, approvals and operator boundaries",
+    href: "/security/access-controls",
+  },
+  {
+    title: "Governance & Policies",
+    desc: "Versioned rules and execution limits",
+    href: "/security/governance",
+  },
+  {
+    title: "Audit & Traceability",
+    desc: "Immutable decision records and timeline",
+    href: "/security/audit",
+  },
+  {
+    title: "Compliance",
+    desc: "Reporting-friendly controls and review paths",
+    href: "/security/compliance",
+  },
+];
+
 function SecurityDropdown() {
-  const cards = [
-    {
-      title: "Security Overview",
-      desc: "Platform-wide safeguards and principles",
-      href: "/security/overview",
-    },
-    {
-      title: "Data Protection",
-      desc: "Handling, storage, and isolation controls",
-      href: "/security/data-protection",
-    },
-    {
-      title: "Access Controls",
-      desc: "Permissions, approvals and operator boundaries",
-      href: "/security/access-controls",
-    },
-    {
-      title: "Governance & Policies",
-      desc: "Versioned rules and execution limits",
-      href: "/security/governance",
-    },
-    {
-      title: "Audit & Traceability",
-      desc: "Immutable decision records and timeline",
-      href: "/security/audit",
-    },
-    {
-      title: "Compliance",
-      desc: "Reporting-friendly controls and review paths",
-      href: "/security/compliance",
-    },
-  ];
+  const cards = SECURITY_CARDS;
 
   return (
     <div className="grid grid-cols-2 gap-0 h-full">
@@ -618,6 +632,203 @@ function DropdownContent({ label }: { label: string }) {
     default:
       return null;
   }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Site search — indexes the real nav link data above (no invented content)
+// ─────────────────────────────────────────────────────────────────
+
+type SearchEntry = {
+  title: string;
+  desc: string;
+  href: string;
+  section: string;
+};
+
+const SEARCH_INDEX: SearchEntry[] = [
+  ...PRODUCT_CARDS.map((c) => ({ ...c, section: "Product" })),
+  ...PRODUCT_BOTTOM.map((c) => ({ ...c, section: "Product" })),
+  ...CHALLENGES_CARDS.map((c) => ({ ...c, section: "Challenges" })),
+  ...CHALLENGES_BOTTOM.map((c) => ({ ...c, section: "Challenges" })),
+  ...SOLUTIONS_COLS.flatMap((col) =>
+    col.links.map((l) => ({
+      title: l.title,
+      desc: col.heading,
+      href: l.href,
+      section: "Solutions",
+    })),
+  ),
+  ...CONNECTIONS_SECTIONS.flatMap((s) =>
+    s.links.map((l) => ({
+      title: l.title,
+      desc: s.label,
+      href: l.href,
+      section: "Connections",
+    })),
+  ),
+  ...RESOURCES_CARDS.map((c) => ({ ...c, section: "Resources" })),
+  ...SECURITY_CARDS.map((c) => ({ ...c, section: "Security" })),
+  {
+    title: "Pricing",
+    desc: "Plans and pricing",
+    href: "/pricing",
+    section: "Pricing",
+  },
+  {
+    title: "Contact us",
+    desc: "Get in touch with the team",
+    href: "/contact-us",
+    section: "Contact",
+  },
+];
+
+function SiteSearch({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setQuery("");
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  }, [open]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return SEARCH_INDEX.filter(
+      (e) =>
+        e.title.toLowerCase().includes(q) ||
+        e.desc.toLowerCase().includes(q) ||
+        e.section.toLowerCase().includes(q),
+    ).slice(0, 8);
+  }, [query]);
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/30 z-[60]"
+            onClick={onClose}
+          />
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed top-[80px] left-1/2 -translate-x-1/2 w-[92vw] max-w-[560px] bg-white border border-gray-200 rounded-2xl shadow-2xl z-[70] overflow-hidden"
+          >
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+              <Search size={16} className="text-gray-400 shrink-0" />
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search pages…"
+                className="flex-1 text-[14px] outline-none border-none bg-transparent placeholder:text-gray-400"
+              />
+              <button
+                onClick={onClose}
+                className="w-6 h-6 rounded-md flex items-center justify-center bg-gray-100 border-none cursor-pointer shrink-0"
+              >
+                <X size={13} className="text-gray-500" />
+              </button>
+            </div>
+
+            {query.trim() && (
+              <div className="max-h-[360px] overflow-y-auto">
+                {results.length === 0 ? (
+                  <p className="px-4 py-6 text-[13px] text-gray-400 text-center">
+                    No pages found for “{query}”
+                  </p>
+                ) : (
+                  results.map((r) => (
+                    <Link
+                      key={r.href + r.title}
+                      href={r.href}
+                      onClick={onClose}
+                      className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-emerald-50/60 transition-colors group border-b border-gray-50 last:border-0"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-bold text-black group-hover:text-emerald-700 truncate">
+                          {r.title}
+                        </p>
+                        <p className="text-[11.5px] text-gray-500 truncate">
+                          {r.section} · {r.desc}
+                        </p>
+                      </div>
+                      <ArrowRight
+                        size={13}
+                        className="text-gray-300 group-hover:text-emerald-500 shrink-0"
+                      />
+                    </Link>
+                  ))
+                )}
+              </div>
+            )}
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// Visual-only for now — no i18n system is wired up yet, so only English is offered.
+function LanguageSelector() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1 px-1 py-1 text-[12.5px] font-bold text-gray-600 hover:text-black transition-colors bg-transparent border-none cursor-pointer"
+      >
+        <Globe size={16} />
+        EN
+        <ChevronDown size={12} className="text-gray-400" />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden min-w-[160px]"
+          >
+            <div className="px-3 py-2 text-[13px] font-semibold text-black bg-emerald-50/60">
+              English
+            </div>
+            <div className="px-3 py-2 text-[12px] text-gray-400 border-t border-gray-100">
+              More languages coming soon
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -906,6 +1117,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <>
@@ -928,38 +1140,46 @@ export default function Navbar() {
           </div>
 
           <div className="hidden 2xl:flex items-center gap-3 ml-auto">
+            <button
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search"
+              className="w-9 h-9 rounded-lg flex items-center justify-center bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-colors text-gray-600 hover:text-black"
+            >
+              <Search size={16} />
+            </button>
+            <LanguageSelector />
+            <div className="w-px h-5 bg-gray-200 shrink-0" />
             <Link
               href="/waitlist"
-              className="px-5 py-2.5 rounded-lg text-[13.5px] font-bold border border-IMSDarkGreen text-IMSLightGreen hover:brightness-110 transition-all"
+              className="px-5 py-2.5 rounded-lg text-[13.5px] font-semibold border bg-white hover:shadow-lg shadow-light hover:brightness-110 transition-all"
             >
               Join Waitlist
             </Link>
             <Link
               href="/auth/signin"
-              className="px-5 py-2.5 rounded-lg text-[13.5px] font-bold text-white border-none hover:brightness-110 transition-all"
-              style={{
-                background:
-                  "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
-              }}
+              className="px-5 bg-black hover:bg-IMSLightGreen  py-2.5 rounded-lg text-[13.5px] font-bold text-white border-none hover:brightness-110 transition-all"
             >
               Get Started
             </Link>
           </div>
 
           <div className="flex 2xl:hidden items-center gap-3 ml-auto">
+            <button
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search"
+              className="w-9 h-9 rounded-lg flex items-center justify-center bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-colors text-gray-600 hover:text-black"
+            >
+              <Search size={16} />
+            </button>
             <Link
               href="/waitlist"
-              className="px-4 py-2 border border-IMSDarkGreen text-IMSLightGreen rounded-lg text-[13px] font-bold "
+              className="px-5 py-2.5 rounded-lg text-[13.5px] font-semibold border bg-white hover:shadow-lg shadow-light hover:brightness-110 transition-all"
             >
               Join Waitlist
             </Link>
             <Link
               href="/auth/signin"
-              className="px-5 py-2.5 hidden md:block rounded-lg text-[13.5px] font-bold text-white border-none hover:brightness-110 transition-all"
-              style={{
-                background:
-                  "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
-              }}
+              className="px-5 bg-black hover:bg-IMSLightGreen  py-2.5 rounded-lg text-[13.5px] font-bold text-white border-none hover:brightness-110 transition-all"
             >
               Get Started
             </Link>
@@ -977,6 +1197,7 @@ export default function Navbar() {
       {mobileOpen && (
         <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
       )}
+      <SiteSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }

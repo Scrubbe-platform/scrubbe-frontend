@@ -6,6 +6,8 @@ import Contact from "./Contact";
 import ApiReference from "./ApiReference";
 import CategoryShiftBanner from "./CategoryShiftBanner";
 import TickerItem from "./TickerItem";
+import NvidiaInceptionSection from "./NvidiaInceptionSection";
+import MttrSection from "./MttrSection";
 import CategoryStatement from "./CategoryStatement";
 import ProblemSection from "./ProblemSection";
 import TransformationSection from "./TransformationalSection";
@@ -25,32 +27,33 @@ import MigrationSection from "./MigrationSection";
 import RecommendedActions from "./RecommendedAction";
 import RecentFindings from "./RecentFindings";
 import ScrubbeSDKSection from "./SdkSection";
+import TalkToUsSection from "./TalkToUsSection";
 
 const Index = () => {
   return (
-    <div className=" overflow-x-hidden bg-[#060709]">
+    <div className=" overflow-x-hidden">
       <Hero />
-      <CategoryShiftBanner />
       <TickerItem />
-      <CategoryStatement />
-      {/* <ProblemSection /> */}
+      <NvidiaInceptionSection />
       <TransformationSection />
+      <MttrSection />
       {/* <WhyScrubbeExists /> */}
       <WhoUsesScrubbe />
-      <ClosedLoopProof />
-      <HowItWorks />
+      {/* <ClosedLoopProof /> */}
+      {/* <HowItWorks /> */}
       {/* <FeaturesSection /> */}
-      <RecommendedActions />
+      {/* <RecommendedActions /> */}
       <VideoSection />
       <ConnectorsSection />
-      <IndustriesSection />
-      <RecentFindings />
+      {/* <IndustriesSection /> */}
+      {/* <RecentFindings /> */}
       {/* <GovernanceSection /> */}
-      <WarRoomSection />
+      {/* <WarRoomSection /> */}
       <APISection />
-      <ScrubbeSDKSection />
+      {/* <ScrubbeSDKSection /> */}
       <EzraCodeEngineSection />
       <MigrationSection />
+      <TalkToUsSection />
     </div>
   );
 };

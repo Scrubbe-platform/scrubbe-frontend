@@ -11,8 +11,8 @@ import { card } from "@heroui/react";
 const SLIDES = [
   {
     id: 0,
-    headline: ["Systems detect failure.", "They still can't fix it."],
-    accent: "Intelligently.",
+    headline: ["From incident to", "resolution intelligently"],
+    accent: ".",
     sub: "A governed control loop for understanding incidents, choosing the right action, and moving toward resolution safely.",
     card: "Scrubbe detects disruption early across distributed services and immediately coordinates response. Agents isolate the issue and propose a safe fix within minutes. Policies validate every step before execution. Systems recover before customer impact spreads.",
   },
@@ -160,6 +160,42 @@ function FloatingCard({ text }: { text: string }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
+// Video placeholder — no demo video yet, just reserving the space
+// ─────────────────────────────────────────────────────────────────
+
+function VideoPlaceholder() {
+  return (
+    <div
+      className="relative w-full mt-12 rounded-2xl overflow-hidden"
+      style={{ aspectRatio: "16/9", background: "#0d1117" }}
+    >
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="rounded-full flex items-center justify-center"
+          style={{
+            width: 72,
+            height: 72,
+            background: "rgba(255,255,255,0.12)",
+            border: "1.5px solid rgba(255,255,255,0.25)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <svg
+            width={26}
+            height={26}
+            viewBox="0 0 16 16"
+            fill="none"
+            style={{ marginLeft: "10%" }}
+          >
+            <path d="M4 2.5l10 5.5-10 5.5V2.5z" fill="white" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
 // CTA Button
 // ─────────────────────────────────────────────────────────────────
 
@@ -184,11 +220,9 @@ function CTAButton() {
       data-cal-config='{"layout":"month_view","theme":"light"}'
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="relative inline-flex items-center gap-2 px-7 py-4 rounded-md font-semibold text-white text-[15px] tracking-tight overflow-hidden cursor-pointer border-none"
+      className="relative inline-flex items-center gap-2 px-7 py-4 rounded-md font-semibold text-white text-[15px] tracking-tight overflow-hidden cursor-pointer border-none bg-black"
       style={{
-        background:
-          "linear-gradient(90deg, #1a2a1a 0%, #14532d 60%, #22c55e 100%)",
-        boxShadow: "0 2px 20px rgba(34,197,94,0.2)",
+        boxShadow: "0 2px 20px rgba(0,0,0,0.15)",
       }}
     >
       Book a decision-system demo
@@ -288,7 +322,6 @@ export default function HeroSection() {
 
   return (
     <section className="relative w-full min-h-[100vh] flex items-center overflow-hidden bg-white">
-      <WorldMapBackground />
       <div className="absolute inset-0 pointer-events-none">
         <svg
           className="w-full h-full opacity-60"
@@ -313,7 +346,7 @@ export default function HeroSection() {
         </svg>
       </div>
       <div className="relative z-10 w-full max-w-[1480px] mx-auto px-8 lg:px-16 py-20">
-        <div className="max-w-[800px] 2xl:max-w-[850px]">
+        <div className="max-w-[800px] 2xl:max-w-[950px] mx-auto text-center">
           {/* Headline */}
           <div className="mb-5" style={{ minHeight: 200 }}>
             <AnimatePresence mode="wait">
@@ -326,19 +359,19 @@ export default function HeroSection() {
                 className="h-[300px]"
               >
                 <h1
-                  className="font-semibold tracking-wide text-gray-950 leading-[1.08] mb-5"
+                  className="font-serif font-bold tracking-wide text-gray-950 leading-[1.08] mb-5"
                   style={{ fontSize: "clamp(38px, 3.4vw, 62px)" }}
                 >
                   {slide.headline.map((line, i) => (
                     <span key={i}>
                       {line}
-                      <br />
+                      {i < slide.headline.length - 1 && <br />}
                     </span>
-                  ))}
+                  ))}{" "}
                   <span className="text-emerald-500">{slide.accent}</span>
                 </h1>
 
-                <p className="text-[16px] text-gray-500 leading-relaxed max-w-[440px]">
+                <p className="text-[16px] text-gray-500 leading-relaxed max-w-[440px] mx-auto">
                   {slide.sub}
                 </p>
               </motion.div>
@@ -346,7 +379,7 @@ export default function HeroSection() {
           </div>
 
           {/* Timer bars + pause/play */}
-          <div className="flex items-center gap-3 my-5">
+          <div className="flex items-center justify-center gap-3 my-5">
             {SLIDES.map((_, i) => (
               <TimerBar
                 key={i}
@@ -364,7 +397,12 @@ export default function HeroSection() {
 
           {/* CTA */}
           <CTAButton />
+        </div>
 
+        {/* Video placeholder — full hero width */}
+        <VideoPlaceholder />
+
+        <div className="max-w-[800px] 2xl:max-w-[850px] mx-auto flex flex-col items-center">
           {/* NVIDIA Inception */}
           <img
             src="/nvidia.jfif"
@@ -372,7 +410,7 @@ export default function HeroSection() {
             className="w-[130px] mt-10 rounded object-contain"
           />
           <div className="mt-3 flex items-center gap-3 max-w-[460px]">
-            <p className="text-[12.5px] leading-snug text-gray-500">
+            <p className="text-[12.5px] leading-snug text-gray-500 text-center">
               <span className="font-semibold text-gray-800">
                 Backed by NVIDIA Inception Program —
               </span>{" "}

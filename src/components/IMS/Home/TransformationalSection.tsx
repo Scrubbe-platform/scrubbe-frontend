@@ -41,44 +41,18 @@ export default function TransformationSection() {
   return (
     <section
       ref={ref}
-      className="relative w-full py-24 px-6 overflow-hidden"
-      style={{ background: "#f9fafb" }}
+      className="relative w-full py-24 px-6 overflow-hidden bg-white"
     >
-      {/* Grid background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <svg
-          className="w-full h-full opacity-60"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <pattern
-              id="tgrid"
-              width="48"
-              height="48"
-              patternUnits="userSpaceOnUse"
-            >
-              <path
-                d="M 48 0 L 0 0 0 48"
-                fill="none"
-                stroke="#e5e7eb"
-                strokeWidth="1"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#tgrid)" />
-        </svg>
-      </div>
-
       <div className="relative z-10 max-w-[1200px] mx-auto">
         {/* Heading */}
         <motion.h2
           initial={{ opacity: 0, y: 28 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          className="font-bold text-gray-950 leading-[1.08] tracking-[-0.03em] mb-5"
-          style={{ fontSize: "clamp(36px, 4.5vw, 72px)" }}
+          className="font-bold font-serif text-gray-950 leading-[1.08] tracking-[-0.03em] mb-5"
+          style={{ fontSize: "clamp(36px, 4.5vw, 56px)" }}
         >
-          From raw signal to operational understanding
+          From raw signal to operational <br /> understanding
         </motion.h2>
 
         {/* Subtext */}
