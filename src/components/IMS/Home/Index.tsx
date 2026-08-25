@@ -28,6 +28,8 @@ import RecommendedActions from "./RecommendedAction";
 import RecentFindings from "./RecentFindings";
 import ScrubbeSDKSection from "./SdkSection";
 import TalkToUsSection from "./TalkToUsSection";
+import SplineSectionOne from "./SplineSectionOne";
+import SplineSectionTwo from "./SplineSectionTwo";
 
 const Index = () => {
   return (
@@ -45,6 +47,7 @@ const Index = () => {
       {/* <RecommendedActions /> */}
       <VideoSection />
       <ConnectorsSection />
+      <SplineSectionTwo />
       {/* <IndustriesSection /> */}
       {/* <RecentFindings /> */}
       {/* <GovernanceSection /> */}
@@ -52,7 +55,9 @@ const Index = () => {
       <APISection />
       {/* <ScrubbeSDKSection /> */}
       <EzraCodeEngineSection />
-      <MigrationSection />
+      {/* <MigrationSection /> */}
+      {/* <SplineSectionOne /> */}
+
       <TalkToUsSection />
     </div>
   );
