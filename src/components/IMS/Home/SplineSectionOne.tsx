@@ -15,9 +15,9 @@ export default function SplineSectionOne() {
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <section ref={ref} className="w-full bg-white py-16 px-6">
+    <section ref={ref} className="w-full bg-white py-16">
       <div
-        className="max-w-[1480px] mx-auto rounded-3xl overflow-hidden relative min-h-[700px]"
+        className="w-full mx-auto overflow-hidden relative min-h-[700px]"
         style={{ background: "#000" }}
       >
         {!loaded && (
@@ -34,7 +34,7 @@ export default function SplineSectionOne() {
           </div>
         )}
 
-        <div className="relative z-10 min-h-[700px] flex flex-col justify-between p-8 md:p-12 pointer-events-none">
+        <div className="relative z-10 w-full mx-auto max-w-[1480px] min-h-[700px] flex flex-col justify-between p-8 md:p-12 pointer-events-none">
           <h2 className="font-serif font-bold text-white text-[clamp(22px,2.6vw,34px)] max-w-2xl">
             Incident Management built for an agentic future
           </h2>

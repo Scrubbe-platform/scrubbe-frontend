@@ -190,7 +190,7 @@ const Navbar = () => {
                                           />
                                           <span className="text-xs">{tag}</span>
                                         </div>
-                                      )
+                                      ),
                                     )}
                                   </div>
                                 )}
@@ -235,14 +235,14 @@ const Navbar = () => {
                 Join Early Design Partners
               </CButton>
             </Link>
-            <Link href={"/auth/signin"} prefetch>
+            {/* <Link href={"/auth/signin"} prefetch>
               <CButton
                 // onClick={() => router.push("/incident/tickets/create")}
                 className="w-fit h-[40px] hidden xl:flex !bg-cyan-500 shadow-none text-base"
               >
                 Get Started
               </CButton>
-            </Link>
+            </Link> */}
           </div>
 
           <div className="flex items-center gap-3 xl:hidden">

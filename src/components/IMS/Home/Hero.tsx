@@ -322,6 +322,13 @@ export default function HeroSection() {
 
   return (
     <section className="relative w-full min-h-[100vh] flex items-center overflow-hidden bg-white">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 900px 600px at 100% 0%, rgba(110,231,183,0.45) 0%, rgba(110,231,183,0) 70%)",
+        }}
+      />
       <div className="absolute inset-0 pointer-events-none">
         <svg
           className="w-full h-full opacity-60"
@@ -401,25 +408,6 @@ export default function HeroSection() {
 
         {/* Video placeholder — full hero width */}
         <VideoPlaceholder />
-
-        <div className="max-w-[800px] 2xl:max-w-[850px] mx-auto flex flex-col items-center">
-          {/* NVIDIA Inception */}
-          <img
-            src="/nvidia.jfif"
-            alt="NVIDIA"
-            className="w-[130px] mt-10 rounded object-contain"
-          />
-          <div className="mt-3 flex items-center gap-3 max-w-[460px]">
-            <p className="text-[12.5px] leading-snug text-gray-500 text-center">
-              <span className="font-semibold text-gray-800">
-                Backed by NVIDIA Inception Program —
-              </span>{" "}
-              Scrubbe is a member of the NVIDIA Inception Program, exploring
-              NVIDIA accelerated computing to power the next generation of
-              autonomous incident response.
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* Floating card */}

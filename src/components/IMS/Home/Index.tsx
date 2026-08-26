@@ -47,7 +47,8 @@ const Index = () => {
       {/* <RecommendedActions /> */}
       <VideoSection />
       <ConnectorsSection />
-      <SplineSectionTwo />
+      <SplineSectionOne />
+      {/* <SplineSectionTwo /> */}
       {/* <IndustriesSection /> */}
       {/* <RecentFindings /> */}
       {/* <GovernanceSection /> */}
@@ -56,7 +57,6 @@ const Index = () => {
       {/* <ScrubbeSDKSection /> */}
       <EzraCodeEngineSection />
       {/* <MigrationSection /> */}
-      {/* <SplineSectionOne /> */}
 
       <TalkToUsSection />
     </div>
