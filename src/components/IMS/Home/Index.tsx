@@ -30,6 +30,7 @@ import ScrubbeSDKSection from "./SdkSection";
 import TalkToUsSection from "./TalkToUsSection";
 import SplineSectionOne from "./SplineSectionOne";
 import SplineSectionTwo from "./SplineSectionTwo";
+import DevOpsLoopSection from "./DevOpsLoopSection";
 
 const Index = () => {
   return (
@@ -47,6 +48,7 @@ const Index = () => {
       {/* <RecommendedActions /> */}
       <VideoSection />
       <ConnectorsSection />
+      <DevOpsLoopSection />
       <SplineSectionOne />
       {/* <SplineSectionTwo /> */}
       {/* <IndustriesSection /> */}

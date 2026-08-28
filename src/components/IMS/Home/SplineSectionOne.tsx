@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useInView } from "framer-motion";
+import MigrationAssessmentModal from "./MigrationAssessmentModal";
 
 const Spline = dynamic(() => import("@splinetool/react-spline"), {
   ssr: false,
@@ -13,6 +13,7 @@ export default function SplineSectionOne() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "300px" });
   const [loaded, setLoaded] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <section ref={ref} className="w-full bg-white py-16">
@@ -54,16 +55,21 @@ export default function SplineSectionOne() {
                 policies, and alert routing move across — with full audit
                 continuity from day one.
               </p>
-              <Link
-                href="/contact-us"
-                className="inline-block mt-4 px-6 py-3 rounded-lg font-bold text-[13.5px] text-white bg-transparent border border-white hover:bg-white hover:text-black transition-all"
+              <button
+                onClick={() => setModalOpen(true)}
+                className="inline-block mt-4 px-6 py-3 rounded-lg font-bold text-[13.5px] text-white bg-transparent border border-white hover:bg-white hover:text-black transition-all cursor-pointer"
               >
                 Request Migration
-              </Link>
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      <MigrationAssessmentModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+      />
     </section>
   );
 }
