@@ -10,7 +10,10 @@ import {
   Plus,
   SlidersHorizontal,
   X,
+  Compass,
 } from "lucide-react";
+import type { Step } from "react-joyride";
+import ProductTour from "@/components/ui/ProductTour";
 import { IncidentListItem } from "@/lib/incident/incident.types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteIncident } from "@/lib/incident/incident.api";
@@ -98,6 +101,50 @@ function applyDateRange(date: Date, range: string | null): boolean {
   return true;
 }
 
+const TOUR_STEPS: Step[] = [
+  {
+    target: "[data-tour='kpi-strip']",
+    title: "Your incident health, at a glance",
+    content:
+      "Live counts by severity and status. Click any tile to filter the list below to just those incidents.",
+    skipBeacon: true,
+    placement: "bottom",
+  },
+  {
+    target: "[data-tour='search']",
+    title: "Search everything",
+    content:
+      "Find an incident by ID, title, affected service, or the commander who ran it.",
+    placement: "bottom",
+  },
+  {
+    target: "[data-tour='filter-rail']",
+    title: "Narrow it down",
+    content:
+      "Filter by status, severity, environment, service, and more — combine as many as you need.",
+    placement: "right",
+  },
+  {
+    target: "[data-tour='ask-ezra']",
+    title: "Ask Ezra",
+    content:
+      "Scrubbe's AI can find duplicates, surface patterns, and answer questions across your incident history.",
+    placement: "bottom",
+  },
+  {
+    target: "[data-tour='incident-table']",
+    title: "Every incident lives here",
+    content: "Click any row to open the full investigation.",
+    placement: "top",
+  },
+  {
+    target: "[data-tour='raise-incident']",
+    title: "Ready to raise one?",
+    content: "Start a new incident here whenever something needs attention.",
+    placement: "bottom",
+  },
+];
+
 export default function IncidentLibraryPage() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("opened-desc");
@@ -131,6 +178,7 @@ export default function IncidentLibraryPage() {
     kind?: "rca" | "report" | "exec";
     payload?: any;
   }>({ type: null });
+  const [tourRunCount, setTourRunCount] = useState(0);
 
   // ── COMPLETE FILTER PIPELINE ─────────────────────────────────────────────
   const filteredIncidents = useMemo(() => {
@@ -222,7 +270,8 @@ export default function IncidentLibraryPage() {
   // ── SELECTION ──────────────────────────────────────────────────────────────
   const handleToggleSelectRow = (id: string) => {
     const next = new Set(selectedIds);
-    next.has(id) ? next.delete(id) : next.add(id);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
     setSelectedIds(next);
     setActiveId(id);
   };
@@ -348,31 +397,45 @@ export default function IncidentLibraryPage() {
         {/* Page header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-2xl">
-            Your organization's searchable operational memory for every
+            Your organization&apos;s searchable operational memory for every
             incident, investigation, and resolution.
           </p>
-          <Button
-            size="sm"
-            leftIcon={<Plus size={14} />}
-            onClick={() => router.push("/incident/tickets/create")}
-          >
-            Raise Incident
-          </Button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setTourRunCount((n) => n + 1)}
+              title="Take a tour"
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            >
+              <Compass size={15} />
+            </button>
+            <div data-tour="raise-incident">
+              <Button
+                size="sm"
+                leftIcon={<Plus size={14} />}
+                onClick={() => router.push("/incident/tickets/create")}
+              >
+                Raise Incident
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* KPI Strip */}
-        <KpiStrip
-          incidents={incidents}
-          onKpiFilter={(p: any) =>
-            setFilters((prev) => ({ ...prev, severity: new Set([p]) }))
-          }
-        />
+        <div data-tour="kpi-strip">
+          <KpiStrip
+            incidents={incidents}
+            onKpiFilter={(p: any) =>
+              setFilters((prev) => ({ ...prev, severity: new Set([p]) }))
+            }
+          />
+        </div>
 
         {/* Toolbar */}
         <div className="flex flex-wrap justify-between items-center gap-3">
           <div className="flex items-center gap-3 flex-1 flex-wrap">
             {/* Search */}
-            <div className="relative max-w-xl w-full">
+            <div className="relative max-w-xl w-full" data-tour="search">
               <Search
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500"
                 size={15}
@@ -439,6 +502,7 @@ export default function IncidentLibraryPage() {
                   size="sm"
                   variant="outline-dark"
                   className="h-fit text-sm !rounded-sm font-thin"
+                  data-tour="ask-ezra"
                 >
                   Ask Ezra
                 </Button>
@@ -466,7 +530,7 @@ export default function IncidentLibraryPage() {
                     }}
                     className="w-full text-left p-1.5 bg-white dark:bg-zinc-900/60 rounded border border-indigo-100 dark:border-indigo-500/20 hover:border-indigo-300 dark:hover:border-indigo-500/40 transition-all truncate"
                   >
-                    "Find duplicates side-by-side"
+                    &quot;Find duplicates side-by-side&quot;
                   </button>
                   <button
                     type="button"
@@ -484,7 +548,7 @@ export default function IncidentLibraryPage() {
         {/* Main split layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           {/* Filter Rail */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3" data-tour="filter-rail">
             <FilterRail
               filters={filters}
               onFilterChange={setFilters}
@@ -496,7 +560,10 @@ export default function IncidentLibraryPage() {
           </div>
 
           {/* Incident table */}
-          <div className="col-span-12 lg:col-span-9 bg-white dark:bg-zinc-900/40 z-0 shadow-sm shadow-light rounded-md overflow-hidden">
+          <div
+            className="col-span-12 lg:col-span-9 bg-white dark:bg-zinc-900/40 z-0 shadow-sm shadow-light rounded-md overflow-hidden"
+            data-tour="incident-table"
+          >
             <div className="flex items-center justify-between px-4 h-11 border-b border-zinc-100 dark:border-zinc-800">
               <div className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
                 Incident List
@@ -846,6 +913,11 @@ export default function IncidentLibraryPage() {
           onClose={() => setActiveModal({ type: null })}
         />
       </main>
+      <ProductTour
+        tourId="incidents-dashboard"
+        steps={TOUR_STEPS}
+        forceRun={tourRunCount}
+      />
     </>
   );
 }
