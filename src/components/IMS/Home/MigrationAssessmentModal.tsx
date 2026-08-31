@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { toast } from "sonner";
 
 const PLATFORMS = [
@@ -104,6 +104,15 @@ const EMPTY_FORM: FormState = {
   anythingElse: "",
 };
 
+const ALL_SECTIONS_OPEN: Record<number, boolean> = {
+  1: true,
+  2: true,
+  3: true,
+  4: true,
+  5: true,
+  6: true,
+};
+
 const REQUIRED_FIELDS: (keyof FormState)[] = [
   "companyName",
   "industry",
@@ -114,6 +123,19 @@ const REQUIRED_FIELDS: (keyof FormState)[] = [
   "migrationTimeline",
   "migrationScope",
 ];
+
+// Which collapsible section each field lives in — used to auto-expand a
+// section when it contains a missing required field on submit.
+const FIELD_SECTION: Partial<Record<keyof FormState, number>> = {
+  companyName: 1,
+  industry: 1,
+  yourName: 1,
+  workEmail: 1,
+  jobTitle: 1,
+  primaryPlatform: 2,
+  migrationTimeline: 5,
+  migrationScope: 5,
+};
 
 const inputCls =
   "w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-[13.5px] text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all bg-white";
@@ -142,6 +164,55 @@ function CheckboxPill({
   );
 }
 
+function CollapsibleSection({
+  index,
+  title,
+  open,
+  onToggle,
+  children,
+  divider = true,
+}: {
+  index: number;
+  title: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+  divider?: boolean;
+}) {
+  return (
+    <div className={divider ? "pt-6 border-t border-gray-100" : undefined}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer p-0 mb-4"
+      >
+        <p className="text-[14px] font-bold text-IMSLightGreen">
+          {index}. {title}
+        </p>
+        <motion.div
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ChevronDown size={16} className="text-gray-400" />
+        </motion.div>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            style={{ overflow: "hidden" }}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function MigrationAssessmentModal({
   open,
   onClose,
@@ -151,6 +222,11 @@ export default function MigrationAssessmentModal({
 }) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [errors, setErrors] = useState<Set<string>>(new Set());
+  const [openSections, setOpenSections] =
+    useState<Record<number, boolean>>(ALL_SECTIONS_OPEN);
+
+  const toggleSection = (n: number) =>
+    setOpenSections((s) => ({ ...s, [n]: !s[n] }));
 
   const set =
     (k: keyof FormState) =>
@@ -180,17 +256,31 @@ export default function MigrationAssessmentModal({
     );
     if (missing.size > 0) {
       setErrors(missing);
+      const sectionsToOpen = Array.from(missing)
+        .map((k) => FIELD_SECTION[k as keyof FormState])
+        .filter((n): n is number => n !== undefined);
+      if (sectionsToOpen.length) {
+        setOpenSections((s) => {
+          const next = { ...s };
+          sectionsToOpen.forEach((n) => (next[n] = true));
+          return next;
+        });
+      }
       toast.error("Please fill in all required fields.");
       return;
     }
     setErrors(new Set());
-    toast.success("Migration assessment submitted — we'll be in touch shortly.");
+    toast.success(
+      "Migration assessment submitted — we'll be in touch shortly.",
+    );
     setForm(EMPTY_FORM);
+    setOpenSections(ALL_SECTIONS_OPEN);
     onClose();
   };
 
   const handleCancel = () => {
     setForm(EMPTY_FORM);
+    setOpenSections(ALL_SECTIONS_OPEN);
     setErrors(new Set());
     onClose();
   };
@@ -238,10 +328,13 @@ export default function MigrationAssessmentModal({
 
               <form onSubmit={handleSubmit} className="px-7 py-6 space-y-7">
                 {/* 1. Organization Details */}
-                <div>
-                  <p className="text-[14px] font-bold text-IMSLightGreen mb-4">
-                    1. Organization Details
-                  </p>
+                <CollapsibleSection
+                  index={1}
+                  title="Organization Details"
+                  open={openSections[1]}
+                  onToggle={() => toggleSection(1)}
+                  divider={false}
+                >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className={labelCls}>
@@ -308,13 +401,15 @@ export default function MigrationAssessmentModal({
                       />
                     </div>
                   </div>
-                </div>
+                </CollapsibleSection>
 
                 {/* 2. Current Incident Management Platform */}
-                <div className="pt-6 border-t border-gray-100">
-                  <p className="text-[14px] font-bold text-IMSLightGreen mb-4">
-                    2. Current Incident Management Platform
-                  </p>
+                <CollapsibleSection
+                  index={2}
+                  title="Current Incident Management Platform"
+                  open={openSections[2]}
+                  onToggle={() => toggleSection(2)}
+                >
                   <label className={labelCls}>
                     Primary Platform <span className="text-red-500">*</span>
                   </label>
@@ -345,13 +440,15 @@ export default function MigrationAssessmentModal({
                       />
                     </div>
                   )}
-                </div>
+                </CollapsibleSection>
 
                 {/* 3. Environment & Integrations */}
-                <div className="pt-6 border-t border-gray-100">
-                  <p className="text-[14px] font-bold text-IMSLightGreen mb-4">
-                    3. Environment & Integrations
-                  </p>
+                <CollapsibleSection
+                  index={3}
+                  title="Environment & Integrations"
+                  open={openSections[3]}
+                  onToggle={() => toggleSection(3)}
+                >
                   <label className={labelCls}>
                     Please select the tools you currently use{" "}
                     <span className="text-gray-400 font-normal">
@@ -374,13 +471,15 @@ export default function MigrationAssessmentModal({
                     value={form.integrationsOther}
                     onChange={set("integrationsOther")}
                   />
-                </div>
+                </CollapsibleSection>
 
                 {/* 4. Migration Goals */}
-                <div className="pt-6 border-t border-gray-100">
-                  <p className="text-[14px] font-bold text-IMSLightGreen mb-4">
-                    4. Migration Goals
-                  </p>
+                <CollapsibleSection
+                  index={4}
+                  title="Migration Goals"
+                  open={openSections[4]}
+                  onToggle={() => toggleSection(4)}
+                >
                   <label className={labelCls}>
                     What are your primary goals for migrating to Scrubbe?{" "}
                     <span className="text-gray-400 font-normal">
@@ -406,13 +505,15 @@ export default function MigrationAssessmentModal({
                     value={form.additionalGoals}
                     onChange={set("additionalGoals")}
                   />
-                </div>
+                </CollapsibleSection>
 
                 {/* 5. Migration Scope & Timeline */}
-                <div className="pt-6 border-t border-gray-100">
-                  <p className="text-[14px] font-bold text-IMSLightGreen mb-4">
-                    5. Migration Scope & Timeline
-                  </p>
+                <CollapsibleSection
+                  index={5}
+                  title="Migration Scope & Timeline"
+                  open={openSections[5]}
+                  onToggle={() => toggleSection(5)}
+                >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className={labelCls}>
@@ -455,13 +556,15 @@ export default function MigrationAssessmentModal({
                     value={form.scopeDetails}
                     onChange={set("scopeDetails")}
                   />
-                </div>
+                </CollapsibleSection>
 
                 {/* 6. Additional Information */}
-                <div className="pt-6 border-t border-gray-100">
-                  <p className="text-[14px] font-bold text-IMSLightGreen mb-4">
-                    6. Additional Information
-                  </p>
+                <CollapsibleSection
+                  index={6}
+                  title="Additional Information"
+                  open={openSections[6]}
+                  onToggle={() => toggleSection(6)}
+                >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className={labelCls}>Current Challenges</label>
@@ -484,7 +587,7 @@ export default function MigrationAssessmentModal({
                       />
                     </div>
                   </div>
-                </div>
+                </CollapsibleSection>
 
                 {/* Actions */}
                 <div className="flex justify-end gap-3 pt-2">
