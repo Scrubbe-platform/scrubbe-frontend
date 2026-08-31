@@ -84,41 +84,41 @@ export function AddGuardPanel({ isOpen, addedKeys, onAdd, onClose }: AddGuardPan
   })).filter(g => g.items.length > 0);
 
   return (
-    <div ref={ref} className="absolute left-0 top-[calc(100%+8px)] z-50 w-[440px] max-h-[520px] bg-white border border-zinc-200 rounded-2xl shadow-xl flex flex-col overflow-hidden">
+    <div ref={ref} className="absolute left-0 top-[calc(100%+8px)] z-50 w-[440px] max-h-[520px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-xl flex flex-col overflow-hidden">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-teal-50 border border-teal-200 flex items-center justify-center">
-            <Shield size={14} className="text-teal-600" />
+          <div className="w-7 h-7 rounded-lg bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/20 flex items-center justify-center">
+            <Shield size={14} className="text-teal-600 dark:text-teal-400" />
           </div>
           <div>
-            <div className="text-[13.5px] font-bold text-zinc-900">Add suppression guard</div>
-            <div className="text-[11px] text-zinc-400">Skip actions when these conditions are true</div>
+            <div className="text-[13.5px] font-bold text-zinc-900 dark:text-zinc-100">Add suppression guard</div>
+            <div className="text-[11px] text-zinc-400 dark:text-zinc-500">Skip actions when these conditions are true</div>
           </div>
         </div>
-        <button type="button" onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors">
+        <button type="button" onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
           <X size={15} />
         </button>
       </div>
 
       {/* Search */}
-      <div className="px-3 py-2.5 border-b border-zinc-100">
+      <div className="px-3 py-2.5 border-b border-zinc-100 dark:border-zinc-800">
         <div className="relative">
-          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" />
           <input type="text" placeholder="Search guards…" value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-7 pr-3 py-1.5 text-[12.5px] border border-zinc-200 rounded-lg bg-zinc-50 outline-none focus:border-indigo-400 focus:bg-white transition-colors" />
+            className="w-full pl-7 pr-3 py-1.5 text-[12.5px] border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800/60 dark:text-zinc-200 outline-none focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900 transition-colors" />
         </div>
       </div>
 
       {/* Guard list */}
       <div className="flex-1 overflow-y-auto p-3 space-y-4">
         {filtered.length === 0 ? (
-          <div className="text-center text-[12.5px] text-zinc-400 italic py-8">No guards match "{search}"</div>
+          <div className="text-center text-[12.5px] text-zinc-400 dark:text-zinc-500 italic py-8">No guards match &quot;{search}&quot;</div>
         ) : filtered.map(g => (
           <div key={g.sec}>
             {/* Section header */}
-            <div className={`text-[10px] font-black tracking-widest uppercase mb-2 pb-1.5 border-b ${g.sec === "INTELLIGENT · EZRA" ? "text-teal-600 border-teal-100" : "text-zinc-400 border-zinc-100"}`}>
+            <div className={`text-[10px] font-black tracking-widest uppercase mb-2 pb-1.5 border-b ${g.sec === "INTELLIGENT · EZRA" ? "text-teal-600 dark:text-teal-400 border-teal-100 dark:border-teal-500/20" : "text-zinc-400 dark:text-zinc-500 border-zinc-100 dark:border-zinc-800"}`}>
               {g.sec}
             </div>
             <div className="space-y-1.5">
@@ -130,39 +130,39 @@ export function AddGuardPanel({ isOpen, addedKeys, onAdd, onClose }: AddGuardPan
                     onClick={() => { if (!isAdded) { onAdd(item.key); } }}
                     className={`w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-xl border transition-all group ${
                       isAdded
-                        ? "bg-zinc-50 border-zinc-100 opacity-60 cursor-not-allowed"
+                        ? "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-100 dark:border-zinc-800 opacity-60 cursor-not-allowed"
                         : item.intel
-                        ? "border-teal-100 bg-gradient-to-r from-teal-50/60 to-white hover:border-teal-200 hover:bg-teal-50/80 cursor-pointer"
-                        : "border-transparent hover:bg-zinc-50 hover:border-zinc-200 cursor-pointer"
+                        ? "border-teal-100 dark:border-teal-500/20 bg-gradient-to-r from-teal-50/60 to-white dark:from-teal-500/10 dark:to-zinc-900 hover:border-teal-200 dark:hover:border-teal-500/30 hover:bg-teal-50/80 dark:hover:bg-teal-500/10 cursor-pointer"
+                        : "border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800/60 hover:border-zinc-200 dark:hover:border-zinc-700 cursor-pointer"
                     }`}>
                     {/* Icon */}
-                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${item.intel ? "bg-teal-100 border border-teal-200" : "bg-zinc-100 border border-zinc-200"}`}>
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${item.intel ? "bg-teal-100 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/20" : "bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"}`}>
                       {isAdded
-                        ? <Check size={13} className="text-emerald-500" />
-                        : <Shield size={13} className={item.intel ? "text-teal-600" : "text-zinc-500"} />}
+                        ? <Check size={13} className="text-emerald-500 dark:text-emerald-400" />
+                        : <Shield size={13} className={item.intel ? "text-teal-600 dark:text-teal-400" : "text-zinc-500 dark:text-zinc-400"} />}
                     </div>
                     {/* Text */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={`text-[13px] font-semibold ${item.intel ? "text-teal-700" : "text-zinc-800"}`}>
+                        <span className={`text-[13px] font-semibold ${item.intel ? "text-teal-700 dark:text-teal-400" : "text-zinc-800 dark:text-zinc-100"}`}>
                           {item.label}
                         </span>
                         {isAdded && (
-                          <span className="text-[10px] font-bold tracking-wider text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded">
                             Added
                           </span>
                         )}
                         {item.intel && !isAdded && (
-                          <span className="text-[10px] font-bold tracking-wider text-teal-600 bg-teal-50 border border-teal-100 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] font-bold tracking-wider text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/20 px-1.5 py-0.5 rounded">
                             Ezra
                           </span>
                         )}
                       </div>
-                      <p className="text-[11.5px] text-zinc-400 leading-relaxed mt-0.5">{item.use}</p>
+                      <p className="text-[11.5px] text-zinc-400 dark:text-zinc-500 leading-relaxed mt-0.5">{item.use}</p>
                       {item.val && !isAdded && (
-                        <div className="flex items-center gap-1.5 mt-1.5 text-[11px] text-zinc-500 font-medium">
-                          <span className="bg-zinc-100 px-1.5 py-0.5 rounded font-mono">{item.val.pre} {item.val.def}{item.val.suf}</span>
-                          <span className="text-zinc-400">· configurable after adding</span>
+                        <div className="flex items-center gap-1.5 mt-1.5 text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
+                          <span className="bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded font-mono">{item.val.pre} {item.val.def}{item.val.suf}</span>
+                          <span className="text-zinc-400 dark:text-zinc-500">· configurable after adding</span>
                         </div>
                       )}
                     </div>
@@ -175,11 +175,11 @@ export function AddGuardPanel({ isOpen, addedKeys, onAdd, onClose }: AddGuardPan
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-zinc-100 bg-zinc-50">
-        <p className="text-[11.5px] text-zinc-400 leading-relaxed">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/60">
+        <p className="text-[11.5px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
           Guards are evaluated before actions run. When{" "}
-          <span className="font-semibold text-zinc-600">any</span> (or{" "}
-          <span className="font-semibold text-zinc-600">all</span>) are active, the rule steps aside without firing.
+          <span className="font-semibold text-zinc-600 dark:text-zinc-300">any</span> (or{" "}
+          <span className="font-semibold text-zinc-600 dark:text-zinc-300">all</span>) are active, the rule steps aside without firing.
         </p>
       </div>
     </div>

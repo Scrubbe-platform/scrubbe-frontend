@@ -177,15 +177,15 @@ export default function ServiceDetail({
         </nav>
 
         <div className="flex min-w-0 flex-col gap-5">
-          <CurrentStateSection service={service} />
-          <OperationalImpactSection service={service} />
-          <AutomationReadinessSection service={service} />
-          <OverviewSection service={service} />
+          <CurrentStateSection service={service} defaultOpen />
+          <OperationalImpactSection service={service} defaultOpen />
+          <AutomationReadinessSection service={service} defaultOpen />
+          <OverviewSection service={service} defaultOpen />
           <BusinessCapabilitiesSection service={service} />
           <BlastRadiusSection service={service} />
           <OperationalReadinessSection service={service} />
           <OperationalCommunicationSection service={service} />
-          <ServiceHealthSection service={service} />
+          <ServiceHealthSection service={service} defaultOpen />
           <IncidentOrchestrationSection service={service} />
           <OwnershipSection service={service} />
           <DependenciesSection

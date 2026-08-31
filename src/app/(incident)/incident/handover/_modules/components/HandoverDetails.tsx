@@ -14,14 +14,13 @@ import {
   Plus,
   Sparkles,
   ClipboardList,
-  CheckCircle2,
   Clock,
-  Search,
   FileEdit,
   Check,
 } from "lucide-react";
 import Topbar from "./Topbar";
 import Button from "@/components/ui/Button1";
+import SideModal from "@/components/ui/SideModal";
 import AttachExistingHandover from "./AttachExistingHandover";
 import TransferOwnershipModal from "./TransferOwnershipModal";
 import AddIncidentModal from "./AddIncidentModal";
@@ -104,6 +103,44 @@ const CardHeader = ({
   </div>
 );
 
+interface TimelineItem {
+  id: string;
+  timestamp: string;
+  action: string;
+  oldValue?: string | null;
+  newValue?: string | null;
+}
+
+const TimelineEntry = ({
+  item,
+  isLast,
+}: {
+  item: TimelineItem;
+  isLast: boolean;
+}) => (
+  <div className="flex gap-4">
+    <div className="flex flex-col items-center">
+      <StatusDot color="blue" />
+      {!isLast && (
+        <div className="w-px flex-1 bg-zinc-100 dark:bg-zinc-800 mt-1" />
+      )}
+    </div>
+    <div className="pb-5 flex-1 min-w-0">
+      <p className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 mb-0.5">
+        {new Date(item.timestamp).toLocaleString()}
+      </p>
+      <p className="text-[14px] font-bold text-zinc-900 dark:text-zinc-100">
+        {item.action}
+      </p>
+      {(item.oldValue || item.newValue) && (
+        <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+          {item.oldValue} → {item.newValue}
+        </p>
+      )}
+    </div>
+  </div>
+);
+
 const severityColor = (severity?: string | null) =>
   severity === "CRITICAL"
     ? "red"
@@ -137,6 +174,7 @@ export default function HandoverDetailPage() {
     addTask: false,
     rollback: false,
     addHandoverNote: false,
+    viewTimeline: false,
   });
 
   const { triggerCatchMeUp, latestResult: handoverAIResult, thinking: handoverAIThinking } = useHandoverSharedAI(handoverId);
@@ -383,6 +421,19 @@ export default function HandoverDetailPage() {
           </div>
         </div>
 
+        {criticalPending.length > 0 && (
+          <div className="rounded-xl border border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/5 px-5 py-3 mb-4 flex items-center gap-2.5">
+            <AlertTriangle size={15} className="text-red-500 shrink-0" />
+            <p className="text-[13px] text-red-700 dark:text-red-400">
+              <strong>
+                {criticalPending.length} critical task
+                {criticalPending.length === 1 ? "" : "s"}
+              </strong>{" "}
+              blocking transfer — resolve in Pending Tasks below.
+            </p>
+          </div>
+        )}
+
         <LiveCollaborationSection />
         <br />
 
@@ -488,10 +539,7 @@ export default function HandoverDetailPage() {
           </div>
         </Card>
 
-        {/* ── Two column layout ── */}
-        <div className="grid grid-cols-[1fr_340px] gap-4 items-start">
-          {/* ── Left column ── */}
-          <div className="space-y-4">
+        <div className="space-y-4">
             {/* Ezra card */}
             <div
               className="rounded-2xl p-8 text-center relative overflow-hidden"
@@ -563,7 +611,7 @@ export default function HandoverDetailPage() {
                     Get up to speed in under two minutes.
                   </h2>
                   <p className="text-[13px] text-zinc-400 leading-relaxed max-w-md mx-auto mb-6">
-                    Ezra surfaces the existing analysis for this handover's
+                    Ezra surfaces the existing analysis for this handover&apos;s
                     primary incident — root cause, confidence, and
                     recommendation — distilled for the incoming team.
                   </p>
@@ -613,6 +661,16 @@ export default function HandoverDetailPage() {
                       "—",
                   },
                   {
+                    label: "Created",
+                    value: incidentDetail
+                      ? new Date(incidentDetail.createdAt).toLocaleString()
+                      : "—",
+                  },
+                  {
+                    label: "Detection",
+                    value: incidentDetail?.detection || "—",
+                  },
+                  {
                     label: "Affected System",
                     value: incidentDetail?.affectedSystem || "—",
                   },
@@ -625,6 +683,12 @@ export default function HandoverDetailPage() {
                   {
                     label: "Blast Radius",
                     value: incidentDetail?.blastRadius || "—",
+                  },
+                  {
+                    label: "Root Cause",
+                    value: incidentDetail?.aiAnalysis?.suggestion
+                      ? "See Ezra brief"
+                      : "Not yet determined",
                   },
                 ].map((row) => (
                   <div
@@ -752,28 +816,12 @@ export default function HandoverDetailPage() {
                 )}
               </div>
               <div className="space-y-0">
-                {incidentHistory.slice(0, 10).map((item, i) => (
-                  <div key={item.id} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <StatusDot color="blue" />
-                      {i < Math.min(incidentHistory.length, 10) - 1 && (
-                        <div className="w-px flex-1 bg-zinc-100 dark:bg-zinc-800 mt-1" />
-                      )}
-                    </div>
-                    <div className="pb-5 flex-1 min-w-0">
-                      <p className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 mb-0.5">
-                        {new Date(item.timestamp).toLocaleString()}
-                      </p>
-                      <p className="text-[14px] font-bold text-zinc-900 dark:text-zinc-100">
-                        {item.action}
-                      </p>
-                      {(item.oldValue || item.newValue) && (
-                        <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
-                          {item.oldValue} → {item.newValue}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                {incidentHistory.slice(0, 3).map((item, i) => (
+                  <TimelineEntry
+                    key={item.id}
+                    item={item}
+                    isLast={i === Math.min(incidentHistory.length, 3) - 1}
+                  />
                 ))}
                 {incidentHistory.length === 0 && (
                   <p className="text-xs text-zinc-400">
@@ -781,6 +829,16 @@ export default function HandoverDetailPage() {
                   </p>
                 )}
               </div>
+              {incidentHistory.length > 3 && (
+                <button
+                  onClick={() =>
+                    setIsOpenModal((prev) => ({ ...prev, viewTimeline: true }))
+                  }
+                  className="mt-1 text-[12px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
+                  View all {incidentHistory.length} events →
+                </button>
+              )}
             </Card>
 
             {/* Handover Notes */}
@@ -833,165 +891,6 @@ export default function HandoverDetailPage() {
                 )}
               </div>
             </Card>
-          </div>
-
-          {/* ── Right column ── */}
-          <div className="space-y-4">
-            {/* Blocking tasks */}
-            <Card>
-              <CardHeader
-                icon={<CheckCircle2 size={15} className="text-zinc-500" />}
-                title="Blocking Tasks"
-              />
-              <div className="p-5">
-                {criticalPending.length === 0 ? (
-                  <p className="text-[13px] text-zinc-500 dark:text-zinc-400">
-                    No critical tasks blocking transfer.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {criticalPending.map((task) => (
-                      <div
-                        key={task.id}
-                        className="flex items-center justify-between gap-2"
-                      >
-                        <div>
-                          <p className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100">
-                            {task.title}
-                          </p>
-                          <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
-                            {task.assigneeLabel || "Unassigned"}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setActiveTask(task);
-                            setIsOpenModal((p) => ({ ...p, rollback: true }));
-                          }}
-                          className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[12px] font-bold transition-colors shrink-0"
-                        >
-                          Resolve
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </Card>
-
-            {/* Investigation Summary */}
-            <Card>
-              <CardHeader
-                icon={<Search size={15} className="text-zinc-500" />}
-                title="Investigation Summary"
-              />
-              <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {[
-                  {
-                    label: "Created",
-                    value: incidentDetail
-                      ? new Date(incidentDetail.createdAt).toLocaleString()
-                      : "—",
-                  },
-                  {
-                    label: "Affected System",
-                    value: incidentDetail?.affectedSystem || "—",
-                  },
-                  {
-                    label: "Detection",
-                    value: incidentDetail?.detection || "—",
-                  },
-                  {
-                    label: "Blast Radius",
-                    value: incidentDetail?.blastRadius || "—",
-                  },
-                  {
-                    label: "Root Cause",
-                    value: incidentDetail?.aiAnalysis?.suggestion
-                      ? "See Ezra brief"
-                      : "Not yet determined",
-                  },
-                ].map((row) => (
-                  <div
-                    key={row.label}
-                    className="flex items-center justify-between px-5 py-3"
-                  >
-                    <span className="text-[12px] text-zinc-400 dark:text-zinc-500">
-                      {row.label}
-                    </span>
-                    <span className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100 text-right ml-3 truncate max-w-[160px]">
-                      {row.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* Ownership Transfer */}
-            <Card>
-              <CardHeader
-                icon={<ArrowLeftRight size={15} className="text-zinc-500" />}
-                title="Ownership Transfer"
-              />
-              <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {[
-                  { label: "From", value: handover.currentOwnerLabel },
-                  { label: "To", value: handover.nextOwnerLabel },
-                  {
-                    label: "Commander",
-                    value: handover.nextCommander
-                      ? `${handover.nextCommander.firstName} ${handover.nextCommander.lastName}`
-                      : "Unassigned",
-                  },
-                  {
-                    label: "Transfer At",
-                    value: `${new Date(handover.transferAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })} UTC`,
-                  },
-                ].map((row) => (
-                  <div
-                    key={row.label}
-                    className="flex items-center justify-between px-5 py-3"
-                  >
-                    <span className="text-[12px] text-zinc-400 dark:text-zinc-500">
-                      {row.label}
-                    </span>
-                    <span className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100">
-                      {row.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              {!handover.isImmutable && (
-                <div className="flex items-center gap-2 p-4">
-                  <button
-                    onClick={() =>
-                      setIsOpenModal((prev) => ({
-                        ...prev,
-                        transferOwnership: true,
-                      }))
-                    }
-                    className="flex-1 py-2.5 rounded-xl border border-emerald-500 dark:border-emerald-500/40 text-[13px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/5 transition-colors"
-                  >
-                    Edit Transfer
-                  </button>
-                  <button
-                    onClick={() =>
-                      setIsOpenModal((prev) => ({
-                        ...prev,
-                        transferOwnership: true,
-                      }))
-                    }
-                    className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white transition-all hover:brightness-110"
-                    style={{
-                      background: "linear-gradient(135deg, #14532d, #22c55e)",
-                    }}
-                  >
-                    Confirm Now
-                  </button>
-                </div>
-              )}
-            </Card>
-          </div>
         </div>
       </div>
 
@@ -1048,6 +947,25 @@ export default function HandoverDetailPage() {
         handoverId={handover.id}
         onAdded={invalidate}
       />
+
+      <SideModal
+        isOpen={isOpenModal.viewTimeline}
+        onClose={() =>
+          setIsOpenModal((prev) => ({ ...prev, viewTimeline: false }))
+        }
+        title="Timeline — Key Events"
+        subTitle={`${incidentHistory.length} events recorded for this incident`}
+      >
+        <div className="p-5 space-y-0">
+          {incidentHistory.map((item, i) => (
+            <TimelineEntry
+              key={item.id}
+              item={item}
+              isLast={i === incidentHistory.length - 1}
+            />
+          ))}
+        </div>
+      </SideModal>
     </div>
   );
 }

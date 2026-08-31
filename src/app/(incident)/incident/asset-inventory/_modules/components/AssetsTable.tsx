@@ -83,14 +83,16 @@ export default function AssetsTable({
   function toggleGroup(key: string) {
     setOpenGroups((prev) => {
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   }
   function toggleFilterValue(key: string, value: string) {
     setFilters((prev) => {
       const next = { ...prev, [key]: new Set(prev[key]) };
-      next[key].has(value) ? next[key].delete(value) : next[key].add(value);
+      if (next[key].has(value)) next[key].delete(value);
+      else next[key].add(value);
       return next;
     });
     setPage(1);
@@ -124,7 +126,8 @@ export default function AssetsTable({
   function toggleSelect(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }
@@ -227,7 +230,7 @@ export default function AssetsTable({
         </aside>
 
         <div>
-          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800">
+          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900/40">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] border-collapse">
                 <thead>
@@ -341,7 +344,7 @@ export default function AssetsTable({
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={safePage === 1}
-                  className="rounded-md border border-zinc-200 px-3 py-1.5 font-semibold disabled:opacity-40 dark:border-zinc-700"
+                  className="rounded-md border border-zinc-200 px-3 py-1.5 font-semibold disabled:opacity-40 dark:border-zinc-700 dark:hover:bg-zinc-800"
                 >
                   Previous
                 </button>
@@ -353,7 +356,7 @@ export default function AssetsTable({
                       onClick={() => setPage(n)}
                       className={cn(
                         "h-8 w-8 rounded-md font-semibold",
-                        n === safePage ? "bg-IMSDarkGreen text-white" : "border border-zinc-200 hover:bg-zinc-50 dark:border-zinc-700",
+                        n === safePage ? "bg-IMSDarkGreen text-white" : "border border-zinc-200 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800",
                       )}
                     >
                       {n}
@@ -362,7 +365,7 @@ export default function AssetsTable({
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={safePage === totalPages}
-                  className="rounded-md border border-zinc-200 px-3 py-1.5 font-semibold disabled:opacity-40 dark:border-zinc-700"
+                  className="rounded-md border border-zinc-200 px-3 py-1.5 font-semibold disabled:opacity-40 dark:border-zinc-700 dark:hover:bg-zinc-800"
                 >
                   Next
                 </button>

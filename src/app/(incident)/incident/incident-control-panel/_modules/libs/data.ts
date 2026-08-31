@@ -1,12 +1,12 @@
 // lib/icp/data.ts
 
 export const KPI_DATA = [
-  { label: "MTTR Improvement", value: "32.8%", delta: "vs 30 days ago", cls: "text-emerald-600", color: "#02DD82", spark: [40, 33, 30, 28, 24, 22, 18, 15] },
-  { label: "Autonomous Success Rate", value: "89.3%", delta: "↑ 6.7%", cls: "text-emerald-600", color: "#02DD82", spark: [78, 80, 82, 84, 86, 88, 89, 89.3] },
-  { label: "Human Override Rate", value: "8.7%", delta: "↓ 3.1%", cls: "text-purple-600", color: "#A855F7", spark: [14, 13, 12, 11, 10.5, 10, 9, 8.7] },
-  { label: "Incidents Resolved", value: "156", delta: "↑ 18.4%", cls: "text-emerald-600", color: "#3B82F6", spark: [110, 118, 124, 130, 138, 145, 151, 156] },
-  { label: "Knowledge Artifacts", value: "1,248", delta: "↑ 24.6%", cls: "text-emerald-600", color: "#3B82F6", spark: [820, 900, 960, 1020, 1090, 1150, 1200, 1248] },
-  { label: "Confidence Calibration", value: "0.92", delta: "↑ 0.05", cls: "text-amber-600", color: "#F59E0B", spark: [0.84, 0.85, 0.86, 0.88, 0.89, 0.90, 0.91, 0.92] },
+  { label: "MTTR Improvement", value: "32.8%", delta: "vs 30 days ago", cls: "text-emerald-600 dark:text-emerald-400", color: "#02DD82", spark: [40, 33, 30, 28, 24, 22, 18, 15] },
+  { label: "Autonomous Success Rate", value: "89.3%", delta: "↑ 6.7%", cls: "text-emerald-600 dark:text-emerald-400", color: "#02DD82", spark: [78, 80, 82, 84, 86, 88, 89, 89.3] },
+  { label: "Human Override Rate", value: "8.7%", delta: "↓ 3.1%", cls: "text-purple-600 dark:text-purple-400", color: "#A855F7", spark: [14, 13, 12, 11, 10.5, 10, 9, 8.7] },
+  { label: "Incidents Resolved", value: "156", delta: "↑ 18.4%", cls: "text-emerald-600 dark:text-emerald-400", color: "#3B82F6", spark: [110, 118, 124, 130, 138, 145, 151, 156] },
+  { label: "Knowledge Artifacts", value: "1,248", delta: "↑ 24.6%", cls: "text-emerald-600 dark:text-emerald-400", color: "#3B82F6", spark: [820, 900, 960, 1020, 1090, 1150, 1200, 1248] },
+  { label: "Confidence Calibration", value: "0.92", delta: "↑ 0.05", cls: "text-amber-600 dark:text-amber-400", color: "#F59E0B", spark: [0.84, 0.85, 0.86, 0.88, 0.89, 0.90, 0.91, 0.92] },
 ];
 
 export type KPIItem = (typeof KPI_DATA)[number];
@@ -132,10 +132,10 @@ export const ENVIRONMENTS = ["production", "staging", "dev"];
 export const PRIORITIES = ["P0", "P1", "P2", "P3"];
 
 export const GOV_KPIS = [
-  { label: "Autonomous Actions", value: "312", delta: "↑ 23.1%", cls: "text-emerald-600" },
-  { label: "Actions Approved", value: "284", delta: "91.0%", cls: "text-emerald-600" },
-  { label: "Actions Denied", value: "28", delta: "9.0%", cls: "text-amber-600" },
-  { label: "Policy Violations", value: "5", delta: "↓ 37.5%", cls: "text-emerald-600" },
+  { label: "Autonomous Actions", value: "312", delta: "↑ 23.1%", cls: "text-emerald-600 dark:text-emerald-400" },
+  { label: "Actions Approved", value: "284", delta: "91.0%", cls: "text-emerald-600 dark:text-emerald-400" },
+  { label: "Actions Denied", value: "28", delta: "9.0%", cls: "text-amber-600 dark:text-amber-400" },
+  { label: "Policy Violations", value: "5", delta: "↓ 37.5%", cls: "text-emerald-600 dark:text-emerald-400" },
 ];
 
 export const GOV_EVENTS = [
@@ -164,10 +164,10 @@ export const SLO_DATA = [
 ];
 
 export const COST_KPIS = [
-  { label: "Engineer Hours Saved", value: "1,840h", delta: "↑ 22.3% vs last period", cls: "text-emerald-600" },
-  { label: "Autonomous Cost Avoidance", value: "$218K", delta: "↑ 31.4% vs last period", cls: "text-emerald-600" },
-  { label: "Avg Resolution Cost", value: "$94", delta: "↓ $41 vs manual baseline", cls: "text-emerald-600" },
-  { label: "ROI on Automation", value: "6.2×", delta: "↑ 0.9× vs last period", cls: "text-emerald-600" },
+  { label: "Engineer Hours Saved", value: "1,840h", delta: "↑ 22.3% vs last period", cls: "text-emerald-600 dark:text-emerald-400" },
+  { label: "Autonomous Cost Avoidance", value: "$218K", delta: "↑ 31.4% vs last period", cls: "text-emerald-600 dark:text-emerald-400" },
+  { label: "Avg Resolution Cost", value: "$94", delta: "↓ $41 vs manual baseline", cls: "text-emerald-600 dark:text-emerald-400" },
+  { label: "ROI on Automation", value: "6.2×", delta: "↑ 0.9× vs last period", cls: "text-emerald-600 dark:text-emerald-400" },
 ];
 
 export const COST_BARS = [

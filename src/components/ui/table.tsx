@@ -42,7 +42,7 @@ const Table = <TData extends object>({
   });
 
   return (
-    <div className="overflow-x-auto rounded-lg bg-white dark:bg-[#0A1635]">
+    <div className="overflow-x-auto rounded-lg bg-white dark:bg-zinc-900">
       {data && data.length < 1 ? (
         <EmptyState title="No Items yet" />
       ) : (
@@ -51,7 +51,7 @@ const Table = <TData extends object>({
           {...props}
         >
           {/* ── Head ── */}
-          <thead className="bg-zinc-100 dark:bg-[#374151] text-black dark:text-white">
+          <thead className="bg-zinc-100 dark:bg-zinc-800 text-black dark:text-zinc-100">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
                 key={headerGroup.id}
@@ -91,7 +91,7 @@ const Table = <TData extends object>({
           </thead>
 
           {/* ── Body ── */}
-          <tbody className="[&_tr:last-child]:border-0 bg-white dark:bg-[#1F2937] text-black dark:text-white min-h-[600px]">
+          <tbody className="[&_tr:last-child]:border-0 bg-white dark:bg-zinc-900 text-black dark:text-zinc-100 min-h-[600px]">
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
@@ -99,7 +99,7 @@ const Table = <TData extends object>({
                 onClick={() => onRowClick?.(row.original)}
                 className={cn(
                   "border-b border-zinc-300 dark:border-zinc-600 transition-colors",
-                  "hover:bg-zinc-50 dark:hover:bg-zinc-700/40",
+                  "hover:bg-zinc-50 dark:hover:bg-zinc-800/60",
                   "data-[state=selected]:bg-zinc-100 dark:data-[state=selected]:bg-zinc-800",
                   typeof rowClassName === "function"
                     ? rowClassName(row.original)

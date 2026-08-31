@@ -17,6 +17,7 @@ import {
 } from "chart.js";
 import { Line, Doughnut, Bar, Scatter } from "react-chartjs-2";
 import { CATEGORIES, REMEDIATIONS, AGENTS } from "../libs/data";
+import { useIsDarkMode } from "@/hooks/useIsDarkMode";
 
 ChartJS.register(
   CategoryScale,
@@ -33,8 +34,21 @@ ChartJS.register(
 
 const NO_LEGEND = { display: false } as const;
 const GRID_OFF = { display: false } as const;
-const GRID_SOFT = { color: "#F1F5F9", drawBorder: false } as const;
+// Tick label color (#94A3B8 / slate-400) reads with reasonable contrast on
+// both light and dark panel backgrounds, so it doesn't need a theme switch.
 const TICK = { font: { size: 9 as number }, color: "#94A3B8" };
+
+// Grid lines and a couple of one-off axis/slice colors DO need to flip for
+// dark mode (the light-mode values are too faint or too bright to read
+// against a dark panel). These take `isDark` from the calling component's
+// `useIsDarkMode()` since top-level consts can't call hooks.
+function gridColor(isDark: boolean) {
+  return { color: isDark ? "#3F3F46" : "#F1F5F9", drawBorder: false } as const;
+}
+
+function axisLabelColor(isDark: boolean) {
+  return isDark ? "#A1A1AA" : "#475569";
+}
 
 // ── Sparkline (KPI tiles) ────────────────────────────────────────
 
@@ -85,6 +99,7 @@ export function KPIDetailChart({
   data: number[];
   color: string;
 }) {
+  const isDark = useIsDarkMode();
   return (
     <div className="h-[180px]">
       <Line
@@ -109,7 +124,7 @@ export function KPIDetailChart({
           plugins: { legend: NO_LEGEND },
           scales: {
             x: { grid: GRID_OFF, ticks: TICK },
-            y: { grid: GRID_SOFT, ticks: TICK },
+            y: { grid: gridColor(isDark), ticks: TICK },
           },
         }}
       />
@@ -120,6 +135,7 @@ export function KPIDetailChart({
 // ── MTTR Trend ───────────────────────────────────────────────────
 
 export function MTTRChart({ big }: { big?: boolean }) {
+  const isDark = useIsDarkMode();
   const labels = [
     "Apr 29",
     "May 3",
@@ -177,7 +193,7 @@ export function MTTRChart({ big }: { big?: boolean }) {
         },
         scales: {
           x: { grid: GRID_OFF, ticks: { ...TICK, maxRotation: 0 } },
-          y: { grid: GRID_SOFT, ticks: TICK, beginAtZero: true },
+          y: { grid: gridColor(isDark), ticks: TICK, beginAtZero: true },
         },
       }}
     />
@@ -216,6 +232,7 @@ export function CategoryDonut({ big }: { big?: boolean }) {
 // ── Effectiveness Bar ────────────────────────────────────────────
 
 export function EffectivenessChart({ big }: { big?: boolean }) {
+  const isDark = useIsDarkMode();
   return (
     <Bar
       data={{
@@ -241,14 +258,14 @@ export function EffectivenessChart({ big }: { big?: boolean }) {
         },
         scales: {
           x: {
-            grid: GRID_SOFT,
+            grid: gridColor(isDark),
             min: 60,
             max: 100,
             ticks: { ...TICK, callback: (v) => v + "%" },
           },
           y: {
             grid: GRID_OFF,
-            ticks: { font: { size: 10 }, color: "#475569" },
+            ticks: { font: { size: 10 }, color: axisLabelColor(isDark) },
           },
         },
       }}
@@ -300,6 +317,7 @@ export function SuccessDonut({
   rate?: number;
   big?: boolean;
 }) {
+  const isDark = useIsDarkMode();
   return (
     <Doughnut
       data={{
@@ -307,7 +325,7 @@ export function SuccessDonut({
         datasets: [
           {
             data: [rate, 100 - rate],
-            backgroundColor: ["#02DD82", "#E8EDF3"],
+            backgroundColor: ["#02DD82", isDark ? "#3F3F46" : "#E8EDF3"],
             borderWidth: 0,
           },
         ],
@@ -329,6 +347,7 @@ export function SuccessDonut({
 // ── EAL Trend ────────────────────────────────────────────────────
 
 export function EALTrendChart({ big }: { big?: boolean }) {
+  const isDark = useIsDarkMode();
   const labels = ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9", "W10"];
   return (
     <Line
@@ -377,7 +396,7 @@ export function EALTrendChart({ big }: { big?: boolean }) {
         },
         scales: {
           x: { grid: GRID_OFF, ticks: TICK },
-          y: { grid: GRID_SOFT, beginAtZero: true, ticks: TICK },
+          y: { grid: gridColor(isDark), beginAtZero: true, ticks: TICK },
         },
       }}
     />
@@ -387,6 +406,7 @@ export function EALTrendChart({ big }: { big?: boolean }) {
 // ── SLO Burn Rate ────────────────────────────────────────────────
 
 export function BurnRateChart({ big }: { big?: boolean }) {
+  const isDark = useIsDarkMode();
   const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   return (
     <Line
@@ -438,7 +458,7 @@ export function BurnRateChart({ big }: { big?: boolean }) {
         },
         scales: {
           x: { grid: GRID_OFF, ticks: TICK },
-          y: { grid: GRID_SOFT, min: 0, max: 5, ticks: TICK },
+          y: { grid: gridColor(isDark), min: 0, max: 5, ticks: TICK },
         },
       }}
     />
@@ -448,6 +468,7 @@ export function BurnRateChart({ big }: { big?: boolean }) {
 // ── Cost Trend ───────────────────────────────────────────────────
 
 export function CostTrendChart({ big }: { big?: boolean }) {
+  const isDark = useIsDarkMode();
   const labels = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb"];
   return (
     <Line
@@ -492,7 +513,7 @@ export function CostTrendChart({ big }: { big?: boolean }) {
         scales: {
           x: { grid: GRID_OFF, ticks: TICK },
           y: {
-            grid: GRID_SOFT,
+            grid: gridColor(isDark),
             beginAtZero: true,
             ticks: { ...TICK, callback: (v) => "$" + v + "K" },
           },
@@ -505,6 +526,7 @@ export function CostTrendChart({ big }: { big?: boolean }) {
 // ── Orchestration Trend ──────────────────────────────────────────
 
 export function OrchTrendChart({ big }: { big?: boolean }) {
+  const isDark = useIsDarkMode();
   const labels = ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8"];
   return (
     <Line
@@ -547,7 +569,7 @@ export function OrchTrendChart({ big }: { big?: boolean }) {
         scales: {
           x: { grid: GRID_OFF, ticks: TICK },
           y: {
-            grid: GRID_SOFT,
+            grid: gridColor(isDark),
             beginAtZero: true,
             ticks: { ...TICK, callback: (v) => v + "%" },
           },
@@ -560,6 +582,7 @@ export function OrchTrendChart({ big }: { big?: boolean }) {
 // ── Agent Accuracy Trend ─────────────────────────────────────────
 
 export function AgentAccuracyChart({ big }: { big?: boolean }) {
+  const isDark = useIsDarkMode();
   const labels = ["W1", "W2", "W3", "W4", "W5", "W6"];
   return (
     <Line
@@ -589,7 +612,7 @@ export function AgentAccuracyChart({ big }: { big?: boolean }) {
         scales: {
           x: { grid: GRID_OFF, ticks: TICK },
           y: {
-            grid: GRID_SOFT,
+            grid: gridColor(isDark),
             min: 75,
             max: 100,
             ticks: { ...TICK, callback: (v) => v + "%" },
@@ -612,7 +635,7 @@ export function ChartLegend({
       {items.map((l) => (
         <span
           key={l.label}
-          className="flex items-center gap-1.5 text-[11px] text-zinc-500"
+          className="flex items-center gap-1.5 text-[11px] text-zinc-500 dark:text-zinc-500"
         >
           <span
             className="w-3 h-[3px] rounded"

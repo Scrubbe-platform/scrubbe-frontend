@@ -42,7 +42,6 @@ const STATS = [
     icon: AlertTriangle,
     iconColor: "#d97706",
     iconBg: "#fef3c7",
-    trend: "+8.2% vs last month",
   },
   {
     label: "Open",
@@ -128,12 +127,6 @@ function MttrDashboard() {
               <p className="text-[22px] font-bold text-black leading-none">
                 {s.value}
               </p>
-              {s.trend && (
-                <span className="inline-flex items-center gap-1 mt-2 px-2 py-1 rounded-full text-[10.5px] font-semibold bg-emerald-100 text-emerald-700 whitespace-nowrap">
-                  <ArrowUpRight size={11} className="shrink-0" />
-                  {s.trend}
-                </span>
-              )}
             </div>
           );
         })}
@@ -201,7 +194,12 @@ function MttrDashboard() {
                 stroke="#16a34a"
                 strokeWidth={2}
                 fill="url(#mttrFill)"
-                dot={{ r: 3, stroke: "#16a34a", strokeWidth: 1, fill: "#16a34a" }}
+                dot={{
+                  r: 3,
+                  stroke: "#16a34a",
+                  strokeWidth: 1,
+                  fill: "#16a34a",
+                }}
                 activeDot={{
                   r: 5,
                   stroke: "#111827",

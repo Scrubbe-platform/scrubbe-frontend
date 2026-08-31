@@ -12,39 +12,39 @@ export default function SummaryBar({ keys }: { keys: ApiKey[] }) {
       label: "Total Keys",
       val: total,
       meta: "across all types",
-      style: "text-zinc-950",
+      style: "text-zinc-950 dark:text-zinc-100",
     },
     {
       label: "Active",
       val: active,
       meta: "authenticated",
-      style: "text-emerald-600",
+      style: "text-emerald-600 dark:text-emerald-400",
     },
     {
       label: "Expired",
       val: expired,
       meta: "pending rotation",
-      style: "text-amber-600",
+      style: "text-amber-600 dark:text-amber-400",
     },
     {
       label: "Revoked",
       val: revoked,
       meta: "permanently",
-      style: "text-red-600",
+      style: "text-red-600 dark:text-red-400",
     },
     {
       label: "Last Activity",
       val: "2 min ago",
       meta: "payments-sdk",
-      style: "text-zinc-950 font-sans text-base",
+      style: "text-zinc-950 dark:text-zinc-100 font-sans text-base",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 border border-zinc-200 rounded-xl overflow-hidden shadow-2xs bg-white">
+    <div className="grid grid-cols-2 md:grid-cols-5 border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden shadow-2xs bg-white dark:bg-zinc-900/40">
       {metrics.map((m, i) => (
-        <div key={i} className="p-4 border-r last:border-r-0 border-zinc-200">
-          <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-1">
+        <div key={i} className="p-4 border-r last:border-r-0 border-zinc-200 dark:border-zinc-700">
+          <div className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">
             {m.label}
           </div>
           <div
@@ -52,7 +52,7 @@ export default function SummaryBar({ keys }: { keys: ApiKey[] }) {
           >
             {m.val}
           </div>
-          <div className="text-[11px] text-zinc-400 mt-1.5">{m.meta}</div>
+          <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1.5">{m.meta}</div>
         </div>
       ))}
     </div>

@@ -260,7 +260,9 @@ export default function Architecture({ onBackToOverview }: { onBackToOverview: (
               onClick={() => setEnvFilter(key)}
               className={cn(
                 "rounded-full border px-3.5 py-1.5 text-[12.5px] font-semibold",
-                envFilter === key ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-black/60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400",
+                envFilter === key
+                  ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                  : "border-zinc-300 bg-white text-black/60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400",
               )}
             >
               {label}
@@ -275,7 +277,9 @@ export default function Architecture({ onBackToOverview }: { onBackToOverview: (
               className={cn(
                 "px-3.5 py-1.5 text-[12.5px] font-semibold",
                 n !== 1 && "border-l border-zinc-300 dark:border-zinc-700",
-                hops === n ? "bg-zinc-900 text-white" : "bg-white text-black/60 dark:bg-zinc-900 dark:text-zinc-400",
+                hops === n
+                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
+                  : "bg-white text-black/60 dark:bg-zinc-900 dark:text-zinc-400",
               )}
             >
               {n} hop{n > 1 ? "s" : ""}
@@ -336,20 +340,20 @@ export default function Architecture({ onBackToOverview }: { onBackToOverview: (
         </div>
       )}
 
-      <div className="overflow-auto rounded-lg border border-zinc-200 bg-[linear-gradient(#F7F8FA_1px,transparent_1px),linear-gradient(90deg,#F7F8FA_1px,transparent_1px)] bg-white [background-size:26px_26px] dark:border-zinc-800 dark:bg-zinc-900/20">
+      <div className="overflow-auto rounded-lg border border-zinc-200 bg-[linear-gradient(#F7F8FA_1px,transparent_1px),linear-gradient(90deg,#F7F8FA_1px,transparent_1px)] bg-white [background-size:26px_26px] dark:border-zinc-800 dark:bg-zinc-900/20 dark:bg-[linear-gradient(#27272a_1px,transparent_1px),linear-gradient(90deg,#27272a_1px,transparent_1px)]">
         <div
           ref={containerRef}
           className="relative min-w-[1180px] origin-top-left"
           style={{ transform: `scale(${zoom})` }}
         >
           <svg
-            className="pointer-events-none absolute left-0 top-0"
+            className="pointer-events-none absolute left-0 top-0 text-[#D8DDE6] dark:text-zinc-700"
             width={svgSize.w}
             height={svgSize.h}
             viewBox={`0 0 ${svgSize.w} ${svgSize.h}`}
           >
             {svgPaths.map((p) => (
-              <path key={p.key} d={p.d} fill="none" stroke={p.hot ? "#2563eb" : "#D8DDE6"} strokeWidth={p.hot ? 2 : 1.4} />
+              <path key={p.key} d={p.d} fill="none" stroke={p.hot ? "#2563eb" : "currentColor"} strokeWidth={p.hot ? 2 : 1.4} />
             ))}
           </svg>
 

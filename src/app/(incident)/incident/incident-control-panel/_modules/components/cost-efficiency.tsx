@@ -45,7 +45,7 @@ export default function CostEfficiency({ onChartClick, onExpand, costMetrics }: 
             <div className="text-[11px] text-zinc-500 dark:text-zinc-500 leading-snug h-6">
               {k.label}
             </div>
-            <div className="text-xl font-bold tracking-tight mt-1 font-ibm">
+            <div className="text-xl font-bold tracking-tight mt-1 dark:text-zinc-100 font-ibm">
               {k.value}
             </div>
             <div className={`text-[11px] font-semibold ${k.cls}`}>

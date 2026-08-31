@@ -56,7 +56,7 @@ export default function HandoverCenterPage() {
       header: "Handover ID",
       accessorKey: "handoverRef",
       cell: ({ row }) => (
-        <div className="font-mono text-xs font-medium text-blue-600">
+        <div className="font-mono text-xs font-medium text-blue-600 dark:text-blue-400">
           {row.original.handoverRef}
         </div>
       ),
@@ -71,15 +71,17 @@ export default function HandoverCenterPage() {
         const extra = row.original.incidents.length - 1;
         if (!primary) {
           return (
-            <div className="text-xs text-stone-400">No linked incidents</div>
+            <div className="text-xs text-stone-400 dark:text-zinc-500">
+              No linked incidents
+            </div>
           );
         }
         return (
           <>
-            <div className="font-medium text-stone-900">
+            <div className="font-medium text-stone-900 dark:text-zinc-100">
               {primary.incident.summary}
             </div>
-            <div className="mt-[1px] font-mono text-[11px] text-stone-500">
+            <div className="mt-[1px] font-mono text-[11px] text-stone-500 dark:text-zinc-500">
               {primary.incident.ticketId} {extra > 0 && `+${extra} MORE`}
             </div>
           </>
@@ -90,7 +92,7 @@ export default function HandoverCenterPage() {
       header: "Incidents",
       id: "totalIncidents",
       cell: ({ row }) => (
-        <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 font-mono text-[10px] font-bold text-blue-600 whitespace-nowrap">
+        <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 font-mono text-[10px] font-bold text-blue-600 whitespace-nowrap dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400">
           {row.original.incidents.length} incidents
         </span>
       ),
@@ -105,14 +107,14 @@ export default function HandoverCenterPage() {
         const severity =
           primary?.incident.severity || primary?.incident.priority || "—";
         const severityStyles: Record<string, string> = {
-          CRITICAL: "text-red-600",
-          HIGH: "text-amber-600",
-          MEDIUM: "text-blue-600",
-          LOW: "text-green-600",
+          CRITICAL: "text-red-600 dark:text-red-400",
+          HIGH: "text-amber-600 dark:text-amber-400",
+          MEDIUM: "text-blue-600 dark:text-blue-400",
+          LOW: "text-green-600 dark:text-green-400",
         };
         return (
           <span
-            className={`text-xs font-semibold ${severityStyles[severity] || "text-stone-500"}`}
+            className={`text-xs font-semibold ${severityStyles[severity] || "text-stone-500 dark:text-zinc-400"}`}
           >
             {severity}
           </span>
@@ -125,11 +127,16 @@ export default function HandoverCenterPage() {
       cell: ({ getValue }) => {
         const status = getValue<HandoverStatus>();
         const badgeStyles: Record<HandoverStatus, string> = {
-          ACTIVE: "bg-red-50 text-red-600 border-red-200",
-          SCHEDULED: "bg-amber-50 text-amber-600 border-amber-200",
-          COMPLETING: "bg-orange-50 text-orange-600 border-orange-200",
-          COMPLETED: "bg-green-50 text-green-600 border-green-200",
-          MERGED: "bg-stone-100 text-stone-500 border-stone-200",
+          ACTIVE:
+            "bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20",
+          SCHEDULED:
+            "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
+          COMPLETING:
+            "bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20",
+          COMPLETED:
+            "bg-green-50 text-green-600 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20",
+          MERGED:
+            "bg-stone-100 text-stone-500 border-stone-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700",
         };
         return (
           <span
@@ -145,7 +152,7 @@ export default function HandoverCenterPage() {
       header: "Owner",
       accessorKey: "currentOwnerLabel",
       cell: ({ getValue }) => (
-        <span className="text-[13px] text-stone-800 whitespace-nowrap">
+        <span className="text-[13px] text-stone-800 whitespace-nowrap dark:text-zinc-200">
           {getValue<string>()}
         </span>
       ),
@@ -154,7 +161,7 @@ export default function HandoverCenterPage() {
       header: "Transfer",
       accessorKey: "transferAt",
       cell: ({ getValue }) => (
-        <span className="font-mono text-xs text-amber-600 whitespace-nowrap">
+        <span className="font-mono text-xs text-amber-600 whitespace-nowrap dark:text-amber-400">
           {new Date(getValue<string>()).toLocaleString("en-US", {
             hour: "2-digit",
             minute: "2-digit",
@@ -233,11 +240,11 @@ export default function HandoverCenterPage() {
         {/* Table */}
         <div className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
           {isLoading ? (
-            <div className="p-8 text-center text-sm text-stone-400">
+            <div className="p-8 text-center text-sm text-stone-400 dark:text-zinc-500">
               Loading handovers…
             </div>
           ) : filteredHandovers.length === 0 ? (
-            <div className="p-8 text-center text-sm text-stone-400">
+            <div className="p-8 text-center text-sm text-stone-400 dark:text-zinc-500">
               No handovers in this view.
             </div>
           ) : (

@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EalResult, Health, LEVEL } from "./serviceCatalog.data";
 
@@ -246,6 +247,59 @@ export function Section({
   );
 }
 
+/**
+ * Same visual shell as Card + CardHeader, but the header is a button that
+ * shows/hides the body — lets a long detail page default most sections to
+ * collapsed without losing the ability to jump straight to one via #anchor.
+ */
+export function CollapsibleCard({
+  id,
+  title,
+  hint,
+  defaultOpen = false,
+  children,
+}: {
+  id: string;
+  title: string;
+  hint?: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div
+      id={id}
+      className="scroll-mt-28 rounded-lg bg-white shadow-sm shadow-light dark:bg-zinc-900/40"
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full flex-wrap items-baseline justify-between gap-2 p-5 text-left"
+      >
+        <div className="flex flex-wrap items-baseline gap-2">
+          <h3 className="text-[14.5px] font-bold text-black dark:text-zinc-100">
+            {title}
+          </h3>
+          {hint && (
+            <span className="text-[12px] text-black/40 dark:text-zinc-500">
+              {hint}
+            </span>
+          )}
+        </div>
+        <ChevronDown
+          size={16}
+          className={cn(
+            "shrink-0 text-black/40 transition-transform dark:text-zinc-500",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+      {open && <div className="px-5 pb-5">{children}</div>}
+    </div>
+  );
+}
+
 export function ReadinessRing({
   score,
   band,
@@ -277,6 +331,7 @@ export function ReadinessRing({
         fill="none"
         stroke="#E7EAF0"
         strokeWidth={10}
+        className="dark:stroke-zinc-800"
       />
       <circle
         cx={size / 2}
@@ -297,7 +352,7 @@ export function ReadinessRing({
         fontFamily="monospace"
         fontSize={size / 4.3}
         fontWeight={700}
-        fill="#0B1220"
+        className="fill-[#0B1220] dark:fill-zinc-100"
       >
         {score}
       </text>
@@ -307,7 +362,7 @@ export function ReadinessRing({
         textAnchor="middle"
         fontFamily="inherit"
         fontSize={10}
-        fill="#8B93A1"
+        className="fill-[#8B93A1] dark:fill-zinc-500"
       >
         of 100
       </text>

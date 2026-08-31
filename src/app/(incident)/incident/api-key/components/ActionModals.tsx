@@ -30,25 +30,25 @@ export function EditModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-md bg-white rounded-xl p-5 space-y-4">
-        <h3 className="text-sm font-bold text-zinc-900 border-b border-zinc-100 pb-2">
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4">
+        <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 border-b border-zinc-100 dark:border-zinc-800 pb-2">
           Rename API Key
         </h3>
         <div className="flex flex-col">
-          <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
+          <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">
             Key Name
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="h-9 w-full rounded border border-zinc-200 px-3 text-xs outline-none focus:border-zinc-950"
+            className="h-9 w-full rounded border border-zinc-200 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 px-3 text-xs outline-none focus:border-zinc-950 dark:focus:border-zinc-400"
           />
         </div>
         <div className="flex justify-end gap-2 pt-2">
           <button
             onClick={onClose}
-            className="h-8 px-3 rounded border text-xs text-zinc-600 font-medium hover:bg-zinc-50"
+            className="h-8 px-3 rounded border dark:border-zinc-700 text-xs text-zinc-600 dark:text-zinc-300 font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800"
           >
             Cancel
           </button>
@@ -119,14 +119,14 @@ export function RotateModal({
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
-      <div className="w-full max-w-md bg-white rounded-xl p-5 space-y-4">
-        <h3 className="text-sm font-bold text-zinc-900 border-b border-zinc-100 pb-2">
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4">
+        <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 border-b border-zinc-100 dark:border-zinc-800 pb-2">
           Rotate API Key
         </h3>
 
         {phase === 1 && (
           <div className="space-y-4 text-xs">
-            <div className="font-medium text-zinc-700">Select a rotation reason:</div>
+            <div className="font-medium text-zinc-700 dark:text-zinc-300">Select a rotation reason:</div>
             <div className="flex flex-wrap gap-1.5">
               {["Scheduled rotation", "Suspected compromise", "Offboarding"].map((chip) => (
                 <button
@@ -136,7 +136,7 @@ export function RotateModal({
                   className={`px-3 py-1.5 rounded-full border text-[11px] font-medium transition-all ${
                     reason === chip
                       ? "bg-zinc-950 border-zinc-950 text-white"
-                      : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
+                      : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
                   }`}
                 >
                   {chip}
@@ -144,7 +144,7 @@ export function RotateModal({
               ))}
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <button onClick={handleClose} className="h-8 px-3 rounded border text-xs text-zinc-600 font-medium">
+              <button onClick={handleClose} className="h-8 px-3 rounded border dark:border-zinc-700 text-xs text-zinc-600 dark:text-zinc-300 font-medium">
                 Cancel
               </button>
               <button
@@ -160,17 +160,17 @@ export function RotateModal({
 
         {phase === 2 && (
           <div className="space-y-4 text-xs">
-            <div className="bg-amber-50 border-l-2 border-amber-500 text-amber-800 p-3 rounded-r leading-relaxed">
+            <div className="bg-amber-50 dark:bg-amber-500/10 border-l-2 border-amber-500 text-amber-800 dark:text-amber-400 p-3 rounded-r leading-relaxed">
               The current secret is <strong>immediately invalidated</strong> when you rotate.
               Update all services using this key before proceeding.
             </div>
             {rotateMutation.isError && (
-              <p className="text-red-600 text-[11px]">
+              <p className="text-red-600 dark:text-red-400 text-[11px]">
                 {String(rotateMutation.error?.message ?? "Failed to rotate key")}
               </p>
             )}
             <div className="flex justify-end gap-2 pt-2">
-              <button onClick={() => setPhase(1)} className="h-8 px-3 rounded border text-xs text-zinc-600 font-medium">
+              <button onClick={() => setPhase(1)} className="h-8 px-3 rounded border dark:border-zinc-700 text-xs text-zinc-600 dark:text-zinc-300 font-medium">
                 Back
               </button>
               <button
@@ -187,11 +187,11 @@ export function RotateModal({
         {phase === 3 && newKey && (
           <div className="space-y-4 text-xs">
             <div className="text-center">
-              <div className="h-10 w-10 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-500 flex items-center justify-center text-lg mx-auto mb-2">
+              <div className="h-10 w-10 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-500 flex items-center justify-center text-lg mx-auto mb-2">
                 ✓
               </div>
-              <p className="text-sm font-bold text-zinc-950">Key Rotated Successfully</p>
-              <p className="text-zinc-400 text-[11px] mt-0.5">
+              <p className="text-sm font-bold text-zinc-950 dark:text-zinc-100">Key Rotated Successfully</p>
+              <p className="text-zinc-400 dark:text-zinc-500 text-[11px] mt-0.5">
                 Save this new secret now — it won't be shown again.
               </p>
             </div>
@@ -239,11 +239,11 @@ export function SuspendModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-md bg-white rounded-xl p-5 space-y-4">
-        <h3 className="text-sm font-bold text-zinc-900 border-b border-zinc-100 pb-2">
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4">
+        <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 border-b border-zinc-100 dark:border-zinc-800 pb-2">
           {isSuspended ? "Reactivate Key" : "Suspend Key"}
         </h3>
-        <p className="text-xs text-zinc-500 leading-relaxed">
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
           {isSuspended
             ? "Reactivating this key will restore authorization access instantly."
             : "Why are you temporarily suspending this key?"}
@@ -256,7 +256,7 @@ export function SuspendModal({
                 type="button"
                 onClick={() => setReason(chip)}
                 className={`px-3 py-1.5 rounded-full border text-[11px] font-medium ${
-                  reason === chip ? "bg-zinc-950 text-white" : "border-zinc-200 bg-white text-zinc-700"
+                  reason === chip ? "bg-zinc-950 text-white" : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300"
                 }`}
               >
                 {chip}
@@ -265,7 +265,7 @@ export function SuspendModal({
           </div>
         )}
         <div className="flex justify-end gap-2 pt-2">
-          <button onClick={onClose} className="h-8 px-3 rounded border text-xs font-medium">
+          <button onClick={onClose} className="h-8 px-3 rounded border dark:border-zinc-700 text-xs font-medium dark:text-zinc-300">
             Cancel
           </button>
           <button
@@ -343,10 +343,10 @@ export function AuditModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-2xl bg-white rounded-xl p-6 space-y-4">
-        <div className="border-b pb-3 flex justify-between items-center">
-          <h3 className="text-sm font-bold text-zinc-900">Audit History</h3>
-          <span className="font-mono text-xs text-zinc-400 bg-zinc-50 border px-2 py-0.5 rounded truncate max-w-[200px]">
+      <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-xl p-6 space-y-4">
+        <div className="border-b dark:border-zinc-800 pb-3 flex justify-between items-center">
+          <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Audit History</h3>
+          <span className="font-mono text-xs text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/60 border dark:border-zinc-700 px-2 py-0.5 rounded truncate max-w-[200px]">
             {activeKey.id}
           </span>
         </div>
@@ -358,40 +358,40 @@ export function AuditModal({
               className={`px-2.5 py-1 rounded border uppercase font-semibold ${
                 filter === t
                   ? "bg-zinc-950 border-zinc-950 text-white"
-                  : "border-zinc-200 text-zinc-500 bg-white"
+                  : "border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-500 bg-white dark:bg-zinc-900"
               }`}
             >
               {t}
             </button>
           ))}
         </div>
-        <div className="divide-y divide-zinc-100 max-h-[300px] overflow-y-auto font-sans text-xs">
+        <div className="divide-y divide-zinc-100 dark:divide-zinc-800 max-h-[300px] overflow-y-auto font-sans text-xs">
           {mockEvents
             .filter((e) => filter === "all" || e.type === filter)
             .map((e, i) => (
               <div key={i} className="grid grid-cols-12 gap-3 py-3 items-start">
-                <span className="col-span-2 font-mono text-[11px] text-zinc-400">{e.time} UTC</span>
-                <span className="col-span-2 uppercase font-mono text-[10px] font-bold text-zinc-400 tracking-wider">
+                <span className="col-span-2 font-mono text-[11px] text-zinc-400 dark:text-zinc-500">{e.time} UTC</span>
+                <span className="col-span-2 uppercase font-mono text-[10px] font-bold text-zinc-400 dark:text-zinc-500 tracking-wider">
                   [{e.type}]
                 </span>
                 <div className="col-span-6">
-                  <div className="font-semibold text-zinc-800">{e.event}</div>
+                  <div className="font-semibold text-zinc-800 dark:text-zinc-300">{e.event}</div>
                   <div
-                    className="font-mono text-[10.5px] text-zinc-400 mt-0.5"
+                    className="font-mono text-[10.5px] text-zinc-400 dark:text-zinc-500 mt-0.5"
                     dangerouslySetInnerHTML={{ __html: e.meta }}
                   />
                 </div>
-                <span className="col-span-2 text-right font-medium text-zinc-500">{e.actor}</span>
+                <span className="col-span-2 text-right font-medium text-zinc-500 dark:text-zinc-400">{e.actor}</span>
               </div>
             ))}
           {mockEvents.filter((e) => filter === "all" || e.type === filter).length === 0 && (
-            <p className="py-6 text-center text-zinc-400">No events for this filter.</p>
+            <p className="py-6 text-center text-zinc-400 dark:text-zinc-500">No events for this filter.</p>
           )}
         </div>
-        <div className="flex justify-end gap-2 border-t pt-4">
+        <div className="flex justify-end gap-2 border-t dark:border-zinc-800 pt-4">
           <button
             onClick={() => showToast("CSV export coming soon")}
-            className="h-8 px-3 rounded border text-xs font-medium hover:bg-zinc-50"
+            className="h-8 px-3 rounded border dark:border-zinc-700 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-300"
           >
             ↓ Export CSV
           </button>
@@ -425,9 +425,9 @@ export function RevokeModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-md bg-white rounded-xl p-5 space-y-4 border-t-4 border-red-500">
-        <h3 className="text-sm font-bold text-red-600">Delete API Key Permanently</h3>
-        <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded text-xs space-y-2 leading-relaxed">
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4 border-t-4 border-red-500">
+        <h3 className="text-sm font-bold text-red-600 dark:text-red-400">Delete API Key Permanently</h3>
+        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-800 dark:text-red-400 p-3 rounded text-xs space-y-2 leading-relaxed">
           <div>
             &bull; All authentication using this key fails{" "}
             <strong>immediately</strong> — there is no grace period.
@@ -437,15 +437,15 @@ export function RevokeModal({
           </div>
         </div>
         <div className="flex flex-col text-xs">
-          <label className="text-zinc-600 font-medium mb-1.5">
-            Type <strong className="font-mono font-bold text-zinc-900">REVOKE</strong> to confirm
+          <label className="text-zinc-600 dark:text-zinc-300 font-medium mb-1.5">
+            Type <strong className="font-mono font-bold text-zinc-900 dark:text-zinc-100">REVOKE</strong> to confirm
           </label>
           <input
             type="text"
             value={typedConfirm}
             onChange={(e) => setTypedConfirm(e.target.value)}
             placeholder="REVOKE"
-            className="h-9 w-full rounded border border-zinc-200 px-3 font-mono tracking-widest outline-none focus:border-red-500 uppercase"
+            className="h-9 w-full rounded border border-zinc-200 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 px-3 font-mono tracking-widest outline-none focus:border-red-500 uppercase"
           />
         </div>
         <div className="flex justify-end gap-2 pt-2">
@@ -454,7 +454,7 @@ export function RevokeModal({
               setTypedConfirm("");
               onClose();
             }}
-            className="h-8 px-3 rounded border text-xs font-medium"
+            className="h-8 px-3 rounded border dark:border-zinc-700 text-xs font-medium dark:text-zinc-300"
           >
             Cancel
           </button>

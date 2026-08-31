@@ -1,11 +1,11 @@
 export default function KeyDiagram() {
   return (
-    <div className="border border-zinc-200 rounded-xl p-6 bg-white shadow-2xs">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-4 pb-2 border-b border-zinc-100">
+    <div className="border border-zinc-200 dark:border-zinc-700 rounded-xl p-6 bg-white dark:bg-zinc-900/40 shadow-2xs">
+      <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-4 pb-2 border-b border-zinc-100 dark:border-zinc-800">
         What API keys power
       </div>
       <div className="flex flex-col lg:flex-row gap-8 items-start">
-        <div className="shrink-0 bg-white border border-zinc-100 rounded-lg p-2">
+        <div className="shrink-0 bg-white dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg p-2">
           <svg
             width="320"
             height="170"
@@ -13,12 +13,19 @@ export default function KeyDiagram() {
             fill="none"
             className="font-mono"
           >
-            <rect x="120" y="8" width="80" height="30" rx="4" fill="#0A0A0A" />
+            <rect
+              x="120"
+              y="8"
+              width="80"
+              height="30"
+              rx="4"
+              className="fill-[#0A0A0A] dark:fill-zinc-800"
+            />
             <text
               x="160"
               y="28"
               textAnchor="middle"
-              fill="#02DD82"
+              className="fill-[#02DD82]"
               fontWeight="600"
               fontSize="11"
             >
@@ -29,7 +36,7 @@ export default function KeyDiagram() {
               y1="38"
               x2="160"
               y2="58"
-              stroke="#e4e4e4"
+              className="stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <line
@@ -37,7 +44,7 @@ export default function KeyDiagram() {
               y1="58"
               x2="270"
               y2="58"
-              stroke="#e4e4e4"
+              className="stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <line
@@ -45,7 +52,7 @@ export default function KeyDiagram() {
               y1="58"
               x2="50"
               y2="72"
-              stroke="#e4e4e4"
+              className="stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <line
@@ -53,7 +60,7 @@ export default function KeyDiagram() {
               y1="58"
               x2="160"
               y2="72"
-              stroke="#e4e4e4"
+              className="stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <line
@@ -61,7 +68,7 @@ export default function KeyDiagram() {
               y1="58"
               x2="270"
               y2="72"
-              stroke="#e4e4e4"
+              className="stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <rect
@@ -70,8 +77,7 @@ export default function KeyDiagram() {
               width="80"
               height="26"
               rx="3"
-              fill="#f4f4f4"
-              stroke="#e4e4e4"
+              className="fill-[#f4f4f4] dark:fill-zinc-800 stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <text
@@ -79,7 +85,7 @@ export default function KeyDiagram() {
               y="89"
               textAnchor="middle"
               fontSize="10.5"
-              fill="#6b6b6b"
+              className="fill-[#6b6b6b] dark:fill-zinc-400"
             >
               SDKs
             </text>
@@ -89,8 +95,7 @@ export default function KeyDiagram() {
               width="80"
               height="26"
               rx="3"
-              fill="#f4f4f4"
-              stroke="#e4e4e4"
+              className="fill-[#f4f4f4] dark:fill-zinc-800 stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <text
@@ -98,7 +103,7 @@ export default function KeyDiagram() {
               y="89"
               textAnchor="middle"
               fontSize="10.5"
-              fill="#6b6b6b"
+              className="fill-[#6b6b6b] dark:fill-zinc-400"
             >
               MCP
             </text>
@@ -108,8 +113,7 @@ export default function KeyDiagram() {
               width="80"
               height="26"
               rx="3"
-              fill="#f4f4f4"
-              stroke="#e4e4e4"
+              className="fill-[#f4f4f4] dark:fill-zinc-800 stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <text
@@ -117,7 +121,7 @@ export default function KeyDiagram() {
               y="89"
               textAnchor="middle"
               fontSize="10.5"
-              fill="#6b6b6b"
+              className="fill-[#6b6b6b] dark:fill-zinc-400"
             >
               CI/CD
             </text>
@@ -126,7 +130,7 @@ export default function KeyDiagram() {
               y1="98"
               x2="160"
               y2="112"
-              stroke="#e4e4e4"
+              className="stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <line
@@ -134,7 +138,7 @@ export default function KeyDiagram() {
               y1="112"
               x2="260"
               y2="112"
-              stroke="#e4e4e4"
+              className="stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <line
@@ -142,7 +146,7 @@ export default function KeyDiagram() {
               y1="112"
               x2="60"
               y2="124"
-              stroke="#e4e4e4"
+              className="stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <line
@@ -150,7 +154,7 @@ export default function KeyDiagram() {
               y1="112"
               x2="160"
               y2="124"
-              stroke="#e4e4e4"
+              className="stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <line
@@ -158,7 +162,7 @@ export default function KeyDiagram() {
               y1="112"
               x2="260"
               y2="124"
-              stroke="#e4e4e4"
+              className="stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <text
@@ -166,7 +170,7 @@ export default function KeyDiagram() {
               y="138"
               textAnchor="middle"
               fontSize="10"
-              fill="#9b9b9b"
+              className="fill-[#9b9b9b] dark:fill-zinc-500"
             >
               Infrastructure
             </text>
@@ -175,7 +179,7 @@ export default function KeyDiagram() {
               y="138"
               textAnchor="middle"
               fontSize="10"
-              fill="#9b9b9b"
+              className="fill-[#9b9b9b] dark:fill-zinc-500"
             >
               Incidents
             </text>
@@ -184,7 +188,7 @@ export default function KeyDiagram() {
               y="138"
               textAnchor="middle"
               fontSize="10"
-              fill="#9b9b9b"
+              className="fill-[#9b9b9b] dark:fill-zinc-500"
             >
               Automation
             </text>
@@ -193,7 +197,7 @@ export default function KeyDiagram() {
               y1="140"
               x2="160"
               y2="152"
-              stroke="#e4e4e4"
+              className="stroke-[#e4e4e4] dark:stroke-zinc-700"
               strokeWidth="1"
             />
             <rect
@@ -202,8 +206,7 @@ export default function KeyDiagram() {
               width="140"
               height="16"
               rx="3"
-              fill="#e8fdf4"
-              stroke="#a7f3d0"
+              className="fill-[#e8fdf4] dark:fill-emerald-500/10 stroke-[#a7f3d0] dark:stroke-emerald-500/20"
               strokeWidth="1"
             />
             <text
@@ -211,16 +214,16 @@ export default function KeyDiagram() {
               y="164"
               textAnchor="middle"
               fontSize="10"
-              fill="#047857"
+              className="fill-[#047857] dark:fill-emerald-400"
             >
               Knowledge Intelligence
             </text>
           </svg>
         </div>
-        <div className="text-[13px] text-zinc-500 leading-relaxed space-y-3 pt-1">
+        <div className="text-[13px] text-zinc-500 dark:text-zinc-400 leading-relaxed space-y-3 pt-1">
           <p>
             API keys in Scrubbe are not developer tokens. They are{" "}
-            <strong className="text-zinc-900 font-medium">
+            <strong className="text-zinc-900 dark:text-zinc-100 font-medium">
               operational identities
             </strong>{" "}
             — each carrying a defined service scope, a permission envelope, an

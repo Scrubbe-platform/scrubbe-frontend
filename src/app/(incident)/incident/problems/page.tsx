@@ -508,15 +508,15 @@ export default function ProblemRecordsDashboard() {
   const kbCount = records.filter((r: any) => r.kb?.published).length;
 
   return (
-    <div className="bg-[#F6F7F9] text-[#161A22] min-h-screen font-ibm antialiased pb-20 selection:bg-emerald-500/20">
+    <div className="bg-[#F6F7F9] dark:bg-zinc-950 text-[#161A22] dark:text-zinc-100 min-h-screen font-ibm antialiased pb-20 selection:bg-emerald-500/20">
       {/* ─── CONTENT HERO BREADCRUMBS LAYER ─── */}
       <div className="max-w-[1540px] mx-auto px-7 pt-6 space-y-4">
-        <div className="flex flex-col gap-4 border-b border-zinc-200 pb-5">
+        <div className="flex flex-col gap-4 border-b border-zinc-200 dark:border-zinc-700 pb-5">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950 dark:text-zinc-100">
               Problem Records
             </h1>
-            <p className="text-sm text-zinc-500 max-w-2xl mt-1 leading-relaxed">
+            <p className="text-sm text-zinc-500 dark:text-zinc-500 max-w-2xl mt-1 leading-relaxed">
               Recurring architectural failures correlated into structural
               root-cause registries. Append findings logs and authorize
               execution blocks.
@@ -524,7 +524,7 @@ export default function ProblemRecordsDashboard() {
           </div>
 
           {/* Statistics matrix logs */}
-          <div className="grid grid-cols-2 md:grid-cols-4  border border-zinc-200 rounded-sm overflow-hidden shadow-2xs bg-white">
+          <div className="grid grid-cols-2 md:grid-cols-4  border border-zinc-200 dark:border-zinc-700 rounded-sm overflow-hidden shadow-2xs bg-white dark:bg-zinc-900/40">
             <StatsCard value={problemsLoading ? "…" : openCount} label="Open" />
             <StatsCard
               value={problemsLoading ? "…" : knownErrorCount}
@@ -545,12 +545,12 @@ export default function ProblemRecordsDashboard() {
       {/* ─── WORKSPACE CONTROLS TOOLBAR ─── */}
       <div className="max-w-[1540px] mx-auto px-7 py-3 flex flex-wrap items-center gap-3">
         {/* Status Segments bar */}
-        <div className="flex rounded-lg bg-gray-100/70 p-1 shadow-2xs gap-1">
+        <div className="flex rounded-lg bg-gray-100/70 dark:bg-zinc-800/60 p-1 shadow-2xs gap-1">
           {["all", "Investigating", "Known Error", "Resolved"].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1 text-xs font-semibold rounded-md capitalize ${statusFilter === st ? "bg-white text-black shadow-xs" : "text-zinc-500 hover:bg-zinc-50"}`}
+              className={`px-3 py-1 text-xs font-semibold rounded-md capitalize ${statusFilter === st ? "bg-white dark:bg-zinc-700 text-black dark:text-zinc-100 shadow-xs" : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"}`}
             >
               {st}
             </button>
@@ -581,16 +581,16 @@ export default function ProblemRecordsDashboard() {
               onClick={() =>
                 setActivePopover(activePopover === "filter" ? null : "filter")
               }
-              className={`h-8.5 p-2 rounded-lg border text-sm font-semibold flex items-center gap-1.5 shadow-2xs bg-white transition-all ${activePopover === "filter" ? "border-emerald-500 text-emerald-700 bg-emerald-50/20" : "text-zinc-700 hover:bg-zinc-50"}`}
+              className={`h-8.5 p-2 rounded-lg border text-sm font-semibold flex items-center gap-1.5 shadow-2xs bg-white dark:bg-zinc-900/40 transition-all ${activePopover === "filter" ? "border-emerald-500 text-emerald-700 dark:text-emerald-400 bg-emerald-50/20 dark:bg-emerald-500/10" : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"}`}
             >
               <SlidersHorizontal size={13} /> Filters Grid
             </button>
 
             {activePopover === "filter" && (
-              <div className="absolute right-0 mt-2 w-[380px] max-w-[calc(100vw-24px)] bg-white border border-zinc-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fadeIn text-xs flex flex-col font-ibm text-[#161A22]">
+              <div className="absolute right-0 mt-2 w-[380px] max-w-[calc(100vw-24px)] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-xl z-50 overflow-hidden animate-fadeIn text-xs flex flex-col font-ibm text-[#161A22] dark:text-zinc-100">
                 {/* Panel Header */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 bg-zinc-50/50">
-                  <span className="font-bold text-zinc-900">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/60">
+                  <span className="font-bold text-zinc-900 dark:text-zinc-100">
                     Advanced Filter Config
                   </span>
                   <button
@@ -606,17 +606,17 @@ export default function ProblemRecordsDashboard() {
                         datePreset: "any",
                       })
                     }
-                    className="text-[11px] font-semibold text-zinc-500 hover:text-red-600 px-2 py-1 rounded hover:bg-zinc-100 transition-colors"
+                    className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 px-2 py-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                   >
                     Reset all
                   </button>
                 </div>
 
                 {/* Panel Body Elements Scroll */}
-                <div className="p-4 space-y-4 max-h-[440px] overflow-y-auto divide-y divide-zinc-100 scrollbar-thin">
+                <div className="p-4 space-y-4 max-h-[440px] overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800 scrollbar-thin">
                   {/* Section: Date & Time parameters */}
                   <div className="space-y-2 pb-2">
-                    <label className="text-[10px]  font-bold tracking-wider text-zinc-400 uppercase block">
+                    <label className="text-[10px]  font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase block">
                       Date Constraints
                     </label>
                     <div className="flex gap-2">
@@ -628,7 +628,7 @@ export default function ProblemRecordsDashboard() {
                             dateField: e.target.value,
                           }))
                         }
-                        className=" border border-zinc-200 bg-white rounded-lg text-xs font-medium p-2 outline-none flex-1 cursor-pointer"
+                        className=" border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 dark:text-zinc-200 rounded-lg text-xs font-medium p-2 outline-none flex-1 cursor-pointer"
                       >
                         <option value="opened">Opened Date</option>
                         <option value="activity">Last Activity</option>
@@ -646,7 +646,7 @@ export default function ProblemRecordsDashboard() {
                               datePreset: preset,
                             }))
                           }
-                          className={`h-7 rounded border text-[11px] font-semibold transition-all ${advancedFilters.datePreset === preset ? "bg-zinc-950 text-white border-zinc-950" : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:bg-zinc-100"}`}
+                          className={`h-7 rounded border text-[11px] font-semibold transition-all ${advancedFilters.datePreset === preset ? "bg-zinc-950 text-white border-zinc-950" : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
                         >
                           {preset === "any" ? "Any time" : preset}
                         </button>
@@ -656,7 +656,7 @@ export default function ProblemRecordsDashboard() {
 
                   {/* Section: Priority Code Options Grid */}
                   <div className="space-y-2 pt-3 pb-1">
-                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 uppercase block">
+                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase block">
                       Severity Scale
                     </span>
                     <div className="flex flex-wrap gap-1">
@@ -669,10 +669,10 @@ export default function ProblemRecordsDashboard() {
                             onClick={() =>
                               handleToggleAdvancedFilter("pris", p)
                             }
-                            className={`px-3 h-8 border rounded-lg flex items-center gap-2  text-[11px] font-bold transition-all ${active ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+                            className={`px-3 h-8 border rounded-lg flex items-center gap-2  text-[11px] font-bold transition-all ${active ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"}`}
                           >
                             <span
-                              className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
+                              className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300 dark:border-zinc-600"}`}
                             >
                               {active && "✓"}
                             </span>
@@ -685,7 +685,7 @@ export default function ProblemRecordsDashboard() {
 
                   {/* Section: Infrastructure Categories */}
                   <div className="space-y-2 pt-3 pb-1">
-                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 uppercase block">
+                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase block">
                       Type Category
                     </span>
                     <div className="flex flex-wrap gap-1">
@@ -705,10 +705,10 @@ export default function ProblemRecordsDashboard() {
                             onClick={() =>
                               handleToggleAdvancedFilter("cats", c)
                             }
-                            className={`px-3 h-8 border rounded-lg flex items-center gap-2 font-medium transition-all ${active ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+                            className={`px-3 h-8 border rounded-lg flex items-center gap-2 font-medium transition-all ${active ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"}`}
                           >
                             <span
-                              className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
+                              className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300 dark:border-zinc-600"}`}
                             >
                               {active && "✓"}
                             </span>
@@ -721,7 +721,7 @@ export default function ProblemRecordsDashboard() {
 
                   {/* Section: Owning team lists grids */}
                   <div className="space-y-2 pt-3 pb-1">
-                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 uppercase block">
+                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase block">
                       Owning Operational Team
                     </span>
                     <div className="flex flex-wrap gap-1">
@@ -734,10 +734,10 @@ export default function ProblemRecordsDashboard() {
                             onClick={() =>
                               handleToggleAdvancedFilter("owners", key)
                             }
-                            className={`px-3 h-8 border rounded-lg flex items-center gap-2 font-medium transition-all ${active ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+                            className={`px-3 h-8 border rounded-lg flex items-center gap-2 font-medium transition-all ${active ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"}`}
                           >
                             <span
-                              className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
+                              className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300 dark:border-zinc-600"}`}
                             >
                               {active && "✓"}
                             </span>
@@ -750,12 +750,12 @@ export default function ProblemRecordsDashboard() {
 
                   {/* Section: Assignees */}
                   <div className="space-y-2 pt-3">
-                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 uppercase block">
+                    <span className="text-[10px]  font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase block">
                       Assigned Problem Manager
                     </span>
                     <div className="flex flex-wrap gap-1">
                       {dynamicAssignees.length === 0 && (
-                        <span className="text-[11px] text-zinc-400 italic">
+                        <span className="text-[11px] text-zinc-400 dark:text-zinc-500 italic">
                           No assignees on loaded records yet.
                         </span>
                       )}
@@ -768,10 +768,10 @@ export default function ProblemRecordsDashboard() {
                             onClick={() =>
                               handleToggleAdvancedFilter("assignees", name)
                             }
-                            className={`px-3 h-8 border rounded-lg flex items-center gap-2 font-medium transition-all ${active ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+                            className={`px-3 h-8 border rounded-lg flex items-center gap-2 font-medium transition-all ${active ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"}`}
                           >
                             <span
-                              className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300"}`}
+                              className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] text-white ${active ? "bg-emerald-600 border-emerald-600" : "border-zinc-300 dark:border-zinc-600"}`}
                             >
                               {active && "✓"}
                             </span>
@@ -784,8 +784,8 @@ export default function ProblemRecordsDashboard() {
                 </div>
 
                 {/* Footer panel configurations summary */}
-                <div className="p-3 border-t bg-zinc-50/80 flex items-center justify-between gap-2">
-                  <span className="text-zinc-500 font-medium font-serif">
+                <div className="p-3 border-t dark:border-zinc-700 bg-zinc-50/80 dark:bg-zinc-800/60 flex items-center justify-between gap-2">
+                  <span className="text-zinc-500 dark:text-zinc-400 font-medium font-serif">
                     {processedRecords.length} records matching
                   </span>
                   <button
@@ -799,7 +799,7 @@ export default function ProblemRecordsDashboard() {
               </div>
             )}
           </div>
-          <div className="h-4 w-px bg-zinc-200 mx-1" />
+          <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-700 mx-1" />
 
           <Button
             onClick={() => setIsNewRecordModalOpen(true)}
@@ -814,9 +814,9 @@ export default function ProblemRecordsDashboard() {
       {/* ─── DUAL-COLUMN WORKSPACE ─── */}
       <div className="max-w-[1540px] mx-auto px-7 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mt-2">
         {/* LEFT RAIL */}
-        <div className="col-span-12 lg:col-span-4 xl:col-span-3 bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden flex flex-col max-h-[calc(100vh-140px)] sticky top-20">
-          <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between relative select-none">
-            <label className="flex items-center gap-2 text-sm font-bold text-zinc-900 cursor-pointer">
+        <div className="col-span-12 lg:col-span-4 xl:col-span-3 bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm overflow-hidden flex flex-col max-h-[calc(100vh-140px)] sticky top-20">
+          <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between relative select-none">
+            <label className="flex items-center gap-2 text-sm font-bold text-zinc-900 dark:text-zinc-100 cursor-pointer">
               <input
                 type="checkbox"
                 checked={isAllVisibleSelected}
@@ -825,7 +825,7 @@ export default function ProblemRecordsDashboard() {
               />
               Records Feed
             </label>
-            <span className=" text-[11px] text-zinc-400">
+            <span className=" text-[11px] text-zinc-400 dark:text-zinc-500">
               ({processedRecords.length} items)
             </span>
 
@@ -866,7 +866,7 @@ export default function ProblemRecordsDashboard() {
             )}
           </div>
 
-          <div className="overflow-y-auto divide-y divide-zinc-100 flex-1">
+          <div className="overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800 flex-1">
             {processedRecords.map((r: any) => {
               const active = r.id === selectedId;
               const isChecked = selectedRowIds.has(r.id);
@@ -886,9 +886,9 @@ export default function ProblemRecordsDashboard() {
                     selectRecord(r.id);
                     setActiveTab("overview");
                   }}
-                  className={`p-4 cursor-pointer transition-all hover:bg-zinc-50 relative group border-l-2 ${
-                    active ? "bg-blue-50/60" : "border-l-transparent"
-                  } ${isChecked ? "bg-zinc-50" : ""}`}
+                  className={`p-4 cursor-pointer transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800/60 relative group border-l-2 ${
+                    active ? "bg-blue-50/60 dark:bg-blue-500/10" : "border-l-transparent"
+                  } ${isChecked ? "bg-zinc-50 dark:bg-zinc-800/60" : ""}`}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <input
@@ -899,19 +899,19 @@ export default function ProblemRecordsDashboard() {
                       className="accent-emerald-500 h-3 w-3 rounded opacity-0 group-hover:opacity-100 checked:opacity-100 transition-opacity"
                     />
                     <div className="flex items-center gap-2">
-                      <span className=" text-[11px] text-zinc-400 font-medium">
+                      <span className=" text-[11px] text-zinc-400 dark:text-zinc-500 font-medium">
                         {r.ticketId}
                       </span>
                       {/* Priority badge */}
                       <span
                         className={`  text-[10px] font-bold px-1.5 py-0.5 rounded ${
                           r.priority === "P0"
-                            ? "bg-red-50 text-red-700"
+                            ? "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400"
                             : r.priority === "P1"
-                              ? "bg-amber-50 text-amber-700"
+                              ? "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400"
                               : r.priority === "P2"
-                                ? "bg-blue-50 text-blue-700"
-                                : "bg-zinc-100 text-zinc-500"
+                                ? "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400"
+                                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
                         }`}
                       >
                         {r.priority}
@@ -920,7 +920,7 @@ export default function ProblemRecordsDashboard() {
                   </div>
 
                   <h4
-                    className={`font-semibold text-zinc-900 leading-snug mb-2 ${
+                    className={`font-semibold text-zinc-900 dark:text-zinc-100 leading-snug mb-2 ${
                       density === "compact"
                         ? "text-xs line-clamp-1"
                         : "text-[13.5px] line-clamp-2"
@@ -929,7 +929,7 @@ export default function ProblemRecordsDashboard() {
                     {r.title}
                   </h4>
 
-                  <div className="flex items-center gap-4 text-[11px]  text-zinc-400 mb-2">
+                  <div className="flex items-center gap-4 text-[11px]  text-zinc-400 dark:text-zinc-500 mb-2">
                     <span>{r.findings?.length ?? 0} findings</span>
                     <span>{formatRelativeTime(r.updatedAt)}</span>
                   </div>
@@ -938,7 +938,7 @@ export default function ProblemRecordsDashboard() {
             })}
 
             {processedRecords.length === 0 && (
-              <div className="p-10 text-center text-sm text-zinc-400 italic">
+              <div className="p-10 text-center text-sm text-zinc-400 dark:text-zinc-500 italic">
                 {problemsLoading
                   ? "Loading problem records…"
                   : "No records match the current filter."}
@@ -948,13 +948,13 @@ export default function ProblemRecordsDashboard() {
         </div>
 
         {/* RIGHT DETAIL PANEL */}
-        <div className="col-span-12 lg:col-span-8 xl:col-span-9 bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden min-h-[500px]">
+        <div className="col-span-12 lg:col-span-8 xl:col-span-9 bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm overflow-hidden min-h-[500px]">
           {activeRecord ? (
             <div className="animate-fadeIn">
               {/* Detail header */}
               <div className="px-7 pt-6 pb-0">
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className=" text-[10.5px] text-zinc-500 bg-zinc-50 px-2 py-0.5 rounded border border-zinc-100">
+                  <span className=" text-[10.5px] text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/60 px-2 py-0.5 rounded border border-zinc-100 dark:border-zinc-800">
                     {activeRecord?.ticketId}
                   </span>
 
@@ -967,19 +967,19 @@ export default function ProblemRecordsDashboard() {
                         Resolve &amp; close record
                       </Button>
                     ) : (
-                      <span className="h-8 px-3 rounded-lg bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100 text-xs flex items-center gap-1.5">
+                      <span className="h-8 px-3 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold border border-emerald-100 dark:border-emerald-500/20 text-xs flex items-center gap-1.5">
                         <CheckCircle2 size={13} /> Resolution verified
                       </span>
                     )}
                   </div>
                 </div>
 
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 leading-snug mb-5">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-100 leading-snug mb-5">
                   {activeRecord.title}
                 </h2>
 
                 {/* Meta grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 py-4 border-t border-zinc-100">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 py-4 border-t border-zinc-100 dark:border-zinc-800">
                   {[
                     {
                       label: "Owning team",
@@ -1010,10 +1010,10 @@ export default function ProblemRecordsDashboard() {
                     },
                   ].map(({ label, value }) => (
                     <div key={label}>
-                      <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-1">
+                      <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-1">
                         {label}
                       </p>
-                      <p className="text-sm font-semibold text-zinc-700">
+                      <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                         {value}
                       </p>
                     </div>
@@ -1028,11 +1028,11 @@ export default function ProblemRecordsDashboard() {
                 const pct = total ? Math.round((done / total) * 100) : 0;
                 const full = pct === 100;
                 return (
-                  <div className="flex items-center gap-4 px-7 py-3 bg-zinc-50/60 border-y border-zinc-100">
-                    <span className=" text-xs font-bold text-zinc-400 whitespace-nowrap">
+                  <div className="flex items-center gap-4 px-7 py-3 bg-zinc-50/60 dark:bg-zinc-800/60 border-y border-zinc-100 dark:border-zinc-800">
+                    <span className=" text-xs font-bold text-zinc-400 dark:text-zinc-500 whitespace-nowrap">
                       Permanent resolution <strong>{pct}</strong>%
                     </span>
-                    <div className="flex-1 h-1.5 bg-zinc-200 rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{
@@ -1041,9 +1041,9 @@ export default function ProblemRecordsDashboard() {
                         }}
                       />
                     </div>
-                    <span className="text-sm text-zinc-500 whitespace-nowrap">
-                      <b className="text-zinc-900 font-bold">{done}</b> of{" "}
-                      <b className="text-zinc-900 font-bold">{total}</b> steps
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+                      <b className="text-zinc-900 dark:text-zinc-100 font-bold">{done}</b> of{" "}
+                      <b className="text-zinc-900 dark:text-zinc-100 font-bold">{total}</b> steps
                       complete
                     </span>
                   </div>
@@ -1051,7 +1051,7 @@ export default function ProblemRecordsDashboard() {
               })()}
 
               {/* Tabs */}
-              <div className="flex gap-0 px-7 border-b border-zinc-100 bg-white overflow-x-auto">
+              <div className="flex gap-0 px-7 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 overflow-x-auto">
                 {[
                   { id: "overview", label: "Overview" },
                   {
@@ -1080,13 +1080,13 @@ export default function ProblemRecordsDashboard() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`py-3.5 mr-6 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
                       activeTab === tab.id
-                        ? "border-emerald-500 text-zinc-900"
-                        : "border-transparent text-zinc-500 hover:text-zinc-700"
+                        ? "border-emerald-500 text-zinc-900 dark:text-zinc-100"
+                        : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
                     }`}
                   >
                     {tab.label}
                     {tab.count !== undefined && (
-                      <span className=" text-[10px] bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded-full">
+                      <span className=" text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded-full">
                         {tab.count}
                       </span>
                     )}
@@ -1101,17 +1101,17 @@ export default function ProblemRecordsDashboard() {
                   <div className="space-y-6 animate-fadeIn">
                     {/* Summary */}
                     <div>
-                      <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-2">
+                      <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">
                         Summary
                       </p>
-                      <p className="text-sm text-zinc-700 leading-relaxed bg-zinc-50/50 p-4 border border-zinc-100 rounded-xl">
+                      <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed bg-zinc-50/50 dark:bg-zinc-800/60 p-4 border border-zinc-100 dark:border-zinc-800 rounded-xl">
                         {activeRecord.description}
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                       {/* Root cause card — two column with confidence ring */}
-                      <div className="p-4 border border-zinc-200 rounded-xl bg-zinc-50/40 flex gap-4 items-start">
+                      <div className="p-4 border border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50/40 dark:bg-zinc-800/60 flex gap-4 items-start">
                         {/* Confidence ring */}
                         <div className="shrink-0 flex flex-col items-center gap-1 pt-1">
                           <svg width="64" height="64" viewBox="0 0 64 64">
@@ -1147,15 +1147,15 @@ export default function ProblemRecordsDashboard() {
                               {activeRecord.confidence ?? 0}%
                             </text>
                           </svg>
-                          <span className=" text-[8.5px] uppercase tracking-widest text-zinc-400">
+                          <span className=" text-[8.5px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
                             match
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-2">
+                          <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">
                             Root cause
                           </p>
-                          <p className="text-xs text-zinc-600 leading-relaxed">
+                          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
                             {activeRecord.rootCauseNote || "Not yet determined."}
                           </p>
                         </div>
@@ -1163,16 +1163,16 @@ export default function ProblemRecordsDashboard() {
 
                       {/* Proposed fix */}
                       {activeRecord.proposedFix && (
-                        <div className="p-4 border border-zinc-200 rounded-xl bg-zinc-50/40 flex gap-3 items-start">
+                        <div className="p-4 border border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50/40 dark:bg-zinc-800/60 flex gap-3 items-start">
                           <AlertCircle
                             size={18}
                             className="text-amber-500 shrink-0 mt-0.5"
                           />
                           <div>
-                            <p className="font-bold text-black text-sm mb-1">
+                            <p className="font-bold text-black dark:text-zinc-100 text-sm mb-1">
                               Proposed fix
                             </p>
-                            <p className="text-xs text-gray-900/80 leading-relaxed">
+                            <p className="text-xs text-gray-900/80 dark:text-zinc-300 leading-relaxed">
                               {activeRecord.proposedFix}
                             </p>
                           </div>
@@ -1183,17 +1183,17 @@ export default function ProblemRecordsDashboard() {
                     {/* Affected services */}
                     {(activeRecord.services?.length ?? 0) > 0 && (
                       <div>
-                        <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 mb-3">
+                        <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">
                           Affected services
                         </p>
-                        <div className="border border-zinc-100 rounded-xl overflow-hidden divide-y divide-zinc-100">
+                        <div className="border border-zinc-100 dark:border-zinc-800 rounded-xl overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800">
                           {activeRecord.services.map(
                             (svc: any, idx: number) => (
                               <div
                                 key={idx}
                                 className="flex items-center gap-3 px-4 py-3"
                               >
-                                <span className=" text-sm text-zinc-700 flex-1">
+                                <span className=" text-sm text-zinc-700 dark:text-zinc-300 flex-1">
                                   {svc.n}
                                 </span>
                                 <span
@@ -1213,7 +1213,7 @@ export default function ProblemRecordsDashboard() {
                 {/* FINDINGS TAB */}
                 {activeTab === "findings" && (
                   <div className="space-y-4 animate-fadeIn">
-                    <div className="flex items-center gap-2 text-xs text-zinc-400 bg-zinc-50 border border-zinc-100 rounded-lg px-3 py-2">
+                    <div className="flex items-center gap-2 text-xs text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 rounded-lg px-3 py-2">
                       <Lock size={12} />
                       Findings are immutable once appended. Authorship is
                       stamped on sign-off.
@@ -1221,9 +1221,9 @@ export default function ProblemRecordsDashboard() {
 
                     <form
                       onSubmit={handleAddNewFinding}
-                      className="border border-zinc-200 bg-zinc-50/40 p-4 rounded-xl space-y-3"
+                      className="border border-zinc-200 dark:border-zinc-700 bg-zinc-50/40 dark:bg-zinc-800/60 p-4 rounded-xl space-y-3"
                     >
-                      <div className="font-semibold text-sm text-zinc-800 flex items-center gap-1.5">
+                      <div className="font-semibold text-sm text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
                         <Plus size={14} className="text-emerald-600" /> Log
                         diagnostic observation
                       </div>
@@ -1231,7 +1231,7 @@ export default function ProblemRecordsDashboard() {
                         <select
                           value={fType}
                           onChange={(e) => setFType(e.target.value)}
-                          className="h-9 border px-2 text-sm font-semibold bg-white rounded-lg outline-none border-zinc-200 focus:border-emerald-500"
+                          className="h-9 border px-2 text-sm font-semibold bg-white dark:bg-zinc-900 dark:text-zinc-200 rounded-lg outline-none border-zinc-200 dark:border-zinc-700 focus:border-emerald-500"
                         >
                           {[
                             "Observation",
@@ -1248,7 +1248,7 @@ export default function ProblemRecordsDashboard() {
                           placeholder="Source / telemetry reference..."
                           value={fSource}
                           onChange={(e) => setFSource(e.target.value)}
-                          className="h-9 border px-3 text-sm bg-white rounded-lg outline-none col-span-2 border-zinc-200 focus:border-emerald-500"
+                          className="h-9 border px-3 text-sm bg-white dark:bg-zinc-900 dark:text-zinc-200 rounded-lg outline-none col-span-2 border-zinc-200 dark:border-zinc-700 focus:border-emerald-500"
                         />
                       </div>
                       <textarea
@@ -1256,7 +1256,7 @@ export default function ProblemRecordsDashboard() {
                         placeholder="Type observations here. Once appended, entries cannot be modified."
                         value={fBody}
                         onChange={(e) => setFBody(e.target.value)}
-                        className="w-full text-sm border p-3 rounded-lg bg-white outline-none leading-relaxed resize-y border-zinc-200 focus:border-emerald-500"
+                        className="w-full text-sm border p-3 rounded-lg bg-white dark:bg-zinc-900 dark:text-zinc-200 outline-none leading-relaxed resize-y border-zinc-200 dark:border-zinc-700 focus:border-emerald-500"
                       />
                       <div className="flex justify-end">
                         <Button type="submit" size="sm">
@@ -1271,10 +1271,10 @@ export default function ProblemRecordsDashboard() {
                         .map((f: any, i: number) => (
                           <div
                             key={i}
-                            className="p-4 border border-zinc-100 rounded-xl bg-white space-y-2"
+                            className="p-4 border border-zinc-100 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900/40 space-y-2"
                           >
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="px-2 py-0.5 rounded border  font-bold text-[10px] uppercase bg-zinc-100 text-zinc-600 border-zinc-200">
+                              <span className="px-2 py-0.5 rounded border  font-bold text-[10px] uppercase bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700">
                                 {f.type}
                               </span>
                               <div className="flex items-center gap-2">
@@ -1286,19 +1286,19 @@ export default function ProblemRecordsDashboard() {
                                 </span>
                               </div>
                               {f.conf && (
-                                <span className=" text-[10px] text-emerald-700 font-bold">
+                                <span className=" text-[10px] text-emerald-700 dark:text-emerald-400 font-bold">
                                   {f.conf}% confidence
                                 </span>
                               )}
-                              <span className=" text-[11px] text-zinc-400 ml-auto">
+                              <span className=" text-[11px] text-zinc-400 dark:text-zinc-500 ml-auto">
                                 {f.ts}
                               </span>
                             </div>
-                            <p className="text-sm text-zinc-700 leading-relaxed">
+                            <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
                               {f.body}
                             </p>
                             {f.source && (
-                              <p className=" text-[11px] text-blue-700 font-semibold">
+                              <p className=" text-[11px] text-blue-700 dark:text-blue-400 font-semibold">
                                 ↳ {f.source}
                               </p>
                             )}
@@ -1318,8 +1318,8 @@ export default function ProblemRecordsDashboard() {
                           key={idx}
                           className={`p-4 border rounded-xl space-y-2 text-sm transition-all ${
                             step.done
-                              ? "border-emerald-200 bg-emerald-50/20"
-                              : "border-zinc-200"
+                              ? "border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-500/10"
+                              : "border-zinc-200 dark:border-zinc-700"
                           }`}
                         >
                           <div className="flex items-start gap-3">
@@ -1330,13 +1330,13 @@ export default function ProblemRecordsDashboard() {
                               className="accent-emerald-600 h-4 w-4 rounded shrink-0 mt-0.5 cursor-pointer"
                             />
                             <div className="flex-1 space-y-1">
-                              <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400">
+                              <p className=" text-[9.5px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
                                 Step {idx + 1}
                               </p>
-                              <h4 className="font-bold text-zinc-950 text-[13.5px] leading-tight">
+                              <h4 className="font-bold text-zinc-950 dark:text-zinc-100 text-[13.5px] leading-tight">
                                 {step.t}
                               </h4>
-                              <p className="text-xs text-zinc-500 leading-relaxed">
+                              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
                                 {step.d}
                               </p>
                               {step.tags?.length > 0 && (
@@ -1344,7 +1344,7 @@ export default function ProblemRecordsDashboard() {
                                   {step.tags.map((tag: any) => (
                                     <span
                                       key={tag}
-                                      className=" text-[10px] bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded"
+                                      className=" text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded"
                                     >
                                       {tag}
                                     </span>
@@ -1355,7 +1355,7 @@ export default function ProblemRecordsDashboard() {
                           </div>
 
                           {isCompleting && !step.done && (
-                            <div className="bg-zinc-50 border border-zinc-200 p-3 rounded-lg flex gap-2 items-center animate-fadeIn">
+                            <div className="bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 p-3 rounded-lg flex gap-2 items-center animate-fadeIn">
                               <input
                                 type="text"
                                 placeholder="Optional validation note or change request..."
@@ -1363,7 +1363,7 @@ export default function ProblemRecordsDashboard() {
                                 onChange={(e) =>
                                   setCompletionNote(e.target.value)
                                 }
-                                className="h-8 text-xs px-2.5 border border-zinc-200 bg-white flex-1 rounded-lg outline-none focus:border-emerald-500"
+                                className="h-8 text-xs px-2.5 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 dark:text-zinc-200 flex-1 rounded-lg outline-none focus:border-emerald-500"
                               />
                               <button
                                 type="button"
@@ -1375,7 +1375,7 @@ export default function ProblemRecordsDashboard() {
                               <button
                                 type="button"
                                 onClick={() => setCompletingStepIdx(null)}
-                                className="h-8 px-2.5 text-zinc-400 hover:text-zinc-600 text-xs"
+                                className="h-8 px-2.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 text-xs"
                               >
                                 Cancel
                               </button>
@@ -1383,7 +1383,7 @@ export default function ProblemRecordsDashboard() {
                           )}
 
                           {step.done && step.by && (
-                            <div className="text-[11px]  text-emerald-700 font-semibold bg-emerald-50 p-2 rounded-lg border border-emerald-100 flex items-center gap-1.5 mt-1">
+                            <div className="text-[11px]  text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-500/10 p-2 rounded-lg border border-emerald-100 dark:border-emerald-500/20 flex items-center gap-1.5 mt-1">
                               <CheckCircle2 size={12} /> Verified · {step.at}
                               {step.note ? ` — "${step.note}"` : ""}
                             </div>
@@ -1395,9 +1395,9 @@ export default function ProblemRecordsDashboard() {
                     {isAddingStep ? (
                       <form
                         onSubmit={handleAddPlanStep}
-                        className="border border-zinc-200 bg-zinc-50/40 p-4 rounded-xl space-y-3 text-sm animate-fadeIn"
+                        className="border border-zinc-200 dark:border-zinc-700 bg-zinc-50/40 dark:bg-zinc-800/60 p-4 rounded-xl space-y-3 text-sm animate-fadeIn"
                       >
-                        <p className="font-semibold text-zinc-800">
+                        <p className="font-semibold text-zinc-800 dark:text-zinc-200">
                           Add resolution step
                         </p>
                         <input
@@ -1405,19 +1405,19 @@ export default function ProblemRecordsDashboard() {
                           placeholder="Step title..."
                           value={newStepTitle}
                           onChange={(e) => setNewStepTitle(e.target.value)}
-                          className="h-9 w-full border border-zinc-200 px-3 rounded-lg outline-none bg-white text-sm focus:border-emerald-500"
+                          className="h-9 w-full border border-zinc-200 dark:border-zinc-700 px-3 rounded-lg outline-none bg-white dark:bg-zinc-900 dark:text-zinc-200 text-sm focus:border-emerald-500"
                         />
                         <textarea
                           placeholder="How will this be validated?"
                           value={newStepDetail}
                           onChange={(e) => setNewStepDetail(e.target.value)}
-                          className="w-full border border-zinc-200 p-2.5 rounded-lg bg-white outline-none leading-relaxed text-sm resize-y focus:border-emerald-500"
+                          className="w-full border border-zinc-200 dark:border-zinc-700 p-2.5 rounded-lg bg-white dark:bg-zinc-900 dark:text-zinc-200 outline-none leading-relaxed text-sm resize-y focus:border-emerald-500"
                         />
                         <div className="flex gap-2 justify-end">
                           <button
                             type="button"
                             onClick={() => setIsAddingStep(false)}
-                            className="h-8 px-3 text-zinc-500 text-sm"
+                            className="h-8 px-3 text-zinc-500 dark:text-zinc-400 text-sm"
                           >
                             Cancel
                           </button>
@@ -1432,7 +1432,7 @@ export default function ProblemRecordsDashboard() {
                     ) : (
                       <button
                         onClick={() => setIsAddingStep(true)}
-                        className="w-full h-10 border border-dashed border-zinc-200 hover:border-zinc-400 rounded-xl text-sm font-semibold text-zinc-400 hover:text-zinc-600 transition-colors flex items-center justify-center gap-1.5"
+                        className="w-full h-10 border border-dashed border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 rounded-xl text-sm font-semibold text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors flex items-center justify-center gap-1.5"
                       >
                         <Plus size={14} /> Add resolution step
                       </button>
@@ -1444,32 +1444,32 @@ export default function ProblemRecordsDashboard() {
                 {activeTab === "kb" && (
                   <div className="space-y-5 animate-fadeIn">
                     {/* Status card */}
-                    <div className="flex items-center gap-4 p-4 border border-zinc-200 rounded-xl bg-zinc-50/60 flex-wrap">
+                    <div className="flex items-center gap-4 p-4 border border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50/60 dark:bg-zinc-800/60 flex-wrap">
                       {/* Icon */}
                       <div
                         className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
-                          activeKb.published ? "bg-emerald-50" : "bg-zinc-100"
+                          activeKb.published ? "bg-emerald-50 dark:bg-emerald-500/10" : "bg-zinc-100 dark:bg-zinc-800"
                         }`}
                       >
                         {activeKb.published ? (
                           <BookOpen size={20} className="text-emerald-600" />
                         ) : (
-                          <FileText size={20} className="text-zinc-400" />
+                          <FileText size={20} className="text-zinc-400 dark:text-zinc-500" />
                         )}
                       </div>
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-zinc-900 text-sm">
+                        <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">
                           {activeKb.published
                             ? "Published to knowledge base"
                             : "Not yet published"}
                         </p>
-                        <p className="text-xs text-zinc-500 margin-top:2px">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 margin-top:2px">
                           {activeKb.published ? (
                             <>
                               Article{" "}
-                              <span className="text-emerald-700 font-semibold font-mono">
+                              <span className="text-emerald-700 dark:text-emerald-400 font-semibold font-mono">
                                 {activeKb.articleId}
                               </span>{" "}
                               &middot; last synced {activeKb.lastSynced}
@@ -1486,13 +1486,13 @@ export default function ProblemRecordsDashboard() {
                 {/* ACTIVITY TAB */}
                 {activeTab === "activity" && (
                   <div className="space-y-4 animate-fadeIn">
-                    <div className="flex items-center gap-2 text-xs text-zinc-400 bg-zinc-50 border border-zinc-100 rounded-lg px-3 py-2">
+                    <div className="flex items-center gap-2 text-xs text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 rounded-lg px-3 py-2">
                       <Lock size={12} />
                       Complete audit trail &bull; every entry is attributed,
                       timestamped and content-hashed. This log is append-only.
                     </div>
 
-                    <div className="relative pl-6 border-l border-zinc-200 ml-3 space-y-6">
+                    <div className="relative pl-6 border-l border-zinc-200 dark:border-zinc-700 ml-3 space-y-6">
                       {(activeRecord.timeline ?? []).map((item: any, idx: number) => {
                         const isStringAuthor = typeof item.author === "string";
                         const authorName = isStringAuthor
@@ -1510,12 +1510,12 @@ export default function ProblemRecordsDashboard() {
                           <div key={item.hash || idx} className="relative">
                             {/* Timeline Node Ring Marker */}
                             <div
-                              className={`absolute -left-[30px] top-1.5 w-2 h-2 rounded-full border bg-white ${item.ok ? "border-emerald-500 ring-4 ring-emerald-50" : "border-blue-500 ring-4 ring-blue-50"}`}
+                              className={`absolute -left-[30px] top-1.5 w-2 h-2 rounded-full border bg-white dark:bg-zinc-900 ${item.ok ? "border-emerald-500 ring-4 ring-emerald-50 dark:ring-emerald-500/10" : "border-blue-500 ring-4 ring-blue-50 dark:ring-blue-500/10"}`}
                             />
 
                             <div className="space-y-1 text-xs">
-                              <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-400 ">
-                                <span className="bg-blue-50 border border-blue-100/50 text-blue-700 px-1.5 py-0.5 rounded font-sans font-medium flex items-center gap-1.5">
+                              <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-400 dark:text-zinc-500 ">
+                                <span className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100/50 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded font-sans font-medium flex items-center gap-1.5">
                                   {/* <span className="w-6 h-6 rounded bg-blue-700 text-white text-[8px] flex items-center justify-center font-bold ">
                                     {authorInitials}
                                   </span> */}
@@ -1523,14 +1523,14 @@ export default function ProblemRecordsDashboard() {
                                 </span>
                                 <span>&bull;</span>
                                 <span>{item.ts}</span>
-                                <span className="ml-auto inline-flex items-center gap-1 text-[10.5px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100/30">
+                                <span className="ml-auto inline-flex items-center gap-1 text-[10.5px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-100/30 dark:border-emerald-500/20">
                                   <Lock size={10} /> {item.hash}
                                 </span>
                               </div>
-                              <h5 className="font-bold text-zinc-950 text-[13.5px] tracking-tight">
+                              <h5 className="font-bold text-zinc-950 dark:text-zinc-100 text-[13.5px] tracking-tight">
                                 {item.t}
                               </h5>
-                              <p className="text-zinc-500 font-normal leading-relaxed text-xs">
+                              <p className="text-zinc-500 dark:text-zinc-400 font-normal leading-relaxed text-xs">
                                 {item.d}
                               </p>
                             </div>
@@ -1543,7 +1543,7 @@ export default function ProblemRecordsDashboard() {
               </div>
             </div>
           ) : (
-            <div className="p-16 text-center text-sm text-zinc-400 italic">
+            <div className="p-16 text-center text-sm text-zinc-400 dark:text-zinc-500 italic">
               {problemsLoading
                 ? "Loading problem records…"
                 : "Select a record from the left rail to load its investigation workspace."}
@@ -1559,16 +1559,16 @@ export default function ProblemRecordsDashboard() {
           onClick={() => setIsNewRecordModalOpen(false)}
         >
           <div
-            className="bg-white border rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl animate-growIn"
+            className="bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl animate-growIn"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="border-b pb-2 flex justify-between items-center">
-              <h3 className="text-base font-bold text-zinc-950">
+            <div className="border-b dark:border-zinc-700 pb-2 flex justify-between items-center">
+              <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-100">
                 Open Corporate Problem Record
               </h3>
               <button
                 onClick={() => setIsNewRecordModalOpen(false)}
-                className="p-1 text-zinc-400 hover:text-zinc-700"
+                className="p-1 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
               >
                 <X size={16} />
               </button>
@@ -1576,7 +1576,7 @@ export default function ProblemRecordsDashboard() {
 
             <form
               onSubmit={handleCreateProblemRecord}
-              className="space-y-4 text-xs font-semibold text-zinc-700"
+              className="space-y-4 text-xs font-semibold text-zinc-700 dark:text-zinc-300"
             >
               <div className="flex flex-col gap-1">
                 <label>Problem Record Summary Headline</label>
@@ -1586,7 +1586,7 @@ export default function ProblemRecordsDashboard() {
                   placeholder="e.g. Intermittent timeout spikes breaking notifications service layers"
                   value={newRecTitle}
                   onChange={(e) => setNewRecTitle(e.target.value)}
-                  className="h-9 px-3 border rounded-lg bg-white outline-none font-medium text-zinc-800"
+                  className="h-9 px-3 border dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 outline-none font-medium text-zinc-800 dark:text-zinc-200"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -1595,7 +1595,7 @@ export default function ProblemRecordsDashboard() {
                   <select
                     value={newRecPri}
                     onChange={(e) => setNewRecPri(e.target.value)}
-                    className="h-9 px-2 border rounded-lg bg-white cursor-pointer outline-none"
+                    className="h-9 px-2 border dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 dark:text-zinc-200 cursor-pointer outline-none"
                   >
                     <option>P0</option>
                     <option>P1</option>
@@ -1608,7 +1608,7 @@ export default function ProblemRecordsDashboard() {
                   <select
                     value={newRecCat}
                     onChange={(e) => setNewRecCat(e.target.value)}
-                    className="h-9 px-2 border rounded-lg bg-white cursor-pointer outline-none"
+                    className="h-9 px-2 border dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 dark:text-zinc-200 cursor-pointer outline-none"
                   >
                     <option>Database</option>
                     <option>Network</option>
@@ -1623,7 +1623,7 @@ export default function ProblemRecordsDashboard() {
                   <select
                     value={newRecOwner}
                     onChange={(e) => setNewRecOwner(e.target.value)}
-                    className="h-9 px-2 border rounded-lg bg-white cursor-pointer outline-none"
+                    className="h-9 px-2 border dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 dark:text-zinc-200 cursor-pointer outline-none"
                   >
                     {Object.entries(OWNERS).map(([code, label]) => (
                       <option key={code} value={code}>
@@ -1637,7 +1637,7 @@ export default function ProblemRecordsDashboard() {
                   <select
                     value={newRecAssigneeEmail}
                     onChange={(e) => setNewRecAssigneeEmail(e.target.value)}
-                    className="h-9 px-2 border rounded-lg bg-white cursor-pointer outline-none"
+                    className="h-9 px-2 border dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 dark:text-zinc-200 cursor-pointer outline-none"
                   >
                     <option value="">Unassigned</option>
                     {members.map((m) => {
@@ -1660,14 +1660,14 @@ export default function ProblemRecordsDashboard() {
                   placeholder="Recount the recurring error trends or cluster patterns being compiled..."
                   value={newRecSummary}
                   onChange={(e) => setNewRecSummary(e.target.value)}
-                  className="w-full p-2.5 border rounded-lg bg-white outline-none font-medium leading-relaxed resize-y text-zinc-800"
+                  className="w-full p-2.5 border dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 outline-none font-medium leading-relaxed resize-y text-zinc-800 dark:text-zinc-200"
                 />
               </div>
-              <div className="pt-2 border-t flex justify-end gap-2 font-bold">
+              <div className="pt-2 border-t dark:border-zinc-700 flex justify-end gap-2 font-bold">
                 <button
                   type="button"
                   onClick={() => setIsNewRecordModalOpen(false)}
-                  className="h-9 px-4 border rounded-lg text-zinc-500"
+                  className="h-9 px-4 border dark:border-zinc-700 rounded-lg text-zinc-500 dark:text-zinc-400"
                 >
                   Cancel
                 </button>

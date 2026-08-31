@@ -93,7 +93,7 @@ export default function GovernanceDash({
               className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3"
             >
               <div className="text-[11px] text-zinc-500 dark:text-zinc-500">{k.label}</div>
-              <div className="text-2xl font-bold tracking-tight mt-1 font-ibm">
+              <div className="text-2xl font-bold tracking-tight mt-1 dark:text-zinc-100 font-ibm">
                 {k.value}
               </div>
               <div className={`text-[11px] font-semibold ${k.cls}`}>

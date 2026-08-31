@@ -518,12 +518,13 @@ function reviveAnyCondition(c: any): AnyCondition {
 
 const VARIANT_CLS: Record<BtnVariant, string> = {
   default:
-    "!bg-white !text-zinc-900 !border !border-zinc-300 shadow-sm hover:!bg-zinc-50",
+    "!bg-white dark:!bg-zinc-900/40 !text-zinc-900 dark:!text-zinc-100 !border !border-zinc-300 dark:!border-zinc-700 shadow-sm hover:!bg-zinc-50 dark:hover:!bg-zinc-800",
   primary: "",
   ghost:
-    "!bg-transparent !border-transparent !text-indigo-500 !shadow-none hover:!bg-indigo-50",
-  danger: "!bg-white !text-red-500 !border !border-zinc-300 hover:!bg-red-50",
-  good: "!bg-white !text-emerald-600 !border !border-zinc-300 hover:!bg-emerald-50",
+    "!bg-transparent !border-transparent !text-indigo-500 !shadow-none hover:!bg-indigo-50 dark:hover:!bg-indigo-500/10",
+  danger:
+    "!bg-white dark:!bg-zinc-900/40 !text-red-500 !border !border-zinc-300 dark:!border-zinc-700 hover:!bg-red-50 dark:hover:!bg-red-500/10",
+  good: "!bg-white dark:!bg-zinc-900/40 !text-emerald-600 !border !border-zinc-300 dark:!border-zinc-700 hover:!bg-emerald-50 dark:hover:!bg-emerald-500/10",
 };
 
 interface BtnProps {
@@ -561,7 +562,7 @@ function Btn({
 // ─── SHARED INPUT CLASS ───────────────────────────────────────────────────────
 
 const inputCls =
-  "w-full border border-zinc-300 rounded-lg px-3 py-2 text-sm text-zinc-900 bg-white font-medium outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors";
+  "w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 bg-white dark:bg-zinc-900 font-medium outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-500/20 transition-colors";
 const selectCls = `${inputCls} cursor-pointer`;
 
 // ─── TOAST ───────────────────────────────────────────────────────────────────
@@ -590,9 +591,9 @@ function Toast({ toasts }: { toasts: ToastItem[] }): React.JSX.Element {
 
 function StatusBadge({ status }: { status: RuleStatus }): React.JSX.Element {
   const cls: Record<RuleStatus, string> = {
-    enabled: "bg-indigo-50 text-indigo-600",
-    draft: "bg-amber-50 text-amber-700",
-    disabled: "bg-zinc-100 text-zinc-500",
+    enabled: "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
+    draft: "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    disabled: "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400",
   };
   const labels: Record<RuleStatus, string> = {
     enabled: "Enabled",
@@ -618,9 +619,9 @@ function ConnectorChip({
   onChange: (v: Connector) => void;
 }): React.JSX.Element {
   const cls: Record<Connector, string> = {
-    AND: "bg-slate-100 text-slate-500 border-slate-200",
-    OR: "bg-orange-50 text-orange-700 border-orange-200",
-    NOT: "bg-red-50 text-red-600 border-red-200",
+    AND: "bg-slate-100 dark:bg-slate-500/10 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-500/20",
+    OR: "bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20",
+    NOT: "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/20",
   };
   const seq: Connector[] = ["AND", "OR", "NOT"];
   return (
@@ -710,7 +711,7 @@ function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
   }
   if (t === VT.DAYS)
     return (
-      <div className="flex flex-wrap gap-1.5 items-center border border-zinc-300 rounded-lg px-2 py-1.5 min-h-[42px] bg-white">
+      <div className="flex flex-wrap gap-1.5 items-center border border-zinc-300 dark:border-zinc-700 rounded-lg px-2 py-1.5 min-h-[42px] bg-white dark:bg-zinc-900">
         {DAYS.map((d) => (
           <button
             key={d}
@@ -722,7 +723,7 @@ function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
                   : [...cond.days, d],
               })
             }
-            className={`text-[11.5px] font-semibold px-2 py-1 rounded-md border cursor-pointer transition-colors ${cond.days.includes(d) ? "bg-indigo-50 text-indigo-600 border-indigo-200" : "bg-zinc-50 text-zinc-400 border-transparent"}`}
+            className={`text-[11.5px] font-semibold px-2 py-1 rounded-md border cursor-pointer transition-colors ${cond.days.includes(d) ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20" : "bg-zinc-50 dark:bg-zinc-800/60 text-zinc-400 dark:text-zinc-500 border-transparent"}`}
           >
             {d}
           </button>
@@ -731,19 +732,19 @@ function ValueCell({ cond, onChange }: ValueCellProps): React.JSX.Element {
     );
   if (t === VT.TIMERANGE)
     return (
-      <div className="flex items-center gap-2 border border-zinc-300 rounded-lg px-3 py-1.5 min-h-[42px] bg-white">
+      <div className="flex items-center gap-2 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-1.5 min-h-[42px] bg-white dark:bg-zinc-900">
         <input
           type="time"
           value={cond.t1}
           onChange={(e) => onChange({ t1: e.target.value })}
-          className="border-none bg-transparent font-semibold text-sm outline-none"
+          className="border-none bg-transparent font-semibold text-sm outline-none dark:text-zinc-200"
         />
-        <span className="text-zinc-400">–</span>
+        <span className="text-zinc-400 dark:text-zinc-500">–</span>
         <input
           type="time"
           value={cond.t2}
           onChange={(e) => onChange({ t2: e.target.value })}
-          className="border-none bg-transparent font-semibold text-sm outline-none"
+          className="border-none bg-transparent font-semibold text-sm outline-none dark:text-zinc-200"
         />
       </div>
     );
@@ -826,7 +827,7 @@ function ConditionRow({
             type="button"
             onClick={onRemove}
             title="Remove"
-            className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+            className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
           >
             <Trash2 size={14} />
           </button>
@@ -860,10 +861,10 @@ function GroupRow({
   return (
     <div className="flex items-start gap-2.5 mb-2.5">
       <div className="w-14 flex justify-center pt-2.5 shrink-0">{leading}</div>
-      <div className="flex-1 border border-dashed border-indigo-200 bg-indigo-50/40 rounded-2xl p-3.5 pb-2.5">
+      <div className="flex-1 border border-dashed border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/40 dark:bg-indigo-500/5 rounded-2xl p-3.5 pb-2.5">
         <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-2.5 text-[12.5px] font-semibold text-zinc-600">
-            <span className="text-[10.5px] font-bold tracking-wider text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-md">
+          <div className="flex items-center gap-2.5 text-[12.5px] font-semibold text-zinc-600 dark:text-zinc-300">
+            <span className="text-[10.5px] font-bold tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-500/10 px-2 py-0.5 rounded-md">
               GROUP
             </span>
             <button
@@ -873,7 +874,7 @@ function GroupRow({
                   matchType: group.matchType === "all" ? "any" : "all",
                 })
               }
-              className="inline-flex items-center gap-1 text-zinc-600 cursor-pointer"
+              className="inline-flex items-center gap-1 text-zinc-600 dark:text-zinc-300 cursor-pointer"
             >
               Match{" "}
               <span className="text-indigo-500">
@@ -886,7 +887,7 @@ function GroupRow({
             type="button"
             onClick={onRemoveGroup}
             title="Remove group"
-            className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+            className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
           >
             <Trash2 size={14} />
           </button>
@@ -930,33 +931,33 @@ function ActionRow({
 }): React.JSX.Element {
   const meta = ACTIONS[action.key];
   return (
-    <div className="flex items-center gap-3 px-3 py-2.5 border border-zinc-200 rounded-xl bg-white mb-2">
-      <div className="text-zinc-300 cursor-grab">
+    <div className="flex items-center gap-3 px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900/40 mb-2">
+      <div className="text-zinc-300 dark:text-zinc-600 cursor-grab">
         <GripVertical size={16} />
       </div>
 
-      <div className="w-48 font-semibold text-[13.5px] text-zinc-900 shrink-0 text-nowrap">
+      <div className="w-48 font-semibold text-[13.5px] text-zinc-900 dark:text-zinc-100 shrink-0 text-nowrap">
         {meta.name}
       </div>
       <div className="flex-1">
         <input
           value={action.detail}
           onChange={(e) => onUpdateDetail(e.target.value)}
-          className="w-full border border-transparent rounded-lg px-2 py-1.5 text-sm text-zinc-500 bg-transparent outline-none focus:border-indigo-400 focus:bg-white transition-colors"
+          className="w-full border border-transparent rounded-lg px-2 py-1.5 text-sm text-zinc-500 dark:text-zinc-400 bg-transparent outline-none focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900 transition-colors"
           onFocus={(e) => {
             e.currentTarget.className =
-              "w-full border border-indigo-400 rounded-lg px-2 py-1.5 text-sm text-zinc-800 bg-white outline-none transition-colors";
+              "w-full border border-indigo-400 rounded-lg px-2 py-1.5 text-sm text-zinc-800 dark:text-zinc-200 bg-white dark:bg-zinc-900 outline-none transition-colors";
           }}
           onBlur={(e) => {
             e.currentTarget.className =
-              "w-full border border-transparent rounded-lg px-2 py-1.5 text-sm text-zinc-500 bg-transparent outline-none focus:border-indigo-400 focus:bg-white transition-colors";
+              "w-full border border-transparent rounded-lg px-2 py-1.5 text-sm text-zinc-500 dark:text-zinc-400 bg-transparent outline-none focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900 transition-colors";
           }}
         />
       </div>
       <button
         type="button"
         onClick={onRemove}
-        className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+        className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
       >
         <Trash2 size={14} />
       </button>
@@ -979,13 +980,13 @@ function GuardRow({
   if (!m) return null;
   return (
     <div
-      className={`flex items-center gap-3 border rounded-xl px-3 py-2.5 mb-2 border-zinc-200 bg-white`}
+      className={`flex items-center gap-3 border rounded-xl px-3 py-2.5 mb-2 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/40`}
     >
-      <span className="flex-1 text-[13.5px] font-semibold text-zinc-900">
+      <span className="flex-1 text-[13.5px] font-semibold text-zinc-900 dark:text-zinc-100">
         {m.label}
       </span>
       {m.val && (
-        <span className="inline-flex items-center gap-1.5 text-[12.5px] text-zinc-500 whitespace-nowrap">
+        <span className="inline-flex items-center gap-1.5 text-[12.5px] text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
           {m.val.pre}
           <input
             type="number"
@@ -993,7 +994,7 @@ function GuardRow({
             max={m.val.max}
             value={guard.value ?? m.val.def}
             onChange={(e) => onUpdateVal(e.target.value)}
-            className="w-14 border border-zinc-300 rounded-md px-2 py-1 text-center font-mono font-semibold text-sm outline-none focus:border-indigo-500 bg-white"
+            className="w-14 border border-zinc-300 dark:border-zinc-700 rounded-md px-2 py-1 text-center font-mono font-semibold text-sm outline-none focus:border-indigo-500 bg-white dark:bg-zinc-900 dark:text-zinc-200"
           />
           {m.val.suf}
         </span>
@@ -1001,7 +1002,7 @@ function GuardRow({
       <button
         type="button"
         onClick={onRemove}
-        className="w-6 h-6 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+        className="w-6 h-6 rounded-md flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
       >
         <X size={14} />
       </button>
@@ -1057,30 +1058,30 @@ function ExecControls({
     help: string;
     children: ReactNode;
   }) => (
-    <div className="bg-white p-4">
-      <div className="flex items-center gap-2 text-xs font-bold text-zinc-800 mb-2.5">
+    <div className="bg-white dark:bg-zinc-900/40 p-4">
+      <div className="flex items-center gap-2 text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-2.5">
         {title}
       </div>
       {children}
-      <p className="text-[11px] text-zinc-400 mt-2 leading-snug">{help}</p>
+      <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-2 leading-snug">{help}</p>
     </div>
   );
 
   return (
-    <div className="mt-5 border border-zinc-200 rounded-2xl overflow-hidden">
-      <div className="flex items-center gap-2.5 px-4 py-3 border-b border-zinc-200">
+    <div className="mt-5 border border-zinc-200 dark:border-zinc-700 rounded-2xl overflow-hidden">
+      <div className="flex items-center gap-2.5 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">
         <div>
-          <div className="font-bold text-sm text-zinc-900">
+          <div className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
             Execution controls
           </div>
-          <div className="text-[11.5px] text-zinc-400">
+          <div className="text-[11.5px] text-zinc-400 dark:text-zinc-500">
             The run envelope applied once the rule clears its guards.
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-px bg-zinc-200">
+      <div className="grid grid-cols-3 gap-px bg-zinc-200 dark:bg-zinc-700">
         <Cell
-          icon={<VolumeX size={13} className="text-zinc-400" />}
+          icon={<VolumeX size={13} className="text-zinc-400 dark:text-zinc-500" />}
           title="Suppression window"
           help="Don't re-run for the same scope inside this window."
         >
@@ -1091,9 +1092,9 @@ function ExecControls({
               max="1440"
               value={controls.window.minutes}
               onChange={(e) => onChange("win.min", e.target.value)}
-              className="w-14 text-center border border-zinc-300 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
+              className="w-14 text-center border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
             />
-            <span className="text-xs text-zinc-400">min ·</span>
+            <span className="text-xs text-zinc-400 dark:text-zinc-500">min ·</span>
             <select
               value={controls.window.scope}
               onChange={(e) => onChange("win.scope", e.target.value)}
@@ -1108,7 +1109,7 @@ function ExecControls({
           </div>
         </Cell>
         <Cell
-          icon={<Zap size={13} className="text-zinc-400" />}
+          icon={<Zap size={13} className="text-zinc-400 dark:text-zinc-500" />}
           title="Maximum executions"
           help="Cap how often this rule can fire."
         >
@@ -1119,7 +1120,7 @@ function ExecControls({
               max="999"
               value={controls.maxExecutions.count}
               onChange={(e) => onChange("max.count", e.target.value)}
-              className="w-14 text-center border border-zinc-300 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
+              className="w-14 text-center border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
             />
             <select
               value={controls.maxExecutions.per}
@@ -1135,7 +1136,7 @@ function ExecControls({
           </div>
         </Cell>
         <Cell
-          icon={<RefreshCw size={13} className="text-zinc-400" />}
+          icon={<RefreshCw size={13} className="text-zinc-400 dark:text-zinc-500" />}
           title="Retry policy"
           help="What happens when an action fails."
         >
@@ -1152,7 +1153,7 @@ function ExecControls({
           </select>
         </Cell>
         <Cell
-          icon={<Users size={13} className="text-zinc-400" />}
+          icon={<Users size={13} className="text-zinc-400 dark:text-zinc-500" />}
           title="Concurrency limit"
           help="Parallel runs allowed."
         >
@@ -1163,13 +1164,13 @@ function ExecControls({
               max="99"
               value={controls.concurrency}
               onChange={(e) => onChange("conc", e.target.value)}
-              className="w-14 text-center border border-zinc-300 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
+              className="w-14 text-center border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
             />
-            <span className="text-xs text-zinc-400">at a time</span>
+            <span className="text-xs text-zinc-400 dark:text-zinc-500">at a time</span>
           </div>
         </Cell>
         <Cell
-          icon={<Check size={13} className="text-zinc-400" />}
+          icon={<Check size={13} className="text-zinc-400 dark:text-zinc-500" />}
           title="Approval requirement"
           help="Gate the actions behind sign-off before they run."
         >
@@ -1184,7 +1185,7 @@ function ExecControls({
           </select>
         </Cell>
         <Cell
-          icon={<Clock size={13} className="text-zinc-400" />}
+          icon={<Clock size={13} className="text-zinc-400 dark:text-zinc-500" />}
           title="Execution timeout"
           help="Abort the run if it exceeds this."
         >
@@ -1195,9 +1196,9 @@ function ExecControls({
               max="1440"
               value={controls.timeout}
               onChange={(e) => onChange("timeout", e.target.value)}
-              className="w-14 text-center border border-zinc-300 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
+              className="w-14 text-center border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 rounded-md px-2 py-1.5 text-sm font-semibold outline-none focus:border-indigo-500"
             />
-            <span className="text-xs text-zinc-400">min</span>
+            <span className="text-xs text-zinc-400 dark:text-zinc-500">min</span>
           </div>
         </Cell>
       </div>
@@ -1274,7 +1275,7 @@ function RuleSummary({
       >
         {label}
       </span>
-      <span className="text-[13px] leading-relaxed text-zinc-800">{text}</span>
+      <span className="text-[13px] leading-relaxed text-zinc-800 dark:text-zinc-300">{text}</span>
     </div>
   );
   return (
@@ -1396,7 +1397,7 @@ function TestPanel({
         <Play size={14} fill="currentColor" /> Run test
       </Btn>
       {result && (
-        <div className="mt-4 border border-zinc-200 rounded-xl p-4">
+        <div className="mt-4 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4">
           {"error" in result ? (
             <div className="flex items-center gap-2 text-red-500 font-semibold text-[13px]">
               <Info size={15} /> {result.error}
@@ -1411,27 +1412,27 @@ function TestPanel({
                   ? "Rule will trigger"
                   : "Rule will not trigger"}
               </div>
-              <p className="text-xs text-zinc-400 mb-1.5">
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-1.5">
                 Simulated event values:
               </p>
-              <div className="border border-zinc-100 rounded-lg overflow-hidden bg-zinc-50 mb-3">
+              <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg overflow-hidden bg-zinc-50 dark:bg-zinc-800/60 mb-3">
                 {Object.entries(result.ctx)
                   .slice(0, 6)
                   .map(([k, v]) => (
                     <div
                       key={k}
-                      className="flex justify-between px-3 py-1.5 text-[12.5px] border-b border-zinc-100 last:border-0"
+                      className="flex justify-between px-3 py-1.5 text-[12.5px] border-b border-zinc-100 dark:border-zinc-800 last:border-0"
                     >
-                      <span className="text-zinc-500">
+                      <span className="text-zinc-500 dark:text-zinc-400">
                         {FIELDS[k as FieldKey]?.label ?? k}
                       </span>
-                      <b className="text-zinc-800">{String(v)}</b>
+                      <b className="text-zinc-800 dark:text-zinc-200">{String(v)}</b>
                     </div>
                   ))}
               </div>
               {result.triggered && (
                 <>
-                  <p className="text-xs text-zinc-400 mb-1.5">
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-1.5">
                     Actions that would run:
                   </p>
                   <ul className="space-y-1 text-[13px]">
@@ -1439,13 +1440,13 @@ function TestPanel({
                       result.actNames.map((a) => (
                         <li
                           key={a}
-                          className="flex items-center gap-2 text-zinc-600"
+                          className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300"
                         >
                           <Check size={14} className="text-emerald-500" /> {a}
                         </li>
                       ))
                     ) : (
-                      <li className="text-zinc-400">No actions configured</li>
+                      <li className="text-zinc-400 dark:text-zinc-500">No actions configured</li>
                     )}
                   </ul>
                 </>
@@ -1478,16 +1479,16 @@ function Dropdown({
   return (
     <div
       ref={ref}
-      className="absolute z-50 bg-white border border-zinc-200 rounded-xl shadow-xl p-1.5 min-w-[240px] max-h-[340px] overflow-y-auto top-[calc(100%+6px)] left-0"
+      className="absolute z-50 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-xl p-1.5 min-w-[240px] max-h-[340px] overflow-y-auto top-[calc(100%+6px)] left-0"
     >
       {items.map((item, i) => {
         if (item.type === "sep")
-          return <div key={i} className="h-px bg-zinc-100 my-1" />;
+          return <div key={i} className="h-px bg-zinc-100 dark:bg-zinc-800 my-1" />;
         if (item.type === "label")
           return (
             <div
               key={i}
-              className="text-[11px] font-bold tracking-widest text-zinc-400 uppercase px-2 py-1.5"
+              className="text-[11px] font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase px-2 py-1.5"
             >
               {item.label}
             </div>
@@ -1500,7 +1501,7 @@ function Dropdown({
               item.onClick?.();
               onClose();
             }}
-            className="flex items-center w-full text-left px-2.5 py-2 rounded-lg text-[13.5px] text-zinc-800 font-medium cursor-pointer hover:bg-zinc-50 transition-colors gap-2.5"
+            className="flex items-center w-full text-left px-2.5 py-2 rounded-lg text-[13.5px] text-zinc-800 dark:text-zinc-200 font-medium cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors gap-2.5"
           >
             {item.label}
           </button>
@@ -2062,7 +2063,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
   );
 
   return (
-    <div className="bg-zinc-50 min-h-screen font-ibm text-zinc-900 antialiased pb-20">
+    <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen font-ibm text-zinc-900 dark:text-zinc-100 antialiased pb-20">
       <div className="max-w-[1480px] mx-auto px-7 py-6">
         {/* Breadcrumb */}
 
@@ -2072,8 +2073,8 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             <h1 className="text-[27px] font-medium tracking-tight flex items-center gap-3 flex-wrap">
               Create operational rule
             </h1>
-            <p className="text-zinc-500 text-sm mt-1 max-w-xl leading-relaxed">
-              Govern how Scrubbe's autonomous agents investigate and remediate.
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1 max-w-xl leading-relaxed">
+              Govern how Scrubbe&apos;s autonomous agents investigate and remediate.
               Ezra evaluates every condition in real time and routes each event
               between automated action, human approval, and hand-off
             </p>
@@ -2086,34 +2087,34 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             <div className="relative">
               <Btn onClick={() => setShowSched((s) => !s)}>
                 <Calendar size={16} /> Schedule
-                <span className="text-[11px] font-bold text-blue-600  rounded px-1.5 py-0.5">
+                <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400  rounded px-1.5 py-0.5">
                   {schedule.mode === "at" && schedule.date
                     ? schedule.date
                     : "Continuous"}
                 </span>
               </Btn>
               {showSched && (
-                <div className="absolute left-0 top-[calc(100%+8px)] z-[120] bg-white border border-zinc-200 rounded-2xl shadow-xl p-4 w-[340px]">
+                <div className="absolute left-0 top-[calc(100%+8px)] z-[120] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-xl p-4 w-[340px]">
                   <div className="flex items-center gap-2.5 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center">
                       <Calendar size={15} className="text-indigo-500" />
                     </div>
                     <div>
-                      <div className="font-bold text-[14.5px]">Schedule</div>
-                      <div className="text-[11.5px] text-zinc-400">
+                      <div className="font-bold text-[14.5px] text-zinc-900 dark:text-zinc-100">Schedule</div>
+                      <div className="text-[11.5px] text-zinc-400 dark:text-zinc-500">
                         {schedule.mode === "at"
                           ? "Activates at a scheduled time."
                           : "Evaluated continuously, in real time."}
                       </div>
                     </div>
                   </div>
-                  <div className="flex bg-zinc-100 border border-zinc-200 rounded-xl p-1 gap-1 mb-3">
+                  <div className="flex bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl p-1 gap-1 mb-3">
                     {(["always", "at"] as ScheduleMode[]).map((m) => (
                       <button
                         key={m}
                         type="button"
                         onClick={() => setSchedule((s) => ({ ...s, mode: m }))}
-                        className={`flex-1 text-[12.5px] font-semibold py-1.5 rounded-lg border-none cursor-pointer transition-all ${schedule.mode === m ? "bg-white text-indigo-600 shadow-sm" : "text-zinc-400 bg-transparent"}`}
+                        className={`flex-1 text-[12.5px] font-semibold py-1.5 rounded-lg border-none cursor-pointer transition-all ${schedule.mode === m ? "bg-white dark:bg-zinc-900 text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-zinc-400 dark:text-zinc-500 bg-transparent"}`}
                       >
                         {m === "always" ? "Continuous" : "Scheduled"}
                       </button>
@@ -2122,7 +2123,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                   {schedule.mode === "at" && (
                     <div className="grid grid-cols-2 gap-2.5">
                       <div>
-                        <label className="text-[12.5px] font-semibold text-zinc-500 block mb-1.5">
+                        <label className="text-[12.5px] font-semibold text-zinc-500 dark:text-zinc-400 block mb-1.5">
                           Date
                         </label>
                         <input
@@ -2135,7 +2136,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                         />
                       </div>
                       <div>
-                        <label className="text-[12.5px] font-semibold text-zinc-500 block mb-1.5">
+                        <label className="text-[12.5px] font-semibold text-zinc-500 dark:text-zinc-400 block mb-1.5">
                           Time
                         </label>
                         <input
@@ -2148,7 +2149,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                         />
                       </div>
                       <div className="col-span-2">
-                        <label className="text-[12.5px] font-semibold text-zinc-500 block mb-1.5">
+                        <label className="text-[12.5px] font-semibold text-zinc-500 dark:text-zinc-400 block mb-1.5">
                           Repeat
                         </label>
                         <select
@@ -2310,14 +2311,14 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
         </div> */}
 
         {/* Main canvas */}
-        <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-7 mb-5">
+        <div className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm p-7 mb-5">
           {/* Rule details */}
           <div
             className="grid gap-5 mb-1"
             style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1.15fr)" }}
           >
             <div>
-              <label className="text-sm text-zinc-500 block mb-1.5">
+              <label className="text-sm text-zinc-500 dark:text-zinc-400 block mb-1.5">
                 Rule name
               </label>
               <input
@@ -2330,9 +2331,9 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
               />
             </div>
             <div>
-              <label className="text-sm text-zinc-500 block mb-1.5">
+              <label className="text-sm text-zinc-500 dark:text-zinc-400 block mb-1.5">
                 Description{" "}
-                <span className="font-normal text-zinc-400">(optional)</span>
+                <span className="font-normal text-zinc-400 dark:text-zinc-500">(optional)</span>
               </label>
               <textarea
                 value={ruleDesc}
@@ -2346,7 +2347,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             </div>
           </div>
 
-          <hr className="border-zinc-100 my-6" />
+          <hr className="border-zinc-100 dark:border-zinc-800 my-6" />
 
           {/* IF */}
           <div className="flex items-center gap-3 mb-4 flex-wrap">
@@ -2359,7 +2360,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                 onClick={() =>
                   setOpenDrop((d) => (d === "match" ? null : "match"))
                 }
-                className="inline-flex items-center gap-2 text-[14.5px] font-semibold text-zinc-800 bg-none border-none cursor-pointer px-1.5 py-1 rounded-sm hover:bg-zinc-50 transition-colors"
+                className="inline-flex items-center gap-2 text-[14.5px] font-semibold text-zinc-800 dark:text-zinc-200 bg-none border-none cursor-pointer px-1.5 py-1 rounded-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
               >
                 <span className="text-indigo-500">
                   {matchType === "all"
@@ -2369,7 +2370,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                       : "None"}
                 </span>{" "}
                 of the following conditions are true{" "}
-                <ChevronDown size={15} className="text-zinc-400" />
+                <ChevronDown size={15} className="text-zinc-400 dark:text-zinc-500" />
               </button>
               {openDrop === "match" && (
                 <Dropdown
@@ -2381,14 +2382,14 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
           </div>
 
           {conditions.length === 0 && (
-            <p className="text-[13px] text-zinc-400 italic py-3">
+            <p className="text-[13px] text-zinc-400 dark:text-zinc-500 italic py-3">
               No conditions yet. Add a condition below.
             </p>
           )}
           {conditions.map((c, i) => {
             const leading =
               i === 0 ? (
-                <span className="text-[11px] text-zinc-400 font-semibold px-2 py-1">
+                <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-semibold px-2 py-1">
                   IF
                 </span>
               ) : (
@@ -2448,7 +2449,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             </Button>
           </div>
 
-          <div className="flex justify-center text-zinc-300 my-5">
+          <div className="flex justify-center text-zinc-300 dark:text-zinc-700 my-5">
             <ArrowDown size={20} />
           </div>
 
@@ -2457,13 +2458,13 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             <span className="text-xs font-black tracking-wider text-white px-3 py-1 rounded-lg bg-emerald-500">
               THEN
             </span>
-            <span className="text-[14.5px] font-semibold text-zinc-800">
+            <span className="text-[14.5px] font-semibold text-zinc-800 dark:text-zinc-200">
               Perform the following actions
             </span>
           </div>
 
           {actions.length === 0 && (
-            <p className="text-[13px] text-zinc-400 italic py-3">
+            <p className="text-[13px] text-zinc-400 dark:text-zinc-500 italic py-3">
               No actions yet. Add an action below.
             </p>
           )}
@@ -2491,7 +2492,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             )}
           </div>
 
-          <div className="flex justify-center text-zinc-300 my-5">
+          <div className="flex justify-center text-zinc-300 dark:text-zinc-700 my-5">
             <ArrowDown size={20} />
           </div>
 
@@ -2500,7 +2501,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             <span className="text-xs font-black tracking-wider text-white px-3 py-1 rounded-lg bg-teal-600">
               UNLESS
             </span>
-            <div className="flex items-center gap-2 flex-wrap text-[13px] text-zinc-500">
+            <div className="flex items-center gap-2 flex-wrap text-[13px] text-zinc-500 dark:text-zinc-400">
               Skip the actions when
               <button
                 type="button"
@@ -2508,19 +2509,19 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                   setGuardMatch((m) => (m === "any" ? "all" : "any"));
                   stamp();
                 }}
-                className="inline-flex items-center gap-1.5 font-black text-xs text-teal-700 bg-teal-50 border border-teal-200 rounded-lg px-2.5 py-1 cursor-pointer hover:bg-teal-100 transition-colors"
+                className="inline-flex items-center gap-1.5 font-black text-xs text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/20 rounded-lg px-2.5 py-1 cursor-pointer hover:bg-teal-100 dark:hover:bg-teal-500/20 transition-colors"
               >
                 {guardMatch} <ChevronDown size={12} />
               </button>
               of these guards are active{" "}
               {guards.length > 0 && (
-                <b className="text-zinc-700">· {guards.length} set</b>
+                <b className="text-zinc-700 dark:text-zinc-300">· {guards.length} set</b>
               )}
             </div>
           </div>
 
           {guards.length === 0 && (
-            <div className="flex items-center gap-3 border border-dashed border-zinc-300 rounded-xl p-3.5 bg-zinc-50 text-zinc-500 text-[12.5px] leading-snug mb-2">
+            <div className="flex items-center gap-3 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl p-3.5 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-500 dark:text-zinc-400 text-[12.5px] leading-snug mb-2">
               <VolumeX size={18} className="text-teal-500 shrink-0" />
               No guards yet. Add one so this rule steps aside when a responder,
               war room, or Ezra is already handling the incident.
@@ -2560,9 +2561,9 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
         {/* Bottom 3-col grid */}
         <div className="grid grid-cols-3 gap-5 mt-5">
           {/* Summary */}
-          <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-5">
-            <h3 className="text-[15px] font-extrabold mb-1">Rule summary</h3>
-            <p className="text-[12.5px] text-zinc-400 mb-4">
+          <section className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm p-5">
+            <h3 className="text-[15px] font-extrabold mb-1 text-zinc-900 dark:text-zinc-100">Rule summary</h3>
+            <p className="text-[12.5px] text-zinc-400 dark:text-zinc-500 mb-4">
               Plain-language read of what this rule does.
             </p>
             <RuleSummary
@@ -2577,9 +2578,9 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
           </section>
 
           {/* Test */}
-          <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-5">
-            <h3 className="text-[15px] font-extrabold mb-1">Test rule</h3>
-            <p className="text-[12.5px] text-zinc-400 mb-4">
+          <section className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm p-5">
+            <h3 className="text-[15px] font-extrabold mb-1 text-zinc-900 dark:text-zinc-100">Test rule</h3>
+            <p className="text-[12.5px] text-zinc-400 dark:text-zinc-500 mb-4">
               Run this rule against its own conditions to confirm it triggers.
             </p>
             <TestPanel
@@ -2590,9 +2591,9 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
           </section>
 
           {/* Status */}
-          <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-5">
-            <h3 className="text-[15px] font-extrabold mb-1">Rule status</h3>
-            <p className="text-[12.5px] text-zinc-400 mb-4">
+          <section className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm p-5">
+            <h3 className="text-[15px] font-extrabold mb-1 text-zinc-900 dark:text-zinc-100">Rule status</h3>
+            <p className="text-[12.5px] text-zinc-400 dark:text-zinc-500 mb-4">
               Lifecycle and recent activity.
             </p>
             {(
@@ -2608,7 +2609,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                         );
                         stamp();
                       }}
-                      className={`relative w-9 h-[22px] rounded-full border-none cursor-pointer transition-colors ${status === "enabled" ? "bg-emerald-400" : "bg-zinc-300"}`}
+                      className={`relative w-9 h-[22px] rounded-full border-none cursor-pointer transition-colors ${status === "enabled" ? "bg-emerald-400" : "bg-zinc-300 dark:bg-zinc-700"}`}
                     >
                       <span
                         className={`absolute top-0.5 w-[18px] h-[18px] rounded-full bg-white shadow transition-all ${status === "enabled" ? "left-[18px]" : "left-0.5"}`}
@@ -2638,37 +2639,37 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
             ).map(({ k, v }) => (
               <div
                 key={k}
-                className="flex items-center justify-between py-2.5 border-b border-zinc-100 text-[13px] last:border-0"
+                className="flex items-center justify-between py-2.5 border-b border-zinc-100 dark:border-zinc-800 text-[13px] last:border-0"
               >
-                <span className="text-zinc-500">{k}</span>
-                <span className="font-semibold text-zinc-800">{v}</span>
+                <span className="text-zinc-500 dark:text-zinc-400">{k}</span>
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200">{v}</span>
               </div>
             ))}
           </section>
         </div>
 
         {/* Rule as code */}
-        <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm mt-5 overflow-hidden">
+        <section className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm mt-5 overflow-hidden">
           <details ref={codeDetailsRef}>
-            <summary className="flex items-center justify-between px-5 py-4 cursor-pointer list-none select-none hover:bg-zinc-50 transition-colors">
+            <summary className="flex items-center justify-between px-5 py-4 cursor-pointer list-none select-none hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
               <span className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center">
-                  <FileText size={16} className="text-zinc-500" />
+                <span className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
+                  <FileText size={16} className="text-zinc-500 dark:text-zinc-400" />
                 </span>
                 <span>
-                  <span className="font-extrabold text-[15px] block">
+                  <span className="font-extrabold text-[15px] block text-zinc-900 dark:text-zinc-100">
                     Rule as code
                   </span>
-                  <span className="text-[11px] text-zinc-400 font-mono">
+                  <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-mono">
                     scrubbe.operational-rule/v1 · {jsonMetaText}
                   </span>
                 </span>
               </span>
-              <span className="flex items-center gap-2 text-[12px] font-semibold text-zinc-400">
+              <span className="flex items-center gap-2 text-[12px] font-semibold text-zinc-400 dark:text-zinc-500">
                 Expand <ChevronDown size={17} />
               </span>
             </summary>
-            <div className="border-t border-zinc-100 p-4">
+            <div className="border-t border-zinc-100 dark:border-zinc-800 p-4">
               <div className="border border-[#1c2230] rounded-xl bg-[#0e1117] overflow-hidden">
                 <div className="flex items-center justify-between px-3 py-2 bg-[#0b0e14] border-b border-[#1c2230]">
                   <span className="flex items-center gap-2 text-[11.5px] text-[#8b93a6] font-mono">
@@ -2749,12 +2750,12 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                   <Info size={15} /> {jsonError}
                 </div>
               ) : (
-                <p className="flex items-start gap-2 mt-2.5 text-xs text-zinc-400 leading-relaxed">
+                <p className="flex items-start gap-2 mt-2.5 text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed">
                   <Info size={14} className="text-indigo-400 shrink-0 mt-0.5" />
                   New to rule-as-code? Hit{" "}
-                  <b className="text-zinc-500 font-semibold">Template</b> for a
+                  <b className="text-zinc-500 dark:text-zinc-400 font-semibold">Template</b> for a
                   reusable, self-documenting starter you can edit and{" "}
-                  <b className="text-zinc-500 font-semibold">Apply</b>.
+                  <b className="text-zinc-500 dark:text-zinc-400 font-semibold">Apply</b>.
                 </p>
               )}
             </div>
@@ -2763,29 +2764,29 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
 
         {/* Saved rules list */}
         {savedRules.length > 0 && (
-          <section className="bg-white border border-zinc-200 rounded-2xl shadow-sm mt-5 overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+          <section className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm mt-5 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
               <span className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center">
-                  <Shield size={16} className="text-zinc-500" />
+                <span className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
+                  <Shield size={16} className="text-zinc-500 dark:text-zinc-400" />
                 </span>
                 <span>
-                  <span className="font-extrabold text-[15px] block">Saved Guardrails</span>
-                  <span className="text-[11px] text-zinc-400">{savedRules.length} rule{savedRules.length !== 1 ? "s" : ""} saved</span>
+                  <span className="font-extrabold text-[15px] block text-zinc-900 dark:text-zinc-100">Saved Guardrails</span>
+                  <span className="text-[11px] text-zinc-400 dark:text-zinc-500">{savedRules.length} rule{savedRules.length !== 1 ? "s" : ""} saved</span>
                 </span>
               </span>
             </div>
-            <div className="divide-y divide-zinc-100">
+            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {savedRules.map((rule: any) => (
-                <div key={rule.id} className="flex items-center gap-4 px-5 py-3 hover:bg-zinc-50 transition-colors">
-                  <span className={`w-2 h-2 rounded-full shrink-0 ${rule.isActive ? "bg-emerald-500" : "bg-zinc-300"}`} />
+                <div key={rule.id} className="flex items-center gap-4 px-5 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${rule.isActive ? "bg-emerald-500" : "bg-zinc-300 dark:bg-zinc-700"}`} />
                   <div className="flex-1 min-w-0">
-                    <div className="text-[13.5px] font-semibold text-zinc-800 truncate">{rule.name}</div>
+                    <div className="text-[13.5px] font-semibold text-zinc-800 dark:text-zinc-200 truncate">{rule.name}</div>
                     {rule.description && (
-                      <div className="text-[11.5px] text-zinc-400 truncate">{rule.description}</div>
+                      <div className="text-[11.5px] text-zinc-400 dark:text-zinc-500 truncate">{rule.description}</div>
                     )}
                   </div>
-                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${rule.isActive ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-500"}`}>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${rule.isActive ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"}`}>
                     {rule.isActive ? "Enabled" : "Draft"}
                   </span>
                   <button
@@ -2808,7 +2809,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                       toast(`Loaded "${rule.name}"`, "good");
                       window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
-                    className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
+                    className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 px-2 py-1 rounded hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors"
                   >
                     Edit
                   </button>
@@ -2816,7 +2817,7 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
                     type="button"
                     onClick={() => setDeleteTarget({ id: rule.id, name: rule.name })}
                     title="Delete draft"
-                    className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -2844,16 +2845,16 @@ export default function OperationalRuleBuilder(): React.JSX.Element {
       >
         <div className="p-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center shrink-0">
               <Trash2 size={18} className="text-red-500" />
             </div>
-            <h3 className="font-bold text-[15px] text-zinc-900">
+            <h3 className="font-bold text-[15px] text-zinc-900 dark:text-zinc-100">
               Delete this draft?
             </h3>
           </div>
-          <p className="text-sm text-zinc-500 mb-5 leading-relaxed">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-5 leading-relaxed">
             This will permanently delete{" "}
-            <b className="text-zinc-800 font-semibold">
+            <b className="text-zinc-800 dark:text-zinc-200 font-semibold">
               &ldquo;{deleteTarget?.name}&rdquo;
             </b>
             . This action cannot be undone.

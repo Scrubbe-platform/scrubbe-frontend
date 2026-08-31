@@ -125,14 +125,16 @@ export default function ServicesTable({
   function toggleGroup(key: string) {
     setOpenGroups((prev) => {
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   }
   function toggleFilterValue(key: string, value: string) {
     setFilters((prev) => {
       const next = { ...prev, [key]: new Set(prev[key]) };
-      next[key].has(value) ? next[key].delete(value) : next[key].add(value);
+      if (next[key].has(value)) next[key].delete(value);
+      else next[key].add(value);
       return next;
     });
     setPage(1);
@@ -196,7 +198,8 @@ export default function ServicesTable({
   function toggleSelect(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }
@@ -341,7 +344,7 @@ export default function ServicesTable({
         </aside>
 
         <div>
-          <div className="overflow-hidden rounded-lg bg-white border border-zinc-200 dark:border-zinc-800">
+          <div className="overflow-hidden rounded-lg bg-white border border-zinc-200 dark:bg-zinc-900/40 dark:border-zinc-800">
             <div className="flex flex-wrap items-center gap-3 border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
               <h2 className="text-[14px] font-bold text-black dark:text-zinc-100">
                 All Services
@@ -525,8 +528,8 @@ export default function ServicesTable({
                     className={cn(
                       "h-8 w-8 rounded-md font-semibold",
                       n === safePage
-                        ? "bg-black text-white"
-                        : "border border-zinc-200 hover:bg-zinc-50 dark:border-zinc-700",
+                        ? "bg-black text-white dark:bg-zinc-100 dark:text-zinc-900"
+                        : "border border-zinc-200 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800",
                     )}
                   >
                     {n}
