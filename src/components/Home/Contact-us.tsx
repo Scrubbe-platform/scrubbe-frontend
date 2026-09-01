@@ -47,8 +47,8 @@ const WAYS: WayItem[] = [
     iconBg: "bg-white text-gray-700 border border-gray-200",
     icon: <Mail size={20} />,
     title: "Email us",
-    desc: "hello@scrubbe.com",
-    href: "mailto:hello@scrubbe.com", // ← opens email client
+    desc: "support@scrubbe.com",
+    href: "mailto:support@scrubbe.com", // ← opens email client
   },
   {
     iconBg: "bg-gray-100 text-gray-700",
