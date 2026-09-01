@@ -17,15 +17,61 @@ import {
   List,
   BookOpen,
   FileText,
+  Compass,
 } from "lucide-react";
+import type { Step } from "react-joyride";
 import StatsCard from "./_modules/components/StatsCard";
 import Dropdown, { DropdownItem } from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button1";
+import ProductTour from "@/components/ui/ProductTour";
 import { useProblems, createProblem, updateProblem } from "@/hooks/useImsData";
 import useMember from "@/hooks/useMember";
 import { customAxios } from "@/lib/api/axios";
 import { endpoint } from "@/lib/api/endpoint";
 import { toast } from "sonner";
+
+const TOUR_STEPS: Step[] = [
+  {
+    target: '[data-tour="kpi-strip"]',
+    title: "Problem Records at a glance",
+    content:
+      "Open, Known Error, Resolved and KB Article counts update live as records change status.",
+    placement: "bottom",
+    skipBeacon: true,
+  },
+  {
+    target: '[data-tour="status-tabs"]',
+    title: "Filter by status",
+    content: "Jump between all records, active investigations, known errors, or resolved records.",
+    placement: "bottom",
+  },
+  {
+    target: '[data-tour="filters"]',
+    title: "Advanced filters",
+    content:
+      "Narrow the list by severity, owning team, assignee, knowledge-base status, or a date range.",
+    placement: "bottom",
+  },
+  {
+    target: '[data-tour="new-record"]',
+    title: "Log a new problem",
+    content: "Open a new problem record to start tracking a recurring or structural root cause.",
+    placement: "left",
+  },
+  {
+    target: '[data-tour="records-feed"]',
+    title: "Records feed",
+    content: "Select a record here to load its full detail on the right — findings, resolution steps, KB and activity.",
+    placement: "right",
+  },
+  {
+    target: '[data-tour="detail-panel"]',
+    title: "Record detail",
+    content:
+      "Overview, Findings, Resolution, Knowledge Base and Activity tabs live here for whichever record is selected.",
+    placement: "left",
+  },
+];
 
 const OWNERS: Record<string, string> = {
   rel: "Platform Reliability",
@@ -85,6 +131,7 @@ export default function ProblemRecordsDashboard() {
   // ─── WORKSPACE STATES ───
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [tourRunCount, setTourRunCount] = useState(0);
 
   // ─── REAL API DATA ───
   const {
@@ -524,7 +571,10 @@ export default function ProblemRecordsDashboard() {
           </div>
 
           {/* Statistics matrix logs */}
-          <div className="grid grid-cols-2 md:grid-cols-4  border border-zinc-200 dark:border-zinc-700 rounded-sm overflow-hidden shadow-2xs bg-white dark:bg-zinc-900/40">
+          <div
+            data-tour="kpi-strip"
+            className="grid grid-cols-2 md:grid-cols-4  border border-zinc-200 dark:border-zinc-700 rounded-sm overflow-hidden shadow-2xs bg-white dark:bg-zinc-900/40"
+          >
             <StatsCard value={problemsLoading ? "…" : openCount} label="Open" />
             <StatsCard
               value={problemsLoading ? "…" : knownErrorCount}
@@ -545,7 +595,10 @@ export default function ProblemRecordsDashboard() {
       {/* ─── WORKSPACE CONTROLS TOOLBAR ─── */}
       <div className="max-w-[1540px] mx-auto px-7 py-3 flex flex-wrap items-center gap-3">
         {/* Status Segments bar */}
-        <div className="flex rounded-lg bg-gray-100/70 dark:bg-zinc-800/60 p-1 shadow-2xs gap-1">
+        <div
+          data-tour="status-tabs"
+          className="flex rounded-lg bg-gray-100/70 dark:bg-zinc-800/60 p-1 shadow-2xs gap-1"
+        >
           {["all", "Investigating", "Known Error", "Resolved"].map((st) => (
             <button
               key={st}
@@ -576,7 +629,7 @@ export default function ProblemRecordsDashboard() {
 
           {/* IMPLEMENTING USER DROPDOWN COMPONENT EXACTLY FOR DENSITY CONFIG */}
 
-          <div className="relative">
+          <div data-tour="filters" className="relative">
             <button
               onClick={() =>
                 setActivePopover(activePopover === "filter" ? null : "filter")
@@ -801,20 +854,34 @@ export default function ProblemRecordsDashboard() {
           </div>
           <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-700 mx-1" />
 
-          <Button
-            onClick={() => setIsNewRecordModalOpen(true)}
-            size="sm"
-            leftIcon={<Plus size={14} />}
+          <button
+            type="button"
+            onClick={() => setTourRunCount((n) => n + 1)}
+            title="Take a tour"
+            className="flex h-8.5 w-8.5 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
           >
-            New Record
-          </Button>
+            <Compass size={15} />
+          </button>
+
+          <div data-tour="new-record">
+            <Button
+              onClick={() => setIsNewRecordModalOpen(true)}
+              size="sm"
+              leftIcon={<Plus size={14} />}
+            >
+              New Record
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* ─── DUAL-COLUMN WORKSPACE ─── */}
       <div className="max-w-[1540px] mx-auto px-7 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mt-2">
         {/* LEFT RAIL */}
-        <div className="col-span-12 lg:col-span-4 xl:col-span-3 bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm overflow-hidden flex flex-col max-h-[calc(100vh-140px)] sticky top-20">
+        <div
+          data-tour="records-feed"
+          className="col-span-12 lg:col-span-4 xl:col-span-3 bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm overflow-hidden flex flex-col max-h-[calc(100vh-140px)] sticky top-20"
+        >
           <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between relative select-none">
             <label className="flex items-center gap-2 text-sm font-bold text-zinc-900 dark:text-zinc-100 cursor-pointer">
               <input
@@ -948,7 +1015,10 @@ export default function ProblemRecordsDashboard() {
         </div>
 
         {/* RIGHT DETAIL PANEL */}
-        <div className="col-span-12 lg:col-span-8 xl:col-span-9 bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm overflow-hidden min-h-[500px]">
+        <div
+          data-tour="detail-panel"
+          className="col-span-12 lg:col-span-8 xl:col-span-9 bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm overflow-hidden min-h-[500px]"
+        >
           {activeRecord ? (
             <div className="animate-fadeIn">
               {/* Detail header */}
@@ -1682,6 +1752,8 @@ export default function ProblemRecordsDashboard() {
           </div>
         </div>
       )}
+
+      <ProductTour tourId="problems-dashboard" steps={TOUR_STEPS} forceRun={tourRunCount} />
     </div>
   );
 }
