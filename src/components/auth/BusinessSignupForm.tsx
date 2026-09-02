@@ -555,13 +555,7 @@ export default function BusinessSignupForm() {
           <button
             type="submit"
             disabled={isLoading || !isValid}
-            className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
-            style={{
-              background:
-                isLoading || !isValid
-                  ? "#374151"
-                  : "linear-gradient(90deg, #1a2a1a 0%, #14532d 55%, #22c55e 100%)",
-            }}
+            className="w-full py-3.5 bg-black hover:bg-IMSLightGreen rounded-xl font-bold text-[15px] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">

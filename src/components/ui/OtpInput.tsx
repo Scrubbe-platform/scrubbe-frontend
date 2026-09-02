@@ -25,7 +25,7 @@ const OtpInput = ({
   const [resendTimer, setResendTimer] = useState<number>(51);
   const [isResendDisabled, setIsResendDisabled] = useState<boolean>(true);
   const [verificationCode, setVerificationCode] = useState<string[]>(
-    Array(6).fill("")
+    Array(6).fill(""),
   );
   const handleChange = (idx: number, val: string) => {
     if (!/^[0-9a-zA-Z]?$/.test(val)) return;
@@ -39,11 +39,11 @@ const OtpInput = ({
 
   const handleKeyDown = (
     idx: number,
-    e: React.KeyboardEvent<HTMLInputElement>
+    e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     if (e.key === "Backspace" && !verificationCode[idx] && idx > 0) {
       setVerificationCode(
-        verificationCode.map((v, i) => (i === idx - 1 ? "" : v))
+        verificationCode.map((v, i) => (i === idx - 1 ? "" : v)),
       );
       inputRefs.current[idx - 1]?.focus();
     }
@@ -135,7 +135,7 @@ const OtpInput = ({
               onChange={(e) => handleChange(idx, e.target.value)}
               onKeyDown={(e) => handleKeyDown(idx, e)}
               onPaste={handlePaste}
-              className="w-12 h-12 text-center dark:text-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg font-medium"
+              className="w-12 h-12 text-center bg-white text-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg font-medium"
               disabled={disabled}
             />
           ))}
