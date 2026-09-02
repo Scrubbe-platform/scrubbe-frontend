@@ -662,11 +662,7 @@ export default function SignInForm() {
                 <button
                   type="submit"
                   disabled={!isValid || isDiscoveryLoading}
-                  className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
-                  style={{
-                    background:
-                      "linear-gradient(90deg,#1a2a1a 0%,#14532d 55%,#22c55e 100%)",
-                  }}
+                  className="w-full py-3.5 rounded-xl font-bold text-[15px] bg-black hover:bg-IMSLightGreen text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
                 >
                   {isDiscoveryLoading ? (
                     <Loader2 size={16} className="animate-spin mx-auto" />
@@ -895,11 +891,7 @@ export default function SignInForm() {
                   <button
                     type="submit"
                     disabled={!password.trim() || isLoginLoading}
-                    className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
-                    style={{
-                      background:
-                        "linear-gradient(90deg,#1a2a1a 0%,#14532d 55%,#22c55e 100%)",
-                    }}
+                    className="w-full py-3.5 bg-black hover:bg-IMSLightGreen rounded-xl font-bold text-[15px] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
                   >
                     {isLoginLoading ? (
                       <Loader2 size={16} className="animate-spin mx-auto" />

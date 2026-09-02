@@ -290,10 +290,22 @@ export default function ContactPage() {
   const rightFAQ = FAQ_ITEMS.slice(half);
 
   return (
-    <div className="bg-white min-h-screen font-sans pt-20">
+    <div className="bg-white min-h-screen font-sans">
       {/* ── CONTACT SECTION ── */}
-      <section className="max-w-[1160px] mx-auto">
-        <Image src={"/IMS/contact-us.png"} width={4008} height={1356} alt="" />
+      <section className="w-full mx-auto h-[500px] relative z-0">
+        <Image
+          src={"/IMS/contact-us.png"}
+          width={4008}
+          height={1356}
+          className="h-full absolute"
+          alt=""
+        />
+
+        <div className="inset-0 w-full h-full max-w-[1060px] mx-auto absolute flex items-center">
+          <h1 className="text-white text-6xl font-serif font-bold z-40">
+            Contact Us
+          </h1>
+        </div>
       </section>
       <section className="max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-10 lg:gap-14 items-start">
         {/* LEFT */}

@@ -14,7 +14,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           {/* Left — fills full height, Spline scene contained inside */}
           <div className="hidden md:flex justify-center items-center w-full h-full overflow-hidden relative bg-[#050B18]">
             <Spline
-              className="absolute w-full h-full"
+              className="absolute w-full h-full top-[150px]"
               scene="https://prod.spline.design/US9RKuH9CFEk4TPE/scene.splinecode"
             />
 
