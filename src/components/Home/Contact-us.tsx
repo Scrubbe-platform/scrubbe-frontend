@@ -292,7 +292,7 @@ export default function ContactPage() {
   return (
     <div className="bg-white min-h-screen font-sans">
       {/* ── CONTACT SECTION ── */}
-      <section className="w-full mx-auto h-[500px] relative z-0">
+      <section className="w-full mx-auto h-[450px] relative z-0">
         <Image
           src={"/IMS/contact-us.png"}
           width={4008}
