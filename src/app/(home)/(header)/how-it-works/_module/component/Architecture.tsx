@@ -4,23 +4,25 @@ import { motion } from "framer-motion";
 
 const ArchitectureCTA = () => {
   return (
-    <section className="w-full bg-[#f8fafc] py-20 px-6 md:px-12 border-t border-slate-200">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start justify-between gap-12">
+    <section className="w-full bg-[#FAFAFA] py-16 px-6 md:px-12 border border-slate-200">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10"
+      >
         {/* Left Side: Typography-focused Heading */}
         <div className="flex-1">
-          <h2 className="text-4xl md:text-[64px] leading-tight tracking-tight text-slate-900">
-            <span className="block font-serif italic text-slate-800">
-              See the
-            </span>
-            <span className="block font-serif italic text-black -mt-2 md:-mt-4">
-              architecture.
-            </span>
+          <h2 className="font-besley font-black text-4xl md:text-[52px] leading-[1.05] tracking-tight">
+            <span className="block text-slate-950">See the</span>
+            <span className="block text-zinc-400">architecture.</span>
           </h2>
         </div>
 
         {/* Right Side: Description and Actions */}
         <div className="flex-1 max-w-xl">
-          <p className="text-slate-600 text-base md:text-[17px] leading-relaxed mb-10 font-medium">
+          <p className="text-slate-600 text-[15px] font-ibm leading-relaxed mb-8">
             Understand how Scrubbe coordinates agents, policies, and execution
             systems across the production stack. Every layer of the platform —
             from signal ingestion and evidence collection to governed
@@ -28,22 +30,16 @@ const ArchitectureCTA = () => {
             engineering and security leadership.
           </p>
 
-          <div className="flex flex-wrap gap-4">
-            {/* Primary Gradient Button */}
-            <button className="relative overflow-hidden group px-8 py-3.5 rounded-sm transition-all active:scale-95">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#061e1a] via-[#10b981] to-[#c9f6d9] transition-transform group-hover:scale-105" />
-              <span className="relative z-10 text-white font-bold text-sm">
-                See Architecture
-              </span>
+          <div className="flex flex-wrap gap-3">
+            <button className="px-6 py-3 rounded-lg bg-black text-white font-semibold text-sm hover:bg-slate-800 transition-colors active:scale-95">
+              See architecture
             </button>
-
-            {/* Secondary Outlined Button */}
-            <button className="px-8 py-3.5 border border-[#10b981] bg-white text-[#065f46] font-bold text-sm rounded-sm hover:bg-emerald-50 transition-colors active:scale-95">
+            <button className="px-6 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 font-semibold text-sm hover:bg-slate-50 transition-colors active:scale-95">
               Browse Walkthrough
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };

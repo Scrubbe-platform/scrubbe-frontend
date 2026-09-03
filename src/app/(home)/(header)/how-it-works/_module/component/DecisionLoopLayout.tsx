@@ -35,58 +35,65 @@ const DecisionLoopLayout = () => {
   ];
 
   return (
-    <div className="flex h-screen max-w-[1280px] mx-auto bg-white font-sans text-slate-900 overflow-hidden">
-      {/* 1. LEFT NAVIGATION (Master) */}
-      <aside className="w-[320px] border-r border-slate-200 flex flex-col p-8 shrink-0">
-        <h3 className="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-widest mb-6">
-          Decision loop
-        </h3>
+    <div className="w-full bg-white px-6 py-16 lg:py-20">
+      <div className="flex flex-col lg:flex-row gap-6 max-w-[1280px] mx-auto items-start">
+        {/* 1. LEFT NAVIGATION (Master) */}
+        <aside className="w-full lg:w-[320px] shrink-0 rounded-2xl bg-[#0B1220] p-6 lg:sticky lg:top-8">
+          <h3 className="text-white text-base font-semibold mb-6">
+            Decision loop
+          </h3>
 
-        <nav className="flex flex-col gap-1">
-          {steps.map((step, idx) => (
-            <button
-              key={step}
-              onClick={() => setActiveStep(idx)}
-              className={cn(
-                "group flex items-center gap-4 px-4 py-3 rounded-lg text-left transition-all",
-                activeStep === idx
-                  ? "bg-emerald-100 text-emerald-900"
-                  : "hover:bg-slate-50 text-slate-500"
-              )}
+          <nav className="flex flex-col gap-1">
+            {steps.map((step, idx) => {
+              const active = activeStep === idx;
+              return (
+                <button
+                  key={step}
+                  onClick={() => setActiveStep(idx)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors",
+                    active ? "bg-white" : "hover:bg-white/5"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 transition-colors",
+                      active
+                        ? "bg-emerald-500 text-white"
+                        : "text-slate-400"
+                    )}
+                  >
+                    {idx + 1}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-[13.5px] font-medium tracking-tight transition-colors",
+                      active ? "text-slate-900" : "text-slate-300"
+                    )}
+                  >
+                    {step}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        {/* 2. MAIN CONTENT (Detail) */}
+        <main className="flex-1 w-full">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeStep}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
             >
-              <div
-                className={cn(
-                  "w-6 h-6 rounded-full border flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors",
-                  activeStep === idx
-                    ? "bg-emerald-500 border-emerald-500 text-white"
-                    : "border-slate-200"
-                )}
-              >
-                {idx + 1}
-              </div>
-              <span className="text-[13px] font-semibold tracking-tight">
-                {step}
-              </span>
-            </button>
-          ))}
-        </nav>
-      </aside>
-
-      {/* 2. MAIN CONTENT (Detail) */}
-      <main className="flex-1 bg-slate-50/50 p-12 overflow-y-auto">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="max-w-4xl mx-auto"
-          >
-            <StepDetailContent stepIndex={activeStep} />
-          </motion.div>
-        </AnimatePresence>
-      </main>
+              <StepDetailContent stepIndex={activeStep} />
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
     </div>
   );
 };
@@ -99,27 +106,23 @@ const StepDetailContent = ({ stepIndex }: { stepIndex: number }) => {
   return (
     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
       {/* Header */}
-      <div className="p-8 border-b border-slate-100 bg-slate-50/30">
-        <div className="flex items-center gap-6">
-          <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white font-bold text-xl">
-            {(stepIndex + 1).toString().padStart(2, "0")}
-          </div>
-          <div>
-            <p className="text-[11px] font-mono font-bold text-emerald-500 uppercase tracking-widest mb-1">
-              {content.category}
-            </p>
-            <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
-              {content.title}
-            </h1>
-          </div>
+      <div className="px-8 py-6 bg-[#0B1220] flex items-center gap-5">
+        <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center text-[#0B1220] font-bold text-sm shrink-0">
+          {(stepIndex + 1).toString().padStart(2, "0")}
+        </div>
+        <div>
+          <p className="text-[12px] text-slate-400 font-medium mb-0.5">
+            {content.category}
+          </p>
+          <h1 className="text-3xl font-bold text-white tracking-tight">
+            {content.title}
+          </h1>
         </div>
       </div>
 
       {/* Body Section */}
       <div className="p-10">
-        <div className="prose prose-slate max-w-none mb-12">
-          {content.description}
-        </div>
+        <div className="mb-12">{content.description}</div>
 
         {/* Optional Custom UI (like the tables in Step 03 or 07) */}
         {content.table && (
@@ -162,16 +165,14 @@ const StepDetailContent = ({ stepIndex }: { stepIndex: number }) => {
 
         {/* Outcome Section */}
         <div>
-          <h3 className="text-xs font-mono font-bold text-slate-900 uppercase tracking-widest mb-6">
-            Outcome
-          </h3>
-          <div className="space-y-4">
+          <h3 className="text-lg font-bold text-slate-900 mb-2">Outcome</h3>
+          <div>
             {content.outcomes.map((outcome, i) => (
-              <div key={i} className="flex gap-4 py-4 border-t border-slate-50">
-                <span className="text-emerald-500 text-lg font-bold">—</span>
-                <p className="text-[14px] text-slate-600 font-medium">
-                  {outcome}
-                </p>
+              <div key={i} className="flex gap-4 py-4 border-t border-slate-100">
+                <span className="text-emerald-500 text-base font-bold shrink-0">
+                  –
+                </span>
+                <p className="text-[14px] text-slate-600">{outcome}</p>
               </div>
             ))}
           </div>

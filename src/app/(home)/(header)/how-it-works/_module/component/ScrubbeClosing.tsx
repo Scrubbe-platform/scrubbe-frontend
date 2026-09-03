@@ -1,24 +1,27 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const ScrubbeClosing = () => {
   return (
-    <section className="relative w-full min-h-[600px] flex flex-col items-center justify-center px-6 py-20 overflow-hidden bg-black text-center">
-      {/* 1. BACKGROUND PLACEHOLDER 
-          Swap this div for your <img> or a background-image style */}
-      <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
-        {/* Example: <img src="/path/to/your/background.jpg" className="w-full h-full object-cover" /> */}
-        <div className="w-full h-full bg-gradient-to-b from-transparent via-slate-900/50 to-black" />
-      </div>
+    <section className="w-full grid grid-cols-1 lg:grid-cols-2 border border-slate-200 overflow-hidden">
+      {/* LEFT — dark textured background + copy */}
+      <div className="relative flex flex-col justify-center px-8 md:px-14 py-16 lg:py-0 lg:min-h-[560px] overflow-hidden">
+        <Image
+          src="/IMS/black-cube.jpg"
+          alt=""
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-black/25" />
 
-      <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
         {/* Main Headline */}
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-white text-3xl md:text-[56px] font-bold leading-[1.1] tracking-tight mb-8"
+          className="relative z-10 text-white text-3xl md:text-[42px] font-bold leading-[1.15] tracking-tight mb-6 max-w-lg"
         >
           Scrubbe does not just <br />
           automate tasks. It runs the <br />
@@ -31,41 +34,30 @@ const ScrubbeClosing = () => {
           whileInView={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
           viewport={{ once: true }}
-          className="text-slate-400 text-sm md:text-base font-medium leading-relaxed max-w-3xl mb-12 px-4"
+          className="relative z-10 text-slate-300 text-[15px] leading-relaxed max-w-md"
         >
           Every step from detection to verified recovery is governed,
-          evidence-backed, and attributable. Scrubbe does not act on assumptions
-          — it acts on ranked hypotheses, with blast radius evaluated before
-          simulation, policy applied before execution, and recovery verified
-          before closure. The result is autonomous incident response that
-          engineering organizations can trust with production.
+          evidence-backed, and attributable. Scrubbe does not act on
+          assumptions — it acts on ranked hypotheses, with blast radius
+          evaluated before simulation, policy applied before execution, and
+          recovery verified before closure. The result is autonomous incident
+          response that engineering organizations can trust with production.
         </motion.p>
+      </div>
 
-        {/* Bottom Feature Pills */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          viewport={{ once: true }}
-          className="flex flex-wrap justify-center gap-3 md:gap-4 mt-4"
-        >
-          <Pill text="Evidence-backed" />
-          <Pill text="Blast-radius aware" />
-          <Pill text="Policy-governed" />
-          <Pill text="Execution-ready" />
-        </motion.div>
+      {/* RIGHT — dashboard screenshot */}
+      <div className="bg-white lg:min-h-[560px] p-6 lg:p-10">
+        <div className="relative w-full h-full min-h-[320px]">
+          <Image
+            src="/IMS/learning-dashboard.png"
+            alt="Learning Dashboard Overview — MTTR improvement, autonomous success rate, human override rate, incidents resolved, MTTR trend, and top recurring incident categories."
+            fill
+            className="object-contain"
+          />
+        </div>
       </div>
     </section>
   );
 };
-
-// --- Sub-component for the pills ---
-const Pill = ({ text }: { text: string }) => (
-  <div className="px-5 py-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/5 backdrop-blur-sm">
-    <span className="text-[11px] md:text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">
-      {text}
-    </span>
-  </div>
-);
 
 export default ScrubbeClosing;

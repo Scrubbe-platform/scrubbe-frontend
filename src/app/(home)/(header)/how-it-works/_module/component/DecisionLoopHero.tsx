@@ -1,69 +1,49 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import { ChevronRight } from "lucide-react";
-import { FaArrowRightLong } from "react-icons/fa6";
+import Image from "next/image";
 
 const DecisionLoopHero = () => {
-  const steps = [
-    "Detect",
-    "Scope",
-    "Collect",
-    "Correlate",
-    "Propose",
-    "Simulate",
-    "Govern",
-    "Execute",
-    "Verify",
-    "Iterate",
-    "Learn",
-  ];
-
   return (
-    <section className="w-full bg-[#f8fafc] py-24 px-6 md:px-12 flex flex-col items-center border-b border-slate-200">
+    <section className="w-full bg-white py-20 md:py-24 px-6 flex flex-col items-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl text-center flex flex-col items-center"
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-3xl text-center flex flex-col items-center"
       >
         {/* Main Heading */}
-        <h1 className="text-[44px] md:text-[64px] font-semibold text-[#334155] leading-[1.1] tracking-tight mb-8">
-          How Scrubbe resolves <br />
-          production
-          <span className="text-[#4ade80]"> incidents.</span>
+        <h1 className="font-besley font-black text-slate-950 text-[36px] md:text-[52px] leading-[1.15] tracking-tight mb-6">
+          How Scrubbe resolves
+          <br />
+          production incidents.
         </h1>
 
         {/* Narrative Subtext */}
-        <p className="text-slate-500 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-16">
+        <p className="text-slate-500 text-[15px] font-ibm md:text-base leading-relaxed max-w-2xl">
           This is how Scrubbe handles production incidents — from first signal
           to verified recovery — under strict operational controls. The loop
           does not stop at a single remediation attempt. It continues until
           recovery is confirmed or a governed escalation transfers the incident
           to human operators with the complete decision history in hand.
         </p>
-
-        {/* Step Navigation Bar */}
       </motion.div>
-      <div className="w-full bg-white border border-slate-200 rounded-xl shadow-sm overflow-auto flex  items-center  px-4 py-6">
-        {steps.map((step, index) => (
-          <div
-            className="border-r flex-row gap-2 items-center flex px-4"
-            key={step}
-          >
-            <div className="flex flex-col items-center px-4">
-              <span className="text-[13px] font-mono font-medium text-slate-700 tracking-tight">
-                {step}
-              </span>
-            </div>
 
-            {index !== steps.length - 1 && (
-              <div className="flex items-center justify-center text-slate-300">
-                <FaArrowRightLong size={12} strokeWidth={3} />
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-4xl mt-16"
+      >
+        <Image
+          src="/IMS/how-scrubbe-works.png"
+          alt="How Scrubbe works — Detect, Scope, Collect, Correlate, Purpose, Simulate, Govern, Execute, Verify, Iterate."
+          width={1581}
+          height={995}
+          className="w-full h-auto"
+          priority
+        />
+      </motion.div>
     </section>
   );
 };
