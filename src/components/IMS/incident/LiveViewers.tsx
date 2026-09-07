@@ -3,17 +3,10 @@ import Dropdown from "@/components/ui/Dropdown";
 import React, { useMemo, useState } from "react";
 import { BiMessageRoundedDetail } from "react-icons/bi";
 import { useIncidentPresence } from "@/hooks/useIncidentPresence";
+import { useAgentPresence } from "@/hooks/useAgentPresence";
 import useMember from "@/hooks/useMember";
 import useAuthStore from "@/lib/stores/auth.store";
-import { useSharedAI, type AIQueryType } from "@/hooks/useSharedAI";
-
-const AGENT_LABELS: Record<AIQueryType, { abbr: string; name: string }> = {
-  ezra_analysis:   { abbr: "EZ", name: "Ezra (Analysis)" },
-  five_whys:       { abbr: "5W", name: "5-Whys Agent" },
-  ai_suggestion:   { abbr: "AI", name: "AI Suggestion" },
-  stakeholder_msg: { abbr: "CM", name: "Comms Agent" },
-  investigation:   { abbr: "IN", name: "Investigation Agent" },
-};
+import ApprovalGateModal from "@/components/incident/ApprovalGateModal";
 
 const AVATAR_COLORS = [
   "bg-zinc-900 text-white font-mono",
@@ -23,12 +16,26 @@ const AVATAR_COLORS = [
   "bg-pink-700 text-white font-mono",
   "bg-emerald-700 text-white font-mono",
 ];
-// Same hash-based color assignment MessagesModal.tsx uses, so a person's
-// avatar color is consistent between the two components.
+
 function colorClassFor(id: string) {
   let hash = 0;
   for (const c of id) hash = (hash * 31 + c.charCodeAt(0)) & 0xffff;
   return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
+const AGENT_DISPLAY: Record<string, { abbr: string; color: string; bgColor: string }> = {
+  "agent:resolver": { abbr: "RV", color: "text-white", bgColor: "bg-emerald-600" },
+  "agent:code-fix": { abbr: "CF", color: "text-white", bgColor: "bg-blue-600" },
+  "agent:triage":   { abbr: "TR", color: "text-white", bgColor: "bg-amber-600" },
+  "agent:root-cause": { abbr: "RC", color: "text-white", bgColor: "bg-orange-600" },
+  "agent:stakeholder": { abbr: "SK", color: "text-white", bgColor: "bg-pink-600" },
+  "agent:blast-radius": { abbr: "BR", color: "text-white", bgColor: "bg-red-600" },
+};
+
+function getAgentDisplay(agentId: string) {
+  if (AGENT_DISPLAY[agentId]) return AGENT_DISPLAY[agentId];
+  const abbr = agentId.replace("agent:", "").slice(0, 2).toUpperCase();
+  return { abbr, color: "text-white", bgColor: "bg-purple-600" };
 }
 
 type Props = {
@@ -42,8 +49,7 @@ const LiveViewers = ({ title, ticketId }: Props) => {
   const { user } = useAuthStore();
   const { data: members = [] } = useMember();
   const presenceRows = useIncidentPresence(ticketId);
-  const { whoIsThinking } = useSharedAI(ticketId);
-  const agentThinking = whoIsThinking();
+  const { activeAgents, pendingResolution, clearPendingResolution } = useAgentPresence(ticketId);
 
   const memberMap = useMemo(
     () => new Map(members.map((m) => [m.id, m])),
@@ -75,106 +81,126 @@ const LiveViewers = ({ title, ticketId }: Props) => {
     setOpenChatModal(true);
   };
 
-  if (viewers.length < 1 && !agentThinking) {
-    return null;
-  }
+  const hasActivity = viewers.length > 0 || activeAgents.length > 0;
+  if (!hasActivity) return null;
+
+  const totalCount = viewers.length + activeAgents.length;
 
   return (
-    <div>
+    <>
       <Dropdown
         position="left"
         trigger={
-          <div className=" border items-center flex gap-2 p-1 px-2 rounded-md bg-gray-50">
+          <div className="border items-center flex gap-2 p-1 px-2 rounded-md bg-gray-50 dark:bg-zinc-800/60 dark:border-zinc-700">
             <div className="flex items-center -space-x-2 select-none">
-              {agentThinking && (
-                <div
-                  className="relative h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold shadow-2xs dark:border-zinc-950 bg-emerald-500 text-white z-20"
-                  title={`${AGENT_LABELS[agentThinking.queryType].name} is working on this incident…`}
-                >
-                  <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-50" />
-                  <span className="relative z-10">{AGENT_LABELS[agentThinking.queryType].abbr}</span>
-                </div>
-              )}
-              {viewers.slice(0, 4).map((viewer) => (
+              {/* Active AI agents first */}
+              {activeAgents.slice(0, 2).map((agent) => {
+                const display = getAgentDisplay(agent.agentId);
+                return (
+                  <div
+                    key={agent.agentId}
+                    className={`relative h-8 w-8 rounded-full border-2 border-white dark:border-zinc-950 flex items-center justify-center text-[10px] font-bold shadow-2xs ${display.bgColor} ${display.color} z-20`}
+                    title={`${agent.displayName}${agent.step ? ` — ${agent.step}` : " — Working on this incident"}`}
+                  >
+                    <span className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-60" />
+                    <span className="relative z-10">{display.abbr}</span>
+                  </div>
+                );
+              })}
+              {/* Human viewers */}
+              {viewers.slice(0, 3).map((viewer) => (
                 <div
                   key={viewer.userId}
-                  className={`relative h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold shadow-2xs dark:border-zinc-950 cursor-pointer transition-transform hover:-translate-y-0.5 z-10 ${viewer.colorClass}`}
+                  className={`relative h-8 w-8 rounded-full border-2 border-white dark:border-zinc-950 flex items-center justify-center text-[10px] font-bold shadow-2xs cursor-pointer transition-transform hover:-translate-y-0.5 z-10 ${viewer.colorClass}`}
                   title={`${viewer.name}${viewer.role ? ` — ${viewer.role}` : ""}`}
                 >
                   {viewer.name?.slice(0, 2).toUpperCase()}
                 </div>
               ))}
-              {viewers.length === 0 && !agentThinking && (
-                <div className="h-8 w-8 rounded-full border-2 border-white bg-stone-100 text-stone-400 flex items-center justify-center text-[10px] dark:border-zinc-950" />
-              )}
-              {viewers.length - 4 > 0 && (
-                <div className="h-8 w-8 rounded-full border-2 border-white bg-stone-200 text-stone-600 flex items-center justify-center text-[10px] font-bold dark:border-zinc-950 dark:bg-zinc-800 dark:text-zinc-400">
-                  +{viewers.length - 4}
+              {totalCount - 5 > 0 && (
+                <div className="h-8 w-8 rounded-full border-2 border-white dark:border-zinc-950 bg-stone-200 dark:bg-zinc-700 text-stone-600 dark:text-zinc-300 flex items-center justify-center text-[10px] font-bold">
+                  +{totalCount - 5}
                 </div>
               )}
             </div>
-            <p className="text-sm font-medium">Viewing</p>
+            <p className="text-sm font-medium">
+              {activeAgents.length > 0 ? "Active" : "Viewing"}
+            </p>
           </div>
         }
       >
-        <div className="min-w-[270px] px-4 py-4">
+        <div className="min-w-[290px] px-4 py-4">
           <div>
             <p className="text-base font-bold">{title}</p>
             <p className="text-xs text-zinc-400 dark:text-zinc-500">
-              {viewers.length} team member{viewers.length === 1 ? "" : "s"}{agentThinking ? " · 1 AI agent" : ""} · live
+              {viewers.length > 0 ? `${viewers.length} team member${viewers.length === 1 ? "" : "s"}` : ""}
+              {activeAgents.length > 0 ? `${viewers.length > 0 ? " · " : ""}${activeAgents.length} AI agent${activeAgents.length === 1 ? "" : "s"} working` : ""} · live
             </p>
           </div>
 
-          <div className="mt-3">
-            {agentThinking && (
-              <div className="flex items-center gap-3 py-2 border-b border-zinc-100 dark:border-zinc-800 mb-1">
-                <div className="relative h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold bg-emerald-500 text-white shrink-0 dark:border-zinc-950">
-                  <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-40" />
-                  <span className="relative z-10">{AGENT_LABELS[agentThinking.queryType].abbr}</span>
-                </div>
-                <div>
-                  <p className="text-sm font-bold">{AGENT_LABELS[agentThinking.queryType].name}</p>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400">Working on this incident…</p>
-                </div>
-              </div>
-            )}
-            {viewers.length === 0 && !agentThinking && (
-              <p className="py-3 text-xs text-zinc-400 dark:text-zinc-500">
-                No one else is viewing this incident right now.
-              </p>
-            )}
-            {viewers.map((viewer) => (
-              <div
-                key={viewer.userId}
-                className="flex justify-between items-center py-2"
-              >
-                <div className="flex items-end gap-3">
-                  <div
-                    className={`relative h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold shadow-2xs dark:border-zinc-950 cursor-pointer transition-transform hover:-translate-y-0.5 z-10 ${viewer.colorClass}`}
-                    title={`${viewer.name}${viewer.role ? ` — ${viewer.role}` : ""}`}
-                  >
-                    {viewer.name?.slice(0, 2).toUpperCase()}
+          {/* Active AI agents */}
+          {activeAgents.length > 0 && (
+            <div className="mt-3 mb-2">
+              <p className="text-[10px] font-semibold uppercase text-zinc-400 tracking-wider mb-2">AI Agents Working</p>
+              {activeAgents.map((agent) => {
+                const display = getAgentDisplay(agent.agentId);
+                return (
+                  <div key={agent.agentId} className="flex items-center gap-3 py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+                    <div className={`relative h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${display.bgColor} ${display.color}`}>
+                      <span className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-50" />
+                      <span className="relative z-10">{display.abbr}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">{agent.displayName}</p>
+                      {agent.step && (
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 truncate">{agent.step}</p>
+                      )}
+                      {!agent.step && <p className="text-xs text-zinc-400">Investigating…</p>}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold">
-                      {viewer.name} {viewer.isYou && "(You)"}
-                    </p>
-                    {viewer.role && <p className="text-xs">{viewer.role}</p>}
-                  </div>
-                </div>
+                );
+              })}
+            </div>
+          )}
 
-                {!viewer.isYou && (
-                  <div
-                    onClick={() => openChatWith(viewer.userId)}
-                    className="cursor-pointer text-sm text-IMSLightGreen border-IMSDarkGreen flex items-center gap-1 border rounded-sm px-2"
-                  >
-                    <BiMessageRoundedDetail />
-                    Message
+          {/* Human viewers */}
+          {viewers.length > 0 && (
+            <div className="mt-2">
+              {activeAgents.length > 0 && (
+                <p className="text-[10px] font-semibold uppercase text-zinc-400 tracking-wider mb-2">Team Members</p>
+              )}
+              {viewers.length === 0 && activeAgents.length === 0 && (
+                <p className="py-3 text-xs text-zinc-400 dark:text-zinc-500">
+                  No one else is viewing this incident right now.
+                </p>
+              )}
+              {viewers.map((viewer) => (
+                <div key={viewer.userId} className="flex justify-between items-center py-2">
+                  <div className="flex items-end gap-3">
+                    <div
+                      className={`relative h-8 w-8 rounded-full border-2 border-white dark:border-zinc-950 flex items-center justify-center text-[10px] font-bold shadow-2xs cursor-pointer transition-transform hover:-translate-y-0.5 z-10 ${viewer.colorClass}`}
+                      title={`${viewer.name}${viewer.role ? ` — ${viewer.role}` : ""}`}
+                    >
+                      {viewer.name?.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold">{viewer.name} {viewer.isYou && "(You)"}</p>
+                      {viewer.role && <p className="text-xs text-zinc-500">{viewer.role}</p>}
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                  {!viewer.isYou && (
+                    <div
+                      onClick={() => openChatWith(viewer.userId)}
+                      className="cursor-pointer text-sm text-IMSLightGreen border-IMSDarkGreen flex items-center gap-1 border rounded-sm px-2"
+                    >
+                      <BiMessageRoundedDetail />
+                      Message
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </Dropdown>
 
@@ -184,7 +210,18 @@ const LiveViewers = ({ title, ticketId }: Props) => {
           initialMemberId={chatMemberId}
         />
       )}
-    </div>
+
+      {/* Approval Gate Modal — shown when an agent requests resolution */}
+      {pendingResolution && (
+        <ApprovalGateModal
+          resolution={pendingResolution}
+          ticketId={ticketId ?? ""}
+          onClose={clearPendingResolution}
+          onGranted={() => clearPendingResolution()}
+          onRejected={() => clearPendingResolution()}
+        />
+      )}
+    </>
   );
 };
 

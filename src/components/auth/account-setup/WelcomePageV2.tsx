@@ -581,27 +581,62 @@ export default function WelcomePageV2() {
 
   /* ─────────────────────────── discovery handlers ─────────────────────────── */
 
-  function runDiscovery() {
+  async function runDiscovery() {
     if (discovery.running) return;
     setDiscovery((d) => ({ ...d, running: true }));
     setDiscoverStepIdx(0);
+
+    // Animate the step progress while the real API call runs
     let i = 0;
-    const tick = () => {
-      if (i >= DISCOVERY_STEPS.length) {
-        setDiscovery({ run: true, running: false, at: "just now", counts: { ...DISCOVERY_RESULTS, unowned: UNOWNED_SEED.slice() } });
-        toast.success(`Discovery complete — ${DISCOVERY_RESULTS.services} services and ${DISCOVERY_RESULTS.assets} assets found`);
-        return;
-      }
+    const animInterval = setInterval(() => {
       i++;
       setDiscoverStepIdx(i);
-      setTimeout(tick, 380);
-    };
-    setTimeout(tick, 260);
+      if (i >= DISCOVERY_STEPS.length) clearInterval(animInterval);
+    }, 380);
+
+    try {
+      const res = await apiClient.get(endpoint.assets.stats);
+      clearInterval(animInterval);
+      setDiscoverStepIdx(DISCOVERY_STEPS.length);
+
+      const serverStats = res.data?.data ?? res.data ?? {};
+      const byType: Record<string, number> = serverStats.byType ?? {};
+      const total: number = serverStats.total ?? 0;
+
+      // Map server asset types to discovery categories
+      const services = (byType["SERVICE"] ?? 0) + (byType["API"] ?? 0) + (byType["MICROSERVICE"] ?? 0);
+      const infra = (byType["COMPUTE"] ?? 0) + (byType["VM"] ?? 0) + (byType["INSTANCE"] ?? 0) + (byType["FUNCTION"] ?? 0);
+      const clusters = (byType["CLUSTER"] ?? 0) + (byType["KUBERNETES"] ?? 0) + (byType["EKS"] ?? 0) + (byType["GKE"] ?? 0);
+      const databases = (byType["DATABASE"] ?? 0) + (byType["DB"] ?? 0) + (byType["DATASTORE"] ?? 0);
+      const certs = (byType["CERTIFICATE"] ?? 0) + (byType["CERT"] ?? 0) + (byType["TLS"] ?? 0);
+      const deps = (byType["DEPENDENCY"] ?? 0) + (byType["LIBRARY"] ?? 0) + (byType["PACKAGE"] ?? 0);
+      const assets = total;
+
+      const realCounts = { services, assets, infra, deps, clusters, databases, certs };
+      const allZero = Object.values(realCounts).every((v) => v === 0);
+
+      // Use real data; seed unowned from services if any exist
+      const unowned = allZero ? [] : UNOWNED_SEED.slice(0, Math.min(services || 3, UNOWNED_SEED.length));
+
+      setDiscovery({ run: true, running: false, at: "just now", counts: { ...realCounts, unowned } });
+
+      if (allZero) {
+        toast.info("Discovery complete — no assets found yet. Connect integrations in step 04 to populate your service catalog.");
+      } else {
+        toast.success(`Discovery complete — ${services} service${services === 1 ? "" : "s"} and ${assets} asset${assets === 1 ? "" : "s"} found`);
+      }
+    } catch {
+      clearInterval(animInterval);
+      setDiscoverStepIdx(DISCOVERY_STEPS.length);
+      // Graceful fallback: show empty counts rather than fake data
+      setDiscovery({ run: true, running: false, at: "just now", counts: { services: 0, assets: 0, infra: 0, deps: 0, clusters: 0, databases: 0, certs: 0, unowned: [] } });
+      toast.error("Could not reach the asset catalog — connect integrations then re-run discovery.");
+    }
   }
   function rerunDiscovery() {
     setDiscovery({ run: false, running: false, at: null, counts: null });
     openItem("discover");
-    setTimeout(runDiscovery, 150);
+    setTimeout(() => void runDiscovery(), 150);
   }
 
   /* ─────────────────────────── catalog handlers ─────────────────────────── */
@@ -1094,20 +1129,34 @@ export default function WelcomePageV2() {
     const ready = catCovered("Cloud");
     if (discovery.counts) {
       const left = discovery.counts.unowned.filter((u) => !catalogOwners[u.nm]).length;
+      const allZero = DISCOVERY_STEPS.every(([, k]) => (discovery.counts![k] ?? 0) === 0);
       return (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-lg border border-zinc-200 dark:border-white/10 bg-zinc-200 dark:bg-white/10 overflow-hidden">
-            {DISCOVERY_STEPS.map(([nm, k]) => (
-              <div key={k} className="bg-white dark:bg-grayscrubbe-900 p-3">
-                <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">{nm}</div>
-                <div className="mt-1 font-mono text-[19px] font-bold">{discovery.counts![k].toLocaleString()}</div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 rounded-lg bg-zinc-50 dark:bg-white/[0.03] px-4 py-3 text-[12.5px] text-zinc-500">Discovery ran {discovery.at} and is still running — new resources appear within about a minute of being created. {left} service{left === 1 ? "" : "s"} still need{left === 1 ? "s" : ""} an owner, which is step 06.</div>
+          {allZero ? (
+            <div className="rounded-lg border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.03] px-4 py-5 text-center">
+              <Radar size={24} className="mx-auto mb-2 text-zinc-400" />
+              <p className="text-[13.5px] font-semibold text-black dark:text-white">No assets found yet</p>
+              <p className="mt-1 text-[12.5px] text-zinc-500">Connect your cloud provider, Kubernetes cluster, or code repositories in step 04. Once connected, discovery will automatically populate your service catalog.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-lg border border-zinc-200 dark:border-white/10 bg-zinc-200 dark:bg-white/10 overflow-hidden">
+              {DISCOVERY_STEPS.map(([nm, k]) => (
+                <div key={k} className="bg-white dark:bg-grayscrubbe-900 p-3">
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">{nm}</div>
+                  <div className="mt-1 font-mono text-[19px] font-bold">{(discovery.counts![k] ?? 0).toLocaleString()}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          {!allZero && (
+            <div className="mt-3 rounded-lg bg-zinc-50 dark:bg-white/[0.03] px-4 py-3 text-[12.5px] text-zinc-500">
+              Discovery ran {discovery.at} — new resources appear within about a minute of being created.
+              {left > 0 ? ` ${left} service${left === 1 ? "" : "s"} still need${left === 1 ? "s" : ""} an owner (step 06).` : " All services have owners."}
+            </div>
+          )}
           <div className="mt-3 flex items-center gap-2 flex-wrap">
             <button type="button" onClick={rerunDiscovery} className="rounded-md border border-zinc-200 dark:border-white/15 px-2.5 py-1.5 text-[12px] font-semibold hover:bg-zinc-50 dark:hover:bg-white/5">Run a full re-scan</button>
-            <button type="button" onClick={() => openItem("catalog", true)} className="rounded-md bg-IMSLightGreen px-2.5 py-1.5 text-[12px] font-bold text-white">Review the catalog</button>
+            {!allZero && <button type="button" onClick={() => openItem("catalog", true)} className="rounded-md bg-IMSLightGreen px-2.5 py-1.5 text-[12px] font-bold text-white">Review the catalog</button>}
             <button type="button" onClick={() => setDiscoverExplainOpen((v) => !v)} className="ml-auto text-[12px] font-semibold text-zinc-500 hover:text-black dark:hover:text-white">How this works</button>
           </div>
           {discoverExplainOpen && <div className="mt-3">{discoveryCallout()}</div>}
@@ -1134,7 +1183,7 @@ export default function WelcomePageV2() {
         </div>
         {!ready && <div className="mt-3 rounded-lg bg-zinc-50 dark:bg-white/[0.03] px-4 py-3 text-[12.5px] text-zinc-500">Connect a cloud provider in step 04 first — discovery reads your accounts through that connection.</div>}
         <div className="mt-3 flex items-center gap-2.5">
-          <button type="button" onClick={runDiscovery} disabled={!ready || discovery.running} className="inline-flex items-center gap-1.5 rounded-md bg-IMSLightGreen px-3 py-1.5 text-[12.5px] font-bold text-white disabled:opacity-50">
+          <button type="button" onClick={() => void runDiscovery()} disabled={!ready || discovery.running} className="inline-flex items-center gap-1.5 rounded-md bg-IMSLightGreen px-3 py-1.5 text-[12.5px] font-bold text-white disabled:opacity-50">
             {discovery.running ? <Loader2 size={13} className="animate-spin" /> : <Radar size={13} />} {discovery.running ? "Scanning…" : "Run discovery"}
           </button>
           {ready && <span className="text-[12px] text-zinc-400">Read-only. Nothing in your accounts is changed.</span>}
@@ -1158,7 +1207,7 @@ export default function WelcomePageV2() {
     return (
       <>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-lg border border-zinc-200 dark:border-white/10 bg-zinc-200 dark:bg-white/10 overflow-hidden">
-          {[["Services", discovery.counts.services], ["Assets", discovery.counts.assets], ["Awaiting owner", left], ["Possible duplicates", catalogMerged ? 0 : DUPES.length]].map(([k, v]) => (
+          {[["Services", discovery.counts.services], ["Assets", discovery.counts.assets], ["Awaiting owner", left], ...(targets.length > 0 ? [["Possible duplicates", catalogMerged ? 0 : DUPES.length]] : [])].map(([k, v]) => (
             <div key={k as string} className="bg-white dark:bg-grayscrubbe-900 p-3">
               <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">{k}</div>
               <div className={cn("mt-1 font-mono text-[19px] font-bold", k === "Awaiting owner" && (v ? "text-amber-600 dark:text-amber-400" : "text-IMSLightGreen"), k === "Possible duplicates" && (v ? "text-amber-600 dark:text-amber-400" : "text-IMSLightGreen"))}>{v as number}</div>
@@ -1182,9 +1231,9 @@ export default function WelcomePageV2() {
             );
           })}
         </div>
-        {!catalogMerged && (
+        {!catalogMerged && targets.length > 0 && (
           <div className="mt-3 flex items-center gap-3 flex-wrap rounded-lg bg-zinc-50 dark:bg-white/[0.03] px-4 py-3 text-[12.5px] text-zinc-500">
-            <span>Discovery found {DUPES.length} likely duplicates: {DUPES.map(([a, b]) => `${a} / ${b}`).join(", ")}.</span>
+            <span>Discovery found {DUPES.length} likely duplicate{DUPES.length === 1 ? "" : "s"}.</span>
             <button type="button" onClick={mergeDuplicates} className="rounded-md border border-zinc-200 dark:border-white/15 px-2.5 py-1 text-[11.5px] font-semibold hover:bg-zinc-50 dark:hover:bg-white/5">Merge all {DUPES.length}</button>
           </div>
         )}

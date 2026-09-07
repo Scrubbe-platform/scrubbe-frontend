@@ -175,6 +175,15 @@ export const endpoint = {
   },
   incident_workspace: {
     presence: "/incident-workspace",     // GET /incident-workspace/:ticketId/presence
+    ai_participants: "/incident-workspace", // GET /incident-workspace/:ticketId/ai-participants
+  },
+  incident_resolution: {
+    request: "/incident-resolution/request",
+    orchestrate: "/incident-resolution/orchestrate",
+    grant: "/incident-resolution/grant",
+    reject: "/incident-resolution/reject",
+    pending: "/incident-resolution/pending",
+    pending_ticket: "/incident-resolution/pending", // GET /incident-resolution/pending/:ticketId
   },
   direct_messages: {
     conversations: "/direct-messages/conversations", // GET (list), POST { recipientId } (get-or-create)
