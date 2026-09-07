@@ -41,6 +41,15 @@ export type User = {
   purpose?: string;
 };
 
+export type MfaSetup = { secret: string; otpauthUrl: string };
+export type AuthTokens = { accessToken: string; refreshToken: string };
+export type AuthOutcome = {
+  user: User;
+  mfaRequired: boolean;
+  mfaToken?: string;
+  mfaSetup?: MfaSetup;
+};
+
 type AuthState = {
   token: string | null;
   refreshToken: string | null;
@@ -50,31 +59,32 @@ type AuthState = {
 };
 
 type AuthActions = {
-  login: (email: string, password: string) => Promise<User | null>;
+  login: (email: string, password: string) => Promise<AuthOutcome>;
   oauthLogin: (
     email: string,
     provider_uuid: string,
     oAuthProvider: string
-  ) => Promise<User | null>;
+  ) => Promise<AuthOutcome>;
   requestMagicLink: (email: string, to?: string | null) => Promise<void>;
-  consumeMagicLink: (token: string) => Promise<User | null>;
+  consumeMagicLink: (token: string) => Promise<AuthOutcome>;
   developerSignup: (
     data: Zod.infer<typeof developerSignupSchema>
-  ) => Promise<void>;
+  ) => Promise<AuthOutcome>;
   businessSignup: (
     data: Zod.infer<typeof businessSignupSchema>
-  ) => Promise<void>;
+  ) => Promise<AuthOutcome>;
   businessProfileSignup: (
     data: Zod.infer<typeof businessProfileSignupSchema> & Partial<UserSession>
-  ) => Promise<void>;
+  ) => Promise<AuthOutcome>;
   developerProfileSignup: (
     data: Zod.infer<typeof developerProfileSignupSchema> & Partial<UserSession>
-  ) => Promise<void>;
+  ) => Promise<AuthOutcome>;
   verifyEmail: (code: string) => Promise<void>;
   resendOTP: () => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
   setUser: (value: User) => void;
+  verifyMfa: (mfaToken: string, code: string) => Promise<User>;
   refreshAccessToken: () => Promise<boolean>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
@@ -83,6 +93,39 @@ type AuthActions = {
   isAdmin: () => boolean;
   isSuperAdmin: () => boolean;
 };
+
+function finalizeAuthResponse(
+  set: (partial: Partial<AuthState>) => void,
+  payload: {
+    user: User;
+    mfaRequired?: boolean;
+    mfaToken?: string;
+    mfaSetup?: MfaSetup;
+    tokens?: AuthTokens;
+  }
+): AuthOutcome {
+  if (payload.mfaRequired) {
+    set({ isLoading: false, user: payload.user });
+    return {
+      user: payload.user,
+      mfaRequired: true,
+      mfaToken: payload.mfaToken,
+      mfaSetup: payload.mfaSetup,
+    };
+  }
+
+  const tokens = payload.tokens!;
+  set({
+    token: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+    user: payload.user,
+    isLoading: false,
+  });
+  setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
+  setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
+
+  return { user: payload.user, mfaRequired: false };
+}
 
 const useAuthStore = create<AuthState & AuthActions>()(
   persist(
@@ -95,25 +138,41 @@ const useAuthStore = create<AuthState & AuthActions>()(
       setUser: (value) => {
         set({ user: value });
       },
-      login: async (email, password) => {
+      verifyMfa: async (mfaToken, code) => {
         try {
           set({ isLoading: true, error: null });
-          const validatedData = loginSchema.parse({ email, password });
-
-          const { data } = await apiClient.post("/auth/login", validatedData);
+          const { data } = await apiClient.post("/auth/mfa/verify", {
+            mfaToken,
+            code,
+          });
           const { user, tokens } = data.data;
-
           set({
             token: tokens.accessToken,
             refreshToken: tokens.refreshToken,
             user,
             isLoading: false,
           });
-
           setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
           setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
           return user;
         } catch (error) {
+          set({
+            error:
+              error instanceof AxiosError
+                ? error.response?.data?.message
+                : "Two-factor verification failed",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+      login: async (email, password) => {
+        try {
+          set({ isLoading: true, error: null });
+          const validatedData = loginSchema.parse({ email, password });
+
+          const { data } = await apiClient.post("/auth/login", validatedData);
+          return finalizeAuthResponse(set, data.data);} catch (error) {
           set({
             error:
               error instanceof AxiosError
@@ -138,19 +197,7 @@ const useAuthStore = create<AuthState & AuthActions>()(
             "/auth/oauth/login",
             validatedData
           );
-          const { user, tokens } = data.data;
-
-          set({
-            token: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-            user,
-            isLoading: false,
-          });
-          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
-
-          return user;
-        } catch (error) {
+          return finalizeAuthResponse(set, data.data);} catch (error) {
           set({
             error:
               error instanceof AxiosError
@@ -189,19 +236,7 @@ const useAuthStore = create<AuthState & AuthActions>()(
           const { data } = await apiClient.post("/auth/magic-link/consume", {
             token,
           });
-          const { user, tokens } = data.data;
-
-          set({
-            token: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-            user,
-            isLoading: false,
-          });
-          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
-
-          return user;
-        } catch (error) {
+          return finalizeAuthResponse(set, data.data);} catch (error) {
           set({
             error:
               error instanceof AxiosError
@@ -227,16 +262,7 @@ const useAuthStore = create<AuthState & AuthActions>()(
             experienceLevel: validatedData.experience,
           };
           const { data } = await apiClient.post("/auth/dev/register", devData);
-          const { user, tokens } = data.data;
-          set({
-            token: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-            user,
-            isLoading: false,
-          });
-          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
-        } catch (error) {
+          return finalizeAuthResponse(set, data.data);} catch (error) {
           set({
             error:
               error instanceof AxiosError
@@ -268,16 +294,7 @@ const useAuthStore = create<AuthState & AuthActions>()(
             "/auth/business/register",
             newBusinessData
           );
-          const { user, tokens } = data.data;
-          set({
-            token: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-            user,
-            isLoading: false,
-          });
-          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
-        } catch (error) {
+          return finalizeAuthResponse(set, data.data);} catch (error) {
           set({
             error:
               error instanceof AxiosError
@@ -347,17 +364,7 @@ const useAuthStore = create<AuthState & AuthActions>()(
             endpoint.auth.oauth_business_register,
             newBusinessData
           );
-          const { user, tokens } = data.data;
-          set({
-            token: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-            user,
-            isLoading: false,
-          });
-          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
-          return user;
-        } catch (error) {
+          return finalizeAuthResponse(set, data.data);} catch (error) {
           set({
             error:
               error instanceof AxiosError
@@ -387,16 +394,7 @@ const useAuthStore = create<AuthState & AuthActions>()(
             "/auth/oauth/dev/register",
             newDevData
           );
-          const { user, tokens } = data.data;
-          set({
-            token: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-            user,
-            isLoading: false,
-          });
-          setCookie(COOKIE_KEYS.TOKEN, tokens.accessToken);
-          setCookie(COOKIE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
-        } catch (error) {
+          return finalizeAuthResponse(set, data.data);} catch (error) {
           set({
             error:
               error instanceof AxiosError

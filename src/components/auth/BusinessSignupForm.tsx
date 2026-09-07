@@ -27,6 +27,8 @@ import CompleteBusinessProfile, {
 } from "./CompleteBusinessProfile";
 import OtpInput from "../ui/OtpInput";
 import IdleLoader from "../ui/LoaderUI/IdleLoader";
+import TwoFactorAuth from "./TwoFactorAuth";
+import type { MfaSetup } from "@/lib/stores/auth.store";
 
 const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 
@@ -160,6 +162,12 @@ export default function BusinessSignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [profileComplete, setProfileComplete] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [mfa, setMfa] = useState<{
+    mfaToken: string;
+    mfaSetup: MfaSetup;
+    email: string;
+    next: "otp" | "success";
+  } | null>(null);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -172,6 +180,7 @@ export default function BusinessSignupForm() {
     isLoading,
     verifyEmail,
     resendOTP,
+    verifyMfa,
     error,
   } = useAuthStore();
 
@@ -238,8 +247,17 @@ export default function BusinessSignupForm() {
 
   const onSubmit = async (data: BusinessSignupFormData) => {
     try {
-      await businessSignup(data);
+      const outcome = await businessSignup(data);
       setFormData(data);
+      if (outcome.mfaRequired && outcome.mfaToken && outcome.mfaSetup) {
+        setMfa({
+          mfaToken: outcome.mfaToken,
+          mfaSetup: outcome.mfaSetup,
+          email: data.businessEmail,
+          next: "otp",
+        });
+        return;
+      }
       setIsOTP(true);
     } catch (err) {
       toast.error("Registration failed", {
@@ -253,8 +271,18 @@ export default function BusinessSignupForm() {
 
   const onProfileSubmit = async (data: BusinessProfileSignupFormData) => {
     try {
-      await businessProfileSignup({ ...data, ...session.data?.user });
+      const outcome = await businessProfileSignup({ ...data, ...session.data?.user });
       setFormData({ ...data, ...session.data?.user } as any);
+      if (outcome.mfaRequired && outcome.mfaToken && outcome.mfaSetup) {
+        setMfa({
+          mfaToken: outcome.mfaToken,
+          mfaSetup: outcome.mfaSetup,
+          email: (session.data?.user?.email as string) ?? "",
+          next: "success",
+        });
+        await signOut({ redirect: false });
+        return;
+      }
       await signOut({ redirect: false });
       setShowSuccess(true);
     } catch (err) {
@@ -296,7 +324,33 @@ export default function BusinessSignupForm() {
     }
   };
 
+  const handleMfaVerify = async (code: string) => {
+    if (!mfa) return;
+    await verifyMfa(mfa.mfaToken, code);
+    toast.success("Authenticator app set up successfully");
+    setMfa(null);
+    if (mfa.next === "otp") {
+      setIsOTP(true);
+    } else {
+      setShowSuccess(true);
+    }
+  };
+
   // ── Render states ──────────────────────────────────────────────
+
+  if (mfa) {
+    return (
+      <div className="w-full">
+        <TwoFactorAuth
+          mode="setup"
+          email={mfa.email}
+          mfaSetup={mfa.mfaSetup}
+          isLoading={isLoading}
+          onVerify={handleMfaVerify}
+        />
+      </div>
+    );
+  }
 
   if (showSuccess && formData) {
     return (

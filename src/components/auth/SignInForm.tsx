@@ -26,6 +26,8 @@ import { endpoint } from "@/lib/api/endpoint";
 import { apiClient } from "@/lib/api/client";
 import { motion, AnimatePresence } from "framer-motion";
 import IdleLoader from "../ui/LoaderUI/IdleLoader";
+import TwoFactorAuth from "./TwoFactorAuth";
+import type { AuthOutcome } from "@/lib/stores/auth.store";
 
 const IS_STANDALONE = process.env.NEXT_PUBLIC_IS_STANDALONE === "true";
 
@@ -308,7 +310,7 @@ function Divider({ label, icon }: { label?: string; icon?: ReactNode }) {
 // ─── Main ────────────────────────────────────────────────────────
 
 export default function SignInForm() {
-  const { login, oauthLogin, requestMagicLink, consumeMagicLink } =
+  const { login, oauthLogin, requestMagicLink, consumeMagicLink, verifyMfa } =
     useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -321,7 +323,12 @@ export default function SignInForm() {
   const shownErrorRef = useRef<string | null>(null);
 
   // Step 1 = email entry, Step 2 = password entry (after SSO discovery finds no enforced SSO)
-  const [step, setStep] = useState<"email" | "password">("email");
+  const [step, setStep] = useState<"email" | "password" | "mfa">("email");
+  const [mfa, setMfa] = useState<{
+    mfaToken: string;
+    mfaSetup?: { secret: string; otpauthUrl: string };
+    email: string;
+  } | null>(null);
   const [ssoResult, setSsoResult] = useState<SsoDiscoveryResult | null>(null);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -397,6 +404,24 @@ export default function SignInForm() {
     window.location.href = callbackUrl || "/incident";
   };
 
+  const enterMfaStep = (outcome: AuthOutcome, email: string) => {
+    if (!outcome.mfaRequired || !outcome.mfaToken) return false;
+    setMfa({
+      mfaToken: outcome.mfaToken,
+      mfaSetup: outcome.mfaSetup,
+      email,
+    });
+    setStep("mfa");
+    return true;
+  };
+
+  const handleMfaVerify = async (code: string) => {
+    if (!mfa) return;
+    const user = await verifyMfa(mfa.mfaToken, code);
+    toast.success("Signed in successfully", { id: "mfa-success" });
+    redirectAfterLogin(user?.accountType, (user as any)?.purpose ?? null);
+  };
+
   // Step 1: discover SSO for this email domain
   const handleContinue = async () => {
     const email = emailValue.trim();
@@ -458,9 +483,13 @@ export default function SignInForm() {
     }
     try {
       setIsLoginLoading(true);
-      const user = await login(email, password);
+      const outcome = await login(email, password);
+      if (enterMfaStep(outcome, email)) {
+        toast.info("Enter the code from your authenticator app");
+        return;
+      }
       toast.success("Signed in successfully", { id: "login-success" });
-      redirectAfterLogin(user?.accountType, (user as any)?.purpose ?? null);
+      redirectAfterLogin(outcome.user?.accountType, outcome.user?.purpose ?? null);
     } catch (err) {
       toast.error(
         err instanceof AxiosError
@@ -517,12 +546,17 @@ export default function SignInForm() {
         session.data.user.id ?? "",
         session.data.user.oAuthProvider ?? "",
       );
+      if (enterMfaStep(d, session.data.user.email ?? "")) {
+        await signOut({ redirect: false });
+        toast.info("Enter the code from your authenticator app");
+        return;
+      }
       toast.success("Successfully signed in!", {
         duration: 10000,
         id: "redirect",
       });
       await signOut({ redirect: false });
-      redirectAfterLogin(d?.accountType, (d as any)?.purpose ?? null);
+      redirectAfterLogin(d.user?.accountType, d.user?.purpose ?? null);
     } catch (err) {
       if (err instanceof AxiosError && err.response?.status === 404) {
         const p = new URLSearchParams();
@@ -566,12 +600,17 @@ export default function SignInForm() {
         isAuthRef.current = true;
         const d = await consumeMagicLink(magicToken);
         if (!mounted) return;
+        if (enterMfaStep(d, d.user?.email ?? "")) {
+          await signOut({ redirect: false });
+          toast.info("Enter the code from your authenticator app");
+          return;
+        }
         await signOut({ redirect: false });
         toast.success("Successfully signed in!", {
           duration: 10000,
           id: "magic-link-redirect",
         });
-        redirectAfterLogin(d?.accountType, (d as any)?.purpose ?? null);
+        redirectAfterLogin(d.user?.accountType, d.user?.purpose ?? null);
       } catch {
         if (!mounted) return;
         toast.error("Magic link failed");
@@ -919,6 +958,29 @@ export default function SignInForm() {
               )}
             </motion.div>
           )}
+          {/* ── STEP 3: TWO-FACTOR AUTH ─────────────────────────────── */}
+          {step === "mfa" && mfa && (
+            <motion.div
+              key="mfa-step"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.2 }}
+            >
+              <TwoFactorAuth
+                mode={mfa.mfaSetup ? "setup" : "verify"}
+                email={mfa.email}
+                mfaSetup={mfa.mfaSetup}
+                isLoading={isLoginLoading}
+                onVerify={handleMfaVerify}
+                onBack={() => {
+                  setStep("password");
+                  setMfa(null);
+                }}
+              />
+            </motion.div>
+          )}
+
         </AnimatePresence>
 
         {/* Bottom */}

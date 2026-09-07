@@ -26,6 +26,8 @@ import { BiCheck } from "react-icons/bi";
 import { apiClient } from "@/lib/api/client";
 import { endpoint } from "@/lib/api/endpoint";
 import IdleLoader from "../ui/LoaderUI/IdleLoader";
+import TwoFactorAuth from "./TwoFactorAuth";
+import type { MfaSetup } from "@/lib/stores/auth.store";
 
 // Define the form schema using zod
 export const developerSignupSchema = z
@@ -73,6 +75,7 @@ export default function DeveloperSignupForm() {
     developerProfileSignup,
     resendOTP,
     verifyEmail,
+    verifyMfa,
   } = useAuthStore();
 
   const session = useSession();
@@ -88,6 +91,12 @@ export default function DeveloperSignupForm() {
 
   const router = useRouter();
   const [isOTP, setIsOTP] = useState(false);
+  const [mfa, setMfa] = useState<{
+    mfaToken: string;
+    mfaSetup: MfaSetup;
+    email: string;
+    next: "otp" | "success";
+  } | null>(null);
   // const [password, setPassword] = useState("");
   const [isPasswordValid, setIsPasswordValid] = useState(false);
 
@@ -135,10 +144,18 @@ export default function DeveloperSignupForm() {
         return;
       }
 
-      // Simulate a 5-second delay
-      await developerSignup(data);
       // Store form data and show success page
       setFormData(data);
+      const outcome = await developerSignup(data);
+      if (outcome.mfaRequired && outcome.mfaToken && outcome.mfaSetup) {
+        setMfa({
+          mfaToken: outcome.mfaToken,
+          mfaSetup: outcome.mfaSetup,
+          email: data.email,
+          next: "otp",
+        });
+        return;
+      }
       setIsOTP(true);
     } catch (error) {
       toast.error("Registration failed", {
@@ -158,10 +175,20 @@ export default function DeveloperSignupForm() {
         ...data,
         ...session.data?.user,
       };
-      await developerProfileSignup(details);
+      const outcome = await developerProfileSignup(details);
 
       // Store form data and show success page
       setFormData({ ...data, ...session.data?.user });
+      if (outcome.mfaRequired && outcome.mfaToken && outcome.mfaSetup) {
+        setMfa({
+          mfaToken: outcome.mfaToken,
+          mfaSetup: outcome.mfaSetup,
+          email: (details as { email?: string }).email ?? "",
+          next: "success",
+        });
+        await signOut({ redirect: false });
+        return;
+      }
       await signOut({ redirect: false });
       setShowSuccess(true);
 
@@ -173,6 +200,18 @@ export default function DeveloperSignupForm() {
             ? error.response?.data?.message
             : "Signup failed",
       });
+    }
+  };
+
+  const handleMfaVerify = async (code: string) => {
+    if (!mfa) return;
+    await verifyMfa(mfa.mfaToken, code);
+    toast.success("Authenticator app set up successfully");
+    setMfa(null);
+    if (mfa.next === "otp") {
+      setIsOTP(true);
+    } else {
+      setShowSuccess(true);
     }
   };
 
@@ -284,8 +323,18 @@ export default function DeveloperSignupForm() {
             lastName={formData.lastName ?? ""}
           />
         )}
+        {mfa && (
+          <TwoFactorAuth
+            mode="setup"
+            email={mfa.email}
+            mfaSetup={mfa.mfaSetup}
+            isLoading={isLoading}
+            onVerify={handleMfaVerify}
+          />
+        )}
+
         <>
-          {profileComplete && !showSuccess && (
+          {!mfa && profileComplete && !showSuccess && (
             <>
               <h1 className="text-xl md:text-2xl dark:text-white font-semibold mb-2 ">
                 Complete Your Profile
@@ -301,7 +350,7 @@ export default function DeveloperSignupForm() {
             </>
           )}
 
-          {!profileComplete && !showSuccess && (
+          {!mfa && !profileComplete && !showSuccess && (
             <>
               {isOTP ? (
                 <VerifyAccount />
